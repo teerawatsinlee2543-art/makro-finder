@@ -41,12 +41,13 @@ body{margin:0;padding:0}
 #mainApp{flex:1;flex-direction:column;width:100%}
 .hdr{background:var(--brand-red);padding:18px clamp(16px,4vw,40px) 14px}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:680px;margin:0 auto;width:100%}
-.hdr-logo{display:flex;align-items:center;gap:8px}
+.hdr-logo{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.hdr-logo>div:last-child{min-width:0;overflow:hidden}
 .hdr-logo-badge{height:54px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .hdr-logo-badge svg{height:100%;width:auto;display:block}
 .hdr-logotext{font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
 .hdr-logotext i{font-size:18px}
-.hdr-sub{font-size:13px;font-weight:500;color:rgba(255,255,255,.8);margin-top:1px}
+.hdr-sub{font-size:13px;font-weight:500;color:rgba(255,255,255,.8);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-icons{display:flex;align-items:center;gap:8px}
 .hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;cursor:pointer;border:none;flex-shrink:0}
 .search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin:12px auto 0;border:0.5px solid rgba(255,255,255,0.2);max-width:680px}
@@ -222,6 +223,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div class="hdr-icons">
+        <button class="hdr-icon" onclick="switchRole()" title="กลับ" aria-label="กลับไปหน้าเลือกมุมมอง"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
         <button class="hdr-icon" onclick="toggleFullscreen()" title="เต็มจอ" aria-label="เต็มจอ"><i id="fsIcon" class="ti ti-maximize" aria-hidden="true"></i></button>
         <button class="hdr-icon" onclick="openScanner()" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
       </div>
