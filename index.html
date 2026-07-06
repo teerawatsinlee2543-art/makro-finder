@@ -39,11 +39,11 @@ body{margin:0;padding:0}
 .hdr{background:var(--brand-red);padding:18px clamp(16px,4vw,40px) 14px}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:680px;margin:0 auto;width:100%}
 .hdr-logo{display:flex;align-items:center;gap:8px}
-.hdr-logo-badge{height:34px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:5px 9px}
+.hdr-logo-badge{height:44px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:7px 12px}
 .hdr-logo-badge svg{height:100%;width:auto;display:block}
-.hdr-logotext{font-size:17px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px}
-.hdr-logotext i{font-size:15px}
-.hdr-sub{font-size:11px;color:rgba(255,255,255,.75);margin-top:1px}
+.hdr-logotext{font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
+.hdr-logotext i{font-size:18px}
+.hdr-sub{font-size:13px;font-weight:500;color:rgba(255,255,255,.8);margin-top:1px}
 .hdr-icons{display:flex;align-items:center;gap:8px}
 .hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;cursor:pointer;border:none;flex-shrink:0}
 .search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin:12px auto 0;border:0.5px solid rgba(255,255,255,0.2);max-width:680px}
@@ -55,7 +55,7 @@ body{margin:0;padding:0}
 .cat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:20px}
 .cat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);transition:border-color .15s}
 .cat-card:hover{border-color:var(--color-border-secondary)}
-.cat-card i{font-size:22px;display:block;margin-bottom:5px}
+.cat-card i{font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0 auto 8px;background:color-mix(in srgb, currentColor 15%, white)}
 .cat-card span{font-size:12px;color:var(--color-text-secondary);font-weight:500}
 .cat-fresh i{color:#E24B4A}.cat-dry i{color:#BA7517}.cat-nonfood i{color:#1D9E75}
 .cat-drink i{color:#534AB7}.cat-veg i{color:#3B6D11}.cat-clean i{color:#185FA5}
@@ -99,7 +99,7 @@ body{margin:0;padding:0}
 .login-screen{position:fixed;inset:0;background:var(--brand-red);display:none;align-items:center;justify-content:center;padding:24px;z-index:1500}
 .login-card{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
 .brand-logo{width:150px;height:auto;display:block;margin:0 auto 8px}
-.login-sub{font-size:12px;color:var(--color-text-tertiary);margin-top:2px;margin-bottom:14px}
+.login-sub{font-size:15px;font-weight:500;color:var(--color-text-secondary);margin-top:2px;margin-bottom:14px}
 .login-desc{font-size:13px;color:var(--color-text-secondary);margin-bottom:22px;line-height:1.5}
 .login-field{text-align:left;margin-bottom:16px}
 .field-label{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px;display:block}
@@ -136,11 +136,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
   <div class="role-screen" id="roleScreen">
     <div class="role-card-wrap">
-      <svg class="brand-logo" viewBox="0 0 300 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <line x1="74" y1="216" x2="10" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
-        <circle cx="150" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
-        <text x="150" y="128" font-family="Arial,Helvetica,sans-serif" font-size="46" font-weight="900" text-anchor="middle" fill="#E8192C">makro</text>
-        <text x="150" y="174" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" text-anchor="middle" fill="#E8192C">Finder</text>
+      <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
+        <circle cx="170" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
+        <text x="170" y="128" font-family="Arial,Helvetica,sans-serif" font-size="46" font-weight="900" text-anchor="middle" fill="#E8192C">makro</text>
+        <text x="170" y="174" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" text-anchor="middle" fill="#E8192C">Finder</text>
       </svg>
       <div class="login-sub">Store 42 · Ramintra</div>
       <p class="role-intro-desc">กรุณาเลือกมุมมองการใช้งาน</p>
@@ -164,11 +164,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
       <button class="login-back" onclick="showRoleScreen()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
-      <svg class="brand-logo" viewBox="0 0 300 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <line x1="74" y1="216" x2="10" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
-        <circle cx="150" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
-        <text x="150" y="128" font-family="Arial,Helvetica,sans-serif" font-size="46" font-weight="900" text-anchor="middle" fill="#E8192C">makro</text>
-        <text x="150" y="174" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" text-anchor="middle" fill="#E8192C">Finder</text>
+      <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
+        <circle cx="170" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
+        <text x="170" y="128" font-family="Arial,Helvetica,sans-serif" font-size="46" font-weight="900" text-anchor="middle" fill="#E8192C">makro</text>
+        <text x="170" y="174" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" text-anchor="middle" fill="#E8192C">Finder</text>
       </svg>
       <div class="login-sub">Store 42 · Ramintra</div>
       <p class="login-desc">กรอกข้อมูลพนักงานก่อนเข้าใช้งานระบบค้นหาสินค้า</p>
