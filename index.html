@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Makro Finder - ค้นหาสินค้า Store 17</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f5f6f8;
+  --color-border-tertiary:#e5e7eb;
+  --color-border-secondary:#d1d5db;
+  --color-text-primary:#1a1a1a;
+  --color-text-secondary:#4b5563;
+  --color-text-tertiary:#9ca3af;
+  --color-background-success:#e6f7ee;
+  --color-text-success:#0a7a42;
+  --color-border-success:#a7e3c4;
+  --color-background-info:#eaf3ff;
+  --color-text-info:#1560bd;
+  --color-border-info:#bcdcff;
+}
+html,body{background:var(--color-background-secondary);min-height:100vh;font-family:'Sarabun','Segoe UI',sans-serif}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+body{padding:24px 12px}
+</style>
+</head>
+<body>
+<h2 class="sr-only">Makro Finder — แอปค้นหาสินค้าและดูแผนที่ภายใน Makro Store 17 สาขา J.Snitwong</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.frame{background:var(--color-background-secondary);border-radius:20px;padding:16px;max-width:400px;margin:0 auto}
+.phone{background:var(--color-background-primary);border-radius:16px;border:0.5px solid var(--color-border-tertiary);overflow:hidden}
+.hdr{background:#003087;padding:18px 16px 14px}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.hdr-logo{display:flex;align-items:center;gap:8px}
+.hdr-logotext{font-size:13px;font-weight:500;color:#fff}
+.hdr-sub{font-size:11px;color:#85B7EB;margin-top:1px}
+.hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+.search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin-top:12px;border:0.5px solid rgba(255,255,255,0.2)}
+.search-box input{background:transparent;border:none;outline:none;color:#fff;font-size:14px;flex:1;font-family:inherit}
+.search-box input::placeholder{color:rgba(255,255,255,0.5)}
+.search-box i{color:rgba(255,255,255,0.6);font-size:17px;flex-shrink:0}
+.body{padding:16px}
+.section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+.cat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.cat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);transition:border-color .15s}
+.cat-card:hover{border-color:var(--color-border-secondary)}
+.cat-card i{font-size:22px;display:block;margin-bottom:5px}
+.cat-card span{font-size:12px;color:var(--color-text-secondary);font-weight:500}
+.cat-fresh i{color:#E24B4A}.cat-dry i{color:#BA7517}.cat-nonfood i{color:#1D9E75}
+.cat-drink i{color:#534AB7}.cat-veg i{color:#3B6D11}.cat-clean i{color:#185FA5}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.chip{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);cursor:pointer;background:var(--color-background-primary);white-space:nowrap}
+.chip:hover{background:var(--color-background-secondary)}
+.result-wrap{display:none}
+.result-wrap.show{display:block}
+.result-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.result-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
+.loc-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.loc-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success)}
+.loc-pill.sec{background:var(--color-background-secondary);color:var(--color-text-secondary);border-color:var(--color-border-tertiary)}
+.loc-pill i{font-size:15px}
+.tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
+.tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
+.tip-text{font-size:13px;color:var(--color-text-info)}
+.map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
+.map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
+.store-map{position:relative;width:100%;height:180px;background:var(--color-background-secondary);border-radius:12px;border:0.5px solid var(--color-border-tertiary);overflow:hidden}
+.zb{position:absolute;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0.5px solid transparent;font-size:10px;font-weight:500;cursor:default;gap:2px}
+.zb.hl{border-width:2px!important}
+.zb i{font-size:14px}
+.map-pin{position:absolute;z-index:3;color:#E24B4A;font-size:18px;transform:translate(-50%,-100%)}
+.no-result{text-align:center;padding:28px 16px;color:var(--color-text-tertiary)}
+.no-result i{font-size:32px;display:block;margin-bottom:8px}
+.no-result p{font-size:13px}
+</style>
+
+<div class="frame">
+<div class="phone">
+
+  <div class="hdr">
+    <div class="hdr-row">
+      <div class="hdr-logo">
+        <div class="hdr-icon"><i class="ti ti-map-pin" aria-hidden="true"></i></div>
+        <div>
+          <div class="hdr-logotext">Makro Finder</div>
+          <div class="hdr-sub">Store 17 · J.Snitwong</div>
+        </div>
+      </div>
+      <div class="hdr-icon"><i class="ti ti-qrcode" aria-hidden="true"></i></div>
+    </div>
+    <div class="search-box">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input type="text" id="si" placeholder="ค้นหาสินค้า..." oninput="search(this.value)">
+      <i class="ti ti-x" id="clr" style="display:none;cursor:pointer" onclick="clearSearch()" aria-label="ล้าง"></i>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <div id="homeView">
+      <div class="section-label">หมวดหมู่</div>
+      <div class="cat-row">
+        <div class="cat-card cat-fresh" onclick="search('ไก่สด')"><i class="ti ti-meat" aria-hidden="true"></i><span>Fresh Food</span></div>
+        <div class="cat-card cat-dry" onclick="search('น้ำมัน')"><i class="ti ti-box" aria-hidden="true"></i><span>Dry Food</span></div>
+        <div class="cat-card cat-nonfood" onclick="search('กระดาษ')"><i class="ti ti-package" aria-hidden="true"></i><span>Non Food</span></div>
+        <div class="cat-card cat-drink" onclick="search('เครื่องดื่ม')"><i class="ti ti-cup" aria-hidden="true"></i><span>เครื่องดื่ม</span></div>
+        <div class="cat-card cat-veg" onclick="search('ผัก')"><i class="ti ti-plant" aria-hidden="true"></i><span>ผัก-ผลไม้</span></div>
+        <div class="cat-card cat-clean" onclick="search('สบู่')"><i class="ti ti-sparkles" aria-hidden="true"></i><span>ของใช้</span></div>
+      </div>
+      <div class="section-label">ค้นหาบ่อย</div>
+      <div class="chips">
+        <span class="chip" onclick="search('ข้าวสาร')">ข้าวสาร</span>
+        <span class="chip" onclick="search('ปลาทูน่า')">ปลาทูน่า</span>
+        <span class="chip" onclick="search('กุ้งสด')">กุ้งสด</span>
+        <span class="chip" onclick="search('น้ำตาล')">น้ำตาล</span>
+        <span class="chip" onclick="search('สบู่')">สบู่</span>
+        <span class="chip" onclick="search('ทำความสะอาด')">ทำความสะอาด</span>
+      </div>
+    </div>
+
+    <div id="resultView" class="result-wrap">
+      <div id="foundCard" style="display:none">
+        <div class="result-top">
+          <div class="result-icon-wrap" id="rIconWrap"><i id="rIcon" aria-hidden="true"></i></div>
+          <div>
+            <div class="result-name" id="rName"></div>
+            <span class="result-cat-badge" id="rBadge"></span>
+          </div>
+        </div>
+        <div class="loc-row" id="rLoc"></div>
+        <div class="tip-box">
+          <i class="ti ti-navigation" aria-hidden="true"></i>
+          <div class="tip-text" id="rTip"></div>
+        </div>
+        <div class="map-label-row">
+          <span class="map-label"><i class="ti ti-map" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>แผนที่สาขา</span>
+          <span class="map-hl-label" id="mapHlLabel"></span>
+        </div>
+        <div class="store-map" id="storeMap"></div>
+      </div>
+      <div id="notFound" style="display:none" class="no-result">
+        <i class="ti ti-mood-sad" aria-hidden="true"></i>
+        <p id="nfText"></p>
+        <p style="margin-top:6px;font-size:12px">ลองคำอื่น หรือถามพนักงาน</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+const DB=[
+  {name:"ไก่สด",cat:"Fresh Food",zone:"A",aisle:"A3",shelf:"ชั้น 1-2",tip:"โซนตู้แช่เย็นด้านซ้าย เดินตรงจากทางเข้า",icon:"ti-meat",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D"},
+  {name:"กุ้งสด",cat:"Fresh Food",zone:"A",aisle:"A3",shelf:"ชั้น 2",tip:"ถัดจากโซนไก่สด ตู้แช่แข็งฝั่งซ้าย",icon:"ti-fish",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D"},
+  {name:"ผัก",cat:"Fresh Food",zone:"A",aisle:"A1",shelf:"ชั้น 1",tip:"โซนผักสดใกล้ทางเข้า ฝั่งซ้ายมือ",icon:"ti-plant",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D"},
+  {name:"น้ำมัน",cat:"Dry Food",zone:"B",aisle:"B2",shelf:"ชั้น 3-4",tip:"ทางเดิน B ฝั่งกลางสาขา เดินผ่าน Zone A",icon:"ti-bottle",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806"},
+  {name:"น้ำตาล",cat:"Dry Food",zone:"B",aisle:"B2",shelf:"ชั้น 5",tip:"ชั้นเดียวกับน้ำมัน ปลายทางเดิน B2",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806"},
+  {name:"ข้าวสาร",cat:"Dry Food",zone:"B",aisle:"B1",shelf:"ชั้น 1",tip:"ต้นทางเดิน B โซน Bulk ถุงใหญ่",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806"},
+  {name:"ปลาทูน่า",cat:"Dry Food",zone:"B",aisle:"B3",shelf:"ชั้น 2-3",tip:"โซนกระป๋อง ทางเดิน B3 ฝั่งขวา",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806"},
+  {name:"เครื่องดื่ม",cat:"เครื่องดื่ม",zone:"C",aisle:"C1",shelf:"ชั้น 1-3",tip:"โซน C ใกล้แคชเชียร์ ทางเดินหลัก",icon:"ti-cup",bg:"#EEEDFE",ic:"#534AB7",badge:"#EEEDFE",badgeTxt:"#3C3489"},
+  {name:"กระดาษ",cat:"Non Food",zone:"D",aisle:"D2",shelf:"ชั้น 2",tip:"โซน D ฝั่งขวาของสาขา สินค้า Non Food",icon:"ti-file",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041"},
+  {name:"สบู่",cat:"Non Food",zone:"D",aisle:"D1",shelf:"ชั้น 3",tip:"ต้นทางเดิน D โซนของใช้ส่วนตัว",icon:"ti-sparkles",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041"},
+  {name:"ทำความสะอาด",cat:"Non Food",zone:"D",aisle:"D3",shelf:"ชั้น 1-2",tip:"โซน D ปลายทาง ใกล้โกดัง ฝั่งขวาสุด",icon:"ti-sparkles",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041"},
+];
+const ZONES=[
+  {id:"A",label:"Zone A",sub:"Fresh",x:3,y:3,w:40,h:73,bg:"#FCEBEB",bd:"#E24B4A",tc:"#A32D2D",ic:"ti-meat"},
+  {id:"B",label:"Zone B",sub:"Dry Food",x:46,y:3,w:40,h:73,bg:"#FAEEDA",bd:"#BA7517",tc:"#633806",ic:"ti-box"},
+  {id:"C",label:"Zone C",sub:"เครื่องดื่ม",x:89,y:3,w:8,h:36,bg:"#EEEDFE",bd:"#534AB7",tc:"#3C3489",ic:"ti-cup"},
+  {id:"D",label:"Zone D",sub:"Non Food",x:89,y:42,w:8,h:34,bg:"#E1F5EE",bd:"#1D9E75",tc:"#085041",ic:"ti-package"},
+  {id:"E",label:"แคชเชียร์",sub:"",x:3,y:79,w:94,h:18,bg:"#F1EFE8",bd:"#888780",tc:"#444441",ic:"ti-cash"},
+];
+
+function buildMap(hlZone){
+  const el=document.getElementById('storeMap');
+  if(!el)return;
+  const W=el.offsetWidth||340,H=180;
+  el.innerHTML='';
+  ZONES.forEach(z=>{
+    const d=document.createElement('div');
+    d.className='zb'+(hlZone===z.id?' hl':'');
+    const x=Math.round(z.x/100*W),y=Math.round(z.y/100*H);
+    const w=Math.round(z.w/100*W),h=Math.round(z.h/100*H);
+    d.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${z.bg};border-color:${z.bd};color:${z.tc}`;
+    d.innerHTML=`<i class="ti ${z.ic}" aria-hidden="true" style="font-size:${z.id==='E'?11:14}px"></i><span>${z.label}</span>${z.sub?`<span style="font-size:9px;opacity:.7">${z.sub}</span>`:''}`;
+    el.appendChild(d);
+  });
+  if(hlZone){
+    const z=ZONES.find(z=>z.id===hlZone);
+    if(z){
+      const pin=document.createElement('i');
+      pin.className='ti ti-map-pin map-pin';
+      pin.setAttribute('aria-hidden','true');
+      const cx=Math.round((z.x+z.w/2)/100*el.offsetWidth);
+      const cy=Math.round((z.y+z.h/2)/100*H);
+      pin.style.left=cx+'px';pin.style.top=cy+'px';
+      el.appendChild(pin);
+    }
+  }
+}
+
+function search(q){
+  const inp=document.getElementById('si');
+  if(inp.value!==q)inp.value=q;
+  document.getElementById('clr').style.display=q?'block':'none';
+  const home=document.getElementById('homeView');
+  const rv=document.getElementById('resultView');
+  if(!q.trim()){home.style.display='block';rv.classList.remove('show');return;}
+  home.style.display='none';
+  rv.classList.add('show');
+  const found=DB.find(d=>d.name.includes(q)||q.includes(d.name)||d.cat.includes(q));
+  const fc=document.getElementById('foundCard');
+  const nf=document.getElementById('notFound');
+  if(found){
+    fc.style.display='block';nf.style.display='none';
+    document.getElementById('rName').textContent=found.name;
+    const iw=document.getElementById('rIconWrap');
+    iw.style.background=found.bg;iw.style.borderRadius='12px';
+    const ri=document.getElementById('rIcon');
+    ri.className='ti '+found.icon;ri.style.color=found.ic;ri.style.fontSize='22px';
+    const rb=document.getElementById('rBadge');
+    rb.textContent=found.cat;rb.style.cssText=`background:${found.badge};color:${found.badgeTxt};font-size:11px;padding:2px 8px;border-radius:20px`;
+    document.getElementById('rLoc').innerHTML=`
+      <div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Zone ${found.zone}</div>
+      <div class="loc-pill"><i class="ti ti-layout-rows" aria-hidden="true"></i>Aisle ${found.aisle}</div>
+      <div class="loc-pill sec"><i class="ti ti-layers" aria-hidden="true"></i>${found.shelf}</div>`;
+    document.getElementById('rTip').textContent=found.tip;
+    document.getElementById('mapHlLabel').textContent='Zone '+found.zone+' highlighted';
+    setTimeout(()=>buildMap(found.zone),30);
+  } else {
+    fc.style.display='none';nf.style.display='block';
+    document.getElementById('nfText').textContent='ไม่พบ "'+q+'" ในระบบ';
+  }
+}
+
+function clearSearch(){
+  document.getElementById('si').value='';
+  document.getElementById('clr').style.display='none';
+  document.getElementById('homeView').style.display='block';
+  document.getElementById('resultView').classList.remove('show');
+}
+</script>
+</body>
+</html>
