@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Makro Finder - ค้นหาสินค้า Store 17</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <style>
 :root{
   --color-background-primary:#ffffff;
@@ -21,30 +22,31 @@
   --color-text-info:#1560bd;
   --color-border-info:#bcdcff;
 }
-html,body{background:var(--color-background-secondary);min-height:100vh;font-family:'Sarabun','Segoe UI',sans-serif}
+html,body{background:var(--color-background-secondary);height:100%;font-family:'Sarabun','Segoe UI',sans-serif}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-body{padding:24px 12px}
+body{margin:0;padding:0}
 </style>
 </head>
 <body>
 <h2 class="sr-only">Makro Finder — แอปค้นหาสินค้าและดูแผนที่ภายใน Makro Store 17 สาขา J.Snitwong</h2>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-.frame{background:var(--color-background-secondary);border-radius:20px;padding:16px;max-width:400px;margin:0 auto}
-.phone{background:var(--color-background-primary);border-radius:16px;border:0.5px solid var(--color-border-tertiary);overflow:hidden}
-.hdr{background:#003087;padding:18px 16px 14px}
-.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.frame{background:var(--color-background-secondary);min-height:100dvh;width:100%;display:flex;flex-direction:column}
+.phone{background:var(--color-background-primary);flex:1;display:flex;flex-direction:column;width:100%}
+.hdr{background:#003087;padding:18px clamp(16px,4vw,40px) 14px}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:680px;margin:0 auto;width:100%}
 .hdr-logo{display:flex;align-items:center;gap:8px}
 .hdr-logotext{font-size:13px;font-weight:500;color:#fff}
 .hdr-sub{font-size:11px;color:#85B7EB;margin-top:1px}
-.hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
-.search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin-top:12px;border:0.5px solid rgba(255,255,255,0.2)}
+.hdr-icons{display:flex;align-items:center;gap:8px}
+.hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;cursor:pointer;border:none;flex-shrink:0}
+.search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin:12px auto 0;border:0.5px solid rgba(255,255,255,0.2);max-width:680px}
 .search-box input{background:transparent;border:none;outline:none;color:#fff;font-size:14px;flex:1;font-family:inherit}
 .search-box input::placeholder{color:rgba(255,255,255,0.5)}
 .search-box i{color:rgba(255,255,255,0.6);font-size:17px;flex-shrink:0}
-.body{padding:16px}
+.body{padding:16px clamp(16px,4vw,40px) 40px;flex:1;max-width:680px;margin:0 auto;width:100%}
 .section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
-.cat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.cat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:20px}
 .cat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);transition:border-color .15s}
 .cat-card:hover{border-color:var(--color-border-secondary)}
 .cat-card i{font-size:22px;display:block;margin-bottom:5px}
@@ -78,6 +80,16 @@ body{padding:24px 12px}
 .no-result{text-align:center;padding:28px 16px;color:var(--color-text-tertiary)}
 .no-result i{font-size:32px;display:block;margin-bottom:8px}
 .no-result p{font-size:13px}
+.scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
+.scan-box{width:100%;max-width:420px}
+.scan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.scan-header span{color:#fff;font-size:15px;font-weight:500}
+.scan-header i{color:#fff;font-size:22px;cursor:pointer}
+.scan-video-wrap{position:relative;width:100%;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:#111}
+.scan-video-wrap video{width:100%;height:100%;object-fit:cover}
+.scan-guide{position:absolute;inset:12%;border:3px solid #fff;border-radius:16px;box-shadow:0 0 0 2000px rgba(0,0,0,.35)}
+.scan-hint{color:rgba(255,255,255,.75);font-size:13px;text-align:center;margin-top:14px}
+.scan-error{color:#ffb3b3;font-size:13px;text-align:center;margin-top:14px}
 </style>
 
 <div class="frame">
@@ -92,7 +104,10 @@ body{padding:24px 12px}
           <div class="hdr-sub">Store 17 · J.Snitwong</div>
         </div>
       </div>
-      <div class="hdr-icon"><i class="ti ti-qrcode" aria-hidden="true"></i></div>
+      <div class="hdr-icons">
+        <button class="hdr-icon" onclick="toggleFullscreen()" title="เต็มจอ" aria-label="เต็มจอ"><i id="fsIcon" class="ti ti-maximize" aria-hidden="true"></i></button>
+        <button class="hdr-icon" onclick="openScanner()" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
+      </div>
     </div>
     <div class="search-box">
       <i class="ti ti-search" aria-hidden="true"></i>
@@ -154,6 +169,22 @@ body{padding:24px 12px}
   </div>
 </div>
 </div>
+
+<div class="scan-overlay" id="scanOverlay">
+  <div class="scan-box">
+    <div class="scan-header">
+      <span>สแกน QR โค้ดสินค้า</span>
+      <i class="ti ti-x" onclick="closeScanner()" aria-label="ปิด"></i>
+    </div>
+    <div class="scan-video-wrap">
+      <video id="scanVideo" playsinline autoplay muted></video>
+      <div class="scan-guide"></div>
+    </div>
+    <p class="scan-hint">เล็งกล้องไปที่ QR โค้ดบนป้ายสินค้า</p>
+    <p class="scan-error" id="scanError" style="display:none"></p>
+  </div>
+</div>
+<canvas id="scanCanvas" style="display:none"></canvas>
 
 <script>
 const DB=[
@@ -244,6 +275,66 @@ function clearSearch(){
   document.getElementById('clr').style.display='none';
   document.getElementById('homeView').style.display='block';
   document.getElementById('resultView').classList.remove('show');
+}
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  } else {
+    document.exitFullscreen();
+  }
+}
+document.addEventListener('fullscreenchange',()=>{
+  const icon=document.getElementById('fsIcon');
+  if(icon)icon.className=document.fullscreenElement?'ti ti-minimize':'ti ti-maximize';
+});
+
+let scanStream=null,scanRAF=null;
+function openScanner(){
+  const overlay=document.getElementById('scanOverlay');
+  const err=document.getElementById('scanError');
+  err.style.display='none';err.textContent='';
+  overlay.style.display='flex';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง';
+    err.style.display='block';
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}})
+    .then(stream=>{
+      scanStream=stream;
+      const video=document.getElementById('scanVideo');
+      video.srcObject=stream;
+      video.play();
+      scanRAF=requestAnimationFrame(scanTick);
+    })
+    .catch(()=>{
+      err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้องในเบราว์เซอร์';
+      err.style.display='block';
+    });
+}
+function scanTick(){
+  const video=document.getElementById('scanVideo');
+  const canvas=document.getElementById('scanCanvas');
+  if(video.readyState===video.HAVE_ENOUGH_DATA){
+    canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+    const code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
+    if(code&&code.data){
+      closeScanner();
+      search(code.data.trim());
+      return;
+    }
+  }
+  scanRAF=requestAnimationFrame(scanTick);
+}
+function closeScanner(){
+  document.getElementById('scanOverlay').style.display='none';
+  if(scanRAF)cancelAnimationFrame(scanRAF);
+  scanRAF=null;
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
 }
 </script>
 </body>
