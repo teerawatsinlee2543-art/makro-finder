@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
   --brand-red:#E8192C;
@@ -144,6 +145,16 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .fb-submit{margin-top:8px;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .fb-submit:hover{background:var(--brand-red-dark)}
 .fb-thanks{margin-top:8px;font-size:12.5px;color:var(--color-text-success)}
+.fb-admin-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.fb-admin-count{font-size:12.5px;color:var(--color-text-tertiary)}
+.fb-export-btn{display:flex;align-items:center;gap:6px;background:#1D9E75;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.fb-export-btn:hover{background:#167a5b}
+.fb-export-btn i{font-size:15px}
+.fb-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto}
+.fb-item{background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);border-radius:10px;padding:10px 12px}
+.fb-item-meta{font-size:10.5px;color:var(--color-text-tertiary);margin-bottom:3px}
+.fb-item-text{font-size:13px;color:var(--color-text-primary);line-height:1.4}
+.fb-empty{text-align:center;padding:24px 12px;color:var(--color-text-tertiary);font-size:12.5px}
 </style>
 
 <div class="frame">
@@ -261,11 +272,21 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <span class="chip" onclick="search('สบู่')">สบู่</span>
         <span class="chip" onclick="search('ทำความสะอาด')">ทำความสะอาด</span>
       </div>
-      <div class="section-label">ข้อเสนอแนะ / ข้อคิดเห็นเพิ่มเติม</div>
-      <div class="feedback-box">
-        <textarea id="fbText" class="fb-textarea" rows="3" placeholder="แจ้งปัญหา ข้อเสนอแนะ หรือความคิดเห็นเพิ่มเติม..."></textarea>
-        <button class="fb-submit" onclick="submitFeedback()">ส่งความคิดเห็น</button>
-        <p class="fb-thanks" id="fbThanks" style="display:none">ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ</p>
+      <div id="customerFeedbackSection">
+        <div class="section-label">ข้อเสนอแนะ / ข้อคิดเห็นเพิ่มเติม</div>
+        <div class="feedback-box">
+          <textarea id="fbText" class="fb-textarea" rows="3" placeholder="แจ้งปัญหา ข้อเสนอแนะ หรือความคิดเห็นเพิ่มเติม..."></textarea>
+          <button class="fb-submit" onclick="submitFeedback()">ส่งความคิดเห็น</button>
+          <p class="fb-thanks" id="fbThanks" style="display:none">ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ</p>
+        </div>
+      </div>
+      <div id="employeeFeedbackSection" style="display:none">
+        <div class="section-label">ข้อเสนอแนะจากลูกค้า</div>
+        <div class="fb-admin-toolbar">
+          <span class="fb-admin-count" id="fbCount">0 รายการ</span>
+          <button class="fb-export-btn" onclick="exportFeedbackExcel()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
+        </div>
+        <div id="fbList" class="fb-list"></div>
       </div>
     </div>
 
@@ -522,22 +543,63 @@ function showMain(sess){
   const bar=document.getElementById('empBarText');
   if(sess.role==='employee'){
     bar.innerHTML='พนักงาน: <b>'+sess.name+' · '+sess.dept+'</b>';
+    document.getElementById('customerFeedbackSection').style.display='none';
+    document.getElementById('employeeFeedbackSection').style.display='block';
+    renderFeedbackList();
   } else {
     bar.innerHTML='<b>มุมมองลูกค้า</b>';
+    document.getElementById('customerFeedbackSection').style.display='block';
+    document.getElementById('employeeFeedbackSection').style.display='none';
   }
+}
+function getFeedbackList(){
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem('mf_feedback'))||[];}catch(e){}
+  return list;
 }
 function submitFeedback(){
   const ta=document.getElementById('fbText');
   const text=ta.value.trim();
   if(!text)return;
-  let list=[];
-  try{list=JSON.parse(localStorage.getItem('mf_feedback'))||[];}catch(e){}
+  const list=getFeedbackList();
   list.push({text,ts:Date.now(),role:currentRole});
   localStorage.setItem('mf_feedback',JSON.stringify(list));
   ta.value='';
   const thanks=document.getElementById('fbThanks');
   thanks.style.display='block';
   setTimeout(()=>{thanks.style.display='none';},3000);
+}
+function renderFeedbackList(){
+  const list=getFeedbackList().slice().sort((a,b)=>b.ts-a.ts);
+  const wrap=document.getElementById('fbList');
+  document.getElementById('fbCount').textContent=list.length+' รายการ';
+  if(!list.length){
+    wrap.innerHTML='<div class="fb-empty">ยังไม่มีข้อเสนอแนะจากลูกค้า</div>';
+    return;
+  }
+  wrap.innerHTML=list.map(item=>{
+    const d=new Date(item.ts);
+    const dateStr=d.toLocaleDateString('th-TH')+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    return '<div class="fb-item"><div class="fb-item-meta">'+dateStr+'</div><div class="fb-item-text">'+
+      item.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div></div>';
+  }).join('');
+}
+function exportFeedbackExcel(){
+  const list=getFeedbackList().slice().sort((a,b)=>a.ts-b.ts);
+  if(!list.length){alert('ยังไม่มีข้อเสนอแนะให้ส่งออก');return;}
+  const rows=list.map(item=>{
+    const d=new Date(item.ts);
+    return {
+      'วันที่':d.toLocaleDateString('th-TH'),
+      'เวลา':d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
+      'ข้อเสนอแนะ / ความคิดเห็น':item.text,
+    };
+  });
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:12},{wch:10},{wch:60}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'ข้อเสนอแนะ');
+  XLSX.writeFile(wb,'makro_finder_feedback_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 function submitLogin(){
   const name=document.getElementById('empName').value.trim();
