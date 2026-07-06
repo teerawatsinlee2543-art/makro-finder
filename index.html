@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Makro Finder - ค้นหาสินค้า Store 17</title>
+<title>Makro Finder - ค้นหาสินค้า Store 42</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <style>
@@ -28,11 +28,12 @@ body{margin:0;padding:0}
 </style>
 </head>
 <body>
-<h2 class="sr-only">Makro Finder — แอปค้นหาสินค้าและดูแผนที่ภายใน Makro Store 17 สาขา J.Snitwong</h2>
+<h2 class="sr-only">Makro Finder — แอปค้นหาสินค้าและดูแผนที่ภายใน Makro Store 42 สาขา J.Snitwong</h2>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 .frame{background:var(--color-background-secondary);min-height:100dvh;width:100%;display:flex;flex-direction:column}
 .phone{background:var(--color-background-primary);flex:1;display:flex;flex-direction:column;width:100%}
+#mainApp{flex:1;flex-direction:column;width:100%}
 .hdr{background:#003087;padding:18px clamp(16px,4vw,40px) 14px}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:680px;margin:0 auto;width:100%}
 .hdr-logo{display:flex;align-items:center;gap:8px}
@@ -90,10 +91,56 @@ body{margin:0;padding:0}
 .scan-guide{position:absolute;inset:12%;border:3px solid #fff;border-radius:16px;box-shadow:0 0 0 2000px rgba(0,0,0,.35)}
 .scan-hint{color:rgba(255,255,255,.75);font-size:13px;text-align:center;margin-top:14px}
 .scan-error{color:#ffb3b3;font-size:13px;text-align:center;margin-top:14px}
+.login-screen{position:fixed;inset:0;background:#003087;display:none;align-items:center;justify-content:center;padding:24px;z-index:1500}
+.login-card{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
+.login-logo{width:56px;height:56px;background:var(--color-background-info);color:#003087;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px}
+.login-title{font-size:20px;font-weight:600;color:var(--color-text-primary)}
+.login-sub{font-size:12px;color:var(--color-text-tertiary);margin-top:2px;margin-bottom:14px}
+.login-desc{font-size:13px;color:var(--color-text-secondary);margin-bottom:22px;line-height:1.5}
+.login-field{text-align:left;margin-bottom:16px}
+.field-label{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px;display:block}
+.req{color:#E24B4A}
+.inp{width:100%;padding:12px 14px;border:1px solid var(--color-border-secondary);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--color-text-primary);background:#fff}
+.inp:focus{border-color:#003087}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
+.login-error{color:#E24B4A;font-size:12.5px;margin-bottom:12px;text-align:left}
+.login-btn{width:100%;padding:13px;border:none;border-radius:12px;background:#003087;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.login-btn:hover{background:#002569}
+.emp-bar{display:flex;align-items:center;justify-content:space-between;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:8px 12px;margin-bottom:16px;font-size:12.5px;color:var(--color-text-secondary);gap:8px}
+.emp-bar b{color:var(--color-text-primary)}
+.emp-bar button{background:none;border:none;color:#1560bd;font-size:12.5px;cursor:pointer;font-family:inherit;padding:0;flex-shrink:0}
 </style>
 
 <div class="frame">
 <div class="phone">
+
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo"><i class="ti ti-map-pin" aria-hidden="true"></i></div>
+      <div class="login-title">Makro Finder</div>
+      <div class="login-sub">Store 42 · J.Snitwong</div>
+      <p class="login-desc">กรอกข้อมูลพนักงานก่อนเข้าใช้งานระบบค้นหาสินค้า</p>
+      <div class="login-field">
+        <label class="field-label">ชื่อ-นามสกุล <span class="req">*</span></label>
+        <input type="text" id="empName" class="inp" placeholder="เช่น สมชาย ใจดี">
+      </div>
+      <div class="login-field">
+        <label class="field-label">แผนก <span class="req">*</span></label>
+        <select id="empDept" class="inp">
+          <option value="">เลือกแผนก</option>
+          <option>แคชเชียร์</option>
+          <option>คลังสินค้า/สต็อก</option>
+          <option>ฝ่ายขาย</option>
+          <option>รักษาความปลอดภัย</option>
+          <option>อื่นๆ</option>
+        </select>
+      </div>
+      <p class="login-error" id="loginError" style="display:none"></p>
+      <button class="login-btn" onclick="submitLogin()">เข้าใช้งาน</button>
+    </div>
+  </div>
+
+  <div id="mainApp" style="display:none">
 
   <div class="hdr">
     <div class="hdr-row">
@@ -101,7 +148,7 @@ body{margin:0;padding:0}
         <div class="hdr-icon"><i class="ti ti-map-pin" aria-hidden="true"></i></div>
         <div>
           <div class="hdr-logotext">Makro Finder</div>
-          <div class="hdr-sub">Store 17 · J.Snitwong</div>
+          <div class="hdr-sub">Store 42 · J.Snitwong</div>
         </div>
       </div>
       <div class="hdr-icons">
@@ -117,6 +164,11 @@ body{margin:0;padding:0}
   </div>
 
   <div class="body">
+
+    <div class="emp-bar">
+      <span>พนักงาน: <b id="empGreeting"></b></span>
+      <button onclick="logout()">เปลี่ยนผู้ใช้งาน</button>
+    </div>
 
     <div id="homeView">
       <div class="section-label">หมวดหมู่</div>
@@ -166,6 +218,7 @@ body{margin:0;padding:0}
       </div>
     </div>
 
+  </div>
   </div>
 </div>
 </div>
@@ -336,6 +389,41 @@ function closeScanner(){
   scanRAF=null;
   if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
 }
+
+function showMain(emp){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainApp').style.display='flex';
+  document.getElementById('empGreeting').textContent=emp.name+(emp.dept?' · '+emp.dept:'');
+}
+function submitLogin(){
+  const name=document.getElementById('empName').value.trim();
+  const dept=document.getElementById('empDept').value;
+  const err=document.getElementById('loginError');
+  if(!name){err.textContent='กรุณากรอกชื่อ-นามสกุล';err.style.display='block';return;}
+  if(!dept){err.textContent='กรุณาเลือกแผนก';err.style.display='block';return;}
+  err.style.display='none';
+  const emp={name,dept,ts:Date.now()};
+  localStorage.setItem('mf_employee',JSON.stringify(emp));
+  showMain(emp);
+}
+function logout(){
+  localStorage.removeItem('mf_employee');
+  document.getElementById('empName').value='';
+  document.getElementById('empDept').value='';
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  clearSearch();
+}
+function checkLogin(){
+  let emp=null;
+  try{emp=JSON.parse(localStorage.getItem('mf_employee'));}catch(e){}
+  if(emp&&emp.name&&emp.dept){
+    showMain(emp);
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+  }
+}
+checkLogin();
 </script>
 </body>
 </html>
