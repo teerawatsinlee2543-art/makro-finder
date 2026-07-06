@@ -39,7 +39,7 @@ body{margin:0;padding:0}
 .hdr{background:var(--brand-red);padding:18px clamp(16px,4vw,40px) 14px}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:680px;margin:0 auto;width:100%}
 .hdr-logo{display:flex;align-items:center;gap:8px}
-.hdr-logo-badge{height:44px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:7px 12px}
+.hdr-logo-badge{height:54px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .hdr-logo-badge svg{height:100%;width:auto;display:block}
 .hdr-logotext{font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
 .hdr-logotext i{font-size:18px}
@@ -129,6 +129,17 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .emp-stock-label{font-size:11px;font-weight:600;color:#95610A;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
 .emp-stock-text{font-size:13.5px;font-weight:600;color:#6b4306}
 .emp-stock-note{font-size:12px;color:#8a6a2f;margin-top:2px}
+.promo-box{background:#FFF0F1;border:1px solid #FFC9CD;border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
+.promo-box i{color:var(--brand-red);font-size:19px;flex-shrink:0;margin-top:1px}
+.promo-tag{display:inline-block;background:var(--brand-red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;letter-spacing:.02em}
+.promo-title{font-size:14px;font-weight:700;color:#8a0e17}
+.promo-detail{font-size:12.5px;color:#a3454d;margin-top:1px}
+.feedback-box{margin-top:2px}
+.fb-textarea{width:100%;border:1px solid var(--color-border-secondary);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;resize:vertical;min-height:64px;outline:none;color:var(--color-text-primary);background:#fff}
+.fb-textarea:focus{border-color:var(--brand-red)}
+.fb-submit{margin-top:8px;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.fb-submit:hover{background:var(--brand-red-dark)}
+.fb-thanks{margin-top:8px;font-size:12.5px;color:var(--color-text-success)}
 </style>
 
 <div class="frame">
@@ -199,7 +210,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div class="hdr-logo">
         <div class="hdr-logo-badge">
           <svg viewBox="0 0 260 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <text x="130" y="72" font-family="Arial,Helvetica,sans-serif" font-size="66" font-weight="900" text-anchor="middle" fill="#E8192C" stroke="#6b0e16" stroke-width="6" stroke-linejoin="round" paint-order="stroke">makro</text>
+            <text x="130" y="72" font-family="Arial,Helvetica,sans-serif" font-size="66" font-weight="900" text-anchor="middle" fill="#ffffff" stroke="#6b0e16" stroke-width="6" stroke-linejoin="round" paint-order="stroke">makro</text>
           </svg>
         </div>
         <div>
@@ -245,6 +256,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <span class="chip" onclick="search('สบู่')">สบู่</span>
         <span class="chip" onclick="search('ทำความสะอาด')">ทำความสะอาด</span>
       </div>
+      <div class="section-label">ข้อเสนอแนะ / ข้อคิดเห็นเพิ่มเติม</div>
+      <div class="feedback-box">
+        <textarea id="fbText" class="fb-textarea" rows="3" placeholder="แจ้งปัญหา ข้อเสนอแนะ หรือความคิดเห็นเพิ่มเติม..."></textarea>
+        <button class="fb-submit" onclick="submitFeedback()">ส่งความคิดเห็น</button>
+        <p class="fb-thanks" id="fbThanks" style="display:none">ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ</p>
+      </div>
     </div>
 
     <div id="resultView" class="result-wrap">
@@ -257,6 +274,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           </div>
         </div>
         <div class="loc-row" id="rLoc"></div>
+        <div class="promo-box" id="promoBlock" style="display:none">
+          <i class="ti ti-discount-2" aria-hidden="true"></i>
+          <div>
+            <span class="promo-tag" id="promoTag"></span>
+            <div class="promo-title" id="promoTitle"></div>
+            <div class="promo-detail" id="promoDetail"></div>
+          </div>
+        </div>
         <div class="emp-stock-box" id="empStockBlock" style="display:none">
           <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> สำหรับพนักงาน · สต็อกสำรอง</div>
           <div class="emp-stock-text" id="empStockText"></div>
@@ -302,17 +327,17 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
 <script>
 const DB=[
-  {name:"ไก่สด",cat:"Fresh Food",zone:"A",aisle:"A3",shelf:"ชั้น 1-2",tip:"โซนตู้แช่เย็นด้านซ้าย เดินตรงจากทางเข้า",icon:"ti-meat",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D",stock:{loc:"แร็คเย็นสำรอง ชั้นบน โซน A",qty:"5 ลัง"}},
-  {name:"กุ้งสด",cat:"Fresh Food",zone:"A",aisle:"A3",shelf:"ชั้น 2",tip:"ถัดจากโซนไก่สด ตู้แช่แข็งฝั่งซ้าย",icon:"ti-fish",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D",stock:{loc:"ห้องเย็นสำรอง ชั้นบน โซน A",qty:"8 ลัง"}},
-  {name:"ผัก",cat:"Fresh Food",zone:"A",aisle:"A1",shelf:"ชั้น 1",tip:"โซนผักสดใกล้ทางเข้า ฝั่งซ้ายมือ",icon:"ti-plant",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D",stock:{loc:"แร็คสำรอง ชั้นบน ใกล้ทางเข้าโซน A",qty:"10 ตะกร้า"}},
-  {name:"น้ำมัน",cat:"Dry Food",zone:"B",aisle:"B2",shelf:"ชั้น 3-4",tip:"ทางเดิน B ฝั่งกลางสาขา เดินผ่าน Zone A",icon:"ti-bottle",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แร็คสูง ชั้นบน โซน B",qty:"20 ลัง"}},
-  {name:"น้ำตาล",cat:"Dry Food",zone:"B",aisle:"B2",shelf:"ชั้น 5",tip:"ชั้นเดียวกับน้ำมัน ปลายทางเดิน B2",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แร็คสูง ชั้นบน โซน B",qty:"15 ลัง"}},
-  {name:"ข้าวสาร",cat:"Dry Food",zone:"B",aisle:"B1",shelf:"ชั้น 1",tip:"ต้นทางเดิน B โซน Bulk ถุงใหญ่",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แพเลทสำรอง ชั้นบน โซน B",qty:"30 กระสอบ"}},
-  {name:"ปลาทูน่า",cat:"Dry Food",zone:"B",aisle:"B3",shelf:"ชั้น 2-3",tip:"โซนกระป๋อง ทางเดิน B3 ฝั่งขวา",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แร็คสูง ชั้นบน โซน B",qty:"25 ลัง"}},
-  {name:"เครื่องดื่ม",cat:"เครื่องดื่ม",zone:"C",aisle:"C1",shelf:"ชั้น 1-3",tip:"โซน C ใกล้แคชเชียร์ ทางเดินหลัก",icon:"ti-cup",bg:"#EEEDFE",ic:"#534AB7",badge:"#EEEDFE",badgeTxt:"#3C3489",stock:{loc:"แร็คสำรอง ชั้นบน โซน C",qty:"18 ลัง"}},
-  {name:"กระดาษ",cat:"Non Food",zone:"D",aisle:"D2",shelf:"ชั้น 2",tip:"โซน D ฝั่งขวาของสาขา สินค้า Non Food",icon:"ti-file",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041",stock:{loc:"แร็คสูง ชั้นบน โซน D",qty:"12 ลัง"}},
-  {name:"สบู่",cat:"Non Food",zone:"D",aisle:"D1",shelf:"ชั้น 3",tip:"ต้นทางเดิน D โซนของใช้ส่วนตัว",icon:"ti-sparkles",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041",stock:{loc:"แร็คสำรอง ชั้นบน โซน D",qty:"14 ลัง"}},
-  {name:"ทำความสะอาด",cat:"Non Food",zone:"D",aisle:"D3",shelf:"ชั้น 1-2",tip:"โซน D ปลายทาง ใกล้โกดัง ฝั่งขวาสุด",icon:"ti-sparkles",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041",stock:{loc:"แร็คสูง ชั้นบน โซน D ปลายทาง",qty:"9 ลัง"}},
+  {name:"ไก่สด",cat:"Fresh Food",zone:"A",aisle:"A3",shelf:"ชั้น 1-2",tip:"โซนตู้แช่เย็นด้านซ้าย เดินตรงจากทางเข้า",icon:"ti-meat",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D",stock:{loc:"แร็คเย็นสำรอง ชั้นบน โซน A",qty:"5 ลัง"},promo:{tag:"โปรฯ วันนี้",title:"ลด 10 บาท/กก.",detail:"เฉพาะวันนี้ถึง 20:00 น."}},
+  {name:"กุ้งสด",cat:"Fresh Food",zone:"A",aisle:"A3",shelf:"ชั้น 2",tip:"ถัดจากโซนไก่สด ตู้แช่แข็งฝั่งซ้าย",icon:"ti-fish",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D",stock:{loc:"ห้องเย็นสำรอง ชั้นบน โซน A",qty:"8 ลัง"},promo:{tag:"ซื้อคุ้ม",title:"ซื้อ 2 กก. ลด 5%",detail:"จำกัดคนละ 3 กก."}},
+  {name:"ผัก",cat:"Fresh Food",zone:"A",aisle:"A1",shelf:"ชั้น 1",tip:"โซนผักสดใกล้ทางเข้า ฝั่งซ้ายมือ",icon:"ti-plant",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D",stock:{loc:"แร็คสำรอง ชั้นบน ใกล้ทางเข้าโซน A",qty:"10 ตะกร้า"},promo:{tag:"โปรฯ สด",title:"ลดสูงสุด 15%",detail:"ผักคัดสดใหม่ทุกเช้า"}},
+  {name:"น้ำมัน",cat:"Dry Food",zone:"B",aisle:"B2",shelf:"ชั้น 3-4",tip:"ทางเดิน B ฝั่งกลางสาขา เดินผ่าน Zone A",icon:"ti-bottle",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แร็คสูง ชั้นบน โซน B",qty:"20 ลัง"},promo:{tag:"HOT",title:"ลด 20 บาท/ขวด",detail:"เมื่อซื้อครบ 2 ขวดขึ้นไป"}},
+  {name:"น้ำตาล",cat:"Dry Food",zone:"B",aisle:"B2",shelf:"ชั้น 5",tip:"ชั้นเดียวกับน้ำมัน ปลายทางเดิน B2",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แร็คสูง ชั้นบน โซน B",qty:"15 ลัง"},promo:{tag:"โปรฯ",title:"ซื้อ 3 แถม 1",detail:"เฉพาะถุงขนาด 1 กก."}},
+  {name:"ข้าวสาร",cat:"Dry Food",zone:"B",aisle:"B1",shelf:"ชั้น 1",tip:"ต้นทางเดิน B โซน Bulk ถุงใหญ่",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แพเลทสำรอง ชั้นบน โซน B",qty:"30 กระสอบ"},promo:{tag:"ลดพิเศษ",title:"ลด 5% ทั้งร้าน",detail:"เมื่อซื้อครบ 500 บาท"}},
+  {name:"ปลาทูน่า",cat:"Dry Food",zone:"B",aisle:"B3",shelf:"ชั้น 2-3",tip:"โซนกระป๋อง ทางเดิน B3 ฝั่งขวา",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แร็คสูง ชั้นบน โซน B",qty:"25 ลัง"},promo:{tag:"โปรฯ",title:"ซื้อ 5 แถม 1",detail:"กระป๋องขนาด 185 กรัม"}},
+  {name:"เครื่องดื่ม",cat:"เครื่องดื่ม",zone:"C",aisle:"C1",shelf:"ชั้น 1-3",tip:"โซน C ใกล้แคชเชียร์ ทางเดินหลัก",icon:"ti-cup",bg:"#EEEDFE",ic:"#534AB7",badge:"#EEEDFE",badgeTxt:"#3C3489",stock:{loc:"แร็คสำรอง ชั้นบน โซน C",qty:"18 ลัง"},promo:{tag:"HOT",title:"ลด 10%",detail:"เฉพาะแพ็ค 6 กระป๋องขึ้นไป"}},
+  {name:"กระดาษ",cat:"Non Food",zone:"D",aisle:"D2",shelf:"ชั้น 2",tip:"โซน D ฝั่งขวาของสาขา สินค้า Non Food",icon:"ti-file",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041",stock:{loc:"แร็คสูง ชั้นบน โซน D",qty:"12 ลัง"},promo:{tag:"โปรฯ",title:"ซื้อ 2 แถม 1",detail:"เฉพาะกระดาษทิชชู่ 6 ม้วน"}},
+  {name:"สบู่",cat:"Non Food",zone:"D",aisle:"D1",shelf:"ชั้น 3",tip:"ต้นทางเดิน D โซนของใช้ส่วนตัว",icon:"ti-sparkles",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041",stock:{loc:"แร็คสำรอง ชั้นบน โซน D",qty:"14 ลัง"},promo:{tag:"ลดพิเศษ",title:"ลด 15%",detail:"เมื่อซื้อครบ 2 ชิ้น"}},
+  {name:"ทำความสะอาด",cat:"Non Food",zone:"D",aisle:"D3",shelf:"ชั้น 1-2",tip:"โซน D ปลายทาง ใกล้โกดัง ฝั่งขวาสุด",icon:"ti-sparkles",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041",stock:{loc:"แร็คสูง ชั้นบน โซน D ปลายทาง",qty:"9 ลัง"},promo:{tag:"โปรฯ",title:"ลด 20 บาท",detail:"น้ำยาทำความสะอาดทุกชนิด"}},
 ];
 const ZONES=[
   {id:"A",label:"Zone A",sub:"Fresh",x:3,y:3,w:40,h:73,bg:"#FCEBEB",bd:"#E24B4A",tc:"#A32D2D",ic:"ti-meat"},
@@ -375,6 +400,15 @@ function search(q){
       <div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Zone ${found.zone}</div>
       <div class="loc-pill"><i class="ti ti-layout-rows" aria-hidden="true"></i>ล็อก ${found.aisle}</div>
       <div class="loc-pill sec"><i class="ti ti-layers" aria-hidden="true"></i>${found.shelf}</div>`;
+    const promoBlock=document.getElementById('promoBlock');
+    if(found.promo){
+      promoBlock.style.display='flex';
+      document.getElementById('promoTag').textContent=found.promo.tag;
+      document.getElementById('promoTitle').textContent=found.promo.title;
+      document.getElementById('promoDetail').textContent=found.promo.detail;
+    } else {
+      promoBlock.style.display='none';
+    }
     const empBlock=document.getElementById('empStockBlock');
     if(currentRole==='employee'&&found.stock){
       empBlock.style.display='block';
@@ -486,6 +520,19 @@ function showMain(sess){
   } else {
     bar.innerHTML='<b>มุมมองลูกค้า</b>';
   }
+}
+function submitFeedback(){
+  const ta=document.getElementById('fbText');
+  const text=ta.value.trim();
+  if(!text)return;
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem('mf_feedback'))||[];}catch(e){}
+  list.push({text,ts:Date.now(),role:currentRole});
+  localStorage.setItem('mf_feedback',JSON.stringify(list));
+  ta.value='';
+  const thanks=document.getElementById('fbThanks');
+  thanks.style.display='block';
+  setTimeout(()=>{thanks.style.display='none';},3000);
 }
 function submitLogin(){
   const name=document.getElementById('empName').value.trim();
