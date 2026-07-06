@@ -212,6 +212,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="hdr">
     <div class="hdr-row">
       <div class="hdr-logo">
+        <button class="hdr-icon" onclick="switchRole()" title="กลับ" aria-label="กลับไปหน้าเลือกมุมมอง"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
         <div class="hdr-logo-badge">
           <svg viewBox="0 0 260 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <text x="130" y="72" font-family="Arial,Helvetica,sans-serif" font-size="66" font-weight="900" text-anchor="middle" fill="#ffffff" stroke="#000000" stroke-width="9" stroke-linejoin="round" paint-order="stroke">makro</text>
@@ -223,7 +224,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div class="hdr-icons">
-        <button class="hdr-icon" onclick="switchRole()" title="กลับ" aria-label="กลับไปหน้าเลือกมุมมอง"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
         <button class="hdr-icon" onclick="toggleFullscreen()" title="เต็มจอ" aria-label="เต็มจอ"><i id="fsIcon" class="ti ti-maximize" aria-hidden="true"></i></button>
         <button class="hdr-icon" onclick="openScanner()" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
       </div>
