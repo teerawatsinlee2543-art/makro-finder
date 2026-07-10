@@ -80,6 +80,19 @@ body{margin:0;padding:0}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
+.promo-box{background:#FFF0F1;border:1px solid #FFC9CD;border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
+.promo-box i{color:var(--brand-red);font-size:19px;flex-shrink:0;margin-top:1px}
+.promo-tag{display:inline-block;background:var(--brand-red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;letter-spacing:.02em}
+.promo-title{font-size:14px;font-weight:700;color:#8a0e17}
+.promo-detail{font-size:12.5px;color:#a3454d;margin-top:1px}
+.map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
+.map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
+.store-map{position:relative;width:100%;height:180px;background:var(--color-background-secondary);border-radius:12px;border:0.5px solid var(--color-border-tertiary);overflow:hidden}
+.zb{position:absolute;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0.5px solid transparent;font-size:10px;font-weight:500;cursor:default;gap:2px}
+.zb.hl{border-width:2px!important}
+.zb i{font-size:14px}
+.map-pin{position:absolute;z-index:3;color:#E24B4A;font-size:18px;transform:translate(-50%,-100%)}
 .no-result{text-align:center;padding:28px 16px;color:var(--color-text-tertiary)}
 .no-result i{font-size:32px;display:block;margin-bottom:8px}
 .no-result p{font-size:13px}
@@ -315,6 +328,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           </div>
         </div>
         <div class="loc-row" id="rLoc"></div>
+        <div class="promo-box" id="promoBlock">
+          <i class="ti ti-discount-2" aria-hidden="true"></i>
+          <div>
+            <span class="promo-tag">ลดพิเศษ</span>
+            <div class="promo-title">ลด 5% ทั้งร้าน</div>
+            <div class="promo-detail">เมื่อซื้อครบ 500 บาท</div>
+          </div>
+        </div>
         <div class="emp-stock-box" id="empStockBlock" style="display:none">
           <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> สำหรับพนักงาน · ข้อมูลจัดวางสินค้า</div>
           <div id="empStockList"></div>
@@ -323,6 +344,15 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <i class="ti ti-note" aria-hidden="true"></i>
           <div class="tip-text" id="rRemark"></div>
         </div>
+        <div class="tip-box">
+          <i class="ti ti-navigation" aria-hidden="true"></i>
+          <div class="tip-text">เดินตามป้ายบอกโซนภายในสาขาเพื่อไปยังตำแหน่งจัดเก็บสินค้า</div>
+        </div>
+        <div class="map-label-row">
+          <span class="map-label"><i class="ti ti-map" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>แผนที่สาขา</span>
+          <span class="map-hl-label" id="mapHlLabel"></span>
+        </div>
+        <div class="store-map" id="storeMap"></div>
       </div>
       <div id="notFound" style="display:none" class="no-result">
         <i class="ti ti-mood-sad" aria-hidden="true"></i>
@@ -353,6 +383,42 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <canvas id="scanCanvas" style="display:none"></canvas>
 
 <script>
+const ZONES=[
+  {id:"A",label:"Zone A",sub:"Fresh",x:3,y:3,w:40,h:73,bg:"#FCEBEB",bd:"#E24B4A",tc:"#A32D2D",ic:"ti-meat"},
+  {id:"B",label:"Zone B",sub:"Dry Food",x:46,y:3,w:40,h:73,bg:"#FAEEDA",bd:"#BA7517",tc:"#633806",ic:"ti-box"},
+  {id:"C",label:"Zone C",sub:"เครื่องดื่ม",x:89,y:3,w:8,h:36,bg:"#EEEDFE",bd:"#534AB7",tc:"#3C3489",ic:"ti-cup"},
+  {id:"D",label:"Zone D",sub:"Non Food",x:89,y:42,w:8,h:34,bg:"#E1F5EE",bd:"#1D9E75",tc:"#085041",ic:"ti-package"},
+  {id:"E",label:"แคชเชียร์",sub:"",x:3,y:79,w:94,h:18,bg:"#F1EFE8",bd:"#888780",tc:"#444441",ic:"ti-cash"},
+];
+
+function buildMap(hlZone){
+  const el=document.getElementById('storeMap');
+  if(!el)return;
+  const W=el.offsetWidth||340,H=180;
+  el.innerHTML='';
+  ZONES.forEach(z=>{
+    const d=document.createElement('div');
+    d.className='zb'+(hlZone===z.id?' hl':'');
+    const x=Math.round(z.x/100*W),y=Math.round(z.y/100*H);
+    const w=Math.round(z.w/100*W),h=Math.round(z.h/100*H);
+    d.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${z.bg};border-color:${z.bd};color:${z.tc}`;
+    d.innerHTML=`<i class="ti ${z.ic}" aria-hidden="true" style="font-size:${z.id==='E'?11:14}px"></i><span>${z.label}</span>${z.sub?`<span style="font-size:9px;opacity:.7">${z.sub}</span>`:''}`;
+    el.appendChild(d);
+  });
+  if(hlZone){
+    const z=ZONES.find(z=>z.id===hlZone);
+    if(z){
+      const pin=document.createElement('i');
+      pin.className='ti ti-map-pin map-pin';
+      pin.setAttribute('aria-hidden','true');
+      const cx=Math.round((z.x+z.w/2)/100*el.offsetWidth);
+      const cy=Math.round((z.y+z.h/2)/100*H);
+      pin.style.left=cx+'px';pin.style.top=cy+'px';
+      el.appendChild(pin);
+    }
+  }
+}
+
 let PRODUCTS_READY=false;
 let PRODUCTS_BY_KEY=[];
 let pendingSearchQuery=null;
@@ -511,6 +577,8 @@ function renderDetail(item,fromList){
   } else {
     remarkBlock.style.display='none';
   }
+  document.getElementById('mapHlLabel').textContent='Zone B highlighted';
+  setTimeout(()=>buildMap('B'),30);
 }
 
 function clearSearch(){
