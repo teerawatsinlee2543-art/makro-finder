@@ -70,7 +70,7 @@ body{margin:0;padding:0}
 .result-wrap{display:none}
 .result-wrap.show{display:block}
 .result-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.result-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.result-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
 .result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
 .loc-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
@@ -80,17 +80,24 @@ body{margin:0;padding:0}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
-.map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
-.map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
-.store-map{position:relative;width:100%;height:180px;background:var(--color-background-secondary);border-radius:12px;border:0.5px solid var(--color-border-tertiary);overflow:hidden}
-.zb{position:absolute;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0.5px solid transparent;font-size:10px;font-weight:500;cursor:default;gap:2px}
-.zb.hl{border-width:2px!important}
-.zb i{font-size:14px}
-.map-pin{position:absolute;z-index:3;color:#E24B4A;font-size:18px;transform:translate(-50%,-100%)}
 .no-result{text-align:center;padding:28px 16px;color:var(--color-text-tertiary)}
 .no-result i{font-size:32px;display:block;margin-bottom:8px}
 .no-result p{font-size:13px}
+#dataLoading i{animation:spin 1s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.results-count{font-size:12.5px;color:var(--color-text-tertiary);margin-bottom:10px}
+.result-item{display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--color-border-tertiary);border-radius:12px;margin-bottom:8px;cursor:pointer;background:var(--color-background-primary)}
+.result-item:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary)}
+.result-item-icon{width:38px;height:38px;border-radius:10px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-text-secondary);flex-shrink:0}
+.result-item-info{min-width:0;flex:1}
+.result-item-name{font-size:14px;font-weight:500;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result-item-meta{font-size:11.5px;color:var(--color-text-tertiary);margin-top:2px}
+.result-item i.ti-chevron-right{color:var(--color-text-tertiary);font-size:16px;flex-shrink:0}
+.back-to-list{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
+.loc-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.loc-group-idx{font-size:11px;color:var(--color-text-tertiary);width:100%}
+.emp-loc-item{background:#fff;border:1px solid #FFD9A0;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px;color:#6b4306}
+.emp-loc-item:last-child{margin-bottom:0}
 .scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
 .scan-box{width:100%;max-width:420px}
 .scan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -132,13 +139,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .login-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
 .emp-stock-box{background:#FFF4E5;border:1px solid #FFD9A0;border-radius:10px;padding:10px 12px;margin-bottom:16px}
 .emp-stock-label{font-size:11px;font-weight:600;color:#95610A;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
-.emp-stock-text{font-size:13.5px;font-weight:600;color:#6b4306}
-.emp-stock-note{font-size:12px;color:#8a6a2f;margin-top:2px}
-.promo-box{background:#FFF0F1;border:1px solid #FFC9CD;border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
-.promo-box i{color:var(--brand-red);font-size:19px;flex-shrink:0;margin-top:1px}
-.promo-tag{display:inline-block;background:var(--brand-red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;letter-spacing:.02em}
-.promo-title{font-size:14px;font-weight:700;color:#8a0e17}
-.promo-detail{font-size:12.5px;color:#a3454d;margin-top:1px}
 .feedback-box{margin-top:2px}
 .fb-textarea{width:100%;border:1px solid var(--color-border-secondary);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;resize:vertical;min-height:64px;outline:none;color:var(--color-text-primary);background:#fff}
 .fb-textarea:focus{border-color:var(--brand-red)}
@@ -219,6 +219,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <option>SAFETY</option>
         </select>
       </div>
+      <div class="login-field">
+        <label class="field-label">รหัส PIN พนักงาน <span class="req">*</span></label>
+        <input type="password" inputmode="numeric" maxlength="4" id="empPin" class="inp" placeholder="ใส่รหัส PIN 4 หลัก">
+      </div>
       <p class="login-error" id="loginError" style="display:none"></p>
       <button class="login-btn" onclick="submitLogin()">เข้าใช้งาน</button>
     </div>
@@ -297,37 +301,28 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
 
     <div id="resultView" class="result-wrap">
+      <div id="dataLoading" style="display:none" class="no-result">
+        <i class="ti ti-loader-2" aria-hidden="true"></i>
+        <p>กำลังโหลดข้อมูลสินค้า...</p>
+      </div>
+      <div id="resultsList" style="display:none"></div>
       <div id="foundCard" style="display:none">
         <div class="result-top">
-          <div class="result-icon-wrap" id="rIconWrap"><i id="rIcon" aria-hidden="true"></i></div>
+          <div class="result-icon-wrap" id="rIconWrap"><i class="ti ti-package" aria-hidden="true"></i></div>
           <div>
             <div class="result-name" id="rName"></div>
             <span class="result-cat-badge" id="rBadge"></span>
           </div>
         </div>
         <div class="loc-row" id="rLoc"></div>
-        <div class="promo-box" id="promoBlock" style="display:none">
-          <i class="ti ti-discount-2" aria-hidden="true"></i>
-          <div>
-            <span class="promo-tag" id="promoTag"></span>
-            <div class="promo-title" id="promoTitle"></div>
-            <div class="promo-detail" id="promoDetail"></div>
-          </div>
-        </div>
         <div class="emp-stock-box" id="empStockBlock" style="display:none">
-          <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> สำหรับพนักงาน · สต็อกสำรอง</div>
-          <div class="emp-stock-text" id="empStockText"></div>
-          <div class="emp-stock-note" id="empStockNote"></div>
+          <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> สำหรับพนักงาน · ข้อมูลจัดวางสินค้า</div>
+          <div id="empStockList"></div>
         </div>
-        <div class="tip-box">
-          <i class="ti ti-navigation" aria-hidden="true"></i>
-          <div class="tip-text" id="rTip"></div>
+        <div id="remarkBlock" class="tip-box" style="display:none">
+          <i class="ti ti-note" aria-hidden="true"></i>
+          <div class="tip-text" id="rRemark"></div>
         </div>
-        <div class="map-label-row">
-          <span class="map-label"><i class="ti ti-map" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>แผนที่สาขา</span>
-          <span class="map-hl-label" id="mapHlLabel"></span>
-        </div>
-        <div class="store-map" id="storeMap"></div>
       </div>
       <div id="notFound" style="display:none" class="no-result">
         <i class="ti ti-mood-sad" aria-hidden="true"></i>
@@ -358,53 +353,67 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <canvas id="scanCanvas" style="display:none"></canvas>
 
 <script>
-const DB=[
-  {name:"ไก่สด",cat:"Fresh Food",zone:"A",aisle:"A3",shelf:"ชั้น 1-2",tip:"โซนตู้แช่เย็นด้านซ้าย เดินตรงจากทางเข้า",icon:"ti-meat",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D",stock:{loc:"แร็คเย็นสำรอง ชั้นบน โซน A",qty:"5 ลัง"},promo:{tag:"โปรฯ วันนี้",title:"ลด 10 บาท/กก.",detail:"เฉพาะวันนี้ถึง 20:00 น."}},
-  {name:"กุ้งสด",cat:"Fresh Food",zone:"A",aisle:"A3",shelf:"ชั้น 2",tip:"ถัดจากโซนไก่สด ตู้แช่แข็งฝั่งซ้าย",icon:"ti-fish",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D",stock:{loc:"ห้องเย็นสำรอง ชั้นบน โซน A",qty:"8 ลัง"},promo:{tag:"ซื้อคุ้ม",title:"ซื้อ 2 กก. ลด 5%",detail:"จำกัดคนละ 3 กก."}},
-  {name:"ผัก",cat:"Fresh Food",zone:"A",aisle:"A1",shelf:"ชั้น 1",tip:"โซนผักสดใกล้ทางเข้า ฝั่งซ้ายมือ",icon:"ti-plant",bg:"#FCEBEB",ic:"#E24B4A",badge:"#FCEBEB",badgeTxt:"#A32D2D",stock:{loc:"แร็คสำรอง ชั้นบน ใกล้ทางเข้าโซน A",qty:"10 ตะกร้า"},promo:{tag:"โปรฯ สด",title:"ลดสูงสุด 15%",detail:"ผักคัดสดใหม่ทุกเช้า"}},
-  {name:"น้ำมัน",cat:"Dry Food",zone:"B",aisle:"B2",shelf:"ชั้น 3-4",tip:"ทางเดิน B ฝั่งกลางสาขา เดินผ่าน Zone A",icon:"ti-bottle",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แร็คสูง ชั้นบน โซน B",qty:"20 ลัง"},promo:{tag:"HOT",title:"ลด 20 บาท/ขวด",detail:"เมื่อซื้อครบ 2 ขวดขึ้นไป"}},
-  {name:"น้ำตาล",cat:"Dry Food",zone:"B",aisle:"B2",shelf:"ชั้น 5",tip:"ชั้นเดียวกับน้ำมัน ปลายทางเดิน B2",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แร็คสูง ชั้นบน โซน B",qty:"15 ลัง"},promo:{tag:"โปรฯ",title:"ซื้อ 3 แถม 1",detail:"เฉพาะถุงขนาด 1 กก."}},
-  {name:"ข้าวสาร",cat:"Dry Food",zone:"B",aisle:"B1",shelf:"ชั้น 1",tip:"ต้นทางเดิน B โซน Bulk ถุงใหญ่",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แพเลทสำรอง ชั้นบน โซน B",qty:"30 กระสอบ"},promo:{tag:"ลดพิเศษ",title:"ลด 5% ทั้งร้าน",detail:"เมื่อซื้อครบ 500 บาท"}},
-  {name:"ปลาทูน่า",cat:"Dry Food",zone:"B",aisle:"B3",shelf:"ชั้น 2-3",tip:"โซนกระป๋อง ทางเดิน B3 ฝั่งขวา",icon:"ti-box",bg:"#FAEEDA",ic:"#BA7517",badge:"#FAEEDA",badgeTxt:"#633806",stock:{loc:"แร็คสูง ชั้นบน โซน B",qty:"25 ลัง"},promo:{tag:"โปรฯ",title:"ซื้อ 5 แถม 1",detail:"กระป๋องขนาด 185 กรัม"}},
-  {name:"เครื่องดื่ม",cat:"เครื่องดื่ม",zone:"C",aisle:"C1",shelf:"ชั้น 1-3",tip:"โซน C ใกล้แคชเชียร์ ทางเดินหลัก",icon:"ti-cup",bg:"#EEEDFE",ic:"#534AB7",badge:"#EEEDFE",badgeTxt:"#3C3489",stock:{loc:"แร็คสำรอง ชั้นบน โซน C",qty:"18 ลัง"},promo:{tag:"HOT",title:"ลด 10%",detail:"เฉพาะแพ็ค 6 กระป๋องขึ้นไป"}},
-  {name:"กระดาษ",cat:"Non Food",zone:"D",aisle:"D2",shelf:"ชั้น 2",tip:"โซน D ฝั่งขวาของสาขา สินค้า Non Food",icon:"ti-file",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041",stock:{loc:"แร็คสูง ชั้นบน โซน D",qty:"12 ลัง"},promo:{tag:"โปรฯ",title:"ซื้อ 2 แถม 1",detail:"เฉพาะกระดาษทิชชู่ 6 ม้วน"}},
-  {name:"สบู่",cat:"Non Food",zone:"D",aisle:"D1",shelf:"ชั้น 3",tip:"ต้นทางเดิน D โซนของใช้ส่วนตัว",icon:"ti-sparkles",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041",stock:{loc:"แร็คสำรอง ชั้นบน โซน D",qty:"14 ลัง"},promo:{tag:"ลดพิเศษ",title:"ลด 15%",detail:"เมื่อซื้อครบ 2 ชิ้น"}},
-  {name:"ทำความสะอาด",cat:"Non Food",zone:"D",aisle:"D3",shelf:"ชั้น 1-2",tip:"โซน D ปลายทาง ใกล้โกดัง ฝั่งขวาสุด",icon:"ti-sparkles",bg:"#E1F5EE",ic:"#1D9E75",badge:"#E1F5EE",badgeTxt:"#085041",stock:{loc:"แร็คสูง ชั้นบน โซน D ปลายทาง",qty:"9 ลัง"},promo:{tag:"โปรฯ",title:"ลด 20 บาท",detail:"น้ำยาทำความสะอาดทุกชนิด"}},
-];
-const ZONES=[
-  {id:"A",label:"Zone A",sub:"Fresh",x:3,y:3,w:40,h:73,bg:"#FCEBEB",bd:"#E24B4A",tc:"#A32D2D",ic:"ti-meat"},
-  {id:"B",label:"Zone B",sub:"Dry Food",x:46,y:3,w:40,h:73,bg:"#FAEEDA",bd:"#BA7517",tc:"#633806",ic:"ti-box"},
-  {id:"C",label:"Zone C",sub:"เครื่องดื่ม",x:89,y:3,w:8,h:36,bg:"#EEEDFE",bd:"#534AB7",tc:"#3C3489",ic:"ti-cup"},
-  {id:"D",label:"Zone D",sub:"Non Food",x:89,y:42,w:8,h:34,bg:"#E1F5EE",bd:"#1D9E75",tc:"#085041",ic:"ti-package"},
-  {id:"E",label:"แคชเชียร์",sub:"",x:3,y:79,w:94,h:18,bg:"#F1EFE8",bd:"#888780",tc:"#444441",ic:"ti-cash"},
-];
+let PRODUCTS_READY=false;
+let PRODUCTS_BY_KEY=[];
+let pendingSearchQuery=null;
 
-function buildMap(hlZone){
-  const el=document.getElementById('storeMap');
-  if(!el)return;
-  const W=el.offsetWidth||340,H=180;
-  el.innerHTML='';
-  ZONES.forEach(z=>{
-    const d=document.createElement('div');
-    d.className='zb'+(hlZone===z.id?' hl':'');
-    const x=Math.round(z.x/100*W),y=Math.round(z.y/100*H);
-    const w=Math.round(z.w/100*W),h=Math.round(z.h/100*H);
-    d.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${z.bg};border-color:${z.bd};color:${z.tc}`;
-    d.innerHTML=`<i class="ti ${z.ic}" aria-hidden="true" style="font-size:${z.id==='E'?11:14}px"></i><span>${z.label}</span>${z.sub?`<span style="font-size:9px;opacity:.7">${z.sub}</span>`:''}`;
-    el.appendChild(d);
-  });
-  if(hlZone){
-    const z=ZONES.find(z=>z.id===hlZone);
-    if(z){
-      const pin=document.createElement('i');
-      pin.className='ti ti-map-pin map-pin';
-      pin.setAttribute('aria-hidden','true');
-      const cx=Math.round((z.x+z.w/2)/100*el.offsetWidth);
-      const cy=Math.round((z.y+z.h/2)/100*H);
-      pin.style.left=cx+'px';pin.style.top=cy+'px';
-      el.appendChild(pin);
+function loadProductData(){
+  return fetch('ItemLocation_10_Jul_2026.xlsx')
+    .then(r=>{ if(!r.ok) throw new Error('fetch failed: '+r.status); return r.arrayBuffer(); })
+    .then(buf=>{
+      const wb=XLSX.read(buf,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      const map=new Map();
+      rows.forEach(r=>{
+        const itemNo=String(r['Item No']||'').trim();
+        const desc=String(r['Item Desc']||'').trim();
+        if(!itemNo||!desc)return;
+        const barcode=String(r['Barcode']||'').trim();
+        const loc=String(r['Loc']||'').trim();
+        const location=String(r['Location']||'').trim();
+        const facing=r['Facing'];
+        const maxQty=r['Max Qty'];
+        const remark=String(r['Remark']||'').trim();
+        let item=map.get(itemNo);
+        if(!item){
+          item={itemNo,barcode,desc,remark,locations:[]};
+          map.set(itemNo,item);
+        }
+        if(!item.barcode&&barcode)item.barcode=barcode;
+        if(!item.remark&&remark)item.remark=remark;
+        const dupe=item.locations.some(l=>l.loc===loc&&l.location===location);
+        if(!dupe&&(loc||location)){
+          item.locations.push({loc,location,facing,maxQty});
+        }
+      });
+      PRODUCTS_BY_KEY=Array.from(map.values());
+      PRODUCTS_READY=true;
+      if(pendingSearchQuery!==null){
+        const q=pendingSearchQuery;
+        pendingSearchQuery=null;
+        search(q);
+      }
+    })
+    .catch(err=>{
+      console.error('โหลดข้อมูลสินค้าไม่สำเร็จ',err);
+    });
+}
+loadProductData();
+
+function findMatches(query){
+  const q=query.trim();
+  if(!q)return[];
+  const lower=q.toLowerCase();
+  const exact=[],partial=[];
+  for(const item of PRODUCTS_BY_KEY){
+    if(item.itemNo===q||item.barcode===q){
+      exact.push(item);
+    } else if(item.desc.toLowerCase().includes(lower)||item.itemNo.includes(q)||(item.barcode&&item.barcode.includes(q))){
+      partial.push(item);
     }
   }
+  return exact.concat(partial);
 }
 
 function search(q){
@@ -416,45 +425,91 @@ function search(q){
   if(!q.trim()){home.style.display='block';rv.classList.remove('show');return;}
   home.style.display='none';
   rv.classList.add('show');
-  const found=DB.find(d=>d.name.includes(q)||q.includes(d.name)||d.cat.includes(q));
+  const dl=document.getElementById('dataLoading');
+  const rl=document.getElementById('resultsList');
   const fc=document.getElementById('foundCard');
   const nf=document.getElementById('notFound');
-  if(found){
-    fc.style.display='block';nf.style.display='none';
-    document.getElementById('rName').textContent=found.name;
-    const iw=document.getElementById('rIconWrap');
-    iw.style.background=found.bg;iw.style.borderRadius='12px';
-    const ri=document.getElementById('rIcon');
-    ri.className='ti '+found.icon;ri.style.color=found.ic;ri.style.fontSize='22px';
-    const rb=document.getElementById('rBadge');
-    rb.textContent=found.cat;rb.style.cssText=`background:${found.badge};color:${found.badgeTxt};font-size:11px;padding:2px 8px;border-radius:20px`;
-    document.getElementById('rLoc').innerHTML=`
-      <div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Zone ${found.zone}</div>
-      <div class="loc-pill"><i class="ti ti-layout-rows" aria-hidden="true"></i>ล็อก ${found.aisle}</div>
-      <div class="loc-pill sec"><i class="ti ti-layers" aria-hidden="true"></i>${found.shelf}</div>`;
-    const promoBlock=document.getElementById('promoBlock');
-    if(found.promo){
-      promoBlock.style.display='flex';
-      document.getElementById('promoTag').textContent=found.promo.tag;
-      document.getElementById('promoTitle').textContent=found.promo.title;
-      document.getElementById('promoDetail').textContent=found.promo.detail;
-    } else {
-      promoBlock.style.display='none';
-    }
-    const empBlock=document.getElementById('empStockBlock');
-    if(currentRole==='employee'&&found.stock){
-      empBlock.style.display='block';
-      document.getElementById('empStockText').textContent=found.stock.loc;
-      document.getElementById('empStockNote').textContent='คงเหลือ '+found.stock.qty;
-    } else {
-      empBlock.style.display='none';
-    }
-    document.getElementById('rTip').textContent=found.tip;
-    document.getElementById('mapHlLabel').textContent='Zone '+found.zone+' highlighted';
-    setTimeout(()=>buildMap(found.zone),30);
-  } else {
-    fc.style.display='none';nf.style.display='block';
+  if(!PRODUCTS_READY){
+    pendingSearchQuery=q;
+    dl.style.display='block';rl.style.display='none';fc.style.display='none';nf.style.display='none';
+    return;
+  }
+  dl.style.display='none';
+  const matches=findMatches(q);
+  if(matches.length===0){
+    rl.style.display='none';fc.style.display='none';nf.style.display='block';
     document.getElementById('nfText').textContent='ไม่พบ "'+q+'" ในระบบ';
+  } else if(matches.length===1){
+    rl.style.display='none';nf.style.display='none';
+    renderDetail(matches[0]);
+  } else {
+    fc.style.display='none';nf.style.display='none';
+    renderList(matches,q);
+  }
+}
+
+function renderList(matches,q){
+  const rl=document.getElementById('resultsList');
+  const shown=matches.slice(0,50);
+  rl.innerHTML='<div class="results-count">พบ '+matches.length+' รายการ'+(matches.length>50?' (แสดง 50 รายการแรก)':'')+'</div>'+
+    shown.map((item,i)=>{
+      const loc=item.locations[0];
+      const metaLoc=loc?('Loc '+loc.loc+' · Location '+loc.location):'ไม่มีข้อมูลตำแหน่ง';
+      return '<div class="result-item" onclick="selectResult('+i+')">'+
+        '<div class="result-item-icon"><i class="ti ti-package" aria-hidden="true"></i></div>'+
+        '<div class="result-item-info">'+
+          '<div class="result-item-name">'+escapeHtml(item.desc)+'</div>'+
+          '<div class="result-item-meta">'+escapeHtml(item.itemNo)+' · '+metaLoc+'</div>'+
+        '</div>'+
+        '<i class="ti ti-chevron-right" aria-hidden="true"></i>'+
+      '</div>';
+    }).join('');
+  rl.style.display='block';
+  rl._matches=shown;
+}
+
+function selectResult(i){
+  const rl=document.getElementById('resultsList');
+  const item=rl._matches&&rl._matches[i];
+  if(!item)return;
+  rl.style.display='none';
+  renderDetail(item,true);
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderDetail(item,fromList){
+  const fc=document.getElementById('foundCard');
+  fc.style.display='block';
+  document.getElementById('rName').textContent=item.desc;
+  document.getElementById('rBadge').textContent='Item No '+item.itemNo+(item.barcode?' · '+item.barcode:'');
+  document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:11px;padding:2px 8px;border-radius:20px';
+  const rLoc=document.getElementById('rLoc');
+  if(item.locations.length){
+    rLoc.innerHTML=item.locations.map(l=>
+      '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Loc '+escapeHtml(l.loc)+'</div>'+
+      '<div class="loc-pill sec"><i class="ti ti-map-2" aria-hidden="true"></i>Location '+escapeHtml(l.location)+'</div>'
+    ).join('');
+  } else {
+    rLoc.innerHTML='<div class="loc-pill sec"><i class="ti ti-map-pin-off" aria-hidden="true"></i>ไม่มีข้อมูลตำแหน่งจัดเก็บ</div>';
+  }
+  const empBlock=document.getElementById('empStockBlock');
+  if(currentRole==='employee'&&item.locations.length){
+    empBlock.style.display='block';
+    document.getElementById('empStockList').innerHTML=item.locations.map(l=>
+      '<div class="emp-loc-item">Loc '+escapeHtml(l.loc)+' / Location '+escapeHtml(l.location)+' — Facing '+(l.facing||'-')+' · Max Qty '+(l.maxQty||'-')+'</div>'
+    ).join('');
+  } else {
+    empBlock.style.display='none';
+  }
+  const remarkBlock=document.getElementById('remarkBlock');
+  if(item.remark){
+    remarkBlock.style.display='flex';
+    document.getElementById('rRemark').textContent=item.remark;
+  } else {
+    remarkBlock.style.display='none';
   }
 }
 
@@ -607,12 +662,16 @@ function exportFeedbackExcel(){
   XLSX.utils.book_append_sheet(wb,ws,'ข้อเสนอแนะ');
   XLSX.writeFile(wb,'makro_finder_feedback_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
+const EMP_PIN='0042';
 function submitLogin(){
   const name=document.getElementById('empName').value.trim();
   const dept=document.getElementById('empDept').value;
+  const pin=document.getElementById('empPin').value.trim();
   const err=document.getElementById('loginError');
   if(!name){err.textContent='กรุณากรอกชื่อ-นามสกุล';err.style.display='block';return;}
   if(!dept){err.textContent='กรุณาเลือกแผนก';err.style.display='block';return;}
+  if(!pin){err.textContent='กรุณากรอกรหัส PIN';err.style.display='block';return;}
+  if(pin!==EMP_PIN){err.textContent='รหัส PIN ไม่ถูกต้อง เฉพาะพนักงานที่ได้รับรหัสเท่านั้น';err.style.display='block';return;}
   err.style.display='none';
   const sess={role:'employee',name,dept,ts:Date.now()};
   localStorage.setItem('mf_session',JSON.stringify(sess));
@@ -622,6 +681,7 @@ function switchRole(){
   localStorage.removeItem('mf_session');
   document.getElementById('empName').value='';
   document.getElementById('empDept').value='';
+  document.getElementById('empPin').value='';
   clearSearch();
   showRoleScreen();
 }
