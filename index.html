@@ -88,11 +88,11 @@ body{margin:0;padding:0}
 .map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
 .map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
-.store-map{position:relative;width:100%;height:180px;background:var(--color-background-secondary);border-radius:12px;border:0.5px solid var(--color-border-tertiary);overflow:hidden}
-.zb{position:absolute;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0.5px solid transparent;font-size:10px;font-weight:500;cursor:default;gap:2px}
-.zb.hl{border-width:2px!important}
-.zb i{font-size:14px}
-.map-pin{position:absolute;z-index:3;color:#E24B4A;font-size:18px;transform:translate(-50%,-100%)}
+.store-map{position:relative;width:100%;background:var(--color-background-secondary);border-radius:12px;border:0.5px solid var(--color-border-tertiary);overflow:hidden;padding:6px}
+.store-map svg{display:block;width:100%;height:auto}
+.map-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;margin-bottom:16px}
+.map-legend span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)}
+.map-legend i{width:12px;height:12px;border-radius:3px;border:1px solid;display:inline-block}
 .no-result{text-align:center;padding:28px 16px;color:var(--color-text-tertiary)}
 .no-result i{font-size:32px;display:block;margin-bottom:8px}
 .no-result p{font-size:13px}
@@ -350,9 +350,51 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
         <div class="map-label-row">
           <span class="map-label"><i class="ti ti-map" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>แผนที่สาขา</span>
-          <span class="map-hl-label" id="mapHlLabel"></span>
+          <span class="map-hl-label">จากแบบแปลนจริง St.042</span>
         </div>
-        <div class="store-map" id="storeMap"></div>
+        <div class="store-map" id="storeMap">
+          <svg viewBox="0 0 640 545" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้าน Makro รามอินทรา ฉบับเข้าใจง่าย">
+            <text x="320" y="20" text-anchor="middle" font-size="15" fill="#666">▽ รับสินค้า (Receiving)</text>
+            <rect x="15" y="35" width="610" height="490" rx="10" fill="#fff" stroke="#9ca3af" stroke-width="2"/>
+
+            <rect x="25" y="50" width="110" height="110" rx="8" fill="#CFEFD1" stroke="#4FAE5C"/>
+            <text x="80" y="113" text-anchor="middle" font-size="34">🏢</text>
+
+            <rect x="25" y="170" width="110" height="290" rx="8" fill="#BFE3F5" stroke="#4FA8D8"/>
+            <text x="80" y="222" text-anchor="middle" font-size="32">🐟</text>
+            <text x="80" y="294" text-anchor="middle" font-size="32">🥩</text>
+            <text x="80" y="366" text-anchor="middle" font-size="32">🥬</text>
+            <text x="80" y="438" text-anchor="middle" font-size="32">🧊</text>
+
+            <rect x="150" y="50" width="485" height="290" rx="8" fill="#FDE9A8" stroke="#D9A72C"/>
+            <g stroke="#E8C86B" stroke-width="2">
+              <line x1="250" y1="90" x2="250" y2="320"/><line x1="345" y1="90" x2="345" y2="320"/><line x1="440" y1="90" x2="440" y2="320"/><line x1="535" y1="90" x2="535" y2="320"/>
+            </g>
+            <text x="392" y="192" text-anchor="middle" font-size="30" font-weight="800" fill="#1a1a1a">Dry Food</text>
+            <text x="392" y="222" text-anchor="middle" font-size="19" fill="#6B4E05">3,349 ตร.ม. · 51.5%</text>
+
+            <rect x="150" y="340" width="485" height="18" rx="4" fill="#D9CCF2" stroke="#8B6FCB"/>
+
+            <rect x="150" y="358" width="485" height="102" rx="8" fill="#FBD3A8" stroke="#D9762C"/>
+            <text x="392" y="400" text-anchor="middle" font-size="26" font-weight="800" fill="#1a1a1a">Non Food</text>
+            <text x="392" y="428" text-anchor="middle" font-size="18" fill="#6B3505">1,247 ตร.ม. · 22.2%</text>
+
+            <rect x="25" y="470" width="610" height="50" rx="8" fill="#FBD0D6" stroke="#E0607A"/>
+            <text x="45" y="502" font-size="24" font-weight="800" fill="#7A1B30">Checkout</text>
+            <text x="615" y="502" text-anchor="end" font-size="18" fill="#7A1B30">30 จุด · $</text>
+
+            <text x="200" y="540" text-anchor="middle" font-size="16" fill="#666">▲ ทางเข้า</text>
+            <text x="460" y="540" text-anchor="middle" font-size="16" fill="#666">▲ ทางออก</text>
+          </svg>
+        </div>
+        <div class="map-legend">
+          <span><i style="background:#BFE3F5;border-color:#4FA8D8"></i>Fresh Food</span>
+          <span><i style="background:#FDE9A8;border-color:#D9A72C"></i>Dry Food</span>
+          <span><i style="background:#FBD3A8;border-color:#D9762C"></i>Non Food</span>
+          <span><i style="background:#D9CCF2;border-color:#8B6FCB"></i>Share Area</span>
+          <span><i style="background:#FBD0D6;border-color:#E0607A"></i>Checkout</span>
+          <span><i style="background:#CFEFD1;border-color:#4FAE5C"></i>Back Office</span>
+        </div>
       </div>
       <div id="notFound" style="display:none" class="no-result">
         <i class="ti ti-mood-sad" aria-hidden="true"></i>
@@ -383,42 +425,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <canvas id="scanCanvas" style="display:none"></canvas>
 
 <script>
-const ZONES=[
-  {id:"A",label:"Zone A",sub:"Fresh",x:3,y:3,w:40,h:73,bg:"#FCEBEB",bd:"#E24B4A",tc:"#A32D2D",ic:"ti-meat"},
-  {id:"B",label:"Zone B",sub:"Dry Food",x:46,y:3,w:40,h:73,bg:"#FAEEDA",bd:"#BA7517",tc:"#633806",ic:"ti-box"},
-  {id:"C",label:"Zone C",sub:"เครื่องดื่ม",x:89,y:3,w:8,h:36,bg:"#EEEDFE",bd:"#534AB7",tc:"#3C3489",ic:"ti-cup"},
-  {id:"D",label:"Zone D",sub:"Non Food",x:89,y:42,w:8,h:34,bg:"#E1F5EE",bd:"#1D9E75",tc:"#085041",ic:"ti-package"},
-  {id:"E",label:"แคชเชียร์",sub:"",x:3,y:79,w:94,h:18,bg:"#F1EFE8",bd:"#888780",tc:"#444441",ic:"ti-cash"},
-];
-
-function buildMap(hlZone){
-  const el=document.getElementById('storeMap');
-  if(!el)return;
-  const W=el.offsetWidth||340,H=180;
-  el.innerHTML='';
-  ZONES.forEach(z=>{
-    const d=document.createElement('div');
-    d.className='zb'+(hlZone===z.id?' hl':'');
-    const x=Math.round(z.x/100*W),y=Math.round(z.y/100*H);
-    const w=Math.round(z.w/100*W),h=Math.round(z.h/100*H);
-    d.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${z.bg};border-color:${z.bd};color:${z.tc}`;
-    d.innerHTML=`<i class="ti ${z.ic}" aria-hidden="true" style="font-size:${z.id==='E'?11:14}px"></i><span>${z.label}</span>${z.sub?`<span style="font-size:9px;opacity:.7">${z.sub}</span>`:''}`;
-    el.appendChild(d);
-  });
-  if(hlZone){
-    const z=ZONES.find(z=>z.id===hlZone);
-    if(z){
-      const pin=document.createElement('i');
-      pin.className='ti ti-map-pin map-pin';
-      pin.setAttribute('aria-hidden','true');
-      const cx=Math.round((z.x+z.w/2)/100*el.offsetWidth);
-      const cy=Math.round((z.y+z.h/2)/100*H);
-      pin.style.left=cx+'px';pin.style.top=cy+'px';
-      el.appendChild(pin);
-    }
-  }
-}
-
 let PRODUCTS_READY=false;
 let PRODUCTS_BY_KEY=[];
 let pendingSearchQuery=null;
@@ -577,8 +583,6 @@ function renderDetail(item,fromList){
   } else {
     remarkBlock.style.display='none';
   }
-  document.getElementById('mapHlLabel').textContent='Zone B highlighted';
-  setTimeout(()=>buildMap('B'),30);
 }
 
 function clearSearch(){
