@@ -88,7 +88,7 @@ body{margin:0;padding:0}
 .map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
 .map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
-.store-map{position:relative;width:100vw;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;background:var(--color-background-secondary);border-radius:0;border:0;border-top:0.5px solid var(--color-border-tertiary);border-bottom:0.5px solid var(--color-border-tertiary);overflow:hidden;padding:10px 0}
+.store-map{position:relative;width:100vw;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;background:var(--color-background-secondary);border-radius:0;border:0;border-top:0.5px solid var(--color-border-tertiary);border-bottom:0.5px solid var(--color-border-tertiary);overflow:hidden;padding:10px 0;cursor:pointer}
 .store-map svg{display:block;width:100%;height:auto}
 .no-result{text-align:center;padding:28px 16px;color:var(--color-text-tertiary)}
 .no-result i{font-size:32px;display:block;margin-bottom:8px}
@@ -108,6 +108,10 @@ body{margin:0;padding:0}
 .loc-group-idx{font-size:11px;color:var(--color-text-tertiary);width:100%}
 .emp-loc-item{background:#fff;border:1px solid #FFD9A0;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px;color:#6b4306}
 .emp-loc-item:last-child{margin-bottom:0}
+.map-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2000;padding:16px}
+.map-overlay-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.14);border:none;color:#fff;width:40px;height:40px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1}
+.map-overlay-content{width:100%;max-height:100%}
+.map-overlay-content svg{display:block;width:100%;height:auto;max-height:calc(100dvh - 32px)}
 .scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
 .scan-box{width:100%;max-width:420px}
 .scan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -347,9 +351,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
         <div class="map-label-row">
           <span class="map-label"><i class="ti ti-map" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>แผนที่สาขา</span>
-          <span class="map-hl-label">ผังแผนกสินค้าในสาขา</span>
+          <span class="map-hl-label"><i class="ti ti-arrows-maximize" style="font-size:12px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>แตะเพื่อขยายเต็มจอ</span>
         </div>
-        <div class="store-map" id="storeMap">
+        <div class="store-map" id="storeMap" onclick="openMapFullscreen()">
           <svg viewBox="0 0 640 545" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042">
             <rect x="8" y="8" width="624" height="522" rx="12" fill="#141a2e" stroke="#0a0e1c" stroke-width="2"/>
 
@@ -449,6 +453,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   </div>
   </div>
 </div>
+</div>
+
+<div class="map-overlay" id="mapOverlay" onclick="closeMapFullscreen()">
+  <button class="map-overlay-close" onclick="closeMapFullscreen()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
+  <div class="map-overlay-content" id="mapOverlayContent" onclick="event.stopPropagation()"></div>
 </div>
 
 <div class="scan-overlay" id="scanOverlay">
@@ -693,6 +702,18 @@ function closeScanner(){
   if(scanRAF)cancelAnimationFrame(scanRAF);
   scanRAF=null;
   if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+}
+
+function openMapFullscreen(){
+  const svg=document.querySelector('#storeMap svg');
+  if(!svg)return;
+  const content=document.getElementById('mapOverlayContent');
+  content.innerHTML='';
+  content.appendChild(svg.cloneNode(true));
+  document.getElementById('mapOverlay').style.display='flex';
+}
+function closeMapFullscreen(){
+  document.getElementById('mapOverlay').style.display='none';
 }
 
 let currentRole=null;
