@@ -82,6 +82,10 @@ body{margin:0;padding:0}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
+.view-image-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:1px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:16px;text-decoration:none}
+.view-image-btn:hover{background:var(--color-background-secondary)}
+.view-image-btn i{font-size:16px}
+.view-image-btn i.ti-external-link{font-size:13px;opacity:.6}
 .promo-box{background:#FFF0F1;border:1px solid #FFC9CD;border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
 .promo-box i{color:var(--brand-red);font-size:19px;flex-shrink:0;margin-top:1px}
 .promo-tag{display:inline-block;background:var(--brand-red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;letter-spacing:.02em}
@@ -360,6 +364,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           </div>
         </div>
         <div class="loc-row" id="rLoc"></div>
+        <a id="rImageLink" href="#" target="_blank" rel="noopener noreferrer" class="view-image-btn" style="display:none">
+          <i class="ti ti-photo" aria-hidden="true"></i> ดูรูปภาพสินค้าใน Makro PRO <i class="ti ti-external-link" aria-hidden="true"></i>
+        </a>
         <div class="promo-box" id="promoBlock">
           <i class="ti ti-discount-2" aria-hidden="true"></i>
           <div>
@@ -811,6 +818,14 @@ function renderDetail(item,fromList){
     ).join('');
   } else {
     rLoc.innerHTML='<div class="loc-pill sec"><i class="ti ti-map-pin-off" aria-hidden="true"></i>ไม่มีข้อมูลตำแหน่งจัดเก็บ</div>';
+  }
+  const imgLink=document.getElementById('rImageLink');
+  const imgQuery=item.barcode||item.itemNo;
+  if(imgQuery){
+    imgLink.href='https://www.makro.pro/c/search?q='+encodeURIComponent(imgQuery);
+    imgLink.style.display='flex';
+  } else {
+    imgLink.style.display='none';
   }
   const empBlock=document.getElementById('empStockBlock');
   if(currentRole==='employee'&&item.locations.length){
