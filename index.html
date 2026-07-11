@@ -732,7 +732,6 @@ function applyItemImage(wrapEl,item){
     if(!wrapEl.isConnected)return;
     const img=new Image();
     img.alt=item.desc||'';
-    img.loading='lazy';
     img.onload=()=>{ wrapEl.innerHTML='';wrapEl.appendChild(img); };
     img.onerror=()=>{ /* เก็บไอคอน placeholder เดิมไว้ถ้าโหลดรูปไม่สำเร็จ */ };
     img.src=url;
