@@ -10,6 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --brand-red:#E8192C;
@@ -41,7 +43,7 @@ body{margin:0;padding:0}
 .phone{background:var(--color-background-primary);flex:1;display:flex;flex-direction:column;width:100%}
 #mainApp{flex:1;flex-direction:column;width:100%}
 .hdr{background:var(--brand-red);padding:18px clamp(16px,4vw,40px) 14px}
-.hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:680px;margin:0 auto;width:100%}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:min(1100px,94vw);margin:0 auto;width:100%}
 .hdr-logo{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .hdr-logo>div:last-child{min-width:0;overflow:hidden}
 .hdr-logo-badge{height:54px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -51,11 +53,11 @@ body{margin:0;padding:0}
 .hdr-sub{font-size:13px;font-weight:500;color:rgba(255,255,255,.8);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-icons{display:flex;align-items:center;gap:8px}
 .hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;cursor:pointer;border:none;flex-shrink:0}
-.search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin:12px auto 0;border:0.5px solid rgba(255,255,255,0.2);max-width:680px}
+.search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin:12px auto 0;border:0.5px solid rgba(255,255,255,0.2);max-width:min(1100px,94vw)}
 .search-box input{background:transparent;border:none;outline:none;color:#fff;font-size:14px;flex:1;font-family:inherit}
 .search-box input::placeholder{color:rgba(255,255,255,0.5)}
 .search-box i{color:rgba(255,255,255,0.6);font-size:17px;flex-shrink:0}
-.body{padding:16px clamp(16px,4vw,40px) 40px;flex:1;max-width:680px;margin:0 auto;width:100%}
+.body{padding:16px clamp(16px,4vw,40px) 40px;flex:1;max-width:min(1100px,94vw);margin:0 auto;width:100%}
 .section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
 .cat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:20px}
 .cat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);transition:border-color .15s}
@@ -110,8 +112,20 @@ body{margin:0;padding:0}
 .emp-loc-item:last-child{margin-bottom:0}
 .map-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2000;padding:16px}
 .map-overlay-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.14);border:none;color:#fff;width:40px;height:40px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1}
-.map-overlay-content{width:100%;max-height:100%}
-.map-overlay-content svg{display:block;width:100%;height:auto;max-height:calc(100dvh - 32px)}
+.map-overlay-content{width:100%;max-width:min(1100px,94vw);max-height:100%}
+.map-overlay-content svg{display:block;width:100%;height:auto;max-height:calc(100dvh - 110px)}
+.map-overlay.editing .map-overlay-content svg{cursor:default}
+#mapEditOpenBar{margin-top:10px}
+.map-edit-open-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.map-edit-open-btn:hover{background:var(--color-border-tertiary)}
+.map-edit-bar{display:none;flex-direction:column;align-items:center;gap:8px;margin-top:14px;width:100%;max-width:min(1100px,94vw)}
+.map-edit-bar-row{display:flex;gap:10px;width:100%}
+.map-edit-save,.map-edit-cancel{flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;border:none}
+.map-edit-save{background:var(--brand-red);color:#fff}
+.map-edit-save:hover{background:var(--brand-red-dark)}
+.map-edit-cancel{background:rgba(255,255,255,.14);color:#fff}
+.map-edit-cancel:hover{background:rgba(255,255,255,.22)}
+.map-edit-hint{font-size:12px;color:#9ca3af;text-align:center}
 .scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
 .scan-box{width:100%;max-width:420px}
 .scan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -169,6 +183,23 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .fb-item-meta{font-size:10.5px;color:var(--color-text-tertiary);margin-bottom:3px}
 .fb-item-text{font-size:13px;color:var(--color-text-primary);line-height:1.4}
 .fb-empty{text-align:center;padding:24px 12px;color:var(--color-text-tertiary);font-size:12.5px}
+@media (min-width:720px){
+  body{font-size:15px}
+  .hdr-logotext{font-size:23px}
+  .hdr-sub{font-size:14px}
+  .search-box input{font-size:15px}
+  .cat-row{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .cat-card i{font-size:32px;width:60px;height:60px}
+  .cat-card span{font-size:13.5px}
+  .result-name{font-size:19px}
+  .loc-pill{font-size:14.5px;padding:7px 14px}
+  .promo-title{font-size:16px}
+  .role-card-wrap,.login-card{max-width:440px}
+}
+@media (min-width:1024px){
+  .hdr-row,.search-box,.body{max-width:min(1100px,90vw)}
+  .cat-row{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+}
 </style>
 
 <div class="frame">
@@ -353,94 +384,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <span class="map-label"><i class="ti ti-map" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>แผนที่สาขา</span>
           <span class="map-hl-label"><i class="ti ti-arrows-maximize" style="font-size:12px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>แตะเพื่อขยายเต็มจอ</span>
         </div>
-        <div class="store-map" id="storeMap" onclick="openMapFullscreen()">
-          <svg viewBox="0 0 640 545" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042">
-            <rect x="8" y="8" width="624" height="522" rx="12" fill="#141a2e" stroke="#0a0e1c" stroke-width="2"/>
-
-            <g font-family="'Sarabun','Segoe UI',sans-serif">
-              <rect x="20" y="20" width="190" height="75" rx="8" fill="#a8524f"/>
-              <text x="28" y="47" font-size="15" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px">เนื้อสัตว์และแช่แข็ง</text>
-              <text x="28" y="64" font-size="12" font-weight="600" fill="#fff" fill-opacity="0.95">Butchery &amp; Frozen</text>
-
-              <rect x="220" y="20" width="75" height="75" rx="8" fill="#3f8f4f"/>
-              <text x="228" y="56" font-size="24" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px">ขนม</text>
-              <text x="228" y="82" font-size="19" font-weight="600" fill="#fff" fill-opacity="0.95">Snack</text>
-
-              <rect x="305" y="20" width="85" height="75" rx="8" fill="#2f8fae"/>
-              <text x="313" y="38" font-size="12" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2px">ไวน์/เบียร์</text>
-              <text x="313" y="51" font-size="9" font-weight="600" fill="#fff" fill-opacity="0.95">Wine &amp; Beer</text>
-
-              <rect x="400" y="20" width="135" height="75" rx="8" fill="#6a3fc9"/>
-              <text x="408" y="49" font-size="23" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px">เครื่องดื่ม</text>
-              <text x="408" y="74" font-size="18" font-weight="600" fill="#fff" fill-opacity="0.95">Drink</text>
-
-              <rect x="20" y="105" width="190" height="85" rx="8" fill="#4472a0"/>
-              <text x="28" y="134" font-size="23" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px">ปลา/อาหารทะเล</text>
-              <text x="28" y="159" font-size="18" font-weight="600" fill="#fff" fill-opacity="0.95">Fish &amp; Seafood</text>
-
-              <rect x="220" y="105" width="95" height="65" rx="8" fill="#a9843a"/>
-              <text x="228" y="123" font-size="12" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2px">ไก่ย่าง</text>
-              <text x="228" y="136" font-size="9" font-weight="600" fill="#fff" fill-opacity="0.95">Grilled Chicken</text>
-
-              <rect x="325" y="105" width="210" height="135" rx="8" fill="#d17ba0"/>
-              <text x="333" y="150" font-size="24" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px">Dry Food</text>
-              <text x="333" y="176" font-size="19" font-weight="600" fill="#fff" fill-opacity="0.95">Loc. 28-39</text>
-
-              <rect x="20" y="200" width="190" height="50" rx="8" fill="#c0392b"/>
-              <text x="28" y="220" font-size="14" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2px">เครื่องเทศ</text>
-              <text x="28" y="235" font-size="11" font-weight="600" fill="#fff" fill-opacity="0.95">Condiments / Spices</text>
-
-              <rect x="20" y="260" width="190" height="135" rx="8" fill="#6fa03e"/>
-              <text x="28" y="305" font-size="24" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px">ผัก-ผลไม้</text>
-              <text x="28" y="331" font-size="19" font-weight="600" fill="#fff" fill-opacity="0.95">Fruit &amp; Veg</text>
-
-              <rect x="220" y="250" width="315" height="145" rx="8" fill="#a688d1"/>
-              <text x="228" y="295" font-size="24" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px">Non-Food</text>
-              <text x="228" y="321" font-size="19" font-weight="600" fill="#fff" fill-opacity="0.95">Loc. 1-28</text>
-
-              <rect x="545" y="105" width="75" height="290" rx="8" fill="#d2762f"/>
-              <text x="582" y="240" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2px">O2O</text>
-              <text x="582" y="253" text-anchor="middle" font-size="9" font-weight="600" fill="#fff" fill-opacity="0.95">แผนกออนไลน์</text>
-              <text x="582" y="263" text-anchor="middle" font-size="7" font-weight="600" fill="#fff" fill-opacity="0.9">Makro Pro</text>
-
-              <rect x="20" y="405" width="150" height="85" rx="8" fill="#8a7a3f"/>
-              <text x="28" y="445" font-size="24" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px">เบเกอรี่</text>
-              <text x="28" y="471" font-size="19" font-weight="600" fill="#fff" fill-opacity="0.95">Bakery</text>
-
-              <rect x="180" y="405" width="220" height="85" rx="8" fill="#52b788"/>
-              <text x="188" y="445" font-size="24" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px">แคชเชียร์</text>
-              <text x="188" y="471" font-size="19" font-weight="600" fill="#fff" fill-opacity="0.95">Cashier</text>
-
-              <rect x="410" y="405" width="95" height="85" rx="8" fill="#19bcd6"/>
-              <text x="418" y="441" font-size="20" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2px">ไอศกรีม</text>
-              <text x="418" y="463" font-size="16" font-weight="600" fill="#fff" fill-opacity="0.95">Ice Cream</text>
-
-              <rect x="515" y="405" width="105" height="85" rx="8" fill="#8a97a3"/>
-              <text x="523" y="438" font-size="17" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2px">จุดของแถม</text>
-              <text x="523" y="456" font-size="13" font-weight="600" fill="#fff" fill-opacity="0.95">Premium</text>
-            </g>
-
-            <g fill="#ffffff" fill-opacity="0.55">
-              <rect x="197" y="82" width="5" height="5" rx="1"/>
-              <rect x="282" y="82" width="5" height="5" rx="1"/>
-              <rect x="377" y="82" width="5" height="5" rx="1"/>
-              <rect x="522" y="82" width="5" height="5" rx="1"/>
-              <rect x="197" y="177" width="5" height="5" rx="1"/>
-              <rect x="302" y="157" width="5" height="5" rx="1"/>
-              <rect x="522" y="227" width="5" height="5" rx="1"/>
-              <rect x="197" y="237" width="5" height="5" rx="1"/>
-              <rect x="197" y="382" width="5" height="5" rx="1"/>
-              <rect x="522" y="382" width="5" height="5" rx="1"/>
-              <rect x="607" y="382" width="5" height="5" rx="1"/>
-              <rect x="157" y="477" width="5" height="5" rx="1"/>
-              <rect x="387" y="477" width="5" height="5" rx="1"/>
-              <rect x="492" y="477" width="5" height="5" rx="1"/>
-              <rect x="607" y="477" width="5" height="5" rx="1"/>
-            </g>
-
-            <text x="200" y="537" text-anchor="middle" font-size="13" fill="#9ca3af">▲ ทางเข้า</text>
-            <text x="460" y="537" text-anchor="middle" font-size="13" fill="#9ca3af">▲ ทางออก</text>
-          </svg>
+        <div class="store-map" id="storeMap" onclick="openMapFullscreen()"></div>
+        <div id="mapEditOpenBar" style="display:none">
+          <button class="map-edit-open-btn" onclick="openMapEditor()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ไขแผนที่</button>
         </div>
       </div>
       <div id="notFound" style="display:none" class="no-result">
@@ -458,6 +404,13 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div class="map-overlay" id="mapOverlay" onclick="closeMapFullscreen()">
   <button class="map-overlay-close" onclick="closeMapFullscreen()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
   <div class="map-overlay-content" id="mapOverlayContent" onclick="event.stopPropagation()"></div>
+  <div class="map-edit-bar" id="mapEditBar" onclick="event.stopPropagation()">
+    <p class="map-edit-hint" id="mapEditHint">ลากมุมล่างขวาของแต่ละบล็อกเพื่อปรับขนาด</p>
+    <div class="map-edit-bar-row">
+      <button class="map-edit-cancel" onclick="cancelMapEdit()">ยกเลิก</button>
+      <button class="map-edit-save" onclick="saveMapEdit()">บันทึก</button>
+    </div>
+  </div>
 </div>
 
 <div class="scan-overlay" id="scanOverlay">
@@ -477,6 +430,243 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <canvas id="scanCanvas" style="display:none"></canvas>
 
 <script>
+/* ---------- Store map: data model, rendering, employee editing ---------- */
+const MAP_VB_W=640, MAP_VB_H=545, MAP_MIN_W=40, MAP_MIN_H=30;
+const DEFAULT_MAP_BLOCKS=[
+  {id:'butchery',x:20,y:20,w:190,h:75,fill:'#a8524f',lines:[
+    {dx:8,dy:27,size:15,weight:800,text:'เนื้อสัตว์และแช่แข็ง'},
+    {dx:8,dy:44,size:12,weight:600,opacity:.95,text:'Butchery & Frozen'}]},
+  {id:'snack',x:220,y:20,w:75,h:75,fill:'#3f8f4f',lines:[
+    {dx:8,dy:36,size:24,weight:800,text:'ขนม'},
+    {dx:8,dy:62,size:19,weight:600,opacity:.95,text:'Snack'}]},
+  {id:'winebeer',x:305,y:20,w:85,h:75,fill:'#2f8fae',lines:[
+    {dx:8,dy:18,size:12,weight:800,text:'ไวน์/เบียร์'},
+    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Wine & Beer'}]},
+  {id:'drink',x:400,y:20,w:135,h:75,fill:'#6a3fc9',lines:[
+    {dx:8,dy:29,size:23,weight:800,text:'เครื่องดื่ม'},
+    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Drink'}]},
+  {id:'fishseafood',x:20,y:105,w:190,h:85,fill:'#4472a0',lines:[
+    {dx:8,dy:29,size:23,weight:800,text:'ปลา/อาหารทะเล'},
+    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Fish & Seafood'}]},
+  {id:'grilledchicken',x:220,y:105,w:95,h:65,fill:'#a9843a',lines:[
+    {dx:8,dy:18,size:12,weight:800,text:'ไก่ย่าง'},
+    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Grilled Chicken'}]},
+  {id:'dryfood',x:325,y:105,w:210,h:135,fill:'#d17ba0',lines:[
+    {dx:8,dy:45,size:24,weight:800,text:'Dry Food'},
+    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 28-39'}]},
+  {id:'condiments',x:20,y:200,w:190,h:50,fill:'#c0392b',lines:[
+    {dx:8,dy:20,size:14,weight:800,text:'เครื่องเทศ'},
+    {dx:8,dy:35,size:11,weight:600,opacity:.95,text:'Condiments / Spices'}]},
+  {id:'fruitveg',x:20,y:260,w:190,h:135,fill:'#6fa03e',lines:[
+    {dx:8,dy:45,size:24,weight:800,text:'ผัก-ผลไม้'},
+    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Fruit & Veg'}]},
+  {id:'nonfood',x:220,y:250,w:315,h:145,fill:'#a688d1',lines:[
+    {dx:8,dy:45,size:24,weight:800,text:'Non-Food'},
+    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 1-28'}]},
+  {id:'o2o',x:545,y:105,w:75,h:290,fill:'#d2762f',anchor:'middle',lines:[
+    {fx:0.5,dy:135,size:12,weight:800,text:'O2O'},
+    {fx:0.5,dy:148,size:9,weight:600,opacity:.95,text:'แผนกออนไลน์'},
+    {fx:0.5,dy:158,size:7,weight:600,opacity:.9,text:'Makro Pro'}]},
+  {id:'bakery',x:20,y:405,w:150,h:85,fill:'#8a7a3f',lines:[
+    {dx:8,dy:40,size:24,weight:800,text:'เบเกอรี่'},
+    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Bakery'}]},
+  {id:'cashier',x:180,y:405,w:220,h:85,fill:'#52b788',lines:[
+    {dx:8,dy:40,size:24,weight:800,text:'แคชเชียร์'},
+    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Cashier'}]},
+  {id:'icecream',x:410,y:405,w:95,h:85,fill:'#19bcd6',lines:[
+    {dx:8,dy:36,size:20,weight:800,text:'ไอศกรีม'},
+    {dx:8,dy:58,size:16,weight:600,opacity:.95,text:'Ice Cream'}]},
+  {id:'premium',x:515,y:405,w:105,h:85,fill:'#8a97a3',lines:[
+    {dx:8,dy:33,size:17,weight:800,text:'จุดของแถม'},
+    {dx:8,dy:51,size:13,weight:600,opacity:.95,text:'Premium'}]},
+];
+const MAP_CORNER_DOTS=[[197,82],[282,82],[377,82],[522,82],[197,177],[302,157],[522,227],[197,237],[197,382],[522,382],[607,382],[157,477],[387,477],[492,477],[607,477]];
+
+let currentMapBlocks=JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+let mapEditMode=false;
+let mapEditSnapshot=null;
+let mapDragState=null;
+
+const FIREBASE_CONFIG=null; // TODO: paste Firebase web config here to enable shared (everyone-sees-it) map storage
+let mapFirestoreDocRef=null;
+try{
+  if(FIREBASE_CONFIG){
+    firebase.initializeApp(FIREBASE_CONFIG);
+    mapFirestoreDocRef=firebase.firestore().collection('makroFinder').doc('storeMapLayout');
+  }
+}catch(e){ console.error('Firebase init ไม่สำเร็จ',e); mapFirestoreDocRef=null; }
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function mapLineMarkup(b,l){
+  const x=b.anchor==='middle' ? (b.x+b.w*(l.fx!==undefined?l.fx:0.5)) : (b.x+(l.dx!==undefined?l.dx:8));
+  const y=b.y+l.dy;
+  const anchorAttr=b.anchor==='middle' ? ' text-anchor="middle"' : '';
+  const opAttr=l.opacity!==undefined ? ' fill-opacity="'+l.opacity+'"' : '';
+  const strokeStyle=l.weight>=800 ? ' style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:'+(l.size>=20?'2.5':'2')+'px"' : '';
+  const dataAttr=b.anchor==='middle' ? ' data-mid="'+b.id+'" data-fx="'+(l.fx!==undefined?l.fx:0.5)+'"' : '';
+  return '<text'+dataAttr+' x="'+x+'" y="'+y+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="#fff"'+opAttr+anchorAttr+strokeStyle+'>'+escapeHtml(l.text)+'</text>';
+}
+
+function mapBlockMarkup(b,editable){
+  const lines=b.lines.map(l=>mapLineMarkup(b,l)).join('');
+  const handle=editable ? '<rect class="resize-handle" data-id="'+b.id+'" x="'+(b.x+b.w-16)+'" y="'+(b.y+b.h-16)+'" width="20" height="20" rx="5" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>' : '';
+  return '<g><rect class="map-block-rect" data-id="'+b.id+'" x="'+b.x+'" y="'+b.y+'" width="'+b.w+'" height="'+b.h+'" rx="8" fill="'+b.fill+'"/>'+lines+handle+'</g>';
+}
+
+function renderMapSVG(blocks,editable){
+  const blockMarkup=blocks.map(b=>mapBlockMarkup(b,editable)).join('');
+  const dots=editable ? '' : '<g fill="#ffffff" fill-opacity="0.55">'+MAP_CORNER_DOTS.map(d=>'<rect x="'+d[0]+'" y="'+d[1]+'" width="5" height="5" rx="1"/>').join('')+'</g>';
+  return '<svg viewBox="0 0 '+MAP_VB_W+' '+MAP_VB_H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042">'+
+    '<rect x="8" y="8" width="624" height="522" rx="12" fill="#141a2e" stroke="#0a0e1c" stroke-width="2"/>'+
+    '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+'</g>'+
+    dots+
+    '<text x="200" y="537" text-anchor="middle" font-size="13" fill="#9ca3af">▲ ทางเข้า</text>'+
+    '<text x="460" y="537" text-anchor="middle" font-size="13" fill="#9ca3af">▲ ทางออก</text>'+
+    '</svg>';
+}
+
+function refreshInlineMap(){
+  const el=document.getElementById('storeMap');
+  if(el) el.innerHTML=renderMapSVG(currentMapBlocks,false);
+}
+
+function updateMapEditBarVisibility(){
+  const bar=document.getElementById('mapEditOpenBar');
+  if(bar) bar.style.display=(currentRole==='employee') ? 'block' : 'none';
+}
+
+function openMapFullscreen(){
+  if(mapEditMode)return;
+  const content=document.getElementById('mapOverlayContent');
+  content.innerHTML=renderMapSVG(currentMapBlocks,false);
+  document.getElementById('mapEditBar').style.display='none';
+  document.getElementById('mapOverlay').classList.remove('editing');
+  document.getElementById('mapOverlay').style.display='flex';
+}
+function closeMapFullscreen(){
+  if(mapEditMode){ cancelMapEdit(); return; }
+  document.getElementById('mapOverlay').style.display='none';
+}
+function openMapEditor(){
+  mapEditMode=true;
+  mapEditSnapshot=JSON.parse(JSON.stringify(currentMapBlocks));
+  const content=document.getElementById('mapOverlayContent');
+  content.innerHTML=renderMapSVG(currentMapBlocks,true);
+  document.getElementById('mapEditHint').textContent=mapFirestoreDocRef
+    ? 'ลากมุมล่างขวาของแต่ละบล็อกเพื่อปรับขนาด · บันทึกแล้วทุกคนจะเห็นเหมือนกัน'
+    : 'ลากมุมล่างขวาของแต่ละบล็อกเพื่อปรับขนาด · ยังไม่ได้เชื่อมฐานข้อมูลกลาง บันทึกนี้จะเก็บไว้เฉพาะเครื่องนี้เท่านั้น';
+  document.getElementById('mapEditBar').style.display='flex';
+  document.getElementById('mapOverlay').classList.add('editing');
+  document.getElementById('mapOverlay').style.display='flex';
+}
+function cancelMapEdit(){
+  currentMapBlocks=mapEditSnapshot || JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+  mapEditMode=false;
+  mapDragState=null;
+  document.getElementById('mapEditBar').style.display='none';
+  document.getElementById('mapOverlay').classList.remove('editing');
+  document.getElementById('mapOverlay').style.display='none';
+  refreshInlineMap();
+}
+async function saveMapEdit(){
+  mapEditMode=false;
+  mapDragState=null;
+  document.getElementById('mapEditBar').style.display='none';
+  document.getElementById('mapOverlay').classList.remove('editing');
+  document.getElementById('mapOverlay').style.display='none';
+  refreshInlineMap();
+  await persistMapBlocks(currentMapBlocks);
+}
+
+function applyBlockGeometry(block){
+  document.querySelectorAll('rect.map-block-rect[data-id="'+block.id+'"]').forEach(function(r){
+    r.setAttribute('width',block.w);
+    r.setAttribute('height',block.h);
+  });
+  document.querySelectorAll('rect.resize-handle[data-id="'+block.id+'"]').forEach(function(r){
+    r.setAttribute('x',block.x+block.w-16);
+    r.setAttribute('y',block.y+block.h-16);
+  });
+  if(block.anchor==='middle'){
+    document.querySelectorAll('text[data-mid="'+block.id+'"]').forEach(function(t){
+      const fx=parseFloat(t.getAttribute('data-fx'));
+      t.setAttribute('x',block.x+block.w*fx);
+    });
+  }
+}
+
+document.addEventListener('pointerdown',function(e){
+  if(!mapEditMode)return;
+  const handle=e.target.closest && e.target.closest('.resize-handle');
+  if(!handle)return;
+  e.preventDefault();
+  e.stopPropagation();
+  const svg=handle.ownerSVGElement;
+  const id=handle.getAttribute('data-id');
+  if(!currentMapBlocks.find(b=>b.id===id))return;
+  mapDragState={svg:svg,pt:svg.createSVGPoint(),id:id};
+});
+document.addEventListener('pointermove',function(e){
+  if(!mapDragState)return;
+  const block=currentMapBlocks.find(b=>b.id===mapDragState.id);
+  if(!block)return;
+  const pt=mapDragState.pt;
+  pt.x=e.clientX;pt.y=e.clientY;
+  const loc=pt.matrixTransform(mapDragState.svg.getScreenCTM().inverse());
+  let newW=Math.round(loc.x-block.x);
+  let newH=Math.round(loc.y-block.y);
+  newW=Math.max(MAP_MIN_W,Math.min(newW,MAP_VB_W-16-block.x));
+  newH=Math.max(MAP_MIN_H,Math.min(newH,MAP_VB_H-40-block.y));
+  block.w=newW;block.h=newH;
+  applyBlockGeometry(block);
+});
+document.addEventListener('pointerup',function(){ mapDragState=null; });
+document.addEventListener('pointercancel',function(){ mapDragState=null; });
+
+async function loadMapBlocksFromStorage(){
+  if(mapFirestoreDocRef){
+    try{
+      const doc=await mapFirestoreDocRef.get();
+      if(doc.exists){
+        const data=doc.data();
+        if(data && Array.isArray(data.blocks) && data.blocks.length){
+          currentMapBlocks=data.blocks;
+          return;
+        }
+      }
+    }catch(e){ console.error('โหลดผังจาก Firestore ไม่สำเร็จ',e); }
+  }
+  try{
+    const raw=localStorage.getItem('mf_map_layout');
+    if(raw){
+      const parsed=JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length) currentMapBlocks=parsed;
+    }
+  }catch(e){}
+}
+async function persistMapBlocks(blocks){
+  try{ localStorage.setItem('mf_map_layout',JSON.stringify(blocks)); }catch(e){}
+  if(mapFirestoreDocRef){
+    let updatedBy='unknown';
+    try{
+      const sess=JSON.parse(localStorage.getItem('mf_session'));
+      if(sess && sess.name) updatedBy=sess.name+' · '+(sess.dept||'');
+    }catch(e){}
+    try{
+      await mapFirestoreDocRef.set({blocks:blocks,updatedAt:Date.now(),updatedBy:updatedBy});
+    }catch(e){
+      console.error('บันทึกผังไป Firestore ไม่สำเร็จ',e);
+      alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
+    }
+  }
+}
+
+loadMapBlocksFromStorage().then(refreshInlineMap);
+refreshInlineMap();
+
 let PRODUCTS_READY=false;
 let PRODUCTS_BY_KEY=[];
 let pendingSearchQuery=null;
@@ -600,10 +790,6 @@ function selectResult(i){
   renderDetail(item,true);
 }
 
-function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
 function renderDetail(item,fromList){
   const fc=document.getElementById('foundCard');
   fc.style.display='block';
@@ -722,6 +908,7 @@ function showRoleScreen(){
   document.getElementById('roleScreen').style.display='flex';
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('mainApp').style.display='none';
+  updateMapEditBarVisibility();
 }
 function chooseCustomer(){
   const sess={role:'customer',ts:Date.now()};
@@ -748,6 +935,7 @@ function showMain(sess){
     document.getElementById('customerFeedbackSection').style.display='block';
     document.getElementById('employeeFeedbackSection').style.display='none';
   }
+  updateMapEditBarVisibility();
 }
 function getFeedbackList(){
   let list=[];
