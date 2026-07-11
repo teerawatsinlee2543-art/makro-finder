@@ -487,7 +487,14 @@ let mapEditMode=false;
 let mapEditSnapshot=null;
 let mapDragState=null;
 
-const FIREBASE_CONFIG=null; // TODO: paste Firebase web config here to enable shared (everyone-sees-it) map storage
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyCOGD2xdLUODa705sQBu_slLJmQng_tLCA",
+  authDomain:"makro-finder.firebaseapp.com",
+  projectId:"makro-finder",
+  storageBucket:"makro-finder.firebasestorage.app",
+  messagingSenderId:"39825032351",
+  appId:"1:39825032351:web:cdfcf244f920959ffaceaa"
+};
 let mapFirestoreDocRef=null;
 try{
   if(FIREBASE_CONFIG){
