@@ -681,7 +681,7 @@ refreshInlineMap();
 let ITEM_IMAGES={};
 let ITEM_IMAGES_READY=false;
 function loadItemImages(){
-  return fetch('item_images.json')
+  return fetch('item_images.json',{cache:'no-store'})
     .then(r=>r.ok?r.json():{})
     .then(data=>{ ITEM_IMAGES=data||{}; ITEM_IMAGES_READY=true; })
     .catch(()=>{ ITEM_IMAGES={}; ITEM_IMAGES_READY=true; });
