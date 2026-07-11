@@ -72,7 +72,8 @@ body{margin:0;padding:0}
 .result-wrap{display:none}
 .result-wrap.show{display:block}
 .result-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.result-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.result-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;background:var(--color-background-secondary);color:var(--color-text-secondary);overflow:hidden}
+.result-icon-wrap img,.result-item-icon img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit}
 .result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
 .loc-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
@@ -82,10 +83,6 @@ body{margin:0;padding:0}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
-.view-image-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:1px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:16px;text-decoration:none}
-.view-image-btn:hover{background:var(--color-background-secondary)}
-.view-image-btn i{font-size:16px}
-.view-image-btn i.ti-external-link{font-size:13px;opacity:.6}
 .promo-box{background:#FFF0F1;border:1px solid #FFC9CD;border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
 .promo-box i{color:var(--brand-red);font-size:19px;flex-shrink:0;margin-top:1px}
 .promo-tag{display:inline-block;background:var(--brand-red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;letter-spacing:.02em}
@@ -104,7 +101,7 @@ body{margin:0;padding:0}
 .results-count{font-size:12.5px;color:var(--color-text-tertiary);margin-bottom:10px}
 .result-item{display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--color-border-tertiary);border-radius:12px;margin-bottom:8px;cursor:pointer;background:var(--color-background-primary)}
 .result-item:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary)}
-.result-item-icon{width:38px;height:38px;border-radius:10px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-text-secondary);flex-shrink:0}
+.result-item-icon{width:38px;height:38px;border-radius:10px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-text-secondary);flex-shrink:0;overflow:hidden}
 .result-item-info{min-width:0;flex:1}
 .result-item-name{font-size:14px;font-weight:500;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .result-item-meta{font-size:11.5px;color:var(--color-text-tertiary);margin-top:2px}
@@ -364,9 +361,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           </div>
         </div>
         <div class="loc-row" id="rLoc"></div>
-        <a id="rImageLink" href="#" target="_blank" rel="noopener noreferrer" class="view-image-btn" style="display:none">
-          <i class="ti ti-photo" aria-hidden="true"></i> ดูรูปภาพสินค้าใน Makro PRO <i class="ti ti-external-link" aria-hidden="true"></i>
-        </a>
         <div class="promo-box" id="promoBlock">
           <i class="ti ti-discount-2" aria-hidden="true"></i>
           <div>
@@ -681,6 +675,71 @@ async function persistMapBlocks(blocks){
 loadMapBlocksFromStorage().then(refreshInlineMap);
 refreshInlineMap();
 
+// ==== รูปภาพสินค้าจริงจาก Makro PRO ====
+// รูปสินค้าจริงถูกดึงมาไว้ล่วงหน้าแล้วในไฟล์ item_images.json (itemNo -> URL รูปจริงบน makro.pro)
+// ต้องวางไฟล์ item_images.json ไว้โฟลเดอร์เดียวกับ index.html
+let ITEM_IMAGES={};
+let ITEM_IMAGES_READY=false;
+function loadItemImages(){
+  return fetch('item_images.json')
+    .then(r=>r.ok?r.json():{})
+    .then(data=>{ ITEM_IMAGES=data||{}; ITEM_IMAGES_READY=true; })
+    .catch(()=>{ ITEM_IMAGES={}; ITEM_IMAGES_READY=true; });
+}
+loadItemImages();
+
+// (ทางเลือกเสริม) ถ้าอยาก auto-เติมรูปสำหรับไอเทมใหม่ที่ยังไม่มีใน item_images.json แบบ real-time
+// ให้ deploy Cloudflare Worker ตามไฟล์ image-proxy-worker.js แล้วใส่ URL ตรงนี้ ไม่งั้นปล่อยว่างไว้ได้
+const IMAGE_PROXY_URL='';
+const IMG_CACHE_KEY='makroFinderImgCache_v1';
+let ITEM_IMAGE_CACHE={};
+try{ITEM_IMAGE_CACHE=JSON.parse(localStorage.getItem(IMG_CACHE_KEY)||'{}');}catch(e){ITEM_IMAGE_CACHE={};}
+let imgCacheDirty=false;
+function saveImageCacheSoon(){
+  if(imgCacheDirty)return;
+  imgCacheDirty=true;
+  setTimeout(()=>{
+    try{localStorage.setItem(IMG_CACHE_KEY,JSON.stringify(ITEM_IMAGE_CACHE));}catch(e){}
+    imgCacheDirty=false;
+  },500);
+}
+function resolveItemImage(item){
+  const key=item.itemNo;
+  if(ITEM_IMAGES&&Object.prototype.hasOwnProperty.call(ITEM_IMAGES,key)){
+    return Promise.resolve(ITEM_IMAGES[key]);
+  }
+  if(!IMAGE_PROXY_URL){
+    return Promise.resolve(null);
+  }
+  if(Object.prototype.hasOwnProperty.call(ITEM_IMAGE_CACHE,key)){
+    return Promise.resolve(ITEM_IMAGE_CACHE[key]);
+  }
+  const params=new URLSearchParams({itemNo:item.itemNo,barcode:item.barcode||''});
+  return fetch(IMAGE_PROXY_URL+'?'+params.toString())
+    .then(r=>r.ok?r.json():{image:null})
+    .then(data=>{
+      const url=data&&data.image?data.image:null;
+      ITEM_IMAGE_CACHE[key]=url;
+      saveImageCacheSoon();
+      return url;
+    })
+    .catch(()=>null);
+}
+function applyItemImage(wrapEl,item){
+  if(!wrapEl)return;
+  resolveItemImage(item).then(url=>{
+    if(!url)return;
+    if(!wrapEl.isConnected)return;
+    const img=new Image();
+    img.alt=item.desc||'';
+    img.loading='lazy';
+    img.onload=()=>{ wrapEl.innerHTML='';wrapEl.appendChild(img); };
+    img.onerror=()=>{ /* เก็บไอคอน placeholder เดิมไว้ถ้าโหลดรูปไม่สำเร็จ */ };
+    img.src=url;
+  });
+}
+// ==== จบส่วนรูปภาพสินค้า ====
+
 let PRODUCTS_READY=false;
 let PRODUCTS_BY_KEY=[];
 let pendingSearchQuery=null;
@@ -784,7 +843,7 @@ function renderList(matches,q){
       const loc=item.locations[0];
       const metaLoc=loc?('Loc '+loc.loc+' · Location '+loc.location):'ไม่มีข้อมูลตำแหน่ง';
       return '<div class="result-item" onclick="selectResult('+i+')">'+
-        '<div class="result-item-icon"><i class="ti ti-package" aria-hidden="true"></i></div>'+
+        '<div class="result-item-icon" id="resultIcon'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
         '<div class="result-item-info">'+
           '<div class="result-item-name">'+escapeHtml(item.desc)+'</div>'+
           '<div class="result-item-meta">'+escapeHtml(item.itemNo)+' · '+metaLoc+'</div>'+
@@ -794,6 +853,9 @@ function renderList(matches,q){
     }).join('');
   rl.style.display='block';
   rl._matches=shown;
+  shown.forEach((item,i)=>{
+    applyItemImage(document.getElementById('resultIcon'+i),item);
+  });
 }
 
 function selectResult(i){
@@ -819,14 +881,9 @@ function renderDetail(item,fromList){
   } else {
     rLoc.innerHTML='<div class="loc-pill sec"><i class="ti ti-map-pin-off" aria-hidden="true"></i>ไม่มีข้อมูลตำแหน่งจัดเก็บ</div>';
   }
-  const imgLink=document.getElementById('rImageLink');
-  const imgQuery=item.barcode||item.itemNo;
-  if(imgQuery){
-    imgLink.href='https://www.makro.pro/c/search?q='+encodeURIComponent(imgQuery);
-    imgLink.style.display='flex';
-  } else {
-    imgLink.style.display='none';
-  }
+  const rIconWrap=document.getElementById('rIconWrap');
+  rIconWrap.innerHTML='<i class="ti ti-package" aria-hidden="true"></i>';
+  applyItemImage(rIconWrap,item);
   const empBlock=document.getElementById('empStockBlock');
   if(currentRole==='employee'&&item.locations.length){
     empBlock.style.display='block';
