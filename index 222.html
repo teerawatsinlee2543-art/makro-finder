@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Makro Finder - ค้นหาสินค้า Store 42</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --brand-red:#E8192C;
+  --brand-red-dark:#A30F1D;
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f5f6f8;
+  --color-border-tertiary:#e5e7eb;
+  --color-border-secondary:#d1d5db;
+  --color-text-primary:#1a1a1a;
+  --color-text-secondary:#4b5563;
+  --color-text-tertiary:#9ca3af;
+  --color-background-success:#e6f7ee;
+  --color-text-success:#0a7a42;
+  --color-border-success:#a7e3c4;
+  --color-background-info:#eaf3ff;
+  --color-text-info:#1560bd;
+  --color-border-info:#bcdcff;
+}
+html,body{background:var(--color-background-secondary);height:100%;font-family:'Sarabun','Segoe UI',sans-serif}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+body{margin:0;padding:0}
+</style>
+</head>
+<body>
+<h2 class="sr-only">Makro Finder — แอปค้นหาสินค้าและดูแผนที่ภายใน Makro Store 42 สาขา Ramintra</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.frame{background:var(--color-background-secondary);min-height:100dvh;width:100%;display:flex;flex-direction:column}
+.phone{background:var(--color-background-primary);flex:1;display:flex;flex-direction:column;width:100%}
+#mainApp{flex:1;flex-direction:column;width:100%}
+.hdr{background:var(--brand-red);padding:18px clamp(16px,4vw,40px) 14px}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:min(1100px,94vw);margin:0 auto;width:100%}
+.hdr-logo{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.hdr-logo>div:last-child{min-width:0;overflow:hidden}
+.hdr-logo-badge{height:54px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-logo-badge svg{height:100%;width:auto;display:block}
+.hdr-logotext{font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
+.hdr-logotext i{font-size:18px}
+.hdr-sub{font-size:13px;font-weight:500;color:rgba(255,255,255,.8);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-icons{display:flex;align-items:center;gap:8px}
+.hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;cursor:pointer;border:none;flex-shrink:0}
+.search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin:12px auto 0;border:0.5px solid rgba(255,255,255,0.2);max-width:min(1100px,94vw)}
+.search-box input{background:transparent;border:none;outline:none;color:#fff;font-size:14px;flex:1;font-family:inherit}
+.search-box input::placeholder{color:rgba(255,255,255,0.5)}
+.search-box i{color:rgba(255,255,255,0.6);font-size:17px;flex-shrink:0}
+.body{padding:16px clamp(16px,4vw,40px) 40px;flex:1;max-width:min(1100px,94vw);margin:0 auto;width:100%}
+.section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+.cat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:20px}
+.cat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);transition:border-color .15s}
+.cat-card:hover{border-color:var(--color-border-secondary)}
+.cat-card i{font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0 auto 8px;background:color-mix(in srgb, currentColor 15%, white)}
+.cat-card span{font-size:12px;color:var(--color-text-secondary);font-weight:500}
+.cat-fresh i{color:#E24B4A}.cat-dry i{color:#BA7517}.cat-nonfood i{color:#1D9E75}
+.cat-drink i{color:#534AB7}.cat-veg i{color:#3B6D11}.cat-clean i{color:#185FA5}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.chip{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);cursor:pointer;background:var(--color-background-primary);white-space:nowrap}
+.chip:hover{background:var(--color-background-secondary)}
+.result-wrap{display:none}
+.result-wrap.show{display:block}
+.result-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.result-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;background:var(--color-background-secondary);color:var(--color-text-secondary);overflow:hidden}
+.result-icon-wrap img,.result-item-icon img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit}
+.result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
+.loc-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.loc-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success)}
+.loc-pill.sec{background:var(--color-background-secondary);color:var(--color-text-secondary);border-color:var(--color-border-tertiary)}
+.loc-pill i{font-size:15px}
+.tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
+.tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
+.tip-text{font-size:13px;color:var(--color-text-info)}
+.promo-box{background:#FFF0F1;border:1px solid #FFC9CD;border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
+.promo-box i{color:var(--brand-red);font-size:19px;flex-shrink:0;margin-top:1px}
+.promo-tag{display:inline-block;background:var(--brand-red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;letter-spacing:.02em}
+.promo-title{font-size:14px;font-weight:700;color:#8a0e17}
+.promo-detail{font-size:12.5px;color:#a3454d;margin-top:1px}
+.map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
+.map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
+.store-map{position:relative;width:100vw;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;background:var(--color-background-secondary);border-radius:0;border:0;border-top:0.5px solid var(--color-border-tertiary);border-bottom:0.5px solid var(--color-border-tertiary);overflow:hidden;padding:10px 0;cursor:pointer}
+.store-map svg{display:block;width:100%;height:auto}
+.no-result{text-align:center;padding:28px 16px;color:var(--color-text-tertiary)}
+.no-result i{font-size:32px;display:block;margin-bottom:8px}
+.no-result p{font-size:13px}
+#dataLoading i{animation:spin 1s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.results-count{font-size:12.5px;color:var(--color-text-tertiary);margin-bottom:10px}
+.result-item{display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--color-border-tertiary);border-radius:12px;margin-bottom:8px;cursor:pointer;background:var(--color-background-primary)}
+.result-item:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary)}
+.result-item-icon{width:38px;height:38px;border-radius:10px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-text-secondary);flex-shrink:0;overflow:hidden}
+.result-item-info{min-width:0;flex:1}
+.result-item-name{font-size:14px;font-weight:500;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result-item-meta{font-size:11.5px;color:var(--color-text-tertiary);margin-top:2px}
+.result-item i.ti-chevron-right{color:var(--color-text-tertiary);font-size:16px;flex-shrink:0}
+.back-to-list{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
+.loc-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.loc-group-idx{font-size:11px;color:var(--color-text-tertiary);width:100%}
+.emp-loc-item{background:#fff;border:1px solid #FFD9A0;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px;color:#6b4306}
+.emp-loc-item:last-child{margin-bottom:0}
+.map-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2000;padding:16px}
+.map-overlay-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.14);border:none;color:#fff;width:40px;height:40px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1}
+.map-overlay-content{width:100%;max-width:min(1100px,94vw);max-height:100%}
+.map-overlay-content svg{display:block;width:100%;height:auto;max-height:calc(100dvh - 110px)}
+.map-overlay.editing .map-overlay-content svg{cursor:default}
+#mapEditOpenBar{margin-top:10px}
+.map-edit-open-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.map-edit-open-btn:hover{background:var(--color-border-tertiary)}
+.map-edit-bar{display:none;flex-direction:column;align-items:center;gap:8px;margin-top:14px;width:100%;max-width:min(1100px,94vw)}
+.map-edit-bar-row{display:flex;gap:10px;width:100%}
+.map-edit-save,.map-edit-cancel{flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;border:none}
+.map-edit-save{background:var(--brand-red);color:#fff}
+.map-edit-save:hover{background:var(--brand-red-dark)}
+.map-edit-cancel{background:rgba(255,255,255,.14);color:#fff}
+.map-edit-cancel:hover{background:rgba(255,255,255,.22)}
+.map-edit-hint{font-size:12px;color:#9ca3af;text-align:center}
+.scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
+.scan-box{width:100%;max-width:420px}
+.scan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.scan-header span{color:#fff;font-size:15px;font-weight:500}
+.scan-header i{color:#fff;font-size:22px;cursor:pointer}
+.scan-video-wrap{position:relative;width:100%;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:#111}
+.scan-video-wrap video{width:100%;height:100%;object-fit:cover}
+.scan-guide{position:absolute;inset:12%;border:3px solid #fff;border-radius:16px;box-shadow:0 0 0 2000px rgba(0,0,0,.35)}
+.scan-hint{color:rgba(255,255,255,.75);font-size:13px;text-align:center;margin-top:14px}
+.scan-error{color:#ffb3b3;font-size:13px;text-align:center;margin-top:14px}
+.login-screen{position:fixed;inset:0;background:var(--brand-red);display:none;align-items:center;justify-content:center;padding:24px;z-index:1500}
+.login-card{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
+.brand-logo{width:150px;height:auto;display:block;margin:0 auto 8px}
+.login-sub{font-size:15px;font-weight:500;color:var(--color-text-secondary);margin-top:2px;margin-bottom:14px}
+.login-desc{font-size:13px;color:var(--color-text-secondary);margin-bottom:22px;line-height:1.5}
+.login-field{text-align:left;margin-bottom:16px}
+.field-label{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px;display:block}
+.req{color:#E24B4A}
+.inp{width:100%;padding:12px 14px;border:1px solid var(--color-border-secondary);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--color-text-primary);background:#fff}
+.inp:focus{border-color:var(--brand-red)}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
+.login-error{color:#E24B4A;font-size:12.5px;margin-bottom:12px;text-align:left}
+.login-btn{width:100%;padding:13px;border:none;border-radius:12px;background:var(--brand-red);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.login-btn:hover{background:var(--brand-red-dark)}
+.emp-bar{display:flex;align-items:center;justify-content:space-between;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:8px 12px;margin-bottom:16px;font-size:12.5px;color:var(--color-text-secondary);gap:8px}
+.emp-bar b{color:var(--color-text-primary)}
+.emp-bar button{background:none;border:none;color:var(--brand-red);font-size:12.5px;cursor:pointer;font-family:inherit;padding:0;flex-shrink:0}
+.role-screen{position:fixed;inset:0;background:var(--brand-red);display:flex;align-items:center;justify-content:center;padding:24px;z-index:1500}
+.role-card-wrap{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
+.role-intro-desc{font-size:13px;color:var(--color-text-secondary);margin-bottom:22px;line-height:1.5}
+.role-option{display:flex;align-items:center;gap:14px;text-align:left;border:1.5px solid var(--color-border-secondary);border-radius:14px;padding:14px;cursor:pointer;margin-bottom:12px;transition:border-color .15s,background .15s;background:none;width:100%;font-family:inherit}
+.role-option:hover{border-color:var(--brand-red);background:#fff5f5}
+.role-option:last-child{margin-bottom:0}
+.role-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;color:#fff}
+.role-icon.cust{background:#1D9E75}
+.role-icon.emp{background:var(--brand-red)}
+.role-name{font-size:15px;font-weight:600;color:var(--color-text-primary)}
+.role-desc{font-size:12px;color:var(--color-text-tertiary);margin-top:2px}
+.login-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
+.emp-stock-box{background:#FFF4E5;border:1px solid #FFD9A0;border-radius:10px;padding:10px 12px;margin-bottom:16px}
+.emp-stock-label{font-size:11px;font-weight:600;color:#95610A;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.feedback-box{margin-top:2px}
+.fb-textarea{width:100%;border:1px solid var(--color-border-secondary);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;resize:vertical;min-height:64px;outline:none;color:var(--color-text-primary);background:#fff}
+.fb-textarea:focus{border-color:var(--brand-red)}
+.fb-submit{margin-top:8px;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.fb-submit:hover{background:var(--brand-red-dark)}
+.fb-thanks{margin-top:8px;font-size:12.5px;color:var(--color-text-success)}
+.fb-admin-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.fb-admin-count{font-size:12.5px;color:var(--color-text-tertiary)}
+.fb-export-btn{display:flex;align-items:center;gap:6px;background:#1D9E75;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.fb-export-btn:hover{background:#167a5b}
+.fb-export-btn i{font-size:15px}
+.fb-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto}
+.fb-item{background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);border-radius:10px;padding:10px 12px}
+.fb-item-meta{font-size:10.5px;color:var(--color-text-tertiary);margin-bottom:3px}
+.fb-item-text{font-size:13px;color:var(--color-text-primary);line-height:1.4}
+.fb-empty{text-align:center;padding:24px 12px;color:var(--color-text-tertiary);font-size:12.5px}
+@media (min-width:720px){
+  body{font-size:15px}
+  .hdr-logotext{font-size:23px}
+  .hdr-sub{font-size:14px}
+  .search-box input{font-size:15px}
+  .cat-row{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .cat-card i{font-size:32px;width:60px;height:60px}
+  .cat-card span{font-size:13.5px}
+  .result-name{font-size:19px}
+  .loc-pill{font-size:14.5px;padding:7px 14px}
+  .promo-title{font-size:16px}
+  .role-card-wrap,.login-card{max-width:440px}
+}
+@media (min-width:1024px){
+  .hdr-row,.search-box,.body{max-width:min(1100px,90vw)}
+  .cat-row{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+}
+</style>
+
+<div class="frame">
+<div class="phone">
+
+  <div class="role-screen" id="roleScreen">
+    <div class="role-card-wrap">
+      <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
+        <circle cx="170" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
+        <text x="170" y="128" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="900" text-anchor="middle" fill="#E8192C" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">makro</text>
+        <text x="170" y="174" font-family="Arial,Helvetica,sans-serif" font-size="32" font-weight="900" text-anchor="middle" fill="#E8192C">Finder</text>
+      </svg>
+      <div class="login-sub">Store 42 · Ramintra</div>
+      <p class="role-intro-desc">กรุณาเลือกมุมมองการใช้งาน</p>
+      <button class="role-option" onclick="chooseCustomer()">
+        <div class="role-icon cust"><i class="ti ti-user" aria-hidden="true"></i></div>
+        <div>
+          <div class="role-name">ลูกค้า</div>
+          <div class="role-desc">ค้นหา/สแกนสินค้า ดูโซนและตำแหน่งจัดเก็บ</div>
+        </div>
+      </button>
+      <button class="role-option" onclick="chooseEmployee()">
+        <div class="role-icon emp"><i class="ti ti-id-badge-2" aria-hidden="true"></i></div>
+        <div>
+          <div class="role-name">พนักงาน</div>
+          <div class="role-desc">เข้าสู่ระบบพนักงาน ดูข้อมูลสต็อกเต็มรูปแบบ</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <button class="login-back" onclick="showRoleScreen()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
+      <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
+        <circle cx="170" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
+        <text x="170" y="128" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="900" text-anchor="middle" fill="#E8192C" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">makro</text>
+        <text x="170" y="174" font-family="Arial,Helvetica,sans-serif" font-size="32" font-weight="900" text-anchor="middle" fill="#E8192C">Finder</text>
+      </svg>
+      <div class="login-sub">Store 42 · Ramintra</div>
+      <p class="login-desc">กรอกข้อมูลพนักงานก่อนเข้าใช้งานระบบค้นหาสินค้า</p>
+      <div class="login-field">
+        <label class="field-label">ชื่อ-นามสกุล <span class="req">*</span></label>
+        <input type="text" id="empName" class="inp" placeholder="เช่น สมชาย ใจดี">
+      </div>
+      <div class="login-field">
+        <label class="field-label">แผนก <span class="req">*</span></label>
+        <select id="empDept" class="inp">
+          <option value="">เลือกแผนก</option>
+          <option>FV</option>
+          <option>FS</option>
+          <option>BK</option>
+          <option>DAILY FZ</option>
+          <option>DF1</option>
+          <option>DF2</option>
+          <option>NF1</option>
+          <option>NF2</option>
+          <option>GR</option>
+          <option>O2O</option>
+          <option>SAFETY</option>
+        </select>
+      </div>
+      <div class="login-field">
+        <label class="field-label">รหัส PIN พนักงาน <span class="req">*</span></label>
+        <input type="password" inputmode="numeric" maxlength="4" id="empPin" class="inp" placeholder="ใส่รหัส PIN 4 หลัก">
+      </div>
+      <p class="login-error" id="loginError" style="display:none"></p>
+      <button class="login-btn" onclick="submitLogin()">เข้าใช้งาน</button>
+    </div>
+  </div>
+
+  <div id="mainApp" style="display:none">
+
+  <div class="hdr">
+    <div class="hdr-row">
+      <div class="hdr-logo">
+        <button class="hdr-icon" onclick="switchRole()" title="กลับ" aria-label="กลับไปหน้าเลือกมุมมอง"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <div class="hdr-logo-badge">
+          <svg viewBox="0 0 260 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <text x="130" y="72" font-family="Arial,Helvetica,sans-serif" font-size="66" font-weight="900" text-anchor="middle" fill="#ffffff" stroke="#000000" stroke-width="9" stroke-linejoin="round" paint-order="stroke">makro</text>
+          </svg>
+        </div>
+        <div>
+          <div class="hdr-logotext"><i class="ti ti-search" aria-hidden="true"></i> Finder</div>
+          <div class="hdr-sub">Store 42 · Ramintra</div>
+        </div>
+      </div>
+      <div class="hdr-icons">
+        <button class="hdr-icon" onclick="toggleFullscreen()" title="เต็มจอ" aria-label="เต็มจอ"><i id="fsIcon" class="ti ti-maximize" aria-hidden="true"></i></button>
+        <button class="hdr-icon" onclick="openScanner()" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div class="search-box">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input type="text" id="si" placeholder="ค้นหาสินค้า..." oninput="search(this.value)">
+      <i class="ti ti-x" id="clr" style="display:none;cursor:pointer" onclick="clearSearch()" aria-label="ล้าง"></i>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <div class="emp-bar">
+      <span id="empBarText"></span>
+      <button id="empBarSwitch" onclick="switchRole()">เปลี่ยนมุมมอง</button>
+    </div>
+
+    <div id="homeView">
+      <div class="section-label">หมวดหมู่</div>
+      <div class="cat-row">
+        <div class="cat-card cat-fresh" onclick="search('ไก่สด')"><i class="ti ti-meat" aria-hidden="true"></i><span>Fresh Food</span></div>
+        <div class="cat-card cat-dry" onclick="search('น้ำมัน')"><i class="ti ti-box" aria-hidden="true"></i><span>Dry Food</span></div>
+        <div class="cat-card cat-nonfood" onclick="search('กระดาษ')"><i class="ti ti-package" aria-hidden="true"></i><span>Non Food</span></div>
+        <div class="cat-card cat-drink" onclick="search('เครื่องดื่ม')"><i class="ti ti-cup" aria-hidden="true"></i><span>เครื่องดื่ม</span></div>
+        <div class="cat-card cat-veg" onclick="search('ผัก')"><i class="ti ti-plant" aria-hidden="true"></i><span>ผัก-ผลไม้</span></div>
+        <div class="cat-card cat-clean" onclick="search('สบู่')"><i class="ti ti-sparkles" aria-hidden="true"></i><span>ของใช้</span></div>
+      </div>
+      <div class="section-label">ค้นหาบ่อย</div>
+      <div class="chips">
+        <span class="chip" onclick="search('ข้าวสาร')">ข้าวสาร</span>
+        <span class="chip" onclick="search('ปลาทูน่า')">ปลาทูน่า</span>
+        <span class="chip" onclick="search('กุ้งสด')">กุ้งสด</span>
+        <span class="chip" onclick="search('น้ำตาล')">น้ำตาล</span>
+        <span class="chip" onclick="search('สบู่')">สบู่</span>
+        <span class="chip" onclick="search('ทำความสะอาด')">ทำความสะอาด</span>
+      </div>
+      <div id="customerFeedbackSection">
+        <div class="section-label">ข้อเสนอแนะ / ข้อคิดเห็นเพิ่มเติม</div>
+        <div class="feedback-box">
+          <textarea id="fbText" class="fb-textarea" rows="3" placeholder="แจ้งปัญหา ข้อเสนอแนะ หรือความคิดเห็นเพิ่มเติม..."></textarea>
+          <button class="fb-submit" onclick="submitFeedback()">ส่งความคิดเห็น</button>
+          <p class="fb-thanks" id="fbThanks" style="display:none">ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ</p>
+        </div>
+      </div>
+      <div id="employeeFeedbackSection" style="display:none">
+        <div class="section-label">ข้อเสนอแนะจากลูกค้า</div>
+        <div class="fb-admin-toolbar">
+          <span class="fb-admin-count" id="fbCount">0 รายการ</span>
+          <button class="fb-export-btn" onclick="exportFeedbackExcel()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
+        </div>
+        <div id="fbList" class="fb-list"></div>
+      </div>
+    </div>
+
+    <div id="resultView" class="result-wrap">
+      <div id="dataLoading" style="display:none" class="no-result">
+        <i class="ti ti-loader-2" aria-hidden="true"></i>
+        <p>กำลังโหลดข้อมูลสินค้า...</p>
+      </div>
+      <div id="resultsList" style="display:none"></div>
+      <div id="foundCard" style="display:none">
+        <div class="result-top">
+          <div class="result-icon-wrap" id="rIconWrap"><i class="ti ti-package" aria-hidden="true"></i></div>
+          <div>
+            <div class="result-name" id="rName"></div>
+            <span class="result-cat-badge" id="rBadge"></span>
+          </div>
+        </div>
+        <div class="loc-row" id="rLoc"></div>
+        <div class="promo-box" id="promoBlock">
+          <i class="ti ti-discount-2" aria-hidden="true"></i>
+          <div>
+            <span class="promo-tag">ลดพิเศษ</span>
+            <div class="promo-title">ลด 5% ทั้งร้าน</div>
+            <div class="promo-detail">เมื่อซื้อครบ 500 บาท</div>
+          </div>
+        </div>
+        <div class="emp-stock-box" id="empStockBlock" style="display:none">
+          <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> สำหรับพนักงาน · ข้อมูลจัดวางสินค้า</div>
+          <div id="empStockList"></div>
+        </div>
+        <div id="remarkBlock" class="tip-box" style="display:none">
+          <i class="ti ti-note" aria-hidden="true"></i>
+          <div class="tip-text" id="rRemark"></div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-navigation" aria-hidden="true"></i>
+          <div class="tip-text">เดินตามป้ายบอกโซนภายในสาขาเพื่อไปยังตำแหน่งจัดเก็บสินค้า</div>
+        </div>
+        <div class="map-label-row">
+          <span class="map-label"><i class="ti ti-map" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>แผนที่สาขา</span>
+          <span class="map-hl-label"><i class="ti ti-arrows-maximize" style="font-size:12px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>แตะเพื่อขยายเต็มจอ</span>
+        </div>
+        <div class="store-map" id="storeMap" onclick="openMapFullscreen()"></div>
+        <div id="mapEditOpenBar" style="display:none">
+          <button class="map-edit-open-btn" onclick="openMapEditor()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ไขแผนที่</button>
+        </div>
+      </div>
+      <div id="notFound" style="display:none" class="no-result">
+        <i class="ti ti-mood-sad" aria-hidden="true"></i>
+        <p id="nfText"></p>
+        <p style="margin-top:6px;font-size:12px">ลองคำอื่น หรือถามพนักงาน</p>
+      </div>
+    </div>
+
+  </div>
+  </div>
+</div>
+</div>
+
+<div class="map-overlay" id="mapOverlay" onclick="closeMapFullscreen()">
+  <button class="map-overlay-close" onclick="closeMapFullscreen()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
+  <div class="map-overlay-content" id="mapOverlayContent" onclick="event.stopPropagation()"></div>
+  <div class="map-edit-bar" id="mapEditBar" onclick="event.stopPropagation()">
+    <p class="map-edit-hint" id="mapEditHint">ลากมุมล่างขวาของแต่ละบล็อกเพื่อปรับขนาด</p>
+    <div class="map-edit-bar-row">
+      <button class="map-edit-cancel" onclick="cancelMapEdit()">ยกเลิก</button>
+      <button class="map-edit-save" onclick="saveMapEdit()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="scan-overlay" id="scanOverlay">
+  <div class="scan-box">
+    <div class="scan-header">
+      <span>สแกน QR โค้ดสินค้า</span>
+      <i class="ti ti-x" onclick="closeScanner()" aria-label="ปิด"></i>
+    </div>
+    <div class="scan-video-wrap">
+      <video id="scanVideo" playsinline autoplay muted></video>
+      <div class="scan-guide"></div>
+    </div>
+    <p class="scan-hint">เล็งกล้องไปที่ QR โค้ดบนป้ายสินค้า</p>
+    <p class="scan-error" id="scanError" style="display:none"></p>
+  </div>
+</div>
+<canvas id="scanCanvas" style="display:none"></canvas>
+
+<script>
+/* ---------- Store map: data model, rendering, employee editing ---------- */
+const MAP_VB_W=640, MAP_VB_H=545, MAP_MIN_W=40, MAP_MIN_H=30;
+const DEFAULT_MAP_BLOCKS=[
+  {id:'butchery',x:20,y:20,w:190,h:75,fill:'#a8524f',lines:[
+    {dx:8,dy:27,size:15,weight:800,text:'เนื้อสัตว์และแช่แข็ง'},
+    {dx:8,dy:44,size:12,weight:600,opacity:.95,text:'Butchery & Frozen'}]},
+  {id:'snack',x:220,y:20,w:75,h:75,fill:'#3f8f4f',lines:[
+    {dx:8,dy:36,size:24,weight:800,text:'ขนม'},
+    {dx:8,dy:62,size:19,weight:600,opacity:.95,text:'Snack'}]},
+  {id:'winebeer',x:305,y:20,w:85,h:75,fill:'#2f8fae',lines:[
+    {dx:8,dy:18,size:12,weight:800,text:'ไวน์/เบียร์'},
+    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Wine & Beer'}]},
+  {id:'drink',x:400,y:20,w:135,h:75,fill:'#6a3fc9',lines:[
+    {dx:8,dy:29,size:23,weight:800,text:'เครื่องดื่ม'},
+    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Drink'}]},
+  {id:'fishseafood',x:20,y:105,w:190,h:85,fill:'#4472a0',lines:[
+    {dx:8,dy:29,size:23,weight:800,text:'ปลา/อาหารทะเล'},
+    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Fish & Seafood'}]},
+  {id:'grilledchicken',x:220,y:105,w:95,h:65,fill:'#a9843a',lines:[
+    {dx:8,dy:18,size:12,weight:800,text:'ไก่ย่าง'},
+    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Grilled Chicken'}]},
+  {id:'dryfood',x:325,y:105,w:210,h:135,fill:'#d17ba0',lines:[
+    {dx:8,dy:45,size:24,weight:800,text:'Dry Food'},
+    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 28-39'}]},
+  {id:'condiments',x:20,y:200,w:190,h:50,fill:'#c0392b',lines:[
+    {dx:8,dy:20,size:14,weight:800,text:'เครื่องเทศ'},
+    {dx:8,dy:35,size:11,weight:600,opacity:.95,text:'Condiments / Spices'}]},
+  {id:'fruitveg',x:20,y:260,w:190,h:135,fill:'#6fa03e',lines:[
+    {dx:8,dy:45,size:24,weight:800,text:'ผัก-ผลไม้'},
+    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Fruit & Veg'}]},
+  {id:'nonfood',x:220,y:250,w:315,h:145,fill:'#a688d1',lines:[
+    {dx:8,dy:45,size:24,weight:800,text:'Non-Food'},
+    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 1-28'}]},
+  {id:'o2o',x:545,y:105,w:75,h:290,fill:'#d2762f',anchor:'middle',lines:[
+    {fx:0.5,dy:135,size:12,weight:800,text:'O2O'},
+    {fx:0.5,dy:148,size:9,weight:600,opacity:.95,text:'แผนกออนไลน์'},
+    {fx:0.5,dy:158,size:7,weight:600,opacity:.9,text:'Makro Pro'}]},
+  {id:'bakery',x:20,y:405,w:150,h:85,fill:'#8a7a3f',lines:[
+    {dx:8,dy:40,size:24,weight:800,text:'เบเกอรี่'},
+    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Bakery'}]},
+  {id:'cashier',x:180,y:405,w:220,h:85,fill:'#52b788',lines:[
+    {dx:8,dy:40,size:24,weight:800,text:'แคชเชียร์'},
+    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Cashier'}]},
+  {id:'icecream',x:410,y:405,w:95,h:85,fill:'#19bcd6',lines:[
+    {dx:8,dy:36,size:20,weight:800,text:'ไอศกรีม'},
+    {dx:8,dy:58,size:16,weight:600,opacity:.95,text:'Ice Cream'}]},
+  {id:'premium',x:515,y:405,w:105,h:85,fill:'#8a97a3',lines:[
+    {dx:8,dy:33,size:17,weight:800,text:'จุดของแถม'},
+    {dx:8,dy:51,size:13,weight:600,opacity:.95,text:'Premium'}]},
+];
+const MAP_CORNER_DOTS=[[197,82],[282,82],[377,82],[522,82],[197,177],[302,157],[522,227],[197,237],[197,382],[522,382],[607,382],[157,477],[387,477],[492,477],[607,477]];
+
+let currentMapBlocks=JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+let mapEditMode=false;
+let mapEditSnapshot=null;
+let mapDragState=null;
+
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyCOGD2xdLUODa705sQBu_slLJmQng_tLCA",
+  authDomain:"makro-finder.firebaseapp.com",
+  projectId:"makro-finder",
+  storageBucket:"makro-finder.firebasestorage.app",
+  messagingSenderId:"39825032351",
+  appId:"1:39825032351:web:cdfcf244f920959ffaceaa"
+};
+let mapFirestoreDocRef=null;
+try{
+  if(FIREBASE_CONFIG){
+    firebase.initializeApp(FIREBASE_CONFIG);
+    mapFirestoreDocRef=firebase.firestore().collection('makroFinder').doc('storeMapLayout');
+  }
+}catch(e){ console.error('Firebase init ไม่สำเร็จ',e); mapFirestoreDocRef=null; }
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function mapLineMarkup(b,l){
+  const x=b.anchor==='middle' ? (b.x+b.w*(l.fx!==undefined?l.fx:0.5)) : (b.x+(l.dx!==undefined?l.dx:8));
+  const y=b.y+l.dy;
+  const anchorAttr=b.anchor==='middle' ? ' text-anchor="middle"' : '';
+  const opAttr=l.opacity!==undefined ? ' fill-opacity="'+l.opacity+'"' : '';
+  const strokeStyle=l.weight>=800 ? ' style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:'+(l.size>=20?'2.5':'2')+'px"' : '';
+  const dataAttr=b.anchor==='middle' ? ' data-mid="'+b.id+'" data-fx="'+(l.fx!==undefined?l.fx:0.5)+'"' : '';
+  return '<text'+dataAttr+' x="'+x+'" y="'+y+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="#fff"'+opAttr+anchorAttr+strokeStyle+'>'+escapeHtml(l.text)+'</text>';
+}
+
+function mapBlockMarkup(b,editable){
+  const lines=b.lines.map(l=>mapLineMarkup(b,l)).join('');
+  const handle=editable ? '<rect class="resize-handle" data-id="'+b.id+'" x="'+(b.x+b.w-16)+'" y="'+(b.y+b.h-16)+'" width="20" height="20" rx="5" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>' : '';
+  return '<g><rect class="map-block-rect" data-id="'+b.id+'" x="'+b.x+'" y="'+b.y+'" width="'+b.w+'" height="'+b.h+'" rx="8" fill="'+b.fill+'"/>'+lines+handle+'</g>';
+}
+
+function renderMapSVG(blocks,editable){
+  const blockMarkup=blocks.map(b=>mapBlockMarkup(b,editable)).join('');
+  const dots=editable ? '' : '<g fill="#ffffff" fill-opacity="0.55">'+MAP_CORNER_DOTS.map(d=>'<rect x="'+d[0]+'" y="'+d[1]+'" width="5" height="5" rx="1"/>').join('')+'</g>';
+  return '<svg viewBox="0 0 '+MAP_VB_W+' '+MAP_VB_H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042">'+
+    '<rect x="8" y="8" width="624" height="522" rx="12" fill="#141a2e" stroke="#0a0e1c" stroke-width="2"/>'+
+    '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+'</g>'+
+    dots+
+    '<text x="200" y="537" text-anchor="middle" font-size="13" fill="#9ca3af">▲ ทางเข้า</text>'+
+    '<text x="460" y="537" text-anchor="middle" font-size="13" fill="#9ca3af">▲ ทางออก</text>'+
+    '</svg>';
+}
+
+function refreshInlineMap(){
+  const el=document.getElementById('storeMap');
+  if(el) el.innerHTML=renderMapSVG(currentMapBlocks,false);
+}
+
+function updateMapEditBarVisibility(){
+  const bar=document.getElementById('mapEditOpenBar');
+  if(bar) bar.style.display=(currentRole==='employee') ? 'block' : 'none';
+}
+
+function openMapFullscreen(){
+  if(mapEditMode)return;
+  const content=document.getElementById('mapOverlayContent');
+  content.innerHTML=renderMapSVG(currentMapBlocks,false);
+  document.getElementById('mapEditBar').style.display='none';
+  document.getElementById('mapOverlay').classList.remove('editing');
+  document.getElementById('mapOverlay').style.display='flex';
+}
+function closeMapFullscreen(){
+  if(mapEditMode){ cancelMapEdit(); return; }
+  document.getElementById('mapOverlay').style.display='none';
+}
+function openMapEditor(){
+  mapEditMode=true;
+  mapEditSnapshot=JSON.parse(JSON.stringify(currentMapBlocks));
+  const content=document.getElementById('mapOverlayContent');
+  content.innerHTML=renderMapSVG(currentMapBlocks,true);
+  document.getElementById('mapEditHint').textContent=mapFirestoreDocRef
+    ? 'ลากมุมล่างขวาของแต่ละบล็อกเพื่อปรับขนาด · บันทึกแล้วทุกคนจะเห็นเหมือนกัน'
+    : 'ลากมุมล่างขวาของแต่ละบล็อกเพื่อปรับขนาด · ยังไม่ได้เชื่อมฐานข้อมูลกลาง บันทึกนี้จะเก็บไว้เฉพาะเครื่องนี้เท่านั้น';
+  document.getElementById('mapEditBar').style.display='flex';
+  document.getElementById('mapOverlay').classList.add('editing');
+  document.getElementById('mapOverlay').style.display='flex';
+}
+function cancelMapEdit(){
+  currentMapBlocks=mapEditSnapshot || JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+  mapEditMode=false;
+  mapDragState=null;
+  document.getElementById('mapEditBar').style.display='none';
+  document.getElementById('mapOverlay').classList.remove('editing');
+  document.getElementById('mapOverlay').style.display='none';
+  refreshInlineMap();
+}
+async function saveMapEdit(){
+  mapEditMode=false;
+  mapDragState=null;
+  document.getElementById('mapEditBar').style.display='none';
+  document.getElementById('mapOverlay').classList.remove('editing');
+  document.getElementById('mapOverlay').style.display='none';
+  refreshInlineMap();
+  await persistMapBlocks(currentMapBlocks);
+}
+
+function applyBlockGeometry(block){
+  document.querySelectorAll('rect.map-block-rect[data-id="'+block.id+'"]').forEach(function(r){
+    r.setAttribute('width',block.w);
+    r.setAttribute('height',block.h);
+  });
+  document.querySelectorAll('rect.resize-handle[data-id="'+block.id+'"]').forEach(function(r){
+    r.setAttribute('x',block.x+block.w-16);
+    r.setAttribute('y',block.y+block.h-16);
+  });
+  if(block.anchor==='middle'){
+    document.querySelectorAll('text[data-mid="'+block.id+'"]').forEach(function(t){
+      const fx=parseFloat(t.getAttribute('data-fx'));
+      t.setAttribute('x',block.x+block.w*fx);
+    });
+  }
+}
+
+document.addEventListener('pointerdown',function(e){
+  if(!mapEditMode)return;
+  const handle=e.target.closest && e.target.closest('.resize-handle');
+  if(!handle)return;
+  e.preventDefault();
+  e.stopPropagation();
+  const svg=handle.ownerSVGElement;
+  const id=handle.getAttribute('data-id');
+  if(!currentMapBlocks.find(b=>b.id===id))return;
+  mapDragState={svg:svg,pt:svg.createSVGPoint(),id:id};
+});
+document.addEventListener('pointermove',function(e){
+  if(!mapDragState)return;
+  const block=currentMapBlocks.find(b=>b.id===mapDragState.id);
+  if(!block)return;
+  const pt=mapDragState.pt;
+  pt.x=e.clientX;pt.y=e.clientY;
+  const loc=pt.matrixTransform(mapDragState.svg.getScreenCTM().inverse());
+  let newW=Math.round(loc.x-block.x);
+  let newH=Math.round(loc.y-block.y);
+  newW=Math.max(MAP_MIN_W,Math.min(newW,MAP_VB_W-16-block.x));
+  newH=Math.max(MAP_MIN_H,Math.min(newH,MAP_VB_H-40-block.y));
+  block.w=newW;block.h=newH;
+  applyBlockGeometry(block);
+});
+document.addEventListener('pointerup',function(){ mapDragState=null; });
+document.addEventListener('pointercancel',function(){ mapDragState=null; });
+
+async function loadMapBlocksFromStorage(){
+  if(mapFirestoreDocRef){
+    try{
+      const doc=await mapFirestoreDocRef.get();
+      if(doc.exists){
+        const data=doc.data();
+        if(data && Array.isArray(data.blocks) && data.blocks.length){
+          currentMapBlocks=data.blocks;
+          return;
+        }
+      }
+    }catch(e){ console.error('โหลดผังจาก Firestore ไม่สำเร็จ',e); }
+  }
+  try{
+    const raw=localStorage.getItem('mf_map_layout');
+    if(raw){
+      const parsed=JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length) currentMapBlocks=parsed;
+    }
+  }catch(e){}
+}
+async function persistMapBlocks(blocks){
+  try{ localStorage.setItem('mf_map_layout',JSON.stringify(blocks)); }catch(e){}
+  if(mapFirestoreDocRef){
+    let updatedBy='unknown';
+    try{
+      const sess=JSON.parse(localStorage.getItem('mf_session'));
+      if(sess && sess.name) updatedBy=sess.name+' · '+(sess.dept||'');
+    }catch(e){}
+    try{
+      await mapFirestoreDocRef.set({blocks:blocks,updatedAt:Date.now(),updatedBy:updatedBy});
+    }catch(e){
+      console.error('บันทึกผังไป Firestore ไม่สำเร็จ',e);
+      alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
+    }
+  }
+}
+
+loadMapBlocksFromStorage().then(refreshInlineMap);
+refreshInlineMap();
+
+// ==== รูปภาพสินค้าจริงจาก Makro PRO ====
+// รูปสินค้าจริงถูกดึงมาไว้ล่วงหน้าแล้วในไฟล์ item_images.json (itemNo -> URL รูปจริงบน makro.pro)
+// ต้องวางไฟล์ item_images.json ไว้โฟลเดอร์เดียวกับ index.html
+let ITEM_IMAGES={};
+let ITEM_IMAGES_READY=false;
+function loadItemImages(){
+  return fetch('item_images.json',{cache:'no-store'})
+    .then(r=>r.ok?r.json():{})
+    .then(data=>{ ITEM_IMAGES=data||{}; ITEM_IMAGES_READY=true; })
+    .catch(()=>{ ITEM_IMAGES={}; ITEM_IMAGES_READY=true; });
+}
+loadItemImages();
+
+// (ทางเลือกเสริม) ถ้าอยาก auto-เติมรูปสำหรับไอเทมใหม่ที่ยังไม่มีใน item_images.json แบบ real-time
+// ให้ deploy Cloudflare Worker ตามไฟล์ image-proxy-worker.js แล้วใส่ URL ตรงนี้ ไม่งั้นปล่อยว่างไว้ได้
+const IMAGE_PROXY_URL='';
+const IMG_CACHE_KEY='makroFinderImgCache_v1';
+let ITEM_IMAGE_CACHE={};
+try{ITEM_IMAGE_CACHE=JSON.parse(localStorage.getItem(IMG_CACHE_KEY)||'{}');}catch(e){ITEM_IMAGE_CACHE={};}
+let imgCacheDirty=false;
+function saveImageCacheSoon(){
+  if(imgCacheDirty)return;
+  imgCacheDirty=true;
+  setTimeout(()=>{
+    try{localStorage.setItem(IMG_CACHE_KEY,JSON.stringify(ITEM_IMAGE_CACHE));}catch(e){}
+    imgCacheDirty=false;
+  },500);
+}
+function resolveItemImage(item){
+  const key=item.itemNo;
+  if(ITEM_IMAGES&&Object.prototype.hasOwnProperty.call(ITEM_IMAGES,key)){
+    return Promise.resolve(ITEM_IMAGES[key]);
+  }
+  if(!IMAGE_PROXY_URL){
+    return Promise.resolve(null);
+  }
+  if(Object.prototype.hasOwnProperty.call(ITEM_IMAGE_CACHE,key)){
+    return Promise.resolve(ITEM_IMAGE_CACHE[key]);
+  }
+  const params=new URLSearchParams({itemNo:item.itemNo,barcode:item.barcode||''});
+  return fetch(IMAGE_PROXY_URL+'?'+params.toString())
+    .then(r=>r.ok?r.json():{image:null})
+    .then(data=>{
+      const url=data&&data.image?data.image:null;
+      ITEM_IMAGE_CACHE[key]=url;
+      saveImageCacheSoon();
+      return url;
+    })
+    .catch(()=>null);
+}
+function applyItemImage(wrapEl,item){
+  if(!wrapEl)return;
+  resolveItemImage(item).then(url=>{
+    if(!url)return;
+    if(!wrapEl.isConnected)return;
+    const img=new Image();
+    img.alt=item.desc||'';
+    img.onload=()=>{ wrapEl.innerHTML='';wrapEl.appendChild(img); };
+    img.onerror=()=>{ /* เก็บไอคอน placeholder เดิมไว้ถ้าโหลดรูปไม่สำเร็จ */ };
+    img.src=url;
+  });
+}
+// ==== จบส่วนรูปภาพสินค้า ====
+
+let PRODUCTS_READY=false;
+let PRODUCTS_BY_KEY=[];
+let pendingSearchQuery=null;
+
+function loadProductData(){
+  return fetch('ItemLocation_10_Jul_2026.xlsx')
+    .then(r=>{ if(!r.ok) throw new Error('fetch failed: '+r.status); return r.arrayBuffer(); })
+    .then(buf=>{
+      const wb=XLSX.read(buf,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      const map=new Map();
+      rows.forEach(r=>{
+        const itemNo=String(r['Item No']||'').trim();
+        const desc=String(r['Item Desc']||'').trim();
+        if(!itemNo||!desc)return;
+        const barcode=String(r['Barcode']||'').trim();
+        const loc=String(r['Loc']||'').trim();
+        const location=String(r['Location']||'').trim();
+        const facing=r['Facing'];
+        const maxQty=r['Max Qty'];
+        const remark=String(r['Remark']||'').trim();
+        let item=map.get(itemNo);
+        if(!item){
+          item={itemNo,barcode,desc,remark,locations:[]};
+          map.set(itemNo,item);
+        }
+        if(!item.barcode&&barcode)item.barcode=barcode;
+        if(!item.remark&&remark)item.remark=remark;
+        const dupe=item.locations.some(l=>l.loc===loc&&l.location===location);
+        if(!dupe&&(loc||location)){
+          item.locations.push({loc,location,facing,maxQty});
+        }
+      });
+      PRODUCTS_BY_KEY=Array.from(map.values());
+      PRODUCTS_READY=true;
+      if(pendingSearchQuery!==null){
+        const q=pendingSearchQuery;
+        pendingSearchQuery=null;
+        search(q);
+      }
+    })
+    .catch(err=>{
+      console.error('โหลดข้อมูลสินค้าไม่สำเร็จ',err);
+    });
+}
+loadProductData();
+
+function findMatches(query){
+  const q=query.trim();
+  if(!q)return[];
+  const lower=q.toLowerCase();
+  const exact=[],partial=[];
+  for(const item of PRODUCTS_BY_KEY){
+    if(item.itemNo===q||item.barcode===q){
+      exact.push(item);
+    } else if(item.desc.toLowerCase().includes(lower)||item.itemNo.includes(q)||(item.barcode&&item.barcode.includes(q))){
+      partial.push(item);
+    }
+  }
+  return exact.concat(partial);
+}
+
+function search(q){
+  const inp=document.getElementById('si');
+  if(inp.value!==q)inp.value=q;
+  document.getElementById('clr').style.display=q?'block':'none';
+  const home=document.getElementById('homeView');
+  const rv=document.getElementById('resultView');
+  if(!q.trim()){home.style.display='block';rv.classList.remove('show');return;}
+  home.style.display='none';
+  rv.classList.add('show');
+  const dl=document.getElementById('dataLoading');
+  const rl=document.getElementById('resultsList');
+  const fc=document.getElementById('foundCard');
+  const nf=document.getElementById('notFound');
+  if(!PRODUCTS_READY){
+    pendingSearchQuery=q;
+    dl.style.display='block';rl.style.display='none';fc.style.display='none';nf.style.display='none';
+    return;
+  }
+  dl.style.display='none';
+  const matches=findMatches(q);
+  if(matches.length===0){
+    rl.style.display='none';fc.style.display='none';nf.style.display='block';
+    document.getElementById('nfText').textContent='ไม่พบ "'+q+'" ในระบบ';
+  } else if(matches.length===1){
+    rl.style.display='none';nf.style.display='none';
+    renderDetail(matches[0]);
+  } else {
+    fc.style.display='none';nf.style.display='none';
+    renderList(matches,q);
+  }
+}
+
+function renderList(matches,q){
+  const rl=document.getElementById('resultsList');
+  const shown=matches.slice(0,50);
+  rl.innerHTML='<div class="results-count">พบ '+matches.length+' รายการ'+(matches.length>50?' (แสดง 50 รายการแรก)':'')+'</div>'+
+    shown.map((item,i)=>{
+      const loc=item.locations[0];
+      const metaLoc=loc?('Loc '+loc.loc+' · Location '+loc.location):'ไม่มีข้อมูลตำแหน่ง';
+      return '<div class="result-item" onclick="selectResult('+i+')">'+
+        '<div class="result-item-icon" id="resultIcon'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
+        '<div class="result-item-info">'+
+          '<div class="result-item-name">'+escapeHtml(item.desc)+'</div>'+
+          '<div class="result-item-meta">'+escapeHtml(item.itemNo)+' · '+metaLoc+'</div>'+
+        '</div>'+
+        '<i class="ti ti-chevron-right" aria-hidden="true"></i>'+
+      '</div>';
+    }).join('');
+  rl.style.display='block';
+  rl._matches=shown;
+  shown.forEach((item,i)=>{
+    applyItemImage(document.getElementById('resultIcon'+i),item);
+  });
+}
+
+function selectResult(i){
+  const rl=document.getElementById('resultsList');
+  const item=rl._matches&&rl._matches[i];
+  if(!item)return;
+  rl.style.display='none';
+  renderDetail(item,true);
+}
+
+function renderDetail(item,fromList){
+  const fc=document.getElementById('foundCard');
+  fc.style.display='block';
+  document.getElementById('rName').textContent=item.desc;
+  document.getElementById('rBadge').textContent='Item No '+item.itemNo+(item.barcode?' · '+item.barcode:'');
+  document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:11px;padding:2px 8px;border-radius:20px';
+  const rLoc=document.getElementById('rLoc');
+  if(item.locations.length){
+    rLoc.innerHTML=item.locations.map(l=>
+      '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Loc '+escapeHtml(l.loc)+'</div>'+
+      '<div class="loc-pill sec"><i class="ti ti-map-2" aria-hidden="true"></i>Location '+escapeHtml(l.location)+'</div>'
+    ).join('');
+  } else {
+    rLoc.innerHTML='<div class="loc-pill sec"><i class="ti ti-map-pin-off" aria-hidden="true"></i>ไม่มีข้อมูลตำแหน่งจัดเก็บ</div>';
+  }
+  const rIconWrap=document.getElementById('rIconWrap');
+  rIconWrap.innerHTML='<i class="ti ti-package" aria-hidden="true"></i>';
+  applyItemImage(rIconWrap,item);
+  const empBlock=document.getElementById('empStockBlock');
+  if(currentRole==='employee'&&item.locations.length){
+    empBlock.style.display='block';
+    document.getElementById('empStockList').innerHTML=item.locations.map(l=>
+      '<div class="emp-loc-item">Loc '+escapeHtml(l.loc)+' / Location '+escapeHtml(l.location)+' — Facing '+(l.facing||'-')+' · Max Qty '+(l.maxQty||'-')+'</div>'
+    ).join('');
+  } else {
+    empBlock.style.display='none';
+  }
+  const remarkBlock=document.getElementById('remarkBlock');
+  if(item.remark){
+    remarkBlock.style.display='flex';
+    document.getElementById('rRemark').textContent=item.remark;
+  } else {
+    remarkBlock.style.display='none';
+  }
+}
+
+function clearSearch(){
+  document.getElementById('si').value='';
+  document.getElementById('clr').style.display='none';
+  document.getElementById('homeView').style.display='block';
+  document.getElementById('resultView').classList.remove('show');
+}
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  } else {
+    document.exitFullscreen();
+  }
+}
+document.addEventListener('fullscreenchange',()=>{
+  const icon=document.getElementById('fsIcon');
+  if(icon)icon.className=document.fullscreenElement?'ti ti-minimize':'ti ti-maximize';
+});
+
+let scanStream=null,scanRAF=null;
+function openScanner(){
+  const overlay=document.getElementById('scanOverlay');
+  const err=document.getElementById('scanError');
+  err.style.display='none';err.textContent='';
+  overlay.style.display='flex';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง';
+    err.style.display='block';
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}})
+    .then(stream=>{
+      scanStream=stream;
+      const video=document.getElementById('scanVideo');
+      video.srcObject=stream;
+      video.play();
+      scanRAF=requestAnimationFrame(scanTick);
+    })
+    .catch(()=>{
+      err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้องในเบราว์เซอร์';
+      err.style.display='block';
+    });
+}
+function scanTick(){
+  const video=document.getElementById('scanVideo');
+  const canvas=document.getElementById('scanCanvas');
+  if(video.readyState===video.HAVE_ENOUGH_DATA){
+    canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+    const code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
+    if(code&&code.data){
+      closeScanner();
+      search(code.data.trim());
+      return;
+    }
+  }
+  scanRAF=requestAnimationFrame(scanTick);
+}
+function closeScanner(){
+  document.getElementById('scanOverlay').style.display='none';
+  if(scanRAF)cancelAnimationFrame(scanRAF);
+  scanRAF=null;
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+}
+
+function openMapFullscreen(){
+  const svg=document.querySelector('#storeMap svg');
+  if(!svg)return;
+  const content=document.getElementById('mapOverlayContent');
+  content.innerHTML='';
+  content.appendChild(svg.cloneNode(true));
+  document.getElementById('mapOverlay').style.display='flex';
+}
+function closeMapFullscreen(){
+  document.getElementById('mapOverlay').style.display='none';
+}
+
+let currentRole=null;
+function showRoleScreen(){
+  currentRole=null;
+  document.getElementById('roleScreen').style.display='flex';
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainApp').style.display='none';
+  updateMapEditBarVisibility();
+}
+function chooseCustomer(){
+  const sess={role:'customer',ts:Date.now()};
+  localStorage.setItem('mf_session',JSON.stringify(sess));
+  showMain(sess);
+}
+function chooseEmployee(){
+  document.getElementById('roleScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+}
+function showMain(sess){
+  currentRole=sess.role;
+  document.getElementById('roleScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainApp').style.display='flex';
+  const bar=document.getElementById('empBarText');
+  if(sess.role==='employee'){
+    bar.innerHTML='พนักงาน: <b>'+sess.name+' · '+sess.dept+'</b>';
+    document.getElementById('customerFeedbackSection').style.display='none';
+    document.getElementById('employeeFeedbackSection').style.display='block';
+    renderFeedbackList();
+  } else {
+    bar.innerHTML='<b>มุมมองลูกค้า</b>';
+    document.getElementById('customerFeedbackSection').style.display='block';
+    document.getElementById('employeeFeedbackSection').style.display='none';
+  }
+  updateMapEditBarVisibility();
+}
+function getFeedbackList(){
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem('mf_feedback'))||[];}catch(e){}
+  return list;
+}
+function submitFeedback(){
+  const ta=document.getElementById('fbText');
+  const text=ta.value.trim();
+  if(!text)return;
+  const list=getFeedbackList();
+  list.push({text,ts:Date.now(),role:currentRole});
+  localStorage.setItem('mf_feedback',JSON.stringify(list));
+  ta.value='';
+  const thanks=document.getElementById('fbThanks');
+  thanks.style.display='block';
+  setTimeout(()=>{thanks.style.display='none';},3000);
+}
+function renderFeedbackList(){
+  const list=getFeedbackList().slice().sort((a,b)=>b.ts-a.ts);
+  const wrap=document.getElementById('fbList');
+  document.getElementById('fbCount').textContent=list.length+' รายการ';
+  if(!list.length){
+    wrap.innerHTML='<div class="fb-empty">ยังไม่มีข้อเสนอแนะจากลูกค้า</div>';
+    return;
+  }
+  wrap.innerHTML=list.map(item=>{
+    const d=new Date(item.ts);
+    const dateStr=d.toLocaleDateString('th-TH')+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    return '<div class="fb-item"><div class="fb-item-meta">'+dateStr+'</div><div class="fb-item-text">'+
+      item.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div></div>';
+  }).join('');
+}
+function exportFeedbackExcel(){
+  const list=getFeedbackList().slice().sort((a,b)=>a.ts-b.ts);
+  if(!list.length){alert('ยังไม่มีข้อเสนอแนะให้ส่งออก');return;}
+  const rows=list.map(item=>{
+    const d=new Date(item.ts);
+    return {
+      'วันที่':d.toLocaleDateString('th-TH'),
+      'เวลา':d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
+      'ข้อเสนอแนะ / ความคิดเห็น':item.text,
+    };
+  });
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:12},{wch:10},{wch:60}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'ข้อเสนอแนะ');
+  XLSX.writeFile(wb,'makro_finder_feedback_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+const EMP_PIN='0042';
+function submitLogin(){
+  const name=document.getElementById('empName').value.trim();
+  const dept=document.getElementById('empDept').value;
+  const pin=document.getElementById('empPin').value.trim();
+  const err=document.getElementById('loginError');
+  if(!name){err.textContent='กรุณากรอกชื่อ-นามสกุล';err.style.display='block';return;}
+  if(!dept){err.textContent='กรุณาเลือกแผนก';err.style.display='block';return;}
+  if(!pin){err.textContent='กรุณากรอกรหัส PIN';err.style.display='block';return;}
+  if(pin!==EMP_PIN){err.textContent='รหัส PIN ไม่ถูกต้อง เฉพาะพนักงานที่ได้รับรหัสเท่านั้น';err.style.display='block';return;}
+  err.style.display='none';
+  const sess={role:'employee',name,dept,ts:Date.now()};
+  localStorage.setItem('mf_session',JSON.stringify(sess));
+  showMain(sess);
+}
+function switchRole(){
+  localStorage.removeItem('mf_session');
+  document.getElementById('empName').value='';
+  document.getElementById('empDept').value='';
+  document.getElementById('empPin').value='';
+  clearSearch();
+  showRoleScreen();
+}
+function checkSession(){
+  let sess=null;
+  try{sess=JSON.parse(localStorage.getItem('mf_session'));}catch(e){}
+  if(sess&&sess.role==='employee'&&sess.name&&sess.dept){
+    showMain(sess);
+  } else if(sess&&sess.role==='customer'){
+    showMain(sess);
+  } else {
+    showRoleScreen();
+  }
+}
+checkSession();
+</script>
+</body>
+</html>
