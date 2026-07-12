@@ -64,8 +64,8 @@ body{margin:0;padding:0}
 .cat-card:hover{border-color:var(--color-border-secondary)}
 .cat-card i{font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0 auto 8px;background:color-mix(in srgb, currentColor 15%, white)}
 .cat-card span{font-size:12px;color:var(--color-text-secondary);font-weight:500}
-.cat-fresh i{color:#E24B4A}.cat-dry i{color:#BA7517}.cat-nonfood i{color:#1D9E75}
-.cat-drink i{color:#534AB7}.cat-veg i{color:#3B6D11}.cat-clean i{color:#185FA5}
+.cat-electric i{color:#2563EB}.cat-frozen i{color:#0891B2}.cat-home i{color:#7C3AED}
+.cat-seasoning i{color:#EA580C}.cat-drink i{color:#0D9488}.cat-snack i{color:#DB2777}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
 .chip{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);cursor:pointer;background:var(--color-background-primary);white-space:nowrap}
 .chip:hover{background:var(--color-background-secondary)}
@@ -325,12 +325,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="homeView">
       <div class="section-label">หมวดหมู่</div>
       <div class="cat-row">
-        <div class="cat-card cat-fresh" onclick="search('ไก่สด')"><i class="ti ti-meat" aria-hidden="true"></i><span>Fresh Food</span></div>
-        <div class="cat-card cat-dry" onclick="search('น้ำมัน')"><i class="ti ti-box" aria-hidden="true"></i><span>Dry Food</span></div>
-        <div class="cat-card cat-nonfood" onclick="search('กระดาษ')"><i class="ti ti-package" aria-hidden="true"></i><span>Non Food</span></div>
+        <div class="cat-card cat-electric" onclick="search('ไฟฟ้า')"><i class="ti ti-plug" aria-hidden="true"></i><span>เครื่องใช้ไฟฟ้า</span></div>
+        <div class="cat-card cat-frozen" onclick="search('แช่แข็ง')"><i class="ti ti-snowflake" aria-hidden="true"></i><span>อาหารสดและแช่แข็ง</span></div>
+        <div class="cat-card cat-home" onclick="search('ของใช้')"><i class="ti ti-home-2" aria-hidden="true"></i><span>ของใช้ในบ้าน</span></div>
+        <div class="cat-card cat-seasoning" onclick="search('เครื่องปรุง')"><i class="ti ti-tools-kitchen-2" aria-hidden="true"></i><span>อาหารและเครื่องปรุง</span></div>
         <div class="cat-card cat-drink" onclick="search('เครื่องดื่ม')"><i class="ti ti-cup" aria-hidden="true"></i><span>เครื่องดื่ม</span></div>
-        <div class="cat-card cat-veg" onclick="search('ผัก')"><i class="ti ti-plant" aria-hidden="true"></i><span>ผัก-ผลไม้</span></div>
-        <div class="cat-card cat-clean" onclick="search('สบู่')"><i class="ti ti-sparkles" aria-hidden="true"></i><span>ของใช้</span></div>
+        <div class="cat-card cat-snack" onclick="search('ขนม')"><i class="ti ti-candy" aria-hidden="true"></i><span>ขนม</span></div>
       </div>
       <div class="section-label">ค้นหาบ่อย</div>
       <div class="chips">
