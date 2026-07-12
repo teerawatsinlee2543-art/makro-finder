@@ -304,8 +304,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div class="hdr-icons">
-        <button class="hdr-icon" onclick="toggleFullscreen()" title="เต็มจอ" aria-label="เต็มจอ"><i id="fsIcon" class="ti ti-maximize" aria-hidden="true"></i></button>
-        <button class="hdr-icon" onclick="openScanner()" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
+        <button class="hdr-icon" onclick="openScanner()" title="สแกนบาร์โค้ด/QR" aria-label="สแกนบาร์โค้ด/QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
       </div>
     </div>
     <div class="search-box">
@@ -443,14 +442,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div class="scan-overlay" id="scanOverlay">
   <div class="scan-box">
     <div class="scan-header">
-      <span>สแกน QR โค้ดสินค้า</span>
+      <span>สแกนบาร์โค้ด/QR สินค้า</span>
       <i class="ti ti-x" onclick="closeScanner()" aria-label="ปิด"></i>
     </div>
     <div class="scan-video-wrap">
       <video id="scanVideo" playsinline autoplay muted></video>
       <div class="scan-guide"></div>
     </div>
-    <p class="scan-hint">เล็งกล้องไปที่ QR โค้ดบนป้ายสินค้า</p>
+    <p class="scan-hint">เล็งกล้องไปที่บาร์โค้ด, QR โค้ด หรือเลข Item บนป้ายสินค้า เจอแล้วจะแสดงผลลัพธ์ทันที</p>
     <p class="scan-error" id="scanError" style="display:none"></p>
   </div>
 </div>
@@ -1120,19 +1119,13 @@ function clearSearch(){
   document.getElementById('resultView').classList.remove('show');
 }
 
-function toggleFullscreen(){
-  if(!document.fullscreenElement){
-    document.documentElement.requestFullscreen().catch(()=>{});
-  } else {
-    document.exitFullscreen();
-  }
-}
-document.addEventListener('fullscreenchange',()=>{
-  const icon=document.getElementById('fsIcon');
-  if(icon)icon.className=document.fullscreenElement?'ti ti-minimize':'ti ti-maximize';
-});
-
 let scanStream=null,scanRAF=null;
+let barcodeDetector=null;
+if('BarcodeDetector' in window){
+  try{
+    barcodeDetector=new BarcodeDetector({formats:['qr_code','ean_13','ean_8','upc_a','upc_e','code_128','code_39','itf','codabar']});
+  }catch(e){ barcodeDetector=null; }
+}
 function openScanner(){
   const overlay=document.getElementById('scanOverlay');
   const err=document.getElementById('scanError');
@@ -1163,6 +1156,19 @@ function scanTick(){
     canvas.width=video.videoWidth;canvas.height=video.videoHeight;
     const ctx=canvas.getContext('2d');
     ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    if(barcodeDetector){
+      barcodeDetector.detect(canvas).then(codes=>{
+        if(codes&&codes.length&&codes[0].rawValue){
+          closeScanner();
+          search(codes[0].rawValue.trim());
+        } else {
+          scanRAF=requestAnimationFrame(scanTick);
+        }
+      }).catch(()=>{
+        scanRAF=requestAnimationFrame(scanTick);
+      });
+      return;
+    }
     const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
     const code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
     if(code&&code.data){
