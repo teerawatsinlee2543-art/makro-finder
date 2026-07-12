@@ -62,10 +62,10 @@ body{margin:0;padding:0}
 .cat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:20px}
 .cat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);transition:border-color .15s}
 .cat-card:hover{border-color:var(--color-border-secondary)}
-.cat-card i{font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0 auto 8px;background:color-mix(in srgb, currentColor 15%, white)}
+.cat-card img{width:52px;height:52px;object-fit:contain;display:block;margin:0 auto 8px;border-radius:50%;padding:8px;box-sizing:border-box}
 .cat-card span{font-size:12px;color:var(--color-text-secondary);font-weight:500}
-.cat-electric i{color:#2563EB}.cat-frozen i{color:#0891B2}.cat-home i{color:#7C3AED}
-.cat-seasoning i{color:#EA580C}.cat-drink i{color:#0D9488}.cat-snack i{color:#DB2777}
+.cat-electric img{background:#2563EB26}.cat-frozen img{background:#0891B226}.cat-home img{background:#7C3AED26}
+.cat-seasoning img{background:#EA580C26}.cat-drink img{background:#0D948826}.cat-snack img{background:#DB277726}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
 .chip{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);cursor:pointer;background:var(--color-background-primary);white-space:nowrap}
 .chip:hover{background:var(--color-background-secondary)}
@@ -202,7 +202,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .hdr-sub{font-size:14px}
   .search-box input{font-size:15px}
   .cat-row{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
-  .cat-card i{font-size:32px;width:60px;height:60px}
+  .cat-card img{width:60px;height:60px}
   .cat-card span{font-size:13.5px}
   .result-name{font-size:19px}
   .loc-pill{font-size:14.5px;padding:7px 14px}
@@ -325,12 +325,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="homeView">
       <div class="section-label">หมวดหมู่</div>
       <div class="cat-row">
-        <div class="cat-card cat-electric" onclick="searchByCategory('electric')"><i class="ti ti-plug" aria-hidden="true"></i><span>เครื่องใช้ไฟฟ้า</span></div>
-        <div class="cat-card cat-frozen" onclick="searchByCategory('frozen')"><i class="ti ti-snowflake" aria-hidden="true"></i><span>อาหารสดและแช่แข็ง</span></div>
-        <div class="cat-card cat-home" onclick="searchByCategory('home')"><i class="ti ti-home-2" aria-hidden="true"></i><span>ของใช้ในบ้าน</span></div>
-        <div class="cat-card cat-seasoning" onclick="searchByCategory('seasoning')"><i class="ti ti-tools-kitchen-2" aria-hidden="true"></i><span>อาหารและเครื่องปรุง</span></div>
-        <div class="cat-card cat-drink" onclick="searchByCategory('drink')"><i class="ti ti-cup" aria-hidden="true"></i><span>เครื่องดื่ม</span></div>
-        <div class="cat-card cat-snack" onclick="searchByCategory('snack')"><i class="ti ti-candy" aria-hidden="true"></i><span>ขนม</span></div>
+        <div class="cat-card cat-electric" onclick="searchByCategory('electric')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Electronics_7b6f092700.png" alt="" aria-hidden="true"><span>เครื่องใช้ไฟฟ้า</span></div>
+        <div class="cat-card cat-frozen" onclick="searchByCategory('frozen')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/L1_Fresh_Food_Story_70c56f6cb4.png" alt="" aria-hidden="true"><span>อาหารสดและแช่แข็ง</span></div>
+        <div class="cat-card cat-home" onclick="searchByCategory('home')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Home_Care_6557cb2bd6.png" alt="" aria-hidden="true"><span>ของใช้ในบ้าน</span></div>
+        <div class="cat-card cat-seasoning" onclick="searchByCategory('seasoning')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Grocery_53f0589e85.png" alt="" aria-hidden="true"><span>อาหารและเครื่องปรุง</span></div>
+        <div class="cat-card cat-drink" onclick="searchByCategory('drink')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Beverage_and_Milk_v2_78f9f26baa.png" alt="" aria-hidden="true"><span>เครื่องดื่ม</span></div>
+        <div class="cat-card cat-snack" onclick="searchByCategory('snack')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Icon_in_app_1_fc27c246fa.png" alt="" aria-hidden="true"><span>ขนม</span></div>
       </div>
       <div class="section-label">ค้นหาบ่อย</div>
       <div class="chips">
