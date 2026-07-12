@@ -90,9 +90,14 @@ body{margin:0;padding:0}
 .tip-text{font-size:13px;color:var(--color-text-info)}
 .promo-box{background:#FFF0F1;border:1px solid #FFC9CD;border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
 .promo-box i{color:var(--brand-red);font-size:19px;flex-shrink:0;margin-top:1px}
+.promo-text-wrap{flex:1;min-width:0}
 .promo-tag{display:inline-block;background:var(--brand-red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;letter-spacing:.02em}
 .promo-title{font-size:14px;font-weight:700;color:#8a0e17}
 .promo-detail{font-size:12.5px;color:#a3454d;margin-top:1px}
+.promo-edit-btn{background:none;border:none;color:var(--brand-red);cursor:pointer;flex-shrink:0;padding:2px;font-size:15px}
+.emp-stock-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.emp-stock-label-row .emp-stock-label{margin-bottom:0}
+.emp-stock-edit-btn{background:none;border:none;color:#95610A;cursor:pointer;padding:2px;font-size:14px}
 .map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
 .map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
@@ -379,14 +384,18 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
         <div class="promo-box" id="promoBlock">
           <i class="ti ti-discount-2" aria-hidden="true"></i>
-          <div>
-            <span class="promo-tag">ลดพิเศษ</span>
-            <div class="promo-title">ลด 5% ทั้งร้าน</div>
-            <div class="promo-detail">เมื่อซื้อครบ 500 บาท</div>
+          <div class="promo-text-wrap">
+            <span class="promo-tag" id="promoTagText">ลดพิเศษ</span>
+            <div class="promo-title" id="promoTitleText">ลด 5% ทั้งร้าน</div>
+            <div class="promo-detail" id="promoDetailText">เมื่อซื้อครบ 500 บาท</div>
           </div>
+          <button class="promo-edit-btn" id="promoEditBtn" onclick="openPromoEditor()" style="display:none" aria-label="แก้ไขโปรโมชั่น"><i class="ti ti-pencil" aria-hidden="true"></i></button>
         </div>
         <div class="emp-stock-box" id="empStockBlock" style="display:none">
-          <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> สำหรับพนักงาน · ข้อมูลจัดวางสินค้า</div>
+          <div class="emp-stock-label-row">
+            <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> สำหรับพนักงาน · ข้อมูลจัดวางสินค้า</div>
+            <button class="emp-stock-edit-btn" onclick="openStockEditor()" aria-label="แก้ไขข้อมูลจัดวางสินค้า"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+          </div>
           <div id="empStockList"></div>
         </div>
         <div id="remarkBlock" class="tip-box" style="display:none">
@@ -524,12 +533,113 @@ const FIREBASE_CONFIG={
   appId:"1:39825032351:web:cdfcf244f920959ffaceaa"
 };
 let mapFirestoreDocRef=null;
+let promoFirestoreDocRef=null;
+let stockOverridesFirestoreDocRef=null;
 try{
   if(FIREBASE_CONFIG){
     firebase.initializeApp(FIREBASE_CONFIG);
-    mapFirestoreDocRef=firebase.firestore().collection('makroFinder').doc('storeMapLayout');
+    const db=firebase.firestore();
+    mapFirestoreDocRef=db.collection('makroFinder').doc('storeMapLayout');
+    promoFirestoreDocRef=db.collection('makroFinder').doc('promoConfig');
+    stockOverridesFirestoreDocRef=db.collection('makroFinder').doc('stockOverrides');
   }
-}catch(e){ console.error('Firebase init ไม่สำเร็จ',e); mapFirestoreDocRef=null; }
+}catch(e){ console.error('Firebase init ไม่สำเร็จ',e); mapFirestoreDocRef=null; promoFirestoreDocRef=null; stockOverridesFirestoreDocRef=null; }
+
+function currentSessionLabel(){
+  try{
+    const sess=JSON.parse(localStorage.getItem('mf_session'));
+    if(sess&&sess.name) return sess.name+' · '+(sess.dept||'');
+  }catch(e){}
+  return 'unknown';
+}
+
+/* ---------- Promo: global, employee-editable ---------- */
+let currentPromo={tag:'ลดพิเศษ',title:'ลด 5% ทั้งร้าน',detail:'เมื่อซื้อครบ 500 บาท'};
+function refreshPromoDisplay(){
+  const tagEl=document.getElementById('promoTagText');
+  const titleEl=document.getElementById('promoTitleText');
+  const detailEl=document.getElementById('promoDetailText');
+  if(tagEl)tagEl.textContent=currentPromo.tag;
+  if(titleEl)titleEl.textContent=currentPromo.title;
+  if(detailEl)detailEl.textContent=currentPromo.detail;
+}
+async function loadPromoConfig(){
+  if(promoFirestoreDocRef){
+    try{
+      const doc=await promoFirestoreDocRef.get();
+      if(doc.exists){
+        const data=doc.data();
+        if(data&&data.title){ currentPromo={tag:data.tag||'',title:data.title||'',detail:data.detail||''}; return; }
+      }
+    }catch(e){ console.error('โหลดโปรโมชั่นจาก Firestore ไม่สำเร็จ',e); }
+  }
+  try{
+    const raw=localStorage.getItem('mf_promo_config');
+    if(raw){ const parsed=JSON.parse(raw); if(parsed&&parsed.title) currentPromo=parsed; }
+  }catch(e){}
+}
+async function persistPromoConfig(promo){
+  try{ localStorage.setItem('mf_promo_config',JSON.stringify(promo)); }catch(e){}
+  if(promoFirestoreDocRef){
+    try{ await promoFirestoreDocRef.set({tag:promo.tag,title:promo.title,detail:promo.detail,updatedAt:Date.now(),updatedBy:currentSessionLabel()}); }
+    catch(e){ console.error('บันทึกโปรโมชั่นไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); }
+  }
+}
+function openPromoEditor(){
+  const newTag=prompt('ป้ายกำกับโปรโมชั่น (เช่น ลดพิเศษ)',currentPromo.tag);
+  if(newTag===null)return;
+  const newTitle=prompt('หัวข้อโปรโมชั่น',currentPromo.title);
+  if(newTitle===null)return;
+  const newDetail=prompt('รายละเอียดโปรโมชั่น',currentPromo.detail);
+  if(newDetail===null)return;
+  currentPromo={tag:newTag.trim(),title:newTitle.trim(),detail:newDetail.trim()};
+  refreshPromoDisplay();
+  persistPromoConfig(currentPromo);
+}
+loadPromoConfig().then(refreshPromoDisplay);
+
+/* ---------- Employee stock (Facing/Max Qty) overrides, per item+location ---------- */
+let STOCK_OVERRIDES={};
+function stockKey(itemNo,loc,location){ return itemNo+'|'+loc+'|'+location; }
+async function loadStockOverrides(){
+  if(stockOverridesFirestoreDocRef){
+    try{
+      const doc=await stockOverridesFirestoreDocRef.get();
+      if(doc.exists){
+        const data=doc.data();
+        if(data&&data.overrides){ STOCK_OVERRIDES=data.overrides; return; }
+      }
+    }catch(e){ console.error('โหลดข้อมูลแก้ไขสต็อกจาก Firestore ไม่สำเร็จ',e); }
+  }
+  try{
+    const raw=localStorage.getItem('mf_stock_overrides');
+    if(raw){ const parsed=JSON.parse(raw); if(parsed) STOCK_OVERRIDES=parsed; }
+  }catch(e){}
+}
+async function persistStockOverrides(){
+  try{ localStorage.setItem('mf_stock_overrides',JSON.stringify(STOCK_OVERRIDES)); }catch(e){}
+  if(stockOverridesFirestoreDocRef){
+    try{ await stockOverridesFirestoreDocRef.set({overrides:STOCK_OVERRIDES,updatedAt:Date.now(),updatedBy:currentSessionLabel()}); }
+    catch(e){ console.error('บันทึกข้อมูลแก้ไขสต็อกไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); }
+  }
+}
+function openStockEditor(){
+  const item=currentDetailItem;
+  if(!item||!item.locations.length){ alert('ไม่มีตำแหน่งจัดเก็บให้แก้ไข'); return; }
+  for(let i=0;i<item.locations.length;i++){
+    const l=item.locations[i];
+    const key=stockKey(item.itemNo,l.loc,l.location);
+    const existing=STOCK_OVERRIDES[key]||{facing:l.facing,maxQty:l.maxQty};
+    const newFacing=prompt('Facing สำหรับ Loc '+l.loc+' / Location '+l.location,existing.facing!=null?String(existing.facing):'');
+    if(newFacing===null)break;
+    const newMaxQty=prompt('Max Qty สำหรับ Loc '+l.loc+' / Location '+l.location,existing.maxQty!=null?String(existing.maxQty):'');
+    if(newMaxQty===null)break;
+    STOCK_OVERRIDES[key]={facing:newFacing.trim(),maxQty:newMaxQty.trim()};
+  }
+  persistStockOverrides();
+  renderDetail(item);
+}
+loadStockOverrides();
 
 function escapeHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -577,6 +687,8 @@ function refreshInlineMap(){
 function updateMapEditBarVisibility(){
   const bar=document.getElementById('mapEditOpenBar');
   if(bar) bar.style.display=(currentRole==='employee') ? 'block' : 'none';
+  const promoBtn=document.getElementById('promoEditBtn');
+  if(promoBtn) promoBtn.style.display=(currentRole==='employee') ? 'block' : 'none';
 }
 
 function openMapFullscreen(){
@@ -1075,9 +1187,12 @@ function selectResult(i){
   renderDetail(item,true);
 }
 
+let currentDetailItem=null;
 function renderDetail(item,fromList){
+  currentDetailItem=item;
   const fc=document.getElementById('foundCard');
   fc.style.display='block';
+  refreshPromoDisplay();
   document.getElementById('rName').textContent=item.desc;
   document.getElementById('rBadge').textContent='Item No '+item.itemNo+(item.barcode?' · '+item.barcode:'');
   document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:11px;padding:2px 8px;border-radius:20px';
@@ -1096,9 +1211,12 @@ function renderDetail(item,fromList){
   const empBlock=document.getElementById('empStockBlock');
   if(currentRole==='employee'&&item.locations.length){
     empBlock.style.display='block';
-    document.getElementById('empStockList').innerHTML=item.locations.map(l=>
-      '<div class="emp-loc-item">Loc '+escapeHtml(l.loc)+' / Location '+escapeHtml(l.location)+' — Facing '+(l.facing||'-')+' · Max Qty '+(l.maxQty||'-')+'</div>'
-    ).join('');
+    document.getElementById('empStockList').innerHTML=item.locations.map(l=>{
+      const ov=STOCK_OVERRIDES[stockKey(item.itemNo,l.loc,l.location)];
+      const facing=ov?ov.facing:l.facing;
+      const maxQty=ov?ov.maxQty:l.maxQty;
+      return '<div class="emp-loc-item">Loc '+escapeHtml(l.loc)+' / Location '+escapeHtml(l.location)+' — Facing '+(facing||'-')+' · Max Qty '+(maxQty||'-')+'</div>';
+    }).join('');
   } else {
     empBlock.style.display='none';
   }
