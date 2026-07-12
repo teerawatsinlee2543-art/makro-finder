@@ -71,12 +71,12 @@ body{margin:0;padding:0}
 .chip:hover{background:var(--color-background-secondary)}
 .result-wrap{display:none}
 .result-wrap.show{display:block}
-.result-header-flex{display:flex;gap:14px;align-items:stretch;margin-bottom:14px}
+.result-header-flex{display:flex;flex-direction:column;gap:14px;align-items:stretch;margin-bottom:14px}
 .result-header-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .result-header-info .result-top{margin-bottom:10px}
 .result-header-info .loc-row{margin-bottom:0}
 .result-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.result-image-banner{width:130px;height:auto;aspect-ratio:1/1;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:44px;background:var(--color-background-secondary);color:var(--color-text-tertiary)}
+.result-image-banner{width:min(260px,100%);height:auto;aspect-ratio:1/1;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:88px;background:var(--color-background-secondary);color:var(--color-text-tertiary);margin:0 auto}
 .result-image-banner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .result-item-icon img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit}
 .result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
@@ -208,6 +208,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .loc-pill{font-size:14.5px;padding:7px 14px}
   .promo-title{font-size:16px}
   .role-card-wrap,.login-card{max-width:440px}
+  .result-header-flex{flex-direction:row}
+  .result-image-banner{width:260px;margin:0}
 }
 @media (min-width:1024px){
   .hdr-row,.search-box,.body{max-width:min(1100px,90vw)}
@@ -1243,15 +1245,8 @@ function switchRole(){
   showRoleScreen();
 }
 function checkSession(){
-  let sess=null;
-  try{sess=JSON.parse(localStorage.getItem('mf_session'));}catch(e){}
-  if(sess&&sess.role==='employee'&&sess.name&&sess.dept){
-    showMain(sess);
-  } else if(sess&&sess.role==='customer'){
-    showMain(sess);
-  } else {
-    showRoleScreen();
-  }
+  // ทุกครั้งที่เข้าเว็บ ต้องผ่านหน้าเลือกมุมมอง (หน้าแรก) ก่อนเสมอ ไม่ auto-skip ไปหน้าหลักแม้จะมี session ค้างอยู่
+  showRoleScreen();
 }
 checkSession();
 </script>
