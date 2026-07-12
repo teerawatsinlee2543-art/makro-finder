@@ -72,8 +72,9 @@ body{margin:0;padding:0}
 .result-wrap{display:none}
 .result-wrap.show{display:block}
 .result-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.result-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;background:var(--color-background-secondary);color:var(--color-text-secondary);overflow:hidden}
-.result-icon-wrap img,.result-item-icon img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit}
+.result-image-banner{width:100%;aspect-ratio:4/3;max-height:280px;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;font-size:60px;background:var(--color-background-secondary);color:var(--color-text-tertiary)}
+.result-image-banner img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
+.result-item-icon img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit}
 .result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
 .loc-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
@@ -101,7 +102,7 @@ body{margin:0;padding:0}
 .results-count{font-size:12.5px;color:var(--color-text-tertiary);margin-bottom:10px}
 .result-item{display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--color-border-tertiary);border-radius:12px;margin-bottom:8px;cursor:pointer;background:var(--color-background-primary)}
 .result-item:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary)}
-.result-item-icon{width:38px;height:38px;border-radius:10px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-text-secondary);flex-shrink:0;overflow:hidden}
+.result-item-icon{width:60px;height:60px;border-radius:12px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--color-text-secondary);flex-shrink:0;overflow:hidden}
 .result-item-info{min-width:0;flex:1}
 .result-item-name{font-size:14px;font-weight:500;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .result-item-meta{font-size:11.5px;color:var(--color-text-tertiary);margin-top:2px}
@@ -127,6 +128,13 @@ body{margin:0;padding:0}
 .map-edit-cancel{background:rgba(255,255,255,.14);color:#fff}
 .map-edit-cancel:hover{background:rgba(255,255,255,.22)}
 .map-edit-hint{font-size:12px;color:#9ca3af;text-align:center}
+.map-edit-tools-row,.map-edit-selected-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.map-edit-color-label{display:flex;align-items:center;gap:6px;color:#e5e7eb;font-size:13px;font-weight:600}
+.map-edit-color-label input[type=color]{width:32px;height:32px;border:none;border-radius:8px;padding:0;background:none;cursor:pointer}
+.map-edit-add-btn,.map-edit-rename-btn,.map-edit-delete-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.map-edit-add-btn:hover,.map-edit-rename-btn:hover{background:rgba(255,255,255,.22)}
+.map-edit-delete-btn{background:rgba(239,68,68,.25);color:#fecaca}
+.map-edit-delete-btn:hover{background:rgba(239,68,68,.4)}
 .scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
 .scan-box{width:100%;max-width:420px}
 .scan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -353,8 +361,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
       <div id="resultsList" style="display:none"></div>
       <div id="foundCard" style="display:none">
+        <div class="result-image-banner" id="rIconWrap"><i class="ti ti-package" aria-hidden="true"></i></div>
         <div class="result-top">
-          <div class="result-icon-wrap" id="rIconWrap"><i class="ti ti-package" aria-hidden="true"></i></div>
           <div>
             <div class="result-name" id="rName"></div>
             <span class="result-cat-badge" id="rBadge"></span>
@@ -406,7 +414,16 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <button class="map-overlay-close" onclick="closeMapFullscreen()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
   <div class="map-overlay-content" id="mapOverlayContent" onclick="event.stopPropagation()"></div>
   <div class="map-edit-bar" id="mapEditBar" onclick="event.stopPropagation()">
-    <p class="map-edit-hint" id="mapEditHint">ลากมุมล่างขวาของแต่ละบล็อกเพื่อปรับขนาด</p>
+    <p class="map-edit-hint" id="mapEditHint">ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · แตะกล่องเพื่อเลือก</p>
+    <div class="map-edit-bar-row map-edit-tools-row">
+      <label class="map-edit-color-label">พื้นหลัง <input type="color" id="mapBgColorInput" onchange="onMapBgColorChange(this.value)"></label>
+      <button class="map-edit-add-btn" onclick="addMapBlock()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มกล่อง</button>
+    </div>
+    <div class="map-edit-bar-row map-edit-selected-row" id="mapSelectedRow" style="display:none">
+      <label class="map-edit-color-label">สีกล่อง <input type="color" id="mapBlockColorInput" onchange="onMapBlockColorChange(this.value)"></label>
+      <button class="map-edit-rename-btn" onclick="renameSelectedBlock()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ข้อความ</button>
+      <button class="map-edit-delete-btn" onclick="deleteSelectedBlock()"><i class="ti ti-trash" aria-hidden="true"></i> ลบกล่อง</button>
+    </div>
     <div class="map-edit-bar-row">
       <button class="map-edit-cancel" onclick="cancelMapEdit()">ยกเลิก</button>
       <button class="map-edit-save" onclick="saveMapEdit()">บันทึก</button>
@@ -484,9 +501,12 @@ const DEFAULT_MAP_BLOCKS=[
 const MAP_CORNER_DOTS=[[197,82],[282,82],[377,82],[522,82],[197,177],[302,157],[522,227],[197,237],[197,382],[522,382],[607,382],[157,477],[387,477],[492,477],[607,477]];
 
 let currentMapBlocks=JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+let currentMapBgColor='#141a2e';
 let mapEditMode=false;
 let mapEditSnapshot=null;
+let mapEditBgSnapshot=null;
 let mapDragState=null;
+let selectedBlockId=null;
 
 const FIREBASE_CONFIG={
   apiKey:"AIzaSyCOGD2xdLUODa705sQBu_slLJmQng_tLCA",
@@ -509,26 +529,32 @@ function escapeHtml(s){
 }
 
 function mapLineMarkup(b,l){
-  const x=b.anchor==='middle' ? (b.x+b.w*(l.fx!==undefined?l.fx:0.5)) : (b.x+(l.dx!==undefined?l.dx:8));
+  const isMid=b.anchor==='middle';
+  const fx=l.fx!==undefined?l.fx:0.5;
+  const dx=l.dx!==undefined?l.dx:8;
+  const x=isMid ? (b.x+b.w*fx) : (b.x+dx);
   const y=b.y+l.dy;
-  const anchorAttr=b.anchor==='middle' ? ' text-anchor="middle"' : '';
+  const anchorAttr=isMid ? ' text-anchor="middle"' : '';
   const opAttr=l.opacity!==undefined ? ' fill-opacity="'+l.opacity+'"' : '';
   const strokeStyle=l.weight>=800 ? ' style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:'+(l.size>=20?'2.5':'2')+'px"' : '';
-  const dataAttr=b.anchor==='middle' ? ' data-mid="'+b.id+'" data-fx="'+(l.fx!==undefined?l.fx:0.5)+'"' : '';
+  const dataAttr=' data-id="'+b.id+'" data-dx="'+dx+'" data-dy="'+l.dy+'" data-fx="'+fx+'" data-mid="'+(isMid?'1':'0')+'"';
   return '<text'+dataAttr+' x="'+x+'" y="'+y+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="#fff"'+opAttr+anchorAttr+strokeStyle+'>'+escapeHtml(l.text)+'</text>';
 }
 
 function mapBlockMarkup(b,editable){
   const lines=b.lines.map(l=>mapLineMarkup(b,l)).join('');
   const handle=editable ? '<rect class="resize-handle" data-id="'+b.id+'" x="'+(b.x+b.w-16)+'" y="'+(b.y+b.h-16)+'" width="20" height="20" rx="5" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>' : '';
-  return '<g><rect class="map-block-rect" data-id="'+b.id+'" x="'+b.x+'" y="'+b.y+'" width="'+b.w+'" height="'+b.h+'" rx="8" fill="'+b.fill+'"/>'+lines+handle+'</g>';
+  const isSelected=editable && b.id===selectedBlockId;
+  const selStroke=isSelected ? ' stroke="#fff" stroke-width="3" stroke-dasharray="6 4"' : '';
+  const rectStyle=editable ? ' style="cursor:move;touch-action:none"' : '';
+  return '<g><rect class="map-block-rect" data-id="'+b.id+'" x="'+b.x+'" y="'+b.y+'" width="'+b.w+'" height="'+b.h+'" rx="8" fill="'+b.fill+'"'+selStroke+rectStyle+'/>'+lines+handle+'</g>';
 }
 
 function renderMapSVG(blocks,editable){
   const blockMarkup=blocks.map(b=>mapBlockMarkup(b,editable)).join('');
   const dots=editable ? '' : '<g fill="#ffffff" fill-opacity="0.55">'+MAP_CORNER_DOTS.map(d=>'<rect x="'+d[0]+'" y="'+d[1]+'" width="5" height="5" rx="1"/>').join('')+'</g>';
   return '<svg viewBox="0 0 '+MAP_VB_W+' '+MAP_VB_H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042">'+
-    '<rect x="8" y="8" width="624" height="522" rx="12" fill="#141a2e" stroke="#0a0e1c" stroke-width="2"/>'+
+    '<rect x="8" y="8" width="624" height="522" rx="12" fill="'+currentMapBgColor+'" stroke="#0a0e1c" stroke-width="2"/>'+
     '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+'</g>'+
     dots+
     '<text x="200" y="537" text-anchor="middle" font-size="13" fill="#9ca3af">▲ ทางเข้า</text>'+
@@ -558,22 +584,43 @@ function closeMapFullscreen(){
   if(mapEditMode){ cancelMapEdit(); return; }
   document.getElementById('mapOverlay').style.display='none';
 }
+function rerenderMapEditorSVG(){
+  const content=document.getElementById('mapOverlayContent');
+  if(content) content.innerHTML=renderMapSVG(currentMapBlocks,true);
+}
+function updateSelectedBlockUI(){
+  const row=document.getElementById('mapSelectedRow');
+  if(!row)return;
+  const block=currentMapBlocks.find(b=>b.id===selectedBlockId);
+  if(block){
+    row.style.display='flex';
+    document.getElementById('mapBlockColorInput').value=block.fill;
+  } else {
+    row.style.display='none';
+  }
+}
 function openMapEditor(){
   mapEditMode=true;
+  selectedBlockId=null;
   mapEditSnapshot=JSON.parse(JSON.stringify(currentMapBlocks));
+  mapEditBgSnapshot=currentMapBgColor;
   const content=document.getElementById('mapOverlayContent');
   content.innerHTML=renderMapSVG(currentMapBlocks,true);
   document.getElementById('mapEditHint').textContent=mapFirestoreDocRef
-    ? 'ลากมุมล่างขวาของแต่ละบล็อกเพื่อปรับขนาด · บันทึกแล้วทุกคนจะเห็นเหมือนกัน'
-    : 'ลากมุมล่างขวาของแต่ละบล็อกเพื่อปรับขนาด · ยังไม่ได้เชื่อมฐานข้อมูลกลาง บันทึกนี้จะเก็บไว้เฉพาะเครื่องนี้เท่านั้น';
+    ? 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · แตะกล่องเพื่อเลือกและแก้สี/ข้อความ · บันทึกแล้วทุกคนจะเห็นเหมือนกัน'
+    : 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · แตะกล่องเพื่อเลือกและแก้สี/ข้อความ · ยังไม่ได้เชื่อมฐานข้อมูลกลาง บันทึกนี้จะเก็บไว้เฉพาะเครื่องนี้เท่านั้น';
+  document.getElementById('mapBgColorInput').value=currentMapBgColor;
+  updateSelectedBlockUI();
   document.getElementById('mapEditBar').style.display='flex';
   document.getElementById('mapOverlay').classList.add('editing');
   document.getElementById('mapOverlay').style.display='flex';
 }
 function cancelMapEdit(){
   currentMapBlocks=mapEditSnapshot || JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+  currentMapBgColor=mapEditBgSnapshot || '#141a2e';
   mapEditMode=false;
   mapDragState=null;
+  selectedBlockId=null;
   document.getElementById('mapEditBar').style.display='none';
   document.getElementById('mapOverlay').classList.remove('editing');
   document.getElementById('mapOverlay').style.display='none';
@@ -582,15 +629,69 @@ function cancelMapEdit(){
 async function saveMapEdit(){
   mapEditMode=false;
   mapDragState=null;
+  selectedBlockId=null;
   document.getElementById('mapEditBar').style.display='none';
   document.getElementById('mapOverlay').classList.remove('editing');
   document.getElementById('mapOverlay').style.display='none';
   refreshInlineMap();
-  await persistMapBlocks(currentMapBlocks);
+  await persistMapBlocks(currentMapBlocks,currentMapBgColor);
+}
+function addMapBlock(){
+  const text=prompt('ใส่ชื่อโซน/กล่องใหม่','โซนใหม่');
+  if(text===null)return;
+  const id='block_'+Date.now();
+  const newBlock={id:id,x:40,y:40,w:120,h:80,fill:'#4b5563',lines:[{dx:8,dy:30,size:16,weight:800,text:text||'โซนใหม่'}]};
+  currentMapBlocks.push(newBlock);
+  selectedBlockId=id;
+  rerenderMapEditorSVG();
+  updateSelectedBlockUI();
+}
+function deleteSelectedBlock(){
+  if(!selectedBlockId)return;
+  if(!confirm('ลบกล่องนี้?'))return;
+  currentMapBlocks=currentMapBlocks.filter(b=>b.id!==selectedBlockId);
+  selectedBlockId=null;
+  rerenderMapEditorSVG();
+  updateSelectedBlockUI();
+}
+function renameSelectedBlock(){
+  const block=currentMapBlocks.find(b=>b.id===selectedBlockId);
+  if(!block)return;
+  const current=block.lines.length ? block.lines[0].text : '';
+  const text=prompt('แก้ไขข้อความของกล่อง',current);
+  if(text===null)return;
+  if(!block.lines.length) block.lines=[{dx:8,dy:30,size:16,weight:800,text:text}];
+  else block.lines[0].text=text;
+  rerenderMapEditorSVG();
+}
+function onMapBgColorChange(color){
+  currentMapBgColor=color;
+  rerenderMapEditorSVG();
+}
+function onMapBlockColorChange(color){
+  const block=currentMapBlocks.find(b=>b.id===selectedBlockId);
+  if(!block)return;
+  block.fill=color;
+  document.querySelectorAll('rect.map-block-rect[data-id="'+block.id+'"]').forEach(function(r){
+    r.setAttribute('fill',color);
+  });
+}
+function selectMapBlock(id){
+  selectedBlockId=id;
+  rerenderMapEditorSVG();
+  updateSelectedBlockUI();
+}
+function deselectMapBlock(){
+  if(!selectedBlockId)return;
+  selectedBlockId=null;
+  rerenderMapEditorSVG();
+  updateSelectedBlockUI();
 }
 
 function applyBlockGeometry(block){
   document.querySelectorAll('rect.map-block-rect[data-id="'+block.id+'"]').forEach(function(r){
+    r.setAttribute('x',block.x);
+    r.setAttribute('y',block.y);
     r.setAttribute('width',block.w);
     r.setAttribute('height',block.h);
   });
@@ -598,24 +699,48 @@ function applyBlockGeometry(block){
     r.setAttribute('x',block.x+block.w-16);
     r.setAttribute('y',block.y+block.h-16);
   });
-  if(block.anchor==='middle'){
-    document.querySelectorAll('text[data-mid="'+block.id+'"]').forEach(function(t){
-      const fx=parseFloat(t.getAttribute('data-fx'));
-      t.setAttribute('x',block.x+block.w*fx);
-    });
-  }
+  document.querySelectorAll('text[data-id="'+block.id+'"]').forEach(function(t){
+    const dx=parseFloat(t.getAttribute('data-dx'));
+    const dy=parseFloat(t.getAttribute('data-dy'));
+    const fx=parseFloat(t.getAttribute('data-fx'));
+    const isMid=t.getAttribute('data-mid')==='1';
+    const x=isMid ? (block.x+block.w*fx) : (block.x+dx);
+    const y=block.y+dy;
+    t.setAttribute('x',x);
+    t.setAttribute('y',y);
+  });
 }
 
 document.addEventListener('pointerdown',function(e){
   if(!mapEditMode)return;
   const handle=e.target.closest && e.target.closest('.resize-handle');
-  if(!handle)return;
-  e.preventDefault();
-  e.stopPropagation();
-  const svg=handle.ownerSVGElement;
-  const id=handle.getAttribute('data-id');
-  if(!currentMapBlocks.find(b=>b.id===id))return;
-  mapDragState={svg:svg,pt:svg.createSVGPoint(),id:id};
+  if(handle){
+    e.preventDefault();
+    e.stopPropagation();
+    const svg=handle.ownerSVGElement;
+    const id=handle.getAttribute('data-id');
+    if(!currentMapBlocks.find(b=>b.id===id))return;
+    mapDragState={mode:'resize',svg:svg,pt:svg.createSVGPoint(),id:id};
+    return;
+  }
+  const blockEl=e.target.closest && e.target.closest('[data-id]');
+  if(blockEl){
+    e.preventDefault();
+    e.stopPropagation();
+    const svg=blockEl.ownerSVGElement;
+    const id=blockEl.getAttribute('data-id');
+    const block=currentMapBlocks.find(b=>b.id===id);
+    if(!block)return;
+    const pt=svg.createSVGPoint();
+    pt.x=e.clientX;pt.y=e.clientY;
+    const loc=pt.matrixTransform(svg.getScreenCTM().inverse());
+    mapDragState={mode:'move',svg:svg,pt:svg.createSVGPoint(),id:id,offsetX:loc.x-block.x,offsetY:loc.y-block.y,moved:false,startClientX:e.clientX,startClientY:e.clientY};
+    return;
+  }
+  // แตะพื้นหลังว่างๆ ระหว่างแก้ไข -> ยกเลิกการเลือกกล่อง
+  if(e.target.closest && e.target.closest('#mapOverlayContent') && selectedBlockId){
+    deselectMapBlock();
+  }
 });
 document.addEventListener('pointermove',function(e){
   if(!mapDragState)return;
@@ -624,14 +749,30 @@ document.addEventListener('pointermove',function(e){
   const pt=mapDragState.pt;
   pt.x=e.clientX;pt.y=e.clientY;
   const loc=pt.matrixTransform(mapDragState.svg.getScreenCTM().inverse());
-  let newW=Math.round(loc.x-block.x);
-  let newH=Math.round(loc.y-block.y);
-  newW=Math.max(MAP_MIN_W,Math.min(newW,MAP_VB_W-16-block.x));
-  newH=Math.max(MAP_MIN_H,Math.min(newH,MAP_VB_H-40-block.y));
-  block.w=newW;block.h=newH;
-  applyBlockGeometry(block);
+  if(mapDragState.mode==='resize'){
+    let newW=Math.round(loc.x-block.x);
+    let newH=Math.round(loc.y-block.y);
+    newW=Math.max(MAP_MIN_W,Math.min(newW,MAP_VB_W-16-block.x));
+    newH=Math.max(MAP_MIN_H,Math.min(newH,MAP_VB_H-40-block.y));
+    block.w=newW;block.h=newH;
+    applyBlockGeometry(block);
+  } else if(mapDragState.mode==='move'){
+    const dist=Math.hypot(e.clientX-mapDragState.startClientX,e.clientY-mapDragState.startClientY);
+    if(dist>4) mapDragState.moved=true;
+    let newX=Math.round(loc.x-mapDragState.offsetX);
+    let newY=Math.round(loc.y-mapDragState.offsetY);
+    newX=Math.max(8,Math.min(newX,MAP_VB_W-16-block.w));
+    newY=Math.max(8,Math.min(newY,MAP_VB_H-40-block.h));
+    block.x=newX;block.y=newY;
+    applyBlockGeometry(block);
+  }
 });
-document.addEventListener('pointerup',function(){ mapDragState=null; });
+document.addEventListener('pointerup',function(){
+  if(mapDragState && mapDragState.mode==='move' && !mapDragState.moved){
+    selectMapBlock(mapDragState.id);
+  }
+  mapDragState=null;
+});
 document.addEventListener('pointercancel',function(){ mapDragState=null; });
 
 async function loadMapBlocksFromStorage(){
@@ -642,6 +783,7 @@ async function loadMapBlocksFromStorage(){
         const data=doc.data();
         if(data && Array.isArray(data.blocks) && data.blocks.length){
           currentMapBlocks=data.blocks;
+          if(data.bgColor) currentMapBgColor=data.bgColor;
           return;
         }
       }
@@ -651,12 +793,17 @@ async function loadMapBlocksFromStorage(){
     const raw=localStorage.getItem('mf_map_layout');
     if(raw){
       const parsed=JSON.parse(raw);
-      if(Array.isArray(parsed) && parsed.length) currentMapBlocks=parsed;
+      if(Array.isArray(parsed) && parsed.length){
+        currentMapBlocks=parsed;
+      } else if(parsed && Array.isArray(parsed.blocks) && parsed.blocks.length){
+        currentMapBlocks=parsed.blocks;
+        if(parsed.bgColor) currentMapBgColor=parsed.bgColor;
+      }
     }
   }catch(e){}
 }
-async function persistMapBlocks(blocks){
-  try{ localStorage.setItem('mf_map_layout',JSON.stringify(blocks)); }catch(e){}
+async function persistMapBlocks(blocks,bgColor){
+  try{ localStorage.setItem('mf_map_layout',JSON.stringify({blocks:blocks,bgColor:bgColor})); }catch(e){}
   if(mapFirestoreDocRef){
     let updatedBy='unknown';
     try{
@@ -664,7 +811,7 @@ async function persistMapBlocks(blocks){
       if(sess && sess.name) updatedBy=sess.name+' · '+(sess.dept||'');
     }catch(e){}
     try{
-      await mapFirestoreDocRef.set({blocks:blocks,updatedAt:Date.now(),updatedBy:updatedBy});
+      await mapFirestoreDocRef.set({blocks:blocks,bgColor:bgColor,updatedAt:Date.now(),updatedBy:updatedBy});
     }catch(e){
       console.error('บันทึกผังไป Firestore ไม่สำเร็จ',e);
       alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
