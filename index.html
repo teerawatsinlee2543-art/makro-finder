@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest/umd/index.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -453,7 +453,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <p class="scan-error" id="scanError" style="display:none"></p>
   </div>
 </div>
-<canvas id="scanCanvas" style="display:none"></canvas>
 
 <script>
 /* ---------- Store map: data model, rendering, employee editing ---------- */
@@ -1119,71 +1118,57 @@ function clearSearch(){
   document.getElementById('resultView').classList.remove('show');
 }
 
-let scanStream=null,scanRAF=null;
-let barcodeDetector=null;
-if('BarcodeDetector' in window){
+let zxingReader=null;
+if(typeof ZXing!=='undefined'){
   try{
-    barcodeDetector=new BarcodeDetector({formats:['qr_code','ean_13','ean_8','upc_a','upc_e','code_128','code_39','itf','codabar']});
-  }catch(e){ barcodeDetector=null; }
+    const hints=new Map();
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[
+      ZXing.BarcodeFormat.QR_CODE,
+      ZXing.BarcodeFormat.EAN_13,
+      ZXing.BarcodeFormat.EAN_8,
+      ZXing.BarcodeFormat.UPC_A,
+      ZXing.BarcodeFormat.UPC_E,
+      ZXing.BarcodeFormat.CODE_128,
+      ZXing.BarcodeFormat.CODE_39,
+      ZXing.BarcodeFormat.ITF,
+      ZXing.BarcodeFormat.CODABAR,
+    ]);
+    zxingReader=new ZXing.BrowserMultiFormatReader(hints);
+  }catch(e){ console.error('เริ่มตัวอ่านบาร์โค้ดไม่สำเร็จ',e); zxingReader=null; }
 }
 function openScanner(){
   const overlay=document.getElementById('scanOverlay');
   const err=document.getElementById('scanError');
   err.style.display='none';err.textContent='';
   overlay.style.display='flex';
+  if(!zxingReader){
+    err.textContent='เบราว์เซอร์นี้ไม่รองรับการสแกน กรุณาลองใช้ Chrome หรือ Safari รุ่นล่าสุด';
+    err.style.display='block';
+    return;
+  }
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
     err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง';
     err.style.display='block';
     return;
   }
-  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}})
-    .then(stream=>{
-      scanStream=stream;
-      const video=document.getElementById('scanVideo');
-      video.srcObject=stream;
-      video.play();
-      scanRAF=requestAnimationFrame(scanTick);
-    })
-    .catch(()=>{
-      err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้องในเบราว์เซอร์';
-      err.style.display='block';
-    });
-}
-function scanTick(){
-  const video=document.getElementById('scanVideo');
-  const canvas=document.getElementById('scanCanvas');
-  if(video.readyState===video.HAVE_ENOUGH_DATA){
-    canvas.width=video.videoWidth;canvas.height=video.videoHeight;
-    const ctx=canvas.getContext('2d');
-    ctx.drawImage(video,0,0,canvas.width,canvas.height);
-    if(barcodeDetector){
-      barcodeDetector.detect(canvas).then(codes=>{
-        if(codes&&codes.length&&codes[0].rawValue){
-          closeScanner();
-          search(codes[0].rawValue.trim());
-        } else {
-          scanRAF=requestAnimationFrame(scanTick);
-        }
-      }).catch(()=>{
-        scanRAF=requestAnimationFrame(scanTick);
-      });
-      return;
+  const constraints={video:{facingMode:{ideal:'environment'}}};
+  zxingReader.decodeFromConstraints(constraints,'scanVideo',(result,error)=>{
+    if(result&&result.getText){
+      const text=result.getText().trim();
+      if(text){
+        closeScanner();
+        search(text);
+      }
     }
-    const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-    const code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
-    if(code&&code.data){
-      closeScanner();
-      search(code.data.trim());
-      return;
-    }
-  }
-  scanRAF=requestAnimationFrame(scanTick);
+    // error fires on every frame with no code found (NotFoundException) - safe to ignore
+  }).catch(()=>{
+    err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้องในเบราว์เซอร์';
+    err.style.display='block';
+  });
 }
 function closeScanner(){
   document.getElementById('scanOverlay').style.display='none';
-  if(scanRAF)cancelAnimationFrame(scanRAF);
-  scanRAF=null;
-  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+  if(zxingReader)zxingReader.reset();
 }
 
 function openMapFullscreen(){
