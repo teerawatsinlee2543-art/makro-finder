@@ -325,12 +325,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="homeView">
       <div class="section-label">หมวดหมู่</div>
       <div class="cat-row">
-        <div class="cat-card cat-electric" onclick="search('ไฟฟ้า')"><i class="ti ti-plug" aria-hidden="true"></i><span>เครื่องใช้ไฟฟ้า</span></div>
-        <div class="cat-card cat-frozen" onclick="search('แช่แข็ง')"><i class="ti ti-snowflake" aria-hidden="true"></i><span>อาหารสดและแช่แข็ง</span></div>
-        <div class="cat-card cat-home" onclick="search('ของใช้')"><i class="ti ti-home-2" aria-hidden="true"></i><span>ของใช้ในบ้าน</span></div>
-        <div class="cat-card cat-seasoning" onclick="search('เครื่องปรุง')"><i class="ti ti-tools-kitchen-2" aria-hidden="true"></i><span>อาหารและเครื่องปรุง</span></div>
-        <div class="cat-card cat-drink" onclick="search('เครื่องดื่ม')"><i class="ti ti-cup" aria-hidden="true"></i><span>เครื่องดื่ม</span></div>
-        <div class="cat-card cat-snack" onclick="search('ขนม')"><i class="ti ti-candy" aria-hidden="true"></i><span>ขนม</span></div>
+        <div class="cat-card cat-electric" onclick="searchByCategory('electric')"><i class="ti ti-plug" aria-hidden="true"></i><span>เครื่องใช้ไฟฟ้า</span></div>
+        <div class="cat-card cat-frozen" onclick="searchByCategory('frozen')"><i class="ti ti-snowflake" aria-hidden="true"></i><span>อาหารสดและแช่แข็ง</span></div>
+        <div class="cat-card cat-home" onclick="searchByCategory('home')"><i class="ti ti-home-2" aria-hidden="true"></i><span>ของใช้ในบ้าน</span></div>
+        <div class="cat-card cat-seasoning" onclick="searchByCategory('seasoning')"><i class="ti ti-tools-kitchen-2" aria-hidden="true"></i><span>อาหารและเครื่องปรุง</span></div>
+        <div class="cat-card cat-drink" onclick="searchByCategory('drink')"><i class="ti ti-cup" aria-hidden="true"></i><span>เครื่องดื่ม</span></div>
+        <div class="cat-card cat-snack" onclick="searchByCategory('snack')"><i class="ti ti-candy" aria-hidden="true"></i><span>ขนม</span></div>
       </div>
       <div class="section-label">ค้นหาบ่อย</div>
       <div class="chips">
@@ -898,6 +898,22 @@ function applyItemImage(wrapEl,item){
 let PRODUCTS_READY=false;
 let PRODUCTS_BY_KEY=[];
 let pendingSearchQuery=null;
+let pendingCategoryKey=null;
+
+// รายการคำค้นย่อยต่อหมวดหมู่ อ้างอิงจากหมวดหมู่ย่อยจริงของ makro.pro
+// เพื่อกรองสินค้าของเราให้ตรงหมวดมากขึ้น (สินค้าจะเข้าหมวดถ้า Item Desc มีคำใดคำหนึ่งในลิสต์)
+const CATEGORY_KEYWORDS={
+  electric:['พัดลม','โทรทัศน์','ทีวี','โน้ตบุ๊ค','จอมอนิเตอร์','ตู้เย็น','ตู้แช่','เครื่องซักผ้า','เครื่องปรับอากาศ','แอร์','เตารีด','โทรศัพท์','นาฬิกาสมาร์ทวอช','เครื่องฟอกอากาศ','เครื่องดูดฝุ่น','เครื่องทำน้ำอุ่น','ซาวด์บาร์','หูฟัง','ลำโพง','ไฟฟ้า'],
+  frozen:['เนื้อวัว','เนื้อหมู','เนื้อไก่','ไก่สด','หมูสด','ปลา','กุ้ง','ปูอัด','ปูนิ่ม','ขาปู','เนื้อปู','หอย','ปลาหมึก','อาหารทะเล','ผัก','ผลไม้','สลัด','แช่แข็ง','นมสด','นมผง','นมข้น','นมกล่อง','นมจืด','ไข่','เต้าหู้'],
+  home:['ถุงขยะ','น้ำยาล้างจาน','สบู่','ผงซักฟอก','น้ำยาซักผ้า','น้ำยาทำความสะอาด','ทิชชู่','ไม้ถูพื้น','สารดูดความชื้น','ยาฆ่าแมลง','กาวแท่ง','กาวลาเท็กซ์','กาวร้อน','กาวซูเปอร์','กระดาษกาว','หลอดไฟ'],
+  seasoning:['อาหารกระป๋อง','น้ำมันพืช','น้ำส้มสายชู','แป้ง','ข้าวสาร','ซีเรียล','ถั่ว','พาสต้า','บะหมี่','ก๋วยเตี๋ยว','เครื่องปรุงรส','เครื่องเทศ','ซอส','น้ำปลา','ซีอิ๊ว','น้ำตาล','ผงชูรส','กะทิ'],
+  drink:['น้ำดื่ม','น้ำอัดลม','กาแฟ','ชาเขียว','ชาไทย','ชาดำ','ใบชา','ชาผง','ชาซอง','ลิปตันชา','โออิชิ','น้ำผลไม้','เครื่องดื่มชูกำลัง','โกโก้','ช็อกโกแลต','เครื่องดื่ม','นมสด','นมผง','นมข้น','นมกล่อง','นมจืด'],
+  snack:['ขนม','ลูกอม','ลูกกวาด','เถ้าแก่น้อย','สาหร่าย','มันฝรั่งทอด','คุกกี้','เวเฟอร์','ป๊อกกี้','ท็อฟฟี่','หมากฝรั่ง'],
+};
+const CATEGORY_LABELS={
+  electric:'เครื่องใช้ไฟฟ้า',frozen:'อาหารสดและแช่แข็ง',home:'ของใช้ในบ้าน',
+  seasoning:'อาหารและเครื่องปรุง',drink:'เครื่องดื่ม',snack:'ขนม',
+};
 
 function loadProductData(){
   return fetch('ItemLocation_10_Jul_2026.xlsx')
@@ -935,6 +951,10 @@ function loadProductData(){
         const q=pendingSearchQuery;
         pendingSearchQuery=null;
         search(q);
+      } else if(pendingCategoryKey!==null){
+        const ck=pendingCategoryKey;
+        pendingCategoryKey=null;
+        searchByCategory(ck);
       }
     })
     .catch(err=>{
@@ -987,6 +1007,42 @@ function search(q){
   } else {
     fc.style.display='none';nf.style.display='none';
     renderList(matches,q);
+  }
+}
+
+function searchByCategory(catKey){
+  const label=CATEGORY_LABELS[catKey]||catKey;
+  const inp=document.getElementById('si');
+  inp.value=label;
+  document.getElementById('clr').style.display='block';
+  const home=document.getElementById('homeView');
+  const rv=document.getElementById('resultView');
+  home.style.display='none';
+  rv.classList.add('show');
+  const dl=document.getElementById('dataLoading');
+  const rl=document.getElementById('resultsList');
+  const fc=document.getElementById('foundCard');
+  const nf=document.getElementById('notFound');
+  if(!PRODUCTS_READY){
+    pendingCategoryKey=catKey;
+    dl.style.display='block';rl.style.display='none';fc.style.display='none';nf.style.display='none';
+    return;
+  }
+  dl.style.display='none';
+  const keywords=(CATEGORY_KEYWORDS[catKey]||[]).map(k=>k.toLowerCase());
+  const matches=PRODUCTS_BY_KEY.filter(item=>{
+    const desc=item.desc.toLowerCase();
+    return keywords.some(k=>desc.includes(k));
+  });
+  if(matches.length===0){
+    rl.style.display='none';fc.style.display='none';nf.style.display='block';
+    document.getElementById('nfText').textContent='ไม่พบสินค้าในหมวด "'+label+'"';
+  } else if(matches.length===1){
+    rl.style.display='none';nf.style.display='none';
+    renderDetail(matches[0]);
+  } else {
+    fc.style.display='none';nf.style.display='none';
+    renderList(matches,label);
   }
 }
 
