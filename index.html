@@ -128,7 +128,7 @@ body{margin:0;padding:0}
 .pallet-open-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);color:var(--color-text-primary);border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .pallet-open-btn:hover{background:var(--color-border-tertiary)}
 .pallet-overlay{position:fixed;inset:0;background:rgba(8,11,22,.6);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
-.pallet-overlay-content{width:100%;max-width:440px;max-height:90vh;background:var(--color-background-primary);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.pallet-overlay-content{width:100%;max-width:480px;max-height:92vh;background:var(--color-background-primary);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
 .pallet-header{background:var(--brand-red);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .pallet-header i{font-size:20px;cursor:pointer;flex-shrink:0}
 .pallet-header-title{flex:1;font-size:15px;font-weight:500;min-width:0}
@@ -266,6 +266,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .map-overlay-content{max-width:520px}
   .map-overlay-content svg{max-height:calc(100dvh - 220px)}
   .map-edit-bar{max-width:520px}
+  .pallet-overlay-content{max-width:760px;max-height:88vh}
+  .pallet-body{padding:20px 28px}
+  .pallet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .pallet-grid .pallet-card{margin-bottom:0}
 }
 </style>
 
@@ -781,11 +785,11 @@ function renderPalletListView(pallets){
   }
   if(openPallets.length){
     html+='<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">พาเลสที่เปิดอยู่</div>';
-    html+=openPallets.map(palletCardHtml).join('');
+    html+='<div class="pallet-grid" style="margin-bottom:10px">'+openPallets.map(palletCardHtml).join('')+'</div>';
   }
   if(closedPallets.length){
     html+='<div style="font-size:12px;color:var(--color-text-secondary);margin:14px 0 8px">พาเลสที่ปิดแล้ว</div>';
-    html+=closedPallets.map(palletCardHtml).join('');
+    html+='<div class="pallet-grid">'+closedPallets.map(palletCardHtml).join('')+'</div>';
   }
   body.innerHTML=html;
 }
@@ -843,6 +847,9 @@ function renderPalletDetailView(pallet){
     html+='<div class="pallet-add-btn" onclick="openAddItemToPallet()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มสินค้าเข้าพาเลส</div>';
     html+='<div class="pallet-add-btn" style="margin-top:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary)" onclick="closeCurrentPallet()"><i class="ti ti-lock" aria-hidden="true"></i> ปิดพาเลสนี้</div>';
   }
+  if(isGR()){
+    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#FFF0F1;color:#A32D2D;border-style:solid;border-color:#F09595" onclick="deleteCurrentPallet()"><i class="ti ti-trash" aria-hidden="true"></i> ลบพาเลสนี้ทิ้งถาวร</div>';
+  }
   body.innerHTML=html;
   pallet.items.forEach((it,i)=>{
     const wrap=document.getElementById('palletPhoto'+i);
@@ -893,6 +900,19 @@ function closeCurrentPallet(){
   savePallet(currentPallet);
   document.getElementById('palletHeaderSub').textContent='ปิดแล้ว';
   renderPalletDetailView(currentPallet);
+}
+async function deleteCurrentPallet(){
+  if(!currentPallet||!isGR())return;
+  if(!confirm('ลบพาเลส '+currentPallet.id+' ทิ้งถาวร?\nการกระทำนี้ย้อนกลับไม่ได้'))return;
+  const id=currentPallet.id;
+  PALLETS_CACHE=PALLETS_CACHE.filter(p=>p.id!==id);
+  savePalletsLocal(loadPalletsLocal().filter(p=>p.id!==id));
+  if(palletsCollectionRef){
+    try{ await palletsCollectionRef.doc('pallet_'+id).delete(); }
+    catch(e){ console.error('ลบพาเลสจาก Firestore ไม่สำเร็จ',e); showPalletToast('ลบจากส่วนกลางไม่สำเร็จ (ลบจากเครื่องนี้แล้ว)'); }
+  }
+  showPalletToast('ลบพาเลส '+id+' แล้ว');
+  palletGoBack();
 }
 
 function addItemToPalletData(item,qty){
