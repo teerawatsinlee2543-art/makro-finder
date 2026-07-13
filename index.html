@@ -303,6 +303,34 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
   </div>
 
+  <div class="role-screen" id="grHomeScreen" style="display:none">
+    <div class="role-card-wrap">
+      <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
+        <circle cx="170" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
+        <text x="170" y="128" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="900" text-anchor="middle" fill="#E8192C" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">makro</text>
+        <text x="170" y="174" font-family="Arial,Helvetica,sans-serif" font-size="32" font-weight="900" text-anchor="middle" fill="#E8192C">Finder</text>
+      </svg>
+      <div class="login-sub">Store 42 · Ramintra</div>
+      <p class="role-intro-desc" id="grHomeGreeting">สวัสดี GR — เลือกฟังก์ชันที่ต้องการ</p>
+      <button class="role-option" onclick="grGoToPalletManager()">
+        <div class="role-icon emp"><i class="ti ti-stack-2" aria-hidden="true"></i></div>
+        <div>
+          <div class="role-name">จัดการพาเลส</div>
+          <div class="role-desc">สร้าง/ปิดพาเลส เพิ่ม-ลบ-ปรับจำนวนสินค้า</div>
+        </div>
+      </button>
+      <button class="role-option" onclick="grGoToFindInPallet()">
+        <div class="role-icon cust"><i class="ti ti-search" aria-hidden="true"></i></div>
+        <div>
+          <div class="role-name">หาสินค้าตามพาเลส</div>
+          <div class="role-desc">ค้นหาสินค้าว่าตอนนี้อยู่ในพาเลสไหนบ้าง</div>
+        </div>
+      </button>
+      <button class="login-back" style="margin:6px auto 0;justify-content:center;width:100%" onclick="grGoToMainSearch()">ไปหน้าค้นหาสินค้าทั่วไป <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    </div>
+  </div>
+
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
       <button class="login-back" onclick="showRoleScreen()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
@@ -966,6 +994,58 @@ function renderPalletAddResults(q){
   ).join('');
   matches.forEach((it,i)=>{ applyItemImage(document.getElementById('palletAddPhoto'+i),it); });
 }
+
+// ==== หาสินค้าตามพาเลส ====
+function openFindItemInPallets(){
+  if(!isEmployee())return;
+  document.getElementById('palletOverlay').style.display='flex';
+  document.getElementById('palletBackBtn').style.display='none';
+  currentPallet=null;
+  document.getElementById('palletHeaderTitle').textContent='หาสินค้าตามพาเลส';
+  document.getElementById('palletHeaderSub').textContent='';
+  document.getElementById('palletBody').innerHTML='<p style="text-align:center;color:var(--color-text-secondary);font-size:13px;padding:20px 0">กำลังโหลดข้อมูลพาเลส...</p>';
+  loadAllPallets().then(()=>{
+    document.getElementById('palletBody').innerHTML='<input type="text" id="findInPalletSearch" class="inp" placeholder="ค้นหาชื่อ/Item No/บาร์โค้ด" oninput="renderFindInPalletResults(this.value)" style="margin-bottom:12px">'+
+      '<div id="findInPalletResults"></div>';
+    document.getElementById('findInPalletSearch').focus();
+  });
+}
+function renderFindInPalletResults(q){
+  const box=document.getElementById('findInPalletResults');
+  if(!q||!q.trim()){ box.innerHTML=''; return; }
+  if(!PRODUCTS_READY){ box.innerHTML='<div class="pallet-empty">กำลังโหลดข้อมูลสินค้า...</div>'; return; }
+  const matches=findMatches(q).slice(0,10);
+  if(!matches.length){ box.innerHTML='<div class="pallet-empty">ไม่พบสินค้า</div>'; return; }
+  box.innerHTML=matches.map(item=>{
+    const hits=PALLETS_CACHE.filter(p=>p.items.some(it=>it.itemNo===item.itemNo));
+    const palletListHtml=hits.length
+      ? hits.map(p=>{
+          const it=p.items.find(x=>x.itemNo===item.itemNo);
+          const badge=p.status==='open' ? '<span class="pallet-card-badge open">เปิดอยู่</span>' : '<span class="pallet-card-badge closed">ปิดแล้ว</span>';
+          return '<div class="pallet-card" style="margin-bottom:6px" onclick="closeFindInPalletThenOpen(\''+p.id+'\')">'+
+            '<div class="pallet-card-id">'+p.id+badge+'</div>'+
+            '<div class="pallet-card-meta">จำนวนในพาเลสนี้ '+it.qty+' ชิ้น</div>'+
+          '</div>';
+        }).join('')
+      : '<div class="pallet-empty" style="padding:10px 0">ไม่พบสินค้านี้ในพาเลสใดเลย</div>';
+    return '<div style="margin-bottom:16px">'+
+      '<div class="pallet-item-row" style="border-bottom:none;padding-bottom:6px">'+
+        '<div class="pallet-item-photo" id="findPhoto'+item.itemNo+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
+        '<div class="pallet-item-info">'+
+          '<div class="pallet-item-name">'+escapeHtml(item.desc)+'</div>'+
+          '<div class="pallet-item-meta">Item '+escapeHtml(item.itemNo)+'</div>'+
+        '</div>'+
+      '</div>'+
+      palletListHtml+
+    '</div>';
+  }).join('');
+  matches.forEach(item=>{ applyItemImage(document.getElementById('findPhoto'+item.itemNo),item); });
+}
+function closeFindInPalletThenOpen(palletId){
+  document.getElementById('palletBackBtn').style.display='block';
+  openPalletDetail(palletId);
+}
+// ==== จบส่วนหาสินค้าตามพาเลส ====
 function promptAddQty(itemNo){
   const item=PRODUCTS_BY_KEY.find(x=>x.itemNo===itemNo);
   if(!item)return;
@@ -1639,11 +1719,34 @@ function closeMapFullscreen(){
 }
 
 let currentRole=null;
+function showGRHome(sess){
+  currentRole=sess.role;
+  document.getElementById('roleScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('grHomeScreen').style.display='flex';
+  document.getElementById('grHomeGreeting').textContent='สวัสดี '+sess.name+' · GR — เลือกฟังก์ชันที่ต้องการ';
+}
+function grGoToPalletManager(){
+  const sess=getSession();
+  showMain(sess);
+  openPalletManager();
+}
+function grGoToFindInPallet(){
+  const sess=getSession();
+  showMain(sess);
+  openFindItemInPallets();
+}
+function grGoToMainSearch(){
+  const sess=getSession();
+  showMain(sess);
+}
 function showRoleScreen(){
   currentRole=null;
   document.getElementById('roleScreen').style.display='flex';
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('mainApp').style.display='none';
+  document.getElementById('grHomeScreen').style.display='none';
   updateMapEditBarVisibility();
   updatePalletBarVisibility();
 }
@@ -1660,6 +1763,7 @@ function showMain(sess){
   currentRole=sess.role;
   document.getElementById('roleScreen').style.display='none';
   document.getElementById('loginScreen').style.display='none';
+  document.getElementById('grHomeScreen').style.display='none';
   document.getElementById('mainApp').style.display='flex';
   const bar=document.getElementById('empBarText');
   if(sess.role==='employee'){
@@ -1737,7 +1841,7 @@ function submitLogin(){
   err.style.display='none';
   const sess={role:'employee',name,dept,ts:Date.now()};
   localStorage.setItem('mf_session',JSON.stringify(sess));
-  showMain(sess);
+  if(dept==='GR') showGRHome(sess); else showMain(sess);
 }
 function switchRole(){
   localStorage.removeItem('mf_session');
@@ -1751,7 +1855,7 @@ function checkSession(){
   let sess=null;
   try{sess=JSON.parse(localStorage.getItem('mf_session'));}catch(e){}
   if(sess&&sess.role==='employee'&&sess.name&&sess.dept){
-    showMain(sess);
+    if(sess.dept==='GR') showGRHome(sess); else showMain(sess);
   } else if(sess&&sess.role==='customer'){
     showMain(sess);
   } else {
