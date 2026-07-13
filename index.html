@@ -240,10 +240,20 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .login-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
 .emp-stock-box{background:#FFF4E5;border:1px solid #FFD9A0;border-radius:10px;padding:10px 12px;margin-bottom:16px}
 .emp-stock-label{font-size:11px;font-weight:600;color:#95610A;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.feedback-card{background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);border-radius:12px;padding:14px}
+.feedback-card-title{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--color-text-primary);margin-bottom:10px}
+.feedback-card-title i{color:var(--brand-red);font-size:18px}
 .feedback-box{margin-top:2px}
 .fb-textarea{width:100%;border:1px solid var(--color-border-secondary);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;resize:vertical;min-height:64px;outline:none;color:var(--color-text-primary);background:#fff}
 .fb-textarea:focus{border-color:var(--brand-red)}
-.fb-submit{margin-top:8px;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.fb-photo-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.fb-photo-btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:7px 12px;border-radius:8px;border:1px dashed var(--color-border-secondary);color:var(--color-text-secondary);cursor:pointer;background:#fff}
+.fb-photo-btn:hover{background:var(--color-background-primary)}
+.fb-photo-hint{font-size:11px;color:var(--color-text-tertiary)}
+.fb-photo-preview-wrap{position:relative;display:inline-block;margin-top:8px}
+.fb-photo-preview{max-width:160px;max-height:160px;border-radius:8px;display:block;border:1px solid var(--color-border-tertiary)}
+.fb-photo-remove{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:var(--brand-red);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;padding:0}
+.fb-submit{margin-top:10px;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .fb-submit:hover{background:var(--brand-red-dark)}
 .fb-thanks{margin-top:8px;font-size:12.5px;color:var(--color-text-success)}
 .fb-admin-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -252,9 +262,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .fb-export-btn:hover{background:#167a5b}
 .fb-export-btn i{font-size:15px}
 .fb-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto}
-.fb-item{background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);border-radius:10px;padding:10px 12px}
+.fb-item{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:10px;padding:10px 12px}
 .fb-item-meta{font-size:10.5px;color:var(--color-text-tertiary);margin-bottom:3px}
 .fb-item-text{font-size:13px;color:var(--color-text-primary);line-height:1.4}
+.fb-item-photo{max-width:220px;max-height:220px;border-radius:8px;display:block;margin-top:8px;cursor:pointer;border:1px solid var(--color-border-tertiary)}
 .fb-empty{text-align:center;padding:24px 12px;color:var(--color-text-tertiary);font-size:12.5px}
 @media (min-width:720px){
   body{font-size:15px}
@@ -441,11 +452,22 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <span class="chip" onclick="search('ทำความสะอาด')">ทำความสะอาด</span>
       </div>
       <div id="customerFeedbackSection">
-        <div class="section-label">ข้อเสนอแนะ / ข้อคิดเห็นเพิ่มเติม</div>
-        <div class="feedback-box">
-          <textarea id="fbText" class="fb-textarea" rows="3" placeholder="แจ้งปัญหา ข้อเสนอแนะ หรือความคิดเห็นเพิ่มเติม..."></textarea>
-          <button class="fb-submit" onclick="submitFeedback()">ส่งความคิดเห็น</button>
-          <p class="fb-thanks" id="fbThanks" style="display:none">ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ</p>
+        <div class="feedback-card">
+          <div class="feedback-card-title"><i class="ti ti-message-2" aria-hidden="true"></i> ข้อเสนอแนะ / ข้อคิดเห็นเพิ่มเติม</div>
+          <div class="feedback-box">
+            <textarea id="fbText" class="fb-textarea" rows="3" placeholder="แจ้งปัญหา ข้อเสนอแนะ หรือความคิดเห็นเพิ่มเติม..."></textarea>
+            <div class="fb-photo-row">
+              <label class="fb-photo-btn" for="fbPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> แนบรูปถ่ายเป็นหลักฐาน</label>
+              <input type="file" id="fbPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleFbPhotoSelect(event)">
+              <span class="fb-photo-hint">ไม่บังคับ ไม่แนบก็ส่งได้</span>
+            </div>
+            <div class="fb-photo-preview-wrap" id="fbPhotoPreviewWrap" style="display:none">
+              <img class="fb-photo-preview" id="fbPhotoPreview" alt="รูปที่แนบ">
+              <button class="fb-photo-remove" onclick="removeFbPhoto()" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
+            </div>
+            <button class="fb-submit" onclick="submitFeedback()">ส่งความคิดเห็น</button>
+            <p class="fb-thanks" id="fbThanks" style="display:none">ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ</p>
+          </div>
         </div>
       </div>
       <div id="employeeFeedbackSection" style="display:none">
@@ -665,6 +687,7 @@ let promoFirestoreDocRef=null;
 let stockOverridesDocRef=null;
 let locationOverridesDocRef=null;
 let stockQtyDocRef=null;
+let feedbackCollectionRef=null;
 try{
   if(FIREBASE_CONFIG){
     firebase.initializeApp(FIREBASE_CONFIG);
@@ -675,11 +698,12 @@ try{
     stockOverridesDocRef=mfCol.doc('stockOverrides');
     locationOverridesDocRef=mfCol.doc('locationOverrides');
     stockQtyDocRef=mfCol.doc('stockQty');
+    feedbackCollectionRef=mfCol;
   }
 }catch(e){
   console.error('Firebase init ไม่สำเร็จ',e);
   mapFirestoreDocRef=null; palletsCollectionRef=null; promoFirestoreDocRef=null;
-  stockOverridesDocRef=null; locationOverridesDocRef=null; stockQtyDocRef=null;
+  stockOverridesDocRef=null; locationOverridesDocRef=null; stockQtyDocRef=null; feedbackCollectionRef=null;
 }
 
 function escapeHtml(s){
@@ -2116,26 +2140,83 @@ function showMain(sess){
   updatePalletBarVisibility();
   updatePromoEditBtnVisibility();
 }
-function getFeedbackList(){
-  let list=[];
-  try{list=JSON.parse(localStorage.getItem('mf_feedback'))||[];}catch(e){}
-  return list;
+// ==== ข้อเสนอแนะ/คอมเพลนจากลูกค้า (แนบรูปได้ sync ผ่าน Firestore) ====
+let FEEDBACK_CACHE=[];
+let fbPhotoDataUrl=null;
+function feedbackLocalKey(){ return 'mf_feedback'; }
+function loadFeedbackLocal(){
+  try{ return JSON.parse(localStorage.getItem(feedbackLocalKey()))||[]; }catch(e){ return []; }
 }
-function submitFeedback(){
+function saveFeedbackLocal(list){
+  try{ localStorage.setItem(feedbackLocalKey(),JSON.stringify(list)); }catch(e){}
+}
+function newFeedbackId(){
+  return 'FB-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+}
+function handleFbPhotoSelect(evt){
+  const file=evt.target.files&&evt.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    const img=new Image();
+    img.onload=function(){
+      const maxW=900;
+      const scale=Math.min(1,maxW/img.width);
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(img.width*scale);
+      canvas.height=Math.round(img.height*scale);
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      fbPhotoDataUrl=canvas.toDataURL('image/jpeg',0.6);
+      document.getElementById('fbPhotoPreview').src=fbPhotoDataUrl;
+      document.getElementById('fbPhotoPreviewWrap').style.display='inline-block';
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeFbPhoto(){
+  fbPhotoDataUrl=null;
+  document.getElementById('fbPhotoInput').value='';
+  document.getElementById('fbPhotoPreviewWrap').style.display='none';
+}
+async function submitFeedback(){
   const ta=document.getElementById('fbText');
   const text=ta.value.trim();
   if(!text)return;
-  const list=getFeedbackList();
-  list.push({text,ts:Date.now(),role:currentRole});
-  localStorage.setItem('mf_feedback',JSON.stringify(list));
+  const item={id:newFeedbackId(),type:'feedback',text,photo:fbPhotoDataUrl||null,ts:Date.now(),role:currentRole};
+  const local=loadFeedbackLocal();
+  local.push(item);
+  saveFeedbackLocal(local);
   ta.value='';
+  removeFbPhoto();
   const thanks=document.getElementById('fbThanks');
   thanks.style.display='block';
   setTimeout(()=>{thanks.style.display='none';},3000);
+  if(feedbackCollectionRef){
+    try{ await feedbackCollectionRef.doc(item.id).set(item); }
+    catch(e){ console.error('บันทึกข้อเสนอแนะไป Firestore ไม่สำเร็จ',e); }
+  }
 }
-function renderFeedbackList(){
-  const list=getFeedbackList().slice().sort((a,b)=>b.ts-a.ts);
+async function loadAllFeedback(){
+  if(feedbackCollectionRef){
+    try{
+      const snap=await feedbackCollectionRef.get();
+      const list=[];
+      snap.forEach(doc=>{ const d=doc.data(); if(d&&d.type==='feedback') list.push(d); });
+      list.sort((a,b)=>b.ts-a.ts);
+      FEEDBACK_CACHE=list;
+      saveFeedbackLocal(list);
+      return list;
+    }catch(e){ console.error('โหลดข้อเสนอแนะจาก Firestore ไม่สำเร็จ',e); }
+  }
+  FEEDBACK_CACHE=loadFeedbackLocal().sort((a,b)=>b.ts-a.ts);
+  return FEEDBACK_CACHE;
+}
+async function renderFeedbackList(){
   const wrap=document.getElementById('fbList');
+  wrap.innerHTML='<div class="fb-empty">กำลังโหลด...</div>';
+  const list=await loadAllFeedback();
   document.getElementById('fbCount').textContent=list.length+' รายการ';
   if(!list.length){
     wrap.innerHTML='<div class="fb-empty">ยังไม่มีข้อเสนอแนะจากลูกค้า</div>';
@@ -2144,12 +2225,13 @@ function renderFeedbackList(){
   wrap.innerHTML=list.map(item=>{
     const d=new Date(item.ts);
     const dateStr=d.toLocaleDateString('th-TH')+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    const photoHtml=item.photo ? '<img class="fb-item-photo" src="'+item.photo+'" alt="รูปแนบ" onclick="window.open(this.src,\'_blank\')">' : '';
     return '<div class="fb-item"><div class="fb-item-meta">'+dateStr+'</div><div class="fb-item-text">'+
-      item.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div></div>';
+      escapeHtml(item.text)+'</div>'+photoHtml+'</div>';
   }).join('');
 }
-function exportFeedbackExcel(){
-  const list=getFeedbackList().slice().sort((a,b)=>a.ts-b.ts);
+async function exportFeedbackExcel(){
+  const list=(await loadAllFeedback()).slice().sort((a,b)=>a.ts-b.ts);
   if(!list.length){alert('ยังไม่มีข้อเสนอแนะให้ส่งออก');return;}
   const rows=list.map(item=>{
     const d=new Date(item.ts);
@@ -2157,10 +2239,11 @@ function exportFeedbackExcel(){
       'วันที่':d.toLocaleDateString('th-TH'),
       'เวลา':d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
       'ข้อเสนอแนะ / ความคิดเห็น':item.text,
+      'แนบรูป':item.photo?'มี':'ไม่มี',
     };
   });
   const ws=XLSX.utils.json_to_sheet(rows);
-  ws['!cols']=[{wch:12},{wch:10},{wch:60}];
+  ws['!cols']=[{wch:12},{wch:10},{wch:60},{wch:10}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'ข้อเสนอแนะ');
   XLSX.writeFile(wb,'makro_finder_feedback_'+new Date().toISOString().slice(0,10)+'.xlsx');
