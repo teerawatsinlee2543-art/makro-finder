@@ -63,9 +63,8 @@ body{margin:0;padding:0}
 .cat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);transition:border-color .15s}
 .cat-card:hover{border-color:var(--color-border-secondary)}
 .cat-card i{font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0 auto 8px;background:color-mix(in srgb, currentColor 15%, white)}
+.cat-card img{width:52px;height:52px;display:block;margin:0 auto 8px;border-radius:50%;object-fit:contain;padding:8px;box-sizing:border-box}
 .cat-card span{font-size:12px;color:var(--color-text-secondary);font-weight:500}
-.cat-fresh i{color:#E24B4A}.cat-dry i{color:#BA7517}.cat-nonfood i{color:#1D9E75}
-.cat-drink i{color:#534AB7}.cat-veg i{color:#3B6D11}.cat-clean i{color:#185FA5}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
 .chip{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);cursor:pointer;background:var(--color-background-primary);white-space:nowrap}
 .chip:hover{background:var(--color-background-secondary)}
@@ -254,6 +253,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .search-box input{font-size:15px}
   .cat-row{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
   .cat-card i{font-size:32px;width:60px;height:60px}
+  .cat-card img{width:60px;height:60px}
   .cat-card span{font-size:13.5px}
   .result-name{font-size:19px}
   .loc-pill{font-size:14.5px;padding:7px 14px}
@@ -361,7 +361,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div class="hdr-icons">
-        <button class="hdr-icon" onclick="toggleFullscreen()" title="เต็มจอ" aria-label="เต็มจอ"><i id="fsIcon" class="ti ti-maximize" aria-hidden="true"></i></button>
         <button class="hdr-icon" onclick="openScanner()" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
       </div>
     </div>
@@ -386,12 +385,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="homeView">
       <div class="section-label">หมวดหมู่</div>
       <div class="cat-row">
-        <div class="cat-card cat-fresh" onclick="search('ไก่สด')"><i class="ti ti-meat" aria-hidden="true"></i><span>Fresh Food</span></div>
-        <div class="cat-card cat-dry" onclick="search('น้ำมัน')"><i class="ti ti-box" aria-hidden="true"></i><span>Dry Food</span></div>
-        <div class="cat-card cat-nonfood" onclick="search('กระดาษ')"><i class="ti ti-package" aria-hidden="true"></i><span>Non Food</span></div>
-        <div class="cat-card cat-drink" onclick="search('เครื่องดื่ม')"><i class="ti ti-cup" aria-hidden="true"></i><span>เครื่องดื่ม</span></div>
-        <div class="cat-card cat-veg" onclick="search('ผัก')"><i class="ti ti-plant" aria-hidden="true"></i><span>ผัก-ผลไม้</span></div>
-        <div class="cat-card cat-clean" onclick="search('สบู่')"><i class="ti ti-sparkles" aria-hidden="true"></i><span>ของใช้</span></div>
+        <div class="cat-card" style="background:#D3F38F33" onclick="search('พัดลม')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Electronics_7b6f092700.png" alt="เครื่องใช้ไฟฟ้า" loading="lazy"><span>เครื่องใช้ไฟฟ้า</span></div>
+        <div class="cat-card" style="background:#D7EFD9" onclick="search('แช่แข็ง')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/L1_Fresh_Food_Story_70c56f6cb4.png" alt="อาหารสดและแช่แข็ง" loading="lazy"><span>อาหารสดและแช่แข็ง</span></div>
+        <div class="cat-card" style="background:#FFF0BD66" onclick="search('สบู่')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Home_Care_6557cb2bd6.png" alt="ของใช้ในบ้าน" loading="lazy"><span>ของใช้ในบ้าน</span></div>
+        <div class="cat-card" style="background:#F7C47833" onclick="search('น้ำมัน')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Grocery_53f0589e85.png" alt="อาหารและเครื่องปรุง" loading="lazy"><span>อาหารและเครื่องปรุง</span></div>
+        <div class="cat-card" style="background:#F7E9A066" onclick="search('เครื่องดื่ม')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Beverage_and_Milk_v2_78f9f26baa.png" alt="เครื่องดื่ม" loading="lazy"><span>เครื่องดื่ม</span></div>
+        <div class="cat-card" style="background:#FADCE3" onclick="search('ขนม')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Icon_in_app_1_fc27c246fa.png" alt="ขนม" loading="lazy"><span>ขนม</span></div>
       </div>
       <div class="section-label">ค้นหาบ่อย</div>
       <div class="chips">
@@ -510,6 +509,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <div id="palletHeaderTitle">จัดการพาเลส</div>
         <div class="pallet-header-sub" id="palletHeaderSub"></div>
       </div>
+      <i class="ti ti-pencil" id="palletRenameBtn" aria-hidden="true" onclick="renamePallet()" style="display:none"></i>
     </div>
     <div class="pallet-body" id="palletBody"></div>
   </div>
@@ -754,6 +754,7 @@ function openPalletManager(){
   if(!isEmployee())return;
   document.getElementById('palletOverlay').style.display='flex';
   document.getElementById('palletBackBtn').style.display='none';
+  document.getElementById('palletRenameBtn').style.display='none';
   currentPallet=null;
   document.getElementById('palletHeaderTitle').textContent='จัดการพาเลส';
   document.getElementById('palletHeaderSub').textContent='';
@@ -767,6 +768,7 @@ function closePalletManager(){
 function palletGoBack(){
   currentPallet=null;
   document.getElementById('palletBackBtn').style.display='none';
+  document.getElementById('palletRenameBtn').style.display='none';
   document.getElementById('palletHeaderTitle').textContent='จัดการพาเลส';
   document.getElementById('palletHeaderSub').textContent='';
   renderPalletListView(PALLETS_CACHE);
@@ -796,8 +798,9 @@ function renderPalletListView(pallets){
 function palletCardHtml(p){
   const t=palletTotals(p);
   const badge=p.status==='open' ? '<span class="pallet-card-badge open">เปิดอยู่</span>' : '<span class="pallet-card-badge closed">ปิดแล้ว</span>';
+  const titleLine=p.name ? escapeHtml(p.name)+badge+'<div style="font-size:11px;color:var(--color-text-secondary);font-weight:400;margin-top:1px">'+p.id+'</div>' : p.id+badge;
   return '<div class="pallet-card" onclick="openPalletDetail(\''+p.id+'\')">'+
-    '<div class="pallet-card-id">'+p.id+badge+'</div>'+
+    '<div class="pallet-card-id">'+titleLine+'</div>'+
     '<div class="pallet-card-meta">'+t.skuCount+' รายการ · '+t.unitCount+' ชิ้น · สร้างโดย '+escapeHtml(p.createdBy||'-')+'</div>'+
   '</div>';
 }
@@ -807,6 +810,7 @@ function createNewPallet(){
   const sess=getSession();
   const pallet={
     id:newPalletId(),
+    name:'',
     createdAt:Date.now(),
     createdBy:(sess&&sess.name)?sess.name+' · '+sess.dept:'-',
     status:'open',
@@ -822,9 +826,23 @@ function openPalletDetail(id){
   if(!pallet)return;
   currentPallet=pallet;
   document.getElementById('palletBackBtn').style.display='block';
-  document.getElementById('palletHeaderTitle').textContent=pallet.id;
-  document.getElementById('palletHeaderSub').textContent=pallet.status==='open'?'เปิดอยู่ · สร้างโดย '+escapeHtml(pallet.createdBy||'-'):'ปิดแล้ว';
+  updatePalletHeader(pallet);
   renderPalletDetailView(pallet);
+}
+function updatePalletHeader(pallet){
+  document.getElementById('palletHeaderTitle').textContent=pallet.name||pallet.id;
+  const statusText=pallet.status==='open'?'เปิดอยู่':'ปิดแล้ว';
+  const idLine=pallet.name?pallet.id+' · ':'';
+  document.getElementById('palletHeaderSub').textContent=idLine+statusText+' · สร้างโดย '+(pallet.createdBy||'-');
+  document.getElementById('palletRenameBtn').style.display=isGR()?'block':'none';
+}
+function renamePallet(){
+  if(!currentPallet||!isGR())return;
+  const name=prompt('ตั้งชื่อพาเลส (เว้นว่างเพื่อล้างชื่อ)',currentPallet.name||'');
+  if(name===null)return;
+  currentPallet.name=name.trim();
+  savePallet(currentPallet);
+  updatePalletHeader(currentPallet);
 }
 
 function renderPalletDetailView(pallet){
@@ -898,7 +916,7 @@ function closeCurrentPallet(){
   if(!confirm('ปิดพาเลส '+currentPallet.id+'? หลังปิดจะแก้ไขไม่ได้'))return;
   currentPallet.status='closed';
   savePallet(currentPallet);
-  document.getElementById('palletHeaderSub').textContent='ปิดแล้ว';
+  updatePalletHeader(currentPallet);
   renderPalletDetailView(currentPallet);
 }
 async function deleteCurrentPallet(){
@@ -1593,18 +1611,6 @@ function clearSearch(){
   document.getElementById('homeView').style.display='block';
   document.getElementById('resultView').classList.remove('show');
 }
-
-function toggleFullscreen(){
-  if(!document.fullscreenElement){
-    document.documentElement.requestFullscreen().catch(()=>{});
-  } else {
-    document.exitFullscreen();
-  }
-}
-document.addEventListener('fullscreenchange',()=>{
-  const icon=document.getElementById('fsIcon');
-  if(icon)icon.className=document.fullscreenElement?'ti ti-minimize':'ti ti-maximize';
-});
 
 let scanStream=null,scanRAF=null;
 function openScanner(){
