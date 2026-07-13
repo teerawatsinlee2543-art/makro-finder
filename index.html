@@ -1198,9 +1198,15 @@ function renderDetail(item,fromList){
   document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:11px;padding:2px 8px;border-radius:20px';
   const rLoc=document.getElementById('rLoc');
   if(item.locations.length){
-    rLoc.innerHTML=item.locations.map(l=>
-      '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Loc '+escapeHtml(l.loc)+'</div>'+
-      '<div class="loc-pill sec"><i class="ti ti-map-2" aria-hidden="true"></i>Location '+escapeHtml(l.location)+'</div>'
+    const locGroups=[];
+    item.locations.forEach(l=>{
+      let group=locGroups.find(g=>g.loc===l.loc);
+      if(!group){ group={loc:l.loc,locations:[]}; locGroups.push(group); }
+      group.locations.push(l.location);
+    });
+    rLoc.innerHTML=locGroups.map(g=>
+      '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Loc '+escapeHtml(g.loc)+'</div>'+
+      g.locations.map(loc=>'<div class="loc-pill sec"><i class="ti ti-map-2" aria-hidden="true"></i>Location '+escapeHtml(loc)+'</div>').join('')
     ).join('');
   } else {
     rLoc.innerHTML='<div class="loc-pill sec"><i class="ti ti-map-pin-off" aria-hidden="true"></i>ไม่มีข้อมูลตำแหน่งจัดเก็บ</div>';
