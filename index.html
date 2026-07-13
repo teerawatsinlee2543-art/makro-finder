@@ -124,6 +124,57 @@ body{margin:0;padding:0}
 #mapEditOpenBar{margin-top:10px}
 .map-edit-open-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
 .map-edit-open-btn:hover{background:var(--color-border-tertiary)}
+#palletOpenBar{margin-bottom:16px}
+.pallet-open-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);color:var(--color-text-primary);border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.pallet-open-btn:hover{background:var(--color-border-tertiary)}
+.pallet-overlay{position:fixed;inset:0;background:rgba(8,11,22,.6);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
+.pallet-overlay-content{width:100%;max-width:440px;max-height:90vh;background:var(--color-background-primary);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.pallet-header{background:var(--brand-red);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pallet-header i{font-size:20px;cursor:pointer;flex-shrink:0}
+.pallet-header-title{flex:1;font-size:15px;font-weight:500;min-width:0}
+.pallet-header-sub{font-size:11px;opacity:.85}
+.pallet-body{padding:14px 16px;overflow-y:auto;flex:1}
+.pallet-card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer}
+.pallet-card:hover{border-color:var(--color-border-secondary)}
+.pallet-card-id{font-size:14px;font-weight:600}
+.pallet-card-meta{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.pallet-card-badge{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:6px}
+.pallet-card-badge.open{background:#E1F5EE;color:#085041}
+.pallet-card-badge.closed{background:var(--color-background-tertiary);color:var(--color-text-secondary)}
+.pallet-new-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#FFF0F1;color:#A32D2D;border:1px dashed #F09595;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px}
+.pallet-stats{display:flex;gap:10px;margin-bottom:14px}
+.pallet-stat{flex:1;background:var(--color-background-secondary);border-radius:10px;padding:8px 10px;text-align:center}
+.pallet-stat-label{font-size:11px;color:var(--color-text-secondary)}
+.pallet-stat-val{font-size:18px;font-weight:600}
+.pallet-item-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.pallet-item-num{width:20px;font-size:13px;color:var(--color-text-secondary);font-weight:600;flex-shrink:0}
+.pallet-item-photo{width:48px;height:48px;border-radius:10px;overflow:hidden;background:var(--color-background-secondary);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--color-text-tertiary)}
+.pallet-item-photo img{width:100%;height:100%;object-fit:cover}
+.pallet-item-info{flex:1;min-width:0}
+.pallet-item-name{font-size:13.5px;font-weight:500}
+.pallet-item-meta{font-size:11.5px;color:var(--color-text-secondary)}
+.pallet-item-actions{display:flex;gap:12px;flex-shrink:0}
+.pallet-item-actions i{font-size:17px;cursor:pointer;color:var(--color-text-secondary)}
+.pallet-item-actions i.danger{color:#A32D2D}
+.pallet-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#FFF0F1;color:#A32D2D;border:1px dashed #F09595;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px}
+.pallet-scan-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px}
+.pallet-empty{text-align:center;color:var(--color-text-secondary);font-size:13px;padding:30px 0}
+.pallet-focus-lock{display:flex;align-items:center;gap:6px;background:#FFF0F1;color:#A32D2D;padding:8px 16px;font-size:12px;font-weight:500;flex-shrink:0}
+.pallet-focus-photo{width:100%;aspect-ratio:4/3;max-height:200px;border-radius:14px;overflow:hidden;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:44px;color:var(--color-text-tertiary)}
+.pallet-focus-photo img{width:100%;height:100%;object-fit:contain}
+.pallet-focus-name{font-size:16px;font-weight:600;margin-bottom:2px}
+.pallet-focus-meta{font-size:12px;color:var(--color-text-secondary);margin-bottom:16px}
+.pallet-focus-qty-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:6px}
+.pallet-focus-stepper{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.pallet-stepper-btn{width:48px;height:48px;border-radius:12px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;flex-shrink:0;border:none;font-family:inherit}
+.pallet-stepper-btn.plus{background:var(--brand-red);color:#fff}
+.pallet-focus-qty-val{flex:1;text-align:center;font-size:28px;font-weight:600}
+.pallet-focus-remove{text-align:center;background:#FFF0F1;color:#A32D2D;border-radius:10px;padding:12px;font-size:13px;font-weight:600;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;border:none;font-family:inherit;width:100%}
+.pallet-focus-next{text-align:center;background:var(--brand-red);color:#fff;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;border:none;font-family:inherit;width:100%}
+.pallet-scan-video-wrap{position:relative;width:100%;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:#111;margin-bottom:12px}
+.pallet-scan-video-wrap video{width:100%;height:100%;object-fit:cover}
+.pallet-scan-guide{position:absolute;inset:12%;border:3px solid #fff;border-radius:16px;box-shadow:0 0 0 2000px rgba(0,0,0,.35)}
+.pallet-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;z-index:2300;display:none}
 .map-edit-bar{display:none;flex-direction:column;align-items:center;gap:8px;margin-top:14px;width:100%;max-width:min(1100px,94vw)}
 .map-edit-bar-row{display:flex;gap:10px;width:100%}
 .map-edit-save,.map-edit-cancel{flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;border:none}
@@ -324,6 +375,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <button id="empBarSwitch" onclick="switchRole()">เปลี่ยนมุมมอง</button>
     </div>
 
+    <div id="palletOpenBar" style="display:none;margin-bottom:16px">
+      <button class="pallet-open-btn" onclick="openPalletManager()"><i class="ti ti-stack-2" aria-hidden="true"></i> จัดการพาเลส (GR)</button>
+    </div>
+
     <div id="homeView">
       <div class="section-label">หมวดหมู่</div>
       <div class="cat-row">
@@ -442,6 +497,39 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   </div>
 </div>
 
+<div class="pallet-overlay" id="palletOverlay" onclick="if(event.target===this)closePalletManager()">
+  <div class="pallet-overlay-content">
+    <div class="pallet-header">
+      <i class="ti ti-arrow-left" id="palletBackBtn" aria-hidden="true" onclick="palletGoBack()" style="display:none"></i>
+      <i class="ti ti-x" id="palletCloseBtn" aria-hidden="true" onclick="closePalletManager()"></i>
+      <div class="pallet-header-title">
+        <div id="palletHeaderTitle">จัดการพาเลส</div>
+        <div class="pallet-header-sub" id="palletHeaderSub"></div>
+      </div>
+    </div>
+    <div class="pallet-body" id="palletBody"></div>
+  </div>
+</div>
+
+<div class="pallet-overlay" id="palletScanOverlay" style="z-index:2200">
+  <div class="pallet-overlay-content" style="max-width:420px" onclick="event.stopPropagation()">
+    <div class="pallet-header">
+      <i class="ti ti-x" aria-hidden="true" onclick="closePalletScan()"></i>
+      <div class="pallet-header-title" id="palletScanTitle">สแกนบาร์โค้ด</div>
+    </div>
+    <div class="pallet-body" id="palletScanBody">
+      <div class="pallet-scan-video-wrap">
+        <video id="palletScanVideo" playsinline autoplay muted></video>
+        <div class="pallet-scan-guide"></div>
+      </div>
+      <p style="font-size:13px;color:var(--color-text-secondary);text-align:center" id="palletScanHint">เล็งกล้องไปที่บาร์โค้ดสินค้า</p>
+      <p style="font-size:13px;color:#A32D2D;text-align:center;display:none" id="palletScanError"></p>
+    </div>
+  </div>
+</div>
+<canvas id="palletScanCanvas" style="display:none"></canvas>
+<div class="pallet-toast" id="palletToast"></div>
+
 <div class="scan-overlay" id="scanOverlay">
   <div class="scan-box">
     <div class="scan-header">
@@ -528,12 +616,14 @@ const FIREBASE_CONFIG={
   appId:"1:39825032351:web:cdfcf244f920959ffaceaa"
 };
 let mapFirestoreDocRef=null;
+let palletsCollectionRef=null;
 try{
   if(FIREBASE_CONFIG){
     firebase.initializeApp(FIREBASE_CONFIG);
     mapFirestoreDocRef=firebase.firestore().collection('makroFinder').doc('storeMapLayout');
+    palletsCollectionRef=firebase.firestore().collection('makroFinder');
   }
-}catch(e){ console.error('Firebase init ไม่สำเร็จ',e); mapFirestoreDocRef=null; }
+}catch(e){ console.error('Firebase init ไม่สำเร็จ',e); mapFirestoreDocRef=null; palletsCollectionRef=null; }
 
 function escapeHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -582,6 +672,424 @@ function updateMapEditBarVisibility(){
   const bar=document.getElementById('mapEditOpenBar');
   if(bar) bar.style.display=(currentRole==='employee') ? 'block' : 'none';
 }
+
+// ==== จัดการพาเลส (GR) ====
+function getSession(){
+  try{return JSON.parse(localStorage.getItem('mf_session'));}catch(e){return null;}
+}
+function isEmployee(){ return currentRole==='employee'; }
+function isGR(){
+  const sess=getSession();
+  return isEmployee() && sess && sess.dept==='GR';
+}
+function updatePalletBarVisibility(){
+  const bar=document.getElementById('palletOpenBar');
+  if(bar) bar.style.display=isEmployee() ? 'block' : 'none';
+}
+
+let PALLETS_CACHE=[];
+let currentPallet=null;
+let palletToastTimer=null;
+function showPalletToast(msg){
+  const t=document.getElementById('palletToast');
+  if(!t)return;
+  t.textContent=msg;
+  t.style.display='block';
+  clearTimeout(palletToastTimer);
+  palletToastTimer=setTimeout(()=>{ t.style.display='none'; },2200);
+}
+
+function palletLocalKey(){ return 'mf_pallets'; }
+function loadPalletsLocal(){
+  try{ return JSON.parse(localStorage.getItem(palletLocalKey()))||[]; }catch(e){ return []; }
+}
+function savePalletsLocal(list){
+  try{ localStorage.setItem(palletLocalKey(),JSON.stringify(list)); }catch(e){}
+}
+
+async function loadAllPallets(){
+  if(palletsCollectionRef){
+    try{
+      const snap=await palletsCollectionRef.get();
+      const list=[];
+      snap.forEach(doc=>{
+        const data=doc.data();
+        if(data && data.type==='pallet') list.push(data);
+      });
+      list.sort((a,b)=>b.createdAt-a.createdAt);
+      PALLETS_CACHE=list;
+      return list;
+    }catch(e){ console.error('โหลดพาเลสจาก Firestore ไม่สำเร็จ',e); }
+  }
+  PALLETS_CACHE=loadPalletsLocal().sort((a,b)=>b.createdAt-a.createdAt);
+  return PALLETS_CACHE;
+}
+async function savePallet(pallet){
+  const local=loadPalletsLocal();
+  const idx=local.findIndex(p=>p.id===pallet.id);
+  if(idx>=0) local[idx]=pallet; else local.push(pallet);
+  savePalletsLocal(local);
+  if(palletsCollectionRef){
+    try{ await palletsCollectionRef.doc('pallet_'+pallet.id).set(Object.assign({type:'pallet'},pallet)); }
+    catch(e){ console.error('บันทึกพาเลสไป Firestore ไม่สำเร็จ',e); showPalletToast('บันทึกส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+  }
+}
+function palletTotals(pallet){
+  let skuCount=pallet.items.length;
+  let unitCount=pallet.items.reduce((s,it)=>s+it.qty,0);
+  return {skuCount,unitCount};
+}
+function newPalletId(){
+  const d=new Date();
+  const ymd=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  const seq=String(PALLETS_CACHE.filter(p=>p.id.includes(ymd)).length+1).padStart(3,'0');
+  return 'PLT-'+ymd+'-'+seq;
+}
+
+function openPalletManager(){
+  if(!isEmployee())return;
+  document.getElementById('palletOverlay').style.display='flex';
+  document.getElementById('palletBackBtn').style.display='none';
+  currentPallet=null;
+  document.getElementById('palletHeaderTitle').textContent='จัดการพาเลส';
+  document.getElementById('palletHeaderSub').textContent='';
+  document.getElementById('palletBody').innerHTML='<p style="text-align:center;color:var(--color-text-secondary);font-size:13px;padding:20px 0">กำลังโหลด...</p>';
+  loadAllPallets().then(renderPalletListView);
+}
+function closePalletManager(){
+  document.getElementById('palletOverlay').style.display='none';
+  currentPallet=null;
+}
+function palletGoBack(){
+  currentPallet=null;
+  document.getElementById('palletBackBtn').style.display='none';
+  document.getElementById('palletHeaderTitle').textContent='จัดการพาเลส';
+  document.getElementById('palletHeaderSub').textContent='';
+  renderPalletListView(PALLETS_CACHE);
+}
+
+function renderPalletListView(pallets){
+  const body=document.getElementById('palletBody');
+  const openPallets=pallets.filter(p=>p.status==='open');
+  const closedPallets=pallets.filter(p=>p.status==='closed');
+  let html='';
+  if(isGR()){
+    html+='<div class="pallet-new-btn" onclick="createNewPallet()"><i class="ti ti-plus" aria-hidden="true"></i> สร้างพาเลสใหม่</div>';
+  }
+  if(!openPallets.length && !closedPallets.length){
+    html+='<div class="pallet-empty">ยังไม่มีพาเลสในระบบ</div>';
+  }
+  if(openPallets.length){
+    html+='<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">พาเลสที่เปิดอยู่</div>';
+    html+=openPallets.map(palletCardHtml).join('');
+  }
+  if(closedPallets.length){
+    html+='<div style="font-size:12px;color:var(--color-text-secondary);margin:14px 0 8px">พาเลสที่ปิดแล้ว</div>';
+    html+=closedPallets.map(palletCardHtml).join('');
+  }
+  body.innerHTML=html;
+}
+function palletCardHtml(p){
+  const t=palletTotals(p);
+  const badge=p.status==='open' ? '<span class="pallet-card-badge open">เปิดอยู่</span>' : '<span class="pallet-card-badge closed">ปิดแล้ว</span>';
+  return '<div class="pallet-card" onclick="openPalletDetail(\''+p.id+'\')">'+
+    '<div class="pallet-card-id">'+p.id+badge+'</div>'+
+    '<div class="pallet-card-meta">'+t.skuCount+' รายการ · '+t.unitCount+' ชิ้น · สร้างโดย '+escapeHtml(p.createdBy||'-')+'</div>'+
+  '</div>';
+}
+
+function createNewPallet(){
+  if(!isGR())return;
+  const sess=getSession();
+  const pallet={
+    id:newPalletId(),
+    createdAt:Date.now(),
+    createdBy:(sess&&sess.name)?sess.name+' · '+sess.dept:'-',
+    status:'open',
+    items:[]
+  };
+  PALLETS_CACHE.unshift(pallet);
+  savePallet(pallet);
+  openPalletDetail(pallet.id);
+}
+
+function openPalletDetail(id){
+  const pallet=PALLETS_CACHE.find(p=>p.id===id);
+  if(!pallet)return;
+  currentPallet=pallet;
+  document.getElementById('palletBackBtn').style.display='block';
+  document.getElementById('palletHeaderTitle').textContent=pallet.id;
+  document.getElementById('palletHeaderSub').textContent=pallet.status==='open'?'เปิดอยู่ · สร้างโดย '+escapeHtml(pallet.createdBy||'-'):'ปิดแล้ว';
+  renderPalletDetailView(pallet);
+}
+
+function renderPalletDetailView(pallet){
+  const body=document.getElementById('palletBody');
+  const t=palletTotals(pallet);
+  const canEdit=isGR() && pallet.status==='open';
+  let html='<div class="pallet-stats">'+
+    '<div class="pallet-stat"><div class="pallet-stat-label">รายการ</div><div class="pallet-stat-val">'+t.skuCount+'</div></div>'+
+    '<div class="pallet-stat"><div class="pallet-stat-label">ชิ้นรวม</div><div class="pallet-stat-val">'+t.unitCount+'</div></div>'+
+  '</div>';
+  if(pallet.status==='open'){
+    html+='<div class="pallet-scan-btn" onclick="openPalletScan(\''+(canEdit?'manage':'delete-only')+'\')"><i class="ti ti-scan" aria-hidden="true"></i> '+(canEdit?'สแกนบาร์โค้ดเพื่อเพิ่ม/แก้ไข':'สแกนบาร์โค้ดเพื่อลบสินค้า')+'</div>';
+  }
+  if(!pallet.items.length){
+    html+='<div class="pallet-empty">ยังไม่มีสินค้าในพาเลสนี้</div>';
+  } else {
+    html+=pallet.items.map((it,i)=>palletItemRowHtml(it,i,canEdit)).join('');
+  }
+  if(canEdit){
+    html+='<div class="pallet-add-btn" onclick="openAddItemToPallet()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มสินค้าเข้าพาเลส</div>';
+    html+='<div class="pallet-add-btn" style="margin-top:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary)" onclick="closeCurrentPallet()"><i class="ti ti-lock" aria-hidden="true"></i> ปิดพาเลสนี้</div>';
+  }
+  body.innerHTML=html;
+  pallet.items.forEach((it,i)=>{
+    const wrap=document.getElementById('palletPhoto'+i);
+    applyItemImage(wrap,it);
+  });
+}
+function palletItemRowHtml(it,i,canEdit){
+  const actions=canEdit
+    ? '<div class="pallet-item-actions">'+
+        '<i class="ti ti-minus" aria-hidden="true" onclick="adjustPalletItemQty(\''+it.itemNo+'\',-1)"></i>'+
+        '<i class="ti ti-plus" aria-hidden="true" onclick="adjustPalletItemQty(\''+it.itemNo+'\',1)"></i>'+
+        '<i class="ti ti-trash danger" aria-hidden="true" onclick="removePalletItem(\''+it.itemNo+'\')"></i>'+
+      '</div>'
+    : '';
+  return '<div class="pallet-item-row">'+
+    '<div class="pallet-item-num">'+(i+1)+'</div>'+
+    '<div class="pallet-item-photo" id="palletPhoto'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
+    '<div class="pallet-item-info">'+
+      '<div class="pallet-item-name">'+escapeHtml(it.desc)+'</div>'+
+      '<div class="pallet-item-meta">Item '+escapeHtml(it.itemNo)+' · จำนวน '+it.qty+'</div>'+
+    '</div>'+
+    actions+
+  '</div>';
+}
+
+function adjustPalletItemQty(itemNo,delta){
+  if(!currentPallet||!isGR())return;
+  const it=currentPallet.items.find(x=>x.itemNo===itemNo);
+  if(!it)return;
+  it.qty+=delta;
+  if(it.qty<=0){
+    currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==itemNo);
+  }
+  savePallet(currentPallet);
+  renderPalletDetailView(currentPallet);
+}
+function removePalletItem(itemNo){
+  if(!currentPallet||!isGR())return;
+  if(!confirm('ลบสินค้านี้ออกจากพาเลส?'))return;
+  currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==itemNo);
+  savePallet(currentPallet);
+  renderPalletDetailView(currentPallet);
+}
+function closeCurrentPallet(){
+  if(!currentPallet||!isGR())return;
+  if(!confirm('ปิดพาเลส '+currentPallet.id+'? หลังปิดจะแก้ไขไม่ได้'))return;
+  currentPallet.status='closed';
+  savePallet(currentPallet);
+  document.getElementById('palletHeaderSub').textContent='ปิดแล้ว';
+  renderPalletDetailView(currentPallet);
+}
+
+function addItemToPalletData(item,qty){
+  if(!currentPallet)return;
+  const existing=currentPallet.items.find(x=>x.itemNo===item.itemNo);
+  if(existing) existing.qty+=qty;
+  else currentPallet.items.push({itemNo:item.itemNo,desc:item.desc,barcode:item.barcode||'',qty:qty});
+  savePallet(currentPallet);
+}
+
+function openAddItemToPallet(){
+  if(!currentPallet||!isGR())return;
+  const body=document.getElementById('palletBody');
+  body.innerHTML='<input type="text" id="palletAddSearch" class="inp" placeholder="ค้นหาชื่อ/Item No/บาร์โค้ด" oninput="renderPalletAddResults(this.value)" style="margin-bottom:12px">'+
+    '<div id="palletAddResults"></div>'+
+    '<div class="pallet-add-btn" style="margin-top:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary)" onclick="renderPalletDetailView(currentPallet)"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับไปดูรายการ</div>';
+  document.getElementById('palletAddSearch').focus();
+}
+function renderPalletAddResults(q){
+  const box=document.getElementById('palletAddResults');
+  if(!q||!q.trim()){ box.innerHTML=''; return; }
+  const matches=findMatches(q).slice(0,20);
+  if(!matches.length){ box.innerHTML='<div class="pallet-empty">ไม่พบสินค้า</div>'; return; }
+  box.innerHTML=matches.map((it,i)=>
+    '<div class="pallet-item-row" style="cursor:pointer" onclick="promptAddQty(\''+it.itemNo+'\')">'+
+      '<div class="pallet-item-photo" id="palletAddPhoto'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
+      '<div class="pallet-item-info">'+
+        '<div class="pallet-item-name">'+escapeHtml(it.desc)+'</div>'+
+        '<div class="pallet-item-meta">Item '+escapeHtml(it.itemNo)+'</div>'+
+      '</div>'+
+      '<i class="ti ti-plus" aria-hidden="true" style="color:var(--brand-red);font-size:20px"></i>'+
+    '</div>'
+  ).join('');
+  matches.forEach((it,i)=>{ applyItemImage(document.getElementById('palletAddPhoto'+i),it); });
+}
+function promptAddQty(itemNo){
+  const item=PRODUCTS_BY_KEY.find(x=>x.itemNo===itemNo);
+  if(!item)return;
+  const qtyStr=prompt('ใส่จำนวนของ "'+item.desc+'"','1');
+  if(qtyStr===null)return;
+  const qty=parseInt(qtyStr,10);
+  if(!qty||qty<=0){ alert('กรุณาใส่จำนวนที่ถูกต้อง'); return; }
+  addItemToPalletData(item,qty);
+  showPalletToast('เพิ่ม '+item.desc+' x'+qty+' แล้ว');
+  renderPalletDetailView(currentPallet);
+}
+
+// ==== สแกนบาร์โค้ดสำหรับพาเลส ====
+let palletScanStream=null,palletScanRAF=null,palletScanMode=null,palletDetector=null;
+function openPalletScan(mode){
+  palletScanMode=mode;
+  const overlay=document.getElementById('palletScanOverlay');
+  const err=document.getElementById('palletScanError');
+  const hint=document.getElementById('palletScanHint');
+  err.style.display='none';
+  hint.style.display='block';
+  document.getElementById('palletScanTitle').textContent=mode==='manage'?'สแกนเพื่อเพิ่ม/แก้ไข':'สแกนเพื่อลบสินค้า';
+  overlay.style.display='flex';
+  if(!('BarcodeDetector' in window)){
+    err.textContent='อุปกรณ์นี้ไม่รองรับการสแกนบาร์โค้ด กรุณาใช้ Chrome บน Android หรือค้นหาด้วยมือแทน';
+    err.style.display='block';
+    hint.style.display='none';
+    return;
+  }
+  try{
+    palletDetector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128']});
+  }catch(e){
+    err.textContent='เปิดตัวสแกนบาร์โค้ดไม่สำเร็จ';
+    err.style.display='block';
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
+    .then(stream=>{
+      palletScanStream=stream;
+      const video=document.getElementById('palletScanVideo');
+      video.srcObject=stream;
+      video.play();
+      palletScanRAF=requestAnimationFrame(palletScanTick);
+    })
+    .catch(()=>{
+      err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้อง';
+      err.style.display='block';
+      hint.style.display='none';
+    });
+}
+function palletScanTick(){
+  const video=document.getElementById('palletScanVideo');
+  if(video && video.readyState===video.HAVE_ENOUGH_DATA && palletDetector){
+    palletDetector.detect(video).then(codes=>{
+      if(codes && codes.length){
+        handlePalletScanCode(codes[0].rawValue);
+      } else {
+        palletScanRAF=requestAnimationFrame(palletScanTick);
+      }
+    }).catch(()=>{ palletScanRAF=requestAnimationFrame(palletScanTick); });
+  } else {
+    palletScanRAF=requestAnimationFrame(palletScanTick);
+  }
+}
+function closePalletScan(){
+  document.getElementById('palletScanOverlay').style.display='none';
+  if(palletScanRAF)cancelAnimationFrame(palletScanRAF);
+  if(palletScanStream){ palletScanStream.getTracks().forEach(t=>t.stop()); palletScanStream=null; }
+  palletScanRAF=null;
+}
+function handlePalletScanCode(code){
+  if(palletScanRAF)cancelAnimationFrame(palletScanRAF);
+  palletScanRAF=null;
+  const item=PRODUCTS_BY_KEY.find(x=>x.barcode===code);
+  if(!item){
+    showPalletToast('ไม่พบสินค้านี้ในระบบ');
+    palletScanRAF=requestAnimationFrame(palletScanTick);
+    return;
+  }
+  if(palletScanMode==='delete-only'){
+    const existing=currentPallet && currentPallet.items.find(x=>x.itemNo===item.itemNo);
+    if(!existing){
+      showPalletToast('ไม่พบสินค้านี้ในพาเลส');
+      palletScanRAF=requestAnimationFrame(palletScanTick);
+      return;
+    }
+    if(confirm('ลบ "'+item.desc+'" ออกจากพาเลส?')){
+      currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==item.itemNo);
+      savePallet(currentPallet);
+      renderPalletDetailView(currentPallet);
+      showPalletToast('ลบแล้ว: '+item.desc);
+    }
+    closePalletScan();
+    return;
+  }
+  // mode === 'manage'
+  if(palletScanStream){ palletScanStream.getTracks().forEach(t=>t.stop()); palletScanStream=null; }
+  renderPalletScanFocusCard(item);
+}
+function renderPalletScanFocusCard(item){
+  const existing=currentPallet.items.find(x=>x.itemNo===item.itemNo);
+  if(!existing){
+    currentPallet.items.push({itemNo:item.itemNo,desc:item.desc,barcode:item.barcode||'',qty:1});
+    savePallet(currentPallet);
+  }
+  const body=document.getElementById('palletScanBody');
+  const qty=currentPallet.items.find(x=>x.itemNo===item.itemNo).qty;
+  body.innerHTML='<div class="pallet-focus-lock"><i class="ti ti-lock" aria-hidden="true"></i> ล็อกรายการอื่นชั่วคราว แก้ได้เฉพาะสินค้าที่สแกน</div>'+
+    '<div style="padding-top:12px">'+
+    '<div class="pallet-focus-photo" id="palletFocusPhoto"><i class="ti ti-package" aria-hidden="true"></i></div>'+
+    '<div class="pallet-focus-name">'+escapeHtml(item.desc)+'</div>'+
+    '<div class="pallet-focus-meta">Item '+escapeHtml(item.itemNo)+(item.barcode?' · '+escapeHtml(item.barcode):'')+'</div>'+
+    '<div class="pallet-focus-qty-label">จำนวนในพาเลสนี้</div>'+
+    '<div class="pallet-focus-stepper">'+
+      '<button class="pallet-stepper-btn" onclick="focusAdjustQty(\''+item.itemNo+'\',-1)"><i class="ti ti-minus" aria-hidden="true"></i></button>'+
+      '<div class="pallet-focus-qty-val" id="palletFocusQtyVal">'+qty+'</div>'+
+      '<button class="pallet-stepper-btn plus" onclick="focusAdjustQty(\''+item.itemNo+'\',1)"><i class="ti ti-plus" aria-hidden="true"></i></button>'+
+    '</div>'+
+    '<button class="pallet-focus-remove" onclick="focusRemoveItem(\''+item.itemNo+'\')"><i class="ti ti-trash" aria-hidden="true"></i> ลบออกจากพาเลส</button>'+
+    '<button class="pallet-focus-next" onclick="focusScanNext()"><i class="ti ti-scan" aria-hidden="true"></i> เสร็จแล้ว สแกนชิ้นต่อไป</button>'+
+    '</div>';
+  applyItemImage(document.getElementById('palletFocusPhoto'),item);
+}
+function focusAdjustQty(itemNo,delta){
+  const it=currentPallet.items.find(x=>x.itemNo===itemNo);
+  if(!it)return;
+  it.qty+=delta;
+  if(it.qty<=0){
+    currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==itemNo);
+    savePallet(currentPallet);
+    renderPalletDetailView(currentPallet);
+    closePalletScan();
+    return;
+  }
+  savePallet(currentPallet);
+  document.getElementById('palletFocusQtyVal').textContent=it.qty;
+}
+function focusRemoveItem(itemNo){
+  if(!confirm('ลบสินค้านี้ออกจากพาเลส?'))return;
+  currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==itemNo);
+  savePallet(currentPallet);
+  renderPalletDetailView(currentPallet);
+  closePalletScan();
+}
+function focusScanNext(){
+  renderPalletDetailView(currentPallet);
+  document.getElementById('palletScanBody').innerHTML='<div class="pallet-scan-video-wrap">'+
+    '<video id="palletScanVideo" playsinline autoplay muted></video>'+
+    '<div class="pallet-scan-guide"></div></div>'+
+    '<p style="font-size:13px;color:var(--color-text-secondary);text-align:center" id="palletScanHint">เล็งกล้องไปที่บาร์โค้ดสินค้า</p>'+
+    '<p style="font-size:13px;color:#A32D2D;text-align:center;display:none" id="palletScanError"></p>';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
+    .then(stream=>{
+      palletScanStream=stream;
+      const video=document.getElementById('palletScanVideo');
+      video.srcObject=stream;
+      video.play();
+      palletScanRAF=requestAnimationFrame(palletScanTick);
+    })
+    .catch(()=>{ showPalletToast('ไม่สามารถเข้าถึงกล้องได้'); closePalletScan(); });
+}
+// ==== จบส่วนจัดการพาเลส ====
 
 function openMapFullscreen(){
   if(mapEditMode)return;
@@ -1145,6 +1653,7 @@ function showRoleScreen(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('mainApp').style.display='none';
   updateMapEditBarVisibility();
+  updatePalletBarVisibility();
 }
 function chooseCustomer(){
   const sess={role:'customer',ts:Date.now()};
@@ -1172,6 +1681,7 @@ function showMain(sess){
     document.getElementById('employeeFeedbackSection').style.display='none';
   }
   updateMapEditBarVisibility();
+  updatePalletBarVisibility();
 }
 function getFeedbackList(){
   let list=[];
