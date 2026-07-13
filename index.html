@@ -468,57 +468,56 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 /* ---------- Store map: data model, rendering, employee editing ---------- */
 const MAP_VB_W=640, MAP_VB_H=545, MAP_MIN_W=40, MAP_MIN_H=30;
 const DEFAULT_MAP_BLOCKS=[
-  {id:'butchery',x:20,y:20,w:190,h:75,fill:'#a8524f',lines:[
-    {dx:8,dy:27,size:15,weight:800,text:'เนื้อสัตว์และแช่แข็ง'},
-    {dx:8,dy:44,size:12,weight:600,opacity:.95,text:'Butchery & Frozen'}]},
-  {id:'snack',x:220,y:20,w:75,h:75,fill:'#3f8f4f',lines:[
-    {dx:8,dy:36,size:24,weight:800,text:'ขนม'},
-    {dx:8,dy:62,size:19,weight:600,opacity:.95,text:'Snack'}]},
-  {id:'winebeer',x:305,y:20,w:85,h:75,fill:'#2f8fae',lines:[
-    {dx:8,dy:18,size:12,weight:800,text:'ไวน์/เบียร์'},
-    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Wine & Beer'}]},
-  {id:'drink',x:400,y:20,w:135,h:75,fill:'#6a3fc9',lines:[
-    {dx:8,dy:29,size:23,weight:800,text:'เครื่องดื่ม'},
-    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Drink'}]},
-  {id:'fishseafood',x:20,y:105,w:190,h:85,fill:'#4472a0',lines:[
-    {dx:8,dy:29,size:23,weight:800,text:'ปลา/อาหารทะเล'},
-    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Fish & Seafood'}]},
-  {id:'grilledchicken',x:220,y:105,w:95,h:65,fill:'#a9843a',lines:[
-    {dx:8,dy:18,size:12,weight:800,text:'ไก่ย่าง'},
-    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Grilled Chicken'}]},
-  {id:'dryfood',x:325,y:105,w:210,h:135,fill:'#d17ba0',lines:[
-    {dx:8,dy:45,size:24,weight:800,text:'Dry Food'},
-    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 28-39'}]},
-  {id:'condiments',x:20,y:200,w:190,h:50,fill:'#c0392b',lines:[
-    {dx:8,dy:20,size:14,weight:800,text:'เครื่องเทศ'},
-    {dx:8,dy:35,size:11,weight:600,opacity:.95,text:'Condiments / Spices'}]},
-  {id:'fruitveg',x:20,y:260,w:190,h:135,fill:'#6fa03e',lines:[
-    {dx:8,dy:45,size:24,weight:800,text:'ผัก-ผลไม้'},
-    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Fruit & Veg'}]},
-  {id:'nonfood',x:220,y:250,w:315,h:145,fill:'#a688d1',lines:[
-    {dx:8,dy:45,size:24,weight:800,text:'Non-Food'},
-    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 1-28'}]},
-  {id:'o2o',x:545,y:105,w:75,h:290,fill:'#d2762f',anchor:'middle',lines:[
-    {fx:0.5,dy:135,size:12,weight:800,text:'O2O'},
-    {fx:0.5,dy:148,size:9,weight:600,opacity:.95,text:'แผนกออนไลน์'},
-    {fx:0.5,dy:158,size:7,weight:600,opacity:.9,text:'Makro Pro'}]},
-  {id:'bakery',x:20,y:405,w:150,h:85,fill:'#8a7a3f',lines:[
-    {dx:8,dy:40,size:24,weight:800,text:'เบเกอรี่'},
-    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Bakery'}]},
-  {id:'cashier',x:180,y:405,w:220,h:85,fill:'#52b788',lines:[
-    {dx:8,dy:40,size:24,weight:800,text:'แคชเชียร์'},
-    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Cashier'}]},
-  {id:'icecream',x:410,y:405,w:95,h:85,fill:'#19bcd6',lines:[
-    {dx:8,dy:36,size:20,weight:800,text:'ไอศกรีม'},
-    {dx:8,dy:58,size:16,weight:600,opacity:.95,text:'Ice Cream'}]},
-  {id:'premium',x:515,y:405,w:105,h:85,fill:'#8a97a3',lines:[
-    {dx:8,dy:33,size:17,weight:800,text:'จุดของแถม'},
-    {dx:8,dy:51,size:13,weight:600,opacity:.95,text:'Premium'}]},
+  {id:'butchery',x:20,y:20,w:190,h:75,fill:'#FBE4E4',lines:[
+    {dx:8,dy:27,size:15,weight:800,text:'เนื้อสัตว์และแช่แข็ง',color:'#8B3A3A'},
+    {dx:8,dy:44,size:12,weight:600,opacity:.95,text:'Butchery & Frozen',color:'#B06A6A'}]},
+  {id:'snack',x:220,y:20,w:75,h:75,fill:'#E3F6E8',lines:[
+    {dx:8,dy:36,size:24,weight:800,text:'ขนม',color:'#2F6B44'},
+    {dx:8,dy:62,size:19,weight:600,opacity:.95,text:'Snack',color:'#5A9470'}]},
+  {id:'winebeer',x:305,y:20,w:85,h:75,fill:'#DFF3F3',lines:[
+    {dx:8,dy:18,size:12,weight:800,text:'ไวน์/เบียร์',color:'#1F6B6B'},
+    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Wine & Beer',color:'#4A9494'}]},
+  {id:'drink',x:400,y:20,w:135,h:75,fill:'#EAE4F8',lines:[
+    {dx:8,dy:29,size:23,weight:800,text:'เครื่องดื่ม',color:'#5B3E96'},
+    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Drink',color:'#8A72C0'}]},
+  {id:'fishseafood',x:20,y:105,w:190,h:85,fill:'#DEEBFA',lines:[
+    {dx:8,dy:29,size:23,weight:800,text:'ปลา/อาหารทะเล',color:'#2A5C93'},
+    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Fish & Seafood',color:'#5F8CC0'}]},
+  {id:'grilledchicken',x:220,y:105,w:95,h:65,fill:'#FAEBDA',lines:[
+    {dx:8,dy:18,size:12,weight:800,text:'ไก่ย่าง',color:'#8A5A25'},
+    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Grilled Chicken',color:'#B3874F'}]},
+  {id:'dryfood',x:325,y:105,w:210,h:135,fill:'#FBE1EC',lines:[
+    {dx:8,dy:45,size:24,weight:800,text:'Dry Food',color:'#99406B'},
+    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 28-39',color:'#C36B96'}]},
+  {id:'condiments',x:20,y:200,w:190,h:50,fill:'#FAE0D8',lines:[
+    {dx:8,dy:20,size:14,weight:800,text:'เครื่องเทศ',color:'#9A4A2E'},
+    {dx:8,dy:35,size:11,weight:600,opacity:.95,text:'Condiments / Spices',color:'#C17A58'}]},
+  {id:'fruitveg',x:20,y:260,w:190,h:135,fill:'#E5F3DC',lines:[
+    {dx:8,dy:45,size:24,weight:800,text:'ผัก-ผลไม้',color:'#4C7A2A'},
+    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Fruit & Veg',color:'#7CA858'}]},
+  {id:'nonfood',x:220,y:250,w:315,h:145,fill:'#E7E4F8',lines:[
+    {dx:8,dy:45,size:24,weight:800,text:'Non-Food',color:'#5749A0'},
+    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 1-28',color:'#8B80C8'}]},
+  {id:'o2o',x:545,y:105,w:75,h:290,fill:'#FBEED9',anchor:'middle',lines:[
+    {fx:0.5,dy:135,size:12,weight:800,text:'O2O',color:'#97701E'},
+    {fx:0.5,dy:148,size:9,weight:600,opacity:.95,text:'แผนกออนไลน์',color:'#B3934F'},
+    {fx:0.5,dy:158,size:7,weight:600,opacity:.9,text:'Makro Pro',color:'#C3AB78'}]},
+  {id:'bakery',x:20,y:405,w:150,h:85,fill:'#F3E7D6',lines:[
+    {dx:8,dy:40,size:24,weight:800,text:'เบเกอรี่',color:'#8A6A3C'},
+    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Bakery',color:'#B3966A'}]},
+  {id:'cashier',x:180,y:405,w:220,h:85,fill:'#DFF4EA',lines:[
+    {dx:8,dy:40,size:24,weight:800,text:'แคชเชียร์',color:'#237A56'},
+    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Cashier',color:'#5AA684'}]},
+  {id:'icecream',x:410,y:405,w:95,h:85,fill:'#DBF1F4',lines:[
+    {dx:8,dy:36,size:20,weight:800,text:'ไอศกรีม',color:'#1C7086'},
+    {dx:8,dy:58,size:16,weight:600,opacity:.95,text:'Ice Cream',color:'#4FA0B4'}]},
+  {id:'premium',x:515,y:405,w:105,h:85,fill:'#EAE7F0',lines:[
+    {dx:8,dy:33,size:17,weight:800,text:'จุดของแถม',color:'#5C5470'},
+    {dx:8,dy:51,size:13,weight:600,opacity:.95,text:'Premium',color:'#8A82A0'}]},
 ];
-const MAP_CORNER_DOTS=[[197,82],[282,82],[377,82],[522,82],[197,177],[302,157],[522,227],[197,237],[197,382],[522,382],[607,382],[157,477],[387,477],[492,477],[607,477]];
 
 let currentMapBlocks=JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
-let currentMapBgColor='#141a2e';
+let currentMapBgColor='#FCFBF9';
 let mapEditMode=false;
 let mapEditSnapshot=null;
 let mapEditBgSnapshot=null;
@@ -792,29 +791,27 @@ function mapLineMarkup(b,l){
   const y=b.y+l.dy;
   const anchorAttr=isMid ? ' text-anchor="middle"' : '';
   const opAttr=l.opacity!==undefined ? ' fill-opacity="'+l.opacity+'"' : '';
-  const strokeStyle=l.weight>=800 ? ' style="paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:'+(l.size>=20?'2.5':'2')+'px"' : '';
+  const color=l.color||b.textColor||'#3a3a3a';
   const dataAttr=' data-id="'+b.id+'" data-dx="'+dx+'" data-dy="'+l.dy+'" data-fx="'+fx+'" data-mid="'+(isMid?'1':'0')+'"';
-  return '<text'+dataAttr+' x="'+x+'" y="'+y+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="#fff"'+opAttr+anchorAttr+strokeStyle+'>'+escapeHtml(l.text)+'</text>';
+  return '<text'+dataAttr+' x="'+x+'" y="'+y+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="'+color+'"'+opAttr+anchorAttr+'>'+escapeHtml(l.text)+'</text>';
 }
 
 function mapBlockMarkup(b,editable){
   const lines=b.lines.map(l=>mapLineMarkup(b,l)).join('');
   const handle=editable ? '<rect class="resize-handle" data-id="'+b.id+'" x="'+(b.x+b.w-16)+'" y="'+(b.y+b.h-16)+'" width="20" height="20" rx="5" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>' : '';
   const isSelected=editable && b.id===selectedBlockId;
-  const selStroke=isSelected ? ' stroke="#fff" stroke-width="3" stroke-dasharray="6 4"' : '';
+  const selStroke=isSelected ? ' stroke="#1a1a1a" stroke-width="2.5" stroke-dasharray="6 4"' : '';
   const rectStyle=editable ? ' style="cursor:move;touch-action:none"' : '';
-  return '<g><rect class="map-block-rect" data-id="'+b.id+'" x="'+b.x+'" y="'+b.y+'" width="'+b.w+'" height="'+b.h+'" rx="8" fill="'+b.fill+'"'+selStroke+rectStyle+'/>'+lines+handle+'</g>';
+  return '<g><rect class="map-block-rect" data-id="'+b.id+'" x="'+b.x+'" y="'+b.y+'" width="'+b.w+'" height="'+b.h+'"'+selStroke+' fill="'+b.fill+'"'+rectStyle+'/>'+lines+handle+'</g>';
 }
 
 function renderMapSVG(blocks,editable){
   const blockMarkup=blocks.map(b=>mapBlockMarkup(b,editable)).join('');
-  const dots=editable ? '' : '<g fill="#ffffff" fill-opacity="0.55">'+MAP_CORNER_DOTS.map(d=>'<rect x="'+d[0]+'" y="'+d[1]+'" width="5" height="5" rx="1"/>').join('')+'</g>';
   return '<svg viewBox="0 0 '+MAP_VB_W+' '+MAP_VB_H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042">'+
-    '<rect x="8" y="8" width="624" height="522" rx="12" fill="'+currentMapBgColor+'" stroke="#0a0e1c" stroke-width="2"/>'+
+    '<rect x="8" y="8" width="624" height="522" fill="'+currentMapBgColor+'" stroke="#ECEAE6" stroke-width="1.5"/>'+
     '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+'</g>'+
-    dots+
-    '<text x="200" y="537" text-anchor="middle" font-size="13" fill="#9ca3af">▲ ทางเข้า</text>'+
-    '<text x="460" y="537" text-anchor="middle" font-size="13" fill="#9ca3af">▲ ทางออก</text>'+
+    '<text x="200" y="537" text-anchor="middle" font-size="13" fill="#B7B4AE">▲ ทางเข้า</text>'+
+    '<text x="460" y="537" text-anchor="middle" font-size="13" fill="#B7B4AE">▲ ทางออก</text>'+
     '</svg>';
 }
 
@@ -877,7 +874,7 @@ function openMapEditor(){
 }
 function cancelMapEdit(){
   currentMapBlocks=mapEditSnapshot || JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
-  currentMapBgColor=mapEditBgSnapshot || '#141a2e';
+  currentMapBgColor=mapEditBgSnapshot || '#FCFBF9';
   mapEditMode=false;
   mapDragState=null;
   selectedBlockId=null;
