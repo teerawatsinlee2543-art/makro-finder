@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -979,7 +979,7 @@ function promptAddQty(itemNo){
 }
 
 // ==== สแกนบาร์โค้ดสำหรับพาเลส ====
-let palletScanStream=null,palletScanRAF=null,palletScanMode=null,palletDetector=null;
+let palletScanControls=null,palletScanMode=null;
 function openPalletScan(mode){
   palletScanMode=mode;
   const overlay=document.getElementById('palletScanOverlay');
@@ -989,67 +989,43 @@ function openPalletScan(mode){
   hint.style.display='block';
   document.getElementById('palletScanTitle').textContent=mode==='manage'?'สแกนเพื่อเพิ่ม/แก้ไข':'สแกนเพื่อลบสินค้า';
   overlay.style.display='flex';
-  if(!('BarcodeDetector' in window)){
-    err.textContent='อุปกรณ์นี้ไม่รองรับการสแกนบาร์โค้ด กรุณาใช้ Chrome บน Android หรือค้นหาด้วยมือแทน';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง กรุณาเปิดในเบราว์เซอร์ (Safari/Chrome) แทน';
     err.style.display='block';
     hint.style.display='none';
     return;
   }
-  try{
-    palletDetector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128']});
-  }catch(e){
-    err.textContent='เปิดตัวสแกนบาร์โค้ดไม่สำเร็จ';
-    err.style.display='block';
-    return;
-  }
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
-    .then(stream=>{
-      palletScanStream=stream;
-      const video=document.getElementById('palletScanVideo');
-      video.srcObject=stream;
-      video.play();
-      palletScanRAF=requestAnimationFrame(palletScanTick);
-    })
-    .catch(()=>{
-      err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้อง';
-      err.style.display='block';
-      hint.style.display='none';
-    });
-}
-function palletScanTick(){
   const video=document.getElementById('palletScanVideo');
-  if(video && video.readyState===video.HAVE_ENOUGH_DATA && palletDetector){
-    palletDetector.detect(video).then(codes=>{
-      if(codes && codes.length){
-        handlePalletScanCode(codes[0].rawValue);
-      } else {
-        palletScanRAF=requestAnimationFrame(palletScanTick);
-      }
-    }).catch(()=>{ palletScanRAF=requestAnimationFrame(palletScanTick); });
-  } else {
-    palletScanRAF=requestAnimationFrame(palletScanTick);
-  }
+  getZXingReader().decodeFromConstraints({video:{facingMode:{ideal:'environment'}}},video,(result)=>{
+    if(result){
+      handlePalletScanCode(result.getText().trim());
+    }
+  }).then(controls=>{
+    palletScanControls=controls;
+    if(overlay.style.display==='none'){ controls.stop(); palletScanControls=null; }
+  }).catch(()=>{
+    err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้อง';
+    err.style.display='block';
+    hint.style.display='none';
+  });
 }
 function closePalletScan(){
   document.getElementById('palletScanOverlay').style.display='none';
-  if(palletScanRAF)cancelAnimationFrame(palletScanRAF);
-  if(palletScanStream){ palletScanStream.getTracks().forEach(t=>t.stop()); palletScanStream=null; }
-  palletScanRAF=null;
+  if(palletScanControls){ palletScanControls.stop(); palletScanControls=null; }
 }
 function handlePalletScanCode(code){
-  if(palletScanRAF)cancelAnimationFrame(palletScanRAF);
-  palletScanRAF=null;
-  const item=PRODUCTS_BY_KEY.find(x=>x.barcode===code);
+  if(palletScanControls){ palletScanControls.stop(); palletScanControls=null; }
+  const item=PRODUCTS_BY_KEY.find(x=>x.barcode===code||x.itemNo===code);
   if(!item){
     showPalletToast('ไม่พบสินค้านี้ในระบบ');
-    palletScanRAF=requestAnimationFrame(palletScanTick);
+    openPalletScan(palletScanMode);
     return;
   }
   if(palletScanMode==='delete-only'){
     const existing=currentPallet && currentPallet.items.find(x=>x.itemNo===item.itemNo);
     if(!existing){
       showPalletToast('ไม่พบสินค้านี้ในพาเลส');
-      palletScanRAF=requestAnimationFrame(palletScanTick);
+      openPalletScan(palletScanMode);
       return;
     }
     if(confirm('ลบ "'+item.desc+'" ออกจากพาเลส?')){
@@ -1062,7 +1038,6 @@ function handlePalletScanCode(code){
     return;
   }
   // mode === 'manage'
-  if(palletScanStream){ palletScanStream.getTracks().forEach(t=>t.stop()); palletScanStream=null; }
   renderPalletScanFocusCard(item);
 }
 function renderPalletScanFocusCard(item){
@@ -1117,15 +1092,7 @@ function focusScanNext(){
     '<div class="pallet-scan-guide"></div></div>'+
     '<p style="font-size:13px;color:var(--color-text-secondary);text-align:center" id="palletScanHint">เล็งกล้องไปที่บาร์โค้ดสินค้า</p>'+
     '<p style="font-size:13px;color:#A32D2D;text-align:center;display:none" id="palletScanError"></p>';
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
-    .then(stream=>{
-      palletScanStream=stream;
-      const video=document.getElementById('palletScanVideo');
-      video.srcObject=stream;
-      video.play();
-      palletScanRAF=requestAnimationFrame(palletScanTick);
-    })
-    .catch(()=>{ showPalletToast('ไม่สามารถเข้าถึงกล้องได้'); closePalletScan(); });
+  openPalletScan(palletScanMode);
 }
 // ==== จบส่วนจัดการพาเลส ====
 
@@ -1612,52 +1579,51 @@ function clearSearch(){
   document.getElementById('resultView').classList.remove('show');
 }
 
-let scanStream=null,scanRAF=null;
+let zxingReader=null;
+function getZXingReader(){
+  if(!zxingReader){
+    const hints=new Map();
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[
+      ZXing.BarcodeFormat.QR_CODE,
+      ZXing.BarcodeFormat.EAN_13,
+      ZXing.BarcodeFormat.EAN_8,
+      ZXing.BarcodeFormat.UPC_A,
+      ZXing.BarcodeFormat.UPC_E,
+      ZXing.BarcodeFormat.CODE_128,
+      ZXing.BarcodeFormat.CODE_39
+    ]);
+    zxingReader=new ZXing.BrowserMultiFormatReader(hints);
+  }
+  return zxingReader;
+}
+let scanControls=null;
 function openScanner(){
   const overlay=document.getElementById('scanOverlay');
   const err=document.getElementById('scanError');
   err.style.display='none';err.textContent='';
   overlay.style.display='flex';
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง';
+    err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง กรุณาเปิดลิงก์นี้ในเบราว์เซอร์ (Safari/Chrome) แทน';
     err.style.display='block';
     return;
   }
-  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}})
-    .then(stream=>{
-      scanStream=stream;
-      const video=document.getElementById('scanVideo');
-      video.srcObject=stream;
-      video.play();
-      scanRAF=requestAnimationFrame(scanTick);
-    })
-    .catch(()=>{
-      err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้องในเบราว์เซอร์';
-      err.style.display='block';
-    });
-}
-function scanTick(){
   const video=document.getElementById('scanVideo');
-  const canvas=document.getElementById('scanCanvas');
-  if(video.readyState===video.HAVE_ENOUGH_DATA){
-    canvas.width=video.videoWidth;canvas.height=video.videoHeight;
-    const ctx=canvas.getContext('2d');
-    ctx.drawImage(video,0,0,canvas.width,canvas.height);
-    const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-    const code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
-    if(code&&code.data){
+  getZXingReader().decodeFromConstraints({video:{facingMode:{ideal:'environment'}}},video,(result)=>{
+    if(result){
       closeScanner();
-      search(code.data.trim());
-      return;
+      search(result.getText().trim());
     }
-  }
-  scanRAF=requestAnimationFrame(scanTick);
+  }).then(controls=>{
+    scanControls=controls;
+    if(overlay.style.display==='none'){ controls.stop(); scanControls=null; }
+  }).catch(()=>{
+    err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้องในเบราว์เซอร์';
+    err.style.display='block';
+  });
 }
 function closeScanner(){
   document.getElementById('scanOverlay').style.display='none';
-  if(scanRAF)cancelAnimationFrame(scanRAF);
-  scanRAF=null;
-  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+  if(scanControls){ scanControls.stop(); scanControls=null; }
 }
 
 function openMapFullscreen(){
