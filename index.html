@@ -735,11 +735,8 @@ async function persistStockQtyKey(key,newQty){
   STOCK_QTY[key]=newQty;
   try{ localStorage.setItem('mf_stock_qty',JSON.stringify(STOCK_QTY)); }catch(e){}
   if(stockQtyFirestoreDocRef){
-    try{
-      const patch={updatedAt:Date.now(),updatedBy:currentSessionLabel()};
-      patch['qty.'+key]=newQty;
-      await stockQtyFirestoreDocRef.set(patch,{merge:true});
-    }catch(e){ console.error('บันทึกจำนวนสต็อกไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); }
+    try{ await stockQtyFirestoreDocRef.set({qty:STOCK_QTY,updatedAt:Date.now(),updatedBy:currentSessionLabel()}); }
+    catch(e){ console.error('บันทึกจำนวนสต็อกไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); }
   }
 }
 function handleStockScan(code){
