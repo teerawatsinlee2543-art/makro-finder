@@ -82,9 +82,7 @@ body{margin:0;padding:0}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
 .loc-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .loc-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success)}
-.show-on-map-btn{display:flex;align-items:center;gap:6px;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px}
-.show-on-map-btn:hover{background:var(--brand-red-dark)}
-.show-on-map-approx{display:block;font-size:11px;color:var(--color-text-tertiary);margin:-8px 0 14px}
+#showOnMapInline{margin-bottom:16px}
 .loc-pill.sec{background:var(--color-background-secondary);color:var(--color-text-secondary);border-color:var(--color-border-tertiary)}
 .loc-pill i{font-size:15px}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
@@ -137,8 +135,8 @@ body{margin:0;padding:0}
 .map-edit-open-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
 .map-edit-open-btn:hover{background:var(--color-border-tertiary)}
 #palletOpenBar{margin-bottom:16px}
-.pallet-open-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);color:var(--color-text-primary);border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
-.pallet-open-btn:hover{background:var(--color-border-tertiary)}
+.pallet-open-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#FDECC8;border:1px solid #F0C878;color:#8A5A0E;border-radius:10px;padding:11px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.pallet-open-btn:hover{background:#FBE2AC}
 .pallet-overlay{position:fixed;inset:0;background:rgba(8,11,22,.6);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
 .pallet-overlay-content{width:100%;max-width:480px;max-height:92vh;background:var(--color-background-primary);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
 .pallet-header{background:var(--brand-red);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
@@ -483,12 +481,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div id="employeeFeedbackSection" style="display:none">
-        <div class="section-label">ข้อเสนอแนะจากลูกค้า</div>
-        <div class="fb-admin-toolbar">
-          <span class="fb-admin-count" id="fbCount">0 รายการ</span>
-          <button class="fb-export-btn" onclick="exportFeedbackExcel()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
+        <div class="feedback-card">
+          <div class="feedback-card-title"><i class="ti ti-message-2" aria-hidden="true"></i> ข้อเสนอแนะจากลูกค้า</div>
+          <div class="fb-admin-toolbar">
+            <span class="fb-admin-count" id="fbCount">0 รายการ</span>
+            <button class="fb-export-btn" onclick="exportFeedbackExcel()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
+          </div>
+          <div id="fbList" class="fb-list"></div>
         </div>
-        <div id="fbList" class="fb-list"></div>
       </div>
     </div>
 
@@ -509,11 +509,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
               </div>
             </div>
             <div class="loc-row" id="rLoc"></div>
-            <div id="showOnMapWrap" style="display:none">
-              <button class="show-on-map-btn" id="showOnMapBtn" onclick="showItemOnMap()"><i class="ti ti-map-pin" aria-hidden="true"></i> ดูตำแหน่งบนแผนที่</button>
-              <span class="show-on-map-approx" id="showOnMapApprox" style="display:none">ตำแหน่งโดยประมาณ (ตามหมวดสินค้า)</span>
-            </div>
           </div>
+        </div>
+        <div id="showOnMapInline" style="display:none">
+          <div class="map-label-row">
+            <span class="map-label"><i class="ti ti-map-pin" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>ตำแหน่งสินค้านี้</span>
+            <span class="map-hl-label" id="showOnMapApprox" style="display:none">ตำแหน่งโดยประมาณ</span>
+          </div>
+          <div class="store-map" id="showOnMapSvg" onclick="openMapFullscreen()"></div>
         </div>
         <div class="promo-box" id="promoBlock">
           <i class="ti ti-discount-2" aria-hidden="true"></i>
@@ -952,20 +955,19 @@ function findMapBlockForItem(item){
 }
 let showOnMapMatch=null;
 function updateShowOnMapButton(item){
-  const wrap=document.getElementById('showOnMapWrap');
+  const wrap=document.getElementById('showOnMapInline');
   const approx=document.getElementById('showOnMapApprox');
+  const svgHost=document.getElementById('showOnMapSvg');
   showOnMapMatch=findMapBlockForItem(item);
   if(showOnMapMatch){
+    mapHighlightBlockId=showOnMapMatch.blockId;
     wrap.style.display='block';
     approx.style.display=showOnMapMatch.exact?'none':'block';
+    svgHost.innerHTML=renderMapSVG(currentMapBlocks,false,savedMapRotation,mapHighlightBlockId);
   } else {
+    mapHighlightBlockId=null;
     wrap.style.display='none';
   }
-}
-function showItemOnMap(){
-  if(!showOnMapMatch)return;
-  mapHighlightBlockId=showOnMapMatch.blockId;
-  openMapFullscreen();
 }
 
 // ==== ตำแหน่งฉันแบบ live ด้วย GPS จริง (คลาดเคลื่อนได้เมื่ออยู่ในอาคาร ต้องตั้งจุดอ้างอิงก่อนใช้งาน) ====
@@ -2383,6 +2385,8 @@ function clearSearch(){
   document.getElementById('clr').style.display='none';
   document.getElementById('homeView').style.display='block';
   document.getElementById('resultView').classList.remove('show');
+  mapHighlightBlockId=null;
+  showOnMapMatch=null;
 }
 
 let zxingReader=null;
