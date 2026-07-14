@@ -125,7 +125,7 @@ body{margin:0;padding:0}
 .emp-qty-badge{font-size:11px;font-weight:700;color:#95610A;background:#FFE7BE;padding:2px 8px;border-radius:20px}
 .emp-stock-addbtn{margin-top:2px;width:100%;font-size:12px;padding:8px;border-radius:8px;border:1px dashed #F0B95C;background:transparent;color:#95610A;cursor:pointer;font-family:inherit}
 .emp-stock-scanbtn{margin-top:6px;width:100%;font-size:12px;padding:8px;border-radius:8px;border:none;background:#FFB800;color:#4a2e00;cursor:pointer;font-family:inherit;font-weight:600}
-.map-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2000;padding:16px}
+.map-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;z-index:2000;padding:16px}
 .map-overlay-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.14);border:none;color:#fff;width:40px;height:40px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1}
 .map-overlay-content{width:100%;max-width:min(1100px,94vw);max-height:100%}
 .map-overlay-content svg{display:block;width:100%;height:auto;max-height:calc(100dvh - 110px)}
@@ -199,6 +199,13 @@ body{margin:0;padding:0}
 .map-edit-add-btn:hover,.map-edit-rename-btn:hover{background:rgba(255,255,255,.22)}
 .map-edit-delete-btn{background:rgba(239,68,68,.25);color:#fecaca}
 .map-edit-delete-btn:hover{background:rgba(239,68,68,.4)}
+.map-rotate-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:min(560px,94vw);flex-wrap:wrap}
+.map-rotate-btn{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
+.map-rotate-btn:hover{background:rgba(255,255,255,.22)}
+.map-rotate-bar input[type=range]{flex:1;min-width:120px;max-width:220px;accent-color:var(--brand-red)}
+.map-rotate-value{color:#e5e7eb;font-size:12.5px;font-weight:600;min-width:34px;text-align:center}
+.map-rotate-reset{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.map-rotate-reset:hover{background:rgba(255,255,255,.22)}
 .scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
 .scan-box{width:100%;max-width:420px}
 .scan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -545,6 +552,13 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div class="map-overlay" id="mapOverlay" onclick="closeMapFullscreen()">
   <button class="map-overlay-close" onclick="closeMapFullscreen()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
   <div class="map-overlay-content" id="mapOverlayContent" onclick="event.stopPropagation()"></div>
+  <div class="map-rotate-bar" id="mapRotateBar" onclick="event.stopPropagation()">
+    <button class="map-rotate-btn" onclick="rotateMapBy(-15)" aria-label="หมุนซ้าย"><i class="ti ti-rotate-2" aria-hidden="true" style="transform:scaleX(-1);display:inline-block"></i></button>
+    <input type="range" id="mapRotationSlider" min="0" max="360" value="25" oninput="onMapRotationSlider(this.value)">
+    <button class="map-rotate-btn" onclick="rotateMapBy(15)" aria-label="หมุนขวา"><i class="ti ti-rotate-clockwise-2" aria-hidden="true"></i></button>
+    <span class="map-rotate-value" id="mapRotationValue">25°</span>
+    <button class="map-rotate-reset" onclick="resetMapRotation()">รีเซ็ตมุมมอง</button>
+  </div>
   <div class="map-edit-bar" id="mapEditBar" onclick="event.stopPropagation()">
     <p class="map-edit-hint" id="mapEditHint">ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · แตะกล่องเพื่อเลือก</p>
     <div class="map-edit-bar-row map-edit-tools-row">
@@ -553,7 +567,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
     <div class="map-edit-bar-row map-edit-selected-row" id="mapSelectedRow" style="display:none">
       <label class="map-edit-color-label">สีกล่อง <input type="color" id="mapBlockColorInput" onchange="onMapBlockColorChange(this.value)"></label>
-      <button class="map-edit-rename-btn" onclick="renameSelectedBlock()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ข้อความ</button>
+      <label class="map-edit-color-label">ความสูง <input type="number" id="mapBlockHeightInput" min="20" max="130" step="1" style="width:56px" onchange="onMapBlockHeightChange(this.value)"></label>
+      <button class="map-edit-rename-btn" onclick="editSelectedBlockText()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ข้อความ/สี/ขนาด</button>
       <button class="map-edit-delete-btn" onclick="deleteSelectedBlock()"><i class="ti ti-trash" aria-hidden="true"></i> ลบกล่อง</button>
     </div>
     <div class="map-edit-bar-row">
@@ -615,62 +630,85 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
 <script>
 /* ---------- Store map: data model, rendering, employee editing ---------- */
-const MAP_VB_W=640, MAP_VB_H=545, MAP_MIN_W=40, MAP_MIN_H=30;
+const MAP_VB_W=640, MAP_VB_H=545, MAP_MIN_W=40, MAP_MIN_H=30, MAP_MIN_HEIGHT=20, MAP_MAX_HEIGHT=130;
+const MAP_FLOOR={x:8,y:8,w:624,h:522};
+const MAP_FLOOR_CX=MAP_FLOOR.x+MAP_FLOOR.w/2, MAP_FLOOR_CY=MAP_FLOOR.y+MAP_FLOOR.h/2;
+const MAP_ISO_COS=Math.cos(Math.PI/6), MAP_ISO_SIN=Math.sin(Math.PI/6);
+function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,count,startNum,fill,textColor,height){
+  const gap=4;
+  const w=((bx1-bx0)-gap*(count-1))/count;
+  const arr=[];
+  for(let i=0;i<count;i++){
+    const x0=Math.round(bx0+i*(w+gap));
+    const n1=startNum+i*2, n2=n1+1;
+    arr.push({
+      id:idPrefix+n1+'_'+n2, x:x0, y:by0, w:Math.round(w), h:by1-by0, fill:fill, height:height,
+      lines:[{dx:Math.max(1,w/2-9), dy:(by1-by0)-8, size:7.5, weight:800, text:n1+'-'+n2, color:textColor}]
+    });
+  }
+  return arr;
+}
 const DEFAULT_MAP_BLOCKS=[
-  {id:'butchery',x:20,y:20,w:190,h:75,fill:'#FBE4E4',lines:[
+  {id:'butchery',x:20,y:20,w:190,h:75,fill:'#FBE4E4',height:54,lines:[
     {dx:8,dy:27,size:15,weight:800,text:'เนื้อสัตว์และแช่แข็ง',color:'#8B3A3A'},
     {dx:8,dy:44,size:12,weight:600,opacity:.95,text:'Butchery & Frozen',color:'#B06A6A'}]},
-  {id:'snack',x:220,y:20,w:75,h:75,fill:'#E3F6E8',lines:[
+  {id:'snack',x:220,y:20,w:75,h:75,fill:'#E3F6E8',height:54,lines:[
     {dx:8,dy:36,size:24,weight:800,text:'ขนม',color:'#2F6B44'},
     {dx:8,dy:62,size:19,weight:600,opacity:.95,text:'Snack',color:'#5A9470'}]},
-  {id:'winebeer',x:305,y:20,w:85,h:75,fill:'#DFF3F3',lines:[
+  {id:'winebeer',x:305,y:20,w:85,h:75,fill:'#DFF3F3',height:54,lines:[
     {dx:8,dy:18,size:12,weight:800,text:'ไวน์/เบียร์',color:'#1F6B6B'},
     {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Wine & Beer',color:'#4A9494'}]},
-  {id:'drink',x:400,y:20,w:135,h:75,fill:'#EAE4F8',lines:[
+  {id:'drink',x:400,y:20,w:135,h:75,fill:'#EAE4F8',height:54,lines:[
     {dx:8,dy:29,size:23,weight:800,text:'เครื่องดื่ม',color:'#5B3E96'},
     {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Drink',color:'#8A72C0'}]},
-  {id:'fishseafood',x:20,y:105,w:190,h:85,fill:'#DEEBFA',lines:[
+  {id:'fishseafood',x:20,y:105,w:190,h:85,fill:'#DEEBFA',height:54,lines:[
     {dx:8,dy:29,size:23,weight:800,text:'ปลา/อาหารทะเล',color:'#2A5C93'},
     {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Fish & Seafood',color:'#5F8CC0'}]},
-  {id:'grilledchicken',x:220,y:105,w:95,h:65,fill:'#FAEBDA',lines:[
+  {id:'grilledchicken',x:220,y:105,w:95,h:65,fill:'#FAEBDA',height:54,lines:[
     {dx:8,dy:18,size:12,weight:800,text:'ไก่ย่าง',color:'#8A5A25'},
     {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Grilled Chicken',color:'#B3874F'}]},
-  {id:'dryfood',x:325,y:105,w:210,h:135,fill:'#FBE1EC',lines:[
-    {dx:8,dy:45,size:24,weight:800,text:'Dry Food',color:'#99406B'},
-    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 28-39',color:'#C36B96'}]},
-  {id:'condiments',x:20,y:200,w:190,h:50,fill:'#FAE0D8',lines:[
+  {id:'condiments',x:20,y:200,w:190,h:50,fill:'#FAE0D8',height:54,lines:[
     {dx:8,dy:20,size:14,weight:800,text:'เครื่องเทศ',color:'#9A4A2E'},
     {dx:8,dy:35,size:11,weight:600,opacity:.95,text:'Condiments / Spices',color:'#C17A58'}]},
-  {id:'fruitveg',x:20,y:260,w:190,h:135,fill:'#E5F3DC',lines:[
+  {id:'fruitveg',x:20,y:260,w:190,h:135,fill:'#E5F3DC',height:54,lines:[
     {dx:8,dy:45,size:24,weight:800,text:'ผัก-ผลไม้',color:'#4C7A2A'},
     {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Fruit & Veg',color:'#7CA858'}]},
-  {id:'nonfood',x:220,y:250,w:315,h:145,fill:'#E7E4F8',lines:[
-    {dx:8,dy:45,size:24,weight:800,text:'Non-Food',color:'#5749A0'},
-    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Loc. 1-28',color:'#8B80C8'}]},
-  {id:'o2o',x:545,y:105,w:75,h:290,fill:'#FBEED9',anchor:'middle',lines:[
+  {id:'o2o',x:545,y:105,w:75,h:290,fill:'#FBEED9',height:70,anchor:'middle',lines:[
     {fx:0.5,dy:135,size:12,weight:800,text:'O2O',color:'#97701E'},
     {fx:0.5,dy:148,size:9,weight:600,opacity:.95,text:'แผนกออนไลน์',color:'#B3934F'},
     {fx:0.5,dy:158,size:7,weight:600,opacity:.9,text:'Makro Pro',color:'#C3AB78'}]},
-  {id:'bakery',x:20,y:405,w:150,h:85,fill:'#F3E7D6',lines:[
+  {id:'bakery',x:20,y:405,w:150,h:85,fill:'#F3E7D6',height:54,lines:[
     {dx:8,dy:40,size:24,weight:800,text:'เบเกอรี่',color:'#8A6A3C'},
     {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Bakery',color:'#B3966A'}]},
-  {id:'cashier',x:180,y:405,w:220,h:85,fill:'#DFF4EA',lines:[
+  {id:'cashier',x:180,y:405,w:220,h:85,fill:'#DFF4EA',height:30,lines:[
     {dx:8,dy:40,size:24,weight:800,text:'แคชเชียร์',color:'#237A56'},
     {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Cashier',color:'#5AA684'}]},
-  {id:'icecream',x:410,y:405,w:95,h:85,fill:'#DBF1F4',lines:[
+  {id:'icecream',x:410,y:405,w:95,h:85,fill:'#DBF1F4',height:54,lines:[
     {dx:8,dy:36,size:20,weight:800,text:'ไอศกรีม',color:'#1C7086'},
     {dx:8,dy:58,size:16,weight:600,opacity:.95,text:'Ice Cream',color:'#4FA0B4'}]},
-  {id:'premium',x:515,y:405,w:105,h:85,fill:'#EAE7F0',lines:[
+  {id:'premium',x:515,y:405,w:105,h:85,fill:'#EAE7F0',height:54,lines:[
     {dx:8,dy:33,size:17,weight:800,text:'จุดของแถม',color:'#5C5470'},
     {dx:8,dy:51,size:13,weight:600,opacity:.95,text:'Premium',color:'#8A82A0'}]},
-];
+].concat(
+  generateAisleGroup('dryfood_',325,105,535,240,6,28,'#FBE1EC','#99406B',60)
+).concat(
+  generateAisleGroup('nonfood_',220,250,535,395,14,1,'#E7E4F8','#5749A0',60)
+);
+const MAP_ZONE_LABELS={
+  dryfood_:{main:'Dry Food',sub:'Loc. 28-39',color:'#99406B',subColor:'#C36B96'},
+  nonfood_:{main:'Non-Food',sub:'Loc. 1-28',color:'#5749A0',subColor:'#8B80C8'}
+};
 
 let currentMapBlocks=JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
 let currentMapBgColor='#FCFBF9';
+let savedMapRotation=25;
+let currentMapRotation=25;
 let mapEditMode=false;
 let mapEditSnapshot=null;
 let mapEditBgSnapshot=null;
+let mapEditRotationSnapshot=25;
 let mapDragState=null;
+let mapRotateDragState=null;
 let selectedBlockId=null;
 
 const FIREBASE_CONFIG={
@@ -713,41 +751,132 @@ function jsStr(s){
   return "'"+String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
 }
 
-function mapLineMarkup(b,l){
+// ==== ผังร้าน 3D แบบไอโซเมตริกที่หมุนได้ 360 องศา ====
+function isoProject(x,y,z,rotationDeg){
+  const theta=(rotationDeg||0)*Math.PI/180;
+  const rx=x-MAP_FLOOR_CX, ry=y-MAP_FLOOR_CY;
+  const rotX=rx*Math.cos(theta)-ry*Math.sin(theta);
+  const rotY=rx*Math.sin(theta)+ry*Math.cos(theta);
+  return [ (rotX-rotY)*MAP_ISO_COS, (rotX+rotY)*MAP_ISO_SIN - z ];
+}
+function isoUnproject(screenX,screenY,z,rotationDeg){
+  const theta=(rotationDeg||0)*Math.PI/180;
+  const a=screenX/MAP_ISO_COS;
+  const b=(screenY+z)/MAP_ISO_SIN;
+  const rotX=(a+b)/2, rotY=(b-a)/2;
+  const worldX=rotX*Math.cos(-theta)-rotY*Math.sin(-theta)+MAP_FLOOR_CX;
+  const worldY=rotX*Math.sin(-theta)+rotY*Math.cos(-theta)+MAP_FLOOR_CY;
+  return [worldX,worldY];
+}
+function shadeColor(hex,amt){
+  const c=String(hex).replace('#','');
+  if(c.length!==6) return hex;
+  const num=parseInt(c,16);
+  let r=(num>>16)&255, g=(num>>8)&255, b=num&255;
+  r=Math.max(0,Math.round(r*(1-amt))); g=Math.max(0,Math.round(g*(1-amt))); b=Math.max(0,Math.round(b*(1-amt)));
+  return 'rgb('+r+','+g+','+b+')';
+}
+function polyPts(pts){ return pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '); }
+
+function mapLineMarkup(b,l,rotationDeg,H){
   const isMid=b.anchor==='middle';
   const fx=l.fx!==undefined?l.fx:0.5;
   const dx=l.dx!==undefined?l.dx:8;
-  const x=isMid ? (b.x+b.w*fx) : (b.x+dx);
-  const y=b.y+l.dy;
-  const anchorAttr=isMid ? ' text-anchor="middle"' : '';
+  const wx=isMid ? (b.x+b.w*fx) : (b.x+dx);
+  const wy=b.y+l.dy;
+  const p=isoProject(wx,wy,H,rotationDeg);
   const opAttr=l.opacity!==undefined ? ' fill-opacity="'+l.opacity+'"' : '';
   const color=l.color||b.textColor||'#3a3a3a';
   const dataAttr=' data-id="'+b.id+'" data-dx="'+dx+'" data-dy="'+l.dy+'" data-fx="'+fx+'" data-mid="'+(isMid?'1':'0')+'"';
-  return '<text'+dataAttr+' x="'+x+'" y="'+y+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="'+color+'"'+opAttr+anchorAttr+'>'+escapeHtml(l.text)+'</text>';
+  return '<text'+dataAttr+' x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="'+color+'" text-anchor="middle"'+opAttr+'>'+escapeHtml(l.text)+'</text>';
 }
 
-function mapBlockMarkup(b,editable){
-  const lines=b.lines.map(l=>mapLineMarkup(b,l)).join('');
-  const handle=editable ? '<rect class="resize-handle" data-id="'+b.id+'" x="'+(b.x+b.w-16)+'" y="'+(b.y+b.h-16)+'" width="20" height="20" rx="5" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>' : '';
+function mapBlockPieces(b,editable,rotationDeg){
+  const H=b.height||54;
+  const x0=b.x,y0=b.y,x1=b.x+b.w,y1=b.y+b.h;
+  const top=[isoProject(x0,y0,H,rotationDeg),isoProject(x1,y0,H,rotationDeg),isoProject(x1,y1,H,rotationDeg),isoProject(x0,y1,H,rotationDeg)];
+  const right=[isoProject(x1,y0,H,rotationDeg),isoProject(x1,y1,H,rotationDeg),isoProject(x1,y1,0,rotationDeg),isoProject(x1,y0,0,rotationDeg)];
+  const front=[isoProject(x0,y1,H,rotationDeg),isoProject(x1,y1,H,rotationDeg),isoProject(x1,y1,0,rotationDeg),isoProject(x0,y1,0,rotationDeg)];
   const isSelected=editable && b.id===selectedBlockId;
-  const selStroke=isSelected ? ' stroke="#1a1a1a" stroke-width="2.5" stroke-dasharray="6 4"' : '';
+  const selStroke=isSelected ? ' stroke="#1a1a1a" stroke-width="2.5" stroke-dasharray="6 4"' : ' stroke="rgba(0,0,0,.10)" stroke-width="0.6"';
   const rectStyle=editable ? ' style="cursor:move;touch-action:none"' : '';
-  return '<g><rect class="map-block-rect" data-id="'+b.id+'" x="'+b.x+'" y="'+b.y+'" width="'+b.w+'" height="'+b.h+'"'+selStroke+' fill="'+b.fill+'"'+rectStyle+'/>'+lines+handle+'</g>';
+  const dataAttr=' class="map-block-rect" data-id="'+b.id+'"';
+  let markup='<polygon'+dataAttr+' points="'+polyPts(right)+'" fill="'+shadeColor(b.fill,0.26)+'" stroke="rgba(0,0,0,.10)" stroke-width="0.6"'+rectStyle+'/>'+
+    '<polygon'+dataAttr+' points="'+polyPts(front)+'" fill="'+shadeColor(b.fill,0.40)+'" stroke="rgba(0,0,0,.10)" stroke-width="0.6"'+rectStyle+'/>'+
+    '<polygon'+dataAttr+' points="'+polyPts(top)+'" fill="'+b.fill+'"'+selStroke+rectStyle+'/>';
+  markup+=(b.lines||[]).map(l=>mapLineMarkup(b,l,rotationDeg,H)).join('');
+  if(editable){
+    const handlePt=isoProject(x1,y1,H,rotationDeg);
+    markup+='<circle class="resize-handle" data-id="'+b.id+'" cx="'+handlePt[0].toFixed(1)+'" cy="'+handlePt[1].toFixed(1)+'" r="8" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>';
+  }
+  return {markup:'<g>'+markup+'</g>', depth: (function(){ const rTheta=(rotationDeg||0)*Math.PI/180; const rx=((x0+x1)/2)-MAP_FLOOR_CX, ry=((y0+y1)/2)-MAP_FLOOR_CY; return rx*Math.sin(rTheta)+ry*Math.cos(rTheta); })() };
 }
 
-function renderMapSVG(blocks,editable){
-  const blockMarkup=blocks.map(b=>mapBlockMarkup(b,editable)).join('');
-  return '<svg viewBox="0 0 '+MAP_VB_W+' '+MAP_VB_H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042">'+
-    '<rect x="8" y="8" width="624" height="522" fill="'+currentMapBgColor+'" stroke="#ECEAE6" stroke-width="1.5"/>'+
-    '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+'</g>'+
-    '<text x="200" y="537" text-anchor="middle" font-size="13" fill="#B7B4AE">▲ ทางเข้า</text>'+
-    '<text x="460" y="537" text-anchor="middle" font-size="13" fill="#B7B4AE">▲ ทางออก</text>'+
+function renderMapSVG(blocks,editable,rotationDeg){
+  const rot=rotationDeg!==undefined?rotationDeg:currentMapRotation;
+  const pieces=blocks.map(b=>mapBlockPieces(b,editable,rot));
+  pieces.sort((a,b)=>a.depth-b.depth);
+  const blockMarkup=pieces.map(p=>p.markup).join('');
+
+  const F=MAP_FLOOR;
+  const floorTop=[isoProject(F.x,F.y,0,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
+  const wallH=36;
+  const leftWall=[isoProject(F.x,F.y,wallH,rot),isoProject(F.x,F.y+F.h,wallH,rot),isoProject(F.x,F.y+F.h,0,rot),isoProject(F.x,F.y,0,rot)];
+  const backWall=[isoProject(F.x,F.y,wallH,rot),isoProject(F.x+F.w,F.y,wallH,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x,F.y,0,rot)];
+  const rightWall=[isoProject(F.x+F.w,F.y,wallH,rot),isoProject(F.x+F.w,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x+F.w,F.y,0,rot)];
+  const frontWall=[isoProject(F.x,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
+  // draw only the two walls facing away from the camera at the current rotation, so the shop floor stays visible (cutaway room look)
+  const wallCandidates=[
+    {poly:leftWall, normal:[-1,0]},
+    {poly:backWall, normal:[0,-1]},
+    {poly:rightWall, normal:[1,0]},
+    {poly:frontWall, normal:[0,1]}
+  ];
+  const theta=rot*Math.PI/180;
+  const camDir=[Math.sin(theta),Math.cos(theta)];
+  const wallsMarkup=wallCandidates.filter(w=>{
+    const dot=w.normal[0]*camDir[0]+w.normal[1]*camDir[1];
+    return dot<-0.05;
+  }).map(w=>'<polygon points="'+polyPts(w.poly)+'" fill="'+shadeColor(currentMapBgColor,0.06)+'" stroke="rgba(0,0,0,.06)" stroke-width="0.6"/>').join('');
+
+  const zoneLabels=Object.keys(MAP_ZONE_LABELS).map(prefix=>{
+    const group=blocks.filter(b=>b.id.indexOf(prefix)===0);
+    if(!group.length) return '';
+    const minX=Math.min(...group.map(b=>b.x)), maxX=Math.max(...group.map(b=>b.x+b.w));
+    const minY=Math.min(...group.map(b=>b.y)), maxH=Math.max(...group.map(b=>b.height||54));
+    const info=MAP_ZONE_LABELS[prefix];
+    const p=isoProject((minX+maxX)/2, minY-14, maxH, rot);
+    return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="800" fill="'+info.color+'">'+escapeHtml(info.main)+'</text>'+
+      '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+13).toFixed(1)+'" text-anchor="middle" font-size="9.5" font-weight="600" fill="'+info.subColor+'">'+escapeHtml(info.sub)+'</text>';
+  }).join('');
+
+  const allPts=[floorTop,leftWall,backWall,rightWall,frontWall].reduce((a,p)=>a.concat(p),[]);
+  blocks.forEach(b=>{
+    const H=b.height||54;
+    [[b.x,b.y,H],[b.x+b.w,b.y,H],[b.x+b.w,b.y+b.h,H],[b.x,b.y+b.h,H],[b.x,b.y+b.h,0],[b.x+b.w,b.y+b.h,0]].forEach(([x,y,z])=>{
+      allPts.push(isoProject(x,y,z,rot));
+    });
+  });
+  const entrance=isoProject(MAP_FLOOR.x+180,MAP_FLOOR.y+MAP_FLOOR.h+6,0,rot);
+  const exit=isoProject(MAP_FLOOR.x+420,MAP_FLOOR.y+MAP_FLOOR.h+6,0,rot);
+  allPts.push(entrance,exit);
+  const minX=Math.min(...allPts.map(p=>p[0])), maxX=Math.max(...allPts.map(p=>p[0]));
+  const minY=Math.min(...allPts.map(p=>p[1])), maxY=Math.max(...allPts.map(p=>p[1]));
+  const pad=26;
+  const vbX=minX-pad, vbY=minY-pad, vbW=(maxX-minX)+pad*2, vbH=(maxY-minY)+pad*2+18;
+
+  return '<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042 แบบ 3 มิติ">'+
+    '<polygon points="'+polyPts(floorTop)+'" fill="'+currentMapBgColor+'"/>'+
+    wallsMarkup+
+    '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+zoneLabels+'</g>'+
+    '<text x="'+entrance[0].toFixed(1)+'" y="'+(entrance[1]+14).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#B7B4AE">▲ ทางเข้า</text>'+
+    '<text x="'+exit[0].toFixed(1)+'" y="'+(exit[1]+14).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#B7B4AE">▲ ทางออก</text>'+
     '</svg>';
 }
 
 function refreshInlineMap(){
   const el=document.getElementById('storeMap');
-  if(el) el.innerHTML=renderMapSVG(currentMapBlocks,false);
+  if(el) el.innerHTML=renderMapSVG(currentMapBlocks,false,savedMapRotation);
 }
 
 // ==== โปรโมชั่น (แก้ไขได้สำหรับพนักงาน) ====
@@ -1281,11 +1410,13 @@ function focusScanNext(){
 
 function openMapFullscreen(){
   if(mapEditMode)return;
+  currentMapRotation=savedMapRotation;
   const content=document.getElementById('mapOverlayContent');
-  content.innerHTML=renderMapSVG(currentMapBlocks,false);
+  content.innerHTML=renderMapSVG(currentMapBlocks,false,currentMapRotation);
   document.getElementById('mapEditBar').style.display='none';
   document.getElementById('mapOverlay').classList.remove('editing');
   document.getElementById('mapOverlay').style.display='flex';
+  updateMapRotationUI();
 }
 function closeMapFullscreen(){
   if(mapEditMode){ cancelMapEdit(); return; }
@@ -1293,7 +1424,7 @@ function closeMapFullscreen(){
 }
 function rerenderMapEditorSVG(){
   const content=document.getElementById('mapOverlayContent');
-  if(content) content.innerHTML=renderMapSVG(currentMapBlocks,true);
+  if(content) content.innerHTML=renderMapSVG(currentMapBlocks,mapEditMode,currentMapRotation);
 }
 function updateSelectedBlockUI(){
   const row=document.getElementById('mapSelectedRow');
@@ -1302,22 +1433,40 @@ function updateSelectedBlockUI(){
   if(block){
     row.style.display='flex';
     document.getElementById('mapBlockColorInput').value=block.fill;
+    document.getElementById('mapBlockHeightInput').value=block.height||54;
   } else {
     row.style.display='none';
   }
 }
+function updateMapRotationUI(){
+  const val=document.getElementById('mapRotationValue');
+  if(val) val.textContent=Math.round(currentMapRotation)+'°';
+  const slider=document.getElementById('mapRotationSlider');
+  if(slider) slider.value=Math.round(currentMapRotation);
+}
+function normalizeDeg(d){ d=d%360; if(d<0)d+=360; return d; }
+function setMapRotation(deg){
+  currentMapRotation=normalizeDeg(deg);
+  rerenderMapEditorSVG();
+  updateMapRotationUI();
+}
+function rotateMapBy(delta){ setMapRotation(currentMapRotation+delta); }
+function onMapRotationSlider(val){ setMapRotation(parseFloat(val)||0); }
+function resetMapRotation(){ setMapRotation(25); }
 function openMapEditor(){
   mapEditMode=true;
   selectedBlockId=null;
   mapEditSnapshot=JSON.parse(JSON.stringify(currentMapBlocks));
   mapEditBgSnapshot=currentMapBgColor;
+  mapEditRotationSnapshot=currentMapRotation;
   const content=document.getElementById('mapOverlayContent');
-  content.innerHTML=renderMapSVG(currentMapBlocks,true);
+  content.innerHTML=renderMapSVG(currentMapBlocks,true,currentMapRotation);
   document.getElementById('mapEditHint').textContent=mapFirestoreDocRef
-    ? 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · แตะกล่องเพื่อเลือกและแก้สี/ข้อความ · บันทึกแล้วทุกคนจะเห็นเหมือนกัน'
-    : 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · แตะกล่องเพื่อเลือกและแก้สี/ข้อความ · ยังไม่ได้เชื่อมฐานข้อมูลกลาง บันทึกนี้จะเก็บไว้เฉพาะเครื่องนี้เท่านั้น';
+    ? 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · ลากพื้นหลังเพื่อหมุนมุมมอง · แตะกล่องเพื่อเลือกและแก้สี/ความสูง/ข้อความ · บันทึกแล้วทุกคนจะเห็นเหมือนกัน'
+    : 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · ลากพื้นหลังเพื่อหมุนมุมมอง · แตะกล่องเพื่อเลือกและแก้สี/ความสูง/ข้อความ · ยังไม่ได้เชื่อมฐานข้อมูลกลาง บันทึกนี้จะเก็บไว้เฉพาะเครื่องนี้เท่านั้น';
   document.getElementById('mapBgColorInput').value=currentMapBgColor;
   updateSelectedBlockUI();
+  updateMapRotationUI();
   document.getElementById('mapEditBar').style.display='flex';
   document.getElementById('mapOverlay').classList.add('editing');
   document.getElementById('mapOverlay').style.display='flex';
@@ -1325,8 +1474,10 @@ function openMapEditor(){
 function cancelMapEdit(){
   currentMapBlocks=mapEditSnapshot || JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
   currentMapBgColor=mapEditBgSnapshot || '#FCFBF9';
+  currentMapRotation=mapEditRotationSnapshot;
   mapEditMode=false;
   mapDragState=null;
+  mapRotateDragState=null;
   selectedBlockId=null;
   document.getElementById('mapEditBar').style.display='none';
   document.getElementById('mapOverlay').classList.remove('editing');
@@ -1336,18 +1487,20 @@ function cancelMapEdit(){
 async function saveMapEdit(){
   mapEditMode=false;
   mapDragState=null;
+  mapRotateDragState=null;
   selectedBlockId=null;
+  savedMapRotation=currentMapRotation;
   document.getElementById('mapEditBar').style.display='none';
   document.getElementById('mapOverlay').classList.remove('editing');
   document.getElementById('mapOverlay').style.display='none';
   refreshInlineMap();
-  await persistMapBlocks(currentMapBlocks,currentMapBgColor);
+  await persistMapBlocks(currentMapBlocks,currentMapBgColor,currentMapRotation);
 }
 function addMapBlock(){
   const text=prompt('ใส่ชื่อโซน/กล่องใหม่','โซนใหม่');
   if(text===null)return;
   const id='block_'+Date.now();
-  const newBlock={id:id,x:40,y:40,w:120,h:80,fill:'#4b5563',lines:[{dx:8,dy:30,size:16,weight:800,text:text||'โซนใหม่'}]};
+  const newBlock={id:id,x:40,y:40,w:120,h:80,height:54,fill:'#4b5563',lines:[{dx:8,dy:30,size:16,weight:800,text:text||'โซนใหม่',color:'#ffffff'}]};
   currentMapBlocks.push(newBlock);
   selectedBlockId=id;
   rerenderMapEditorSVG();
@@ -1361,14 +1514,39 @@ function deleteSelectedBlock(){
   rerenderMapEditorSVG();
   updateSelectedBlockUI();
 }
-function renameSelectedBlock(){
+function editSelectedBlockText(){
   const block=currentMapBlocks.find(b=>b.id===selectedBlockId);
   if(!block)return;
-  const current=block.lines.length ? block.lines[0].text : '';
-  const text=prompt('แก้ไขข้อความของกล่อง',current);
-  if(text===null)return;
-  if(!block.lines.length) block.lines=[{dx:8,dy:30,size:16,weight:800,text:text}];
-  else block.lines[0].text=text;
+  if(!block.lines.length) block.lines=[{dx:8,dy:30,size:16,weight:800,text:'',color:'#333333'}];
+  const main=block.lines[0];
+  let v=prompt('ข้อความหลัก:',main.text||'');
+  if(v===null)return;
+  main.text=v;
+  v=prompt('ขนาดตัวอักษรหลัก (px):',main.size||16);
+  if(v===null)return;
+  main.size=Math.max(6,Math.min(60,parseFloat(v)||main.size||16));
+  v=prompt('สีตัวอักษรหลัก (เช่น #333333):',main.color||'#333333');
+  if(v===null)return;
+  main.color=v.trim()||main.color;
+  if(block.lines[1]){
+    const sub=block.lines[1];
+    v=prompt('ข้อความรอง (เว้นว่างเพื่อไม่แสดง):',sub.text||'');
+    if(v===null)return;
+    if(!v){ block.lines.splice(1,1); }
+    else{
+      sub.text=v;
+      v=prompt('ขนาดตัวอักษรรอง (px):',sub.size||12);
+      if(v===null)return;
+      sub.size=Math.max(6,Math.min(40,parseFloat(v)||sub.size||12));
+      v=prompt('สีตัวอักษรรอง:',sub.color||'#666666');
+      if(v===null)return;
+      sub.color=v.trim()||sub.color;
+    }
+  } else {
+    v=prompt('เพิ่มข้อความรอง (เว้นว่างถ้าไม่ต้องการ):','');
+    if(v===null)return;
+    if(v) block.lines.push({dx:main.dx,dy:main.dy+18,size:11,weight:600,text:v,color:'#666666'});
+  }
   rerenderMapEditorSVG();
 }
 function onMapBgColorChange(color){
@@ -1379,9 +1557,13 @@ function onMapBlockColorChange(color){
   const block=currentMapBlocks.find(b=>b.id===selectedBlockId);
   if(!block)return;
   block.fill=color;
-  document.querySelectorAll('rect.map-block-rect[data-id="'+block.id+'"]').forEach(function(r){
-    r.setAttribute('fill',color);
-  });
+  rerenderMapEditorSVG();
+}
+function onMapBlockHeightChange(val){
+  const block=currentMapBlocks.find(b=>b.id===selectedBlockId);
+  if(!block)return;
+  block.height=Math.max(MAP_MIN_HEIGHT,Math.min(MAP_MAX_HEIGHT,parseFloat(val)||block.height||54));
+  rerenderMapEditorSVG();
 }
 function selectMapBlock(id){
   selectedBlockId=id;
@@ -1395,61 +1577,51 @@ function deselectMapBlock(){
   updateSelectedBlockUI();
 }
 
-function applyBlockGeometry(block){
-  document.querySelectorAll('rect.map-block-rect[data-id="'+block.id+'"]').forEach(function(r){
-    r.setAttribute('x',block.x);
-    r.setAttribute('y',block.y);
-    r.setAttribute('width',block.w);
-    r.setAttribute('height',block.h);
-  });
-  document.querySelectorAll('rect.resize-handle[data-id="'+block.id+'"]').forEach(function(r){
-    r.setAttribute('x',block.x+block.w-16);
-    r.setAttribute('y',block.y+block.h-16);
-  });
-  document.querySelectorAll('text[data-id="'+block.id+'"]').forEach(function(t){
-    const dx=parseFloat(t.getAttribute('data-dx'));
-    const dy=parseFloat(t.getAttribute('data-dy'));
-    const fx=parseFloat(t.getAttribute('data-fx'));
-    const isMid=t.getAttribute('data-mid')==='1';
-    const x=isMid ? (block.x+block.w*fx) : (block.x+dx);
-    const y=block.y+dy;
-    t.setAttribute('x',x);
-    t.setAttribute('y',y);
-  });
-}
-
 document.addEventListener('pointerdown',function(e){
-  if(!mapEditMode)return;
-  const handle=e.target.closest && e.target.closest('.resize-handle');
-  if(handle){
-    e.preventDefault();
-    e.stopPropagation();
-    const svg=handle.ownerSVGElement;
-    const id=handle.getAttribute('data-id');
-    if(!currentMapBlocks.find(b=>b.id===id))return;
-    mapDragState={mode:'resize',svg:svg,pt:svg.createSVGPoint(),id:id};
-    return;
+  const overlay=document.getElementById('mapOverlay');
+  if(!overlay || overlay.style.display!=='flex')return;
+  if(mapEditMode){
+    const handle=e.target.closest && e.target.closest('.resize-handle');
+    if(handle){
+      e.preventDefault();
+      e.stopPropagation();
+      const svg=handle.ownerSVGElement;
+      const id=handle.getAttribute('data-id');
+      if(!currentMapBlocks.find(b=>b.id===id))return;
+      mapDragState={mode:'resize',svg:svg,pt:svg.createSVGPoint(),id:id};
+      return;
+    }
+    const blockEl=e.target.closest && e.target.closest('[data-id]');
+    if(blockEl){
+      e.preventDefault();
+      e.stopPropagation();
+      const svg=blockEl.ownerSVGElement;
+      const id=blockEl.getAttribute('data-id');
+      const block=currentMapBlocks.find(b=>b.id===id);
+      if(!block)return;
+      const pt=svg.createSVGPoint();
+      pt.x=e.clientX;pt.y=e.clientY;
+      const loc=pt.matrixTransform(svg.getScreenCTM().inverse());
+      const [wx0,wy0]=isoUnproject(loc.x,loc.y,0,currentMapRotation);
+      mapDragState={mode:'move',svg:svg,pt:svg.createSVGPoint(),id:id,offsetX:wx0-block.x,offsetY:wy0-block.y,moved:false,startClientX:e.clientX,startClientY:e.clientY};
+      return;
+    }
   }
-  const blockEl=e.target.closest && e.target.closest('[data-id]');
-  if(blockEl){
+  // ลากพื้นหลังของแผนที่ (ทั้งโหมดดูและโหมดแก้ไข) เพื่อหมุนมุมมอง 360 องศา
+  if(e.target.closest && e.target.closest('#mapOverlayContent')){
     e.preventDefault();
-    e.stopPropagation();
-    const svg=blockEl.ownerSVGElement;
-    const id=blockEl.getAttribute('data-id');
-    const block=currentMapBlocks.find(b=>b.id===id);
-    if(!block)return;
-    const pt=svg.createSVGPoint();
-    pt.x=e.clientX;pt.y=e.clientY;
-    const loc=pt.matrixTransform(svg.getScreenCTM().inverse());
-    mapDragState={mode:'move',svg:svg,pt:svg.createSVGPoint(),id:id,offsetX:loc.x-block.x,offsetY:loc.y-block.y,moved:false,startClientX:e.clientX,startClientY:e.clientY};
-    return;
-  }
-  // แตะพื้นหลังว่างๆ ระหว่างแก้ไข -> ยกเลิกการเลือกกล่อง
-  if(e.target.closest && e.target.closest('#mapOverlayContent') && selectedBlockId){
-    deselectMapBlock();
+    mapRotateDragState={startX:e.clientX,startRotation:currentMapRotation,moved:false};
   }
 });
 document.addEventListener('pointermove',function(e){
+  const overlay=document.getElementById('mapOverlay');
+  if(!overlay || overlay.style.display!=='flex'){ mapDragState=null; mapRotateDragState=null; return; }
+  if(mapRotateDragState){
+    const dx=e.clientX-mapRotateDragState.startX;
+    if(Math.abs(dx)>3) mapRotateDragState.moved=true;
+    if(mapRotateDragState.moved) setMapRotation(mapRotateDragState.startRotation+dx*0.5);
+    return;
+  }
   if(!mapDragState)return;
   const block=currentMapBlocks.find(b=>b.id===mapDragState.id);
   if(!block)return;
@@ -1457,30 +1629,36 @@ document.addEventListener('pointermove',function(e){
   pt.x=e.clientX;pt.y=e.clientY;
   const loc=pt.matrixTransform(mapDragState.svg.getScreenCTM().inverse());
   if(mapDragState.mode==='resize'){
-    let newW=Math.round(loc.x-block.x);
-    let newH=Math.round(loc.y-block.y);
+    const [wx,wy]=isoUnproject(loc.x,loc.y,block.height||54,currentMapRotation);
+    let newW=Math.round(wx-block.x);
+    let newH=Math.round(wy-block.y);
     newW=Math.max(MAP_MIN_W,Math.min(newW,MAP_VB_W-16-block.x));
     newH=Math.max(MAP_MIN_H,Math.min(newH,MAP_VB_H-40-block.y));
     block.w=newW;block.h=newH;
-    applyBlockGeometry(block);
+    rerenderMapEditorSVG();
   } else if(mapDragState.mode==='move'){
     const dist=Math.hypot(e.clientX-mapDragState.startClientX,e.clientY-mapDragState.startClientY);
     if(dist>4) mapDragState.moved=true;
-    let newX=Math.round(loc.x-mapDragState.offsetX);
-    let newY=Math.round(loc.y-mapDragState.offsetY);
+    const [wx,wy]=isoUnproject(loc.x,loc.y,0,currentMapRotation);
+    let newX=Math.round(wx-mapDragState.offsetX);
+    let newY=Math.round(wy-mapDragState.offsetY);
     newX=Math.max(8,Math.min(newX,MAP_VB_W-16-block.w));
     newY=Math.max(8,Math.min(newY,MAP_VB_H-40-block.h));
     block.x=newX;block.y=newY;
-    applyBlockGeometry(block);
+    rerenderMapEditorSVG();
   }
 });
 document.addEventListener('pointerup',function(){
   if(mapDragState && mapDragState.mode==='move' && !mapDragState.moved){
     selectMapBlock(mapDragState.id);
   }
+  if(mapRotateDragState && !mapRotateDragState.moved && mapEditMode && selectedBlockId){
+    deselectMapBlock();
+  }
   mapDragState=null;
+  mapRotateDragState=null;
 });
-document.addEventListener('pointercancel',function(){ mapDragState=null; });
+document.addEventListener('pointercancel',function(){ mapDragState=null; mapRotateDragState=null; });
 
 async function loadMapBlocksFromStorage(){
   if(mapFirestoreDocRef){
@@ -1491,6 +1669,7 @@ async function loadMapBlocksFromStorage(){
         if(data && Array.isArray(data.blocks) && data.blocks.length){
           currentMapBlocks=data.blocks;
           if(data.bgColor) currentMapBgColor=data.bgColor;
+          if(typeof data.rotation==='number'){ savedMapRotation=data.rotation; currentMapRotation=data.rotation; }
           return;
         }
       }
@@ -1505,12 +1684,13 @@ async function loadMapBlocksFromStorage(){
       } else if(parsed && Array.isArray(parsed.blocks) && parsed.blocks.length){
         currentMapBlocks=parsed.blocks;
         if(parsed.bgColor) currentMapBgColor=parsed.bgColor;
+        if(typeof parsed.rotation==='number'){ savedMapRotation=parsed.rotation; currentMapRotation=parsed.rotation; }
       }
     }
   }catch(e){}
 }
-async function persistMapBlocks(blocks,bgColor){
-  try{ localStorage.setItem('mf_map_layout',JSON.stringify({blocks:blocks,bgColor:bgColor})); }catch(e){}
+async function persistMapBlocks(blocks,bgColor,rotation){
+  try{ localStorage.setItem('mf_map_layout',JSON.stringify({blocks:blocks,bgColor:bgColor,rotation:rotation})); }catch(e){}
   if(mapFirestoreDocRef){
     let updatedBy='unknown';
     try{
@@ -1518,7 +1698,7 @@ async function persistMapBlocks(blocks,bgColor){
       if(sess && sess.name) updatedBy=sess.name+' · '+(sess.dept||'');
     }catch(e){}
     try{
-      await mapFirestoreDocRef.set({blocks:blocks,bgColor:bgColor,updatedAt:Date.now(),updatedBy:updatedBy});
+      await mapFirestoreDocRef.set({blocks:blocks,bgColor:bgColor,rotation:rotation,updatedAt:Date.now(),updatedBy:updatedBy});
     }catch(e){
       console.error('บันทึกผังไป Firestore ไม่สำเร็จ',e);
       alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
@@ -2063,18 +2243,6 @@ function handleStockScan(code){
     const delta=parseInt(deltaStr,10);
     if(!isNaN(delta)) adjustStockQty(item.itemNo,l.loc,l.location,delta);
   }
-}
-
-function openMapFullscreen(){
-  const svg=document.querySelector('#storeMap svg');
-  if(!svg)return;
-  const content=document.getElementById('mapOverlayContent');
-  content.innerHTML='';
-  content.appendChild(svg.cloneNode(true));
-  document.getElementById('mapOverlay').style.display='flex';
-}
-function closeMapFullscreen(){
-  document.getElementById('mapOverlay').style.display='none';
 }
 
 let currentRole=null;
