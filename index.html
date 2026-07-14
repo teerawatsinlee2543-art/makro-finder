@@ -82,6 +82,9 @@ body{margin:0;padding:0}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
 .loc-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .loc-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success)}
+.show-on-map-btn{display:flex;align-items:center;gap:6px;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px}
+.show-on-map-btn:hover{background:var(--brand-red-dark)}
+.show-on-map-approx{display:block;font-size:11px;color:var(--color-text-tertiary);margin:-8px 0 14px}
 .loc-pill.sec{background:var(--color-background-secondary);color:var(--color-text-secondary);border-color:var(--color-border-tertiary)}
 .loc-pill i{font-size:15px}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
@@ -204,8 +207,10 @@ body{margin:0;padding:0}
 .map-rotate-btn:hover{background:rgba(255,255,255,.22)}
 .map-rotate-bar input[type=range]{flex:1;min-width:120px;max-width:220px;accent-color:var(--brand-red)}
 .map-rotate-value{color:#e5e7eb;font-size:12.5px;font-weight:600;min-width:34px;text-align:center}
-.map-rotate-reset{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.map-rotate-reset{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .map-rotate-reset:hover{background:rgba(255,255,255,.22)}
+.map-rotate-reset.active{background:#2E7DE1;color:#fff}
+.map-gps-status{font-size:11.5px;color:#9ca3af}
 .scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
 .scan-box{width:100%;max-width:420px}
 .scan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -504,6 +509,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
               </div>
             </div>
             <div class="loc-row" id="rLoc"></div>
+            <div id="showOnMapWrap" style="display:none">
+              <button class="show-on-map-btn" id="showOnMapBtn" onclick="showItemOnMap()"><i class="ti ti-map-pin" aria-hidden="true"></i> ดูตำแหน่งบนแผนที่</button>
+              <span class="show-on-map-approx" id="showOnMapApprox" style="display:none">ตำแหน่งโดยประมาณ (ตามหมวดสินค้า)</span>
+            </div>
           </div>
         </div>
         <div class="promo-box" id="promoBlock">
@@ -558,6 +567,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <button class="map-rotate-btn" onclick="rotateMapBy(15)" aria-label="หมุนขวา"><i class="ti ti-rotate-clockwise-2" aria-hidden="true"></i></button>
     <span class="map-rotate-value" id="mapRotationValue">25°</span>
     <button class="map-rotate-reset" onclick="resetMapRotation()">รีเซ็ตมุมมอง</button>
+    <button class="map-rotate-reset" id="liveGpsBtn" onclick="toggleLiveGps()"><i class="ti ti-current-location" aria-hidden="true"></i> แสดงตำแหน่งฉัน</button>
   </div>
   <div class="map-edit-bar" id="mapEditBar" onclick="event.stopPropagation()">
     <p class="map-edit-hint" id="mapEditHint">ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · แตะกล่องเพื่อเลือก</p>
@@ -570,6 +580,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <label class="map-edit-color-label">ความสูง <input type="number" id="mapBlockHeightInput" min="20" max="130" step="1" style="width:56px" onchange="onMapBlockHeightChange(this.value)"></label>
       <button class="map-edit-rename-btn" onclick="editSelectedBlockText()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ข้อความ/สี/ขนาด</button>
       <button class="map-edit-delete-btn" onclick="deleteSelectedBlock()"><i class="ti ti-trash" aria-hidden="true"></i> ลบกล่อง</button>
+    </div>
+    <div class="map-edit-bar-row map-edit-tools-row">
+      <button class="map-edit-add-btn" onclick="setGpsOriginHere()"><i class="ti ti-map-pin" aria-hidden="true"></i> ตั้งจุดอ้างอิง GPS ที่นี่</button>
+      <span class="map-gps-status" id="gpsCalibStatus">ยังไม่ได้ตั้งจุดอ้างอิง</span>
+    </div>
+    <div class="map-edit-bar-row map-edit-tools-row">
+      <label class="map-edit-color-label">มุมทิศอาคาร <input type="range" id="gpsBearingSlider" min="0" max="360" value="0" oninput="onGpsBearingChange(this.value)" style="width:120px"></label>
+      <span class="map-rotate-value" id="gpsBearingValue">0°</span>
     </div>
     <div class="map-edit-bar-row">
       <button class="map-edit-cancel" onclick="cancelMapEdit()">ยกเลิก</button>
@@ -637,13 +655,17 @@ const MAP_ISO_COS=Math.cos(Math.PI/6), MAP_ISO_SIN=Math.sin(Math.PI/6);
 function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,count,startNum,fill,textColor,height){
   const gap=4;
   const w=((bx1-bx0)-gap*(count-1))/count;
+  const fontSize=Math.max(5,Math.min(9,w*0.42));
   const arr=[];
   for(let i=0;i<count;i++){
     const x0=Math.round(bx0+i*(w+gap));
     const n1=startNum+i*2, n2=n1+1;
     arr.push({
-      id:idPrefix+n1+'_'+n2, x:x0, y:by0, w:Math.round(w), h:by1-by0, fill:fill, height:height,
-      lines:[{dx:Math.max(1,w/2-9), dy:(by1-by0)-8, size:7.5, weight:800, text:n1+'-'+n2, color:textColor}]
+      id:idPrefix+n1+'_'+n2, x:x0, y:by0, w:Math.round(w), h:by1-by0, fill:fill, height:height, anchor:'middle',
+      lines:[
+        {fx:0.5,dy:(by1-by0)-8-fontSize,size:fontSize,weight:800,text:String(n1),color:textColor},
+        {fx:0.5,dy:(by1-by0)-6,size:fontSize,weight:800,text:String(n2),color:textColor}
+      ]
     });
   }
   return arr;
@@ -726,6 +748,7 @@ let stockOverridesDocRef=null;
 let locationOverridesDocRef=null;
 let stockQtyDocRef=null;
 let feedbackCollectionRef=null;
+let gpsCalibrationDocRef=null;
 try{
   if(FIREBASE_CONFIG){
     firebase.initializeApp(FIREBASE_CONFIG);
@@ -737,11 +760,13 @@ try{
     locationOverridesDocRef=mfCol.doc('locationOverrides');
     stockQtyDocRef=mfCol.doc('stockQty');
     feedbackCollectionRef=mfCol;
+    gpsCalibrationDocRef=mfCol.doc('gpsCalibration');
   }
 }catch(e){
   console.error('Firebase init ไม่สำเร็จ',e);
   mapFirestoreDocRef=null; palletsCollectionRef=null; promoFirestoreDocRef=null;
   stockOverridesDocRef=null; locationOverridesDocRef=null; stockQtyDocRef=null; feedbackCollectionRef=null;
+  gpsCalibrationDocRef=null;
 }
 
 function escapeHtml(s){
@@ -787,18 +812,19 @@ function mapLineMarkup(b,l,rotationDeg,H){
   const p=isoProject(wx,wy,H,rotationDeg);
   const opAttr=l.opacity!==undefined ? ' fill-opacity="'+l.opacity+'"' : '';
   const color=l.color||b.textColor||'#3a3a3a';
+  const anchorAttr=' text-anchor="'+(isMid?'middle':'start')+'"';
   const dataAttr=' data-id="'+b.id+'" data-dx="'+dx+'" data-dy="'+l.dy+'" data-fx="'+fx+'" data-mid="'+(isMid?'1':'0')+'"';
-  return '<text'+dataAttr+' x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="'+color+'" text-anchor="middle"'+opAttr+'>'+escapeHtml(l.text)+'</text>';
+  return '<text'+dataAttr+' x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="'+color+'"'+anchorAttr+opAttr+'>'+escapeHtml(l.text)+'</text>';
 }
 
-function mapBlockPieces(b,editable,rotationDeg){
+function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   const H=b.height||54;
   const x0=b.x,y0=b.y,x1=b.x+b.w,y1=b.y+b.h;
   const top=[isoProject(x0,y0,H,rotationDeg),isoProject(x1,y0,H,rotationDeg),isoProject(x1,y1,H,rotationDeg),isoProject(x0,y1,H,rotationDeg)];
   const right=[isoProject(x1,y0,H,rotationDeg),isoProject(x1,y1,H,rotationDeg),isoProject(x1,y1,0,rotationDeg),isoProject(x1,y0,0,rotationDeg)];
   const front=[isoProject(x0,y1,H,rotationDeg),isoProject(x1,y1,H,rotationDeg),isoProject(x1,y1,0,rotationDeg),isoProject(x0,y1,0,rotationDeg)];
   const isSelected=editable && b.id===selectedBlockId;
-  const selStroke=isSelected ? ' stroke="#1a1a1a" stroke-width="2.5" stroke-dasharray="6 4"' : ' stroke="rgba(0,0,0,.10)" stroke-width="0.6"';
+  const selStroke=isSelected ? ' stroke="#1a1a1a" stroke-width="2.5" stroke-dasharray="6 4"' : (isHighlighted ? ' stroke="#E8192C" stroke-width="3"' : ' stroke="rgba(0,0,0,.10)" stroke-width="0.6"');
   const rectStyle=editable ? ' style="cursor:move;touch-action:none"' : '';
   const dataAttr=' class="map-block-rect" data-id="'+b.id+'"';
   let markup='<polygon'+dataAttr+' points="'+polyPts(right)+'" fill="'+shadeColor(b.fill,0.26)+'" stroke="rgba(0,0,0,.10)" stroke-width="0.6"'+rectStyle+'/>'+
@@ -809,12 +835,18 @@ function mapBlockPieces(b,editable,rotationDeg){
     const handlePt=isoProject(x1,y1,H,rotationDeg);
     markup+='<circle class="resize-handle" data-id="'+b.id+'" cx="'+handlePt[0].toFixed(1)+'" cy="'+handlePt[1].toFixed(1)+'" r="8" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>';
   }
-  return {markup:'<g>'+markup+'</g>', depth: (function(){ const rTheta=(rotationDeg||0)*Math.PI/180; const rx=((x0+x1)/2)-MAP_FLOOR_CX, ry=((y0+y1)/2)-MAP_FLOOR_CY; return rx*Math.sin(rTheta)+ry*Math.cos(rTheta); })() };
+  if(isHighlighted){
+    const pinPt=isoProject((x0+x1)/2,(y0+y1)/2,H,rotationDeg);
+    markup+='<circle cx="'+pinPt[0].toFixed(1)+'" cy="'+pinPt[1].toFixed(1)+'" r="6" fill="#E8192C" fill-opacity="0.55"><animate attributeName="r" values="6;22;6" dur="1.8s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.6;0;0.6" dur="1.8s" repeatCount="indefinite"/></circle>'+
+      '<circle cx="'+pinPt[0].toFixed(1)+'" cy="'+pinPt[1].toFixed(1)+'" r="6" fill="#E8192C" stroke="#fff" stroke-width="1.6"/>';
+  }
+  const depth=(function(){ const rTheta=(rotationDeg||0)*Math.PI/180; const rx=((x0+x1)/2)-MAP_FLOOR_CX, ry=((y0+y1)/2)-MAP_FLOOR_CY; return rx*Math.sin(rTheta)+ry*Math.cos(rTheta); })();
+  return {markup:'<g>'+markup+'</g>', depth: isHighlighted ? Infinity : depth};
 }
 
-function renderMapSVG(blocks,editable,rotationDeg){
+function renderMapSVG(blocks,editable,rotationDeg,highlightId){
   const rot=rotationDeg!==undefined?rotationDeg:currentMapRotation;
-  const pieces=blocks.map(b=>mapBlockPieces(b,editable,rot));
+  const pieces=blocks.map(b=>mapBlockPieces(b,editable,rot,highlightId&&b.id===highlightId));
   pieces.sort((a,b)=>a.depth-b.depth);
   const blockMarkup=pieces.map(p=>p.markup).join('');
 
@@ -845,7 +877,7 @@ function renderMapSVG(blocks,editable,rotationDeg){
     const minX=Math.min(...group.map(b=>b.x)), maxX=Math.max(...group.map(b=>b.x+b.w));
     const minY=Math.min(...group.map(b=>b.y)), maxH=Math.max(...group.map(b=>b.height||54));
     const info=MAP_ZONE_LABELS[prefix];
-    const p=isoProject((minX+maxX)/2, minY-14, maxH, rot);
+    const p=isoProject((minX+maxX)/2, minY+22, maxH, rot);
     return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="800" fill="'+info.color+'">'+escapeHtml(info.main)+'</text>'+
       '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+13).toFixed(1)+'" text-anchor="middle" font-size="9.5" font-weight="600" fill="'+info.subColor+'">'+escapeHtml(info.sub)+'</text>';
   }).join('');
@@ -877,6 +909,173 @@ function renderMapSVG(blocks,editable,rotationDeg){
 function refreshInlineMap(){
   const el=document.getElementById('storeMap');
   if(el) el.innerHTML=renderMapSVG(currentMapBlocks,false,savedMapRotation);
+}
+
+// ==== หาตำแหน่งสินค้าบนแผนที่ ====
+const DEPT_KEYWORDS={
+  butchery:['หมู','เนื้อวัว','เนื้อหมู','ไก่สด','ไก่แช่แข็ง','แช่แข็ง','frozen','เนื้อสัตว์'],
+  snack:['ขนม','เถ้าแก่น้อย','ลูกอม','คุกกี้','เวเฟอร์','ปลาเส้น','ท็อฟฟี่','ช็อกโกแลต'],
+  winebeer:['ไวน์','เบียร์','สุรา','วิสกี้','วอดก้า'],
+  drink:['น้ำดื่ม','น้ำอัดลม','กาแฟ','ชาเขียว','ชาไทย','นมสด','นมกล่อง','น้ำผลไม้','โซดา','เครื่องดื่ม'],
+  fishseafood:['ปลา','กุ้ง','หมึก','อาหารทะเล','ปู'],
+  grilledchicken:['ไก่ย่าง','ไก่ทอด'],
+  condiments:['ซอส','น้ำปลา','เครื่องปรุง','พริกไทย','เกลือป่น','น้ำตาลทราย','น้ำมันพืช','ผงชูรส'],
+  fruitveg:['ผักสด','ผลไม้สด','มะนาว','กล้วย','แตงกวา'],
+  o2o:['ออนไลน์','makro pro'],
+  bakery:['ขนมปัง','เค้ก','เบเกอรี่'],
+  icecream:['ไอศกรีม','ไอติม'],
+  premium:['ของแถม','พรีเมียม']
+};
+function findMapBlockForItem(item){
+  if(item.locations&&item.locations.length){
+    for(const l of item.locations){
+      const locNum=parseInt(String(l.loc).replace(/\D/g,''),10);
+      if(!isNaN(locNum) && locNum>=1 && locNum<=39){
+        const hit=currentMapBlocks.find(b=>{
+          const m=b.id.match(/^(dryfood|nonfood)_(\d+)_(\d+)$/);
+          if(!m)return false;
+          const n1=parseInt(m[2],10), n2=parseInt(m[3],10);
+          return locNum>=n1 && locNum<=n2;
+        });
+        if(hit) return {blockId:hit.id, exact:true};
+      }
+    }
+  }
+  const desc=item.desc.toLowerCase();
+  let best=null, bestHits=0;
+  Object.keys(DEPT_KEYWORDS).forEach(id=>{
+    const hits=DEPT_KEYWORDS[id].filter(kw=>desc.includes(kw.toLowerCase())).length;
+    if(hits>bestHits){ bestHits=hits; best=id; }
+  });
+  if(best && currentMapBlocks.find(b=>b.id===best)) return {blockId:best, exact:false};
+  return null;
+}
+let showOnMapMatch=null;
+function updateShowOnMapButton(item){
+  const wrap=document.getElementById('showOnMapWrap');
+  const approx=document.getElementById('showOnMapApprox');
+  showOnMapMatch=findMapBlockForItem(item);
+  if(showOnMapMatch){
+    wrap.style.display='block';
+    approx.style.display=showOnMapMatch.exact?'none':'block';
+  } else {
+    wrap.style.display='none';
+  }
+}
+function showItemOnMap(){
+  if(!showOnMapMatch)return;
+  mapHighlightBlockId=showOnMapMatch.blockId;
+  openMapFullscreen();
+}
+
+// ==== ตำแหน่งฉันแบบ live ด้วย GPS จริง (คลาดเคลื่อนได้เมื่ออยู่ในอาคาร ต้องตั้งจุดอ้างอิงก่อนใช้งาน) ====
+let gpsOrigin=null;
+let gpsBearingOffset=0;
+const GPS_ENTRANCE_MAP=[MAP_FLOOR.x+180, MAP_FLOOR.y+MAP_FLOOR.h];
+const GPS_UNIT_PER_METER=624/104.7; // สเกลจากพื้นที่ร้านจริง ~9,170.89 ตร.ม. เทียบกับขนาดพื้นผังในระบบ
+let liveGpsWatchId=null;
+let liveGpsMapXY=null;
+let liveGpsAccuracyM=null;
+
+async function loadGpsCalibration(){
+  if(gpsCalibrationDocRef){
+    try{
+      const doc=await gpsCalibrationDocRef.get();
+      if(doc.exists){
+        const d=doc.data();
+        if(typeof d.lat==='number' && typeof d.lon==='number'){
+          gpsOrigin={lat:d.lat,lon:d.lon};
+          gpsBearingOffset=d.bearingOffset||0;
+          return;
+        }
+      }
+    }catch(e){ console.error('โหลดค่าปรับเทียบ GPS ไม่สำเร็จ',e); }
+  }
+  try{
+    const raw=localStorage.getItem('mf_gps_calibration');
+    if(raw){ const d=JSON.parse(raw); if(typeof d.lat==='number'){ gpsOrigin={lat:d.lat,lon:d.lon}; gpsBearingOffset=d.bearingOffset||0; } }
+  }catch(e){}
+}
+async function persistGpsCalibration(){
+  if(!gpsOrigin)return;
+  try{ localStorage.setItem('mf_gps_calibration',JSON.stringify({lat:gpsOrigin.lat,lon:gpsOrigin.lon,bearingOffset:gpsBearingOffset})); }catch(e){}
+  if(gpsCalibrationDocRef){
+    try{ await gpsCalibrationDocRef.set({lat:gpsOrigin.lat,lon:gpsOrigin.lon,bearingOffset:gpsBearingOffset,updatedAt:Date.now()}); }
+    catch(e){ console.error('บันทึกค่าปรับเทียบ GPS ไป Firestore ไม่สำเร็จ',e); }
+  }
+}
+function setGpsOriginHere(){
+  if(!isEmployee())return;
+  if(!navigator.geolocation){ alert('อุปกรณ์นี้ไม่รองรับ GPS'); return; }
+  if(!confirm('ยืนยันว่าตอนนี้คุณยืนอยู่ที่ "หน้าทางเข้าร้าน" ใช่ไหม? จุดนี้จะถูกใช้เป็นจุดอ้างอิงตำแหน่ง GPS ของแผนที่ (ใช้ร่วมกันทุกเครื่อง)'))return;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    gpsOrigin={lat:pos.coords.latitude,lon:pos.coords.longitude};
+    persistGpsCalibration();
+    alert('ตั้งจุดอ้างอิง GPS สำเร็จ (ความแม่นยำของสัญญาณตอนนี้ ±'+Math.round(pos.coords.accuracy)+' เมตร)\nถ้าเปิด "แสดงตำแหน่งฉัน" แล้วจุดหมุนไปผิดทิศ ลองปรับ "มุมทิศอาคาร" ด้านล่าง');
+    updateGpsCalibrationUI();
+  },function(err){
+    alert('อ่านตำแหน่ง GPS ไม่สำเร็จ: '+err.message);
+  },{enableHighAccuracy:true,timeout:15000});
+}
+function onGpsBearingChange(val){
+  gpsBearingOffset=parseFloat(val)||0;
+  updateGpsCalibrationUI();
+  persistGpsCalibration();
+}
+function updateGpsCalibrationUI(){
+  const status=document.getElementById('gpsCalibStatus');
+  if(status) status.textContent=gpsOrigin ? 'ตั้งจุดอ้างอิงแล้ว' : 'ยังไม่ได้ตั้งจุดอ้างอิง';
+  const slider=document.getElementById('gpsBearingSlider');
+  if(slider) slider.value=gpsBearingOffset;
+  const val=document.getElementById('gpsBearingValue');
+  if(val) val.textContent=Math.round(gpsBearingOffset)+'°';
+}
+function gpsToMapXY(lat,lon){
+  if(!gpsOrigin)return null;
+  const latRad=gpsOrigin.lat*Math.PI/180;
+  const dLat=(lat-gpsOrigin.lat)*Math.PI/180;
+  const dLon=(lon-gpsOrigin.lon)*Math.PI/180;
+  const dy=dLat*6371000;
+  const dx=dLon*6371000*Math.cos(latRad);
+  const bearing=gpsBearingOffset*Math.PI/180;
+  const rx=dx*Math.cos(bearing)-dy*Math.sin(bearing);
+  const ry=dx*Math.sin(bearing)+dy*Math.cos(bearing);
+  return [ GPS_ENTRANCE_MAP[0]+rx*GPS_UNIT_PER_METER, GPS_ENTRANCE_MAP[1]-ry*GPS_UNIT_PER_METER ];
+}
+function liveDotMarkup(xy,accM,rot){
+  const p=isoProject(xy[0],xy[1],2,rot);
+  const accRadiusUnits=Math.max(6,Math.min(90,(accM||15)*GPS_UNIT_PER_METER));
+  return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+accRadiusUnits.toFixed(1)+'" fill="#2E7DE1" fill-opacity="0.12" stroke="#2E7DE1" stroke-opacity="0.25" stroke-width="1"/>'+
+    '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="7" fill="#2E7DE1" fill-opacity="0.5"><animate attributeName="r" values="7;16;7" dur="1.6s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.55;0;0.55" dur="1.6s" repeatCount="indefinite"/></circle>'+
+    '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="6" fill="#2E7DE1" stroke="#fff" stroke-width="2"/>';
+}
+function updateLiveGpsBtnUI(){
+  const btn=document.getElementById('liveGpsBtn');
+  if(!btn)return;
+  btn.classList.toggle('active',!!liveGpsWatchId);
+  btn.innerHTML=liveGpsWatchId
+    ? '<i class="ti ti-location-off" aria-hidden="true"></i> ปิดตำแหน่งฉัน'
+    : '<i class="ti ti-current-location" aria-hidden="true"></i> แสดงตำแหน่งฉัน';
+}
+function toggleLiveGps(){
+  if(liveGpsWatchId){ stopLiveGps(); return; }
+  if(!navigator.geolocation){ alert('อุปกรณ์นี้ไม่รองรับ GPS'); return; }
+  if(!gpsOrigin){ alert('ร้านนี้ยังไม่ได้ตั้งจุดอ้างอิง GPS กรุณาแจ้งพนักงานให้ตั้งค่าก่อน (ปุ่ม "ตั้งจุดอ้างอิง GPS" ตอนแก้ไขแผนที่)'); return; }
+  liveGpsWatchId=navigator.geolocation.watchPosition(function(pos){
+    liveGpsMapXY=gpsToMapXY(pos.coords.latitude,pos.coords.longitude);
+    liveGpsAccuracyM=pos.coords.accuracy;
+    rerenderMapEditorSVG();
+  },function(err){
+    alert('อ่านตำแหน่งไม่สำเร็จ: '+err.message);
+    stopLiveGps();
+  },{enableHighAccuracy:true,maximumAge:2000,timeout:20000});
+  updateLiveGpsBtnUI();
+}
+function stopLiveGps(){
+  if(liveGpsWatchId){ navigator.geolocation.clearWatch(liveGpsWatchId); liveGpsWatchId=null; }
+  liveGpsMapXY=null;
+  updateLiveGpsBtnUI();
+  rerenderMapEditorSVG();
 }
 
 // ==== โปรโมชั่น (แก้ไขได้สำหรับพนักงาน) ====
@@ -1408,23 +1607,30 @@ function focusScanNext(){
 }
 // ==== จบส่วนจัดการพาเลส ====
 
+let mapHighlightBlockId=null;
 function openMapFullscreen(){
   if(mapEditMode)return;
   currentMapRotation=savedMapRotation;
-  const content=document.getElementById('mapOverlayContent');
-  content.innerHTML=renderMapSVG(currentMapBlocks,false,currentMapRotation);
   document.getElementById('mapEditBar').style.display='none';
   document.getElementById('mapOverlay').classList.remove('editing');
   document.getElementById('mapOverlay').style.display='flex';
+  rerenderMapEditorSVG();
   updateMapRotationUI();
+  updateLiveGpsBtnUI();
 }
 function closeMapFullscreen(){
   if(mapEditMode){ cancelMapEdit(); return; }
+  mapHighlightBlockId=null;
   document.getElementById('mapOverlay').style.display='none';
 }
 function rerenderMapEditorSVG(){
   const content=document.getElementById('mapOverlayContent');
-  if(content) content.innerHTML=renderMapSVG(currentMapBlocks,mapEditMode,currentMapRotation);
+  if(!content)return;
+  content.innerHTML=renderMapSVG(currentMapBlocks,mapEditMode,currentMapRotation,mapHighlightBlockId);
+  if(liveGpsMapXY){
+    const svgEl=content.querySelector('svg');
+    if(svgEl) svgEl.insertAdjacentHTML('beforeend', liveDotMarkup(liveGpsMapXY,liveGpsAccuracyM,currentMapRotation));
+  }
 }
 function updateSelectedBlockUI(){
   const row=document.getElementById('mapSelectedRow');
@@ -1459,14 +1665,15 @@ function openMapEditor(){
   mapEditSnapshot=JSON.parse(JSON.stringify(currentMapBlocks));
   mapEditBgSnapshot=currentMapBgColor;
   mapEditRotationSnapshot=currentMapRotation;
-  const content=document.getElementById('mapOverlayContent');
-  content.innerHTML=renderMapSVG(currentMapBlocks,true,currentMapRotation);
+  rerenderMapEditorSVG();
   document.getElementById('mapEditHint').textContent=mapFirestoreDocRef
     ? 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · ลากพื้นหลังเพื่อหมุนมุมมอง · แตะกล่องเพื่อเลือกและแก้สี/ความสูง/ข้อความ · บันทึกแล้วทุกคนจะเห็นเหมือนกัน'
     : 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · ลากพื้นหลังเพื่อหมุนมุมมอง · แตะกล่องเพื่อเลือกและแก้สี/ความสูง/ข้อความ · ยังไม่ได้เชื่อมฐานข้อมูลกลาง บันทึกนี้จะเก็บไว้เฉพาะเครื่องนี้เท่านั้น';
   document.getElementById('mapBgColorInput').value=currentMapBgColor;
   updateSelectedBlockUI();
   updateMapRotationUI();
+  updateGpsCalibrationUI();
+  updateLiveGpsBtnUI();
   document.getElementById('mapEditBar').style.display='flex';
   document.getElementById('mapOverlay').classList.add('editing');
   document.getElementById('mapOverlay').style.display='flex';
@@ -1708,6 +1915,7 @@ async function persistMapBlocks(blocks,bgColor,rotation){
 
 loadMapBlocksFromStorage().then(refreshInlineMap);
 loadPromoConfig();
+loadGpsCalibration().then(updateGpsCalibrationUI);
 refreshInlineMap();
 
 // ==== รูปภาพสินค้าจริงจาก Makro PRO ====
@@ -2116,6 +2324,7 @@ function renderDetail(item,fromList){
   document.getElementById('rName').textContent=item.desc;
   document.getElementById('rBadge').textContent='Item No '+item.itemNo+(item.barcode?' · '+item.barcode:'');
   document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:11px;padding:2px 8px;border-radius:20px';
+  updateShowOnMapButton(item);
   const rLoc=document.getElementById('rLoc');
   if(item.locations.length){
     const locGroups=[];
