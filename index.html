@@ -513,13 +513,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
             <div class="loc-row" id="rLoc"></div>
           </div>
         </div>
-        <div id="showOnMapInline" style="display:none">
-          <div class="map-label-row">
-            <span class="map-label"><i class="ti ti-map-pin" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>ตำแหน่งสินค้านี้</span>
-            <span class="map-hl-label" id="showOnMapApprox" style="display:none">ตำแหน่งโดยประมาณ</span>
-          </div>
-          <div class="store-map" id="showOnMapSvg" onclick="openMapFullscreen()"></div>
-        </div>
         <div class="promo-box" id="promoBlock">
           <i class="ti ti-discount-2" aria-hidden="true"></i>
           <div>
@@ -542,16 +535,18 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <i class="ti ti-navigation" aria-hidden="true"></i>
           <div class="tip-text">เดินตามป้ายบอกโซนภายในสาขาเพื่อไปยังตำแหน่งจัดเก็บสินค้า</div>
         </div>
-        <div class="map-label-row">
-          <span class="map-label"><i class="ti ti-map" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>แผนที่สาขา</span>
-          <span class="map-hl-label"><i class="ti ti-arrows-maximize" style="font-size:12px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>แตะเพื่อขยายเต็มจอ</span>
-        </div>
-        <div class="store-map" id="storeMap" onclick="openMapFullscreen()"></div>
-        <div id="inlineGpsBar" style="margin-top:10px">
-          <button class="map-edit-open-btn" id="liveGpsBtnInline" onclick="toggleLiveGps()"><i class="ti ti-current-location" aria-hidden="true"></i> แสดงตำแหน่งฉัน</button>
-        </div>
-        <div id="mapEditOpenBar" style="display:none">
-          <button class="map-edit-open-btn" onclick="openMapEditor()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ไขแผนที่</button>
+        <div id="showOnMapInline">
+          <div class="map-label-row">
+            <span class="map-label"><i class="ti ti-map-pin" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>ตำแหน่งสินค้านี้</span>
+            <span class="map-hl-label" id="showOnMapApprox" style="display:none">ตำแหน่งโดยประมาณ</span>
+          </div>
+          <div class="store-map" id="showOnMapSvg" onclick="openMapFullscreen()"></div>
+          <div id="inlineGpsBar" style="margin-top:10px">
+            <button class="map-edit-open-btn" id="liveGpsBtnInline" onclick="toggleLiveGps()"><i class="ti ti-current-location" aria-hidden="true"></i> แสดงตำแหน่งฉัน</button>
+          </div>
+          <div id="mapEditOpenBar" style="display:none">
+            <button class="map-edit-open-btn" onclick="openMapEditor()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ไขแผนที่</button>
+          </div>
         </div>
       </div>
       <div id="notFound" style="display:none" class="no-result">
@@ -915,9 +910,9 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
 }
 
 function refreshInlineMap(){
-  const el=document.getElementById('storeMap');
+  const el=document.getElementById('showOnMapSvg');
   if(!el)return;
-  el.innerHTML=renderMapSVG(currentMapBlocks,false,savedMapRotation);
+  el.innerHTML=renderMapSVG(currentMapBlocks,false,savedMapRotation,mapHighlightBlockId);
   if(liveGpsMapXY){
     const svgEl=el.querySelector('svg');
     if(svgEl) svgEl.insertAdjacentHTML('beforeend', liveDotMarkup(liveGpsMapXY,liveGpsAccuracyM,savedMapRotation));
@@ -965,19 +960,18 @@ function findMapBlockForItem(item){
 }
 let showOnMapMatch=null;
 function updateShowOnMapButton(item){
-  const wrap=document.getElementById('showOnMapInline');
   const approx=document.getElementById('showOnMapApprox');
   const svgHost=document.getElementById('showOnMapSvg');
   showOnMapMatch=findMapBlockForItem(item);
-  if(showOnMapMatch){
-    mapHighlightBlockId=showOnMapMatch.blockId;
-    wrap.style.display='block';
-    approx.style.display=showOnMapMatch.exact?'none':'block';
-    svgHost.innerHTML=renderMapSVG(currentMapBlocks,false,savedMapRotation,mapHighlightBlockId);
-  } else {
-    mapHighlightBlockId=null;
-    wrap.style.display='none';
+  mapHighlightBlockId=showOnMapMatch?showOnMapMatch.blockId:null;
+  approx.style.display=(showOnMapMatch&&!showOnMapMatch.exact)?'block':'none';
+  svgHost.innerHTML=renderMapSVG(currentMapBlocks,false,savedMapRotation,mapHighlightBlockId);
+  if(liveGpsMapXY){
+    const svgEl=svgHost.querySelector('svg');
+    if(svgEl) svgEl.insertAdjacentHTML('beforeend', liveDotMarkup(liveGpsMapXY,liveGpsAccuracyM,savedMapRotation));
   }
+  updateMapEditBarVisibility();
+  updateLiveGpsBtnUI();
 }
 
 // ==== ตำแหน่งฉันแบบ live ด้วย GPS จริง (คลาดเคลื่อนได้เมื่ออยู่ในอาคาร ต้องตั้งจุดอ้างอิงก่อนใช้งาน) ====
