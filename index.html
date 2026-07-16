@@ -86,6 +86,8 @@ body{margin:0;padding:0}
 #showOnMapInline{margin-bottom:16px}
 .loc-pill.sec{background:var(--color-background-secondary);color:var(--color-text-secondary);border-color:var(--color-border-tertiary)}
 .loc-pill i{font-size:15px}
+.loc-pill-editable{cursor:pointer}
+.loc-pill-editable i.ti-pencil{font-size:11px;margin-left:2px;opacity:.7}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
@@ -2354,6 +2356,29 @@ function applyStockOverridesToProducts(){
     });
   });
 }
+function editItemLocation(itemNo,loc,location){
+  if(!isEmployee())return;
+  const item=getItemByNo(itemNo);
+  if(!item)return;
+  const newLoc=prompt('Loc:',loc);
+  if(newLoc===null)return;
+  const newLocation=prompt('Location:',location);
+  if(newLocation===null)return;
+  const trimmedLoc=newLoc.trim(),trimmedLocation=newLocation.trim();
+  if(!trimmedLoc||!trimmedLocation){ alert('กรุณาระบุ Loc และ Location ให้ครบ'); return; }
+  if(trimmedLoc===loc&&trimmedLocation===location)return;
+  const existing=item.locations.find(x=>x.loc===loc&&x.location===location)||{};
+  if(!LOCATION_OVERRIDES[itemNo])LOCATION_OVERRIDES[itemNo]={adds:[],removes:[]};
+  const ov=LOCATION_OVERRIDES[itemNo];
+  const addIdx=ov.adds.findIndex(a=>a.loc===loc&&a.location===location);
+  if(addIdx>=0){ ov.adds.splice(addIdx,1); }
+  else { ov.removes.push({loc,location}); }
+  ov.adds.push({loc:trimmedLoc,location:trimmedLocation,facing:existing.facing||'',maxQty:existing.maxQty||''});
+  applyLocationOverridesToProducts();
+  applyStockOverridesToProducts();
+  persistLocationOverrides();
+  renderDetail(item);
+}
 function removeLocationFromItem(itemNo,loc,location){
   if(!isEmployee())return;
   if(!confirm('ยืนยันลบตำแหน่ง Loc '+loc+' / Location '+location+' ?'))return;
@@ -2591,9 +2616,15 @@ function renderDetail(item,fromList){
       if(!group){ group={loc:l.loc,locations:[]}; locGroups.push(group); }
       group.locations.push(l.location);
     });
+    const canEditLoc=isEmployee();
     rLoc.innerHTML=locGroups.map(g=>
       '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Loc '+escapeHtml(g.loc)+'</div>'+
-      g.locations.map(loc=>'<div class="loc-pill sec"><i class="ti ti-map-2" aria-hidden="true"></i>Location '+escapeHtml(loc)+'</div>').join('')
+      g.locations.map(loc=>
+        '<div class="loc-pill sec'+(canEditLoc?' loc-pill-editable':'')+'"'+(canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')+'>'+
+          '<i class="ti ti-map-2" aria-hidden="true"></i>Location '+escapeHtml(loc)+
+          (canEditLoc?'<i class="ti ti-pencil" aria-hidden="true"></i>':'')+
+        '</div>'
+      ).join('')
     ).join('');
   } else {
     rLoc.innerHTML='<div class="loc-pill sec"><i class="ti ti-map-pin-off" aria-hidden="true"></i>ไม่มีข้อมูลตำแหน่งจัดเก็บ</div>';
