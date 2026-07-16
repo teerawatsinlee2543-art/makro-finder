@@ -12,6 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js"></script>
 <style>
 :root{
   --brand-red:#E8192C;
@@ -95,6 +96,16 @@ body{margin:0;padding:0}
 .promo-title{font-size:14px;font-weight:700;color:#8a0e17}
 .promo-detail{font-size:12.5px;color:#a3454d;margin-top:1px}
 .promo-edit-btn{margin-left:auto;background:none;border:none;color:var(--brand-red);font-size:16px;cursor:pointer;padding:2px;flex-shrink:0}
+.promo-gallery{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:4px}
+.promo-gallery-item{position:relative;flex:0 0 auto;width:112px;height:150px;border-radius:10px;overflow:hidden;border:1px solid var(--color-border-tertiary);cursor:pointer;background:var(--color-background-secondary)}
+.promo-gallery-item img{width:100%;height:100%;object-fit:cover;display:block}
+.promo-gallery-del{position:absolute;top:5px;right:5px;background:rgba(8,11,22,.6);color:#fff;border:none;border-radius:7px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;z-index:1}
+.promo-add-card{flex:0 0 auto;width:112px;height:150px;border-radius:10px;border:1.5px dashed var(--brand-red);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--brand-red);font-size:12px;font-weight:600;cursor:pointer;background:#FFF0F1}
+.promo-add-card i{font-size:22px}
+.promo-gallery-empty{font-size:12.5px;color:var(--color-text-tertiary);padding:6px 0 12px}
+.promo-view-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
+.promo-view-overlay img{max-width:100%;max-height:100%;border-radius:8px;object-fit:contain;display:block}
+.promo-view-loading{color:#fff;font-size:13px}
 .map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
 .map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
@@ -441,6 +452,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
 
     <div id="homeView">
+      <div class="section-label">โปรโมชั่น</div>
+      <div class="promo-gallery" id="promoGalleryList"></div>
+      <input type="file" id="promoFileInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handlePromoFileSelect(event)">
       <div class="section-label">หมวดหมู่</div>
       <div class="cat-row">
         <div class="cat-card" style="background:#D3F38F33" onclick="searchByCategory('electric')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Electronics_7b6f092700.png" alt="เครื่องใช้ไฟฟ้า" loading="lazy"><span>เครื่องใช้ไฟฟ้า</span></div>
@@ -553,6 +567,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   </div>
   </div>
 </div>
+</div>
+
+<div class="promo-view-overlay" id="promoViewOverlay" onclick="closePromoViewer()">
+  <button class="map-overlay-close" onclick="closePromoViewer()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
+  <img id="promoViewImg" onclick="event.stopPropagation()">
 </div>
 
 <div class="map-overlay" id="mapOverlay" onclick="closeMapFullscreen()">
@@ -749,6 +768,7 @@ const FIREBASE_CONFIG={
 let mapFirestoreDocRef=null;
 let palletsCollectionRef=null;
 let promoFirestoreDocRef=null;
+let promoGalleryCollectionRef=null;
 let stockOverridesDocRef=null;
 let locationOverridesDocRef=null;
 let feedbackCollectionRef=null;
@@ -760,6 +780,7 @@ try{
     mapFirestoreDocRef=mfCol.doc('storeMapLayout');
     palletsCollectionRef=mfCol;
     promoFirestoreDocRef=mfCol.doc('promoConfig');
+    promoGalleryCollectionRef=mfCol;
     stockOverridesDocRef=mfCol.doc('stockOverrides');
     locationOverridesDocRef=mfCol.doc('locationOverrides');
     feedbackCollectionRef=mfCol;
@@ -768,9 +789,13 @@ try{
 }catch(e){
   console.error('Firebase init ไม่สำเร็จ',e);
   mapFirestoreDocRef=null; palletsCollectionRef=null; promoFirestoreDocRef=null;
+  promoGalleryCollectionRef=null;
   stockOverridesDocRef=null; locationOverridesDocRef=null; feedbackCollectionRef=null;
   gpsCalibrationDocRef=null;
 }
+try{
+  if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js';
+}catch(e){}
 
 function escapeHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1157,6 +1182,148 @@ function updatePalletBarVisibility(){
 function updatePromoEditBtnVisibility(){
   const btn=document.getElementById('promoEditBtn');
   if(btn) btn.style.display=isEmployee() ? 'block' : 'none';
+}
+
+// ==== แกลเลอรีโปรโมชั่น (หน้าแรก, พนักงานทุกแผนกเพิ่ม/ลบได้ ลูกค้าดูอย่างเดียว) ====
+let PROMO_GALLERY_CACHE=[];
+function promoGalleryLocalKey(){ return 'mf_promo_gallery'; }
+function loadPromoGalleryLocal(){
+  try{ return JSON.parse(localStorage.getItem(promoGalleryLocalKey()))||[]; }catch(e){ return []; }
+}
+function savePromoGalleryLocal(list){
+  try{ localStorage.setItem(promoGalleryLocalKey(),JSON.stringify(list)); }catch(e){}
+}
+function newPromoId(){
+  return 'PROMO-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+}
+async function loadAllPromoItems(){
+  if(promoGalleryCollectionRef){
+    try{
+      const snap=await promoGalleryCollectionRef.get();
+      const list=[];
+      snap.forEach(doc=>{ const d=doc.data(); if(d&&d.type==='promo') list.push(d); });
+      list.sort((a,b)=>b.ts-a.ts);
+      PROMO_GALLERY_CACHE=list;
+      savePromoGalleryLocal(list);
+      return list;
+    }catch(e){ console.error('โหลดโปรโมชั่นจาก Firestore ไม่สำเร็จ',e); }
+  }
+  PROMO_GALLERY_CACHE=loadPromoGalleryLocal().sort((a,b)=>b.ts-a.ts);
+  return PROMO_GALLERY_CACHE;
+}
+function renderPromoGallery(){
+  const box=document.getElementById('promoGalleryList');
+  if(!box)return;
+  let html='';
+  if(isEmployee()){
+    html+='<div class="promo-add-card" onclick="document.getElementById(\'promoFileInput\').click()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มโปรโมชั่น</div>';
+  }
+  html+=PROMO_GALLERY_CACHE.map(p=>
+    '<div class="promo-gallery-item" onclick="openPromoViewer('+jsStr(p.id)+')">'+
+      '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy">'+
+      (isEmployee()?'<button class="promo-gallery-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
+    '</div>'
+  ).join('');
+  if(!PROMO_GALLERY_CACHE.length && !isEmployee()){
+    html+='<div class="promo-gallery-empty">ยังไม่มีโปรโมชั่นในขณะนี้</div>';
+  }
+  box.innerHTML=html;
+}
+async function handlePromoFileSelect(evt){
+  const files=Array.from(evt.target.files||[]);
+  evt.target.value='';
+  if(!files.length)return;
+  const sess=getSession();
+  const addedBy=sess?(sess.name+' · '+sess.dept):'ไม่ทราบ';
+  for(const file of files){
+    try{
+      if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
+        await addPromoFromPdf(file,addedBy);
+      } else {
+        await addPromoFromImage(file,addedBy);
+      }
+    }catch(e){
+      console.error('เพิ่มโปรโมชั่นไม่สำเร็จ',e);
+      alert('ไม่สามารถอ่านไฟล์ "'+file.name+'" ได้ กรุณาลองไฟล์อื่น');
+    }
+  }
+  renderPromoGallery();
+}
+function addPromoFromImage(file,addedBy){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=function(){
+      const img=new Image();
+      img.onload=function(){
+        const maxW=1280;
+        const scale=Math.min(1,maxW/img.width);
+        const canvas=document.createElement('canvas');
+        canvas.width=Math.round(img.width*scale);
+        canvas.height=Math.round(img.height*scale);
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        const dataUrl=canvas.toDataURL('image/jpeg',0.72);
+        savePromoItem(dataUrl,addedBy).then(resolve).catch(reject);
+      };
+      img.onerror=reject;
+      img.src=reader.result;
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+function withTimeout(promise,ms,message){
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error(message)),ms))
+  ]);
+}
+async function addPromoFromPdf(file,addedBy){
+  if(!window.pdfjsLib){ alert('ไม่สามารถโหลดตัวอ่านไฟล์ PDF ได้ กรุณาตรวจสอบอินเทอร์เน็ต'); return; }
+  const buf=await file.arrayBuffer();
+  const pdf=await withTimeout(pdfjsLib.getDocument({data:buf}).promise,20000,'อ่านไฟล์ PDF ไม่สำเร็จ (ใช้เวลานานเกินไป)');
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const viewport=page.getViewport({scale:1.6});
+    const canvas=document.createElement('canvas');
+    canvas.width=viewport.width;
+    canvas.height=viewport.height;
+    await withTimeout(
+      page.render({canvasContext:canvas.getContext('2d'),viewport:viewport}).promise,
+      20000,
+      'แปลงหน้า PDF เป็นรูปไม่สำเร็จ (ใช้เวลานานเกินไป) กรุณาอย่าสลับแอปขณะอัปโหลด แล้วลองใหม่'
+    );
+    const dataUrl=canvas.toDataURL('image/jpeg',0.72);
+    await savePromoItem(dataUrl,addedBy);
+  }
+}
+async function savePromoItem(dataUrl,addedBy){
+  const item={id:newPromoId(),type:'promo',image:dataUrl,addedBy:addedBy,ts:Date.now()};
+  PROMO_GALLERY_CACHE.unshift(item);
+  savePromoGalleryLocal(PROMO_GALLERY_CACHE);
+  if(promoGalleryCollectionRef){
+    try{ await promoGalleryCollectionRef.doc(item.id).set(item); }
+    catch(e){ console.error('บันทึกโปรโมชั่นไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+  }
+}
+function deletePromoItem(id){
+  if(!isEmployee())return;
+  if(!confirm('ลบโปรโมชั่นนี้ทิ้งใช่หรือไม่?'))return;
+  PROMO_GALLERY_CACHE=PROMO_GALLERY_CACHE.filter(p=>p.id!==id);
+  savePromoGalleryLocal(PROMO_GALLERY_CACHE);
+  renderPromoGallery();
+  if(promoGalleryCollectionRef){
+    promoGalleryCollectionRef.doc(id).delete().catch(e=>console.error('ลบโปรโมชั่นจาก Firestore ไม่สำเร็จ',e));
+  }
+}
+function openPromoViewer(id){
+  const item=PROMO_GALLERY_CACHE.find(p=>p.id===id);
+  if(!item)return;
+  document.getElementById('promoViewImg').src=item.image;
+  document.getElementById('promoViewOverlay').style.display='flex';
+}
+function closePromoViewer(){
+  document.getElementById('promoViewOverlay').style.display='none';
 }
 
 let PALLETS_CACHE=[];
@@ -1979,6 +2146,7 @@ async function persistMapBlocks(blocks,bgColor,rotation){
 
 loadMapBlocksFromStorage().then(refreshInlineMap);
 loadPromoConfig();
+loadAllPromoItems().then(renderPromoGallery);
 loadGpsCalibration().then(updateGpsCalibrationUI);
 refreshInlineMap();
 
@@ -2506,6 +2674,7 @@ function showMain(sess){
   updateMapEditBarVisibility();
   updatePalletBarVisibility();
   updatePromoEditBtnVisibility();
+  renderPromoGallery();
 }
 // ==== ข้อเสนอแนะ/คอมเพลนจากลูกค้า (แนบรูปได้ sync ผ่าน Firestore) ====
 let FEEDBACK_CACHE=[];
