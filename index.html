@@ -874,7 +874,9 @@ function mapLineMarkup(b,l,rotationDeg,H){
   const color=l.color||b.textColor||'#3a3a3a';
   const anchorAttr=' text-anchor="'+(isMid?'middle':'start')+'"';
   const dataAttr=' data-id="'+b.id+'" data-dx="'+dx+'" data-dy="'+l.dy+'" data-fx="'+fx+'" data-mid="'+(isMid?'1':'0')+'"';
-  return '<text'+dataAttr+' x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" font-size="'+l.size+'" font-weight="'+l.weight+'" letter-spacing="0.4" fill="'+color+'"'+anchorAttr+opAttr+'>'+escapeHtml(l.text)+'</text>';
+  const isThai=/[฀-๿]/.test(l.text);
+  const spacingAttr=isThai?'':' letter-spacing="0.4"';
+  return '<text'+dataAttr+' x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" font-size="'+l.size+'" font-weight="'+l.weight+'"'+spacingAttr+' fill="'+color+'"'+anchorAttr+opAttr+'>'+escapeHtml(l.text)+'</text>';
 }
 
 function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
@@ -938,8 +940,8 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     const minY=Math.min(...group.map(b=>b.y)), maxH=Math.max(...group.map(b=>b.height||54));
     const info=MAP_ZONE_LABELS[prefix];
     const p=isoProject((minX+maxX)/2, minY+22, maxH, rot);
-    return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="800" fill="'+info.color+'">'+escapeHtml(info.main)+'</text>'+
-      '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+13).toFixed(1)+'" text-anchor="middle" font-size="9.5" font-weight="600" fill="'+info.subColor+'">'+escapeHtml(info.sub)+'</text>';
+    return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="'+MAP_MAIN_SIZE+'" font-weight="800" letter-spacing="0.4" fill="'+info.color+'">'+escapeHtml(info.main)+'</text>'+
+      '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+17).toFixed(1)+'" text-anchor="middle" font-size="'+MAP_SUB_SIZE+'" font-weight="600" letter-spacing="0.4" fill="'+info.subColor+'">'+escapeHtml(info.sub)+'</text>';
   }).join('');
 
   const allPts=[floorTop,leftWall,backWall,rightWall,frontWall].reduce((a,p)=>a.concat(p),[]);
