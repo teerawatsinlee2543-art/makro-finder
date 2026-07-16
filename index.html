@@ -1575,17 +1575,45 @@ function handlePalletScanCode(code){
       openPalletScan(palletScanMode);
       return;
     }
-    if(confirm('ลบ "'+item.desc+'" ออกจากพาเลท?')){
-      currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==item.itemNo);
-      savePallet(currentPallet);
-      renderPalletDetailView(currentPallet);
-      showPalletToast('ลบแล้ว: '+item.desc);
-    }
-    closePalletScan();
+    renderPalletDeleteFocusCard(item);
     return;
   }
   // mode === 'manage'
   renderPalletScanFocusCard(item);
+}
+function renderPalletDeleteFocusCard(item){
+  const existing=currentPallet.items.find(x=>x.itemNo===item.itemNo);
+  const qty=existing.qty;
+  const body=document.getElementById('palletScanBody');
+  body.innerHTML='<div class="pallet-focus-lock"><i class="ti ti-lock" aria-hidden="true"></i> ล็อกรายการอื่นชั่วคราว แก้ได้เฉพาะสินค้าที่สแกน</div>'+
+    '<div style="padding-top:12px">'+
+    '<div class="pallet-focus-photo" id="palletFocusPhoto"><i class="ti ti-package" aria-hidden="true"></i></div>'+
+    '<div class="pallet-focus-name">'+escapeHtml(item.desc)+'</div>'+
+    '<div class="pallet-focus-meta">Item '+escapeHtml(item.itemNo)+(item.barcode?' · '+escapeHtml(item.barcode):'')+'</div>'+
+    '<div class="pallet-focus-qty-label">จำนวนในพาเลทนี้ '+qty+' ชิ้น</div>'+
+    (qty>1?'<button class="pallet-add-btn" style="background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary);margin-top:14px" onclick="deleteScanOnePiece(\''+item.itemNo+'\')"><i class="ti ti-minus" aria-hidden="true"></i> ลบ 1 ชิ้น</button>':'')+
+    '<button class="pallet-focus-remove" style="margin-top:10px" onclick="deleteScanAllPieces(\''+item.itemNo+'\')"><i class="ti ti-trash" aria-hidden="true"></i> ลบทั้งหมด ('+qty+' ชิ้น)</button>'+
+  '</div>';
+  applyItemImage(document.getElementById('palletFocusPhoto'),item);
+}
+function deleteScanOnePiece(itemNo){
+  const existing=currentPallet.items.find(x=>x.itemNo===itemNo);
+  if(!existing)return;
+  if(existing.qty>1){ existing.qty-=1; } else { currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==itemNo); }
+  savePallet(currentPallet);
+  renderPalletDetailView(currentPallet);
+  showPalletToast('ลบแล้ว 1 ชิ้น: '+existing.desc);
+  closePalletScan();
+}
+function deleteScanAllPieces(itemNo){
+  const existing=currentPallet.items.find(x=>x.itemNo===itemNo);
+  if(!existing)return;
+  if(!confirm('แน่ใจว่าจะลบ "'+existing.desc+'" ทั้งหมด '+existing.qty+' ชิ้น ออกจากพาเลทนี้ใช่หรือไม่?'))return;
+  currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==itemNo);
+  savePallet(currentPallet);
+  renderPalletDetailView(currentPallet);
+  showPalletToast('ลบทั้งหมดแล้ว: '+existing.desc);
+  closePalletScan();
 }
 function renderPalletScanFocusCard(item){
   const existing=currentPallet.items.find(x=>x.itemNo===item.itemNo);
