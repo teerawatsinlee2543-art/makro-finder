@@ -103,9 +103,22 @@ body{margin:0;padding:0}
 .promo-add-card{flex:0 0 auto;width:112px;height:150px;border-radius:10px;border:1.5px dashed var(--brand-red);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--brand-red);font-size:12px;font-weight:600;cursor:pointer;background:#FFF0F1}
 .promo-add-card i{font-size:22px}
 .promo-gallery-empty{font-size:12.5px;color:var(--color-text-tertiary);padding:6px 0 12px}
+.promo-gallery-badge{position:absolute;bottom:0;left:0;right:0;background:rgba(8,11,22,.65);color:#fff;font-size:10px;text-align:center;padding:3px 4px;font-weight:600}
+.promo-gallery-badge.soon{background:rgba(232,25,44,.85)}
 .promo-view-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
 .promo-view-overlay img{max-width:100%;max-height:100%;border-radius:8px;object-fit:contain;display:block}
 .promo-view-loading{color:#fff;font-size:13px}
+.promo-view-caption{color:#fff;font-size:13px;margin-top:10px;text-align:center}
+.promo-date-overlay{position:fixed;inset:0;background:rgba(8,11,22,.6);display:none;align-items:center;justify-content:center;z-index:2150;padding:16px}
+.promo-date-box{width:100%;max-width:340px;background:var(--color-background-primary);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.promo-date-title{font-size:15px;font-weight:700;color:var(--color-text-primary);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.promo-date-title i{color:var(--brand-red)}
+.promo-date-box label{font-size:12.5px;color:var(--color-text-secondary);margin-bottom:-4px}
+.promo-date-box input[type=date]{padding:10px 12px;border-radius:10px;border:1px solid var(--color-border-tertiary);font-size:14px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary)}
+.promo-date-actions{display:flex;gap:10px;margin-top:8px}
+.promo-date-actions button{flex:1;padding:11px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.promo-date-cancel{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.promo-date-confirm{background:var(--brand-red);color:#fff}
 .map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
 .map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
@@ -571,7 +584,24 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
 <div class="promo-view-overlay" id="promoViewOverlay" onclick="closePromoViewer()">
   <button class="map-overlay-close" onclick="closePromoViewer()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
-  <img id="promoViewImg" onclick="event.stopPropagation()">
+  <div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;align-items:center;max-width:100%;max-height:100%">
+    <img id="promoViewImg">
+    <div id="promoViewCaption" class="promo-view-caption"></div>
+  </div>
+</div>
+
+<div class="promo-date-overlay" id="promoDateOverlay">
+  <div class="promo-date-box">
+    <div class="promo-date-title"><i class="ti ti-calendar-event" aria-hidden="true"></i> ช่วงเวลาโปรโมชั่น</div>
+    <label>เริ่มแสดง (ไม่ระบุ = เริ่มทันที)</label>
+    <input type="date" id="promoDateStart">
+    <label>สิ้นสุด (ระบบจะลบให้อัตโนมัติหลังวันนี้)</label>
+    <input type="date" id="promoDateEnd">
+    <div class="promo-date-actions">
+      <button class="promo-date-cancel" onclick="cancelPromoDatePick()">ยกเลิก</button>
+      <button class="promo-date-confirm" onclick="confirmPromoDatePick()">ตกลง เลือกไฟล์</button>
+    </div>
+  </div>
 </div>
 
 <div class="map-overlay" id="mapOverlay" onclick="closeMapFullscreen()">
@@ -1197,50 +1227,92 @@ function newPromoId(){
   return 'PROMO-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
 }
 async function loadAllPromoItems(){
+  const now=Date.now();
   if(promoGalleryCollectionRef){
     try{
       const snap=await promoGalleryCollectionRef.get();
       const list=[];
       snap.forEach(doc=>{ const d=doc.data(); if(d&&d.type==='promo') list.push(d); });
-      list.sort((a,b)=>b.ts-a.ts);
-      PROMO_GALLERY_CACHE=list;
-      savePromoGalleryLocal(list);
-      return list;
+      const active=list.filter(p=>!p.expiresAt||p.expiresAt>now);
+      const expired=list.filter(p=>p.expiresAt&&p.expiresAt<=now);
+      expired.forEach(p=>{ promoGalleryCollectionRef.doc(p.id).delete().catch(e=>console.error('ลบโปรโมชั่นหมดอายุไม่สำเร็จ',e)); });
+      active.sort((a,b)=>b.ts-a.ts);
+      PROMO_GALLERY_CACHE=active;
+      savePromoGalleryLocal(active);
+      return active;
     }catch(e){ console.error('โหลดโปรโมชั่นจาก Firestore ไม่สำเร็จ',e); }
   }
-  PROMO_GALLERY_CACHE=loadPromoGalleryLocal().sort((a,b)=>b.ts-a.ts);
+  PROMO_GALLERY_CACHE=loadPromoGalleryLocal().filter(p=>!p.expiresAt||p.expiresAt>now).sort((a,b)=>b.ts-a.ts);
   return PROMO_GALLERY_CACHE;
+}
+function promoCountdownLabel(expiresAt){
+  const diffMs=expiresAt-Date.now();
+  const days=Math.ceil(diffMs/86400000);
+  if(days<=1) return 'หมดวันนี้';
+  return 'เหลือ '+days+' วัน';
 }
 function renderPromoGallery(){
   const box=document.getElementById('promoGalleryList');
   if(!box)return;
   let html='';
   if(isEmployee()){
-    html+='<div class="promo-add-card" onclick="document.getElementById(\'promoFileInput\').click()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มโปรโมชั่น</div>';
+    html+='<div class="promo-add-card" onclick="openPromoAddFlow()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มโปรโมชั่น</div>';
   }
-  html+=PROMO_GALLERY_CACHE.map(p=>
-    '<div class="promo-gallery-item" onclick="openPromoViewer('+jsStr(p.id)+')">'+
+  html+=PROMO_GALLERY_CACHE.map(p=>{
+    const soon=p.expiresAt&&(p.expiresAt-Date.now())<=2*86400000;
+    const badge=p.expiresAt?('<div class="promo-gallery-badge'+(soon?' soon':'')+'">'+promoCountdownLabel(p.expiresAt)+'</div>'):'';
+    return '<div class="promo-gallery-item" onclick="openPromoViewer('+jsStr(p.id)+')">'+
       '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy">'+
+      badge+
       (isEmployee()?'<button class="promo-gallery-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
-    '</div>'
-  ).join('');
+    '</div>';
+  }).join('');
   if(!PROMO_GALLERY_CACHE.length && !isEmployee()){
     html+='<div class="promo-gallery-empty">ยังไม่มีโปรโมชั่นในขณะนี้</div>';
   }
   box.innerHTML=html;
 }
+// ==== เลือกช่วงเวลาโปรโมชั่นก่อนแนบไฟล์ (ใช้นับถอยหลัง+ลบอัตโนมัติเมื่อหมดอายุ) ====
+let pendingPromoPeriod=null;
+function openPromoAddFlow(){
+  if(!isEmployee())return;
+  document.getElementById('promoDateStart').value='';
+  document.getElementById('promoDateEnd').value='';
+  document.getElementById('promoDateOverlay').style.display='flex';
+}
+function cancelPromoDatePick(){
+  document.getElementById('promoDateOverlay').style.display='none';
+}
+function formatThaiDateShort(isoDate){
+  const d=new Date(isoDate+'T00:00:00');
+  const beYear=(d.getFullYear()+543)%100;
+  return d.getDate()+'/'+(d.getMonth()+1)+'/'+String(beYear).padStart(2,'0');
+}
+function confirmPromoDatePick(){
+  const startVal=document.getElementById('promoDateStart').value;
+  const endVal=document.getElementById('promoDateEnd').value;
+  if(!endVal){ alert('กรุณาระบุวันที่สิ้นสุดโปรโมชั่น'); return; }
+  const expiresAt=new Date(endVal+'T23:59:59').getTime();
+  if(isNaN(expiresAt)||expiresAt<Date.now()){ alert('กรุณาเลือกวันที่สิ้นสุดที่ยังไม่ผ่านไปแล้ว'); return; }
+  const periodLabel=startVal?(formatThaiDateShort(startVal)+' - '+formatThaiDateShort(endVal)):('ถึง '+formatThaiDateShort(endVal));
+  pendingPromoPeriod={expiresAt:expiresAt,periodLabel:periodLabel};
+  document.getElementById('promoDateOverlay').style.display='none';
+  document.getElementById('promoFileInput').click();
+}
 async function handlePromoFileSelect(evt){
   const files=Array.from(evt.target.files||[]);
   evt.target.value='';
-  if(!files.length)return;
+  const period=pendingPromoPeriod;
+  pendingPromoPeriod=null;
+  if(!files.length||!period)return;
   const sess=getSession();
   const addedBy=sess?(sess.name+' · '+sess.dept):'ไม่ทราบ';
   for(const file of files){
     try{
       if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
-        await addPromoFromPdf(file,addedBy);
+        await addPromoFromPdf(file,addedBy,period);
       } else {
-        await addPromoFromImage(file,addedBy);
+        await addPromoFromImage(file,addedBy,period);
       }
     }catch(e){
       console.error('เพิ่มโปรโมชั่นไม่สำเร็จ',e);
@@ -1249,7 +1321,7 @@ async function handlePromoFileSelect(evt){
   }
   renderPromoGallery();
 }
-function addPromoFromImage(file,addedBy){
+function addPromoFromImage(file,addedBy,period){
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
     reader.onload=function(){
@@ -1263,7 +1335,7 @@ function addPromoFromImage(file,addedBy){
         const ctx=canvas.getContext('2d');
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
         const dataUrl=canvas.toDataURL('image/jpeg',0.72);
-        savePromoItem(dataUrl,addedBy).then(resolve).catch(reject);
+        savePromoItem(dataUrl,addedBy,period).then(resolve).catch(reject);
       };
       img.onerror=reject;
       img.src=reader.result;
@@ -1278,7 +1350,7 @@ function withTimeout(promise,ms,message){
     new Promise((_,reject)=>setTimeout(()=>reject(new Error(message)),ms))
   ]);
 }
-async function addPromoFromPdf(file,addedBy){
+async function addPromoFromPdf(file,addedBy,period){
   if(!window.pdfjsLib){ alert('ไม่สามารถโหลดตัวอ่านไฟล์ PDF ได้ กรุณาตรวจสอบอินเทอร์เน็ต'); return; }
   const buf=await file.arrayBuffer();
   const pdf=await withTimeout(pdfjsLib.getDocument({data:buf}).promise,20000,'อ่านไฟล์ PDF ไม่สำเร็จ (ใช้เวลานานเกินไป)');
@@ -1294,11 +1366,11 @@ async function addPromoFromPdf(file,addedBy){
       'แปลงหน้า PDF เป็นรูปไม่สำเร็จ (ใช้เวลานานเกินไป) กรุณาอย่าสลับแอปขณะอัปโหลด แล้วลองใหม่'
     );
     const dataUrl=canvas.toDataURL('image/jpeg',0.72);
-    await savePromoItem(dataUrl,addedBy);
+    await savePromoItem(dataUrl,addedBy,period);
   }
 }
-async function savePromoItem(dataUrl,addedBy){
-  const item={id:newPromoId(),type:'promo',image:dataUrl,addedBy:addedBy,ts:Date.now()};
+async function savePromoItem(dataUrl,addedBy,period){
+  const item={id:newPromoId(),type:'promo',image:dataUrl,addedBy:addedBy,ts:Date.now(),expiresAt:period.expiresAt,periodLabel:period.periodLabel};
   PROMO_GALLERY_CACHE.unshift(item);
   savePromoGalleryLocal(PROMO_GALLERY_CACHE);
   if(promoGalleryCollectionRef){
@@ -1320,6 +1392,7 @@ function openPromoViewer(id){
   const item=PROMO_GALLERY_CACHE.find(p=>p.id===id);
   if(!item)return;
   document.getElementById('promoViewImg').src=item.image;
+  document.getElementById('promoViewCaption').textContent=item.periodLabel||'';
   document.getElementById('promoViewOverlay').style.display='flex';
 }
 function closePromoViewer(){
