@@ -88,8 +88,9 @@ body{margin:0;padding:0}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
-.promo-box{background:#FFF0F1;border:1px solid #FFC9CD;border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px}
-.promo-box i{color:var(--brand-red);font-size:19px;flex-shrink:0;margin-top:1px}
+.promo-box{background:#FFF0F1;border:1px solid #FFC9CD;border-radius:12px;padding:14px;margin-bottom:16px}
+.promo-card-title{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:#8a0e17;margin-bottom:10px}
+.promo-card-title i:first-child{color:var(--brand-red);font-size:18px}
 .promo-tag{display:inline-block;background:var(--brand-red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;letter-spacing:.02em}
 .promo-title{font-size:14px;font-weight:700;color:#8a0e17}
 .promo-detail{font-size:12.5px;color:#a3454d;margin-top:1px}
@@ -122,10 +123,6 @@ body{margin:0;padding:0}
 .emp-loc-actions{display:flex;gap:6px;flex-shrink:0}
 .emp-loc-btn{font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid #F0B95C;background:#fff;color:#95610A;cursor:pointer;font-family:inherit}
 .emp-loc-btn.danger{border-color:#E3897A;color:#B33A2A}
-.emp-qty-row{display:flex;align-items:center;gap:6px;margin-top:6px}
-.emp-qty-badge{font-size:11px;font-weight:700;color:#95610A;background:#FFE7BE;padding:2px 8px;border-radius:20px}
-.emp-stock-addbtn{margin-top:2px;width:100%;font-size:12px;padding:8px;border-radius:8px;border:1px dashed #F0B95C;background:transparent;color:#95610A;cursor:pointer;font-family:inherit}
-.emp-stock-scanbtn{margin-top:6px;width:100%;font-size:12px;padding:8px;border-radius:8px;border:none;background:#FFB800;color:#4a2e00;cursor:pointer;font-family:inherit;font-weight:600}
 .map-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;z-index:2000;padding:16px}
 .map-overlay-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.14);border:none;color:#fff;width:40px;height:40px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1}
 .map-overlay-content{width:100%;max-width:min(1100px,94vw);max-height:100%}
@@ -149,11 +146,10 @@ body{margin:0;padding:0}
 .pallet-card:hover{border-color:var(--color-border-secondary)}
 .pallet-card-id{font-size:14px;font-weight:600}
 .pallet-card-meta{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
-.pallet-card-badge{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:6px}
-.pallet-card-badge.open{background:#E1F5EE;color:#085041}
-.pallet-card-badge.closed{background:var(--color-background-tertiary);color:var(--color-text-secondary)}
 .pallet-new-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#FFF0F1;color:#A32D2D;border:1px dashed #F09595;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px}
 .pallet-stats{display:flex;gap:10px;margin-bottom:14px}
+.pallet-loc-box{display:flex;align-items:center;gap:8px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);border-radius:10px;padding:11px 12px;font-size:13px;color:var(--color-text-primary);margin-bottom:12px}
+.pallet-loc-box i{color:var(--brand-red);font-size:16px;flex-shrink:0}
 .pallet-stat{flex:1;background:var(--color-background-secondary);border-radius:10px;padding:8px 10px;text-align:center}
 .pallet-stat-label{font-size:11px;color:var(--color-text-secondary)}
 .pallet-stat-val{font-size:18px;font-weight:600}
@@ -514,18 +510,16 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           </div>
         </div>
         <div class="promo-box" id="promoBlock">
-          <i class="ti ti-discount-2" aria-hidden="true"></i>
-          <div>
-            <span class="promo-tag">ลดพิเศษ</span>
-            <div class="promo-title">ลด 5% ทั้งร้าน</div>
-            <div class="promo-detail">เมื่อซื้อครบ 500 บาท</div>
+          <div class="promo-card-title"><i class="ti ti-discount-2" aria-hidden="true"></i> โปรโมชั่น
+            <button class="promo-edit-btn" id="promoEditBtn" style="display:none" onclick="openPromoEditor()" aria-label="แก้ไขโปรโมชั่น"><i class="ti ti-pencil" aria-hidden="true"></i></button>
           </div>
-          <button class="promo-edit-btn" id="promoEditBtn" style="display:none" onclick="openPromoEditor()" aria-label="แก้ไขโปรโมชั่น"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+          <span class="promo-tag">ลดพิเศษ</span>
+          <div class="promo-title">ลด 5% ทั้งร้าน</div>
+          <div class="promo-detail">เมื่อซื้อครบ 500 บาท</div>
         </div>
         <div class="emp-stock-box" id="empStockBlock" style="display:none">
           <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> สำหรับพนักงาน · ข้อมูลจัดวางสินค้า</div>
           <div id="empStockList"></div>
-          <button class="emp-stock-scanbtn" id="stockScanBtn" onclick="openStockScanner()"><i class="ti ti-scan" aria-hidden="true"></i> สแกนสินค้าเพื่อปรับจำนวนคงเหลือ</button>
         </div>
         <div id="remarkBlock" class="tip-box" style="display:none">
           <i class="ti ti-note" aria-hidden="true"></i>
@@ -609,6 +603,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <div class="pallet-header-sub" id="palletHeaderSub"></div>
       </div>
       <i class="ti ti-pencil" id="palletRenameBtn" aria-hidden="true" onclick="renamePallet()" style="display:none"></i>
+      <i class="ti ti-scan" id="palletFindScanBtn" aria-hidden="true" onclick="openFindPalletScan()" style="display:none"></i>
     </div>
     <div class="pallet-body" id="palletBody"></div>
   </div>
@@ -655,73 +650,80 @@ const MAP_VB_W=640, MAP_VB_H=545, MAP_MIN_W=40, MAP_MIN_H=30, MAP_MIN_HEIGHT=20,
 const MAP_FLOOR={x:8,y:8,w:624,h:522};
 const MAP_FLOOR_CX=MAP_FLOOR.x+MAP_FLOOR.w/2, MAP_FLOOR_CY=MAP_FLOOR.y+MAP_FLOOR.h/2;
 const MAP_ISO_COS=Math.cos(Math.PI/6), MAP_ISO_SIN=Math.sin(Math.PI/6);
-function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,count,startNum,fill,textColor,height){
+function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textColor,height){
+  const total=endNum-startNum+1;
+  const blockCount=Math.ceil(total/2);
   const gap=4;
-  const w=((bx1-bx0)-gap*(count-1))/count;
+  const w=((bx1-bx0)-gap*(blockCount-1))/blockCount;
   const fontSize=Math.max(5,Math.min(9,w*0.42));
   const arr=[];
-  for(let i=0;i<count;i++){
+  let cur=startNum;
+  for(let i=0;i<blockCount;i++){
     const x0=Math.round(bx0+i*(w+gap));
-    const n1=startNum+i*2, n2=n1+1;
-    arr.push({
-      id:idPrefix+n1+'_'+n2, x:x0, y:by0, w:Math.round(w), h:by1-by0, fill:fill, height:height, anchor:'middle',
-      lines:[
-        {fx:0.5,dy:(by1-by0)-8-fontSize,size:fontSize,weight:800,text:String(n1),color:textColor},
-        {fx:0.5,dy:(by1-by0)-6,size:fontSize,weight:800,text:String(n2),color:textColor}
-      ]
-    });
+    const isSingle=(endNum-cur)<1;
+    const n1=cur, n2=isSingle?null:cur+1;
+    const idSuffix=isSingle?String(n1):(n1+'_'+n2);
+    const lines=isSingle
+      ? [{fx:0.5,dy:(by1-by0)-6,size:fontSize,weight:800,text:String(n1),color:textColor}]
+      : [
+          {fx:0.5,dy:(by1-by0)-8-fontSize,size:fontSize,weight:800,text:String(n1),color:textColor},
+          {fx:0.5,dy:(by1-by0)-6,size:fontSize,weight:800,text:String(n2),color:textColor}
+        ];
+    arr.push({ id:idPrefix+idSuffix, x:x0, y:by0, w:Math.round(w), h:by1-by0, fill:fill, height:height, anchor:'middle', lines:lines });
+    cur+=isSingle?1:2;
   }
   return arr;
 }
+const MAP_MAIN_SIZE=16, MAP_SUB_SIZE=12;
 const DEFAULT_MAP_BLOCKS=[
   {id:'butchery',x:20,y:20,w:190,h:75,fill:'#FBE4E4',height:54,lines:[
-    {dx:8,dy:27,size:15,weight:800,text:'เนื้อสัตว์และแช่แข็ง',color:'#8B3A3A'},
-    {dx:8,dy:44,size:12,weight:600,opacity:.95,text:'Butchery & Frozen',color:'#B06A6A'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'เนื้อสัตว์และแช่แข็ง',color:'#8B3A3A'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Butchery & Frozen',color:'#B06A6A'}]},
   {id:'snack',x:220,y:20,w:75,h:75,fill:'#E3F6E8',height:54,lines:[
-    {dx:8,dy:36,size:24,weight:800,text:'ขนม',color:'#2F6B44'},
-    {dx:8,dy:62,size:19,weight:600,opacity:.95,text:'Snack',color:'#5A9470'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ขนม',color:'#2F6B44'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Snack',color:'#5A9470'}]},
   {id:'winebeer',x:305,y:20,w:85,h:75,fill:'#DFF3F3',height:54,lines:[
-    {dx:8,dy:18,size:12,weight:800,text:'ไวน์/เบียร์',color:'#1F6B6B'},
-    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Wine & Beer',color:'#4A9494'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ไวน์/เบียร์',color:'#1F6B6B'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Wine & Beer',color:'#4A9494'}]},
   {id:'drink',x:400,y:20,w:135,h:75,fill:'#EAE4F8',height:54,lines:[
-    {dx:8,dy:29,size:23,weight:800,text:'เครื่องดื่ม',color:'#5B3E96'},
-    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Drink',color:'#8A72C0'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องดื่ม',color:'#5B3E96'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Drink',color:'#8A72C0'}]},
   {id:'fishseafood',x:20,y:105,w:190,h:85,fill:'#DEEBFA',height:54,lines:[
-    {dx:8,dy:29,size:23,weight:800,text:'ปลา/อาหารทะเล',color:'#2A5C93'},
-    {dx:8,dy:54,size:18,weight:600,opacity:.95,text:'Fish & Seafood',color:'#5F8CC0'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ปลา/อาหารทะเล',color:'#2A5C93'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fish & Seafood',color:'#5F8CC0'}]},
   {id:'grilledchicken',x:220,y:105,w:95,h:65,fill:'#FAEBDA',height:54,lines:[
-    {dx:8,dy:18,size:12,weight:800,text:'ไก่ย่าง',color:'#8A5A25'},
-    {dx:8,dy:31,size:9,weight:600,opacity:.95,text:'Grilled Chicken',color:'#B3874F'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ไก่ย่าง',color:'#8A5A25'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Grilled Chicken',color:'#B3874F'}]},
   {id:'condiments',x:20,y:200,w:190,h:50,fill:'#FAE0D8',height:54,lines:[
-    {dx:8,dy:20,size:14,weight:800,text:'เครื่องเทศ',color:'#9A4A2E'},
-    {dx:8,dy:35,size:11,weight:600,opacity:.95,text:'Condiments / Spices',color:'#C17A58'}]},
+    {dx:8,dy:22,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องเทศ',color:'#9A4A2E'},
+    {dx:8,dy:40,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Condiments / Spices',color:'#C17A58'}]},
   {id:'fruitveg',x:20,y:260,w:190,h:135,fill:'#E5F3DC',height:54,lines:[
-    {dx:8,dy:45,size:24,weight:800,text:'ผัก-ผลไม้',color:'#4C7A2A'},
-    {dx:8,dy:71,size:19,weight:600,opacity:.95,text:'Fruit & Veg',color:'#7CA858'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ผัก-ผลไม้',color:'#4C7A2A'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fruit & Veg',color:'#7CA858'}]},
   {id:'o2o',x:545,y:105,w:75,h:290,fill:'#FBEED9',height:70,anchor:'middle',lines:[
-    {fx:0.5,dy:135,size:12,weight:800,text:'O2O',color:'#97701E'},
-    {fx:0.5,dy:148,size:9,weight:600,opacity:.95,text:'แผนกออนไลน์',color:'#B3934F'},
-    {fx:0.5,dy:158,size:7,weight:600,opacity:.9,text:'Makro Pro',color:'#C3AB78'}]},
+    {fx:0.5,dy:135,size:MAP_MAIN_SIZE,weight:800,text:'O2O',color:'#97701E'},
+    {fx:0.5,dy:153,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'แผนกออนไลน์',color:'#B3934F'},
+    {fx:0.5,dy:169,size:MAP_SUB_SIZE,weight:600,opacity:.9,text:'Makro Pro',color:'#C3AB78'}]},
   {id:'bakery',x:20,y:405,w:150,h:85,fill:'#F3E7D6',height:54,lines:[
-    {dx:8,dy:40,size:24,weight:800,text:'เบเกอรี่',color:'#8A6A3C'},
-    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Bakery',color:'#B3966A'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'เบเกอรี่',color:'#8A6A3C'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Bakery',color:'#B3966A'}]},
   {id:'cashier',x:180,y:405,w:220,h:85,fill:'#DFF4EA',height:30,lines:[
-    {dx:8,dy:40,size:24,weight:800,text:'แคชเชียร์',color:'#237A56'},
-    {dx:8,dy:66,size:19,weight:600,opacity:.95,text:'Cashier',color:'#5AA684'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'แคชเชียร์',color:'#237A56'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Cashier',color:'#5AA684'}]},
   {id:'icecream',x:410,y:405,w:95,h:85,fill:'#DBF1F4',height:54,lines:[
-    {dx:8,dy:36,size:20,weight:800,text:'ไอศกรีม',color:'#1C7086'},
-    {dx:8,dy:58,size:16,weight:600,opacity:.95,text:'Ice Cream',color:'#4FA0B4'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ไอศกรีม',color:'#1C7086'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Ice Cream',color:'#4FA0B4'}]},
   {id:'premium',x:515,y:405,w:105,h:85,fill:'#EAE7F0',height:54,lines:[
-    {dx:8,dy:33,size:17,weight:800,text:'จุดของแถม',color:'#5C5470'},
-    {dx:8,dy:51,size:13,weight:600,opacity:.95,text:'Premium',color:'#8A82A0'}]},
+    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'จุดของแถม',color:'#5C5470'},
+    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Premium',color:'#8A82A0'}]},
 ].concat(
-  generateAisleGroup('dryfood_',325,105,535,240,6,28,'#FBE1EC','#99406B',60)
+  generateAisleGroup('dryfood_',325,105,535,240,29,44,'#FBE1EC','#99406B',60)
 ).concat(
-  generateAisleGroup('nonfood_',220,250,535,395,14,1,'#E7E4F8','#5749A0',60)
+  generateAisleGroup('nonfood_',220,250,535,395,1,25,'#E7E4F8','#5749A0',60)
 );
 const MAP_ZONE_LABELS={
-  dryfood_:{main:'Dry Food',sub:'Loc. 28-39',color:'#99406B',subColor:'#C36B96'},
-  nonfood_:{main:'Non-Food',sub:'Loc. 1-28',color:'#5749A0',subColor:'#8B80C8'}
+  dryfood_:{main:'Dry Food',sub:'Loc. 29-44',color:'#99406B',subColor:'#C36B96'},
+  nonfood_:{main:'Non-Food',sub:'Loc. 1-25',color:'#5749A0',subColor:'#8B80C8'}
 };
 
 let currentMapBlocks=JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
@@ -749,7 +751,6 @@ let palletsCollectionRef=null;
 let promoFirestoreDocRef=null;
 let stockOverridesDocRef=null;
 let locationOverridesDocRef=null;
-let stockQtyDocRef=null;
 let feedbackCollectionRef=null;
 let gpsCalibrationDocRef=null;
 try{
@@ -761,14 +762,13 @@ try{
     promoFirestoreDocRef=mfCol.doc('promoConfig');
     stockOverridesDocRef=mfCol.doc('stockOverrides');
     locationOverridesDocRef=mfCol.doc('locationOverrides');
-    stockQtyDocRef=mfCol.doc('stockQty');
     feedbackCollectionRef=mfCol;
     gpsCalibrationDocRef=mfCol.doc('gpsCalibration');
   }
 }catch(e){
   console.error('Firebase init ไม่สำเร็จ',e);
   mapFirestoreDocRef=null; palletsCollectionRef=null; promoFirestoreDocRef=null;
-  stockOverridesDocRef=null; locationOverridesDocRef=null; stockQtyDocRef=null; feedbackCollectionRef=null;
+  stockOverridesDocRef=null; locationOverridesDocRef=null; feedbackCollectionRef=null;
   gpsCalibrationDocRef=null;
 }
 
@@ -817,7 +817,7 @@ function mapLineMarkup(b,l,rotationDeg,H){
   const color=l.color||b.textColor||'#3a3a3a';
   const anchorAttr=' text-anchor="'+(isMid?'middle':'start')+'"';
   const dataAttr=' data-id="'+b.id+'" data-dx="'+dx+'" data-dy="'+l.dy+'" data-fx="'+fx+'" data-mid="'+(isMid?'1':'0')+'"';
-  return '<text'+dataAttr+' x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" font-size="'+l.size+'" font-weight="'+l.weight+'" fill="'+color+'"'+anchorAttr+opAttr+'>'+escapeHtml(l.text)+'</text>';
+  return '<text'+dataAttr+' x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" font-size="'+l.size+'" font-weight="'+l.weight+'" letter-spacing="0.4" fill="'+color+'"'+anchorAttr+opAttr+'>'+escapeHtml(l.text)+'</text>';
 }
 
 function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
@@ -938,11 +938,11 @@ function findMapBlockForItem(item){
   if(item.locations&&item.locations.length){
     for(const l of item.locations){
       const locNum=parseInt(String(l.loc).replace(/\D/g,''),10);
-      if(!isNaN(locNum) && locNum>=1 && locNum<=39){
+      if(!isNaN(locNum) && locNum>=1 && locNum<=44){
         const hit=currentMapBlocks.find(b=>{
-          const m=b.id.match(/^(dryfood|nonfood)_(\d+)_(\d+)$/);
+          const m=b.id.match(/^(dryfood|nonfood)_(\d+)(?:_(\d+))?$/);
           if(!m)return false;
-          const n1=parseInt(m[2],10), n2=parseInt(m[3],10);
+          const n1=parseInt(m[2],10), n2=m[3]!==undefined?parseInt(m[3],10):n1;
           return locNum>=n1 && locNum<=n2;
         });
         if(hit) return {blockId:hit.id, exact:true};
@@ -1213,9 +1213,9 @@ function palletTotals(pallet){
 }
 function newPalletId(){
   const d=new Date();
-  const ymd=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
-  const seq=String(PALLETS_CACHE.filter(p=>p.id.includes(ymd)).length+1).padStart(3,'0');
-  return 'PLT-'+ymd+'-'+seq;
+  const dmy=String(d.getDate()).padStart(2,'0')+String(d.getMonth()+1).padStart(2,'0')+d.getFullYear();
+  const hms=String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0');
+  return 'PLT-'+dmy+'-'+hms;
 }
 
 function openPalletManager(){
@@ -1223,6 +1223,7 @@ function openPalletManager(){
   document.getElementById('palletOverlay').style.display='flex';
   document.getElementById('palletBackBtn').style.display='none';
   document.getElementById('palletRenameBtn').style.display='none';
+  document.getElementById('palletFindScanBtn').style.display='none';
   currentPallet=null;
   document.getElementById('palletHeaderTitle').textContent='จัดการพาเลท';
   document.getElementById('palletHeaderSub').textContent='';
@@ -1237,6 +1238,7 @@ function palletGoBack(){
   currentPallet=null;
   document.getElementById('palletBackBtn').style.display='none';
   document.getElementById('palletRenameBtn').style.display='none';
+  document.getElementById('palletFindScanBtn').style.display='none';
   document.getElementById('palletHeaderTitle').textContent='จัดการพาเลท';
   document.getElementById('palletHeaderSub').textContent='';
   renderPalletListView(PALLETS_CACHE);
@@ -1244,29 +1246,20 @@ function palletGoBack(){
 
 function renderPalletListView(pallets){
   const body=document.getElementById('palletBody');
-  const openPallets=pallets.filter(p=>p.status==='open');
-  const closedPallets=pallets.filter(p=>p.status==='closed');
   let html='';
   if(isGR()){
     html+='<div class="pallet-new-btn" onclick="createNewPallet()"><i class="ti ti-plus" aria-hidden="true"></i> สร้างพาเลทใหม่</div>';
   }
-  if(!openPallets.length && !closedPallets.length){
+  if(!pallets.length){
     html+='<div class="pallet-empty">ยังไม่มีพาเลทในระบบ</div>';
-  }
-  if(openPallets.length){
-    html+='<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">พาเลทที่เปิดอยู่</div>';
-    html+='<div class="pallet-grid" style="margin-bottom:10px">'+openPallets.map(palletCardHtml).join('')+'</div>';
-  }
-  if(closedPallets.length){
-    html+='<div style="font-size:12px;color:var(--color-text-secondary);margin:14px 0 8px">พาเลทที่ปิดแล้ว</div>';
-    html+='<div class="pallet-grid">'+closedPallets.map(palletCardHtml).join('')+'</div>';
+  } else {
+    html+='<div class="pallet-grid">'+pallets.map(palletCardHtml).join('')+'</div>';
   }
   body.innerHTML=html;
 }
 function palletCardHtml(p){
   const t=palletTotals(p);
-  const badge=p.status==='open' ? '<span class="pallet-card-badge open">เปิดอยู่</span>' : '<span class="pallet-card-badge closed">ปิดแล้ว</span>';
-  const titleLine=p.name ? escapeHtml(p.name)+badge+'<div style="font-size:11px;color:var(--color-text-secondary);font-weight:400;margin-top:1px">'+p.id+'</div>' : p.id+badge;
+  const titleLine=p.name ? escapeHtml(p.name)+'<div style="font-size:11px;color:var(--color-text-secondary);font-weight:400;margin-top:1px">'+p.id+'</div>' : p.id;
   return '<div class="pallet-card" onclick="openPalletDetail(\''+p.id+'\')">'+
     '<div class="pallet-card-id">'+titleLine+'</div>'+
     '<div class="pallet-card-meta">'+t.skuCount+' รายการ · '+t.unitCount+' ชิ้น · สร้างโดย '+escapeHtml(p.createdBy||'-')+'</div>'+
@@ -1281,7 +1274,8 @@ function createNewPallet(){
     name:'',
     createdAt:Date.now(),
     createdBy:(sess&&sess.name)?sess.name+' · '+sess.dept:'-',
-    status:'open',
+    loc:'',
+    location:'',
     items:[]
   };
   PALLETS_CACHE.unshift(pallet);
@@ -1294,14 +1288,14 @@ function openPalletDetail(id){
   if(!pallet)return;
   currentPallet=pallet;
   document.getElementById('palletBackBtn').style.display='block';
+  document.getElementById('palletFindScanBtn').style.display='none';
   updatePalletHeader(pallet);
   renderPalletDetailView(pallet);
 }
 function updatePalletHeader(pallet){
   document.getElementById('palletHeaderTitle').textContent=pallet.name||pallet.id;
-  const statusText=pallet.status==='open'?'เปิดอยู่':'ปิดแล้ว';
   const idLine=pallet.name?pallet.id+' · ':'';
-  document.getElementById('palletHeaderSub').textContent=idLine+statusText+' · สร้างโดย '+(pallet.createdBy||'-');
+  document.getElementById('palletHeaderSub').textContent=idLine+'สร้างโดย '+(pallet.createdBy||'-')+' · '+new Date(pallet.createdAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
   document.getElementById('palletRenameBtn').style.display=isGR()?'block':'none';
 }
 function renamePallet(){
@@ -1312,18 +1306,35 @@ function renamePallet(){
   savePallet(currentPallet);
   updatePalletHeader(currentPallet);
 }
+function editPalletLocation(){
+  if(!currentPallet||!isGR())return;
+  const loc=prompt('พาเลทนี้อยู่ Loc ไหน?',currentPallet.loc||'');
+  if(loc===null)return;
+  const location=prompt('พาเลทนี้อยู่ Location ไหน?',currentPallet.location||'');
+  if(location===null)return;
+  currentPallet.loc=loc.trim();
+  currentPallet.location=location.trim();
+  savePallet(currentPallet);
+  renderPalletDetailView(currentPallet);
+}
+function savePalletAndBack(){
+  if(!currentPallet||!isGR())return;
+  savePallet(currentPallet);
+  showPalletToast('บันทึกพาเลท '+currentPallet.id+' แล้ว');
+  palletGoBack();
+}
 
 function renderPalletDetailView(pallet){
   const body=document.getElementById('palletBody');
   const t=palletTotals(pallet);
-  const canEdit=isGR() && pallet.status==='open';
+  const canEdit=isGR();
   let html='<div class="pallet-stats">'+
     '<div class="pallet-stat"><div class="pallet-stat-label">รายการ</div><div class="pallet-stat-val">'+t.skuCount+'</div></div>'+
     '<div class="pallet-stat"><div class="pallet-stat-label">ชิ้นรวม</div><div class="pallet-stat-val">'+t.unitCount+'</div></div>'+
   '</div>';
-  if(pallet.status==='open'){
-    html+='<div class="pallet-scan-btn" onclick="openPalletScan(\''+(canEdit?'manage':'delete-only')+'\')"><i class="ti ti-scan" aria-hidden="true"></i> '+(canEdit?'สแกนบาร์โค้ดเพื่อเพิ่ม/แก้ไข':'สแกนบาร์โค้ดเพื่อลบสินค้า')+'</div>';
-  }
+  const locText=(pallet.loc||pallet.location) ? ('Loc '+escapeHtml(pallet.loc||'-')+' / Location '+escapeHtml(pallet.location||'-')) : 'ยังไม่ระบุตำแหน่งพาเลท';
+  html+='<div class="pallet-loc-box"'+(isGR()?' onclick="editPalletLocation()" style="cursor:pointer"':'')+'><i class="ti ti-map-pin" aria-hidden="true"></i> พาเลทนี้อยู่ที่ '+locText+(isGR()?' <i class="ti ti-pencil" aria-hidden="true" style="margin-left:auto"></i>':'')+'</div>';
+  html+='<div class="pallet-scan-btn" onclick="openPalletScan(\''+(canEdit?'manage':'delete-only')+'\')"><i class="ti ti-scan" aria-hidden="true"></i> '+(canEdit?'สแกนบาร์โค้ดเพื่อเพิ่ม/แก้ไข':'สแกนบาร์โค้ดเพื่อลบสินค้า')+'</div>';
   if(!pallet.items.length){
     html+='<div class="pallet-empty">ยังไม่มีสินค้าในพาเลทนี้</div>';
   } else {
@@ -1331,7 +1342,7 @@ function renderPalletDetailView(pallet){
   }
   if(canEdit){
     html+='<div class="pallet-add-btn" onclick="openAddItemToPallet()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มสินค้าเข้าพาเลท</div>';
-    html+='<div class="pallet-add-btn" style="margin-top:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary)" onclick="closeCurrentPallet()"><i class="ti ti-lock" aria-hidden="true"></i> ปิดพาเลทนี้</div>';
+    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#E3F6E8;color:#1D6B3F;border-style:solid;border-color:#9AD8AE" onclick="savePalletAndBack()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึกพาเลท</div>';
   }
   if(isGR()){
     html+='<div class="pallet-add-btn" style="margin-top:8px;background:#FFF0F1;color:#A32D2D;border-style:solid;border-color:#F09595" onclick="deleteCurrentPallet()"><i class="ti ti-trash" aria-hidden="true"></i> ลบพาเลทนี้ทิ้งถาวร</div>';
@@ -1377,14 +1388,6 @@ function removePalletItem(itemNo){
   if(!confirm('ลบสินค้านี้ออกจากพาเลท?'))return;
   currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==itemNo);
   savePallet(currentPallet);
-  renderPalletDetailView(currentPallet);
-}
-function closeCurrentPallet(){
-  if(!currentPallet||!isGR())return;
-  if(!confirm('ปิดพาเลท '+currentPallet.id+'? หลังปิดจะแก้ไขไม่ได้'))return;
-  currentPallet.status='closed';
-  savePallet(currentPallet);
-  updatePalletHeader(currentPallet);
   renderPalletDetailView(currentPallet);
 }
 async function deleteCurrentPallet(){
@@ -1440,6 +1443,7 @@ function openFindItemInPallets(){
   if(!isEmployee())return;
   document.getElementById('palletOverlay').style.display='flex';
   document.getElementById('palletBackBtn').style.display='none';
+  document.getElementById('palletFindScanBtn').style.display='block';
   currentPallet=null;
   document.getElementById('palletHeaderTitle').textContent='หาสินค้าตามพาเลท';
   document.getElementById('palletHeaderSub').textContent='';
@@ -1449,6 +1453,10 @@ function openFindItemInPallets(){
       '<div id="findInPalletResults"></div>';
     document.getElementById('findInPalletSearch').focus();
   });
+}
+function openFindPalletScan(){
+  if(!isEmployee())return;
+  openPalletScan('find');
 }
 function renderFindInPalletResults(q){
   const box=document.getElementById('findInPalletResults');
@@ -1461,9 +1469,8 @@ function renderFindInPalletResults(q){
     const palletListHtml=hits.length
       ? hits.map(p=>{
           const it=p.items.find(x=>x.itemNo===item.itemNo);
-          const badge=p.status==='open' ? '<span class="pallet-card-badge open">เปิดอยู่</span>' : '<span class="pallet-card-badge closed">ปิดแล้ว</span>';
           return '<div class="pallet-card" style="margin-bottom:6px" onclick="closeFindInPalletThenOpen(\''+p.id+'\')">'+
-            '<div class="pallet-card-id">'+p.id+badge+'</div>'+
+            '<div class="pallet-card-id">'+p.id+'</div>'+
             '<div class="pallet-card-meta">จำนวนในพาเลทนี้ '+it.qty+' ชิ้น</div>'+
           '</div>';
         }).join('')
@@ -1507,7 +1514,7 @@ function openPalletScan(mode){
   const hint=document.getElementById('palletScanHint');
   err.style.display='none';
   hint.style.display='block';
-  document.getElementById('palletScanTitle').textContent=mode==='manage'?'สแกนเพื่อเพิ่ม/แก้ไข':'สแกนเพื่อลบสินค้า';
+  document.getElementById('palletScanTitle').textContent=mode==='manage'?'สแกนเพื่อเพิ่ม/แก้ไข':(mode==='find'?'สแกนเพื่อค้นหา':'สแกนเพื่อลบสินค้า');
   overlay.style.display='flex';
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
     err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง กรุณาเปิดในเบราว์เซอร์ (Safari/Chrome) แทน';
@@ -1539,6 +1546,12 @@ function handlePalletScanCode(code){
   if(!item){
     showPalletToast('ไม่พบสินค้านี้ในระบบ');
     openPalletScan(palletScanMode);
+    return;
+  }
+  if(palletScanMode==='find'){
+    closePalletScan();
+    const box=document.getElementById('findInPalletSearch');
+    if(box){ box.value=item.itemNo; renderFindInPalletResults(item.itemNo); }
     return;
   }
   if(palletScanMode==='delete-only'){
@@ -2000,7 +2013,6 @@ let pendingCategoryKey=null;
 // ==== ตำแหน่งจัดเก็บ/Facing/Max Qty/จำนวนคงเหลือ ที่พนักงานแก้ไขได้ (sync ผ่าน Firestore) ====
 let LOCATION_OVERRIDES={};
 let STOCK_OVERRIDES={};
-let STOCK_QTY={};
 function qtyKey(itemNo,loc,location){ return itemNo+'|'+loc+'|'+location; }
 function getItemByNo(itemNo){ return PRODUCTS_INDEX[itemNo]; }
 
@@ -2023,15 +2035,6 @@ async function loadOverridesData(){
   if(!Object.keys(STOCK_OVERRIDES).length){
     try{ const raw=localStorage.getItem('mf_stock_overrides'); if(raw) STOCK_OVERRIDES=JSON.parse(raw)||{}; }catch(e){}
   }
-  if(stockQtyDocRef){
-    try{
-      const doc=await stockQtyDocRef.get();
-      if(doc.exists){ const d=doc.data(); if(d&&d.qty) STOCK_QTY=d.qty; }
-    }catch(e){ console.error('โหลดจำนวนคงเหลือไม่สำเร็จ',e); }
-  }
-  if(!Object.keys(STOCK_QTY).length){
-    try{ const raw=localStorage.getItem('mf_stock_qty'); if(raw) STOCK_QTY=JSON.parse(raw)||{}; }catch(e){}
-  }
 }
 async function persistLocationOverrides(){
   try{ localStorage.setItem('mf_location_overrides',JSON.stringify(LOCATION_OVERRIDES)); }catch(e){}
@@ -2045,13 +2048,6 @@ async function persistStockOverrides(){
   if(stockOverridesDocRef){
     try{ await stockOverridesDocRef.set({data:STOCK_OVERRIDES,updatedAt:Date.now()}); }
     catch(e){ console.error('บันทึก facing/max qty ไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
-  }
-}
-async function persistStockQty(){
-  try{ localStorage.setItem('mf_stock_qty',JSON.stringify(STOCK_QTY)); }catch(e){}
-  if(stockQtyDocRef){
-    try{ await stockQtyDocRef.set({qty:STOCK_QTY,updatedAt:Date.now()}); }
-    catch(e){ console.error('บันทึกจำนวนคงเหลือไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
   }
 }
 function applyLocationOverridesToProducts(){
@@ -2074,26 +2070,6 @@ function applyStockOverridesToProducts(){
       }
     });
   });
-}
-function addLocationToItem(itemNo){
-  if(!isEmployee())return;
-  const item=getItemByNo(itemNo);
-  if(!item)return;
-  const loc=prompt('เลข Loc (เช่น Loc23):');
-  if(loc===null||!loc.trim())return;
-  const location=prompt('เลข Location (เช่น 023-123):');
-  if(location===null||!location.trim())return;
-  const locTrim=loc.trim(),locationTrim=location.trim();
-  if(item.locations.some(l=>l.loc===locTrim&&l.location===locationTrim)){ alert('มีตำแหน่งนี้อยู่แล้ว'); return; }
-  if(!LOCATION_OVERRIDES[itemNo])LOCATION_OVERRIDES[itemNo]={adds:[],removes:[]};
-  const ov=LOCATION_OVERRIDES[itemNo];
-  const remIdx=ov.removes.findIndex(r=>r.loc===locTrim&&r.location===locationTrim);
-  if(remIdx>=0){ ov.removes.splice(remIdx,1); }
-  else { ov.adds.push({loc:locTrim,location:locationTrim}); }
-  applyLocationOverridesToProducts();
-  applyStockOverridesToProducts();
-  persistLocationOverrides();
-  renderDetail(item);
 }
 function removeLocationFromItem(itemNo,loc,location){
   if(!isEmployee())return;
@@ -2125,16 +2101,6 @@ function openStockEditor(itemNo,loc,location){
   persistStockOverrides();
   renderDetail(item);
 }
-function adjustStockQty(itemNo,loc,location,delta){
-  if(!isEmployee())return;
-  const key=qtyKey(itemNo,loc,location);
-  const next=Math.max(0,(STOCK_QTY[key]||0)+delta);
-  STOCK_QTY[key]=next;
-  persistStockQty();
-  const item=getItemByNo(itemNo);
-  if(item)renderDetail(item);
-}
-
 function loadProductData(){
   const overridesPromise=loadOverridesData();
   const xlsxPromise=fetch('ItemLocation_10_Jul_2026.xlsx')
@@ -2356,8 +2322,6 @@ function renderDetail(item,fromList){
   if(isEmployee()){
     empBlock.style.display='block';
     const rows=item.locations.map(l=>{
-      const key=qtyKey(item.itemNo,l.loc,l.location);
-      const qty=STOCK_QTY[key]||0;
       return '<div class="emp-loc-item">'+
         '<div class="emp-loc-item-row">'+
           '<div class="emp-loc-text">Loc '+escapeHtml(l.loc)+' / Location '+escapeHtml(l.location)+' — Facing '+escapeHtml(l.facing||'-')+' · Max Qty '+escapeHtml(l.maxQty||'-')+'</div>'+
@@ -2366,15 +2330,9 @@ function renderDetail(item,fromList){
             '<button class="emp-loc-btn danger" onclick="removeLocationFromItem('+jsStr(item.itemNo)+','+jsStr(l.loc)+','+jsStr(l.location)+')">ลบ</button>'+
           '</div>'+
         '</div>'+
-        '<div class="emp-qty-row">'+
-          '<button class="emp-loc-btn" onclick="adjustStockQty('+jsStr(item.itemNo)+','+jsStr(l.loc)+','+jsStr(l.location)+',-1)">−</button>'+
-          '<span class="emp-qty-badge">คงเหลือ '+qty+'</span>'+
-          '<button class="emp-loc-btn" onclick="adjustStockQty('+jsStr(item.itemNo)+','+jsStr(l.loc)+','+jsStr(l.location)+',1)">+</button>'+
-        '</div>'+
       '</div>';
     }).join('');
-    document.getElementById('empStockList').innerHTML=rows+
-      '<button class="emp-stock-addbtn" onclick="addLocationToItem('+jsStr(item.itemNo)+')"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มตำแหน่งจัดเก็บ</button>';
+    document.getElementById('empStockList').innerHTML=rows;
   } else {
     empBlock.style.display='none';
   }
@@ -2414,9 +2372,7 @@ function getZXingReader(){
   return zxingReader;
 }
 let scanControls=null;
-let scanMode='search';
-function openScanner(mode){
-  scanMode=mode||'search';
+function openScanner(){
   const overlay=document.getElementById('scanOverlay');
   const err=document.getElementById('scanError');
   err.style.display='none';err.textContent='';
@@ -2430,10 +2386,8 @@ function openScanner(mode){
   getZXingReader().decodeFromConstraints({video:{facingMode:{ideal:'environment'}}},video,(result)=>{
     if(result){
       const code=result.getText().trim();
-      const mode=scanMode;
       closeScanner();
-      if(mode==='stock') handleStockScan(code);
-      else search(code);
+      search(code);
     }
   }).then(controls=>{
     scanControls=controls;
@@ -2446,23 +2400,6 @@ function openScanner(mode){
 function closeScanner(){
   document.getElementById('scanOverlay').style.display='none';
   if(scanControls){ scanControls.stop(); scanControls=null; }
-}
-function openStockScanner(){
-  if(!isEmployee())return;
-  openScanner('stock');
-}
-function handleStockScan(code){
-  if(!PRODUCTS_READY){ alert('กำลังโหลดข้อมูลสินค้า กรุณาลองใหม่อีกครั้ง'); return; }
-  const item=PRODUCTS_BY_KEY.find(it=>it.itemNo===code||it.barcode===code);
-  if(!item){ alert('ไม่พบสินค้ารหัส "'+code+'" ในระบบ'); return; }
-  search(item.itemNo);
-  if(item.locations.length===1){
-    const l=item.locations[0];
-    const deltaStr=prompt('ปรับจำนวนคงเหลือ Loc '+l.loc+' / Location '+l.location+' (ใส่ + หรือ - เช่น +5, -2):','+1');
-    if(deltaStr===null)return;
-    const delta=parseInt(deltaStr,10);
-    if(!isNaN(delta)) adjustStockQty(item.itemNo,l.loc,l.location,delta);
-  }
 }
 
 let currentRole=null;
@@ -2660,8 +2597,15 @@ function switchRole(){
   showRoleScreen();
 }
 function checkSession(){
-  // ทุกครั้งที่เข้าเว็บ ต้องผ่านหน้าเลือกมุมมอง (หน้าแรก) ก่อนเสมอ ไม่ auto-skip ไปหน้าหลักแม้จะมี session ค้างอยู่
-  showRoleScreen();
+  // ถ้ามี session ค้างอยู่ (เพิ่งใส่ PIN ไปแล้ว) ให้กลับเข้าหน้าเดิมทันที ไม่บังคับให้ใส่รหัสซ้ำ
+  const sess=getSession();
+  if(sess && sess.role==='employee'){
+    if(sess.dept==='GR') showGRHome(sess); else showMain(sess);
+  } else if(sess && sess.role==='customer'){
+    showMain(sess);
+  } else {
+    showRoleScreen();
+  }
 }
 checkSession();
 </script>
