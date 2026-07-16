@@ -292,9 +292,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 @media (min-width:1024px){
   .hdr-row,.search-box,.body{max-width:min(1100px,90vw)}
   .cat-row{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
-  .map-overlay-content{max-width:520px}
-  .map-overlay-content svg{max-height:calc(100dvh - 220px)}
-  .map-edit-bar{max-width:520px}
+  .map-overlay-content{max-width:min(1000px,88vw)}
+  .map-overlay-content svg{max-height:calc(100dvh - 130px)}
+  .map-edit-bar{max-width:min(1000px,88vw)}
   .pallet-overlay-content{max-width:760px;max-height:88vh}
   .pallet-body{padding:20px 28px}
   .pallet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -1212,10 +1212,11 @@ function palletTotals(pallet){
   return {skuCount,unitCount};
 }
 function newPalletId(){
-  const d=new Date();
-  const dmy=String(d.getDate()).padStart(2,'0')+String(d.getMonth()+1).padStart(2,'0')+d.getFullYear();
-  const hms=String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0');
-  return 'PLT-'+dmy+'-'+hms;
+  const maxSeq=PALLETS_CACHE.reduce((max,p)=>{
+    const m=String(p.id).match(/^PLT-(\d+)$/);
+    return m ? Math.max(max,parseInt(m[1],10)) : max;
+  },0);
+  return 'PLT-'+String(maxSeq+1).padStart(3,'0');
 }
 
 function openPalletManager(){
@@ -1332,8 +1333,6 @@ function renderPalletDetailView(pallet){
     '<div class="pallet-stat"><div class="pallet-stat-label">รายการ</div><div class="pallet-stat-val">'+t.skuCount+'</div></div>'+
     '<div class="pallet-stat"><div class="pallet-stat-label">ชิ้นรวม</div><div class="pallet-stat-val">'+t.unitCount+'</div></div>'+
   '</div>';
-  const locText=(pallet.loc||pallet.location) ? ('Loc '+escapeHtml(pallet.loc||'-')+' / Location '+escapeHtml(pallet.location||'-')) : 'ยังไม่ระบุตำแหน่งพาเลท';
-  html+='<div class="pallet-loc-box"'+(isGR()?' onclick="editPalletLocation()" style="cursor:pointer"':'')+'><i class="ti ti-map-pin" aria-hidden="true"></i> พาเลทนี้อยู่ที่ '+locText+(isGR()?' <i class="ti ti-pencil" aria-hidden="true" style="margin-left:auto"></i>':'')+'</div>';
   html+='<div class="pallet-scan-btn" onclick="openPalletScan(\''+(canEdit?'manage':'delete-only')+'\')"><i class="ti ti-scan" aria-hidden="true"></i> '+(canEdit?'สแกนบาร์โค้ดเพื่อเพิ่ม/แก้ไข':'สแกนบาร์โค้ดเพื่อลบสินค้า')+'</div>';
   if(!pallet.items.length){
     html+='<div class="pallet-empty">ยังไม่มีสินค้าในพาเลทนี้</div>';
@@ -1342,6 +1341,10 @@ function renderPalletDetailView(pallet){
   }
   if(canEdit){
     html+='<div class="pallet-add-btn" onclick="openAddItemToPallet()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มสินค้าเข้าพาเลท</div>';
+  }
+  const locText=(pallet.loc||pallet.location) ? ('Loc '+escapeHtml(pallet.loc||'-')+' / Location '+escapeHtml(pallet.location||'-')) : 'ยังไม่ระบุตำแหน่งพาเลท';
+  html+='<div class="pallet-loc-box" style="margin-top:12px'+(isGR()?';cursor:pointer':'')+'"'+(isGR()?' onclick="editPalletLocation()"':'')+'><i class="ti ti-map-pin" aria-hidden="true"></i> พาเลทนี้อยู่ที่ '+locText+(isGR()?' <i class="ti ti-pencil" aria-hidden="true" style="margin-left:auto"></i>':'')+'</div>';
+  if(canEdit){
     html+='<div class="pallet-add-btn" style="margin-top:8px;background:#E3F6E8;color:#1D6B3F;border-style:solid;border-color:#9AD8AE" onclick="savePalletAndBack()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึกพาเลท</div>';
   }
   if(isGR()){
@@ -1417,8 +1420,17 @@ function openAddItemToPallet(){
   const body=document.getElementById('palletBody');
   body.innerHTML='<input type="text" id="palletAddSearch" class="inp" placeholder="ค้นหาชื่อ/Item No/บาร์โค้ด" oninput="renderPalletAddResults(this.value)" style="margin-bottom:12px">'+
     '<div id="palletAddResults"></div>'+
-    '<div class="pallet-add-btn" style="margin-top:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary)" onclick="renderPalletDetailView(currentPallet)"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับไปดูรายการ</div>';
+    '<div class="pallet-add-btn" style="margin-top:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary)" onclick="closeAddItemToPallet()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับไปดูรายการ</div>';
   document.getElementById('palletAddSearch').focus();
+  const scanBtn=document.getElementById('palletFindScanBtn');
+  scanBtn.onclick=function(){ openPalletScan('manage'); };
+  scanBtn.style.display='block';
+}
+function closeAddItemToPallet(){
+  const scanBtn=document.getElementById('palletFindScanBtn');
+  scanBtn.style.display='none';
+  scanBtn.onclick=function(){ openFindPalletScan(); };
+  renderPalletDetailView(currentPallet);
 }
 function renderPalletAddResults(q){
   const box=document.getElementById('palletAddResults');
@@ -1443,7 +1455,9 @@ function openFindItemInPallets(){
   if(!isEmployee())return;
   document.getElementById('palletOverlay').style.display='flex';
   document.getElementById('palletBackBtn').style.display='none';
-  document.getElementById('palletFindScanBtn').style.display='block';
+  const scanBtn=document.getElementById('palletFindScanBtn');
+  scanBtn.onclick=function(){ openFindPalletScan(); };
+  scanBtn.style.display='block';
   currentPallet=null;
   document.getElementById('palletHeaderTitle').textContent='หาสินค้าตามพาเลท';
   document.getElementById('palletHeaderSub').textContent='';
