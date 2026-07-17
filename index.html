@@ -913,11 +913,19 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   const selStroke=isSelected ? ' stroke="#1a1a1a" stroke-width="2.5" stroke-dasharray="6 4"' : (isHighlighted ? ' stroke="#E8192C" stroke-width="3"' : ' stroke="rgba(0,0,0,.10)" stroke-width="0.6"');
   const rectStyle=editable ? ' style="cursor:move;touch-action:none"' : '';
   const dataAttr=' class="map-block-rect" data-id="'+b.id+'"';
-  const shapeMarkup='<g>'+
-    '<polygon'+dataAttr+' points="'+polyPts(right)+'" fill="'+shadeColor(b.fill,0.26)+'" stroke="rgba(0,0,0,.10)" stroke-width="0.6"'+rectStyle+'/>'+
-    '<polygon'+dataAttr+' points="'+polyPts(front)+'" fill="'+shadeColor(b.fill,0.40)+'" stroke="rgba(0,0,0,.10)" stroke-width="0.6"'+rectStyle+'/>'+
-    '<polygon'+dataAttr+' points="'+polyPts(top)+'" fill="'+b.fill+'"'+selStroke+rectStyle+'/>'+
-  '</g>';
+  // depth is based purely on the block's world-space (x,y) footprint (never its height), so a tall
+  // block's own faces always share one consistent stacking position relative to other blocks
+  const depth=(function(){
+    const rTheta=(rotationDeg||0)*Math.PI/180;
+    const rx=((x0+x1)/2)-MAP_FLOOR_CX, ry=((y0+y1)/2)-MAP_FLOOR_CY;
+    const rotX=rx*Math.cos(rTheta)-ry*Math.sin(rTheta), rotY=rx*Math.sin(rTheta)+ry*Math.cos(rTheta);
+    return isHighlighted ? Infinity : rotX+rotY;
+  })();
+  const shapePieces=[
+    {markup:'<polygon'+dataAttr+' points="'+polyPts(right)+'" fill="'+shadeColor(b.fill,0.26)+'" stroke="rgba(0,0,0,.10)" stroke-width="0.6"'+rectStyle+'/>', depth},
+    {markup:'<polygon'+dataAttr+' points="'+polyPts(front)+'" fill="'+shadeColor(b.fill,0.40)+'" stroke="rgba(0,0,0,.10)" stroke-width="0.6"'+rectStyle+'/>', depth},
+    {markup:'<polygon'+dataAttr+' points="'+polyPts(top)+'" fill="'+b.fill+'"'+selStroke+rectStyle+'/>', depth}
+  ];
   const labelMarkup=(b.lines||[]).map(l=>mapLineMarkup(b,l,rotationDeg,H)).join('');
   let topMarkup='';
   if(editable){
@@ -929,17 +937,18 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
     topMarkup+='<circle cx="'+pinPt[0].toFixed(1)+'" cy="'+pinPt[1].toFixed(1)+'" r="6" fill="#E8192C" fill-opacity="0.55"><animate attributeName="r" values="6;22;6" dur="1.8s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.6;0;0.6" dur="1.8s" repeatCount="indefinite"/></circle>'+
       '<circle cx="'+pinPt[0].toFixed(1)+'" cy="'+pinPt[1].toFixed(1)+'" r="6" fill="#E8192C" stroke="#fff" stroke-width="1.6"/>';
   }
-  const depth=(function(){ const rTheta=(rotationDeg||0)*Math.PI/180; const rx=((x0+x1)/2)-MAP_FLOOR_CX, ry=((y0+y1)/2)-MAP_FLOOR_CY; return rx*Math.sin(rTheta)+ry*Math.cos(rTheta); })();
-  return {shapeMarkup, labelMarkup, topMarkup, depth: isHighlighted ? Infinity : depth};
+  return {shapePieces, labelMarkup, topMarkup};
 }
 
 function renderMapSVG(blocks,editable,rotationDeg,highlightId){
   const rot=rotationDeg!==undefined?rotationDeg:currentMapRotation;
   const pieces=blocks.map(b=>mapBlockPieces(b,editable,rot,highlightId&&b.id===highlightId));
-  pieces.sort((a,b)=>a.depth-b.depth);
-  // shapes are depth-sorted for correct 3D stacking, but labels/handles/highlight pins are drawn in a
-  // separate final pass on top of every shape so they can never end up hidden behind a neighboring block's wall
-  const blockMarkup=pieces.map(p=>p.shapeMarkup).join('')+pieces.map(p=>p.labelMarkup).join('')+pieces.map(p=>p.topMarkup).join('');
+  // shape faces are depth-sorted individually (not per-block) so overlapping walls from adjacent blocks
+  // stack correctly; labels/handles/highlight pins are drawn in a separate final pass on top of every
+  // shape so they can never end up hidden behind a neighboring block's wall
+  const allShapePieces=[].concat(...pieces.map(p=>p.shapePieces));
+  allShapePieces.sort((a,b)=>a.depth-b.depth);
+  const blockMarkup=allShapePieces.map(p=>p.markup).join('')+pieces.map(p=>p.labelMarkup).join('')+pieces.map(p=>p.topMarkup).join('');
 
   const F=MAP_FLOOR;
   const floorTop=[isoProject(F.x,F.y,0,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
