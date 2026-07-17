@@ -69,9 +69,6 @@ body{margin:0;padding:0}
 .cat-card i{font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0 auto 8px;background:color-mix(in srgb, currentColor 15%, white)}
 .cat-card img{width:52px;height:52px;display:block;margin:0 auto 8px;border-radius:50%;object-fit:contain;padding:8px;box-sizing:border-box}
 .cat-card span{font-size:12px;color:var(--color-text-secondary);font-weight:500}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
-.chip{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);cursor:pointer;background:var(--color-background-primary);white-space:nowrap}
-.chip:hover{background:var(--color-background-secondary)}
 .result-wrap{display:none}
 .result-wrap.show{display:block}
 .result-header-flex{display:flex;flex-direction:column;gap:14px;align-items:stretch;margin-bottom:14px}
@@ -334,14 +331,15 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 @media (min-width:1024px){
   .hdr-row,.search-box,.body{max-width:min(1100px,90vw)}
   .cat-row{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
-  .map-overlay-content{max-width:min(1000px,88vw)}
-  .map-overlay-content svg{max-height:calc(100dvh - 130px)}
-  .map-edit-bar{max-width:min(1000px,88vw)}
+  .map-overlay-content{max-width:min(1080px,90vw)}
+  .map-overlay-content svg{max-height:calc(100dvh - 120px)}
+  .map-edit-bar{max-width:min(1080px,90vw)}
   .store-map{width:100%;left:auto;right:auto;margin-left:0;margin-right:0;border-radius:10px;border:0.5px solid var(--color-border-tertiary)}
   .store-map svg{width:auto;max-width:100%;height:auto;max-height:min(50vh,360px);margin:0 auto}
   .map-overlay-content svg text[font-size="16"],.store-map svg text[font-size="16"]{font-size:19px}
   .map-overlay-content svg text[font-size="12"],.store-map svg text[font-size="12"]{font-size:14px}
   .map-overlay-content svg text.map-aisle-num,.store-map svg text.map-aisle-num{transform:scale(1.25);transform-box:fill-box;transform-origin:center}
+  .result-cat-badge{font-size:13px}
   .pallet-overlay-content{max-width:760px;max-height:88vh}
   .pallet-body{padding:20px 28px}
   .pallet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -501,15 +499,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <div class="cat-card" style="background:#F7C47833" onclick="searchByCategory('grocery')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Grocery_53f0589e85.png" alt="อาหารและเครื่องปรุง" loading="lazy"><span>อาหารและเครื่องปรุง</span></div>
         <div class="cat-card" style="background:#F7E9A066" onclick="searchByCategory('drink')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Beverage_and_Milk_v2_78f9f26baa.png" alt="เครื่องดื่ม" loading="lazy"><span>เครื่องดื่ม</span></div>
         <div class="cat-card" style="background:#FADCE3" onclick="searchByCategory('snack')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Icon_in_app_1_fc27c246fa.png" alt="ขนม" loading="lazy"><span>ขนม</span></div>
-      </div>
-      <div class="section-label">ค้นหาบ่อย</div>
-      <div class="chips">
-        <span class="chip" onclick="search('ข้าวสาร')">ข้าวสาร</span>
-        <span class="chip" onclick="search('ปลาทูน่า')">ปลาทูน่า</span>
-        <span class="chip" onclick="search('กุ้งสด')">กุ้งสด</span>
-        <span class="chip" onclick="search('น้ำตาล')">น้ำตาล</span>
-        <span class="chip" onclick="search('สบู่')">สบู่</span>
-        <span class="chip" onclick="search('ทำความสะอาด')">ทำความสะอาด</span>
       </div>
       <div id="customerFeedbackSection">
         <div class="feedback-card">
@@ -671,13 +660,13 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="pallet-overlay-content">
     <div class="pallet-header">
       <i class="ti ti-arrow-left" id="palletBackBtn" aria-hidden="true" onclick="palletGoBack()" style="display:none"></i>
-      <i class="ti ti-x" id="palletCloseBtn" aria-hidden="true" onclick="closePalletManager()"></i>
       <div class="pallet-header-title">
         <div id="palletHeaderTitle">จัดการพาเลท</div>
         <div class="pallet-header-sub" id="palletHeaderSub"></div>
       </div>
       <i class="ti ti-pencil" id="palletRenameBtn" aria-hidden="true" onclick="renamePallet()" style="display:none"></i>
       <i class="ti ti-scan" id="palletFindScanBtn" aria-hidden="true" onclick="openFindPalletScan()" style="display:none"></i>
+      <i class="ti ti-x" id="palletCloseBtn" aria-hidden="true" onclick="closePalletManager()"></i>
     </div>
     <div class="pallet-body" id="palletBody"></div>
   </div>
@@ -686,8 +675,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div class="pallet-overlay" id="palletScanOverlay" style="z-index:2200">
   <div class="pallet-overlay-content" style="max-width:420px" onclick="event.stopPropagation()">
     <div class="pallet-header">
-      <i class="ti ti-x" aria-hidden="true" onclick="closePalletScan()"></i>
       <div class="pallet-header-title" id="palletScanTitle">สแกนบาร์โค้ด</div>
+      <i class="ti ti-x" aria-hidden="true" onclick="closePalletScan()"></i>
     </div>
     <div class="pallet-body" id="palletScanBody">
       <div class="pallet-scan-video-wrap">
@@ -750,46 +739,46 @@ function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textCo
 }
 const MAP_MAIN_SIZE=16, MAP_SUB_SIZE=12;
 const DEFAULT_MAP_BLOCKS=[
-  {id:'butchery',x:20,y:20,w:190,h:75,fill:'#FBE4E4',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'เนื้อสัตว์และแช่แข็ง',color:'#8B3A3A'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Butchery & Frozen',color:'#B06A6A'}]},
-  {id:'snack',x:220,y:20,w:75,h:75,fill:'#E3F6E8',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ขนม',color:'#2F6B44'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Snack',color:'#5A9470'}]},
-  {id:'winebeer',x:305,y:20,w:85,h:75,fill:'#DFF3F3',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ไวน์/เบียร์',color:'#1F6B6B'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Wine & Beer',color:'#4A9494'}]},
-  {id:'drink',x:400,y:20,w:135,h:75,fill:'#EAE4F8',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องดื่ม',color:'#5B3E96'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Drink',color:'#8A72C0'}]},
-  {id:'fishseafood',x:20,y:105,w:190,h:85,fill:'#DEEBFA',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ปลา/อาหารทะเล',color:'#2A5C93'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fish & Seafood',color:'#5F8CC0'}]},
-  {id:'grilledchicken',x:220,y:105,w:95,h:65,fill:'#FAEBDA',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ไก่ย่าง',color:'#8A5A25'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Grilled Chicken',color:'#B3874F'}]},
-  {id:'condiments',x:20,y:200,w:190,h:50,fill:'#FAE0D8',height:54,lines:[
-    {dx:8,dy:22,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องเทศ',color:'#9A4A2E'},
-    {dx:8,dy:40,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Condiments / Spices',color:'#C17A58'}]},
-  {id:'fruitveg',x:20,y:260,w:190,h:135,fill:'#E5F3DC',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ผัก-ผลไม้',color:'#4C7A2A'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fruit & Veg',color:'#7CA858'}]},
+  {id:'butchery',x:20,y:20,w:190,h:75,fill:'#FBE4E4',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'เนื้อสัตว์และแช่แข็ง',color:'#8B3A3A'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Butchery & Frozen',color:'#B06A6A'}]},
+  {id:'snack',x:220,y:20,w:75,h:75,fill:'#E3F6E8',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ขนม',color:'#2F6B44'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Snack',color:'#5A9470'}]},
+  {id:'winebeer',x:305,y:20,w:85,h:75,fill:'#DFF3F3',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ไวน์/เบียร์',color:'#1F6B6B'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Wine & Beer',color:'#4A9494'}]},
+  {id:'drink',x:400,y:20,w:135,h:75,fill:'#EAE4F8',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องดื่ม',color:'#5B3E96'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Drink',color:'#8A72C0'}]},
+  {id:'fishseafood',x:20,y:105,w:190,h:85,fill:'#DEEBFA',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ปลา/อาหารทะเล',color:'#2A5C93'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fish & Seafood',color:'#5F8CC0'}]},
+  {id:'grilledchicken',x:220,y:105,w:95,h:65,fill:'#FAEBDA',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ไก่ย่าง',color:'#8A5A25'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Grilled Chicken',color:'#B3874F'}]},
+  {id:'condiments',x:20,y:200,w:190,h:50,fill:'#FAE0D8',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:22,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องเทศ',color:'#9A4A2E'},
+    {fx:0.5,dy:40,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Condiments / Spices',color:'#C17A58'}]},
+  {id:'fruitveg',x:20,y:260,w:190,h:135,fill:'#E5F3DC',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ผัก-ผลไม้',color:'#4C7A2A'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fruit & Veg',color:'#7CA858'}]},
   {id:'o2o',x:545,y:105,w:75,h:290,fill:'#FBEED9',height:70,anchor:'middle',lines:[
     {fx:0.5,dy:135,size:MAP_MAIN_SIZE,weight:800,text:'O2O',color:'#97701E'},
     {fx:0.5,dy:153,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'แผนกออนไลน์',color:'#B3934F'},
     {fx:0.5,dy:169,size:MAP_SUB_SIZE,weight:600,opacity:.9,text:'Makro Pro',color:'#C3AB78'}]},
-  {id:'bakery',x:20,y:405,w:150,h:85,fill:'#F3E7D6',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'เบเกอรี่',color:'#8A6A3C'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Bakery',color:'#B3966A'}]},
-  {id:'cashier',x:180,y:405,w:220,h:85,fill:'#DFF4EA',height:30,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'แคชเชียร์',color:'#237A56'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Cashier',color:'#5AA684'}]},
-  {id:'icecream',x:410,y:405,w:95,h:85,fill:'#DBF1F4',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ไอศกรีม',color:'#1C7086'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Ice Cream',color:'#4FA0B4'}]},
-  {id:'premium',x:515,y:405,w:105,h:85,fill:'#EAE7F0',height:54,lines:[
-    {dx:8,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'จุดของแถม',color:'#5C5470'},
-    {dx:8,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Premium',color:'#8A82A0'}]},
+  {id:'bakery',x:20,y:405,w:150,h:85,fill:'#F3E7D6',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'เบเกอรี่',color:'#8A6A3C'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Bakery',color:'#B3966A'}]},
+  {id:'cashier',x:180,y:405,w:220,h:85,fill:'#DFF4EA',height:30,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'แคชเชียร์',color:'#237A56'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Cashier',color:'#5AA684'}]},
+  {id:'icecream',x:410,y:405,w:95,h:85,fill:'#DBF1F4',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'ไอศกรีม',color:'#1C7086'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Ice Cream',color:'#4FA0B4'}]},
+  {id:'premium',x:515,y:405,w:105,h:85,fill:'#EAE7F0',height:54,anchor:'middle',lines:[
+    {fx:0.5,dy:29,size:MAP_MAIN_SIZE,weight:800,text:'จุดของแถม',color:'#5C5470'},
+    {fx:0.5,dy:47,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Premium',color:'#8A82A0'}]},
 ].concat(
   generateAisleGroup('dryfood_',325,105,535,240,29,44,'#FBE1EC','#99406B',60)
 ).concat(
@@ -2637,7 +2626,7 @@ function renderDetail(item,fromList){
   fc.style.display='block';
   document.getElementById('rName').textContent=item.desc;
   document.getElementById('rBadge').textContent='Item No '+item.itemNo+(item.barcode?' · '+item.barcode:'');
-  document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:11px;padding:2px 8px;border-radius:20px';
+  document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary)';
   updateShowOnMapButton(item);
   const rLoc=document.getElementById('rLoc');
   if(item.locations.length){
