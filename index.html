@@ -347,6 +347,15 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .pallet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
   .pallet-grid .pallet-card{margin-bottom:0}
 }
+.pallet-print-area{display:none}
+@page{size:landscape}
+@media print{
+  body>*:not(#palletPrintArea){display:none !important}
+  #palletPrintArea{display:block !important;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;color:#000;padding:20px}
+  .pallet-print-header{font-size:28px;font-weight:800;margin-bottom:6px}
+  .pallet-print-date{font-size:18px;font-weight:600;margin-bottom:22px;color:#333}
+  .pallet-print-item{font-size:60px;font-weight:800;line-height:1.35;margin-bottom:10px;page-break-inside:avoid}
+}
 </style>
 
 <div class="frame">
@@ -711,6 +720,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   </div>
 </div>
 <canvas id="scanCanvas" style="display:none"></canvas>
+<div id="palletPrintArea" class="pallet-print-area"></div>
 
 <script>
 /* ---------- Store map: data model, rendering, employee editing ---------- */
@@ -1656,11 +1666,35 @@ function renderPalletDetailView(pallet){
   if(isGR()){
     html+='<div class="pallet-add-btn" style="margin-top:8px;background:#FFF0F1;color:#A32D2D;border-style:solid;border-color:#F09595" onclick="deleteCurrentPallet()"><i class="ti ti-trash" aria-hidden="true"></i> ลบพาเลทนี้ทิ้งถาวร</div>';
   }
+  if(isEmployee()){
+    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="printPalletList()"><i class="ti ti-printer" aria-hidden="true"></i> พิมพ์รายการสินค้าทั้งหมด</div>';
+  }
   body.innerHTML=html;
   pallet.items.forEach((it,i)=>{
     const wrap=document.getElementById('palletPhoto'+i);
     applyItemImage(wrap,it);
   });
+}
+function printPalletList(){
+  if(!currentPallet)return;
+  const pallet=currentPallet;
+  const now=new Date();
+  const dd=String(now.getDate()).padStart(2,'0');
+  const mm=String(now.getMonth()+1).padStart(2,'0');
+  const yy=String((now.getFullYear()+543)%100).padStart(2,'0');
+  const hh=String(now.getHours()).padStart(2,'0');
+  const min=String(now.getMinutes()).padStart(2,'0');
+  const dateStr='วันที่ '+dd+'/'+mm+'/'+yy+' เวลา '+hh+'.'+min+' น.';
+  const area=document.getElementById('palletPrintArea');
+  let html='<div class="pallet-print-header">'+escapeHtml(pallet.name?pallet.name+' ('+pallet.id+')':pallet.id)+'</div>'+
+    '<div class="pallet-print-date">'+dateStr+'</div>';
+  if(!pallet.items.length){
+    html+='<div class="pallet-print-item">ยังไม่มีสินค้าในพาเลทนี้</div>';
+  } else {
+    html+=pallet.items.map((it,i)=>'<div class="pallet-print-item">'+(i+1)+'. Item '+escapeHtml(it.itemNo)+' '+escapeHtml(it.desc)+' จำนวน '+it.qty+' MU</div>').join('');
+  }
+  area.innerHTML=html;
+  window.print();
 }
 function palletItemRowHtml(it,i,canEdit){
   const actions=canEdit
