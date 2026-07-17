@@ -356,13 +356,17 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .pallet-grid .pallet-card{margin-bottom:0}
 }
 .pallet-print-area{display:none}
-@page{size:landscape}
+@page{size:A3 landscape;margin:6mm}
 @media print{
   body>*:not(#palletPrintArea){display:none !important}
-  #palletPrintArea{display:block !important;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;color:#000;padding:20px}
-  .pallet-print-header{font-size:28px;font-weight:800;margin-bottom:6px}
-  .pallet-print-date{font-size:18px;font-weight:600;margin-bottom:22px;color:#333}
-  .pallet-print-item{font-size:60px;font-weight:800;line-height:1.35;margin-bottom:10px;page-break-inside:avoid}
+  #palletPrintArea{display:block !important;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;color:#000}
+  .pallet-print-header{font-size:26px;font-weight:800;margin-bottom:10px}
+  .pallet-print-table{width:100%;border-collapse:collapse;table-layout:fixed}
+  .pallet-print-table th,.pallet-print-table td{border:2px solid #000;padding:10px 12px;text-align:left;font-weight:800;font-size:30px;vertical-align:top;word-break:break-word}
+  .pallet-print-table th{font-size:22px;background:#EFEFEF}
+  .pallet-print-table th:first-child,.pallet-print-table td:first-child{width:14%}
+  .pallet-print-table th:last-child,.pallet-print-table td:last-child{width:14%;text-align:center}
+  .pallet-print-date{font-size:18px;font-weight:600;margin-top:14px;color:#333}
 }
 </style>
 
@@ -1722,47 +1726,58 @@ function palletPrintDateStr(){
   const min=String(now.getMinutes()).padStart(2,'0');
   return 'วันที่ '+dd+'/'+mm+'/'+yy+' เวลา '+hh+'.'+min+' น.';
 }
-function palletPrintLines(pallet){
-  return pallet.items.length
-    ? pallet.items.map((it,i)=>(i+1)+'. Item '+it.itemNo+' '+it.desc+' จำนวน '+it.qty+' MU')
-    : ['ยังไม่มีสินค้าในพาเลทนี้'];
+function palletPrintHeaderText(pallet){
+  return 'พาเลทเลข '+(pallet.name||pallet.id);
 }
 function printPalletList(){
   if(!currentPallet)return;
   const pallet=currentPallet;
   const area=document.getElementById('palletPrintArea');
-  let html='<div class="pallet-print-header">'+escapeHtml(pallet.name?pallet.name+' ('+pallet.id+')':pallet.id)+'</div>'+
-    '<div class="pallet-print-date">'+escapeHtml(palletPrintDateStr())+'</div>';
-  html+=palletPrintLines(pallet).map(line=>'<div class="pallet-print-item">'+escapeHtml(line)+'</div>').join('');
+  let html='<div class="pallet-print-header">'+escapeHtml(palletPrintHeaderText(pallet))+'</div>';
+  html+='<table class="pallet-print-table"><thead><tr><th>Item</th><th>Descr</th><th>QTY (MU)</th></tr></thead><tbody>';
+  if(!pallet.items.length){
+    html+='<tr><td colspan="3">ยังไม่มีสินค้าในพาเลทนี้</td></tr>';
+  } else {
+    html+=pallet.items.map(it=>'<tr><td>'+escapeHtml(it.itemNo)+'</td><td>'+escapeHtml(it.desc)+'</td><td>'+it.qty+'</td></tr>').join('');
+  }
+  html+='</tbody></table>';
+  html+='<div class="pallet-print-date">'+escapeHtml(palletPrintDateStr())+'</div>';
   area.innerHTML=html;
   window.print();
 }
 function downloadPalletPrintImage(){
   if(!currentPallet)return;
   const pallet=currentPallet;
-  const W=1600,PAD=60;
-  const headerSize=56,dateSize=34,itemSize=64,lineHeight=Math.round(itemSize*1.4);
+  const W=2000,PAD=50;
   const fontStack='Sarabun,"Leelawadee UI","Segoe UI",Tahoma,sans-serif';
-  const headerText=pallet.name?(pallet.name+' ('+pallet.id+')'):pallet.id;
+  const headerSize=48,dateSize=28,cellFontSize=34,headFontSize=26,rowPadY=16;
+  const col1W=220,col3W=240;
+  const col2W=W-PAD*2-col1W-col3W;
+  const descPad=16;
+  const headerText=palletPrintHeaderText(pallet);
   const dateStr=palletPrintDateStr();
-  const rawLines=palletPrintLines(pallet);
+  const rows=pallet.items.length?pallet.items:[{itemNo:'',desc:'ยังไม่มีสินค้าในพาเลทนี้',qty:''}];
   const measureCanvas=document.createElement('canvas');
   const mctx=measureCanvas.getContext('2d');
-  mctx.font='800 '+itemSize+'px '+fontStack;
-  const maxTextWidth=W-PAD*2;
-  const wrapped=[];
-  rawLines.forEach(line=>{
-    if(mctx.measureText(line).width<=maxTextWidth){ wrapped.push(line); return; }
-    let cur='';
-    for(const ch of line){
+  mctx.font='800 '+cellFontSize+'px '+fontStack;
+  function wrapText(text,maxW){
+    if(mctx.measureText(text).width<=maxW)return[text];
+    const wrapped=[];let cur='';
+    for(const ch of text){
       const test=cur+ch;
-      if(cur && mctx.measureText(test).width>maxTextWidth){ wrapped.push(cur); cur=ch; }
+      if(cur&&mctx.measureText(test).width>maxW){ wrapped.push(cur); cur=ch; }
       else cur=test;
     }
-    if(cur) wrapped.push(cur);
-  });
-  const topBlock=PAD+Math.round(headerSize*1.25)+Math.round(dateSize*1.3)+30;
-  const H=topBlock+wrapped.length*lineHeight+PAD;
+    if(cur)wrapped.push(cur);
+    return wrapped;
+  }
+  const rowsWrapped=rows.map(it=>({itemNo:it.itemNo,qty:it.qty,lines:wrapText(String(it.desc||''),col2W-descPad*2)}));
+  const rowLineH=Math.round(cellFontSize*1.3);
+  const rowHeights=rowsWrapped.map(r=>Math.max(rowLineH+rowPadY*2,r.lines.length*rowLineH+rowPadY*2));
+  const topBlock=PAD+Math.round(headerSize*1.3)+20;
+  const headRowH=Math.round(headFontSize*1.6+rowPadY*2);
+  const tableH=headRowH+rowHeights.reduce((a,b)=>a+b,0);
+  const H=topBlock+tableH+Math.round(dateSize*2.2);
   const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
@@ -1771,19 +1786,40 @@ function downloadPalletPrintImage(){
   ctx.fillStyle='#000';
   ctx.font='800 '+headerSize+'px '+fontStack;
   ctx.fillText(headerText,PAD,PAD);
+  const tableX=PAD,tableW=W-PAD*2;
+  let y=topBlock;
+  ctx.strokeStyle='#000'; ctx.lineWidth=2;
+  ctx.fillStyle='#EFEFEF';
+  ctx.fillRect(tableX,y,tableW,headRowH);
+  ctx.strokeRect(tableX,y,col1W,headRowH);
+  ctx.strokeRect(tableX+col1W,y,col2W,headRowH);
+  ctx.strokeRect(tableX+col1W+col2W,y,col3W,headRowH);
+  ctx.fillStyle='#000';
+  ctx.font='800 '+headFontSize+'px '+fontStack;
+  ctx.fillText('Item',tableX+descPad,y+rowPadY);
+  ctx.fillText('Descr',tableX+col1W+descPad,y+rowPadY);
+  ctx.fillText('QTY (MU)',tableX+col1W+col2W+descPad,y+rowPadY);
+  y+=headRowH;
+  ctx.font='800 '+cellFontSize+'px '+fontStack;
+  rowsWrapped.forEach((r,i)=>{
+    const h=rowHeights[i];
+    ctx.strokeRect(tableX,y,col1W,h);
+    ctx.strokeRect(tableX+col1W,y,col2W,h);
+    ctx.strokeRect(tableX+col1W+col2W,y,col3W,h);
+    ctx.fillText(String(r.itemNo),tableX+descPad,y+rowPadY);
+    r.lines.forEach((line,li)=>{ ctx.fillText(line,tableX+col1W+descPad,y+rowPadY+li*rowLineH); });
+    ctx.textAlign='center';
+    ctx.fillText(String(r.qty),tableX+col1W+col2W+col3W/2,y+rowPadY);
+    ctx.textAlign='left';
+    y+=h;
+  });
   ctx.fillStyle='#333';
   ctx.font='600 '+dateSize+'px '+fontStack;
-  ctx.fillText(dateStr,PAD,PAD+Math.round(headerSize*1.25));
-  ctx.fillStyle='#000';
-  ctx.font='800 '+itemSize+'px '+fontStack;
-  let y=topBlock;
-  wrapped.forEach(line=>{ ctx.fillText(line,PAD,y); y+=lineHeight; });
+  ctx.fillText(dateStr,PAD,y+20);
   const link=document.createElement('a');
   link.download=pallet.id+'_รายการสินค้า.png';
   link.href=canvas.toDataURL('image/png');
-  document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
 }
 function palletItemRowHtml(it,i,canEdit){
   const actions=canEdit
