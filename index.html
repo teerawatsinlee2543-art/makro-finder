@@ -98,15 +98,28 @@ body{margin:0;padding:0}
 .promo-title{font-size:14px;font-weight:700;color:#8a0e17}
 .promo-detail{font-size:12.5px;color:#a3454d;margin-top:1px}
 .promo-edit-btn{margin-left:auto;background:none;border:none;color:var(--brand-red);font-size:16px;cursor:pointer;padding:2px;flex-shrink:0}
-.promo-gallery{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:4px}
-.promo-gallery-item{position:relative;flex:0 0 auto;width:112px;height:150px;border-radius:10px;overflow:hidden;border:1px solid var(--color-border-tertiary);cursor:pointer;background:var(--color-background-secondary)}
-.promo-gallery-item img{width:100%;height:100%;object-fit:cover;display:block}
-.promo-gallery-del{position:absolute;top:5px;right:5px;background:rgba(8,11,22,.6);color:#fff;border:none;border-radius:7px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;z-index:1}
-.promo-add-card{flex:0 0 auto;width:112px;height:150px;border-radius:10px;border:1.5px dashed var(--brand-red);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--brand-red);font-size:12px;font-weight:600;cursor:pointer;background:#FFF0F1}
+.promo-gallery{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 14px;margin-bottom:4px}
+.promo-coupon{flex:0 0 auto;width:128px;background:var(--color-background-primary);border-radius:14px;box-shadow:0 8px 18px -12px rgba(20,20,20,.35);position:relative;cursor:pointer;opacity:0;transform:translateY(8px) rotate(-1.2deg);animation:promoCouponIn .5s cubic-bezier(.2,.9,.3,1.3) forwards}
+.promo-coupon:nth-child(1){animation-delay:.03s}
+.promo-coupon:nth-child(2){animation-delay:.09s}
+.promo-coupon:nth-child(3){animation-delay:.15s}
+.promo-coupon:nth-child(4){animation-delay:.21s}
+.promo-coupon:nth-child(5){animation-delay:.27s}
+.promo-coupon:nth-child(n+6){animation-delay:.3s}
+@keyframes promoCouponIn{to{opacity:1;transform:translateY(0) rotate(0)}}
+@media (prefers-reduced-motion:reduce){ .promo-coupon{animation:none;opacity:1;transform:none} }
+.promo-coupon-photo{position:relative;height:108px;border-radius:14px 14px 0 0;overflow:hidden;background:var(--color-background-secondary)}
+.promo-coupon-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.promo-coupon-flag{position:absolute;top:0;left:10px;background:#E8992A;color:#3A2405;font-size:9.5px;font-weight:800;padding:4px 7px 6px;border-radius:0 0 6px 6px;letter-spacing:.02em;z-index:1}
+.promo-coupon-flag.soon{background:var(--brand-red);color:#fff}
+.promo-coupon-del{position:absolute;top:5px;right:5px;background:rgba(8,11,22,.6);color:#fff;border:none;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;z-index:1}
+.promo-coupon-perf{position:relative;height:11px;background:var(--color-background-primary)}
+.promo-coupon-perf::before{content:"";position:absolute;inset:0 -1px;background-image:radial-gradient(circle,var(--color-background-secondary) 3.2px,transparent 3.3px);background-size:13px 13px;background-position:center;border-top:1px dashed var(--color-border-tertiary)}
+.promo-coupon-info{padding:1px 10px 11px;text-align:left}
+.promo-coupon-period{font-size:11px;font-weight:700;color:var(--color-text-primary);line-height:1.3;margin:0}
+.promo-add-card{flex:0 0 auto;width:128px;height:150px;border-radius:14px;border:1.5px dashed var(--brand-red);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--brand-red);font-size:12px;font-weight:600;cursor:pointer;background:#FFF0F1}
 .promo-add-card i{font-size:22px}
 .promo-gallery-empty{font-size:12.5px;color:var(--color-text-tertiary);padding:6px 0 12px}
-.promo-gallery-badge{position:absolute;bottom:0;left:0;right:0;background:rgba(8,11,22,.65);color:#fff;font-size:10px;text-align:center;padding:3px 4px;font-weight:600}
-.promo-gallery-badge.soon{background:rgba(232,25,44,.85)}
 .promo-view-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
 .promo-view-overlay img{max-width:100%;max-height:100%;border-radius:8px;object-fit:contain;display:block}
 .promo-view-loading{color:#fff;font-size:13px}
@@ -1266,11 +1279,15 @@ function renderPromoGallery(){
   }
   html+=PROMO_GALLERY_CACHE.map(p=>{
     const soon=p.expiresAt&&(p.expiresAt-Date.now())<=2*86400000;
-    const badge=p.expiresAt?('<div class="promo-gallery-badge'+(soon?' soon':'')+'">'+promoCountdownLabel(p.expiresAt)+'</div>'):'';
-    return '<div class="promo-gallery-item" onclick="openPromoViewer('+jsStr(p.id)+')">'+
-      '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy">'+
-      badge+
-      (isEmployee()?'<button class="promo-gallery-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
+    const flagText=p.expiresAt?promoCountdownLabel(p.expiresAt):'โปรโมชั่น';
+    return '<div class="promo-coupon" onclick="openPromoViewer('+jsStr(p.id)+')">'+
+      '<div class="promo-coupon-photo">'+
+        '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy">'+
+        '<div class="promo-coupon-flag'+(soon?' soon':'')+'">'+flagText+'</div>'+
+        (isEmployee()?'<button class="promo-coupon-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
+      '</div>'+
+      '<div class="promo-coupon-perf"></div>'+
+      '<div class="promo-coupon-info"><p class="promo-coupon-period">'+escapeHtml(p.periodLabel||'ไม่ระบุช่วงเวลา')+'</p></div>'+
     '</div>';
   }).join('');
   if(!PROMO_GALLERY_CACHE.length && !isEmployee()){
