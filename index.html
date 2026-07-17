@@ -185,6 +185,8 @@ body{margin:0;padding:0}
 .pallet-card:hover{border-color:var(--color-border-secondary)}
 .pallet-card-id{font-size:14px;font-weight:600}
 .pallet-card-meta{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.pallet-card-loc{font-size:11.5px;color:var(--color-text-secondary);margin-top:4px;display:flex;align-items:center;gap:4px}
+.pallet-card-loc i{font-size:13px;color:var(--brand-red);flex-shrink:0}
 .pallet-new-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#FFF0F1;color:#A32D2D;border:1px dashed #F09595;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px}
 .pallet-stats{display:flex;gap:10px;margin-bottom:14px}
 .pallet-loc-box{display:flex;align-items:center;gap:8px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);border-radius:10px;padding:11px 12px;font-size:13px;color:var(--color-text-primary);margin-bottom:12px}
@@ -1523,9 +1525,11 @@ function renderPalletListView(pallets){
 function palletCardHtml(p){
   const t=palletTotals(p);
   const titleLine=p.name ? escapeHtml(p.name)+'<div style="font-size:11px;color:var(--color-text-secondary);font-weight:400;margin-top:1px">'+p.id+'</div>' : p.id;
+  const locLine=(p.loc||p.location) ? ('<div class="pallet-card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i>พาเลทนี้อยู่ที่ Loc '+escapeHtml(p.loc||'-')+' / Location '+escapeHtml(p.location||'-')+'</div>') : '';
   return '<div class="pallet-card" onclick="openPalletDetail(\''+p.id+'\')">'+
     '<div class="pallet-card-id">'+titleLine+'</div>'+
     '<div class="pallet-card-meta">'+t.skuCount+' รายการ · '+t.unitCount+' ชิ้น · สร้างโดย '+escapeHtml(p.createdBy||'-')+'</div>'+
+    locLine+
   '</div>';
 }
 
@@ -1631,7 +1635,7 @@ function palletItemRowHtml(it,i,canEdit){
     '<div class="pallet-item-photo" id="palletPhoto'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
     '<div class="pallet-item-info">'+
       '<div class="pallet-item-name">'+escapeHtml(it.desc)+'</div>'+
-      '<div class="pallet-item-meta">Item '+escapeHtml(it.itemNo)+' · จำนวน '+it.qty+'</div>'+
+      '<div class="pallet-item-meta">Item '+escapeHtml(it.itemNo)+' · จำนวน '+it.qty+' MU</div>'+
     '</div>'+
     actions+
   '</div>';
