@@ -181,6 +181,11 @@ body{margin:0;padding:0}
 .pallet-card-meta{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
 .pallet-card-loc{font-size:11.5px;color:var(--color-text-secondary);margin-top:4px;display:flex;align-items:center;gap:4px}
 .pallet-card-loc i{font-size:13px;color:var(--brand-red);flex-shrink:0}
+.pallet-search-bar{display:flex;align-items:center;gap:8px;background:#FFF4E5;border:1px solid #FFD9A0;border-radius:10px;padding:9px 11px;margin-bottom:12px}
+.pallet-search-bar>i.ti-search{font-size:17px;color:#95610A;flex-shrink:0}
+.pallet-search-input{flex:1;border:none;background:transparent;font-size:13.5px;font-family:inherit;color:#7A4D08;outline:none;min-width:0}
+.pallet-search-input::placeholder{color:#C89A5E}
+.pallet-search-bar>i.ti-scan{font-size:19px;color:#95610A;cursor:pointer;flex-shrink:0}
 .pallet-new-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#FFF0F1;color:#A32D2D;border:1px dashed #F09595;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px}
 .pallet-stats{display:flex;gap:10px;margin-bottom:14px}
 .pallet-loc-box{display:flex;align-items:center;gap:8px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);border-radius:10px;padding:11px 12px;font-size:13px;color:var(--color-text-primary);margin-bottom:12px}
@@ -1429,6 +1434,7 @@ function closePromoViewer(){
 
 let PALLETS_CACHE=[];
 let currentPallet=null;
+let palletListFilterText='';
 let palletToastTimer=null;
 function showPalletToast(msg){
   const t=document.getElementById('palletToast');
@@ -1494,6 +1500,7 @@ function openPalletManager(){
   document.getElementById('palletRenameBtn').style.display='none';
   document.getElementById('palletFindScanBtn').style.display='none';
   currentPallet=null;
+  palletListFilterText='';
   document.getElementById('palletHeaderTitle').textContent='จัดการพาเลท';
   document.getElementById('palletHeaderSub').textContent='';
   document.getElementById('palletBody').innerHTML='<p style="text-align:center;color:var(--color-text-secondary);font-size:13px;padding:20px 0">กำลังโหลด...</p>';
@@ -1515,16 +1522,45 @@ function palletGoBack(){
 
 function renderPalletListView(pallets){
   const body=document.getElementById('palletBody');
-  let html='';
+  let html='<div class="pallet-search-bar">'+
+    '<i class="ti ti-search" aria-hidden="true"></i>'+
+    '<input type="text" id="palletSearchInput" class="pallet-search-input" placeholder="ค้นหาพาเลท ชื่อ / Loc / Location" value="'+escapeHtml(palletListFilterText)+'" oninput="filterPalletList(this.value)">'+
+    '<i class="ti ti-scan" aria-hidden="true" onclick="openPalletLocScan()" aria-label="สแกนบาร์โค้ด Bay เพื่อค้นหา"></i>'+
+  '</div>';
   if(isGR()){
     html+='<div class="pallet-new-btn" onclick="createNewPallet()"><i class="ti ti-plus" aria-hidden="true"></i> สร้างพาเลทใหม่</div>';
   }
-  if(!pallets.length){
-    html+='<div class="pallet-empty">ยังไม่มีพาเลทในระบบ</div>';
-  } else {
-    html+='<div class="pallet-grid">'+pallets.map(palletCardHtml).join('')+'</div>';
-  }
+  html+='<div id="palletGridContainer"></div>';
   body.innerHTML=html;
+  renderPalletGrid(pallets);
+}
+function renderPalletGrid(pallets){
+  const container=document.getElementById('palletGridContainer');
+  if(!container)return;
+  const filtered=filterPalletsByText(pallets,palletListFilterText);
+  if(!filtered.length){
+    container.innerHTML='<div class="pallet-empty">'+(palletListFilterText.trim()?'ไม่พบพาเลทที่ค้นหา':'ยังไม่มีพาเลทในระบบ')+'</div>';
+  } else {
+    container.innerHTML='<div class="pallet-grid">'+filtered.map(palletCardHtml).join('')+'</div>';
+  }
+}
+function filterPalletsByText(pallets,text){
+  const q=(text||'').trim().toLowerCase();
+  if(!q)return pallets;
+  return pallets.filter(p=>
+    (p.id&&p.id.toLowerCase().includes(q)) ||
+    (p.name&&p.name.toLowerCase().includes(q)) ||
+    (p.loc&&p.loc.toLowerCase().includes(q)) ||
+    (p.location&&p.location.toLowerCase().includes(q))
+  );
+}
+function filterPalletList(text){
+  palletListFilterText=text;
+  renderPalletGrid(PALLETS_CACHE);
+}
+function openPalletLocScan(){
+  if(!isEmployee())return;
+  openPalletScan('palletloc');
 }
 function palletCardHtml(p){
   const t=palletTotals(p);
@@ -1753,9 +1789,11 @@ function renderFindInPalletResults(q){
     const palletListHtml=hits.length
       ? hits.map(p=>{
           const it=p.items.find(x=>x.itemNo===item.itemNo);
+          const locLine=(p.loc||p.location) ? ('<div class="pallet-card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i>พาเลทนี้อยู่ที่ Loc '+escapeHtml(p.loc||'-')+' / Location '+escapeHtml(p.location||'-')+'</div>') : '';
           return '<div class="pallet-card" style="margin-bottom:6px" onclick="closeFindInPalletThenOpen(\''+p.id+'\')">'+
             '<div class="pallet-card-id">'+p.id+'</div>'+
             '<div class="pallet-card-meta">จำนวนในพาเลทนี้ '+it.qty+' ชิ้น</div>'+
+            locLine+
           '</div>';
         }).join('')
       : '<div class="pallet-empty" style="padding:10px 0">ไม่พบสินค้านี้ในพาเลทใดเลย</div>';
@@ -1798,7 +1836,7 @@ function openPalletScan(mode){
   const hint=document.getElementById('palletScanHint');
   err.style.display='none';
   hint.style.display='block';
-  document.getElementById('palletScanTitle').textContent=mode==='manage'?'สแกนเพื่อเพิ่ม/แก้ไข':(mode==='find'?'สแกนเพื่อค้นหา':'สแกนเพื่อลบสินค้า');
+  document.getElementById('palletScanTitle').textContent=mode==='manage'?'สแกนเพื่อเพิ่ม/แก้ไข':(mode==='find'?'สแกนเพื่อค้นหา':(mode==='palletloc'?'สแกนบาร์โค้ด Bay เพื่อค้นหาพาเลท':'สแกนเพื่อลบสินค้า'));
   overlay.style.display='flex';
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
     err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง กรุณาเปิดในเบราว์เซอร์ (Safari/Chrome) แทน';
@@ -1826,6 +1864,14 @@ function closePalletScan(){
 }
 function handlePalletScanCode(code){
   if(palletScanControls){ palletScanControls.stop(); palletScanControls=null; }
+  if(palletScanMode==='palletloc'){
+    closePalletScan();
+    palletListFilterText=code;
+    const input=document.getElementById('palletSearchInput');
+    if(input) input.value=code;
+    renderPalletGrid(PALLETS_CACHE);
+    return;
+  }
   const item=PRODUCTS_BY_KEY.find(x=>x.barcode===code||x.itemNo===code);
   if(!item){
     showPalletToast('ไม่พบสินค้านี้ในระบบ');
