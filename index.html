@@ -60,11 +60,25 @@ body{margin:0;padding:0}
 .search-box i{color:rgba(255,255,255,0.6);font-size:17px;flex-shrink:0}
 .body{padding:16px clamp(16px,4vw,40px) 40px;flex:1;max-width:min(1100px,94vw);margin:0 auto;width:100%}
 .section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
-.promo-frame{position:relative;background:linear-gradient(160deg,rgba(232,25,44,.09),rgba(232,153,42,.07) 65%,var(--color-background-primary) 100%);border:1.5px solid rgba(232,25,44,.28);border-radius:16px;padding:17px 14px 14px;margin-bottom:20px;box-shadow:0 12px 28px -18px rgba(232,25,44,.28)}
-.promo-frame::before{content:"";position:absolute;top:0;left:16px;right:16px;height:4px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--brand-red),#E8992A)}
-.promo-frame-label{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;color:var(--brand-red);margin-bottom:12px}
-.promo-frame-label i{font-size:17px}
-.promo-frame-count{margin-left:auto;font-size:10.5px;font-weight:800;color:#fff;background:linear-gradient(90deg,var(--brand-red),#E8992A);padding:3px 9px;border-radius:20px}
+.promo-carousel{position:relative;width:100vw;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;aspect-ratio:16/9;overflow:hidden;background:var(--color-background-secondary);cursor:pointer;margin-bottom:4px}
+.promo-track{display:flex;height:100%;transition:transform .45s cubic-bezier(.3,.85,.4,1)}
+.promo-slide{position:relative;flex:0 0 100%;height:100%}
+.promo-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.promo-scrim{position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,8,6,.55) 0%,rgba(10,8,6,0) 45%,rgba(10,8,6,.12) 100%)}
+.promo-date{position:absolute;top:12px;left:14px;color:#fff;font-size:13px;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.promo-by{position:absolute;bottom:10px;left:14px;right:90px;color:#fff;font-size:10.5px;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.promo-badge{position:absolute;bottom:9px;right:12px;display:flex;align-items:center;gap:4px;background:linear-gradient(90deg,#E8992A,#F0B54C);color:#3A2405;font-size:10px;font-weight:800;padding:4px 9px;border-radius:20px;box-shadow:0 4px 10px -2px rgba(0,0,0,.4)}
+.promo-badge.soon{background:linear-gradient(90deg,var(--brand-red),#FF4D5E);color:#fff}
+.promo-arrow{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.88);border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px -2px rgba(0,0,0,.35);cursor:pointer;color:var(--color-text-primary);z-index:2;padding:0}
+.promo-arrow.left{left:9px}
+.promo-arrow.right{right:9px}
+.promo-arrow i{font-size:17px}
+.promo-del{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:rgba(8,11,22,.55);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;font-size:13px;padding:0}
+.promo-dots{display:flex;justify-content:center;gap:6px;margin:10px 0 6px}
+.promo-dots span{width:6px;height:6px;border-radius:50%;background:var(--color-border-tertiary);transition:all .3s ease;flex-shrink:0}
+.promo-dots span.active{width:18px;border-radius:4px;background:var(--brand-red)}
+.promo-add-row{margin-bottom:16px}
+.promo-add-banner{border-radius:12px;border:1.5px dashed var(--brand-red);display:flex;align-items:center;justify-content:center;gap:6px;color:var(--brand-red);font-size:12.5px;font-weight:700;padding:10px;cursor:pointer;background:#FFF5F5}
 .cat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:20px}
 .cat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);transition:border-color .15s}
 .cat-card:hover{border-color:var(--color-border-secondary)}
@@ -99,34 +113,7 @@ body{margin:0;padding:0}
 .nav-info-line{font-size:13px;color:#a3454d;line-height:1.5}
 .nav-info-line+.nav-info-line{margin-top:6px}
 .nav-info-line b{color:#8a0e17;font-weight:700}
-.promo-gallery{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 6px}
-.promo-coupon{flex:0 0 auto;width:138px;background:var(--color-background-primary);border:1.5px solid rgba(232,25,44,.22);border-radius:14px;overflow:hidden;box-shadow:0 10px 22px -14px rgba(232,25,44,.32);position:relative;cursor:pointer;opacity:0;transform:translateY(8px) rotate(-1.2deg);animation:promoCouponIn .5s cubic-bezier(.2,.9,.3,1.3) forwards}
-.promo-coupon:nth-child(1){animation-delay:.03s}
-.promo-coupon:nth-child(2){animation-delay:.09s}
-.promo-coupon:nth-child(3){animation-delay:.15s}
-.promo-coupon:nth-child(4){animation-delay:.21s}
-.promo-coupon:nth-child(5){animation-delay:.27s}
-.promo-coupon:nth-child(n+6){animation-delay:.3s}
-@keyframes promoCouponIn{to{opacity:1;transform:translateY(0) rotate(0)}}
-@media (prefers-reduced-motion:reduce){ .promo-coupon{animation:none;opacity:1;transform:none} }
-.promo-coupon-photo{position:relative;height:118px;overflow:hidden;background:var(--color-background-secondary)}
-.promo-coupon-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.promo-coupon-chip{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:4px;background:linear-gradient(90deg,#E8992A,#F0B54C);color:#3A2405;font-size:10px;font-weight:800;padding:4px 8px 4px 6px;border-radius:20px;z-index:1;box-shadow:0 3px 8px -2px rgba(0,0,0,.35)}
-.promo-coupon-chip.soon{background:linear-gradient(90deg,var(--brand-red),#FF4D5E);color:#fff}
-.promo-coupon-chip i{width:6px;height:6px;border-radius:50%;background:#fff;flex-shrink:0;box-shadow:0 0 0 2px rgba(255,255,255,.35)}
-.promo-coupon-chip.soon i{background:#fff}
-.promo-coupon-del{position:absolute;top:8px;right:8px;background:rgba(8,11,22,.6);color:#fff;border:none;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;z-index:1}
-.promo-coupon-cut{height:0;border-top:1.5px dashed var(--color-border-tertiary);margin:0 10px;position:relative}
-.promo-coupon-cut::before,.promo-coupon-cut::after{content:"";position:absolute;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary)}
-.promo-coupon-cut::before{left:-16px}
-.promo-coupon-cut::after{right:-16px}
-.promo-coupon-info{padding:10px 11px 12px;display:flex;flex-direction:column;gap:3px}
-.promo-coupon-period{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--color-text-primary)}
-.promo-coupon-period i{font-size:12px;color:var(--color-text-secondary);flex-shrink:0}
-.promo-coupon-by{font-size:10px;color:var(--color-text-secondary)}
-.promo-add-card{flex:0 0 auto;width:138px;height:118px;border-radius:14px;border:1.5px dashed var(--brand-red);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--brand-red);font-size:11.5px;font-weight:700;cursor:pointer;background:#FFF5F5}
-.promo-add-card i{font-size:20px}
-.promo-gallery-empty{font-size:12.5px;color:var(--color-text-tertiary);padding:6px 0 12px}
+.promo-gallery-empty{font-size:12.5px;color:var(--color-text-tertiary);padding:6px 0 12px;margin-bottom:16px}
 .promo-view-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
 .promo-view-overlay img{width:min(92vw,1000px);height:calc(100dvh - 130px);max-height:100%;object-fit:contain;border-radius:8px;display:block}
 .promo-view-loading{color:#fff;font-size:13px}
@@ -345,6 +332,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .map-edit-bar{max-width:min(1080px,90vw)}
   .store-map{width:100%;left:auto;right:auto;margin-left:0;margin-right:0;border-radius:10px;border:0.5px solid var(--color-border-tertiary)}
   .store-map svg{width:auto;max-width:100%;height:auto;max-height:min(62vh,480px);margin:0 auto}
+  .promo-carousel{width:100%;left:auto;right:auto;margin-left:0;margin-right:0;border-radius:14px;max-height:420px}
   .map-overlay-content svg text[font-size="16"],.store-map svg text[font-size="16"]{font-size:19px}
   .map-overlay-content svg text[font-size="12"],.store-map svg text[font-size="12"]{font-size:14px}
   .map-overlay-content svg text.map-aisle-num,.store-map svg text.map-aisle-num{transform:scale(1.25);transform-box:fill-box;transform-origin:center}
@@ -495,9 +483,16 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
 
     <div id="homeView">
-      <div class="promo-frame">
-        <div class="promo-frame-label"><i class="ti ti-discount-2" aria-hidden="true"></i> โปรโมชั่น <span class="promo-frame-count" id="promoFrameCount" style="display:none"></span></div>
-        <div class="promo-gallery" id="promoGalleryList"></div>
+      <div class="section-label">โปรโมชั่น</div>
+      <div class="promo-carousel" id="promoCarousel" style="display:none">
+        <div class="promo-track" id="promoTrack"></div>
+        <button class="promo-arrow left" onclick="event.stopPropagation();movePromo(-1)" aria-label="ก่อนหน้า"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+        <button class="promo-arrow right" onclick="event.stopPropagation();movePromo(1)" aria-label="ถัดไป"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+      </div>
+      <div class="promo-dots" id="promoDots" style="display:none"></div>
+      <div class="promo-gallery-empty" id="promoEmptyMsg" style="display:none">ยังไม่มีโปรโมชั่นในขณะนี้</div>
+      <div class="promo-add-row" id="promoAddRow" style="display:none">
+        <div class="promo-add-banner" onclick="openPromoAddFlow()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มโปรโมชั่น</div>
       </div>
       <input type="file" id="promoFileInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handlePromoFileSelect(event)">
       <div class="section-label">หมวดหมู่</div>
@@ -1246,38 +1241,64 @@ function promoCountdownLabel(expiresAt){
   if(days<=1) return 'หมดวันนี้';
   return 'เหลือ '+days+' วัน';
 }
+let promoCarouselIndex=0;
+let promoAutoTimer=null;
 function renderPromoGallery(){
-  const box=document.getElementById('promoGalleryList');
-  if(!box)return;
-  const countEl=document.getElementById('promoFrameCount');
-  if(countEl){
-    if(PROMO_GALLERY_CACHE.length){ countEl.textContent=PROMO_GALLERY_CACHE.length+' รายการ'; countEl.style.display='inline-block'; }
-    else { countEl.style.display='none'; }
+  const carousel=document.getElementById('promoCarousel');
+  const track=document.getElementById('promoTrack');
+  const dots=document.getElementById('promoDots');
+  const emptyMsg=document.getElementById('promoEmptyMsg');
+  const addRow=document.getElementById('promoAddRow');
+  if(!carousel||!track)return;
+  if(promoCarouselIndex>=PROMO_GALLERY_CACHE.length) promoCarouselIndex=0;
+  addRow.style.display=isEmployee()?'block':'none';
+  if(!PROMO_GALLERY_CACHE.length){
+    carousel.style.display='none';
+    dots.style.display='none';
+    emptyMsg.style.display=isEmployee()?'none':'block';
+    stopPromoAutoAdvance();
+    return;
   }
-  let html='';
-  if(isEmployee()){
-    html+='<div class="promo-add-card" onclick="openPromoAddFlow()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มโปรโมชั่น</div>';
-  }
-  html+=PROMO_GALLERY_CACHE.map(p=>{
+  emptyMsg.style.display='none';
+  carousel.style.display='block';
+  const multi=PROMO_GALLERY_CACHE.length>1;
+  dots.style.display=multi?'flex':'none';
+  document.querySelectorAll('.promo-arrow').forEach(a=>a.style.display=multi?'flex':'none');
+  track.innerHTML=PROMO_GALLERY_CACHE.map(p=>{
     const soon=p.expiresAt&&(p.expiresAt-Date.now())<=2*86400000;
-    const chipText=p.expiresAt?promoCountdownLabel(p.expiresAt):'โปรโมชั่น';
-    return '<div class="promo-coupon" onclick="openPromoViewer('+jsStr(p.id)+')">'+
-      '<div class="promo-coupon-photo">'+
-        '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy">'+
-        '<div class="promo-coupon-chip'+(soon?' soon':'')+'"><i></i>'+chipText+'</div>'+
-        (isEmployee()?'<button class="promo-coupon-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
-      '</div>'+
-      '<div class="promo-coupon-cut"></div>'+
-      '<div class="promo-coupon-info">'+
-        '<div class="promo-coupon-period"><i class="ti ti-calendar-event" aria-hidden="true"></i>'+escapeHtml(p.periodLabel||'ไม่ระบุช่วงเวลา')+'</div>'+
-        '<div class="promo-coupon-by">โดย '+escapeHtml(p.addedBy||'-')+'</div>'+
-      '</div>'+
+    const badgeText=p.expiresAt?promoCountdownLabel(p.expiresAt):'โปรโมชั่น';
+    return '<div class="promo-slide" onclick="openPromoViewer('+jsStr(p.id)+')">'+
+      '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy">'+
+      '<div class="promo-scrim"></div>'+
+      '<div class="promo-date">'+escapeHtml(p.periodLabel||'ไม่ระบุช่วงเวลา')+'</div>'+
+      '<div class="promo-by">โดย '+escapeHtml(p.addedBy||'-')+'</div>'+
+      '<div class="promo-badge'+(soon?' soon':'')+'">'+badgeText+'</div>'+
+      (isEmployee()?'<button class="promo-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
     '</div>';
   }).join('');
-  if(!PROMO_GALLERY_CACHE.length && !isEmployee()){
-    html+='<div class="promo-gallery-empty">ยังไม่มีโปรโมชั่นในขณะนี้</div>';
-  }
-  box.innerHTML=html;
+  dots.innerHTML=PROMO_GALLERY_CACHE.map((_,i)=>'<span'+(i===promoCarouselIndex?' class="active"':'')+'></span>').join('');
+  applyPromoCarouselPosition();
+  startPromoAutoAdvance();
+}
+function applyPromoCarouselPosition(){
+  const track=document.getElementById('promoTrack');
+  if(track) track.style.transform='translateX(-'+(promoCarouselIndex*100)+'%)';
+  document.querySelectorAll('#promoDots span').forEach((d,i)=>d.classList.toggle('active',i===promoCarouselIndex));
+}
+function movePromo(dir){
+  if(!PROMO_GALLERY_CACHE.length)return;
+  promoCarouselIndex=(promoCarouselIndex+dir+PROMO_GALLERY_CACHE.length)%PROMO_GALLERY_CACHE.length;
+  applyPromoCarouselPosition();
+  startPromoAutoAdvance();
+}
+function startPromoAutoAdvance(){
+  stopPromoAutoAdvance();
+  if(PROMO_GALLERY_CACHE.length<=1)return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  promoAutoTimer=setInterval(()=>movePromo(1),5000);
+}
+function stopPromoAutoAdvance(){
+  if(promoAutoTimer){ clearInterval(promoAutoTimer); promoAutoTimer=null; }
 }
 // ==== เลือกช่วงเวลาโปรโมชั่นก่อนแนบไฟล์ (ใช้นับถอยหลัง+ลบอัตโนมัติเมื่อหมดอายุ) ====
 let pendingPromoPeriod=null;
