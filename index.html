@@ -128,6 +128,14 @@ body{margin:0;padding:0}
 .promo-date-actions button{flex:1;padding:11px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .promo-date-cancel{background:var(--color-background-secondary);color:var(--color-text-secondary)}
 .promo-date-confirm{background:var(--brand-red);color:#fff}
+.promo-date-box input[type=text]{padding:10px 12px;border-radius:10px;border:1px solid var(--color-border-tertiary);font-size:14px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary)}
+.new-item-barcode-row{display:flex;gap:8px;align-items:center}
+.new-item-barcode-row input{flex:1;min-width:0}
+.new-item-scan-btn{flex-shrink:0;width:42px;height:42px;border-radius:10px;border:1px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--brand-red);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.new-item-photo-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:10px;border:1.5px dashed var(--brand-red);color:var(--brand-red);font-size:13px;font-weight:600;cursor:pointer}
+.new-item-photo-preview-wrap{position:relative;display:inline-block;width:100px}
+.new-item-photo-preview-wrap img{width:100px;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--color-border-tertiary);display:block}
+.new-item-photo-remove{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--brand-red);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;padding:0}
 .map-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .map-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
 .map-hl-label{font-size:11px;font-weight:500;color:var(--color-text-success)}
@@ -632,6 +640,32 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   </div>
 </div>
 
+<div class="promo-date-overlay" id="newItemOverlay">
+  <div class="promo-date-box" onclick="event.stopPropagation()">
+    <div class="promo-date-title"><i class="ti ti-package" aria-hidden="true"></i> เพิ่มรายการ Item ใหม่</div>
+    <label>ชื่อสินค้า</label>
+    <input type="text" id="newItemDesc" placeholder="ชื่อสินค้า">
+    <label>เลข Item</label>
+    <input type="text" id="newItemNo" placeholder="เลข Item">
+    <label>บาร์โค้ด</label>
+    <div class="new-item-barcode-row">
+      <input type="text" id="newItemBarcode" placeholder="บาร์โค้ด (ไม่บังคับ)">
+      <button type="button" class="new-item-scan-btn" onclick="openNewItemBarcodeScan()" aria-label="สแกนบาร์โค้ด"><i class="ti ti-scan" aria-hidden="true"></i></button>
+    </div>
+    <label>รูปภาพสินค้า</label>
+    <label class="new-item-photo-btn" for="newItemPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> ถ่าย/แนบรูปสินค้า</label>
+    <input type="file" id="newItemPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleNewItemPhotoSelect(event)">
+    <div class="new-item-photo-preview-wrap" id="newItemPhotoPreviewWrap" style="display:none">
+      <img id="newItemPhotoPreview" alt="รูปสินค้า">
+      <button type="button" class="new-item-photo-remove" onclick="removeNewItemPhoto()" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="promo-date-actions">
+      <button class="promo-date-cancel" onclick="closeNewItemForm()">ยกเลิก</button>
+      <button class="promo-date-confirm" onclick="submitNewItem()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
 <div class="map-overlay" id="mapOverlay" onclick="closeMapFullscreen()">
   <button class="map-overlay-close" onclick="closeMapFullscreen()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
   <div class="map-overlay-content" id="mapOverlayContent" onclick="event.stopPropagation()"></div>
@@ -827,6 +861,7 @@ const FIREBASE_CONFIG={
 let mapFirestoreDocRef=null;
 let palletsCollectionRef=null;
 let promoGalleryCollectionRef=null;
+let customItemsCollectionRef=null;
 let stockOverridesDocRef=null;
 let locationOverridesDocRef=null;
 let feedbackCollectionRef=null;
@@ -838,6 +873,7 @@ try{
     mapFirestoreDocRef=mfCol.doc('storeMapLayout');
     palletsCollectionRef=mfCol;
     promoGalleryCollectionRef=mfCol;
+    customItemsCollectionRef=mfCol;
     stockOverridesDocRef=mfCol.doc('stockOverrides');
     locationOverridesDocRef=mfCol.doc('locationOverrides');
     feedbackCollectionRef=mfCol;
@@ -847,6 +883,7 @@ try{
   console.error('Firebase init ไม่สำเร็จ',e);
   mapFirestoreDocRef=null; palletsCollectionRef=null;
   promoGalleryCollectionRef=null;
+  customItemsCollectionRef=null;
   stockOverridesDocRef=null; locationOverridesDocRef=null; feedbackCollectionRef=null;
   gpsCalibrationDocRef=null;
 }
@@ -1811,6 +1848,7 @@ function openAddItemToPallet(){
   if(!currentPallet||!isGR())return;
   const body=document.getElementById('palletBody');
   body.innerHTML='<input type="text" id="palletAddSearch" class="inp" placeholder="ค้นหาชื่อ/Item No/บาร์โค้ด" oninput="renderPalletAddResults(this.value)" style="margin-bottom:12px">'+
+    '<div class="pallet-add-btn" style="margin-bottom:12px" onclick="openNewItemForm()"><i class="ti ti-package" aria-hidden="true"></i> ไม่พบสินค้า? เพิ่มรายการ Item ใหม่</div>'+
     '<div id="palletAddResults"></div>'+
     '<div class="pallet-add-btn" style="margin-top:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary)" onclick="closeAddItemToPallet()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับไปดูรายการ</div>';
   document.getElementById('palletAddSearch').focus();
@@ -1840,6 +1878,99 @@ function renderPalletAddResults(q){
     '</div>'
   ).join('');
   matches.forEach((it,i)=>{ applyItemImage(document.getElementById('palletAddPhoto'+i),it); });
+}
+
+// ==== เพิ่มรายการ Item ใหม่ที่ยังไม่มีในระบบ ====
+let CUSTOM_ITEMS_CACHE=[];
+function newCustomItemId(){ return 'CUSTITEM-'+Date.now()+'-'+Math.random().toString(36).slice(2,8); }
+async function loadCustomItems(){
+  if(!customItemsCollectionRef){ CUSTOM_ITEMS_CACHE=[]; return []; }
+  try{
+    const snap=await customItemsCollectionRef.get();
+    const list=[];
+    snap.forEach(doc=>{ const d=doc.data(); if(d&&d.type==='customItem') list.push(d); });
+    CUSTOM_ITEMS_CACHE=list;
+    return list;
+  }catch(e){ console.error('โหลดรายการ Item ใหม่ไม่สำเร็จ',e); CUSTOM_ITEMS_CACHE=[]; return []; }
+}
+function mergeCustomItemsIntoProducts(){
+  CUSTOM_ITEMS_CACHE.forEach(ci=>{
+    if(PRODUCTS_INDEX[ci.itemNo])return;
+    const item={itemNo:ci.itemNo,barcode:ci.barcode||'',desc:ci.desc,remark:'',locations:[],baseLocations:[],customImage:ci.image||null,isCustom:true};
+    PRODUCTS_BY_KEY.push(item);
+    PRODUCTS_INDEX[item.itemNo]=item;
+  });
+}
+async function saveCustomItem(desc,itemNo,barcode,image){
+  const sess=getSession();
+  const addedBy=sess?(sess.name+' · '+sess.dept):'ไม่ทราบ';
+  const data={id:newCustomItemId(),type:'customItem',itemNo,barcode:barcode||'',desc,image:image||null,addedBy,ts:Date.now()};
+  CUSTOM_ITEMS_CACHE.push(data);
+  const item={itemNo,barcode:barcode||'',desc,remark:'',locations:[],baseLocations:[],customImage:image||null,isCustom:true};
+  PRODUCTS_BY_KEY.push(item);
+  PRODUCTS_INDEX[itemNo]=item;
+  if(customItemsCollectionRef){
+    try{ await customItemsCollectionRef.doc(data.id).set(data); }
+    catch(e){ console.error('บันทึก Item ใหม่ไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้ชั่วคราว)'); }
+  }
+  return item;
+}
+let newItemPhotoDataUrl=null;
+function openNewItemForm(){
+  if(!isEmployee())return;
+  document.getElementById('newItemDesc').value=document.getElementById('palletAddSearch')?document.getElementById('palletAddSearch').value.trim():'';
+  document.getElementById('newItemNo').value='';
+  document.getElementById('newItemBarcode').value='';
+  removeNewItemPhoto();
+  document.getElementById('newItemOverlay').style.display='flex';
+}
+function closeNewItemForm(){
+  document.getElementById('newItemOverlay').style.display='none';
+}
+function handleNewItemPhotoSelect(evt){
+  const file=evt.target.files&&evt.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    const img=new Image();
+    img.onload=function(){
+      const maxW=900;
+      const scale=Math.min(1,maxW/img.width);
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(img.width*scale);
+      canvas.height=Math.round(img.height*scale);
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      newItemPhotoDataUrl=canvas.toDataURL('image/jpeg',0.7);
+      document.getElementById('newItemPhotoPreview').src=newItemPhotoDataUrl;
+      document.getElementById('newItemPhotoPreviewWrap').style.display='inline-block';
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeNewItemPhoto(){
+  newItemPhotoDataUrl=null;
+  const input=document.getElementById('newItemPhotoInput');
+  if(input) input.value='';
+  document.getElementById('newItemPhotoPreviewWrap').style.display='none';
+}
+function openNewItemBarcodeScan(){
+  if(!isEmployee())return;
+  document.getElementById('newItemOverlay').style.display='none';
+  openPalletScan('newitembarcode');
+}
+async function submitNewItem(){
+  const desc=document.getElementById('newItemDesc').value.trim();
+  const itemNo=document.getElementById('newItemNo').value.trim();
+  const barcode=document.getElementById('newItemBarcode').value.trim();
+  if(!desc||!itemNo){ alert('กรุณากรอกชื่อสินค้าและเลข Item ให้ครบ'); return; }
+  if(!newItemPhotoDataUrl){ alert('กรุณาแนบรูปภาพสินค้า'); return; }
+  if(PRODUCTS_INDEX[itemNo]){ alert('มีเลข Item นี้อยู่ในระบบแล้ว กรุณาตรวจสอบ'); return; }
+  await saveCustomItem(desc,itemNo,barcode,newItemPhotoDataUrl);
+  closeNewItemForm();
+  showPalletToast('เพิ่ม Item ใหม่ '+desc+' แล้ว');
+  promptAddQty(itemNo);
 }
 
 // ==== หาสินค้าตามพาเลท ====
@@ -1922,7 +2053,7 @@ function openPalletScan(mode){
   const hint=document.getElementById('palletScanHint');
   err.style.display='none';
   hint.style.display='block';
-  document.getElementById('palletScanTitle').textContent=mode==='manage'?'สแกนเพื่อเพิ่ม/แก้ไข':(mode==='find'?'สแกนเพื่อค้นหา':(mode==='palletloc'?'สแกนบาร์โค้ด Bay เพื่อค้นหาพาเลท':'สแกนเพื่อลบสินค้า'));
+  document.getElementById('palletScanTitle').textContent=mode==='manage'?'สแกนเพื่อเพิ่ม/แก้ไข':(mode==='find'?'สแกนเพื่อค้นหา':(mode==='palletloc'?'สแกนบาร์โค้ด Bay เพื่อค้นหาพาเลท':(mode==='newitembarcode'?'สแกนบาร์โค้ดสินค้าใหม่':'สแกนเพื่อลบสินค้า')));
   overlay.style.display='flex';
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
     err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง กรุณาเปิดในเบราว์เซอร์ (Safari/Chrome) แทน';
@@ -1947,6 +2078,9 @@ function openPalletScan(mode){
 function closePalletScan(){
   document.getElementById('palletScanOverlay').style.display='none';
   if(palletScanControls){ palletScanControls.stop(); palletScanControls=null; }
+  if(palletScanMode==='newitembarcode'){
+    document.getElementById('newItemOverlay').style.display='flex';
+  }
 }
 function handlePalletScanCode(code){
   if(palletScanControls){ palletScanControls.stop(); palletScanControls=null; }
@@ -1956,6 +2090,13 @@ function handlePalletScanCode(code){
     const input=document.getElementById('palletSearchInput');
     if(input) input.value=code;
     renderPalletGrid(PALLETS_CACHE);
+    return;
+  }
+  if(palletScanMode==='newitembarcode'){
+    closePalletScan();
+    const input=document.getElementById('newItemBarcode');
+    if(input) input.value=code;
+    document.getElementById('newItemOverlay').style.display='flex';
     return;
   }
   const item=PRODUCTS_BY_KEY.find(x=>x.barcode===code||x.itemNo===code);
@@ -2413,6 +2554,7 @@ function saveImageCacheSoon(){
   },500);
 }
 function resolveItemImage(item){
+  if(item.customImage) return Promise.resolve(item.customImage);
   const key=item.itemNo;
   if(ITEM_IMAGES&&Object.prototype.hasOwnProperty.call(ITEM_IMAGES,key)){
     return Promise.resolve(ITEM_IMAGES[key]);
@@ -2570,6 +2712,7 @@ function openStockEditor(itemNo,loc,location){
 }
 function loadProductData(){
   const overridesPromise=loadOverridesData();
+  const customItemsPromise=loadCustomItems();
   const xlsxPromise=fetch('ItemLocation_10_Jul_2026.xlsx')
     .then(r=>{ if(!r.ok) throw new Error('fetch failed: '+r.status); return r.arrayBuffer(); })
     .then(buf=>{
@@ -2602,12 +2745,13 @@ function loadProductData(){
       PRODUCTS_BY_KEY=Array.from(map.values());
       PRODUCTS_BY_KEY.forEach(item=>{ item.baseLocations=item.locations.slice(); });
     });
-  return Promise.all([xlsxPromise,overridesPromise])
+  return Promise.all([xlsxPromise,overridesPromise,customItemsPromise])
     .then(()=>{
       applyLocationOverridesToProducts();
       applyStockOverridesToProducts();
       PRODUCTS_INDEX={};
       PRODUCTS_BY_KEY.forEach(item=>{ PRODUCTS_INDEX[item.itemNo]=item; });
+      mergeCustomItemsIntoProducts();
       PRODUCTS_READY=true;
       if(pendingSearchQuery!==null){
         const q=pendingSearchQuery;
