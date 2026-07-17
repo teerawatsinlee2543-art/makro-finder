@@ -60,9 +60,11 @@ body{margin:0;padding:0}
 .search-box i{color:rgba(255,255,255,0.6);font-size:17px;flex-shrink:0}
 .body{padding:16px clamp(16px,4vw,40px) 40px;flex:1;max-width:min(1100px,94vw);margin:0 auto;width:100%}
 .section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
-.promo-frame{background:#FFF0F1;border:1.5px solid #FFC9CD;border-radius:16px;padding:14px 14px 4px;margin-bottom:20px}
-.promo-frame-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:#8a0e17;margin-bottom:10px}
-.promo-frame-label i{font-size:17px;color:var(--brand-red)}
+.promo-frame{position:relative;background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:16px;padding:16px 14px 14px;margin-bottom:20px;box-shadow:0 10px 26px -20px rgba(20,20,20,.3)}
+.promo-frame::before{content:"";position:absolute;top:0;left:16px;right:16px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--brand-red),#E8992A)}
+.promo-frame-label{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--brand-red);margin-bottom:12px}
+.promo-frame-label i{font-size:16px}
+.promo-frame-count{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:2px 8px;border-radius:20px}
 .cat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:20px}
 .cat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);transition:border-color .15s}
 .cat-card:hover{border-color:var(--color-border-secondary)}
@@ -98,8 +100,8 @@ body{margin:0;padding:0}
 .promo-title{font-size:14px;font-weight:700;color:#8a0e17}
 .promo-detail{font-size:12.5px;color:#a3454d;margin-top:1px}
 .promo-edit-btn{margin-left:auto;background:none;border:none;color:var(--brand-red);font-size:16px;cursor:pointer;padding:2px;flex-shrink:0}
-.promo-gallery{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 14px;margin-bottom:4px}
-.promo-coupon{flex:0 0 auto;width:128px;background:var(--color-background-primary);border-radius:14px;box-shadow:0 8px 18px -12px rgba(20,20,20,.35);position:relative;cursor:pointer;opacity:0;transform:translateY(8px) rotate(-1.2deg);animation:promoCouponIn .5s cubic-bezier(.2,.9,.3,1.3) forwards}
+.promo-gallery{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 6px}
+.promo-coupon{flex:0 0 auto;width:138px;background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:14px;overflow:hidden;box-shadow:0 8px 20px -14px rgba(20,20,20,.3);position:relative;cursor:pointer;opacity:0;transform:translateY(8px) rotate(-1.2deg);animation:promoCouponIn .5s cubic-bezier(.2,.9,.3,1.3) forwards}
 .promo-coupon:nth-child(1){animation-delay:.03s}
 .promo-coupon:nth-child(2){animation-delay:.09s}
 .promo-coupon:nth-child(3){animation-delay:.15s}
@@ -108,17 +110,23 @@ body{margin:0;padding:0}
 .promo-coupon:nth-child(n+6){animation-delay:.3s}
 @keyframes promoCouponIn{to{opacity:1;transform:translateY(0) rotate(0)}}
 @media (prefers-reduced-motion:reduce){ .promo-coupon{animation:none;opacity:1;transform:none} }
-.promo-coupon-photo{position:relative;height:108px;border-radius:14px 14px 0 0;overflow:hidden;background:var(--color-background-secondary)}
+.promo-coupon-photo{position:relative;height:118px;overflow:hidden;background:var(--color-background-secondary)}
 .promo-coupon-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.promo-coupon-flag{position:absolute;top:0;left:10px;background:#E8992A;color:#3A2405;font-size:9.5px;font-weight:800;padding:4px 7px 6px;border-radius:0 0 6px 6px;letter-spacing:.02em;z-index:1}
-.promo-coupon-flag.soon{background:var(--brand-red);color:#fff}
-.promo-coupon-del{position:absolute;top:5px;right:5px;background:rgba(8,11,22,.6);color:#fff;border:none;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;z-index:1}
-.promo-coupon-perf{position:relative;height:11px;background:var(--color-background-primary)}
-.promo-coupon-perf::before{content:"";position:absolute;inset:0 -1px;background-image:radial-gradient(circle,var(--color-background-secondary) 3.2px,transparent 3.3px);background-size:13px 13px;background-position:center;border-top:1px dashed var(--color-border-tertiary)}
-.promo-coupon-info{padding:1px 10px 11px;text-align:left}
-.promo-coupon-period{font-size:11px;font-weight:700;color:var(--color-text-primary);line-height:1.3;margin:0}
-.promo-add-card{flex:0 0 auto;width:128px;height:150px;border-radius:14px;border:1.5px dashed var(--brand-red);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--brand-red);font-size:12px;font-weight:600;cursor:pointer;background:#FFF0F1}
-.promo-add-card i{font-size:22px}
+.promo-coupon-chip{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:4px;background:rgba(20,15,10,.55);backdrop-filter:blur(3px);color:#fff;font-size:10px;font-weight:700;padding:4px 8px;border-radius:20px;z-index:1}
+.promo-coupon-chip.soon{background:var(--brand-red)}
+.promo-coupon-chip i{width:5px;height:5px;border-radius:50%;background:#E8992A;flex-shrink:0}
+.promo-coupon-chip.soon i{background:#fff}
+.promo-coupon-del{position:absolute;top:8px;right:8px;background:rgba(8,11,22,.6);color:#fff;border:none;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;z-index:1}
+.promo-coupon-cut{height:0;border-top:1.5px dashed var(--color-border-tertiary);margin:0 10px;position:relative}
+.promo-coupon-cut::before,.promo-coupon-cut::after{content:"";position:absolute;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary)}
+.promo-coupon-cut::before{left:-16px}
+.promo-coupon-cut::after{right:-16px}
+.promo-coupon-info{padding:10px 11px 12px;display:flex;flex-direction:column;gap:3px}
+.promo-coupon-period{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--color-text-primary)}
+.promo-coupon-period i{font-size:12px;color:var(--color-text-secondary);flex-shrink:0}
+.promo-coupon-by{font-size:10px;color:var(--color-text-secondary)}
+.promo-add-card{flex:0 0 auto;width:138px;height:118px;border-radius:14px;border:1.5px dashed var(--brand-red);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--brand-red);font-size:11.5px;font-weight:700;cursor:pointer;background:#FFF5F5}
+.promo-add-card i{font-size:20px}
 .promo-gallery-empty{font-size:12.5px;color:var(--color-text-tertiary);padding:6px 0 12px}
 .promo-view-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
 .promo-view-overlay img{width:min(92vw,1000px);height:calc(100dvh - 130px);max-height:100%;object-fit:contain;border-radius:8px;display:block}
@@ -489,7 +497,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
     <div id="homeView">
       <div class="promo-frame">
-        <div class="promo-frame-label"><i class="ti ti-discount-2" aria-hidden="true"></i> โปรโมชั่น</div>
+        <div class="promo-frame-label"><i class="ti ti-discount-2" aria-hidden="true"></i> โปรโมชั่น <span class="promo-frame-count" id="promoFrameCount" style="display:none"></span></div>
         <div class="promo-gallery" id="promoGalleryList"></div>
       </div>
       <input type="file" id="promoFileInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handlePromoFileSelect(event)">
@@ -1274,21 +1282,29 @@ function promoCountdownLabel(expiresAt){
 function renderPromoGallery(){
   const box=document.getElementById('promoGalleryList');
   if(!box)return;
+  const countEl=document.getElementById('promoFrameCount');
+  if(countEl){
+    if(PROMO_GALLERY_CACHE.length){ countEl.textContent=PROMO_GALLERY_CACHE.length+' รายการ'; countEl.style.display='inline-block'; }
+    else { countEl.style.display='none'; }
+  }
   let html='';
   if(isEmployee()){
     html+='<div class="promo-add-card" onclick="openPromoAddFlow()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มโปรโมชั่น</div>';
   }
   html+=PROMO_GALLERY_CACHE.map(p=>{
     const soon=p.expiresAt&&(p.expiresAt-Date.now())<=2*86400000;
-    const flagText=p.expiresAt?promoCountdownLabel(p.expiresAt):'โปรโมชั่น';
+    const chipText=p.expiresAt?promoCountdownLabel(p.expiresAt):'โปรโมชั่น';
     return '<div class="promo-coupon" onclick="openPromoViewer('+jsStr(p.id)+')">'+
       '<div class="promo-coupon-photo">'+
         '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy">'+
-        '<div class="promo-coupon-flag'+(soon?' soon':'')+'">'+flagText+'</div>'+
+        '<div class="promo-coupon-chip'+(soon?' soon':'')+'"><i></i>'+chipText+'</div>'+
         (isEmployee()?'<button class="promo-coupon-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
       '</div>'+
-      '<div class="promo-coupon-perf"></div>'+
-      '<div class="promo-coupon-info"><p class="promo-coupon-period">'+escapeHtml(p.periodLabel||'ไม่ระบุช่วงเวลา')+'</p></div>'+
+      '<div class="promo-coupon-cut"></div>'+
+      '<div class="promo-coupon-info">'+
+        '<div class="promo-coupon-period"><i class="ti ti-calendar-event" aria-hidden="true"></i>'+escapeHtml(p.periodLabel||'ไม่ระบุช่วงเวลา')+'</div>'+
+        '<div class="promo-coupon-by">โดย '+escapeHtml(p.addedBy||'-')+'</div>'+
+      '</div>'+
     '</div>';
   }).join('');
   if(!PROMO_GALLERY_CACHE.length && !isEmployee()){
