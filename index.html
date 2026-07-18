@@ -54,6 +54,7 @@ body{margin:0;padding:0}
 .hdr-sub{font-size:13px;font-weight:500;color:rgba(255,255,255,.8);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-icons{display:flex;align-items:center;gap:8px}
 .hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;cursor:pointer;border:none;flex-shrink:0}
+.hdr-icon.scan-btn{width:38px;height:38px;font-size:22px}
 .search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin:12px auto 0;border:0.5px solid rgba(255,255,255,0.2);max-width:min(1100px,94vw)}
 .search-box input{background:transparent;border:none;outline:none;color:#fff;font-size:14px;flex:1;font-family:inherit}
 .search-box input::placeholder{color:rgba(255,255,255,0.5)}
@@ -498,7 +499,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <button class="hdr-icon" onclick="switchRole()" title="กลับ" aria-label="กลับไปหน้าเลือกมุมมอง"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
         <div class="hdr-logo-badge">
           <svg viewBox="0 0 260 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <text x="130" y="72" font-family="Arial,Helvetica,sans-serif" font-size="66" font-weight="900" text-anchor="middle" fill="#ffffff" stroke="#000000" stroke-width="9" stroke-linejoin="round" paint-order="stroke">makro</text>
+            <text x="130" y="72" font-family="Arial,Helvetica,sans-serif" font-size="66" font-weight="900" text-anchor="middle" fill="#000000" stroke="#ffffff" stroke-width="6" stroke-linejoin="round" paint-order="stroke">makro</text>
           </svg>
         </div>
         <div>
@@ -507,7 +508,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div class="hdr-icons">
-        <button class="hdr-icon" onclick="openScanner()" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
+        <button class="hdr-icon scan-btn" onclick="openScanner()" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
       </div>
     </div>
     <div class="search-box">
