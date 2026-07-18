@@ -1793,10 +1793,15 @@ function palletPrintHeaderText(pallet){
 }
 function palletPrintSignerName(){
   const sess=getSession();
-  return (sess&&sess.name)?sess.name:'-';
+  if(!sess||!sess.name)return '-';
+  return sess.dept?(sess.name+' : '+sess.dept):sess.name;
 }
 function palletPrintDateStr(){
   return new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function palletPrintTimeStr(){
+  const now=new Date();
+  return String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+' น.';
 }
 const PALLET_PRINT_PAGE_SIZE=7;
 function printPalletList(){
@@ -1819,7 +1824,7 @@ function printPalletList(){
       html+='<tr><td>'+num+'</td><td>'+(it?escapeHtml(it.itemNo):'')+'</td><td>'+(it?escapeHtml(it.desc):'')+'</td><td>'+(it?it.qty:'')+'</td></tr>';
     }
     html+='</tbody></table>';
-    html+='<div class="pallet-print-footer"><div>ลงชื่อ : '+escapeHtml(palletPrintSignerName())+'</div><div>วันที่ : '+escapeHtml(palletPrintDateStr())+'</div></div>';
+    html+='<div class="pallet-print-footer"><div>ลงชื่อ : '+escapeHtml(palletPrintSignerName())+'</div><div>วันที่ : '+escapeHtml(palletPrintDateStr())+'</div><div>เวลา '+escapeHtml(palletPrintTimeStr())+' ที่ปริ้น</div></div>';
     html+='</div>';
   }
   area.innerHTML=html;
@@ -1910,7 +1915,11 @@ function buildPalletPrintCanvas(pallet,chunk,startNum,pageLabel){
   ctx.font='600 '+footerSize+'px '+fontStack;
   const footerY=y+Math.round(footerSize*0.7);
   ctx.fillText('ลงชื่อ : '+palletPrintSignerName(),tableX,footerY);
+  ctx.textAlign='center';
   ctx.fillText('วันที่ : '+palletPrintDateStr(),tableX+tableW/2,footerY);
+  ctx.textAlign='right';
+  ctx.fillText('เวลา '+palletPrintTimeStr()+' ที่ปริ้น',tableX+tableW,footerY);
+  ctx.textAlign='left';
   return canvas;
 }
 function downloadPalletPrintImage(){
