@@ -178,6 +178,9 @@ body{margin:0;padding:0}
 .pallet-open-btn:hover{background:#CBE0F7}
 .pallet-open-btn.green{background:#DFF5E3;border-color:#A6E0B3;color:#1B7A3D}
 .pallet-open-btn.green:hover{background:#CCEAD3}
+.pallet-open-btn.yellow{background:#FFF3C4;border-color:#F0D775;color:#8A6600}
+.pallet-open-btn.yellow:hover{background:#FCE9A8}
+.pallet-open-btn.compact{width:auto;display:inline-flex;padding:9px 18px}
 .pallet-overlay{position:fixed;inset:0;background:rgba(8,11,22,.6);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
 .pallet-overlay-content{width:100%;max-width:480px;max-height:92vh;background:var(--color-background-primary);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
 .pallet-header{background:var(--brand-red);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
@@ -617,7 +620,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <i class="ti ti-mood-sad" aria-hidden="true"></i>
         <p id="nfText"></p>
         <p style="margin-top:6px;font-size:12px">ลองคำอื่น หรือถามพนักงาน</p>
-        <button id="notFoundAddItemBtn" class="pallet-open-btn green" style="display:none;margin-top:14px" onclick="openNewItemFromNotFound()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มสินค้าใหม่</button>
+        <button id="notFoundAddItemBtn" class="pallet-open-btn yellow compact" style="display:none;margin-top:14px" onclick="openNewItemFromNotFound()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มสินค้าใหม่</button>
       </div>
     </div>
 
@@ -2936,7 +2939,7 @@ function search(q){
     rl.style.display='none';fc.style.display='none';nf.style.display='block';
     document.getElementById('nfText').textContent='ไม่พบ "'+q+'" ในระบบ';
     lastNotFoundQuery=q;
-    document.getElementById('notFoundAddItemBtn').style.display=isEmployee()?'flex':'none';
+    document.getElementById('notFoundAddItemBtn').style.display=isEmployee()?'inline-flex':'none';
   } else if(matches.length===1){
     rl.style.display='none';nf.style.display='none';
     renderDetail(matches[0]);
