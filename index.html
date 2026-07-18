@@ -1325,7 +1325,7 @@ function renderPromoGallery(){
     const soon=p.expiresAt&&(p.expiresAt-Date.now())<=2*86400000;
     const badgeText=p.expiresAt?promoCountdownLabel(p.expiresAt):'โปรโมชั่น';
     return '<div class="promo-slide" onclick="openPromoViewer('+jsStr(p.id)+')">'+
-      '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy">'+
+      '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy" onload="promoMatchBg(this)">'+
       '<div class="promo-scrim"></div>'+
       '<div class="promo-date">'+escapeHtml(p.periodLabel||'ไม่ระบุช่วงเวลา')+'</div>'+
       '<div class="promo-by">โดย '+escapeHtml(p.addedBy||'-')+'</div>'+
@@ -1336,6 +1336,26 @@ function renderPromoGallery(){
   dots.innerHTML=PROMO_GALLERY_CACHE.map((_,i)=>'<span'+(i===promoCarouselIndex?' class="active"':'')+'></span>').join('');
   applyPromoCarouselPosition();
   startPromoAutoAdvance();
+}
+function promoMatchBg(img){
+  try{
+    const size=16;
+    const c=document.createElement('canvas');
+    c.width=size;c.height=size;
+    const ctx=c.getContext('2d');
+    ctx.drawImage(img,0,0,size,size);
+    const d=ctx.getImageData(0,0,size,size).data;
+    let r=0,g=0,b=0,n=0;
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        if(x!==0&&x!==size-1&&y!==0&&y!==size-1)continue;
+        const i=(y*size+x)*4;
+        r+=d[i];g+=d[i+1];b+=d[i+2];n++;
+      }
+    }
+    if(!n)return;
+    img.style.background='rgb('+Math.round(r/n)+','+Math.round(g/n)+','+Math.round(b/n)+')';
+  }catch(e){}
 }
 function applyPromoCarouselPosition(){
   const track=document.getElementById('promoTrack');
