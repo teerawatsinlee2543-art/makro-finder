@@ -3462,11 +3462,10 @@ async function exportFeedbackExcel(){
       'วันที่':d.toLocaleDateString('th-TH'),
       'เวลา':d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
       'ข้อเสนอแนะ / ความคิดเห็น':item.text,
-      'แนบรูป':item.photo?'มี':'ไม่มี',
     };
   });
   const ws=XLSX.utils.json_to_sheet(rows);
-  ws['!cols']=[{wch:12},{wch:10},{wch:60},{wch:10}];
+  ws['!cols']=[{wch:12},{wch:10},{wch:60}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'ข้อเสนอแนะ');
   XLSX.writeFile(wb,'makro_finder_feedback_'+new Date().toISOString().slice(0,10)+'.xlsx');
