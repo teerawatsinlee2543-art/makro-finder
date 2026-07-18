@@ -1791,6 +1791,13 @@ function renderPalletDetailView(pallet){
 function palletPrintHeaderText(pallet){
   return 'พาเลทเลข '+(pallet.name||pallet.id);
 }
+function palletPrintSignerName(){
+  const sess=getSession();
+  return (sess&&sess.name)?sess.name:'-';
+}
+function palletPrintDateStr(){
+  return new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
 const PALLET_PRINT_PAGE_SIZE=7;
 function printPalletList(){
   if(!currentPallet)return;
@@ -1812,7 +1819,7 @@ function printPalletList(){
       html+='<tr><td>'+num+'</td><td>'+(it?escapeHtml(it.itemNo):'')+'</td><td>'+(it?escapeHtml(it.desc):'')+'</td><td>'+(it?it.qty:'')+'</td></tr>';
     }
     html+='</tbody></table>';
-    html+='<div class="pallet-print-footer"><div>ลงชื่อ : ....................................................</div><div>วันที่ : ....................................................</div></div>';
+    html+='<div class="pallet-print-footer"><div>ลงชื่อ : '+escapeHtml(palletPrintSignerName())+'</div><div>วันที่ : '+escapeHtml(palletPrintDateStr())+'</div></div>';
     html+='</div>';
   }
   area.innerHTML=html;
@@ -1902,8 +1909,8 @@ function buildPalletPrintCanvas(pallet,chunk,startNum,pageLabel){
   ctx.fillStyle='#000';
   ctx.font='600 '+footerSize+'px '+fontStack;
   const footerY=y+Math.round(footerSize*0.7);
-  ctx.fillText('ลงชื่อ : ..................................................',tableX,footerY);
-  ctx.fillText('วันที่ : ..................................................',tableX+tableW/2,footerY);
+  ctx.fillText('ลงชื่อ : '+palletPrintSignerName(),tableX,footerY);
+  ctx.fillText('วันที่ : '+palletPrintDateStr(),tableX+tableW/2,footerY);
   return canvas;
 }
 function downloadPalletPrintImage(){
