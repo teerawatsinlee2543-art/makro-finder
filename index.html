@@ -1243,11 +1243,11 @@ function renderProductNavInfo(item){
   const body=document.getElementById('navInfoBody');
   if(!body)return;
   if(item.locations && item.locations.length){
-    body.innerHTML='<div class="nav-info-name">ชื่อสินค้า &nbsp;*&nbsp; '+escapeHtml(item.desc)+'</div>'+
+    body.innerHTML='<div class="nav-info-name">ชื่อสินค้า : '+escapeHtml(item.desc)+'</div>'+
       item.locations.map(l=>
         '<div class="nav-info-loc-group">'+
-          '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> สินค้าอยู่ตรง &nbsp;*&nbsp; Loc (ล็อคที่) : <b>'+escapeHtml(l.loc)+'</b></div>'+
-          '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> อยู่ในช่วง &nbsp;*&nbsp; Location (ชั้นวางที่) : <b>'+escapeHtml(l.location)+'</b></div>'+
+          '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> สินค้าอยู่ตรง : Loc (ล็อคที่) : <b>'+escapeHtml(l.loc)+'</b></div>'+
+          '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> อยู่ในช่วง : Location (ชั้นวางที่) : <b>'+escapeHtml(l.location)+'</b></div>'+
         '</div>'
       ).join('');
   } else {
