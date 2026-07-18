@@ -383,6 +383,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .pallet-print-table th{font-size:30px;background:#EFEFEF}
   .pallet-print-table th:first-child,.pallet-print-table td:first-child{width:6%;text-align:center}
   .pallet-print-table th:nth-child(2),.pallet-print-table td:nth-child(2){width:15%;text-align:center}
+  .pallet-print-table th:nth-child(3),.pallet-print-table td:nth-child(3){text-align:center}
   .pallet-print-table th:last-child,.pallet-print-table td:last-child{width:16%;text-align:center}
   .pallet-print-footer{display:flex;justify-content:space-between;gap:24px;margin-top:16px;font-size:28px;font-weight:600;color:#000;flex:0 0 auto}
 }
@@ -1888,9 +1889,7 @@ function buildPalletPrintCanvas(pallet,chunk,startNum,pageLabel){
   ctx.font='800 '+headFontSize+'px '+fontStack;
   ctx.textAlign='center';
   ctx.fillText('Item',tableX+col0W+col1W/2,y+rowPadY);
-  ctx.textAlign='left';
-  ctx.fillText('Descr',tableX+col0W+col1W+descPad,y+rowPadY);
-  ctx.textAlign='center';
+  ctx.fillText('Descr',tableX+col0W+col1W+col2W/2,y+rowPadY);
   ctx.fillText('QTY (MU)',tableX+col0W+col1W+col2W+col3W/2,y+rowPadY);
   ctx.textAlign='left';
   y+=headRowH;
@@ -1904,9 +1903,7 @@ function buildPalletPrintCanvas(pallet,chunk,startNum,pageLabel){
     ctx.textAlign='center';
     ctx.fillText(String(r.num),tableX+col0W/2,y+rowPadY);
     ctx.fillText(String(r.itemNo),tableX+col0W+col1W/2,y+rowPadY);
-    ctx.textAlign='left';
-    r.lines.forEach((line,li)=>{ ctx.fillText(line,tableX+col0W+col1W+descPad,y+rowPadY+li*rowLineH); });
-    ctx.textAlign='center';
+    r.lines.forEach((line,li)=>{ ctx.fillText(line,tableX+col0W+col1W+col2W/2,y+rowPadY+li*rowLineH); });
     ctx.fillText(String(r.qty),tableX+col0W+col1W+col2W+col3W/2,y+rowPadY);
     ctx.textAlign='left';
     y+=h;
