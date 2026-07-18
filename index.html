@@ -1881,7 +1881,7 @@ function downloadPalletPrintImage(){
 function palletItemRowHtml(it,i,canEdit){
   const actions=canEdit
     ? '<div class="pallet-item-actions">'+
-        '<button type="button" class="pallet-item-move" onclick="openMovePalletPrompt(\''+it.itemNo+'\')" aria-label="ย้ายไปพาเลทอื่น"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้าย</button>'+
+        '<button type="button" class="pallet-item-move" onclick="openMovePalletPrompt(\''+it.itemNo+'\')" aria-label="ย้ายไปพาเลทอื่น"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้ายพาเลท</button>'+
         '<i class="ti ti-minus" aria-hidden="true" onclick="adjustPalletItemQty(\''+it.itemNo+'\',-1)"></i>'+
         '<i class="ti ti-plus" aria-hidden="true" onclick="adjustPalletItemQty(\''+it.itemNo+'\',1)"></i>'+
         '<i class="ti ti-trash danger" aria-hidden="true" onclick="removePalletItem(\''+it.itemNo+'\')"></i>'+
