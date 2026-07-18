@@ -223,9 +223,11 @@ body{margin:0;padding:0}
 .pallet-item-move i{font-size:15px;cursor:pointer;color:#fff}
 .pallet-item-move:hover{background:var(--brand-red-dark)}
 .pallet-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#FFF0F1;color:#A32D2D;border:1px dashed #F09595;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px}
+.pallet-add-btn.purple{background:#F1E9FB;color:#6B21A8;border-color:#CBA6EE}
 .pallet-scan-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px}
 .pallet-action-row{display:flex;gap:10px;margin-bottom:12px}
 .pallet-action-row .pallet-scan-btn{margin-bottom:0;flex:1;padding:13px 6px;font-size:12.5px;text-align:center}
+.pallet-action-row .pallet-add-btn{margin:0;width:auto;flex:1;padding:12px 6px;font-size:12px;text-align:center}
 .pallet-scan-btn.green{background:#1D6B3F}
 .pallet-empty{text-align:center;color:var(--color-text-secondary);font-size:13px;padding:30px 0}
 .pallet-focus-lock{display:flex;align-items:center;gap:6px;background:#FFF0F1;color:#A32D2D;padding:8px 16px;font-size:12px;font-weight:500;flex-shrink:0}
@@ -691,8 +693,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 </div>
 
 <div class="promo-date-overlay" id="movePalletOverlay">
-  <div class="promo-date-box" onclick="event.stopPropagation()">
-    <div class="promo-date-title" id="movePalletModalTitle"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้ายสินค้าไปพาเลทอื่น</div>
+  <div class="promo-date-box" style="max-width:380px" onclick="event.stopPropagation()">
+    <div class="promo-date-title" id="movePalletModalTitle" style="white-space:nowrap"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้ายสินค้าไปพาเลทอื่น</div>
     <label>เลขพาเลทปลายทาง</label>
     <div class="new-item-barcode-row">
       <input type="text" id="movePalletTarget" placeholder="พิมพ์เลขพาเลท หรือสแกน">
@@ -1769,7 +1771,7 @@ function renderPalletDetailView(pallet){
     html+=pallet.items.map((it,i)=>palletItemRowHtml(it,i,canEdit)).join('');
   }
   if(canEdit){
-    html+='<div class="pallet-add-btn" onclick="openMovePalletAllPrompt()"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> โยกย้ายสินค้าในพาเลททั้งหมด</div>';
+    html+='<div class="pallet-add-btn purple" onclick="openMovePalletAllPrompt()"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> โยกย้ายสินค้าในพาเลททั้งหมด</div>';
   }
   const locText=(pallet.loc||pallet.location) ? ('Loc '+escapeHtml(pallet.loc||'-')+' / Location '+escapeHtml(pallet.location||'-')) : 'ยังไม่ระบุตำแหน่งพาเลท';
   html+='<div class="pallet-loc-box" style="margin-top:12px'+(isGR()?';cursor:pointer':'')+'"'+(isGR()?' onclick="editPalletLocation()"':'')+'><i class="ti ti-map-pin" aria-hidden="true"></i> พาเลทนี้อยู่ที่ '+locText+(isGR()?' <i class="ti ti-pencil" aria-hidden="true" style="margin-left:auto"></i>':'')+'</div>';
@@ -1780,8 +1782,10 @@ function renderPalletDetailView(pallet){
     html+='<div class="pallet-add-btn" style="margin-top:8px;background:#FFF0F1;color:#A32D2D;border-style:solid;border-color:#F09595" onclick="deleteCurrentPallet()"><i class="ti ti-trash" aria-hidden="true"></i> ลบพาเลทนี้ทิ้งถาวร</div>';
   }
   if(isEmployee()){
-    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="printPalletList()"><i class="ti ti-printer" aria-hidden="true"></i> พิมพ์รายการสินค้าทั้งหมด</div>';
-    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="downloadPalletPrintImage()"><i class="ti ti-download" aria-hidden="true"></i> ดาวน์โหลดเป็นรูปภาพ (ถ้าพิมพ์ไม่ได้)</div>';
+    html+='<div class="pallet-action-row" style="margin-top:8px;margin-bottom:0">'+
+      '<div class="pallet-add-btn" style="background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="downloadPalletPrintImage()"><i class="ti ti-download" aria-hidden="true"></i> ดาวน์โหลดเป็นรูปภาพ (ถ้าพิมพ์ไม่ได้)</div>'+
+      '<div class="pallet-add-btn" style="background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="printPalletList()"><i class="ti ti-printer" aria-hidden="true"></i> พิมพ์รายการสินค้าทั้งหมด</div>'+
+    '</div>';
   }
   body.innerHTML=html;
   pallet.items.forEach((it,i)=>{
@@ -1985,7 +1989,7 @@ function openMovePalletAllPrompt(){
   if(!currentPallet.items.length){ alert('พาเลทนี้ยังไม่มีสินค้าให้ย้าย'); return; }
   movePalletMoveAll=true;
   movePalletItemNo=null;
-  document.getElementById('movePalletModalTitle').innerHTML='<i class="ti ti-arrows-right-left" aria-hidden="true"></i> โยกย้ายสินค้าในพาเลททั้งหมดไปพาเลทอื่น';
+  document.getElementById('movePalletModalTitle').innerHTML='<i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้ายสินค้าทั้งหมดไปพาเลทอื่น';
   document.getElementById('movePalletTarget').value='';
   document.getElementById('movePalletOverlay').style.display='flex';
 }
