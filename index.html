@@ -374,14 +374,16 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 @media print{
   html,body{width:408mm;height:285mm}
   body>*:not(#palletPrintArea){display:none !important}
-  #palletPrintArea{display:flex !important;flex-direction:column;width:408mm;height:285mm;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;color:#000}
+  #palletPrintArea{display:block !important;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;color:#000}
+  .pallet-print-page{display:flex;flex-direction:column;width:408mm;height:285mm;page-break-after:always}
+  .pallet-print-page:last-child{page-break-after:auto}
   .pallet-print-header{font-size:40px;font-weight:800;margin-bottom:14px;flex:0 0 auto}
   .pallet-print-table{width:100%;height:1px;flex:1 1 auto;border-collapse:collapse;table-layout:fixed}
-  .pallet-print-table th,.pallet-print-table td{border:2px solid #000;padding:14px 16px;text-align:left;font-weight:800;font-size:46px;vertical-align:middle;word-break:break-word}
+  .pallet-print-table th,.pallet-print-table td{border:2px solid #000;padding:14px 16px;text-align:left;font-weight:800;font-size:60px;vertical-align:middle;word-break:break-word}
   .pallet-print-table th{font-size:30px;background:#EFEFEF}
   .pallet-print-table th:first-child,.pallet-print-table td:first-child{width:6%;text-align:center}
-  .pallet-print-table th:nth-child(2),.pallet-print-table td:nth-child(2){width:15%}
-  .pallet-print-table th:last-child,.pallet-print-table td:last-child{width:14%;text-align:center}
+  .pallet-print-table th:nth-child(2),.pallet-print-table td:nth-child(2){width:15%;text-align:center}
+  .pallet-print-table th:last-child,.pallet-print-table td:last-child{width:16%;text-align:center}
   .pallet-print-footer{display:flex;justify-content:space-between;gap:24px;margin-top:16px;font-size:28px;font-weight:600;color:#000;flex:0 0 auto}
 }
 </style>
@@ -1789,37 +1791,46 @@ function renderPalletDetailView(pallet){
 function palletPrintHeaderText(pallet){
   return 'พาเลทเลข '+(pallet.name||pallet.id);
 }
+const PALLET_PRINT_PAGE_SIZE=7;
 function printPalletList(){
   if(!currentPallet)return;
   const pallet=currentPallet;
   const area=document.getElementById('palletPrintArea');
-  let html='<div class="pallet-print-header">'+escapeHtml(palletPrintHeaderText(pallet))+'</div>';
-  html+='<table class="pallet-print-table"><thead><tr><th></th><th>Item</th><th>Descr</th><th>QTY</th></tr></thead><tbody>';
-  const rowCount=Math.max(pallet.items.length,6);
-  for(let i=0;i<rowCount;i++){
-    const it=pallet.items[i];
-    html+='<tr><td>'+(i+1)+'</td><td>'+(it?escapeHtml(it.itemNo):'')+'</td><td>'+(it?escapeHtml(it.desc):'')+'</td><td>'+(it?it.qty:'')+'</td></tr>';
+  const items=pallet.items;
+  const pageCount=Math.max(1,Math.ceil(items.length/PALLET_PRINT_PAGE_SIZE));
+  let html='';
+  for(let p=0;p<pageCount;p++){
+    const chunk=items.slice(p*PALLET_PRINT_PAGE_SIZE,(p+1)*PALLET_PRINT_PAGE_SIZE);
+    const rowCount=Math.max(chunk.length,6);
+    const pageLabel=pageCount>1?(' (หน้า '+(p+1)+'/'+pageCount+')'):'';
+    html+='<div class="pallet-print-page">';
+    html+='<div class="pallet-print-header">'+escapeHtml(palletPrintHeaderText(pallet)+pageLabel)+'</div>';
+    html+='<table class="pallet-print-table"><thead><tr><th></th><th>Item</th><th>Descr</th><th>QTY (MU)</th></tr></thead><tbody>';
+    for(let i=0;i<rowCount;i++){
+      const it=chunk[i];
+      const num=p*PALLET_PRINT_PAGE_SIZE+i+1;
+      html+='<tr><td>'+num+'</td><td>'+(it?escapeHtml(it.itemNo):'')+'</td><td>'+(it?escapeHtml(it.desc):'')+'</td><td>'+(it?it.qty:'')+'</td></tr>';
+    }
+    html+='</tbody></table>';
+    html+='<div class="pallet-print-footer"><div>ลงชื่อ : ....................................................</div><div>วันที่ : ....................................................</div></div>';
+    html+='</div>';
   }
-  html+='</tbody></table>';
-  html+='<div class="pallet-print-footer"><div>ลงชื่อ : ....................................................</div><div>วันที่ : ....................................................</div></div>';
   area.innerHTML=html;
   window.print();
 }
-function downloadPalletPrintImage(){
-  if(!currentPallet)return;
-  const pallet=currentPallet;
+function buildPalletPrintCanvas(pallet,chunk,startNum,pageLabel){
   const W=2000,PAD=50;
   const fontStack='Sarabun,"Leelawadee UI","Segoe UI",Tahoma,sans-serif';
-  const headerSize=58,footerSize=36,cellFontSize=42,headFontSize=32,rowPadY=16;
-  const col0W=90,col1W=220,col3W=200;
+  const headerSize=58,footerSize=36,cellFontSize=60,headFontSize=32,rowPadY=16;
+  const col0W=90,col1W=220,col3W=220;
   const col2W=W-PAD*2-col0W-col1W-col3W;
   const descPad=16;
-  const headerText=palletPrintHeaderText(pallet);
-  const rowCount=Math.max(pallet.items.length,6);
+  const headerText=palletPrintHeaderText(pallet)+(pageLabel?(' ('+pageLabel+')'):'');
+  const rowCount=Math.max(chunk.length,6);
   const rows=[];
   for(let i=0;i<rowCount;i++){
-    const it=pallet.items[i];
-    rows.push({num:i+1,itemNo:it?it.itemNo:'',desc:it?it.desc:'',qty:it?it.qty:''});
+    const it=chunk[i];
+    rows.push({num:startNum+i,itemNo:it?it.itemNo:'',desc:it?it.desc:'',qty:it?it.qty:''});
   }
   const measureCanvas=document.createElement('canvas');
   const mctx=measureCanvas.getContext('2d');
@@ -1863,9 +1874,13 @@ function downloadPalletPrintImage(){
   ctx.strokeRect(tableX+col0W+col1W+col2W,y,col3W,headRowH);
   ctx.fillStyle='#000';
   ctx.font='800 '+headFontSize+'px '+fontStack;
-  ctx.fillText('Item',tableX+col0W+descPad,y+rowPadY);
+  ctx.textAlign='center';
+  ctx.fillText('Item',tableX+col0W+col1W/2,y+rowPadY);
+  ctx.textAlign='left';
   ctx.fillText('Descr',tableX+col0W+col1W+descPad,y+rowPadY);
-  ctx.fillText('QTY',tableX+col0W+col1W+col2W+descPad,y+rowPadY);
+  ctx.textAlign='center';
+  ctx.fillText('QTY (MU)',tableX+col0W+col1W+col2W+col3W/2,y+rowPadY);
+  ctx.textAlign='left';
   y+=headRowH;
   ctx.font='800 '+cellFontSize+'px '+fontStack;
   rowsWrapped.forEach((r,i)=>{
@@ -1876,8 +1891,8 @@ function downloadPalletPrintImage(){
     ctx.strokeRect(tableX+col0W+col1W+col2W,y,col3W,h);
     ctx.textAlign='center';
     ctx.fillText(String(r.num),tableX+col0W/2,y+rowPadY);
+    ctx.fillText(String(r.itemNo),tableX+col0W+col1W/2,y+rowPadY);
     ctx.textAlign='left';
-    ctx.fillText(String(r.itemNo),tableX+col0W+descPad,y+rowPadY);
     r.lines.forEach((line,li)=>{ ctx.fillText(line,tableX+col0W+col1W+descPad,y+rowPadY+li*rowLineH); });
     ctx.textAlign='center';
     ctx.fillText(String(r.qty),tableX+col0W+col1W+col2W+col3W/2,y+rowPadY);
@@ -1889,10 +1904,22 @@ function downloadPalletPrintImage(){
   const footerY=y+Math.round(footerSize*0.7);
   ctx.fillText('ลงชื่อ : ..................................................',tableX,footerY);
   ctx.fillText('วันที่ : ..................................................',tableX+tableW/2,footerY);
-  const link=document.createElement('a');
-  link.download=pallet.id+'_รายการสินค้า.png';
-  link.href=canvas.toDataURL('image/png');
-  link.click();
+  return canvas;
+}
+function downloadPalletPrintImage(){
+  if(!currentPallet)return;
+  const pallet=currentPallet;
+  const items=pallet.items;
+  const pageCount=Math.max(1,Math.ceil(items.length/PALLET_PRINT_PAGE_SIZE));
+  for(let p=0;p<pageCount;p++){
+    const chunk=items.slice(p*PALLET_PRINT_PAGE_SIZE,(p+1)*PALLET_PRINT_PAGE_SIZE);
+    const pageLabel=pageCount>1?('หน้า '+(p+1)+'/'+pageCount):'';
+    const canvas=buildPalletPrintCanvas(pallet,chunk,p*PALLET_PRINT_PAGE_SIZE+1,pageLabel);
+    const link=document.createElement('a');
+    link.download=pallet.id+'_รายการสินค้า'+(pageCount>1?('_'+(p+1)):'')+'.png';
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+  }
 }
 function palletItemRowHtml(it,i,canEdit){
   const actions=canEdit
