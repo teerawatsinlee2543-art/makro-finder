@@ -219,7 +219,8 @@ body{margin:0;padding:0}
 .pallet-item-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
 .pallet-item-actions i{font-size:17px;cursor:pointer;color:var(--color-text-secondary)}
 .pallet-item-actions i.danger{color:#A32D2D}
-.pallet-item-move{background:var(--brand-red);color:#fff;border:none;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:15px;padding:0}
+.pallet-item-move{background:var(--brand-red);color:#fff;border:none;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;flex-shrink:0;font-size:12.5px;font-weight:700;padding:0 12px;white-space:nowrap;font-family:inherit}
+.pallet-item-move i{font-size:15px;cursor:pointer;color:#fff}
 .pallet-item-move:hover{background:var(--brand-red-dark)}
 .pallet-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#FFF0F1;color:#A32D2D;border:1px dashed #F09595;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px}
 .pallet-scan-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--brand-red);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px}
@@ -1880,7 +1881,7 @@ function downloadPalletPrintImage(){
 function palletItemRowHtml(it,i,canEdit){
   const actions=canEdit
     ? '<div class="pallet-item-actions">'+
-        '<button type="button" class="pallet-item-move" onclick="openMovePalletPrompt(\''+it.itemNo+'\')" aria-label="ย้ายไปพาเลทอื่น"><i class="ti ti-arrows-right-left" aria-hidden="true"></i></button>'+
+        '<button type="button" class="pallet-item-move" onclick="openMovePalletPrompt(\''+it.itemNo+'\')" aria-label="ย้ายไปพาเลทอื่น"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้าย</button>'+
         '<i class="ti ti-minus" aria-hidden="true" onclick="adjustPalletItemQty(\''+it.itemNo+'\',-1)"></i>'+
         '<i class="ti ti-plus" aria-hidden="true" onclick="adjustPalletItemQty(\''+it.itemNo+'\',1)"></i>'+
         '<i class="ti ti-trash danger" aria-hidden="true" onclick="removePalletItem(\''+it.itemNo+'\')"></i>'+
