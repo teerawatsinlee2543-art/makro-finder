@@ -3462,6 +3462,27 @@ function checkSession(){
     showRoleScreen();
   }
 }
+const OVERLAY_ZOOM_LOCK_IDS=['promoViewOverlay','promoDateOverlay','newItemOverlay','movePalletOverlay','mapOverlay','palletOverlay','palletScanOverlay','scanOverlay'];
+function updateOverlayZoomLock(){
+  const vp=document.querySelector('meta[name="viewport"]');
+  if(!vp)return;
+  const anyOpen=OVERLAY_ZOOM_LOCK_IDS.some(id=>{
+    const el=document.getElementById(id);
+    return el && getComputedStyle(el).display!=='none';
+  });
+  vp.setAttribute('content',anyOpen
+    ? 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no'
+    : 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes');
+}
+function initOverlayZoomLock(){
+  const observer=new MutationObserver(updateOverlayZoomLock);
+  OVERLAY_ZOOM_LOCK_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) observer.observe(el,{attributes:true,attributeFilter:['style']});
+  });
+  updateOverlayZoomLock();
+}
+initOverlayZoomLock();
 checkSession();
 </script>
 </body>
