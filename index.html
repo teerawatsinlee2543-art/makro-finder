@@ -1339,22 +1339,26 @@ function renderPromoGallery(){
 }
 function promoMatchBg(img){
   try{
-    const size=16;
+    const size=32;
     const c=document.createElement('canvas');
     c.width=size;c.height=size;
     const ctx=c.getContext('2d');
     ctx.drawImage(img,0,0,size,size);
     const d=ctx.getImageData(0,0,size,size).data;
-    let r=0,g=0,b=0,n=0;
-    for(let y=0;y<size;y++){
-      for(let x=0;x<size;x++){
-        if(x!==0&&x!==size-1&&y!==0&&y!==size-1)continue;
-        const i=(y*size+x)*4;
-        r+=d[i];g+=d[i+1];b+=d[i+2];n++;
-      }
+    const buckets={};
+    for(let i=0;i<d.length;i+=4){
+      if(d[i+3]<128)continue;
+      const r=d[i],g=d[i+1],b=d[i+2];
+      const key=(r>>4)+','+(g>>4)+','+(b>>4);
+      const bucket=buckets[key]||(buckets[key]={r:0,g:0,b:0,n:0});
+      bucket.r+=r;bucket.g+=g;bucket.b+=b;bucket.n++;
     }
-    if(!n)return;
-    img.style.background='rgb('+Math.round(r/n)+','+Math.round(g/n)+','+Math.round(b/n)+')';
+    let dominant=null;
+    for(const key in buckets){
+      if(!dominant||buckets[key].n>dominant.n)dominant=buckets[key];
+    }
+    if(!dominant)return;
+    img.style.background='rgb('+Math.round(dominant.r/dominant.n)+','+Math.round(dominant.g/dominant.n)+','+Math.round(dominant.b/dominant.n)+')';
   }catch(e){}
 }
 function applyPromoCarouselPosition(){
