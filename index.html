@@ -668,7 +668,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <input type="date" id="promoDateEnd">
     <div class="promo-date-actions">
       <button class="promo-date-cancel" onclick="cancelPromoDatePick()">ยกเลิก</button>
-      <button class="promo-date-confirm" onclick="confirmPromoDatePick()">ตกลง เลือกไฟล์</button>
+      <button class="promo-date-confirm" id="promoDateConfirmBtn" onclick="confirmPromoDatePick()">ตกลง เลือกไฟล์</button>
     </div>
   </div>
 </div>
@@ -1374,7 +1374,7 @@ function renderPromoGallery(){
     return '<div class="promo-slide" onclick="openPromoViewer('+jsStr(p.id)+')">'+
       '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy" onload="promoMatchBg(this)">'+
       '<div class="promo-scrim"></div>'+
-      '<div class="promo-date">'+escapeHtml(p.periodLabel||'ไม่ระบุช่วงเวลา')+'</div>'+
+      '<div class="promo-date"'+(isEmployee()?' onclick="event.stopPropagation();openPromoDateEdit('+jsStr(p.id)+')" style="cursor:pointer"':'')+'>'+escapeHtml(p.periodLabel||'ไม่ระบุช่วงเวลา')+(isEmployee()?' <i class="ti ti-pencil" aria-hidden="true" style="font-size:11px"></i>':'')+'</div>'+
       '<div class="promo-by">โดย '+escapeHtml(p.addedBy||'-')+'</div>'+
       '<div class="promo-badge'+(soon?' soon':'')+'">'+badgeText+'</div>'+
       (isEmployee()?'<button class="promo-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
@@ -1430,13 +1430,39 @@ function stopPromoAutoAdvance(){
 }
 // ==== เลือกช่วงเวลาโปรโมชั่นก่อนแนบไฟล์ (ใช้นับถอยหลัง+ลบอัตโนมัติเมื่อหมดอายุ) ====
 let pendingPromoPeriod=null;
+let editingPromoId=null;
 function openPromoAddFlow(){
   if(!isEmployee())return;
+  editingPromoId=null;
   document.getElementById('promoDateStart').value='';
   document.getElementById('promoDateEnd').value='';
+  document.getElementById('promoDateConfirmBtn').textContent='ตกลง เลือกไฟล์';
+  document.getElementById('promoDateOverlay').style.display='flex';
+}
+function parseThaiDateShortToISO(str){
+  const m=str&&str.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if(!m)return '';
+  let year=parseInt(m[3],10);
+  if(year<100) year+=2500;
+  year-=543;
+  const mm=String(m[2]).padStart(2,'0');
+  const dd=String(m[1]).padStart(2,'0');
+  return year+'-'+mm+'-'+dd;
+}
+function openPromoDateEdit(id){
+  if(!isEmployee())return;
+  const p=PROMO_GALLERY_CACHE.find(x=>x.id===id);
+  if(!p)return;
+  editingPromoId=id;
+  const label=p.periodLabel||'';
+  const parts=label.split(' - ');
+  document.getElementById('promoDateStart').value=parts.length>1?parseThaiDateShortToISO(parts[0]):'';
+  document.getElementById('promoDateEnd').value=p.expiresAt?new Date(p.expiresAt).toISOString().slice(0,10):parseThaiDateShortToISO(parts[parts.length-1]);
+  document.getElementById('promoDateConfirmBtn').textContent='บันทึก';
   document.getElementById('promoDateOverlay').style.display='flex';
 }
 function cancelPromoDatePick(){
+  editingPromoId=null;
   document.getElementById('promoDateOverlay').style.display='none';
 }
 function formatThaiDateShort(isoDate){
@@ -1444,13 +1470,28 @@ function formatThaiDateShort(isoDate){
   const beYear=(d.getFullYear()+543)%100;
   return d.getDate()+'/'+(d.getMonth()+1)+'/'+String(beYear).padStart(2,'0');
 }
-function confirmPromoDatePick(){
+async function confirmPromoDatePick(){
   const startVal=document.getElementById('promoDateStart').value;
   const endVal=document.getElementById('promoDateEnd').value;
   if(!endVal){ alert('กรุณาระบุวันที่สิ้นสุดโปรโมชั่น'); return; }
   const expiresAt=new Date(endVal+'T23:59:59').getTime();
   if(isNaN(expiresAt)||expiresAt<Date.now()){ alert('กรุณาเลือกวันที่สิ้นสุดที่ยังไม่ผ่านไปแล้ว'); return; }
   const periodLabel=startVal?(formatThaiDateShort(startVal)+' - '+formatThaiDateShort(endVal)):('ถึง '+formatThaiDateShort(endVal));
+  if(editingPromoId){
+    const p=PROMO_GALLERY_CACHE.find(x=>x.id===editingPromoId);
+    editingPromoId=null;
+    document.getElementById('promoDateOverlay').style.display='none';
+    if(!p)return;
+    p.expiresAt=expiresAt;
+    p.periodLabel=periodLabel;
+    savePromoGalleryLocal(PROMO_GALLERY_CACHE);
+    renderPromoGallery();
+    if(promoGalleryCollectionRef){
+      try{ await promoGalleryCollectionRef.doc(p.id).set(p); }
+      catch(e){ console.error('บันทึกช่วงเวลาโปรโมชั่นไป Firestore ไม่สำเร็จ',e); showPalletToast('บันทึกส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+    }
+    return;
+  }
   pendingPromoPeriod={expiresAt:expiresAt,periodLabel:periodLabel};
   document.getElementById('promoDateOverlay').style.display='none';
   document.getElementById('promoFileInput').click();
@@ -3482,6 +3523,25 @@ function initOverlayZoomLock(){
   });
   updateOverlayZoomLock();
 }
+function initPromoSwipe(){
+  const carousel=document.getElementById('promoCarousel');
+  if(!carousel)return;
+  let startX=0,startY=0,tracking=false;
+  carousel.addEventListener('touchstart',function(e){
+    if(e.touches.length!==1)return;
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    tracking=true;
+  },{passive:true});
+  carousel.addEventListener('touchend',function(e){
+    if(!tracking)return;
+    tracking=false;
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=e.changedTouches[0].clientY-startY;
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)) movePromo(dx<0?1:-1);
+  },{passive:true});
+}
+initPromoSwipe();
 initOverlayZoomLock();
 checkSession();
 </script>
