@@ -94,6 +94,7 @@ body{margin:0;padding:0;touch-action:manipulation}
 .result-header-info .result-top{margin-bottom:10px}
 .result-header-info .loc-row{margin-bottom:0}
 .result-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.result-edit-btn{width:36px;height:36px;border-radius:10px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);color:var(--color-text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;font-size:17px;padding:0}
 .result-image-banner{width:min(260px,100%);height:auto;aspect-ratio:1/1;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:88px;background:var(--color-background-secondary);color:var(--color-text-tertiary);margin:0 auto}
 .result-image-banner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .result-item-icon img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit}
@@ -609,6 +610,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
                 <div class="result-name" id="rName"></div>
                 <span class="result-cat-badge" id="rBadge"></span>
               </div>
+              <button type="button" class="result-edit-btn" id="rEditBtn" style="display:none" aria-label="แก้ไขข้อมูลสินค้า"><i class="ti ti-dots-vertical" aria-hidden="true"></i></button>
             </div>
             <div class="loc-row" id="rLoc"></div>
           </div>
@@ -704,6 +706,32 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div class="promo-date-actions">
       <button class="promo-date-cancel" onclick="closeNewItemForm()">ยกเลิก</button>
       <button class="promo-date-confirm" onclick="submitNewItem()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="promo-date-overlay" id="editProductOverlay">
+  <div class="promo-date-box" onclick="event.stopPropagation()">
+    <div class="promo-date-title"><i class="ti ti-edit" aria-hidden="true"></i> แก้ไขข้อมูลสินค้า</div>
+    <label>ชื่อสินค้า</label>
+    <input type="text" id="editProdDesc" placeholder="ชื่อสินค้า">
+    <label>รูปภาพสินค้า</label>
+    <label class="new-item-photo-btn" for="editProdPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> เปลี่ยนรูปสินค้า</label>
+    <input type="file" id="editProdPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleEditProdPhotoSelect(event)">
+    <div class="new-item-photo-preview-wrap" id="editProdPhotoPreviewWrap" style="display:none">
+      <img id="editProdPhotoPreview" alt="รูปสินค้า">
+      <button type="button" class="new-item-photo-remove" onclick="removeEditProdPhoto()" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="promo-date-actions">
+      <button class="promo-date-cancel" onclick="closeEditProductModal()">ยกเลิก</button>
+      <button class="promo-date-confirm" onclick="submitEditProduct()">บันทึก</button>
+    </div>
+    <div style="border-top:1px solid var(--color-border-tertiary);margin-top:14px;padding-top:14px">
+      <label style="color:#A32D2D">ลบสินค้านี้ออกจากระบบ (ต้องใส่รหัส PIN พนักงาน)</label>
+      <div class="new-item-barcode-row">
+        <input type="password" id="editProdDeletePin" placeholder="รหัส PIN 4 หลัก" maxlength="4" inputmode="numeric">
+        <button type="button" class="new-item-scan-btn" style="background:#FFF0F1;color:#A32D2D;border-color:#F09595" onclick="confirmDeleteProduct()" aria-label="ลบสินค้า"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </div>
     </div>
   </div>
 </div>
@@ -921,6 +949,7 @@ let promoGalleryCollectionRef=null;
 let customItemsCollectionRef=null;
 let stockOverridesDocRef=null;
 let locationOverridesDocRef=null;
+let itemOverridesDocRef=null;
 let feedbackCollectionRef=null;
 let gpsCalibrationDocRef=null;
 try{
@@ -933,6 +962,7 @@ try{
     customItemsCollectionRef=mfCol;
     stockOverridesDocRef=mfCol.doc('stockOverrides');
     locationOverridesDocRef=mfCol.doc('locationOverrides');
+    itemOverridesDocRef=mfCol.doc('itemOverrides');
     feedbackCollectionRef=mfCol;
     gpsCalibrationDocRef=mfCol.doc('gpsCalibration');
   }
@@ -941,7 +971,7 @@ try{
   mapFirestoreDocRef=null; palletsCollectionRef=null;
   promoGalleryCollectionRef=null;
   customItemsCollectionRef=null;
-  stockOverridesDocRef=null; locationOverridesDocRef=null; feedbackCollectionRef=null;
+  stockOverridesDocRef=null; locationOverridesDocRef=null; itemOverridesDocRef=null; feedbackCollectionRef=null;
   gpsCalibrationDocRef=null;
 }
 try{
@@ -2283,6 +2313,85 @@ function removeNewItemPhoto(){
   if(input) input.value='';
   document.getElementById('newItemPhotoPreviewWrap').style.display='none';
 }
+
+// ==== แก้ไข/ลบข้อมูลสินค้า (สำหรับพนักงาน) ====
+let editProdItemNo=null;
+let editProdPhotoDataUrl=null;
+function openEditProductModal(itemNo){
+  if(!isEmployee())return;
+  const item=getItemByNo(itemNo);
+  if(!item)return;
+  editProdItemNo=itemNo;
+  editProdPhotoDataUrl=null;
+  document.getElementById('editProdDesc').value=item.desc||'';
+  document.getElementById('editProdPhotoInput').value='';
+  document.getElementById('editProdPhotoPreviewWrap').style.display='none';
+  document.getElementById('editProdDeletePin').value='';
+  document.getElementById('editProductOverlay').style.display='flex';
+}
+function closeEditProductModal(){
+  document.getElementById('editProductOverlay').style.display='none';
+  editProdItemNo=null;
+}
+function handleEditProdPhotoSelect(evt){
+  const file=evt.target.files&&evt.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    const img=new Image();
+    img.onload=function(){
+      const maxW=900;
+      const scale=Math.min(1,maxW/img.width);
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(img.width*scale);
+      canvas.height=Math.round(img.height*scale);
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      editProdPhotoDataUrl=canvas.toDataURL('image/jpeg',0.7);
+      document.getElementById('editProdPhotoPreview').src=editProdPhotoDataUrl;
+      document.getElementById('editProdPhotoPreviewWrap').style.display='inline-block';
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeEditProdPhoto(){
+  editProdPhotoDataUrl=null;
+  const input=document.getElementById('editProdPhotoInput');
+  if(input) input.value='';
+  document.getElementById('editProdPhotoPreviewWrap').style.display='none';
+}
+async function submitEditProduct(){
+  if(!isEmployee()||!editProdItemNo)return;
+  const item=getItemByNo(editProdItemNo);
+  if(!item)return;
+  const desc=document.getElementById('editProdDesc').value.trim();
+  if(!desc){ alert('กรุณากรอกชื่อสินค้า'); return; }
+  if(!ITEM_OVERRIDES[editProdItemNo])ITEM_OVERRIDES[editProdItemNo]={};
+  ITEM_OVERRIDES[editProdItemNo].desc=desc;
+  if(editProdPhotoDataUrl) ITEM_OVERRIDES[editProdItemNo].image=editProdPhotoDataUrl;
+  applyItemOverridesToProducts();
+  await persistItemOverrides();
+  const updated=getItemByNo(editProdItemNo);
+  closeEditProductModal();
+  showPalletToast('บันทึกข้อมูลสินค้าแล้ว');
+  if(updated) renderDetail(updated);
+}
+async function confirmDeleteProduct(){
+  if(!isEmployee()||!editProdItemNo)return;
+  const pin=document.getElementById('editProdDeletePin').value.trim();
+  if(!pin){ alert('กรุณาใส่รหัส PIN เพื่อยืนยันการลบ'); return; }
+  if(pin!==EMP_PIN){ alert('รหัส PIN ไม่ถูกต้อง'); return; }
+  if(!confirm('ยืนยันลบสินค้านี้ออกจากระบบถาวร? การกระทำนี้ย้อนกลับไม่ได้'))return;
+  const itemNo=editProdItemNo;
+  if(!ITEM_OVERRIDES[itemNo])ITEM_OVERRIDES[itemNo]={};
+  ITEM_OVERRIDES[itemNo].deleted=true;
+  applyItemOverridesToProducts();
+  await persistItemOverrides();
+  closeEditProductModal();
+  showPalletToast('ลบสินค้าออกจากระบบแล้ว');
+  clearSearch();
+}
 function openNewItemBarcodeScan(){
   if(!isEmployee())return;
   document.getElementById('newItemOverlay').style.display='none';
@@ -2945,6 +3054,7 @@ let lastNotFoundQuery='';
 // ==== ตำแหน่งจัดเก็บ/Facing/Max Qty/จำนวนคงเหลือ ที่พนักงานแก้ไขได้ (sync ผ่าน Firestore) ====
 let LOCATION_OVERRIDES={};
 let STOCK_OVERRIDES={};
+let ITEM_OVERRIDES={};
 function qtyKey(itemNo,loc,location){ return itemNo+'|'+loc+'|'+location; }
 function getItemByNo(itemNo){ return PRODUCTS_INDEX[itemNo]; }
 
@@ -2967,6 +3077,15 @@ async function loadOverridesData(){
   if(!Object.keys(STOCK_OVERRIDES).length){
     try{ const raw=localStorage.getItem('mf_stock_overrides'); if(raw) STOCK_OVERRIDES=JSON.parse(raw)||{}; }catch(e){}
   }
+  if(itemOverridesDocRef){
+    try{
+      const doc=await itemOverridesDocRef.get();
+      if(doc.exists){ const d=doc.data(); if(d&&d.data) ITEM_OVERRIDES=d.data; }
+    }catch(e){ console.error('โหลดข้อมูลสินค้าที่แก้ไขไม่สำเร็จ',e); }
+  }
+  if(!Object.keys(ITEM_OVERRIDES).length){
+    try{ const raw=localStorage.getItem('mf_item_overrides'); if(raw) ITEM_OVERRIDES=JSON.parse(raw)||{}; }catch(e){}
+  }
 }
 async function persistLocationOverrides(){
   try{ localStorage.setItem('mf_location_overrides',JSON.stringify(LOCATION_OVERRIDES)); }catch(e){}
@@ -2974,6 +3093,25 @@ async function persistLocationOverrides(){
     try{ await locationOverridesDocRef.set({data:LOCATION_OVERRIDES,updatedAt:Date.now()}); }
     catch(e){ console.error('บันทึกตำแหน่งจัดเก็บไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
   }
+}
+async function persistItemOverrides(){
+  try{ localStorage.setItem('mf_item_overrides',JSON.stringify(ITEM_OVERRIDES)); }catch(e){}
+  if(itemOverridesDocRef){
+    try{ await itemOverridesDocRef.set({data:ITEM_OVERRIDES,updatedAt:Date.now()}); }
+    catch(e){ console.error('บันทึกข้อมูลสินค้าไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+  }
+}
+function applyItemOverridesToProducts(){
+  PRODUCTS_BY_KEY=PRODUCTS_BY_KEY.filter(item=>{
+    const ov=ITEM_OVERRIDES[item.itemNo];
+    if(!ov)return true;
+    if(ov.deleted)return false;
+    if(ov.desc)item.desc=ov.desc;
+    if(ov.image)item.customImage=ov.image;
+    return true;
+  });
+  PRODUCTS_INDEX={};
+  PRODUCTS_BY_KEY.forEach(item=>{ PRODUCTS_INDEX[item.itemNo]=item; });
 }
 async function persistStockOverrides(){
   try{ localStorage.setItem('mf_stock_overrides',JSON.stringify(STOCK_OVERRIDES)); }catch(e){}
@@ -3118,6 +3256,7 @@ function loadProductData(){
       PRODUCTS_INDEX={};
       PRODUCTS_BY_KEY.forEach(item=>{ PRODUCTS_INDEX[item.itemNo]=item; });
       mergeCustomItemsIntoProducts();
+      applyItemOverridesToProducts();
       PRODUCTS_READY=true;
       if(pendingSearchQuery!==null){
         const q=pendingSearchQuery;
@@ -3279,6 +3418,14 @@ function renderDetail(item,fromList){
   document.getElementById('rName').textContent=item.desc;
   document.getElementById('rBadge').textContent='Item No '+item.itemNo+(item.barcode?' · '+item.barcode:'');
   document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary)';
+  const rEditBtn=document.getElementById('rEditBtn');
+  if(isEmployee()){
+    rEditBtn.style.display='flex';
+    rEditBtn.onclick=function(){ openEditProductModal(item.itemNo); };
+  } else {
+    rEditBtn.style.display='none';
+    rEditBtn.onclick=null;
+  }
   updateShowOnMapButton(item);
   const rLoc=document.getElementById('rLoc');
   if(item.locations.length){
@@ -3598,7 +3745,7 @@ function checkSession(){
     showRoleScreen();
   }
 }
-const OVERLAY_ZOOM_LOCK_IDS=['promoViewOverlay','promoDateOverlay','newItemOverlay','movePalletOverlay','mapOverlay','palletOverlay','palletScanOverlay','scanOverlay'];
+const OVERLAY_ZOOM_LOCK_IDS=['promoViewOverlay','promoDateOverlay','newItemOverlay','editProductOverlay','movePalletOverlay','mapOverlay','palletOverlay','palletScanOverlay','scanOverlay'];
 function updateOverlayZoomLock(){
   const vp=document.querySelector('meta[name="viewport"]');
   if(!vp)return;
