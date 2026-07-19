@@ -47,7 +47,7 @@ body{margin:0;padding:0;touch-action:manipulation}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:min(1100px,94vw);margin:0 auto;width:100%}
 .hdr-logo{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .hdr-logo>div:last-child{min-width:0;overflow:hidden}
-.hdr-logo-badge{height:54px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-logo-badge{height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .hdr-logo-badge img{height:100%;width:auto;display:block}
 .hdr-logotext{font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
 .hdr-logotext i{font-size:18px}
@@ -392,7 +392,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .pallet-print-table th{font-size:30px;background:#EFEFEF}
   .pallet-print-table th:first-child,.pallet-print-table td:first-child{width:6%;text-align:center}
   .pallet-print-table th:nth-child(2),.pallet-print-table td:nth-child(2){width:15%;text-align:center}
-  .pallet-print-table th:nth-child(3),.pallet-print-table td:nth-child(3){text-align:center}
+  .pallet-print-table th:nth-child(3){text-align:center}
+  .pallet-print-table td:nth-child(3){text-align:left;padding-left:6px}
   .pallet-print-table th:last-child,.pallet-print-table td:last-child{width:16%;text-align:center}
   .pallet-print-footer{display:flex;justify-content:space-between;gap:24px;margin-top:16px;font-size:28px;font-weight:600;color:#000;flex:0 0 auto}
 }
@@ -1875,7 +1876,7 @@ function printPalletList(){
       html+='<tr><td>'+num+'</td><td>'+(it?escapeHtml(it.itemNo):'')+'</td><td>'+(it?escapeHtml(it.desc):'')+'</td><td>'+(it?it.qty:'')+'</td></tr>';
     }
     html+='</tbody></table>';
-    html+='<div class="pallet-print-footer"><div>ลงชื่อ : '+escapeHtml(palletPrintSignerName())+'</div><div>วันที่ : '+escapeHtml(palletPrintDateStr())+'</div><div>เวลา '+escapeHtml(palletPrintTimeStr())+' ที่ปริ้น</div></div>';
+    html+='<div class="pallet-print-footer"><div>ลงชื่อ : '+escapeHtml(palletPrintSignerName())+'</div><div>วันที่ : '+escapeHtml(palletPrintDateStr())+'</div><div>เวลา '+escapeHtml(palletPrintTimeStr())+' ที่ปริ้นท์</div></div>';
     html+='</div>';
   }
   area.innerHTML=html;
@@ -1953,7 +1954,9 @@ function buildPalletPrintCanvas(pallet,chunk,startNum,pageLabel){
     ctx.textAlign='center';
     ctx.fillText(String(r.num),tableX+col0W/2,y+rowPadY);
     ctx.fillText(String(r.itemNo),tableX+col0W+col1W/2,y+rowPadY);
-    r.lines.forEach((line,li)=>{ ctx.fillText(line,tableX+col0W+col1W+col2W/2,y+rowPadY+li*rowLineH); });
+    ctx.textAlign='left';
+    r.lines.forEach((line,li)=>{ ctx.fillText(line,tableX+col0W+col1W+descPad,y+rowPadY+li*rowLineH); });
+    ctx.textAlign='center';
     ctx.fillText(String(r.qty),tableX+col0W+col1W+col2W+col3W/2,y+rowPadY);
     ctx.textAlign='left';
     y+=h;
@@ -1965,7 +1968,7 @@ function buildPalletPrintCanvas(pallet,chunk,startNum,pageLabel){
   ctx.textAlign='center';
   ctx.fillText('วันที่ : '+palletPrintDateStr(),tableX+tableW/2,footerY);
   ctx.textAlign='right';
-  ctx.fillText('เวลา '+palletPrintTimeStr()+' ที่ปริ้น',tableX+tableW,footerY);
+  ctx.fillText('เวลา '+palletPrintTimeStr()+' ที่ปริ้นท์',tableX+tableW,footerY);
   ctx.textAlign='left';
   return canvas;
 }
