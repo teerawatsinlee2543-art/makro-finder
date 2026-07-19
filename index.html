@@ -3619,6 +3619,7 @@ function initPromoSwipe(){
   if(!carousel||!track)return;
   let startX=0,startY=0,dragging=false,dx=0,wasDrag=false;
   carousel.addEventListener('pointerdown',function(e){
+    if(e.target.closest('.promo-arrow,.promo-del,.promo-date'))return;
     if(e.pointerType==='mouse'&&e.button!==0)return;
     if(PROMO_GALLERY_CACHE.length<2)return;
     if(e.pointerType==='mouse') e.preventDefault();
