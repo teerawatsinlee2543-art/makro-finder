@@ -31,7 +31,7 @@
   --color-text-info:#1560bd;
   --color-border-info:#bcdcff;
 }
-html,body{background:var(--color-background-secondary);height:100%;font-family:'Sarabun','Segoe UI',sans-serif}
+html,body{background:var(--color-background-secondary);height:100%;font-family:'Sarabun','Segoe UI',sans-serif;overflow-x:hidden}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 body{margin:0;padding:0;touch-action:manipulation}
 </style>
@@ -61,12 +61,13 @@ body{margin:0;padding:0;touch-action:manipulation}
 .search-box i{color:rgba(255,255,255,0.6);font-size:17px;flex-shrink:0}
 .body{padding:16px clamp(16px,4vw,40px) 40px;flex:1;max-width:min(1100px,94vw);margin:0 auto;width:100%}
 .section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
-.promo-carousel{position:relative;width:100vw;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;aspect-ratio:16/9;overflow:hidden;background:var(--brand-red);cursor:pointer;margin-bottom:4px}
+.promo-carousel{position:relative;width:100vw;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;aspect-ratio:16/9;overflow:hidden;background:var(--brand-red);cursor:pointer;margin-bottom:4px;touch-action:pan-y}
 .promo-track{display:flex;height:100%;transition:transform .45s cubic-bezier(.3,.85,.4,1)}
 .promo-slide{position:relative;flex:0 0 100%;height:100%}
 .promo-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;background:var(--brand-red)}
 .promo-scrim{position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,8,6,.55) 0%,rgba(10,8,6,0) 45%,rgba(10,8,6,.12) 100%)}
 .promo-date{position:absolute;top:12px;left:14px;color:#1a1006;font-size:12px;font-weight:800;background:rgba(255,255,255,.92);padding:4px 10px;border-radius:20px;box-shadow:0 2px 6px -1px rgba(0,0,0,.35)}
+.promo-date.customer-pos{top:auto;left:auto;bottom:10px;right:10px}
 .promo-by{position:absolute;bottom:10px;left:14px;right:90px;color:#fff;font-size:10.5px;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,.5)}
 .promo-badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:4px;background:linear-gradient(90deg,#E8992A,#F0B54C);color:#3A2405;font-size:10px;font-weight:800;padding:4px 9px;border-radius:20px;box-shadow:0 4px 10px -2px rgba(0,0,0,.4);white-space:nowrap}
 .promo-badge.soon{background:linear-gradient(90deg,var(--brand-red),#FF4D5E);color:#fff}
@@ -370,6 +371,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .store-map{width:100%;left:auto;right:auto;margin-left:0;margin-right:0;border-radius:10px;border:0.5px solid var(--color-border-tertiary)}
   .store-map svg{width:auto;max-width:100%;height:auto;max-height:min(62vh,480px);margin:0 auto}
   .promo-carousel{width:100%;left:auto;right:auto;margin-left:0;margin-right:0;border-radius:14px;max-height:420px}
+  .promo-del{width:40px;height:40px;font-size:19px}
+  .promo-badge{font-size:15px;padding:7px 16px;gap:6px}
   .map-overlay-content svg text[font-size="16"],.store-map svg text[font-size="16"]{font-size:19px}
   .map-overlay-content svg text[font-size="12"],.store-map svg text[font-size="12"]{font-size:14px}
   .map-overlay-content svg text.map-aisle-num,.store-map svg text.map-aisle-num{transform:scale(1.25);transform-box:fill-box;transform-origin:center}
@@ -1382,7 +1385,7 @@ function renderPromoGallery(){
     return '<div class="promo-slide" onclick="openPromoViewer('+jsStr(p.id)+')">'+
       '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy" onload="promoMatchBg(this)">'+
       '<div class="promo-scrim"></div>'+
-      '<div class="promo-date"'+(isEmployee()?' onclick="event.stopPropagation();openPromoDateEdit('+jsStr(p.id)+')" style="cursor:pointer"':'')+'>'+escapeHtml(p.periodLabel||'ไม่ระบุช่วงเวลา')+(isEmployee()?' <i class="ti ti-pencil" aria-hidden="true" style="font-size:11px"></i>':'')+'</div>'+
+      '<div class="promo-date'+(isEmployee()?'':' customer-pos')+'"'+(isEmployee()?' onclick="event.stopPropagation();openPromoDateEdit('+jsStr(p.id)+')" style="cursor:pointer"':'')+'>'+escapeHtml(promoDisplayPeriodLabel(p))+(isEmployee()?' <i class="ti ti-pencil" aria-hidden="true" style="font-size:11px"></i>':'')+'</div>'+
       '<div class="promo-by">โดย '+escapeHtml(p.addedBy||'-')+'</div>'+
       '<div class="promo-badge'+(soon?' soon':'')+'">'+badgeText+'</div>'+
       (isEmployee()?'<button class="promo-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
@@ -1491,6 +1494,23 @@ function formatThaiDateShort(isoDate){
   const d=new Date(isoDate+'T00:00:00');
   const beYear=(d.getFullYear()+543)%100;
   return d.getDate()+' '+THAI_MONTH_SHORT[d.getMonth()]+' '+String(beYear).padStart(2,'0');
+}
+function promoDisplayPeriodLabel(p){
+  const label=p.periodLabel;
+  if(!label)return 'ไม่ระบุช่วงเวลา';
+  if(label.indexOf(' - ')>=0){
+    const parts=label.split(' - ');
+    const startIso=parseThaiDateShortToISO(parts[0]);
+    const endIso=parseThaiDateShortToISO(parts[1]);
+    if(startIso&&endIso) return formatThaiDateShort(startIso)+' - '+formatThaiDateShort(endIso);
+    return label;
+  }
+  const m=label.match(/^ถึง\s*(.+)$/);
+  if(m){
+    const endIso=parseThaiDateShortToISO(m[1]);
+    if(endIso) return 'ถึง '+formatThaiDateShort(endIso);
+  }
+  return label;
 }
 async function confirmPromoDatePick(){
   const startVal=document.getElementById('promoDateStart').value;
@@ -1611,7 +1631,7 @@ function openPromoViewer(id){
   const item=PROMO_GALLERY_CACHE.find(p=>p.id===id);
   if(!item)return;
   document.getElementById('promoViewImg').src=item.image;
-  document.getElementById('promoViewCaption').textContent=item.periodLabel||'';
+  document.getElementById('promoViewCaption').textContent=item.periodLabel?promoDisplayPeriodLabel(item):'';
   document.getElementById('promoViewOverlay').style.display='flex';
 }
 function closePromoViewer(){
@@ -3594,21 +3614,44 @@ function initOverlayZoomLock(){
 }
 function initPromoSwipe(){
   const carousel=document.getElementById('promoCarousel');
-  if(!carousel)return;
-  let startX=0,startY=0,tracking=false;
-  carousel.addEventListener('touchstart',function(e){
-    if(e.touches.length!==1)return;
-    startX=e.touches[0].clientX;
-    startY=e.touches[0].clientY;
-    tracking=true;
-  },{passive:true});
-  carousel.addEventListener('touchend',function(e){
-    if(!tracking)return;
-    tracking=false;
-    const dx=e.changedTouches[0].clientX-startX;
-    const dy=e.changedTouches[0].clientY-startY;
-    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)) movePromo(dx<0?1:-1);
-  },{passive:true});
+  const track=document.getElementById('promoTrack');
+  if(!carousel||!track)return;
+  let startX=0,startY=0,dragging=false,dx=0,wasDrag=false;
+  carousel.addEventListener('pointerdown',function(e){
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    if(PROMO_GALLERY_CACHE.length<2)return;
+    dragging=true; wasDrag=false; dx=0;
+    startX=e.clientX; startY=e.clientY;
+    track.style.transition='none';
+    stopPromoAutoAdvance();
+    try{ carousel.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  carousel.addEventListener('pointermove',function(e){
+    if(!dragging)return;
+    dx=e.clientX-startX;
+    const dy=e.clientY-startY;
+    if(!wasDrag&&Math.abs(dx)<6&&Math.abs(dy)<6)return;
+    wasDrag=true;
+    track.style.transform='translateX(calc(-'+(promoCarouselIndex*100)+'% + '+dx+'px))';
+  });
+  function endDrag(){
+    if(!dragging)return;
+    dragging=false;
+    track.style.transition='';
+    if(Math.abs(dx)>50){
+      movePromo(dx<0?1:-1);
+    } else {
+      applyPromoCarouselPosition();
+      startPromoAutoAdvance();
+    }
+    if(wasDrag){
+      const suppressClick=function(ev){ ev.stopPropagation(); ev.preventDefault(); carousel.removeEventListener('click',suppressClick,true); };
+      carousel.addEventListener('click',suppressClick,true);
+    }
+    dx=0;
+  }
+  carousel.addEventListener('pointerup',endDrag);
+  carousel.addEventListener('pointercancel',endDrag);
 }
 initPromoSwipe();
 initOverlayZoomLock();
