@@ -99,7 +99,8 @@ body{margin:0;padding:0;touch-action:manipulation}
 .result-item-icon img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit}
 .result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
-.loc-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.loc-row{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.loc-group-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .loc-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success)}
 #showOnMapInline{margin-bottom:16px}
 .loc-pill.sec{background:var(--color-background-secondary);color:var(--color-text-secondary);border-color:var(--color-border-tertiary)}
@@ -3289,18 +3290,22 @@ function renderDetail(item,fromList){
     });
     const canEditLoc=isEmployee();
     rLoc.innerHTML=locGroups.map(g=>
+      '<div class="loc-group-row">'+
       '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Loc '+escapeHtml(g.loc)+'</div>'+
       g.locations.map(loc=>
         '<div class="loc-pill sec'+(canEditLoc?' loc-pill-editable':'')+'"'+(canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')+'>'+
           '<i class="ti ti-map-2" aria-hidden="true"></i>Location '+escapeHtml(loc)+
           (canEditLoc?'<i class="ti ti-pencil" aria-hidden="true"></i>':'')+
         '</div>'
-      ).join('')
+      ).join('')+
+      '</div>'
     ).join('');
   } else {
     const canAddLoc=isEmployee();
-    rLoc.innerHTML='<div class="loc-pill sec'+(canAddLoc?' loc-pill-editable':'')+'"'+(canAddLoc?' onclick="addItemLocation('+jsStr(item.itemNo)+')"':'')+'><i class="ti ti-map-pin-off" aria-hidden="true"></i>Loc ยังไม่มี'+(canAddLoc?' <i class="ti ti-pencil" aria-hidden="true"></i>':'')+'</div>'+
-      (canAddLoc?'<div class="loc-pill sec loc-pill-editable" onclick="addItemLocation('+jsStr(item.itemNo)+')"><i class="ti ti-map-2" aria-hidden="true"></i>Location ยังไม่มี <i class="ti ti-pencil" aria-hidden="true"></i></div>':'');
+    rLoc.innerHTML='<div class="loc-group-row">'+
+      '<div class="loc-pill sec'+(canAddLoc?' loc-pill-editable':'')+'"'+(canAddLoc?' onclick="addItemLocation('+jsStr(item.itemNo)+')"':'')+'><i class="ti ti-map-pin-off" aria-hidden="true"></i>Loc ยังไม่มี'+(canAddLoc?' <i class="ti ti-pencil" aria-hidden="true"></i>':'')+'</div>'+
+      (canAddLoc?'<div class="loc-pill sec loc-pill-editable" onclick="addItemLocation('+jsStr(item.itemNo)+')"><i class="ti ti-map-2" aria-hidden="true"></i>Location ยังไม่มี <i class="ti ti-pencil" aria-hidden="true"></i></div>':'')+
+      '</div>';
   }
   renderProductNavInfo(item);
   const rIconWrap=document.getElementById('rIconWrap');
