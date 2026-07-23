@@ -498,7 +498,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
       <div class="login-field">
         <label class="field-label">รหัส PIN พนักงาน <span class="req">*</span></label>
-        <input type="password" inputmode="numeric" maxlength="4" id="empPin" class="inp" placeholder="ใส่รหัส PIN 4 หลัก">
+        <input type="password" maxlength="4" id="empPin" class="inp" placeholder="ใส่รหัส PIN 4 หลัก">
       </div>
       <p class="login-error" id="loginError" style="display:none"></p>
       <button class="login-btn" onclick="submitLogin()">เข้าใช้งาน</button>
@@ -729,7 +729,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div style="border-top:1px solid var(--color-border-tertiary);margin-top:14px;padding-top:14px">
       <label style="color:#A32D2D">ลบสินค้านี้ออกจากระบบ (ต้องใส่รหัส PIN พนักงาน)</label>
       <div class="new-item-barcode-row">
-        <input type="password" id="editProdDeletePin" placeholder="รหัส PIN 4 หลัก" maxlength="4" inputmode="numeric">
+        <input type="password" id="editProdDeletePin" placeholder="รหัส PIN 4 หลัก" maxlength="4">
         <button type="button" class="new-item-scan-btn" style="background:#FFF0F1;color:#A32D2D;border-color:#F09595" onclick="confirmDeleteProduct()" aria-label="ลบสินค้า"><i class="ti ti-trash" aria-hidden="true"></i></button>
       </div>
     </div>
@@ -1315,6 +1315,8 @@ function stopLiveGps(){
 function renderProductNavInfo(item){
   const body=document.getElementById('navInfoBody');
   if(!body)return;
+  const canEditShelf=isEmployee();
+  const shelfLine='<div class="nav-info-line"><i class="ti ti-stack-2" aria-hidden="true"></i> อยู่ชั้นวางที่ : <b>'+(item.shelf?escapeHtml(item.shelf):'ยังไม่มี')+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>';
   if(item.locations && item.locations.length){
     body.innerHTML='<div class="nav-info-name">ชื่อสินค้า : '+escapeHtml(item.desc)+'</div>'+
       item.locations.map(l=>
@@ -1322,14 +1324,29 @@ function renderProductNavInfo(item){
           '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> สินค้าอยู่ตรง : Loc (ล็อคที่) : <b>'+escapeHtml(l.loc)+'</b></div>'+
           '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> อยู่ในช่วง : Location (ชั้นวางที่) : <b>'+escapeHtml(l.location)+'</b></div>'+
         '</div>'
-      ).join('');
+      ).join('')+
+      '<div class="nav-info-loc-group">'+shelfLine+'</div>';
   } else {
     const canAdd=isEmployee();
     body.innerHTML='<div class="nav-info-loc-group">'+
       '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> Loc : <b>ยังไม่มี</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>'+
       '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> Location : <b>ยังไม่มี</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>'+
+      shelfLine+
     '</div>';
   }
+}
+function editItemShelf(itemNo){
+  if(!isEmployee())return;
+  const item=getItemByNo(itemNo);
+  if(!item)return;
+  const val=prompt('อยู่ชั้นวางที่ (เช่น 1, 2, 3):',item.shelf||'');
+  if(val===null)return;
+  const trimmed=val.trim();
+  if(!ITEM_OVERRIDES[itemNo])ITEM_OVERRIDES[itemNo]={};
+  ITEM_OVERRIDES[itemNo].shelf=trimmed;
+  applyItemOverridesToProducts();
+  persistItemOverrides();
+  renderDetail(getItemByNo(itemNo));
 }
 
 function updateMapEditBarVisibility(){
@@ -2381,7 +2398,8 @@ async function confirmDeleteProduct(){
   if(!isEmployee()||!editProdItemNo)return;
   const pin=document.getElementById('editProdDeletePin').value.trim();
   if(!pin){ alert('กรุณาใส่รหัส PIN เพื่อยืนยันการลบ'); return; }
-  if(pin!==EMP_PIN){ alert('รหัส PIN ไม่ถูกต้อง'); return; }
+  const sessDept=(getSession()||{}).dept;
+  if(!isValidEmpPin(pin,sessDept)){ alert('รหัส PIN ไม่ถูกต้อง'); return; }
   if(!confirm('ยืนยันลบสินค้านี้ออกจากระบบถาวร? การกระทำนี้ย้อนกลับไม่ได้'))return;
   const itemNo=editProdItemNo;
   if(!ITEM_OVERRIDES[itemNo])ITEM_OVERRIDES[itemNo]={};
@@ -3108,6 +3126,7 @@ function applyItemOverridesToProducts(){
     if(ov.deleted)return false;
     if(ov.desc)item.desc=ov.desc;
     if(ov.image)item.customImage=ov.image;
+    if(ov.shelf!==undefined)item.shelf=ov.shelf;
     return true;
   });
   PRODUCTS_INDEX={};
@@ -3711,7 +3730,11 @@ async function exportFeedbackExcel(){
   XLSX.utils.book_append_sheet(wb,ws,'ข้อเสนอแนะ');
   XLSX.writeFile(wb,'makro_finder_feedback_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
-const EMP_PIN='0042';
+const STAFF_PINS=['0042','4200','4242'];
+const GR_PIN='GR42';
+function isValidEmpPin(pin,dept){
+  return dept==='GR' ? pin===GR_PIN : STAFF_PINS.includes(pin);
+}
 function submitLogin(){
   const name=document.getElementById('empName').value.trim();
   const dept=document.getElementById('empDept').value;
@@ -3720,7 +3743,7 @@ function submitLogin(){
   if(!name){err.textContent='กรุณากรอกชื่อ-นามสกุล';err.style.display='block';return;}
   if(!dept){err.textContent='กรุณาเลือกแผนก';err.style.display='block';return;}
   if(!pin){err.textContent='กรุณากรอกรหัส PIN';err.style.display='block';return;}
-  if(pin!==EMP_PIN){err.textContent='รหัส PIN ไม่ถูกต้อง เฉพาะพนักงานที่ได้รับรหัสเท่านั้น';err.style.display='block';return;}
+  if(!isValidEmpPin(pin,dept)){err.textContent='รหัส PIN ไม่ถูกต้อง เฉพาะพนักงานที่ได้รับรหัสเท่านั้น';err.style.display='block';return;}
   err.style.display='none';
   const sess={role:'employee',name,dept,ts:Date.now()};
   localStorage.setItem('mf_session',JSON.stringify(sess));
