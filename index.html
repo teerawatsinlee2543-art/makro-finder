@@ -118,6 +118,7 @@ body{margin:0;padding:0;touch-action:manipulation}
 .nav-info-line+.nav-info-line{margin-top:4px}
 .nav-info-line b{color:#8a0e17;font-weight:700}
 .nav-info-line i{color:var(--brand-red);font-size:13px;margin-right:3px}
+.nav-info-line svg.shelf-icon{width:11px;height:11px;margin-right:3px;vertical-align:-1px;color:var(--brand-red);flex-shrink:0}
 .nav-info-name{font-size:13px;font-weight:700;color:#8a0e17;line-height:1.5;margin-bottom:16px}
 .nav-info-loc-group+.nav-info-loc-group{margin-top:16px}
 .nav-info-edit-btn{background:none;border:none;color:var(--brand-red);font-size:11.5px;font-weight:700;cursor:pointer;padding:0;margin-left:6px;font-family:inherit;text-decoration:underline}
@@ -1316,7 +1317,15 @@ function renderProductNavInfo(item){
   const body=document.getElementById('navInfoBody');
   if(!body)return;
   const canEditShelf=isEmployee();
-  const shelfLine='<div class="nav-info-line"><i class="ti ti-stack-2" aria-hidden="true"></i> อยู่ชั้นวางที่ : <b>'+(item.shelf?escapeHtml(item.shelf):'ยังไม่มี')+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>';
+  const shelfIconSvg='<svg class="shelf-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'+
+    '<rect x="3" y="2" width="1.6" height="20" rx="0.5"/><rect x="19.4" y="2" width="1.6" height="20" rx="0.5"/>'+
+    '<rect x="2" y="21.3" width="3.6" height="1.4" rx="0.4"/><rect x="18.4" y="21.3" width="3.6" height="1.4" rx="0.4"/>'+
+    '<rect x="3" y="7" width="18" height="1.4" rx="0.4"/><rect x="3" y="13" width="18" height="1.4" rx="0.4"/><rect x="3" y="19" width="18" height="1.4" rx="0.4"/>'+
+    '<rect x="5.5" y="3.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="3.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="3.3" width="3.2" height="3.2" rx="0.5"/>'+
+    '<rect x="5.5" y="9.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="9.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="9.3" width="3.2" height="3.2" rx="0.5"/>'+
+    '<rect x="5.5" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="15.3" width="3.2" height="3.2" rx="0.5"/>'+
+  '</svg>';
+  const shelfLine='<div class="nav-info-line">'+shelfIconSvg+' อยู่ชั้นที่ (นับจากบนลงล่าง) : <b>'+(item.shelf?escapeHtml(item.shelf):'ยังไม่มี')+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">แก้</button>':'')+'</div>';
   if(item.locations && item.locations.length){
     body.innerHTML='<div class="nav-info-name">ชื่อสินค้า : '+escapeHtml(item.desc)+'</div>'+
       item.locations.map(l=>
@@ -1339,7 +1348,7 @@ function editItemShelf(itemNo){
   if(!isEmployee())return;
   const item=getItemByNo(itemNo);
   if(!item)return;
-  const val=prompt('อยู่ชั้นวางที่ (เช่น 1, 2, 3):',item.shelf||'');
+  const val=prompt('อยู่ชั้นที่ (นับจากบนลงล่าง) เช่น 1, 2, 3:',item.shelf||'');
   if(val===null)return;
   const trimmed=val.trim();
   if(!ITEM_OVERRIDES[itemNo])ITEM_OVERRIDES[itemNo]={};
