@@ -3028,6 +3028,37 @@ function loadItemImages(){
 }
 loadItemImages();
 
+// ==== สินค้าจาก Item Master ที่ยังไม่มีตำแหน่งจัดเก็บ (เห็นเฉพาะโหมดพนักงาน) ====
+let EMPLOYEE_ONLY_ITEMS={};
+let EMPLOYEE_ONLY_ITEMS_READY=false;
+let employeeOnlyItemsApplied=false;
+function loadEmployeeOnlyItems(){
+  return fetch('employee_only_items.json',{cache:'no-store'})
+    .then(r=>r.ok?r.json():{})
+    .then(data=>{ EMPLOYEE_ONLY_ITEMS=data||{}; EMPLOYEE_ONLY_ITEMS_READY=true; })
+    .catch(()=>{ EMPLOYEE_ONLY_ITEMS={}; EMPLOYEE_ONLY_ITEMS_READY=true; });
+}
+loadEmployeeOnlyItems();
+function applyEmployeeOnlyVisibility(){
+  if(!PRODUCTS_READY||!EMPLOYEE_ONLY_ITEMS_READY)return;
+  const shouldShow=isEmployee();
+  if(shouldShow===employeeOnlyItemsApplied)return;
+  if(shouldShow){
+    Object.keys(EMPLOYEE_ONLY_ITEMS).forEach(itemNo=>{
+      if(PRODUCTS_INDEX[itemNo])return;
+      const d=EMPLOYEE_ONLY_ITEMS[itemNo];
+      const item={itemNo,barcode:d.barcode||'',desc:d.desc||'',remark:'',locations:[],baseLocations:[],employeeOnly:true};
+      PRODUCTS_BY_KEY.push(item);
+      PRODUCTS_INDEX[itemNo]=item;
+    });
+  } else {
+    PRODUCTS_BY_KEY=PRODUCTS_BY_KEY.filter(item=>!item.employeeOnly);
+    PRODUCTS_INDEX={};
+    PRODUCTS_BY_KEY.forEach(item=>{ PRODUCTS_INDEX[item.itemNo]=item; });
+  }
+  employeeOnlyItemsApplied=shouldShow;
+}
+
 // (ทางเลือกเสริม) ถ้าอยาก auto-เติมรูปสำหรับไอเทมใหม่ที่ยังไม่มีใน item_images.json แบบ real-time
 // ให้ deploy Cloudflare Worker ตามไฟล์ image-proxy-worker.js แล้วใส่ URL ตรงนี้ ไม่งั้นปล่อยว่างไว้ได้
 const IMAGE_PROXY_URL='';
@@ -3295,6 +3326,7 @@ function loadProductData(){
       mergeCustomItemsIntoProducts();
       applyItemOverridesToProducts();
       PRODUCTS_READY=true;
+      applyEmployeeOnlyVisibility();
       if(pendingSearchQuery!==null){
         const q=pendingSearchQuery;
         pendingSearchQuery=null;
@@ -3582,6 +3614,7 @@ function closeScanner(){
 let currentRole=null;
 function showGRHome(sess){
   currentRole=sess.role;
+  applyEmployeeOnlyVisibility();
   document.getElementById('roleScreen').style.display='none';
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('mainApp').style.display='none';
@@ -3604,6 +3637,7 @@ function grGoToMainSearch(){
 }
 function showRoleScreen(){
   currentRole=null;
+  applyEmployeeOnlyVisibility();
   document.getElementById('roleScreen').style.display='flex';
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('mainApp').style.display='none';
@@ -3622,6 +3656,7 @@ function chooseEmployee(){
 }
 function showMain(sess){
   currentRole=sess.role;
+  applyEmployeeOnlyVisibility();
   document.getElementById('roleScreen').style.display='none';
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('grHomeScreen').style.display='none';
