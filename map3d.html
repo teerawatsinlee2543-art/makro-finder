@@ -513,12 +513,7 @@ footnote b{color:var(--ink)}
     return arr;
   }
   const MAP_BLOCK_SKIN={
-    butchery:{type:'freezer'}, fishseafood:{type:'freezer'},
-    icecream:{type:'icecream'}, fruitveg:{type:'produce'}, bakery:{type:'bakery'}, cashier:{type:'cashier'},
-    snack:{type:'rack',levels:3,density:2}, winebeer:{type:'rack',levels:3,density:2},
-    drink:{type:'rack',levels:3,density:3}, grilledchicken:{type:'rack',levels:2,density:2},
-    condiments:{type:'rack',levels:2,density:4}, premium:{type:'rack',levels:3,density:3},
-    o2o:{type:'rack',levels:3,density:2}, infopoint:{type:'counter',kind:'info'}
+    cashier:{type:'cashier'}, infopoint:{type:'counter',kind:'info'}
   };
   function getBlockSkin(b){
     if(MAP_BLOCK_SKIN[b.id]) return MAP_BLOCK_SKIN[b.id];
