@@ -1,0 +1,825 @@
+<title>ผังร้าน 3D แก้ไขได้ — Makro รามอินทรา</title>
+<style>
+:root{
+  --bg:#FAF8F3; --ink:#23201B; --muted:#8A8175; --line:#E7E1D6;
+  --card-bg:#FCFBF9; --card-line:#E4DCC9; --accent:#D2241F; --chip-bg:#F1ECE0;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#17130F; --ink:#F2ECE0; --muted:#A79C8C; --line:#332B22;
+    --card-bg:#1D1811; --card-line:#3A3024; --accent:#FF5A4E; --chip-bg:#241E17;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17130F; --ink:#F2ECE0; --muted:#A79C8C; --line:#332B22;
+  --card-bg:#1D1811; --card-line:#3A3024; --accent:#FF5A4E; --chip-bg:#241E17;
+}
+:root[data-theme="light"]{
+  --bg:#FAF8F3; --ink:#23201B; --muted:#8A8175; --line:#E7E1D6;
+  --card-bg:#FCFBF9; --card-line:#E4DCC9; --accent:#D2241F; --chip-bg:#F1ECE0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Sarabun,"Leelawadee UI","Segoe UI",Tahoma,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1180px;margin:0 auto;padding:36px 24px 56px;display:flex;flex-direction:column;gap:20px}
+header.top{display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line);padding-bottom:18px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0;font-size:clamp(22px,3.6vw,30px);font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.sub{margin:0;color:var(--muted);font-size:14.5px;max-width:66ch;line-height:1.55}
+
+.toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.toolbar .rot-group{display:flex;align-items:center;gap:10px;flex:1;min-width:200px}
+.toolbar label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.toolbar input[type="range"]{flex:1;accent-color:var(--accent)}
+.toolbar .deg{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--muted);width:3.2em;text-align:right}
+button.btn{
+  font:inherit;font-size:13px;font-weight:600;color:var(--ink);
+  background:var(--card-bg);border:1px solid var(--card-line);border-radius:10px;
+  padding:8px 14px;cursor:pointer;white-space:nowrap;
+}
+button.btn:hover{background:var(--chip-bg)}
+button.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.saved-tag{font-size:12px;color:var(--muted);opacity:0;transition:opacity .25s;white-space:nowrap}
+.saved-tag.show{opacity:1}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+
+.floor-wrap{
+  position:relative;background:var(--card-bg);border:1px solid var(--card-line);border-radius:16px;
+  padding:14px;box-shadow:0 1px 2px rgba(20,14,6,.06),0 18px 40px -24px rgba(20,14,6,.35);
+}
+.svg-host{width:100%;line-height:0}
+.svg-host svg{display:block;width:100%;height:auto}
+.add-hint{
+  display:none;position:absolute;top:26px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--bg);font-size:12.5px;font-weight:600;
+  padding:7px 14px;border-radius:20px;box-shadow:0 4px 14px rgba(0,0,0,.3);
+  pointer-events:none;white-space:nowrap;
+}
+
+.edit-panel{
+  display:none;flex-direction:column;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--card-line);
+}
+.edit-panel.open{display:flex}
+.edit-panel .panel-title{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.edit-panel .fields{display:flex;gap:10px;flex-wrap:wrap}
+.edit-panel .field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px}
+.edit-panel .field span{font-size:11.5px;color:var(--muted)}
+.edit-panel input[type="text"]{
+  font:inherit;font-size:14px;padding:8px 10px;border-radius:8px;border:1px solid var(--card-line);
+  background:var(--bg);color:var(--ink);
+}
+.edit-panel input[type="text"]:focus{outline:2px solid var(--accent);outline-offset:1px}
+.edit-panel .actions{display:flex;gap:8px;flex-wrap:wrap}
+.edit-panel .actions .danger{color:var(--accent);border-color:var(--accent)}
+
+aside.legend{
+  display:flex;flex-direction:column;gap:12px;background:var(--card-bg);border:1px solid var(--card-line);
+  border-radius:16px;padding:16px 16px 18px;box-shadow:0 1px 2px rgba(20,14,6,.06),0 18px 40px -24px rgba(20,14,6,.35);
+}
+aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.legend-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto}
+.legend-list li{display:flex;align-items:center;gap:9px;font-size:13px}
+.legend-list .swatch{width:13px;height:13px;border-radius:4px;flex:none;border:1px solid rgba(0,0,0,.15)}
+.legend-list .txt{display:flex;flex-direction:column;line-height:1.22;min-width:0}
+.legend-list .th{font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend-list .en{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend-empty{font-size:12.5px;color:var(--muted)}
+
+footnote{display:block;font-size:12.5px;line-height:1.6;color:var(--muted);background:var(--chip-bg);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+footnote b{color:var(--ink)}
+</style>
+
+<div class="page">
+  <header class="top">
+    <span class="eyebrow">3D Store Map &middot; Editable &middot; Makro Ramindra St.042</span>
+    <h1>ผังร้าน 3D แก้ไขได้</h1>
+    <p class="sub">คลิกที่ตัวชั้นวาง/แผงในผังเพื่อแก้ไขชื่อแผนก หรือกด "เพิ่มป้ายใหม่" แล้วคลิกตำแหน่งบนผังเพื่อวางป้ายจุดที่ยังไม่มี ข้อความจะโชว์ค้างอยู่บนผังเสมอ และบันทึกไว้ในเบราว์เซอร์อัตโนมัติ</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="rot-group">
+      <label for="rot">หมุนผัง</label>
+      <input id="rot" type="range" min="0" max="359" value="25" step="1" />
+      <span class="deg" id="rotDeg">25&deg;</span>
+    </div>
+    <button class="btn" type="button" id="addBtn">+ เพิ่มป้ายใหม่</button>
+    <button class="btn" type="button" id="resetBtn">รีเซ็ตเป็นค่าเริ่มต้น</button>
+    <span class="saved-tag" id="savedTag">บันทึกแล้ว</span>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="floor-wrap">
+        <div class="add-hint" id="addHint">คลิกตำแหน่งบนผังเพื่อวางป้ายใหม่ &middot; Esc ยกเลิก</div>
+        <div class="svg-host" id="svgHost"></div>
+
+        <div class="edit-panel" id="editPanel">
+          <div class="panel-title" id="panelTitle">แก้ไขแผนก</div>
+          <div class="fields" id="zoneFields">
+            <label class="field"><span>ชื่อแผนก (ไทย)</span><input type="text" id="thInput" /></label>
+            <label class="field"><span>English name</span><input type="text" id="enInput" /></label>
+          </div>
+          <div class="fields" id="pinFields">
+            <label class="field"><span>ข้อความบนป้าย</span><input type="text" id="pinInput" /></label>
+          </div>
+          <div class="actions">
+            <button class="btn" type="button" id="saveBtn">บันทึก</button>
+            <button class="btn danger" type="button" id="delBtn">ลบป้ายนี้</button>
+            <button class="btn" type="button" id="closeBtn">ปิด</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside class="legend">
+      <h2>แผนกในร้าน</h2>
+      <ul class="legend-list" id="legendList"></ul>
+    </aside>
+  </div>
+
+  <footnote>
+    ป้ายเริ่มต้นมาจากหมุด Comment ที่ปักไว้ใน Planner 5D &middot; ยังไม่ได้ลงตำแหน่ง <b>จุดขาย (Sale)</b> และ <b>แผนกฮาลาล (Halal)</b> — กด "เพิ่มป้ายใหม่" แล้วคลิกตำแหน่งจริงบนผังเพื่อเพิ่มได้เลย
+  </footnote>
+</div>
+
+<script>
+(function(){
+  // ==== ผังร้าน 3D isometric engine — ดัดแปลงจากเอนจินเดียวกับ index.html ของ Makro-finder ====
+  const MAP_FLOOR={x:11,y:11,w:874,h:731};
+  const MAP_FLOOR_CX=MAP_FLOOR.x+MAP_FLOOR.w/2, MAP_FLOOR_CY=MAP_FLOOR.y+MAP_FLOOR.h/2;
+  const MAP_ISO_COS=Math.cos(Math.PI/6), MAP_ISO_SIN=Math.sin(Math.PI/6);
+  const MAP_MAIN_SIZE=16, MAP_SUB_SIZE=12;
+  const FLOOR_BG='#FCFBF9';
+  const MAP_ZONE_LABELS={
+    dryfood_:{main:'Dry Food',sub:'Loc. 29-44',color:'#99406B',subColor:'#C36B96'},
+    nonfood_:{main:'Non-Food',sub:'Loc. 1-25',color:'#5749A0',subColor:'#8B80C8'}
+  };
+
+  function escapeHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function isoProject(x,y,z,rotationDeg){
+    const theta=(rotationDeg||0)*Math.PI/180;
+    const rx=x-MAP_FLOOR_CX, ry=y-MAP_FLOOR_CY;
+    const rotX=rx*Math.cos(theta)-ry*Math.sin(theta);
+    const rotY=rx*Math.sin(theta)+ry*Math.cos(theta);
+    return [ (rotX-rotY)*MAP_ISO_COS, (rotX+rotY)*MAP_ISO_SIN - z ];
+  }
+  function isoUnproject(screenX,screenY,z,rotationDeg){
+    const theta=(rotationDeg||0)*Math.PI/180;
+    const a=screenX/MAP_ISO_COS;
+    const b=(screenY+z)/MAP_ISO_SIN;
+    const rotX=(a+b)/2, rotY=(b-a)/2;
+    const worldX=rotX*Math.cos(-theta)-rotY*Math.sin(-theta)+MAP_FLOOR_CX;
+    const worldY=rotX*Math.sin(-theta)+rotY*Math.cos(-theta)+MAP_FLOOR_CY;
+    return [worldX,worldY];
+  }
+  function shadeColor(hex,amt){
+    const c=String(hex).replace('#','');
+    if(c.length!==6) return hex;
+    const num=parseInt(c,16);
+    let r=(num>>16)&255, g=(num>>8)&255, b=num&255;
+    r=Math.max(0,Math.round(r*(1-amt))); g=Math.max(0,Math.round(g*(1-amt))); b=Math.max(0,Math.round(b*(1-amt)));
+    return 'rgb('+r+','+g+','+b+')';
+  }
+  function lightenColor(hex,amt){
+    const c=String(hex).replace('#','');
+    if(c.length!==6) return hex;
+    const num=parseInt(c,16);
+    let r=(num>>16)&255, g=(num>>8)&255, b=num&255;
+    r=Math.round(r+(255-r)*amt); g=Math.round(g+(255-g)*amt); b=Math.round(b+(255-b)*amt);
+    return 'rgb('+r+','+g+','+b+')';
+  }
+  function polyPts(pts){ return pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '); }
+
+  function boxFaces(x0,y0,x1,y1,z0,z1,rot,fillTop,fillRight,fillFront){
+    const top=[isoProject(x0,y0,z1,rot),isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x0,y1,z1,rot)];
+    const right=[isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x1,y1,z0,rot),isoProject(x1,y0,z0,rot)];
+    const front=[isoProject(x0,y1,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x1,y1,z0,rot),isoProject(x0,y1,z0,rot)];
+    return ''
+      +'<polygon points="'+polyPts(right)+'" fill="'+fillRight+'" stroke="rgba(0,0,0,.28)" stroke-width="0.5"/>'
+      +'<polygon points="'+polyPts(front)+'" fill="'+fillFront+'" stroke="rgba(0,0,0,.28)" stroke-width="0.5"/>'
+      +'<polygon points="'+polyPts(top)+'" fill="'+fillTop+'" stroke="rgba(255,255,255,.3)" stroke-width="0.5"/>';
+  }
+  function signAt(x,y,z,rot,th,en,tint,big,hitId){
+    const p=isoProject(x,y,z,rot);
+    const poleTop=[p[0],p[1]-(big?18:10)];
+    const w=Math.max(big?70:40, Math.max((th||'').length,(en||'').length)*(big?7.6:5.2));
+    const h=big?34:20;
+    const top=poleTop[1]-h;
+    let s='<line x1="'+p[0].toFixed(1)+'" y1="'+p[1].toFixed(1)+'" x2="'+poleTop[0].toFixed(1)+'" y2="'+poleTop[1].toFixed(1)+'" stroke="#8892a0" stroke-width="1.2"/>'
+      +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?9:6)+'" fill="'+shadeColor(tint,0.55)+'" stroke="'+lightenColor(tint,0.35)+'" stroke-width="1"/>'
+      +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?15:12)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?11.5:8.5)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
+      +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+27).toFixed(1)+'" text-anchor="middle" font-size="8.5" font-weight="600" fill="'+lightenColor(tint,0.6)+'" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
+    if(hitId){
+      s+='<rect class="map-pin-rect" data-id="'+hitId+'" x="'+(p[0]-w/2-4).toFixed(1)+'" y="'+(top-4).toFixed(1)+'" width="'+(w+8)+'" height="'+(h+8)+'" fill="rgba(0,0,0,0)" style="cursor:pointer;pointer-events:all"/>';
+    }
+    return s;
+  }
+  function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en,big){
+    const inset=big?4:2.4;
+    x0+=inset; x1-=inset; y0+=inset; y1-=inset;
+    const parts=[];
+    const postColor='#2E5C94', postColorL='#4A7FC0', beamColor='#E2802F', beamColorL='#F4A24F';
+    const fp=[isoProject(x0,y1,0.4,rot),isoProject(x1,y1,0.4,rot),isoProject(x1,y0,0.4,rot),isoProject(x0,y0,0.4,rot)];
+    parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.14)"/>');
+    const postW=big?4:2.2;
+    [[x0,y1],[x1,y1],[x1,y0]].forEach(([px,py])=>{
+      parts.push(boxFaces(px-postW/2,py-postW/2,px+postW/2,py+postW/2,0,H,rot,postColorL,postColor,shadeColor(postColor,0.2)));
+    });
+    levels=Math.max(1,levels||2); crateDensity=Math.max(1,crateDensity||2);
+    for(let li=0; li<levels; li++){
+      const z=H*((li+1)/(levels+0.15));
+      const beamFront=[isoProject(x0,y1,z,rot),isoProject(x1,y1,z,rot)];
+      const beamRight=[isoProject(x1,y1,z,rot),isoProject(x1,y0,z,rot)];
+      parts.push('<line x1="'+beamFront[0][0].toFixed(1)+'" y1="'+beamFront[0][1].toFixed(1)+'" x2="'+beamFront[1][0].toFixed(1)+'" y2="'+beamFront[1][1].toFixed(1)+'" stroke="'+beamColor+'" stroke-width="'+(big?3:1.6)+'"/>');
+      parts.push('<line x1="'+beamRight[0][0].toFixed(1)+'" y1="'+beamRight[0][1].toFixed(1)+'" x2="'+beamRight[1][0].toFixed(1)+'" y2="'+beamRight[1][1].toFixed(1)+'" stroke="'+beamColorL+'" stroke-width="'+(big?2.4:1.3)+'"/>');
+      if(li<levels-1||levels===1){
+        const cw=(x1-x0-6)/crateDensity;
+        for(let ci=0; ci<crateDensity; ci++){
+          const cx0=x0+3+ci*cw+cw*0.12, cx1=cx0+cw*0.76;
+          const cy0=y1-cw*0.55, cy1=y1-2;
+          const boxH=big?(9+(ci%3)*2):5;
+          const tone=ci%3===0?lightenColor(tint,0.18):(ci%3===1?tint:shadeColor(tint,0.14));
+          parts.push(boxFaces(cx0,cy0,cx1,cy1,z,z+boxH,rot,lightenColor(tone,0.12),shadeColor(tone,0.22),shadeColor(tone,0.08)));
+        }
+      }
+    }
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,big));
+    return parts.join('');
+  }
+  function freezerCase(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[];
+    parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,lightenColor(tint,0.12),shadeColor(tint,0.32),shadeColor(tint,0.16)));
+    const frontTop=[isoProject(x0,y1,H,rot),isoProject(x1,y1,H,rot)];
+    const frontBot=[isoProject(x0,y1,0,rot),isoProject(x1,y1,0,rot)];
+    const glassPts=[frontTop[0],frontTop[1],frontBot[1],frontBot[0]];
+    parts.push('<polygon points="'+polyPts(glassPts)+'" fill="rgba(200,235,255,.28)" stroke="rgba(255,255,255,.5)" stroke-width="0.8"/>');
+    for(let s=0;s<2;s++){
+      const t0=0.15+s*0.32, t1=t0+0.18;
+      const bx=frontTop[0][0]+(frontTop[1][0]-frontTop[0][0])*t1, by=frontTop[0][1]+(frontBot[0][1]-frontTop[0][1])*0.75;
+      const ax=frontTop[0][0]+(frontTop[1][0]-frontTop[0][0])*t0, ay=frontTop[0][1]+(frontBot[0][1]-frontTop[0][1])*0.15;
+      parts.push('<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+bx.toFixed(1)+'" y2="'+by.toFixed(1)+'" stroke="rgba(255,255,255,.45)" stroke-width="4" stroke-linecap="round"/>');
+    }
+    for(let li=1; li<=2; li++){
+      const z=H*li/3;
+      const a=isoProject(x0,y1,z,rot), b=isoProject(x1,y1,z,rot);
+      parts.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(255,255,255,.4)" stroke-width="1"/>');
+      for(let ci=0; ci<3; ci++){
+        const cw=(x1-x0-8)/3, cx0=x0+4+ci*cw+cw*0.15, cx1=cx0+cw*0.65;
+        const tone=ci%2===0?lightenColor(tint,0.1):shadeColor(tint,0.1);
+        parts.push(boxFaces(cx0,y1-6,cx1,y1-2,z,z+6,rot,lightenColor(tone,0.1),shadeColor(tone,0.2),shadeColor(tone,0.05)));
+      }
+    }
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[];
+    parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,'#F4F6F8',shadeColor(tint,0.28),tint));
+    const trimZ=H*0.16;
+    const tf=[isoProject(x0,y1,trimZ,rot),isoProject(x1,y1,trimZ,rot),isoProject(x1,y1,0,rot),isoProject(x0,y1,0,rot)];
+    parts.push('<polygon points="'+polyPts(tf)+'" fill="'+shadeColor(tint,0.5)+'"/>');
+    const rimZ0=H*0.92;
+    const rf=[isoProject(x0,y1,H,rot),isoProject(x1,y1,H,rot),isoProject(x1,y1,rimZ0,rot),isoProject(x0,y1,rimZ0,rot)];
+    parts.push('<polygon points="'+polyPts(rf)+'" fill="rgba(255,255,255,.55)"/>');
+    const gTop=H, gBot=H*0.45, sy=y0+2;
+    const bt=[isoProject(x1,sy,gTop,rot),isoProject(x0,sy,gTop,rot)];
+    const bb=[isoProject(x1,sy,gBot,rot),isoProject(x0,sy,gBot,rot)];
+    parts.push('<polygon points="'+polyPts([bt[0],bt[1],bb[1],bb[0]])+'" fill="rgba(210,240,255,.34)" stroke="rgba(255,255,255,.55)" stroke-width="0.8"/>');
+    const tubColors=['#F4C9DE','#EADCAA','#C9A27E','#EDEAE0','#D9E9C9'];
+    const tubN=Math.max(3,Math.round((x1-x0)/18)-1);
+    for(let i=0;i<tubN;i++){
+      const cx=x0+(x1-x0)*((i+0.6)/(tubN+1));
+      const p=isoProject(cx,sy,gBot+3,rot);
+      parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+(p[1]+1.5).toFixed(1)+'" rx="5.4" ry="2.4" fill="'+shadeColor(tubColors[i%tubColors.length],0.15)+'"/>');
+      parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="5.4" ry="2.4" fill="'+tubColors[i%tubColors.length]+'" stroke="rgba(0,0,0,.15)" stroke-width="0.5"/>');
+      parts.push('<ellipse cx="'+(p[0]-1.3).toFixed(1)+'" cy="'+(p[1]-0.8).toFixed(1)+'" rx="1.6" ry="0.8" fill="rgba(255,255,255,.55)"/>');
+    }
+    const mx0=x1-16, mx1=x1-2, my0=sy+1, my1=sy+9, mH=22;
+    parts.push(boxFaces(mx0,my0,mx1,my1,H,H+mH,rot,'#F7F9FA',shadeColor('#F7F9FA',0.18),shadeColor(tint,0.05)));
+    const stripeZ0=H+mH*0.35, stripeZ1=H+mH*0.55;
+    const sf=[isoProject(mx0,my1,stripeZ1,rot),isoProject(mx1,my1,stripeZ1,rot),isoProject(mx1,my1,stripeZ0,rot),isoProject(mx0,my1,stripeZ0,rot)];
+    parts.push('<polygon points="'+polyPts(sf)+'" fill="'+tint+'"/>');
+    const leverBase=isoProject(mx1-2,my1-1,H+mH*0.4,rot);
+    parts.push('<line x1="'+leverBase[0].toFixed(1)+'" y1="'+leverBase[1].toFixed(1)+'" x2="'+(leverBase[0]+6).toFixed(1)+'" y2="'+(leverBase[1]-3).toFixed(1)+'" stroke="#8892a0" stroke-width="2" stroke-linecap="round"/>');
+    const noz=isoProject((mx0+mx1)/2,my1+1,H+3,rot);
+    parts.push('<rect x="'+(noz[0]-2).toFixed(1)+'" y="'+(noz[1]-4).toFixed(1)+'" width="4" height="5" fill="#B7BFC7"/>');
+    const swirlX=noz[0], swirlY=noz[1]-6;
+    parts.push(
+      '<ellipse cx="'+swirlX.toFixed(1)+'" cy="'+(swirlY-6).toFixed(1)+'" rx="3.2" ry="2.4" fill="#FFF6E8"/>'
+      +'<ellipse cx="'+swirlX.toFixed(1)+'" cy="'+(swirlY-2.5).toFixed(1)+'" rx="4.2" ry="3" fill="#FFF1DA"/>'
+      +'<path d="M '+(swirlX-4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' L '+swirlX.toFixed(1)+' '+(swirlY+9).toFixed(1)+' L '+(swirlX+4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' Z" fill="#D9A65F"/>'
+      +'<path d="M '+(swirlX-4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' L '+swirlX.toFixed(1)+' '+(swirlY+9).toFixed(1)+' L '+(swirlX+4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' Z" fill="none" stroke="#B9834A" stroke-width="0.5"/>'
+    );
+    if(th) parts.push(signAt((x0+x1)/2,y1,H+mH+10,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[];
+    const wood='#C9A56A', woodL='#E0C48F', woodRib='#7A5A30';
+    const bannerRed='#C0272D';
+    const fp=[isoProject(x0,y1,0.4,rot),isoProject(x1,y1,0.4,rot),isoProject(x1,y0,0.4,rot),isoProject(x0,y0,0.4,rot)];
+    parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.13)"/>');
+    [[x0+4,y1-3],[x1-4,y1-3]].forEach(([wx,wy])=>{
+      const p=isoProject(wx,wy,3,rot);
+      parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+(p[1]+3).toFixed(1)+'" rx="3.6" ry="2.1" fill="#2A2E33"/>');
+    });
+    const wraps=['#F4C9DE','#EADCAA','#C9E8D9','#F4E0B8','#E8CFE0'];
+    const tiers=3, tierDepth=(y1-y0)/tiers;
+    for(let ti=0; ti<tiers; ti++){
+      const ty0=y0+ti*tierDepth+2, ty1=ty0+tierDepth-5;
+      const zTop=H*0.32+(tiers-1-ti)*H*0.26;
+      const crateH=8;
+      parts.push(boxFaces(x0,ty0,x1,ty1,zTop-crateH,zTop,rot,woodL,shadeColor(wood,0.25),wood));
+      for(let r=1;r<=3;r++){
+        const rz=zTop-crateH+(crateH*r/4);
+        const ra=isoProject(x0,ty1,rz,rot), rb=isoProject(x1,ty1,rz,rot);
+        parts.push('<line x1="'+ra[0].toFixed(1)+'" y1="'+ra[1].toFixed(1)+'" x2="'+rb[0].toFixed(1)+'" y2="'+rb[1].toFixed(1)+'" stroke="'+woodRib+'" stroke-width="0.7" opacity="0.6"/>');
+      }
+      const nItems=Math.max(3,Math.round((x1-x0)/16));
+      for(let ii=0; ii<nItems; ii++){
+        const cx=x0+(x1-x0)*((ii+0.5)/nItems);
+        const p=isoProject(cx,(ty0+ty1)/2,zTop+2.4,rot);
+        const wrapC=wraps[(ii+ti)%wraps.length];
+        parts.push('<rect x="'+(p[0]-4.5).toFixed(1)+'" y="'+(p[1]-3).toFixed(1)+'" width="9" height="6" rx="2.5" fill="'+wrapC+'" stroke="'+shadeColor(wrapC,0.25)+'" stroke-width="0.4"/>'
+          +'<ellipse cx="'+(p[0]-1.2).toFixed(1)+'" cy="'+(p[1]-1.4).toFixed(1)+'" rx="1.6" ry="0.8" fill="rgba(255,255,255,.5)"/>');
+      }
+    }
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+10,rot,th,en,bannerRed,true));
+    return parts.join('');
+  }
+  function produceStall(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[];
+    const crateGreen='#2E7D4A', crateGreenL='#4FA167', crateRib='#1F5C36';
+    const rows=[
+      {th:'ผลไม้นำเข้า', en:'Imported Fruit', palette:[
+        {c:'#E8912E',shade:'#C06E12'},{c:'#D9463A',shade:'#B22E22'},{c:'#E8DA6A',shade:'#C2B23E'}
+      ]},
+      {th:'ผักสด', en:'Fresh Veg', palette:[
+        {c:'#EDEDE0',shade:'#C9C9B4'},{c:'#CFE8B0',shade:'#9FC97A'},{c:'#4FA85A',shade:'#357040'}
+      ]}
+    ];
+    const rowDepth=(y1-y0)/rows.length;
+    rows.forEach((rowDef,ri)=>{
+      const ry0=y0+ri*rowDepth, ry1=ry0+rowDepth-6;
+      const fp=[isoProject(x0,ry1,0.4,rot),isoProject(x1,ry1,0.4,rot),isoProject(x1,ry0,0.4,rot),isoProject(x0,ry0,0.4,rot)];
+      parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.13)"/>');
+      const bands=3, bandDepth=(ry1-ry0)/bands;
+      for(let bi=0; bi<bands; bi++){
+        const by0=ry0+bi*bandDepth+2, by1=by0+bandDepth-5;
+        const zTop=H*0.34+(bands-1-bi)*H*0.24;
+        const crateH=8;
+        parts.push(boxFaces(x0,by0,x1,by1,zTop-crateH,zTop,rot,crateGreenL,shadeColor(crateGreen,0.25),crateGreen));
+        for(let r=1;r<=3;r++){
+          const rz=zTop-crateH+(crateH*r/4);
+          const ra=isoProject(x0,by1,rz,rot), rb=isoProject(x1,by1,rz,rot);
+          parts.push('<line x1="'+ra[0].toFixed(1)+'" y1="'+ra[1].toFixed(1)+'" x2="'+rb[0].toFixed(1)+'" y2="'+rb[1].toFixed(1)+'" stroke="'+crateRib+'" stroke-width="0.7" opacity="0.6"/>');
+        }
+        const set=rowDef.palette[bi%rowDef.palette.length];
+        const nItems=Math.max(3,Math.round((x1-x0)/15));
+        const round=(bi%2===0);
+        for(let ii=0; ii<nItems; ii++){
+          const cx=x0+(x1-x0)*((ii+0.5)/nItems)+((ii%2)?1:-1);
+          const p=isoProject(cx,(by0+by1)/2,zTop+2.6,rot);
+          if(round){
+            const r=2.6+((ii+bi)%2)*0.5;
+            parts.push('<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+r+'" fill="'+set.c+'" stroke="'+set.shade+'" stroke-width="0.5"/>'
+              +'<circle cx="'+(p[0]-r*0.35).toFixed(1)+'" cy="'+(p[1]-r*0.35).toFixed(1)+'" r="'+(r*0.32).toFixed(1)+'" fill="rgba(255,255,255,.45)"/>');
+          } else {
+            const len=6+((ii+bi)%3);
+            parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="'+len+'" ry="3" fill="'+set.c+'" stroke="'+set.shade+'" stroke-width="0.5" transform="rotate('+((ii%2?6:-6))+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')"/>'
+              +'<ellipse cx="'+(p[0]-len*0.3).toFixed(1)+'" cy="'+(p[1]-1).toFixed(1)+'" rx="'+(len*0.4).toFixed(1)+'" ry="0.9" fill="rgba(255,255,255,.4)"/>');
+          }
+        }
+      }
+      parts.push(signAt((x0+x1)/2,ry0-3,H+16,rot,rowDef.th,rowDef.en,ri===0?'#E8912E':'#4FA85A',true));
+    });
+    if(th) parts.push(signAt((x0+x1)/2,y0-2,H+42,rot,th,en,'#2E7D4A',true));
+    return parts.join('');
+  }
+  function cashierRow(x0,y0,x1,y1,rot,H,lanes){
+    lanes=lanes||10;
+    const parts=[];
+    const laneW=(x1-x0)/lanes;
+    const compact=lanes>6;
+    const red='#E30613', white='#FFFFFF', steel='#C7CDD3', dark='#181B20';
+    for(let i=0;i<lanes;i++){
+      const inset=compact?3.5:2;
+      const lx0=x0+i*laneW+inset, lx1=x0+(i+1)*laneW-inset;
+      parts.push(boxFaces(lx0,y0,lx1,y1,0,H,rot,steel,shadeColor(steel,0.28),red));
+      const beltY0=y0+(y1-y0)*0.12, beltY1=y0+(y1-y0)*0.66;
+      const a=isoProject(lx0+1.5,beltY0,H,rot), b=isoProject(lx1-1.5,beltY0,H,rot), c=isoProject(lx1-1.5,beltY1,H,rot), d=isoProject(lx0+1.5,beltY1,H,rot);
+      parts.push('<polygon points="'+polyPts([a,b,c,d])+'" fill="'+dark+'" opacity="0.92"/>');
+      if(!compact){
+        for(let t=0;t<3;t++){
+          const ty=beltY0+(beltY1-beltY0)*(t+0.5)/3;
+          const ta=isoProject(lx0+1.5,ty,H+0.3,rot), tb=isoProject(lx1-1.5,ty,H+0.3,rot);
+          parts.push('<line x1="'+ta[0].toFixed(1)+'" y1="'+ta[1].toFixed(1)+'" x2="'+tb[0].toFixed(1)+'" y2="'+tb[1].toFixed(1)+'" stroke="rgba(255,255,255,.14)" stroke-width="1"/>');
+        }
+      }
+      const pp=isoProject(lx1-3,y1-4,H,rot);
+      const postH=compact?12:20, boxW=compact?11:14, boxH=compact?7.5:10;
+      parts.push('<line x1="'+pp[0].toFixed(1)+'" y1="'+pp[1].toFixed(1)+'" x2="'+pp[0].toFixed(1)+'" y2="'+(pp[1]-postH).toFixed(1)+'" stroke="#8892a0" stroke-width="'+(compact?1.3:2)+'"/>');
+      const boxTopY=pp[1]-postH-boxH;
+      parts.push('<rect x="'+(pp[0]-boxW/2).toFixed(1)+'" y="'+boxTopY.toFixed(1)+'" width="'+boxW+'" height="'+boxH+'" rx="1.3" fill="'+white+'" stroke="'+red+'" stroke-width="1"/>');
+      parts.push('<text x="'+pp[0].toFixed(1)+'" y="'+(boxTopY+boxH/2+(compact?2.3:3)).toFixed(1)+'" text-anchor="middle" font-size="'+(compact?6.5:9)+'" font-weight="800" fill="'+red+'">'+(i+1)+'</text>');
+      if(i<lanes-1){
+        const px=x0+(i+1)*laneW;
+        const post0=isoProject(px,y1,0,rot), post1=isoProject(px,y1,H+(compact?16:26),rot);
+        parts.push('<line x1="'+post0[0].toFixed(1)+'" y1="'+post0[1].toFixed(1)+'" x2="'+post1[0].toFixed(1)+'" y2="'+post1[1].toFixed(1)+'" stroke="'+red+'" stroke-width="'+(compact?1.3:2)+'"/>');
+        if(!compact) parts.push('<rect x="'+(post1[0]-4.5).toFixed(1)+'" y="'+post1[1].toFixed(1)+'" width="9" height="6" fill="'+white+'"/>');
+      }
+    }
+    return parts.join('');
+  }
+  function counterUnit(x0,y0,x1,y1,rot,tint,H,th,en,kind){
+    const parts=[];
+    parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,'#C7CDD3',shadeColor(tint,0.15),tint));
+    if(kind==='info'){
+      const cx=(x0+x1)/2, cy=(y0+y1)/2;
+      const badge=isoProject(cx,cy-6,H+16,rot);
+      parts.push('<line x1="'+badge[0].toFixed(1)+'" y1="'+badge[1].toFixed(1)+'" x2="'+badge[0].toFixed(1)+'" y2="'+(badge[1]+16).toFixed(1)+'" stroke="#8892a0" stroke-width="2"/>');
+      parts.push('<circle cx="'+badge[0].toFixed(1)+'" cy="'+badge[1].toFixed(1)+'" r="11" fill="#fff" stroke="'+tint+'" stroke-width="2.4"/>');
+      parts.push('<text x="'+badge[0].toFixed(1)+'" y="'+(badge[1]+4.2).toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="800" font-style="italic" fill="'+tint+'">i</text>');
+      const bell=isoProject(x1-9,y1-7,H,rot);
+      parts.push('<ellipse cx="'+bell[0].toFixed(1)+'" cy="'+bell[1].toFixed(1)+'" rx="6" ry="4" fill="'+shadeColor(tint,0.1)+'" stroke="rgba(0,0,0,.2)" stroke-width="0.6"/>');
+      parts.push('<circle cx="'+bell[0].toFixed(1)+'" cy="'+(bell[1]-3).toFixed(1)+'" r="1.4" fill="#fff"/>');
+      const mon=isoProject(x0+9,y1-7,H,rot);
+      parts.push('<rect x="'+(mon[0]-5).toFixed(1)+'" y="'+(mon[1]-13).toFixed(1)+'" width="10" height="7.5" rx="0.8" fill="#20262d" stroke="#8892a0" stroke-width="0.7"/>'
+        +'<rect x="'+(mon[0]-1.2).toFixed(1)+'" y="'+(mon[1]-5.5).toFixed(1)+'" width="2.4" height="2.6" fill="#8892a0"/>'
+        +'<rect x="'+(mon[0]-6).toFixed(1)+'" y="'+(mon[1]-2.6).toFixed(1)+'" width="12" height="2.6" rx="0.6" fill="#3a3f45"/>');
+      const stool=isoProject(cx,y0-9,0,rot);
+      parts.push('<line x1="'+stool[0].toFixed(1)+'" y1="'+stool[1].toFixed(1)+'" x2="'+stool[0].toFixed(1)+'" y2="'+(stool[1]-16).toFixed(1)+'" stroke="#8892a0" stroke-width="2"/>'
+        +'<ellipse cx="'+stool[0].toFixed(1)+'" cy="'+(stool[1]-18).toFixed(1)+'" rx="7" ry="3.4" fill="'+shadeColor(tint,0.05)+'" stroke="rgba(0,0,0,.2)" stroke-width="0.6"/>');
+    } else {
+      for(let i=0;i<3;i++){
+        const bx0=x0+6+i*((x1-x0-12)/3), bx1=bx0+((x1-x0-12)/3)-4;
+        const a=isoProject(bx0,y1-2,H*0.55,rot), b=isoProject(bx1,y1-2,H*0.55,rot), c=isoProject(bx1,y1-2,H*0.18,rot), d=isoProject(bx0,y1-2,H*0.18,rot);
+        parts.push('<polygon points="'+polyPts([a,b,c,d])+'" fill="none" stroke="'+shadeColor(tint,0.35)+'" stroke-width="1.4"/>');
+      }
+    }
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function aisleHeadUnit(x0,y0,x1,y1,rot,n1,n2){
+    const parts=[];
+    parts.push(rackUnit(x0,y0,x1,y1,rot,'#B9C4CE',34,2,2,'','',false));
+    const cx=(x0+x1)/2;
+    const baseP=isoProject(cx,y1,34,rot);
+    const poleTopY=baseP[1]-58;
+    parts.push('<line x1="'+baseP[0].toFixed(1)+'" y1="'+baseP[1].toFixed(1)+'" x2="'+baseP[0].toFixed(1)+'" y2="'+poleTopY.toFixed(1)+'" stroke="#8892a0" stroke-width="2"/>');
+    const bw=24, bh=n2?44:28;
+    const bx=baseP[0]-bw/2, by=poleTopY-bh;
+    parts.push('<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw+'" height="'+bh+'" rx="4" fill="#E30613" stroke="#fff" stroke-width="1.4"/>');
+    if(n2){
+      parts.push('<line x1="'+bx.toFixed(1)+'" y1="'+(by+bh*0.5).toFixed(1)+'" x2="'+(bx+bw).toFixed(1)+'" y2="'+(by+bh*0.5).toFixed(1)+'" stroke="rgba(255,255,255,.4)" stroke-width="1"/>');
+      if(n1) parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.36).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
+      parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.86).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">'+escapeHtml(n2)+'</text>');
+    } else if(n1){
+      parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="16" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
+    }
+    return parts.join('');
+  }
+  function glassDoor(pt,label,tint){
+    const w=54,h=34;
+    return '<g transform="translate('+pt[0].toFixed(1)+','+(pt[1]-6).toFixed(1)+')">'
+      +'<rect x="'+(-w/2)+'" y="'+(-h)+'" width="'+w+'" height="'+h+'" rx="3" fill="rgba(255,255,255,.14)" stroke="'+tint+'" stroke-width="2"/>'
+      +'<line x1="0" y1="'+(-h)+'" x2="0" y2="0" stroke="'+tint+'" stroke-width="1.6"/>'
+      +'<circle cx="-6" cy="'+(-h/2)+'" r="1.6" fill="'+tint+'"/><circle cx="6" cy="'+(-h/2)+'" r="1.6" fill="'+tint+'"/>'
+      +'<text x="0" y="14" text-anchor="middle" font-size="10.5" font-weight="700" fill="'+tint+'">'+escapeHtml(label)+'</text>'
+      +'</g>';
+  }
+  function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textColor,height){
+    const total=endNum-startNum+1;
+    const blockCount=Math.ceil(total/2);
+    const gap=4;
+    const w=((bx1-bx0)-gap*(blockCount-1))/blockCount;
+    const fontSize=Math.max(5,Math.min(9,w*0.42));
+    const arr=[];
+    let cur=startNum;
+    for(let i=0;i<blockCount;i++){
+      const x0=Math.round(bx0+i*(w+gap));
+      const isSingle=(endNum-cur)<1;
+      const n1=cur, n2=isSingle?null:cur+1;
+      const idSuffix=isSingle?String(n1):(n1+'_'+n2);
+      const lines=isSingle
+        ? [{text:String(n1)}]
+        : [{text:String(n1)},{text:String(n2)}];
+      arr.push({ id:idPrefix+idSuffix, x:x0, y:by0, w:Math.round(w), h:by1-by0, fill:fill, height:height, lines:lines });
+      cur+=isSingle?1:2;
+    }
+    return arr;
+  }
+  const MAP_BLOCK_SKIN={
+    butchery:{type:'freezer'}, fishseafood:{type:'freezer'},
+    icecream:{type:'icecream'}, fruitveg:{type:'produce'}, bakery:{type:'bakery'}, cashier:{type:'cashier'},
+    snack:{type:'rack',levels:3,density:2}, winebeer:{type:'rack',levels:3,density:2},
+    drink:{type:'rack',levels:3,density:3}, grilledchicken:{type:'rack',levels:2,density:2},
+    condiments:{type:'rack',levels:2,density:4}, premium:{type:'rack',levels:3,density:3},
+    o2o:{type:'rack',levels:3,density:2}, infopoint:{type:'counter',kind:'info'}
+  };
+  function getBlockSkin(b){
+    if(MAP_BLOCK_SKIN[b.id]) return MAP_BLOCK_SKIN[b.id];
+    if(b.id.indexOf('dryfood_')===0||b.id.indexOf('nonfood_')===0) return {type:'aisle'};
+    return {type:'rack',levels:2,density:2};
+  }
+  function blockText(b){
+    if(b.th!==undefined) return [b.th||'', b.en||''];
+    if(b.lines) return [(b.lines[0]&&b.lines[0].text)||'', (b.lines[1]&&b.lines[1].text)||''];
+    return ['',''];
+  }
+  function mapBlockPieces(b,rot,isEditableZone){
+    const H=b.height||54;
+    const x0=b.x,y0=b.y,x1=b.x+b.w,y1=b.y+b.h;
+    const tint=b.fill;
+    const [th,en]=blockText(b);
+    const skin=getBlockSkin(b);
+    let skinMarkup;
+    if(skin.type==='freezer') skinMarkup=freezerCase(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rot,H,10)+signAt((x0+x1)/2,y0,H+30,rot,th,en,tint,true);
+    else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rot,th,en);
+    else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rot,tint,H,th,en,skin.kind);
+    else skinMarkup=rackUnit(x0,y0,x1,y1,rot,tint,H,skin.levels||2,skin.density||2,th,en,true);
+    const baseMarkup=boxFaces(x0,y0,x1,y1,-6,0,rot,'#4A4E54','#1C1E21','#2C2F33');
+    skinMarkup=baseMarkup+skinMarkup;
+    const depth=(function(){
+      const rTheta=(rot||0)*Math.PI/180;
+      const rx=((x0+x1)/2)-MAP_FLOOR_CX, ry=((y0+y1)/2)-MAP_FLOOR_CY;
+      const rotX=rx*Math.cos(rTheta)-ry*Math.sin(rTheta), rotY=rx*Math.sin(rTheta)+ry*Math.cos(rTheta);
+      return rotX+rotY;
+    })();
+    let topMarkup='';
+    if(isEditableZone){
+      const hitTop=[isoProject(x0,y0,H,rot),isoProject(x1,y0,H,rot),isoProject(x1,y1,H,rot),isoProject(x0,y1,H,rot)];
+      topMarkup='<polygon class="map-block-rect" data-id="'+b.id+'" points="'+polyPts(hitTop)+'" fill="rgba(0,0,0,0)" style="cursor:pointer;pointer-events:all"/>';
+    }
+    return {depth, skinMarkup, topMarkup};
+  }
+  function renderMapSVG(zones,pins,rot){
+    const aisleBlocks=generateAisleGroup('dryfood_',455,147,749,336,29,44,'#FBE1EC','#99406B',84)
+      .concat(generateAisleGroup('nonfood_',308,350,749,553,1,25,'#E7E4F8','#5749A0',84));
+    const blocks=zones.concat(aisleBlocks);
+
+    const pieces=blocks.map(b=>mapBlockPieces(b,rot,!/^dryfood_|^nonfood_/.test(b.id)));
+    const sortedPieces=pieces.slice().sort((a,b)=>a.depth-b.depth);
+    const blockMarkup=sortedPieces.map(p=>p.skinMarkup).join('')+pieces.map(p=>p.topMarkup).join('');
+
+    const F=MAP_FLOOR;
+    const floorTop=[isoProject(F.x,F.y,0,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
+    const wallH=36;
+    const leftWall=[isoProject(F.x,F.y,wallH,rot),isoProject(F.x,F.y+F.h,wallH,rot),isoProject(F.x,F.y+F.h,0,rot),isoProject(F.x,F.y,0,rot)];
+    const backWall=[isoProject(F.x,F.y,wallH,rot),isoProject(F.x+F.w,F.y,wallH,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x,F.y,0,rot)];
+    const rightWall=[isoProject(F.x+F.w,F.y,wallH,rot),isoProject(F.x+F.w,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x+F.w,F.y,0,rot)];
+    const frontWall=[isoProject(F.x,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
+    const wallCandidates=[
+      {poly:leftWall, normal:[-1,0]},
+      {poly:backWall, normal:[0,-1]},
+      {poly:rightWall, normal:[1,0]},
+      {poly:frontWall, normal:[0,1]}
+    ];
+    const theta=rot*Math.PI/180;
+    const camDir=[Math.sin(theta),Math.cos(theta)];
+    const wallsMarkup=wallCandidates.filter(w=>{
+      const dot=w.normal[0]*camDir[0]+w.normal[1]*camDir[1];
+      return dot<-0.05;
+    }).map(w=>'<polygon points="'+polyPts(w.poly)+'" fill="'+shadeColor(FLOOR_BG,0.06)+'" stroke="rgba(0,0,0,.06)" stroke-width="0.6"/>').join('');
+
+    const zoneLabels=Object.keys(MAP_ZONE_LABELS).map(prefix=>{
+      const group=blocks.filter(b=>b.id.indexOf(prefix)===0);
+      if(!group.length) return '';
+      const minX=Math.min(...group.map(b=>b.x)), maxX=Math.max(...group.map(b=>b.x+b.w));
+      const minY=Math.min(...group.map(b=>b.y)), maxH=Math.max(...group.map(b=>b.height||54));
+      const info=MAP_ZONE_LABELS[prefix];
+      const p=isoProject((minX+maxX)/2, minY+22, maxH, rot);
+      return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="'+MAP_MAIN_SIZE+'" font-weight="800" letter-spacing="0.4" fill="'+info.color+'">'+escapeHtml(info.main)+'</text>'+
+        '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+17).toFixed(1)+'" text-anchor="middle" font-size="'+MAP_SUB_SIZE+'" font-weight="600" letter-spacing="0.4" fill="'+info.subColor+'">'+escapeHtml(info.sub)+'</text>';
+    }).join('');
+
+    const pinsMarkup=pins.map(item=>signAt(item.x,item.y,2,rot,item.text||'…','','#2C2A26',false,item.id)).join('');
+
+    const allPts=[floorTop,leftWall,backWall,rightWall,frontWall].reduce((a,p)=>a.concat(p),[]);
+    blocks.forEach(b=>{
+      const H=b.height||54;
+      [[b.x,b.y,H],[b.x+b.w,b.y,H],[b.x+b.w,b.y+b.h,H],[b.x,b.y+b.h,H],[b.x,b.y+b.h,0],[b.x+b.w,b.y+b.h,0]].forEach(([x,y,z])=>{
+        allPts.push(isoProject(x,y,z,rot));
+      });
+    });
+    pins.forEach(item=>{
+      allPts.push(isoProject(item.x,item.y,50,rot));
+      allPts.push(isoProject(item.x,item.y,0,rot));
+    });
+    const entrance=isoProject(MAP_FLOOR.x+252,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
+    const exit=isoProject(MAP_FLOOR.x+588,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
+    allPts.push(entrance,exit);
+    const minX=Math.min(...allPts.map(p=>p[0])), maxX=Math.max(...allPts.map(p=>p[0]));
+    const minY=Math.min(...allPts.map(p=>p[1])), maxY=Math.max(...allPts.map(p=>p[1]));
+    const pad=26;
+    const vbX=minX-pad, vbY=minY-pad, vbW=(maxX-minX)+pad*2, vbH=(maxY-minY)+pad*2+18;
+
+    const floorHit='<polygon class="map-floor-bg" points="'+polyPts(floorTop)+'" fill="rgba(0,0,0,0)" style="pointer-events:all"/>';
+
+    return '<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้าน Makro รามอินทรา St.042 แบบ 3 มิติ แก้ไขได้">'+
+      '<polygon points="'+polyPts(floorTop)+'" fill="'+FLOOR_BG+'"/>'+
+      floorHit+
+      wallsMarkup+
+      '<g font-family="Sarabun,Segoe UI,sans-serif">'+blockMarkup+zoneLabels+pinsMarkup+'</g>'+
+      glassDoor(entrance,'ทางเข้า · IN','#3FAE6E')+
+      glassDoor(exit,'ทางออก · OUT','#FF6B4A')+
+      '</svg>';
+  }
+
+  // ==== state, wiring ====
+  const STORAGE_KEY='makroDept3DEditorV1';
+  function defaultItems(){
+    return [
+      {id:'butchery',type:'zone',x:28,y:28,w:266,h:105,height:76,fill:'#FBE4E4',th:'เนื้อสัตว์และแช่แข็ง',en:'Butchery & Frozen'},
+      {id:'snack',type:'zone',x:308,y:28,w:105,h:105,height:76,fill:'#E3F6E8',th:'ขนม',en:'Snack'},
+      {id:'winebeer',type:'zone',x:427,y:28,w:119,h:105,height:76,fill:'#DFF3F3',th:'ไวน์/เบียร์',en:'Wine & Beer'},
+      {id:'drink',type:'zone',x:560,y:28,w:189,h:105,height:76,fill:'#EAE4F8',th:'เครื่องดื่ม',en:'Drink'},
+      {id:'fishseafood',type:'zone',x:28,y:147,w:266,h:119,height:76,fill:'#DEEBFA',th:'ปลา/อาหารทะเล',en:'Fish & Seafood'},
+      {id:'grilledchicken',type:'zone',x:308,y:147,w:133,h:91,height:76,fill:'#FAEBDA',th:'ไก่ย่าง',en:'Grilled Chicken'},
+      {id:'o2o',type:'zone',x:763,y:147,w:105,h:406,height:98,fill:'#FBEED9',th:'O2O แผนกออนไลน์',en:'Makro Pro'},
+      {id:'condiments',type:'zone',x:28,y:280,w:266,h:70,height:76,fill:'#FAE0D8',th:'เครื่องเทศ',en:'Condiments / Spices'},
+      {id:'fruitveg',type:'zone',x:28,y:364,w:266,h:189,height:76,fill:'#E5F3DC',th:'ผัก-ผลไม้',en:'Fruit & Veg'},
+      {id:'bakery',type:'zone',x:28,y:567,w:154,h:119,height:76,fill:'#F3E7D6',th:'เบเกอรี่',en:'Bakery'},
+      {id:'infopoint',type:'zone',x:189,y:567,w:56,h:119,height:42,fill:'#DFE9F5',th:'จุดประชาสัมพันธ์',en:'Information'},
+      {id:'cashier',type:'zone',x:252,y:567,w:308,h:119,height:42,fill:'#DFF4EA',th:'แคชเชียร์',en:'Cashier'},
+      {id:'icecream',type:'zone',x:574,y:567,w:133,h:119,height:76,fill:'#DBF1F4',th:'ไอศกรีม',en:'Ice Cream'},
+      {id:'premium',type:'zone',x:721,y:567,w:147,h:119,height:76,fill:'#EAE7F0',th:'จุดของแถม',en:'Premium'}
+    ];
+  }
+  function loadState(){
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY);
+      if(raw){ const parsed=JSON.parse(raw); if(parsed && Array.isArray(parsed.items)) return parsed; }
+    }catch(e){}
+    return {items:defaultItems()};
+  }
+  let state=loadState();
+
+  const svgHost=document.getElementById('svgHost');
+  const rotInput=document.getElementById('rot');
+  const rotDeg=document.getElementById('rotDeg');
+  const legendList=document.getElementById('legendList');
+  const savedTag=document.getElementById('savedTag');
+  const addBtn=document.getElementById('addBtn');
+  const addHint=document.getElementById('addHint');
+  const resetBtn=document.getElementById('resetBtn');
+  const panel=document.getElementById('editPanel');
+  const panelTitle=document.getElementById('panelTitle');
+  const zoneFields=document.getElementById('zoneFields');
+  const pinFields=document.getElementById('pinFields');
+  const thInput=document.getElementById('thInput');
+  const enInput=document.getElementById('enInput');
+  const pinInput=document.getElementById('pinInput');
+  const saveBtn=document.getElementById('saveBtn');
+  const delBtn=document.getElementById('delBtn');
+  const closeBtn=document.getElementById('closeBtn');
+
+  let savedTimer=null;
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    savedTag.classList.add('show');
+    if(savedTimer) clearTimeout(savedTimer);
+    savedTimer=setTimeout(()=>{ savedTag.classList.remove('show'); }, 1200);
+  }
+
+  function renderLegend(zones){
+    if(!zones.length){
+      legendList.innerHTML='<li class="legend-empty">ยังไม่มีแผนก — กด "เพิ่มป้ายใหม่" เพื่อเริ่ม</li>';
+      return;
+    }
+    legendList.innerHTML=zones.map(function(z){
+      return '<li><span class="swatch" style="background:'+z.fill+'"></span>'
+        +'<span class="txt"><span class="th">'+escapeHtml(z.th||'(ไม่มีชื่อ)')+'</span><span class="en">'+escapeHtml(z.en||'')+'</span></span></li>';
+    }).join('');
+  }
+
+  function renderMap(){
+    const rot=Number(rotInput.value);
+    rotDeg.textContent=rot+'°';
+    const zones=state.items.filter(it=>it.type==='zone');
+    const pins=state.items.filter(it=>it.type==='pin');
+    svgHost.innerHTML=renderMapSVG(zones,pins,rot);
+    renderLegend(zones);
+  }
+  rotInput.addEventListener('input', renderMap);
+
+  let editingId=null, editingType=null;
+  function openEditor(type,id){
+    const item=state.items.find(it=>it.id===id);
+    if(!item) return;
+    editingType=type; editingId=id;
+    panel.classList.add('open');
+    if(type==='zone'){
+      panelTitle.textContent='แก้ไขแผนก';
+      zoneFields.style.display='flex';
+      pinFields.style.display='none';
+      thInput.value=item.th||'';
+      enInput.value=item.en||'';
+      thInput.focus();
+      thInput.select();
+    } else {
+      panelTitle.textContent='แก้ไขป้าย';
+      zoneFields.style.display='none';
+      pinFields.style.display='flex';
+      pinInput.value=item.text||'';
+      pinInput.focus();
+      pinInput.select();
+    }
+  }
+  function closeEditor(){
+    panel.classList.remove('open');
+    editingId=null; editingType=null;
+  }
+  function commitEditor(){
+    if(!editingId) return;
+    const item=state.items.find(it=>it.id===editingId);
+    if(!item) return;
+    if(editingType==='zone'){ item.th=thInput.value; item.en=enInput.value; }
+    else { item.text=pinInput.value; }
+    save();
+    renderMap();
+    closeEditor();
+  }
+  function deleteEditing(){
+    if(!editingId) return;
+    state.items=state.items.filter(it=>it.id!==editingId);
+    save();
+    renderMap();
+    closeEditor();
+  }
+  saveBtn.addEventListener('click', commitEditor);
+  delBtn.addEventListener('click', deleteEditing);
+  closeBtn.addEventListener('click', closeEditor);
+  [thInput,enInput,pinInput].forEach(function(inp){
+    inp.addEventListener('keydown', function(ev){
+      if(ev.key==='Enter'){ ev.preventDefault(); commitEditor(); }
+    });
+  });
+
+  let addMode=false;
+  function setAddMode(on){
+    addMode=on;
+    addBtn.classList.toggle('active', on);
+    addBtn.textContent = on ? 'กำลังวางป้าย…' : '+ เพิ่มป้ายใหม่';
+    addHint.style.display = on ? 'block' : 'none';
+    svgHost.style.cursor = on ? 'copy' : 'default';
+  }
+  addBtn.addEventListener('click', ()=> setAddMode(!addMode));
+
+  function svgPointFromEvent(svgEl, evt){
+    const pt=svgEl.createSVGPoint();
+    pt.x=evt.clientX; pt.y=evt.clientY;
+    const ctm=svgEl.getScreenCTM();
+    if(!ctm) return {x:0,y:0};
+    const loc=pt.matrixTransform(ctm.inverse());
+    return {x:loc.x, y:loc.y};
+  }
+
+  svgHost.addEventListener('click', function(e){
+    if(addMode){
+      const svgEl=svgHost.querySelector('svg');
+      if(!svgEl) return;
+      const loc=svgPointFromEvent(svgEl, e);
+      const rot=Number(rotInput.value);
+      const world=isoUnproject(loc.x, loc.y, 0, rot);
+      const id='pin-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+      state.items.push({id:id,type:'pin',x:world[0],y:world[1],text:''});
+      save();
+      renderMap();
+      setAddMode(false);
+      openEditor('pin', id);
+      return;
+    }
+    const blockHit=e.target.closest ? e.target.closest('.map-block-rect') : null;
+    if(blockHit){ openEditor('zone', blockHit.getAttribute('data-id')); return; }
+    const pinHit=e.target.closest ? e.target.closest('.map-pin-rect') : null;
+    if(pinHit){ openEditor('pin', pinHit.getAttribute('data-id')); return; }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){
+      if(addMode) setAddMode(false);
+      if(panel.classList.contains('open')) closeEditor();
+    }
+  });
+
+  resetBtn.addEventListener('click', function(){
+    if(window.confirm('รีเซ็ตป้ายทั้งหมดกลับเป็นค่าเริ่มต้น? การแก้ไขที่ทำไว้จะหายไป')){
+      state={items:defaultItems()};
+      save();
+      renderMap();
+      closeEditor();
+      setAddMode(false);
+    }
+  });
+
+  renderMap();
+})();
+</script>
