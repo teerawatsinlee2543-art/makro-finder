@@ -137,6 +137,11 @@ body{margin:0;padding:0;touch-action:manipulation}
 .promo-date-actions button{flex:1;padding:11px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .promo-date-cancel{background:var(--color-background-secondary);color:var(--color-text-secondary)}
 .promo-date-confirm{background:var(--brand-red);color:#fff}
+.lang-option{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:15px;font-family:inherit;cursor:pointer}
+.lang-option.active{border-color:var(--brand-red);color:var(--brand-red);font-weight:700}
+.lang-option.active i{color:var(--brand-red)}
+#langModalList{display:flex;flex-direction:column;gap:8px}
+.hdr-icon.lang-btn{font-size:18px}
 .promo-date-box input[type=text]{padding:10px 12px;border-radius:10px;border:1px solid var(--color-border-tertiary);font-size:16px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary)}
 .new-item-barcode-row{display:flex;gap:8px;align-items:center}
 .new-item-barcode-row input{flex:1;min-width:0}
@@ -428,19 +433,19 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <text x="170" y="174" font-family="Arial,Helvetica,sans-serif" font-size="32" font-weight="900" text-anchor="middle" fill="#E8192C">Finder</text>
       </svg>
       <div class="login-sub">Store 42 · Ramintra</div>
-      <p class="role-intro-desc">กรุณาเลือกมุมมองการใช้งาน</p>
+      <p class="role-intro-desc" data-i18n="roleIntro">กรุณาเลือกมุมมองการใช้งาน</p>
       <button class="role-option" onclick="chooseCustomer()">
         <div class="role-icon cust"><i class="ti ti-user" aria-hidden="true"></i></div>
         <div>
-          <div class="role-name">ลูกค้า</div>
-          <div class="role-desc">ค้นหา/สแกนสินค้า ดูโซนและตำแหน่งจัดเก็บ</div>
+          <div class="role-name" data-i18n="roleCustomerName">ลูกค้า</div>
+          <div class="role-desc" data-i18n="roleCustomerDesc">ค้นหา/สแกนสินค้า ดูโซนและตำแหน่งจัดเก็บ</div>
         </div>
       </button>
       <button class="role-option" onclick="chooseEmployee()">
         <div class="role-icon emp"><i class="ti ti-id-badge-2" aria-hidden="true"></i></div>
         <div>
-          <div class="role-name">พนักงาน</div>
-          <div class="role-desc">เข้าสู่ระบบพนักงาน ดูข้อมูลสต็อกเต็มรูปแบบ</div>
+          <div class="role-name" data-i18n="roleEmployeeName">พนักงาน</div>
+          <div class="role-desc" data-i18n="roleEmployeeDesc">เข้าสู่ระบบพนักงาน ดูข้อมูลสต็อกเต็มรูปแบบ</div>
         </div>
       </button>
     </div>
@@ -530,13 +535,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div class="hdr-icons">
-        <button class="hdr-icon scan-btn" onclick="openScanner()" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
+        <button class="hdr-icon lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><i class="ti ti-language" aria-hidden="true"></i></button>
+        <button class="hdr-icon scan-btn" onclick="openScanner()" data-i18n-title="scanTitle" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
       </div>
     </div>
     <div class="search-box">
       <i class="ti ti-search" aria-hidden="true"></i>
-      <input type="text" id="si" placeholder="ค้นหาสินค้า..." oninput="search(this.value)">
-      <i class="ti ti-x" id="clr" style="display:none;cursor:pointer" onclick="clearSearch()" aria-label="ล้าง"></i>
+      <input type="text" id="si" data-i18n-placeholder="searchPlaceholder" placeholder="ค้นหาสินค้า..." oninput="search(this.value)">
+      <i class="ti ti-x" id="clr" style="display:none;cursor:pointer" onclick="clearSearch()" data-i18n-title="clearAria" aria-label="ล้าง"></i>
     </div>
   </div>
 
@@ -544,7 +550,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
     <div class="emp-bar">
       <span id="empBarText"></span>
-      <button id="empBarSwitch" onclick="switchRole()">เปลี่ยนมุมมอง</button>
+      <button id="empBarSwitch" onclick="switchRole()" data-i18n="switchView">เปลี่ยนมุมมอง</button>
     </div>
 
     <div id="palletOpenBar" style="display:none;margin-bottom:16px">
@@ -553,43 +559,43 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
 
     <div id="homeView">
-      <div class="section-label">โปรโมชั่น</div>
+      <div class="section-label" data-i18n="promoLabel">โปรโมชั่น</div>
       <div class="promo-carousel" id="promoCarousel" style="display:none">
         <div class="promo-track" id="promoTrack"></div>
         <button class="promo-arrow left" onclick="event.stopPropagation();movePromo(-1)" aria-label="ก่อนหน้า"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
         <button class="promo-arrow right" onclick="event.stopPropagation();movePromo(1)" aria-label="ถัดไป"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
       </div>
       <div class="promo-dots" id="promoDots" style="display:none"></div>
-      <div class="promo-gallery-empty" id="promoEmptyMsg" style="display:none">ยังไม่มีโปรโมชั่นในขณะนี้</div>
+      <div class="promo-gallery-empty" id="promoEmptyMsg" style="display:none" data-i18n="promoEmpty">ยังไม่มีโปรโมชั่นในขณะนี้</div>
       <div class="promo-add-row" id="promoAddRow" style="display:none">
         <div class="promo-add-banner" onclick="openPromoAddFlow()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มโปรโมชั่น</div>
       </div>
       <input type="file" id="promoFileInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handlePromoFileSelect(event)">
-      <div class="section-label">หมวดหมู่</div>
+      <div class="section-label" data-i18n="categoryLabel">หมวดหมู่</div>
       <div class="cat-row">
-        <div class="cat-card" style="background:#D3F38F33" onclick="searchByCategory('electric')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Electronics_7b6f092700.png" alt="เครื่องใช้ไฟฟ้า" loading="lazy"><span>เครื่องใช้ไฟฟ้า</span></div>
-        <div class="cat-card" style="background:#D7EFD9" onclick="searchByCategory('freshfrozen')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/L1_Fresh_Food_Story_70c56f6cb4.png" alt="อาหารสดและแช่แข็ง" loading="lazy"><span>อาหารสดและแช่แข็ง</span></div>
-        <div class="cat-card" style="background:#FFF0BD66" onclick="searchByCategory('homecare')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Home_Care_6557cb2bd6.png" alt="ของใช้ในบ้าน" loading="lazy"><span>ของใช้ในบ้าน</span></div>
-        <div class="cat-card" style="background:#F7C47833" onclick="searchByCategory('grocery')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Grocery_53f0589e85.png" alt="อาหารและเครื่องปรุง" loading="lazy"><span>อาหารและเครื่องปรุง</span></div>
-        <div class="cat-card" style="background:#F7E9A066" onclick="searchByCategory('drink')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Beverage_and_Milk_v2_78f9f26baa.png" alt="เครื่องดื่ม" loading="lazy"><span>เครื่องดื่ม</span></div>
-        <div class="cat-card" style="background:#FADCE3" onclick="searchByCategory('snack')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Icon_in_app_1_fc27c246fa.png" alt="ขนม" loading="lazy"><span>ขนม</span></div>
+        <div class="cat-card" style="background:#D3F38F33" onclick="searchByCategory('electric')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Electronics_7b6f092700.png" data-i18n-alt="catElectric" alt="เครื่องใช้ไฟฟ้า" loading="lazy"><span data-i18n="catElectric">เครื่องใช้ไฟฟ้า</span></div>
+        <div class="cat-card" style="background:#D7EFD9" onclick="searchByCategory('freshfrozen')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/L1_Fresh_Food_Story_70c56f6cb4.png" data-i18n-alt="catFreshFrozen" alt="อาหารสดและแช่แข็ง" loading="lazy"><span data-i18n="catFreshFrozen">อาหารสดและแช่แข็ง</span></div>
+        <div class="cat-card" style="background:#FFF0BD66" onclick="searchByCategory('homecare')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Home_Care_6557cb2bd6.png" data-i18n-alt="catHomeCare" alt="ของใช้ในบ้าน" loading="lazy"><span data-i18n="catHomeCare">ของใช้ในบ้าน</span></div>
+        <div class="cat-card" style="background:#F7C47833" onclick="searchByCategory('grocery')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Grocery_53f0589e85.png" data-i18n-alt="catGrocery" alt="อาหารและเครื่องปรุง" loading="lazy"><span data-i18n="catGrocery">อาหารและเครื่องปรุง</span></div>
+        <div class="cat-card" style="background:#F7E9A066" onclick="searchByCategory('drink')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Beverage_and_Milk_v2_78f9f26baa.png" data-i18n-alt="catDrink" alt="เครื่องดื่ม" loading="lazy"><span data-i18n="catDrink">เครื่องดื่ม</span></div>
+        <div class="cat-card" style="background:#FADCE3" onclick="searchByCategory('snack')"><img src="https://strapi-cdn.mango-prod.siammakro.cloud/uploads/Icon_in_app_1_fc27c246fa.png" data-i18n-alt="catSnack" alt="ขนม" loading="lazy"><span data-i18n="catSnack">ขนม</span></div>
       </div>
       <div id="customerFeedbackSection">
         <div class="feedback-card">
-          <div class="feedback-card-title"><i class="ti ti-message-2" aria-hidden="true"></i> ข้อเสนอแนะ / ข้อคิดเห็นเพิ่มเติม</div>
+          <div class="feedback-card-title"><i class="ti ti-message-2" aria-hidden="true"></i> <span data-i18n="feedbackTitle">ข้อเสนอแนะ / ข้อคิดเห็นเพิ่มเติม</span></div>
           <div class="feedback-box">
-            <textarea id="fbText" class="fb-textarea" rows="3" placeholder="แจ้งปัญหา ข้อเสนอแนะ หรือความคิดเห็นเพิ่มเติม..."></textarea>
+            <textarea id="fbText" class="fb-textarea" rows="3" data-i18n-placeholder="feedbackPlaceholder" placeholder="แจ้งปัญหา ข้อเสนอแนะ หรือความคิดเห็นเพิ่มเติม..."></textarea>
             <div class="fb-photo-row">
-              <label class="fb-photo-btn" for="fbPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> แนบรูปถ่ายเป็นหลักฐาน</label>
+              <label class="fb-photo-btn" for="fbPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> <span data-i18n="feedbackPhotoLabel">แนบรูปถ่ายเป็นหลักฐาน</span></label>
               <input type="file" id="fbPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleFbPhotoSelect(event)">
-              <span class="fb-photo-hint">ไม่บังคับ ไม่แนบก็ส่งได้</span>
+              <span class="fb-photo-hint" data-i18n="feedbackPhotoHint">ไม่บังคับ ไม่แนบก็ส่งได้</span>
             </div>
             <div class="fb-photo-preview-wrap" id="fbPhotoPreviewWrap" style="display:none">
               <img class="fb-photo-preview" id="fbPhotoPreview" alt="รูปที่แนบ">
               <button class="fb-photo-remove" onclick="removeFbPhoto()" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
             </div>
-            <button class="fb-submit" onclick="submitFeedback()">ส่งความคิดเห็น</button>
-            <p class="fb-thanks" id="fbThanks" style="display:none">ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ</p>
+            <button class="fb-submit" onclick="submitFeedback()" data-i18n="feedbackSubmit">ส่งความคิดเห็น</button>
+            <p class="fb-thanks" id="fbThanks" style="display:none" data-i18n="feedbackThanks">ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ</p>
           </div>
         </div>
       </div>
@@ -608,7 +614,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="resultView" class="result-wrap">
       <div id="dataLoading" style="display:none" class="no-result">
         <i class="ti ti-loader-2" aria-hidden="true"></i>
-        <p>กำลังโหลดข้อมูลสินค้า...</p>
+        <p data-i18n="loadingProducts">กำลังโหลดข้อมูลสินค้า...</p>
       </div>
       <div id="resultsList" style="display:none"></div>
       <div id="foundCard" style="display:none">
@@ -626,7 +632,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           </div>
         </div>
         <div class="nav-info-box" id="navInfoBlock">
-          <div class="nav-info-title"><i class="ti ti-map-pin" aria-hidden="true"></i> รายละเอียดเพิ่มเติมสินค้า</div>
+          <div class="nav-info-title"><i class="ti ti-map-pin" aria-hidden="true"></i> <span data-i18n="navInfoTitle">รายละเอียดเพิ่มเติมสินค้า</span></div>
           <div id="navInfoBody"></div>
         </div>
         <div class="emp-stock-box" id="empStockBlock" style="display:none">
@@ -639,16 +645,16 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
         <div class="tip-box">
           <i class="ti ti-navigation" aria-hidden="true"></i>
-          <div class="tip-text">เดินตามป้ายบอกโซนภายในสาขาเพื่อไปยังตำแหน่งจัดเก็บสินค้า</div>
+          <div class="tip-text" data-i18n="tipWalkSigns">เดินตามป้ายบอกโซนภายในสาขาเพื่อไปยังตำแหน่งจัดเก็บสินค้า</div>
         </div>
         <div id="showOnMapInline">
           <div class="map-label-row">
-            <span class="map-label"><i class="ti ti-map-pin" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>ตำแหน่งสินค้านี้</span>
-            <span class="map-hl-label" id="showOnMapApprox" style="display:none">ตำแหน่งโดยประมาณ</span>
+            <span class="map-label"><i class="ti ti-map-pin" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i><span data-i18n="mapThisItem">ตำแหน่งสินค้านี้</span></span>
+            <span class="map-hl-label" id="showOnMapApprox" style="display:none" data-i18n="mapApprox">ตำแหน่งโดยประมาณ</span>
           </div>
           <div class="store-map" id="showOnMapSvg" onclick="openMapFullscreen()"></div>
           <div id="inlineGpsBar" style="margin-top:10px">
-            <button class="map-edit-open-btn" id="liveGpsBtnInline" onclick="toggleLiveGps()"><i class="ti ti-current-location" aria-hidden="true"></i> แสดงตำแหน่งฉัน</button>
+            <button class="map-edit-open-btn" id="liveGpsBtnInline" onclick="toggleLiveGps()"><i class="ti ti-current-location" aria-hidden="true"></i> <span data-i18n="showMyLocation">แสดงตำแหน่งฉัน</span></button>
           </div>
           <div id="mapEditOpenBar" style="display:none">
             <button class="map-edit-open-btn" onclick="openMapEditor()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ไขแผนที่</button>
@@ -658,7 +664,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div id="notFound" style="display:none" class="no-result">
         <i class="ti ti-mood-sad" aria-hidden="true"></i>
         <p id="nfText"></p>
-        <p style="margin-top:6px;font-size:12px">ลองคำอื่น หรือถามพนักงาน</p>
+        <p style="margin-top:6px;font-size:12px" data-i18n="tryOtherWord">ลองคำอื่น หรือถามพนักงาน</p>
         <button id="notFoundAddItemBtn" class="pallet-open-btn yellow compact" style="display:none;margin-top:14px" onclick="openNewItemFromNotFound()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มสินค้าใหม่</button>
       </div>
     </div>
@@ -761,6 +767,13 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   </div>
 </div>
 
+<div class="promo-date-overlay" id="langModal" onclick="closeLangModal()">
+  <div class="promo-date-box" onclick="event.stopPropagation()">
+    <div class="promo-date-title"><i class="ti ti-language" aria-hidden="true"></i> <span data-i18n="languageModalTitle">เลือกภาษา</span></div>
+    <div id="langModalList"></div>
+  </div>
+</div>
+
 <div class="map-overlay" id="mapOverlay" onclick="closeMapFullscreen()">
   <button class="map-overlay-close" onclick="closeMapFullscreen()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
   <div class="map-overlay-content" id="mapOverlayContent" onclick="event.stopPropagation()"></div>
@@ -852,6 +865,378 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div id="palletPrintArea" class="pallet-print-area"></div>
 
 <script>
+/* ---------- ระบบหลายภาษา (i18n) — เฉพาะฝั่งลูกค้าในเวอร์ชันนี้ ---------- */
+const I18N_LANGS=[
+  {code:'th',native:'ไทย'},
+  {code:'en',native:'English'},
+  {code:'cn',native:'中文'},
+  {code:'mm',native:'မြန်မာ'},
+  {code:'kr',native:'한국어'},
+  {code:'jp',native:'日本語'}
+];
+const I18N={
+  th:{
+    roleIntro:'กรุณาเลือกมุมมองการใช้งาน',
+    roleCustomerName:'ลูกค้า',
+    roleCustomerDesc:'ค้นหา/สแกนสินค้า ดูโซนและตำแหน่งจัดเก็บ',
+    roleEmployeeName:'พนักงาน',
+    roleEmployeeDesc:'เข้าสู่ระบบพนักงาน ดูข้อมูลสต็อกเต็มรูปแบบ',
+    searchPlaceholder:'ค้นหาสินค้า...',
+    scanTitle:'สแกน QR',
+    clearAria:'ล้าง',
+    switchView:'เปลี่ยนมุมมอง',
+    customerViewLabel:'มุมมองลูกค้า',
+    languageBtn:'ภาษา',
+    languageModalTitle:'เลือกภาษา',
+    promoLabel:'โปรโมชั่น',
+    promoEmpty:'ยังไม่มีโปรโมชั่นในขณะนี้',
+    categoryLabel:'หมวดหมู่',
+    catElectric:'เครื่องใช้ไฟฟ้า',
+    catFreshFrozen:'อาหารสดและแช่แข็ง',
+    catHomeCare:'ของใช้ในบ้าน',
+    catGrocery:'อาหารและเครื่องปรุง',
+    catDrink:'เครื่องดื่ม',
+    catSnack:'ขนม',
+    feedbackTitle:'ข้อเสนอแนะ / ข้อคิดเห็นเพิ่มเติม',
+    feedbackPlaceholder:'แจ้งปัญหา ข้อเสนอแนะ หรือความคิดเห็นเพิ่มเติม...',
+    feedbackPhotoLabel:'แนบรูปถ่ายเป็นหลักฐาน',
+    feedbackPhotoHint:'ไม่บังคับ ไม่แนบก็ส่งได้',
+    feedbackSubmit:'ส่งความคิดเห็น',
+    feedbackThanks:'ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ',
+    loadingProducts:'กำลังโหลดข้อมูลสินค้า...',
+    navInfoTitle:'รายละเอียดเพิ่มเติมสินค้า',
+    tipWalkSigns:'เดินตามป้ายบอกโซนภายในสาขาเพื่อไปยังตำแหน่งจัดเก็บสินค้า',
+    mapThisItem:'ตำแหน่งสินค้านี้',
+    mapApprox:'ตำแหน่งโดยประมาณ',
+    showMyLocation:'แสดงตำแหน่งฉัน',
+    hideMyLocation:'ปิดตำแหน่งฉัน',
+    tryOtherWord:'ลองคำอื่น หรือถามพนักงาน',
+    itemNoLabel:'Item No',
+    locLabel:'Loc',
+    locationLabel:'Location',
+    notYetAvailable:'ยังไม่มี',
+    productNameLabel:'ชื่อสินค้า',
+    productIsAt:'สินค้าอยู่ตรง',
+    withinRange:'อยู่ในช่วง',
+    locFull:'Loc (ล็อคที่)',
+    locationFull:'Location (ชั้นวางที่)',
+    shelfTier:'อยู่ชั้นที่ (นับจากบนลงล่าง)',
+    noLocationInfo:'ไม่มีข้อมูลตำแหน่ง',
+    foundCount:'พบ {n} รายการ',
+    showFirst50:'(แสดง 50 รายการแรก)',
+    notFoundInCategory:'ไม่พบสินค้าในหมวด "{label}"',
+    notFoundQuery:'ไม่พบ "{q}" ในระบบ'
+  },
+  en:{
+    roleIntro:'Please choose how you want to use the app',
+    roleCustomerName:'Customer',
+    roleCustomerDesc:'Search/scan products, view zones and storage locations',
+    roleEmployeeName:'Employee',
+    roleEmployeeDesc:'Employee sign-in, view full stock details',
+    searchPlaceholder:'Search products...',
+    scanTitle:'Scan QR',
+    clearAria:'Clear',
+    switchView:'Switch view',
+    customerViewLabel:'Customer view',
+    languageBtn:'Language',
+    languageModalTitle:'Select language',
+    promoLabel:'Promotions',
+    promoEmpty:'No promotions at the moment',
+    categoryLabel:'Categories',
+    catElectric:'Electronics',
+    catFreshFrozen:'Fresh & Frozen',
+    catHomeCare:'Home Care',
+    catGrocery:'Grocery',
+    catDrink:'Drinks',
+    catSnack:'Snacks',
+    feedbackTitle:'Feedback / Comments',
+    feedbackPlaceholder:'Report an issue, suggestion, or comment...',
+    feedbackPhotoLabel:'Attach a photo',
+    feedbackPhotoHint:'Optional — you can submit without one',
+    feedbackSubmit:'Submit feedback',
+    feedbackThanks:'Thank you for your feedback!',
+    loadingProducts:'Loading product data...',
+    navInfoTitle:'Additional product details',
+    tipWalkSigns:'Follow the zone signs in-store to reach the storage location',
+    mapThisItem:'This item\'s location',
+    mapApprox:'Approximate location',
+    showMyLocation:'Show my location',
+    hideMyLocation:'Hide my location',
+    tryOtherWord:'Try another word or ask a staff member',
+    itemNoLabel:'Item No',
+    locLabel:'Loc',
+    locationLabel:'Location',
+    notYetAvailable:'Not yet available',
+    productNameLabel:'Product name',
+    productIsAt:'Item is at',
+    withinRange:'Within range',
+    locFull:'Loc (section)',
+    locationFull:'Location (shelf position)',
+    shelfTier:'Shelf tier (counted top to bottom)',
+    noLocationInfo:'No location data',
+    foundCount:'Found {n} item(s)',
+    showFirst50:'(showing the first 50)',
+    notFoundInCategory:'No items found in category "{label}"',
+    notFoundQuery:'No results found for "{q}"'
+  },
+  cn:{
+    roleIntro:'请选择使用模式',
+    roleCustomerName:'顾客',
+    roleCustomerDesc:'搜索/扫描商品，查看分区和存放位置',
+    roleEmployeeName:'员工',
+    roleEmployeeDesc:'员工登录，查看完整库存信息',
+    searchPlaceholder:'搜索商品...',
+    scanTitle:'扫描二维码',
+    clearAria:'清除',
+    switchView:'切换视图',
+    customerViewLabel:'顾客视图',
+    languageBtn:'语言',
+    languageModalTitle:'选择语言',
+    promoLabel:'促销活动',
+    promoEmpty:'暂无促销活动',
+    categoryLabel:'分类',
+    catElectric:'电器',
+    catFreshFrozen:'生鲜冷冻',
+    catHomeCare:'家居用品',
+    catGrocery:'食品调味',
+    catDrink:'饮料',
+    catSnack:'零食',
+    feedbackTitle:'意见 / 建议',
+    feedbackPlaceholder:'请输入问题、建议或意见...',
+    feedbackPhotoLabel:'附加照片作为证明',
+    feedbackPhotoHint:'非必填，不附加也可提交',
+    feedbackSubmit:'提交意见',
+    feedbackThanks:'感谢您的反馈！',
+    loadingProducts:'正在加载商品数据...',
+    navInfoTitle:'商品详细信息',
+    tipWalkSigns:'请依照店内分区指示牌前往存放位置',
+    mapThisItem:'该商品位置',
+    mapApprox:'大概位置',
+    showMyLocation:'显示我的位置',
+    hideMyLocation:'关闭我的位置',
+    tryOtherWord:'请尝试其他关键词或询问店员',
+    itemNoLabel:'商品编号',
+    locLabel:'区域',
+    locationLabel:'位置',
+    notYetAvailable:'暂无',
+    productNameLabel:'商品名称',
+    productIsAt:'商品位于',
+    withinRange:'位于范围',
+    locFull:'区域（Loc）',
+    locationFull:'位置（货架位）',
+    shelfTier:'所在层数（从上往下数）',
+    noLocationInfo:'暂无位置信息',
+    foundCount:'找到 {n} 项',
+    showFirst50:'（仅显示前 50 项）',
+    notFoundInCategory:'该分类"{label}"中未找到商品',
+    notFoundQuery:'未找到"{q}"相关商品'
+  },
+  mm:{
+    roleIntro:'အသုံးပြုမည့်မုဒ်ကို ရွေးချယ်ပါ',
+    roleCustomerName:'ဖောက်သည်',
+    roleCustomerDesc:'ပစ္စည်းရှာဖွေ/စကန်ဖတ်ပြီး ဇုန်နှင့်သိုလှောင်နေရာကို ကြည့်ရှုပါ',
+    roleEmployeeName:'ဝန်ထမ်း',
+    roleEmployeeDesc:'ဝန်ထမ်းအကောင့်ဝင်ပြီး လက်ကျန်ပစ္စည်းအပြည့်အစုံကို ကြည့်ရှုပါ',
+    searchPlaceholder:'ပစ္စည်းရှာဖွေရန်...',
+    scanTitle:'QR စကန်ဖတ်ရန်',
+    clearAria:'ရှင်းလင်းရန်',
+    switchView:'မုဒ်ပြောင်းရန်',
+    customerViewLabel:'ဖောက်သည်မြင်ကွင်း',
+    languageBtn:'ဘာသာစကား',
+    languageModalTitle:'ဘာသာစကားရွေးချယ်ပါ',
+    promoLabel:'ပရိုမိုးရှင်း',
+    promoEmpty:'လောလောဆယ် ပရိုမိုးရှင်းမရှိသေးပါ',
+    categoryLabel:'အမျိုးအစားများ',
+    catElectric:'လျှပ်စစ်ပစ္စည်း',
+    catFreshFrozen:'လတ်ဆတ်/အေးခဲပစ္စည်း',
+    catHomeCare:'အိမ်သုံးပစ္စည်း',
+    catGrocery:'စားသောက်ကုန်နှင့်ဟင်းခတ်အမွှေးအကြိုင်',
+    catDrink:'အဖျော်ယမကာ',
+    catSnack:'မုန့်များ',
+    feedbackTitle:'အကြံပြုချက် / မှတ်ချက်',
+    feedbackPlaceholder:'ပြဿနာ၊ အကြံပြုချက် သို့မဟုတ် မှတ်ချက်ရေးပါ...',
+    feedbackPhotoLabel:'သက်သေအဖြစ် ဓာတ်ပုံတွဲရန်',
+    feedbackPhotoHint:'မဖြစ်မနေမလိုပါ၊ မတွဲပဲပို့နိုင်ပါသည်',
+    feedbackSubmit:'အကြံပြုချက်ပို့ရန်',
+    feedbackThanks:'သင့်အကြံပြုချက်အတွက် ကျေးဇူးတင်ပါသည်!',
+    loadingProducts:'ပစ္စည်းအချက်အလက် ဖွင့်နေသည်...',
+    navInfoTitle:'ပစ္စည်းအသေးစိတ်အချက်အလက်',
+    tipWalkSigns:'သိုလှောင်နေရာသို့ရောက်ရန် ဆိုင်ရှိဇုန်ဆိုင်းဘုတ်များကို လိုက်နာပါ',
+    mapThisItem:'ဤပစ္စည်း၏တည်နေရာ',
+    mapApprox:'ခန့်မှန်းတည်နေရာ',
+    showMyLocation:'ကျွန်ုပ်၏တည်နေရာပြရန်',
+    hideMyLocation:'ကျွန်ုပ်၏တည်နေရာပိတ်ရန်',
+    tryOtherWord:'အခြားစကားလုံးဖြင့်ရှာကြည့်ပါ သို့မဟုတ် ဝန်ထမ်းကိုမေးမြန်းပါ',
+    itemNoLabel:'ပစ္စည်းနံပါတ်',
+    locLabel:'ဇုန်',
+    locationLabel:'တည်နေရာ',
+    notYetAvailable:'မရှိသေးပါ',
+    productNameLabel:'ပစ္စည်းအမည်',
+    productIsAt:'ပစ္စည်းရှိသည့်နေရာ',
+    withinRange:'အကွာအဝေးအတွင်း',
+    locFull:'ဇုန် (Loc)',
+    locationFull:'တည်နေရာ (စင်ပေါ်နေရာ)',
+    shelfTier:'ရှိသည့်ထပ် (အပေါ်မှအောက်သို့ရေတွက်)',
+    noLocationInfo:'တည်နေရာအချက်အလက်မရှိပါ',
+    foundCount:'{n} ခု တွေ့ရှိသည်',
+    showFirst50:'(ပထမဆုံး ၅၀ ကိုသာ ပြသသည်)',
+    notFoundInCategory:'"{label}" အမျိုးအစားတွင် ပစ္စည်းမတွေ့ပါ',
+    notFoundQuery:'"{q}" ကို စနစ်တွင်မတွေ့ပါ'
+  },
+  kr:{
+    roleIntro:'사용 모드를 선택해 주세요',
+    roleCustomerName:'고객',
+    roleCustomerDesc:'상품 검색/스캔, 구역 및 진열 위치 확인',
+    roleEmployeeName:'직원',
+    roleEmployeeDesc:'직원 로그인, 전체 재고 정보 확인',
+    searchPlaceholder:'상품 검색...',
+    scanTitle:'QR 스캔',
+    clearAria:'지우기',
+    switchView:'모드 전환',
+    customerViewLabel:'고객 화면',
+    languageBtn:'언어',
+    languageModalTitle:'언어 선택',
+    promoLabel:'프로모션',
+    promoEmpty:'현재 진행 중인 프로모션이 없습니다',
+    categoryLabel:'카테고리',
+    catElectric:'가전제품',
+    catFreshFrozen:'신선/냉동식품',
+    catHomeCare:'생활용품',
+    catGrocery:'식품 및 조미료',
+    catDrink:'음료',
+    catSnack:'과자',
+    feedbackTitle:'의견 / 코멘트',
+    feedbackPlaceholder:'문제, 제안 또는 의견을 입력하세요...',
+    feedbackPhotoLabel:'증빙 사진 첨부',
+    feedbackPhotoHint:'선택 사항이며, 첨부하지 않아도 제출 가능합니다',
+    feedbackSubmit:'의견 보내기',
+    feedbackThanks:'소중한 의견 감사합니다!',
+    loadingProducts:'상품 정보를 불러오는 중...',
+    navInfoTitle:'상품 상세 정보',
+    tipWalkSigns:'매장 내 구역 표지판을 따라 진열 위치로 이동하세요',
+    mapThisItem:'이 상품의 위치',
+    mapApprox:'대략적인 위치',
+    showMyLocation:'내 위치 표시',
+    hideMyLocation:'내 위치 끄기',
+    tryOtherWord:'다른 검색어를 시도하거나 직원에게 문의하세요',
+    itemNoLabel:'상품 번호',
+    locLabel:'구역',
+    locationLabel:'위치',
+    notYetAvailable:'아직 없음',
+    productNameLabel:'상품명',
+    productIsAt:'상품 위치',
+    withinRange:'해당 구간',
+    locFull:'구역 (Loc)',
+    locationFull:'위치 (진열대 위치)',
+    shelfTier:'진열 층수 (위에서부터)',
+    noLocationInfo:'위치 정보 없음',
+    foundCount:'{n}개 발견',
+    showFirst50:'(처음 50개만 표시)',
+    notFoundInCategory:'"{label}" 카테고리에서 상품을 찾을 수 없습니다',
+    notFoundQuery:'"{q}"에 대한 검색 결과가 없습니다'
+  },
+  jp:{
+    roleIntro:'利用モードを選択してください',
+    roleCustomerName:'お客様',
+    roleCustomerDesc:'商品検索・スキャン、ゾーンと保管場所の確認',
+    roleEmployeeName:'従業員',
+    roleEmployeeDesc:'従業員ログイン、在庫情報をすべて確認',
+    searchPlaceholder:'商品を検索...',
+    scanTitle:'QRスキャン',
+    clearAria:'クリア',
+    switchView:'表示切替',
+    customerViewLabel:'お客様表示',
+    languageBtn:'言語',
+    languageModalTitle:'言語を選択',
+    promoLabel:'プロモーション',
+    promoEmpty:'現在プロモーションはありません',
+    categoryLabel:'カテゴリー',
+    catElectric:'家電',
+    catFreshFrozen:'生鮮・冷凍食品',
+    catHomeCare:'家庭用品',
+    catGrocery:'食品・調味料',
+    catDrink:'飲料',
+    catSnack:'お菓子',
+    feedbackTitle:'ご意見・ご感想',
+    feedbackPlaceholder:'問題点やご意見、ご感想をご記入ください...',
+    feedbackPhotoLabel:'証拠写真を添付',
+    feedbackPhotoHint:'任意です。添付なしでも送信できます',
+    feedbackSubmit:'送信する',
+    feedbackThanks:'ご意見ありがとうございました！',
+    loadingProducts:'商品データを読み込み中...',
+    navInfoTitle:'商品の詳細情報',
+    tipWalkSigns:'店内のゾーン案内板に従って保管場所へお進みください',
+    mapThisItem:'この商品の位置',
+    mapApprox:'おおよその位置',
+    showMyLocation:'現在地を表示',
+    hideMyLocation:'現在地表示を停止',
+    tryOtherWord:'別のキーワードをお試しいただくか、スタッフにお尋ねください',
+    itemNoLabel:'商品番号',
+    locLabel:'ロケ',
+    locationLabel:'ロケーション',
+    notYetAvailable:'未登録',
+    productNameLabel:'商品名',
+    productIsAt:'商品の位置',
+    withinRange:'該当範囲',
+    locFull:'ロケ（区画）',
+    locationFull:'ロケーション（棚位置）',
+    shelfTier:'棚の段（上から数えて）',
+    noLocationInfo:'位置情報がありません',
+    foundCount:'{n}件見つかりました',
+    showFirst50:'（最初の50件を表示）',
+    notFoundInCategory:'カテゴリー「{label}」に商品が見つかりません',
+    notFoundQuery:'「{q}」に一致する商品が見つかりません'
+  }
+};
+let currentLang=(function(){ try{ return localStorage.getItem('mf_lang')||'th'; }catch(e){ return 'th'; } })();
+function t(key,vars){
+  let s=(I18N[currentLang]&&I18N[currentLang][key])!==undefined?I18N[currentLang][key]:(I18N.th[key]!==undefined?I18N.th[key]:key);
+  if(vars){ Object.keys(vars).forEach(k=>{ s=s.split('{'+k+'}').join(vars[k]); }); }
+  return s;
+}
+function applyI18n(root){
+  const scope=root||document;
+  scope.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.getAttribute('data-i18n')); });
+  scope.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ el.placeholder=t(el.getAttribute('data-i18n-placeholder')); });
+  scope.querySelectorAll('[data-i18n-title]').forEach(el=>{ const v=t(el.getAttribute('data-i18n-title')); el.title=v; el.setAttribute('aria-label',v); });
+  scope.querySelectorAll('[data-i18n-alt]').forEach(el=>{ el.alt=t(el.getAttribute('data-i18n-alt')); });
+}
+function setLang(code){
+  if(!I18N[code])return;
+  currentLang=code;
+  try{ localStorage.setItem('mf_lang',code); }catch(e){}
+  applyI18n();
+  closeLangModal();
+  refreshCurrentViewForLangChange();
+}
+function refreshCurrentViewForLangChange(){
+  try{
+    const rv=document.getElementById('resultView');
+    if(rv&&rv.classList.contains('show')){
+      const q=document.getElementById('si').value;
+      if(pendingCategoryKeyForLang){ searchByCategory(pendingCategoryKeyForLang); }
+      else if(q&&q.trim()){ search(q); }
+    }
+    if(typeof renderPromoGallery==='function') renderPromoGallery();
+  }catch(e){}
+}
+let pendingCategoryKeyForLang=null;
+function openLangModal(){
+  const modal=document.getElementById('langModal');
+  if(!modal)return;
+  const list=document.getElementById('langModalList');
+  list.innerHTML=I18N_LANGS.map(l=>
+    '<button type="button" class="lang-option'+(l.code===currentLang?' active':'')+'" onclick="setLang('+jsStr(l.code)+')">'+
+      '<span>'+escapeHtml(l.native)+'</span>'+
+      (l.code===currentLang?'<i class="ti ti-check" aria-hidden="true"></i>':'')+
+    '</button>'
+  ).join('');
+  modal.style.display='flex';
+}
+function closeLangModal(){
+  const modal=document.getElementById('langModal');
+  if(modal)modal.style.display='none';
+}
 /* ---------- Store map: data model, rendering, employee editing ---------- */
 const MAP_VB_W=896, MAP_VB_H=763, MAP_MIN_W=56, MAP_MIN_H=42, MAP_MIN_HEIGHT=28, MAP_MAX_HEIGHT=182;
 const MAP_FLOOR={x:11,y:11,w:874,h:731};
@@ -1622,8 +2007,8 @@ function updateLiveGpsBtnUI(){
     if(!btn)return;
     btn.classList.toggle('active',!!liveGpsWatchId);
     btn.innerHTML=liveGpsWatchId
-      ? '<i class="ti ti-location-off" aria-hidden="true"></i> ปิดตำแหน่งฉัน'
-      : '<i class="ti ti-current-location" aria-hidden="true"></i> แสดงตำแหน่งฉัน';
+      ? '<i class="ti ti-location-off" aria-hidden="true"></i> '+t('hideMyLocation')
+      : '<i class="ti ti-current-location" aria-hidden="true"></i> '+t('showMyLocation');
   });
 }
 function toggleLiveGps(){
@@ -1662,21 +2047,21 @@ function renderProductNavInfo(item){
     '<rect x="5.5" y="9.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="9.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="9.3" width="3.2" height="3.2" rx="0.5"/>'+
     '<rect x="5.5" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="15.3" width="3.2" height="3.2" rx="0.5"/>'+
   '</svg>';
-  const shelfLine='<div class="nav-info-line">'+shelfIconSvg+' อยู่ชั้นที่ (นับจากบนลงล่าง) : <b>'+(item.shelf?escapeHtml(item.shelf):'ยังไม่มี')+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">แก้</button>':'')+'</div>';
+  const shelfLine='<div class="nav-info-line">'+shelfIconSvg+' '+t('shelfTier')+' : <b>'+(item.shelf?escapeHtml(item.shelf):t('notYetAvailable'))+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">แก้</button>':'')+'</div>';
   if(item.locations && item.locations.length){
-    body.innerHTML='<div class="nav-info-name">ชื่อสินค้า : '+escapeHtml(item.desc)+'</div>'+
+    body.innerHTML='<div class="nav-info-name">'+t('productNameLabel')+' : '+escapeHtml(item.desc)+'</div>'+
       item.locations.map(l=>
         '<div class="nav-info-loc-group">'+
-          '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> สินค้าอยู่ตรง : Loc (ล็อคที่) : <b>'+escapeHtml(l.loc)+'</b></div>'+
-          '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> อยู่ในช่วง : Location (ชั้นวางที่) : <b>'+escapeHtml(l.location)+'</b></div>'+
+          '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> '+t('productIsAt')+' : '+t('locFull')+' : <b>'+escapeHtml(l.loc)+'</b></div>'+
+          '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> '+t('withinRange')+' : '+t('locationFull')+' : <b>'+escapeHtml(l.location)+'</b></div>'+
         '</div>'
       ).join('')+
       '<div class="nav-info-loc-group">'+shelfLine+'</div>';
   } else {
     const canAdd=isEmployee();
     body.innerHTML='<div class="nav-info-loc-group">'+
-      '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> Loc : <b>ยังไม่มี</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>'+
-      '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> Location : <b>ยังไม่มี</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>'+
+      '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> '+t('locLabel')+' : <b>'+t('notYetAvailable')+'</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>'+
+      '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> '+t('locationLabel')+' : <b>'+t('notYetAvailable')+'</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>'+
       shelfLine+
     '</div>';
   }
@@ -3721,13 +4106,13 @@ function findMatches(query){
   return exact.concat(partial,locExact,locPartial);
 }
 
-const CATEGORY_LABELS={
-  electric:'เครื่องใช้ไฟฟ้า',
-  freshfrozen:'อาหารสดและแช่แข็ง',
-  homecare:'ของใช้ในบ้าน',
-  grocery:'อาหารและเครื่องปรุง',
-  drink:'เครื่องดื่ม',
-  snack:'ขนม'
+const CATEGORY_LABEL_KEYS={
+  electric:'catElectric',
+  freshfrozen:'catFreshFrozen',
+  homecare:'catHomeCare',
+  grocery:'catGrocery',
+  drink:'catDrink',
+  snack:'catSnack'
 };
 const CATEGORY_KEYWORDS={
   electric:['พัดลม','หม้อหุงข้าว','กระทะไฟฟ้า','เตารีด','เครื่องปั่น','ไมโครเวฟ','ตู้เย็น','แอร์','เครื่องซักผ้า','หลอดไฟ','ปลั๊กไฟ','สายไฟ','ถ่านไฟฉาย','แบตเตอรี่','เครื่องดูดฝุ่น','กระติกน้ำร้อน','เครื่องทำน้ำอุ่น','เตาอบ','เครื่องปิ้งขนมปัง'],
@@ -3738,6 +4123,7 @@ const CATEGORY_KEYWORDS={
   snack:['เถ้าแก่น้อย','ขนมขบเคี้ยว','ลูกอม','ท็อฟฟี่','ช็อกโกแลต','คุกกี้','เวเฟอร์','ปลาเส้น','ข้าวเกรียบ','มันฝรั่งทอด','สาหร่ายทอด','ลูกกวาด']
 };
 function searchByCategory(key){
+  pendingCategoryKeyForLang=key;
   const home=document.getElementById('homeView');
   const rv=document.getElementById('resultView');
   home.style.display='none';
@@ -3749,7 +4135,7 @@ function searchByCategory(key){
   const rl=document.getElementById('resultsList');
   const fc=document.getElementById('foundCard');
   const nf=document.getElementById('notFound');
-  const label=CATEGORY_LABELS[key]||key;
+  const label=CATEGORY_LABEL_KEYS[key]?t(CATEGORY_LABEL_KEYS[key]):key;
   if(!PRODUCTS_READY){
     pendingCategoryKey=key;
     dl.style.display='block';rl.style.display='none';fc.style.display='none';nf.style.display='none';
@@ -3763,7 +4149,7 @@ function searchByCategory(key){
   });
   if(matches.length===0){
     rl.style.display='none';fc.style.display='none';nf.style.display='block';
-    document.getElementById('nfText').textContent='ไม่พบสินค้าในหมวด "'+label+'"';
+    document.getElementById('nfText').textContent=t('notFoundInCategory',{label:label});
     document.getElementById('notFoundAddItemBtn').style.display='none';
   } else if(matches.length===1){
     rl.style.display='none';nf.style.display='none';
@@ -3775,6 +4161,7 @@ function searchByCategory(key){
 }
 
 function search(q){
+  pendingCategoryKeyForLang=null;
   const inp=document.getElementById('si');
   if(inp.value!==q)inp.value=q;
   document.getElementById('clr').style.display=q?'block':'none';
@@ -3796,7 +4183,7 @@ function search(q){
   const matches=findMatches(q);
   if(matches.length===0){
     rl.style.display='none';fc.style.display='none';nf.style.display='block';
-    document.getElementById('nfText').textContent='ไม่พบ "'+q+'" ในระบบ';
+    document.getElementById('nfText').textContent=t('notFoundQuery',{q:q});
     lastNotFoundQuery=q;
     document.getElementById('notFoundAddItemBtn').style.display=isEmployee()?'inline-flex':'none';
   } else if(matches.length===1){
@@ -3811,10 +4198,10 @@ function search(q){
 function renderList(matches,q){
   const rl=document.getElementById('resultsList');
   const shown=matches.slice(0,50);
-  rl.innerHTML='<div class="results-count">พบ '+matches.length+' รายการ'+(matches.length>50?' (แสดง 50 รายการแรก)':'')+'</div>'+
+  rl.innerHTML='<div class="results-count">'+t('foundCount',{n:matches.length})+(matches.length>50?' '+t('showFirst50'):'')+'</div>'+
     shown.map((item,i)=>{
       const loc=item.locations[0];
-      const metaLoc=loc?('Loc '+loc.loc+' · Location '+loc.location):'ไม่มีข้อมูลตำแหน่ง';
+      const metaLoc=loc?(t('locLabel')+' '+loc.loc+' · '+t('locationLabel')+' '+loc.location):t('noLocationInfo');
       return '<div class="result-item" onclick="selectResult('+i+')">'+
         '<div class="result-item-icon" id="resultIcon'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
         '<div class="result-item-info">'+
@@ -3843,7 +4230,7 @@ function renderDetail(item,fromList){
   const fc=document.getElementById('foundCard');
   fc.style.display='block';
   document.getElementById('rName').textContent=item.desc;
-  document.getElementById('rBadge').textContent='Item No '+item.itemNo+(item.barcode?' · '+item.barcode:'');
+  document.getElementById('rBadge').textContent=t('itemNoLabel')+' '+item.itemNo+(item.barcode?' · '+item.barcode:'');
   document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary)';
   const rEditBtn=document.getElementById('rEditBtn');
   if(isEmployee()){
@@ -3865,10 +4252,10 @@ function renderDetail(item,fromList){
     const canEditLoc=isEmployee();
     rLoc.innerHTML=locGroups.map(g=>
       '<div class="loc-group-row">'+
-      '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>Loc '+escapeHtml(g.loc)+'</div>'+
+      '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>'+t('locLabel')+' '+escapeHtml(g.loc)+'</div>'+
       g.locations.map(loc=>
         '<div class="loc-pill sec'+(canEditLoc?' loc-pill-editable':'')+'"'+(canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')+'>'+
-          '<i class="ti ti-map-2" aria-hidden="true"></i>Location '+escapeHtml(loc)+
+          '<i class="ti ti-map-2" aria-hidden="true"></i>'+t('locationLabel')+' '+escapeHtml(loc)+
           (canEditLoc?'<i class="ti ti-pencil" aria-hidden="true"></i>':'')+
         '</div>'
       ).join('')+
@@ -3877,8 +4264,8 @@ function renderDetail(item,fromList){
   } else {
     const canAddLoc=isEmployee();
     rLoc.innerHTML='<div class="loc-group-row">'+
-      '<div class="loc-pill sec'+(canAddLoc?' loc-pill-editable':'')+'"'+(canAddLoc?' onclick="addItemLocation('+jsStr(item.itemNo)+')"':'')+'><i class="ti ti-map-pin-off" aria-hidden="true"></i>Loc ยังไม่มี'+(canAddLoc?' <i class="ti ti-pencil" aria-hidden="true"></i>':'')+'</div>'+
-      (canAddLoc?'<div class="loc-pill sec loc-pill-editable" onclick="addItemLocation('+jsStr(item.itemNo)+')"><i class="ti ti-map-2" aria-hidden="true"></i>Location ยังไม่มี <i class="ti ti-pencil" aria-hidden="true"></i></div>':'')+
+      '<div class="loc-pill sec'+(canAddLoc?' loc-pill-editable':'')+'"'+(canAddLoc?' onclick="addItemLocation('+jsStr(item.itemNo)+')"':'')+'><i class="ti ti-map-pin-off" aria-hidden="true"></i>'+t('locLabel')+' '+t('notYetAvailable')+(canAddLoc?' <i class="ti ti-pencil" aria-hidden="true"></i>':'')+'</div>'+
+      (canAddLoc?'<div class="loc-pill sec loc-pill-editable" onclick="addItemLocation('+jsStr(item.itemNo)+')"><i class="ti ti-map-2" aria-hidden="true"></i>'+t('locationLabel')+' '+t('notYetAvailable')+' <i class="ti ti-pencil" aria-hidden="true"></i></div>':'')+
       '</div>';
   }
   renderProductNavInfo(item);
@@ -4026,7 +4413,7 @@ function showMain(sess){
     document.getElementById('employeeFeedbackSection').style.display='block';
     renderFeedbackList();
   } else {
-    bar.innerHTML='<b>มุมมองลูกค้า</b>';
+    bar.innerHTML='<b data-i18n="customerViewLabel">'+t('customerViewLabel')+'</b>';
     document.getElementById('customerFeedbackSection').style.display='block';
     document.getElementById('employeeFeedbackSection').style.display='none';
   }
@@ -4244,6 +4631,7 @@ function initPromoSwipe(){
 }
 initPromoSwipe();
 initOverlayZoomLock();
+applyI18n();
 checkSession();
 </script>
 </body>
