@@ -311,7 +311,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .emp-bar b{color:var(--color-text-primary)}
 .emp-bar button{background:none;border:none;color:var(--brand-red);font-size:12.5px;cursor:pointer;font-family:inherit;padding:0;flex-shrink:0}
 .role-screen{position:fixed;inset:0;background:var(--brand-red);display:flex;align-items:center;justify-content:center;padding:24px;z-index:1500}
-.role-card-wrap{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
+.role-card-wrap{position:relative;background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
+.role-lang-btn{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:9px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);color:var(--color-text-secondary);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .role-intro-desc{font-size:13px;color:var(--color-text-secondary);margin-bottom:22px;line-height:1.5}
 .role-option{display:flex;align-items:center;gap:14px;text-align:left;border:1.5px solid var(--color-border-secondary);border-radius:14px;padding:14px;cursor:pointer;margin-bottom:12px;transition:border-color .15s,background .15s;background:none;width:100%;font-family:inherit}
 .role-option:hover{border-color:var(--brand-red);background:#fff5f5}
@@ -428,6 +429,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
   <div class="role-screen" id="roleScreen">
     <div class="role-card-wrap">
+      <button type="button" class="role-lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><i class="ti ti-language" aria-hidden="true"></i></button>
       <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
         <circle cx="170" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
