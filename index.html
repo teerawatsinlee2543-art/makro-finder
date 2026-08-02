@@ -301,7 +301,7 @@ body{margin:0;padding:0;touch-action:manipulation}
 .scan-hint{color:rgba(255,255,255,.75);font-size:13px;text-align:center;margin-top:14px}
 .scan-error{color:#ffb3b3;font-size:13px;text-align:center;margin-top:14px}
 .login-screen{position:fixed;inset:0;background:var(--brand-red);display:none;align-items:center;justify-content:center;padding:24px;z-index:1500;overflow-y:auto}
-.login-card{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center;margin:auto}
+.login-card{position:relative;background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center;margin:auto}
 .brand-logo{width:150px;height:auto;display:block;margin:0 auto 8px}
 .login-sub{font-size:15px;font-weight:500;color:var(--color-text-secondary);margin-top:2px;margin-bottom:14px}
 .login-desc{font-size:13px;color:var(--color-text-secondary);margin-bottom:22px;line-height:1.5}
@@ -469,6 +469,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
   <div class="role-screen" id="grHomeScreen" style="display:none">
     <div class="role-card-wrap">
+      <div class="role-lang-col">
+        <button type="button" class="role-lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
+        <span class="role-lang-caption" data-i18n="changeLanguageLabel">เปลี่ยนภาษา</span>
+      </div>
       <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
         <circle cx="170" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
@@ -480,24 +484,28 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <button class="role-option" onclick="grGoToPalletManager()">
         <div class="role-icon emp"><i class="ti ti-stack-2" aria-hidden="true"></i></div>
         <div>
-          <div class="role-name">จัดการพาเลท</div>
-          <div class="role-desc">สร้าง/ปิดพาเลท เพิ่ม-ลบ-ปรับจำนวนสินค้า</div>
+          <div class="role-name" data-i18n="grPalletMgmtName">จัดการพาเลท</div>
+          <div class="role-desc" data-i18n="grPalletMgmtDesc">สร้าง/ปิดพาเลท เพิ่ม-ลบ-ปรับจำนวนสินค้า</div>
         </div>
       </button>
       <button class="role-option" onclick="grGoToFindInPallet()">
         <div class="role-icon cust"><i class="ti ti-search" aria-hidden="true"></i></div>
         <div>
-          <div class="role-name">หาสินค้าตามพาเลท</div>
-          <div class="role-desc">ค้นหาสินค้าว่าตอนนี้อยู่ในพาเลทไหนบ้าง</div>
+          <div class="role-name" data-i18n="grFindInPalletName">หาสินค้าตามพาเลท</div>
+          <div class="role-desc" data-i18n="grFindInPalletDesc">ค้นหาสินค้าว่าตอนนี้อยู่ในพาเลทไหนบ้าง</div>
         </div>
       </button>
-      <button class="login-back" style="margin:6px auto 0;justify-content:center;width:100%" onclick="grGoToMainSearch()">ไปหน้าค้นหาสินค้าทั่วไป <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      <button class="login-back" style="margin:6px auto 0;justify-content:center;width:100%" onclick="grGoToMainSearch()"><span data-i18n="grGoToMainSearchBtn">ไปหน้าค้นหาสินค้าทั่วไป</span> <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
     </div>
   </div>
 
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
-      <button class="login-back" onclick="showRoleScreen()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
+      <div class="role-lang-col">
+        <button type="button" class="role-lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
+        <span class="role-lang-caption" data-i18n="changeLanguageLabel">เปลี่ยนภาษา</span>
+      </div>
+      <button class="login-back" onclick="showRoleScreen()"><i class="ti ti-arrow-left" aria-hidden="true"></i> <span data-i18n="loginBackBtn">กลับ</span></button>
       <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
         <circle cx="170" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
@@ -505,15 +513,15 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <text x="170" y="174" font-family="Arial,Helvetica,sans-serif" font-size="32" font-weight="900" text-anchor="middle" fill="#E8192C">Finder</text>
       </svg>
       <div class="login-sub">Store 42 · Ramintra</div>
-      <p class="login-desc">กรอกข้อมูลพนักงานก่อนเข้าใช้งานระบบค้นหาสินค้า</p>
+      <p class="login-desc" data-i18n="loginDesc">กรอกข้อมูลพนักงานก่อนเข้าใช้งานระบบค้นหาสินค้า</p>
       <div class="login-field">
-        <label class="field-label">ชื่อ-นามสกุล <span class="req">*</span></label>
-        <input type="text" id="empName" class="inp" placeholder="เช่น สมชาย ใจดี">
+        <label class="field-label"><span data-i18n="fieldNameLabel">ชื่อ-นามสกุล</span> <span class="req">*</span></label>
+        <input type="text" id="empName" class="inp" data-i18n-placeholder="fieldNamePlaceholder" placeholder="เช่น สมชาย ใจดี">
       </div>
       <div class="login-field">
-        <label class="field-label">แผนก <span class="req">*</span></label>
+        <label class="field-label"><span data-i18n="fieldDeptLabel">แผนก</span> <span class="req">*</span></label>
         <select id="empDept" class="inp">
-          <option value="">เลือกแผนก</option>
+          <option value="" data-i18n="fieldDeptDefaultOption">เลือกแผนก</option>
           <option>FV</option>
           <option>FS</option>
           <option>BK</option>
@@ -528,11 +536,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </select>
       </div>
       <div class="login-field">
-        <label class="field-label">รหัส PIN พนักงาน <span class="req">*</span></label>
-        <input type="password" maxlength="4" id="empPin" class="inp" placeholder="ใส่รหัส PIN 4 หลัก">
+        <label class="field-label"><span data-i18n="fieldPinLabel">รหัส PIN พนักงาน</span> <span class="req">*</span></label>
+        <input type="password" maxlength="4" id="empPin" class="inp" data-i18n-placeholder="fieldPinPlaceholder" placeholder="ใส่รหัส PIN 4 หลัก">
       </div>
       <p class="login-error" id="loginError" style="display:none"></p>
-      <button class="login-btn" onclick="submitLogin()">เข้าใช้งาน</button>
+      <button class="login-btn" onclick="submitLogin()" data-i18n="loginSubmitBtn">เข้าใช้งาน</button>
     </div>
   </div>
 
@@ -576,8 +584,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
 
     <div id="palletOpenBar" style="display:none;margin-bottom:16px">
-      <button class="pallet-open-btn" onclick="openPalletManager()"><i class="ti ti-stack-2" aria-hidden="true"></i> จัดการพาเลท (GR)</button>
-      <button class="pallet-open-btn green" style="margin-top:8px" onclick="openFindItemInPallets()"><i class="ti ti-search" aria-hidden="true"></i> หาสินค้าตามพาเลท</button>
+      <button class="pallet-open-btn" onclick="openPalletManager()"><i class="ti ti-stack-2" aria-hidden="true"></i> <span data-i18n="palletMgmtGRBtn">จัดการพาเลท (GR)</span></button>
+      <button class="pallet-open-btn green" style="margin-top:8px" onclick="openFindItemInPallets()"><i class="ti ti-search" aria-hidden="true"></i> <span data-i18n="grFindInPalletName">หาสินค้าตามพาเลท</span></button>
     </div>
 
     <div id="homeView">
@@ -590,7 +598,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div class="promo-dots" id="promoDots" style="display:none"></div>
       <div class="promo-gallery-empty" id="promoEmptyMsg" style="display:none" data-i18n="promoEmpty">ยังไม่มีโปรโมชั่นในขณะนี้</div>
       <div class="promo-add-row" id="promoAddRow" style="display:none">
-        <div class="promo-add-banner" onclick="openPromoAddFlow()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มโปรโมชั่น</div>
+        <div class="promo-add-banner" onclick="openPromoAddFlow()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addPromoBtn">เพิ่มโปรโมชั่น</span></div>
       </div>
       <input type="file" id="promoFileInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handlePromoFileSelect(event)">
       <div class="section-label" data-i18n="categoryLabel">หมวดหมู่</div>
@@ -623,10 +631,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
       <div id="employeeFeedbackSection" style="display:none">
         <div class="feedback-card">
-          <div class="feedback-card-title"><i class="ti ti-message-2" aria-hidden="true"></i> ข้อเสนอแนะจากลูกค้า</div>
+          <div class="feedback-card-title"><i class="ti ti-message-2" aria-hidden="true"></i> <span data-i18n="empFeedbackTitle">ข้อเสนอแนะจากลูกค้า</span></div>
           <div class="fb-admin-toolbar">
             <span class="fb-admin-count" id="fbCount">0 รายการ</span>
-            <button class="fb-export-btn" onclick="exportFeedbackExcel()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
+            <button class="fb-export-btn" onclick="exportFeedbackExcel()"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> <span data-i18n="empFeedbackExportBtn">ส่งออกเป็น Excel</span></button>
           </div>
           <div id="fbList" class="fb-list"></div>
         </div>
@@ -658,7 +666,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <div id="navInfoBody"></div>
         </div>
         <div class="emp-stock-box" id="empStockBlock" style="display:none">
-          <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> สำหรับพนักงาน · ข้อมูลจัดวางสินค้า</div>
+          <div class="emp-stock-label"><i class="ti ti-lock" aria-hidden="true"></i> <span data-i18n="empStockLabel">สำหรับพนักงาน · ข้อมูลจัดวางสินค้า</span></div>
           <div id="empStockList"></div>
         </div>
         <div id="remarkBlock" class="tip-box" style="display:none">
@@ -679,7 +687,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
             <button class="map-edit-open-btn" id="liveGpsBtnInline" onclick="toggleLiveGps()"><i class="ti ti-current-location" aria-hidden="true"></i> <span data-i18n="showMyLocation">แสดงตำแหน่งฉัน</span></button>
           </div>
           <div id="mapEditOpenBar" style="display:none">
-            <button class="map-edit-open-btn" onclick="openMapEditor()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ไขแผนที่</button>
+            <button class="map-edit-open-btn" onclick="openMapEditor()"><i class="ti ti-pencil" aria-hidden="true"></i> <span data-i18n="editMapBtn">แก้ไขแผนที่</span></button>
           </div>
         </div>
       </div>
@@ -706,68 +714,68 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
 <div class="promo-date-overlay" id="promoDateOverlay">
   <div class="promo-date-box">
-    <div class="promo-date-title"><i class="ti ti-calendar-event" aria-hidden="true"></i> ช่วงเวลาโปรโมชั่น</div>
-    <label>เริ่มแสดง (ไม่ระบุ = เริ่มทันที)</label>
+    <div class="promo-date-title"><i class="ti ti-calendar-event" aria-hidden="true"></i> <span data-i18n="promoDateModalTitle">ช่วงเวลาโปรโมชั่น</span></div>
+    <label data-i18n="promoStartLabel">เริ่มแสดง (ไม่ระบุ = เริ่มทันที)</label>
     <input type="date" id="promoDateStart">
-    <label>สิ้นสุด (ระบบจะลบให้อัตโนมัติหลังวันนี้)</label>
+    <label data-i18n="promoEndLabel">สิ้นสุด (ระบบจะลบให้อัตโนมัติหลังวันนี้)</label>
     <input type="date" id="promoDateEnd">
     <div class="promo-date-actions">
-      <button class="promo-date-cancel" onclick="cancelPromoDatePick()">ยกเลิก</button>
-      <button class="promo-date-confirm" id="promoDateConfirmBtn" onclick="confirmPromoDatePick()">ตกลง เลือกไฟล์</button>
+      <button class="promo-date-cancel" onclick="cancelPromoDatePick()" data-i18n="cancelBtn">ยกเลิก</button>
+      <button class="promo-date-confirm" id="promoDateConfirmBtn" onclick="confirmPromoDatePick()" data-i18n="promoConfirmPickFile">ตกลง เลือกไฟล์</button>
     </div>
   </div>
 </div>
 
 <div class="promo-date-overlay" id="newItemOverlay">
   <div class="promo-date-box" onclick="event.stopPropagation()">
-    <div class="promo-date-title"><i class="ti ti-package" aria-hidden="true"></i> เพิ่มรายการ Item ใหม่</div>
-    <label>ชื่อสินค้า</label>
-    <input type="text" id="newItemDesc" placeholder="ชื่อสินค้า">
-    <label>เลข Item</label>
-    <input type="text" id="newItemNo" placeholder="เลข Item">
-    <label>บาร์โค้ด</label>
+    <div class="promo-date-title"><i class="ti ti-package" aria-hidden="true"></i> <span data-i18n="newItemModalTitle">เพิ่มรายการ Item ใหม่</span></div>
+    <label data-i18n="productNameLabel">ชื่อสินค้า</label>
+    <input type="text" id="newItemDesc" data-i18n-placeholder="productNameLabel" placeholder="ชื่อสินค้า">
+    <label data-i18n="itemNoFieldLabel">เลข Item</label>
+    <input type="text" id="newItemNo" data-i18n-placeholder="itemNoFieldLabel" placeholder="เลข Item">
+    <label data-i18n="barcodeLabel">บาร์โค้ด</label>
     <div class="new-item-barcode-row">
-      <input type="text" id="newItemBarcode" placeholder="บาร์โค้ด (ไม่บังคับ)">
+      <input type="text" id="newItemBarcode" data-i18n-placeholder="barcodeOptionalPlaceholder" placeholder="บาร์โค้ด (ไม่บังคับ)">
       <button type="button" class="new-item-scan-btn" onclick="openNewItemBarcodeScan()" aria-label="สแกนบาร์โค้ด"><i class="ti ti-scan" aria-hidden="true"></i></button>
     </div>
     <label>Loc</label>
-    <input type="text" id="newItemLoc" placeholder="เช่น 025 (ไม่บังคับ)">
+    <input type="text" id="newItemLoc" data-i18n-placeholder="locOptionalPlaceholder" placeholder="เช่น 025 (ไม่บังคับ)">
     <label>Location</label>
-    <input type="text" id="newItemLocation" placeholder="เช่น 025-209 (ไม่บังคับ)">
-    <label>รูปภาพสินค้า</label>
-    <label class="new-item-photo-btn" for="newItemPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> ถ่าย/แนบรูปสินค้า</label>
+    <input type="text" id="newItemLocation" data-i18n-placeholder="locationOptionalPlaceholder" placeholder="เช่น 025-209 (ไม่บังคับ)">
+    <label data-i18n="productImageLabel">รูปภาพสินค้า</label>
+    <label class="new-item-photo-btn" for="newItemPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> <span data-i18n="takeAttachPhotoBtn">ถ่าย/แนบรูปสินค้า</span></label>
     <input type="file" id="newItemPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleNewItemPhotoSelect(event)">
     <div class="new-item-photo-preview-wrap" id="newItemPhotoPreviewWrap" style="display:none">
       <img id="newItemPhotoPreview" alt="รูปสินค้า">
       <button type="button" class="new-item-photo-remove" onclick="removeNewItemPhoto()" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
     <div class="promo-date-actions">
-      <button class="promo-date-cancel" onclick="closeNewItemForm()">ยกเลิก</button>
-      <button class="promo-date-confirm" onclick="submitNewItem()">บันทึก</button>
+      <button class="promo-date-cancel" onclick="closeNewItemForm()" data-i18n="cancelBtn">ยกเลิก</button>
+      <button class="promo-date-confirm" onclick="submitNewItem()" data-i18n="saveBtn">บันทึก</button>
     </div>
   </div>
 </div>
 
 <div class="promo-date-overlay" id="editProductOverlay">
   <div class="promo-date-box" onclick="event.stopPropagation()">
-    <div class="promo-date-title"><i class="ti ti-edit" aria-hidden="true"></i> แก้ไขข้อมูลสินค้า</div>
-    <label>ชื่อสินค้า</label>
-    <input type="text" id="editProdDesc" placeholder="ชื่อสินค้า">
-    <label>รูปภาพสินค้า</label>
-    <label class="new-item-photo-btn" for="editProdPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> เปลี่ยนรูปสินค้า</label>
+    <div class="promo-date-title"><i class="ti ti-edit" aria-hidden="true"></i> <span data-i18n="editProductModalTitle">แก้ไขข้อมูลสินค้า</span></div>
+    <label data-i18n="productNameLabel">ชื่อสินค้า</label>
+    <input type="text" id="editProdDesc" data-i18n-placeholder="productNameLabel" placeholder="ชื่อสินค้า">
+    <label data-i18n="productImageLabel">รูปภาพสินค้า</label>
+    <label class="new-item-photo-btn" for="editProdPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> <span data-i18n="changePhotoBtn">เปลี่ยนรูปสินค้า</span></label>
     <input type="file" id="editProdPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleEditProdPhotoSelect(event)">
     <div class="new-item-photo-preview-wrap" id="editProdPhotoPreviewWrap" style="display:none">
       <img id="editProdPhotoPreview" alt="รูปสินค้า">
       <button type="button" class="new-item-photo-remove" onclick="removeEditProdPhoto()" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
     <div class="promo-date-actions">
-      <button class="promo-date-cancel" onclick="closeEditProductModal()">ยกเลิก</button>
-      <button class="promo-date-confirm" onclick="submitEditProduct()">บันทึก</button>
+      <button class="promo-date-cancel" onclick="closeEditProductModal()" data-i18n="cancelBtn">ยกเลิก</button>
+      <button class="promo-date-confirm" onclick="submitEditProduct()" data-i18n="saveBtn">บันทึก</button>
     </div>
     <div style="border-top:1px solid var(--color-border-tertiary);margin-top:14px;padding-top:14px">
-      <label style="color:#A32D2D">ลบสินค้านี้ออกจากระบบ (ต้องใส่รหัส PIN พนักงาน)</label>
+      <label style="color:#A32D2D" data-i18n="deleteProductSectionLabel">ลบสินค้านี้ออกจากระบบ (ต้องใส่รหัส PIN พนักงาน)</label>
       <div class="new-item-barcode-row">
-        <input type="password" id="editProdDeletePin" placeholder="รหัส PIN 4 หลัก" maxlength="4">
+        <input type="password" id="editProdDeletePin" data-i18n-placeholder="pin4DigitsPlaceholder" placeholder="รหัส PIN 4 หลัก" maxlength="4">
         <button type="button" class="new-item-scan-btn" style="background:#FFF0F1;color:#A32D2D;border-color:#F09595" onclick="confirmDeleteProduct()" aria-label="ลบสินค้า"><i class="ti ti-trash" aria-hidden="true"></i></button>
       </div>
     </div>
@@ -804,32 +812,32 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <input type="range" id="mapRotationSlider" min="0" max="360" value="25" oninput="onMapRotationSlider(this.value)">
     <button class="map-rotate-btn" onclick="rotateMapBy(15)" aria-label="หมุนขวา"><i class="ti ti-rotate-clockwise-2" aria-hidden="true"></i></button>
     <span class="map-rotate-value" id="mapRotationValue">25°</span>
-    <button class="map-rotate-reset" onclick="resetMapRotation()">รีเซ็ตมุมมอง</button>
-    <button class="map-rotate-reset" id="liveGpsBtn" onclick="toggleLiveGps()"><i class="ti ti-current-location" aria-hidden="true"></i> แสดงตำแหน่งฉัน</button>
+    <button class="map-rotate-reset" onclick="resetMapRotation()" data-i18n="resetViewBtn">รีเซ็ตมุมมอง</button>
+    <button class="map-rotate-reset" id="liveGpsBtn" onclick="toggleLiveGps()"><i class="ti ti-current-location" aria-hidden="true"></i> <span data-i18n="showMyLocation">แสดงตำแหน่งฉัน</span></button>
   </div>
   <div class="map-edit-bar" id="mapEditBar" onclick="event.stopPropagation()">
     <p class="map-edit-hint" id="mapEditHint">ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · แตะกล่องเพื่อเลือก</p>
     <div class="map-edit-bar-row map-edit-tools-row">
-      <label class="map-edit-color-label">พื้นหลัง <input type="color" id="mapBgColorInput" onchange="onMapBgColorChange(this.value)"></label>
-      <button class="map-edit-add-btn" onclick="addMapBlock()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มกล่อง</button>
+      <label class="map-edit-color-label"><span data-i18n="bgColorLabel">พื้นหลัง</span> <input type="color" id="mapBgColorInput" onchange="onMapBgColorChange(this.value)"></label>
+      <button class="map-edit-add-btn" onclick="addMapBlock()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addBoxBtn">เพิ่มกล่อง</span></button>
     </div>
     <div class="map-edit-bar-row map-edit-selected-row" id="mapSelectedRow" style="display:none">
-      <label class="map-edit-color-label">สีกล่อง <input type="color" id="mapBlockColorInput" onchange="onMapBlockColorChange(this.value)"></label>
-      <label class="map-edit-color-label">ความสูง <input type="number" id="mapBlockHeightInput" min="20" max="130" step="1" style="width:56px" onchange="onMapBlockHeightChange(this.value)"></label>
-      <button class="map-edit-rename-btn" onclick="editSelectedBlockText()"><i class="ti ti-pencil" aria-hidden="true"></i> แก้ข้อความ/สี/ขนาด</button>
-      <button class="map-edit-delete-btn" onclick="deleteSelectedBlock()"><i class="ti ti-trash" aria-hidden="true"></i> ลบกล่อง</button>
+      <label class="map-edit-color-label"><span data-i18n="boxColorLabel">สีกล่อง</span> <input type="color" id="mapBlockColorInput" onchange="onMapBlockColorChange(this.value)"></label>
+      <label class="map-edit-color-label"><span data-i18n="boxHeightLabel">ความสูง</span> <input type="number" id="mapBlockHeightInput" min="20" max="130" step="1" style="width:56px" onchange="onMapBlockHeightChange(this.value)"></label>
+      <button class="map-edit-rename-btn" onclick="editSelectedBlockText()"><i class="ti ti-pencil" aria-hidden="true"></i> <span data-i18n="editTextColorSizeBtn">แก้ข้อความ/สี/ขนาด</span></button>
+      <button class="map-edit-delete-btn" onclick="deleteSelectedBlock()"><i class="ti ti-trash" aria-hidden="true"></i> <span data-i18n="deleteBoxBtn">ลบกล่อง</span></button>
     </div>
     <div class="map-edit-bar-row map-edit-tools-row">
-      <button class="map-edit-add-btn" onclick="setGpsOriginHere()"><i class="ti ti-map-pin" aria-hidden="true"></i> ตั้งจุดอ้างอิง GPS ที่นี่</button>
-      <span class="map-gps-status" id="gpsCalibStatus">ยังไม่ได้ตั้งจุดอ้างอิง</span>
+      <button class="map-edit-add-btn" onclick="setGpsOriginHere()"><i class="ti ti-map-pin" aria-hidden="true"></i> <span data-i18n="setGpsOriginBtn">ตั้งจุดอ้างอิง GPS ที่นี่</span></button>
+      <span class="map-gps-status" id="gpsCalibStatus" data-i18n="gpsNotSetStatus">ยังไม่ได้ตั้งจุดอ้างอิง</span>
     </div>
     <div class="map-edit-bar-row map-edit-tools-row">
-      <label class="map-edit-color-label">มุมทิศอาคาร <input type="range" id="gpsBearingSlider" min="0" max="360" value="0" oninput="onGpsBearingChange(this.value)" style="width:120px"></label>
+      <label class="map-edit-color-label"><span data-i18n="buildingBearingLabel">มุมทิศอาคาร</span> <input type="range" id="gpsBearingSlider" min="0" max="360" value="0" oninput="onGpsBearingChange(this.value)" style="width:120px"></label>
       <span class="map-rotate-value" id="gpsBearingValue">0°</span>
     </div>
     <div class="map-edit-bar-row">
-      <button class="map-edit-cancel" onclick="cancelMapEdit()">ยกเลิก</button>
-      <button class="map-edit-save" onclick="saveMapEdit()">บันทึก</button>
+      <button class="map-edit-cancel" onclick="cancelMapEdit()" data-i18n="cancelBtn">ยกเลิก</button>
+      <button class="map-edit-save" onclick="saveMapEdit()" data-i18n="saveBtn">บันทึก</button>
     </div>
   </div>
 </div>
@@ -961,7 +969,84 @@ const I18N={
     foundCount:'พบ {n} รายการ',
     showFirst50:'(แสดง 50 รายการแรก)',
     notFoundInCategory:'ไม่พบสินค้าในหมวด "{label}"',
-    notFoundQuery:'ไม่พบ "{q}" ในระบบ'
+    notFoundQuery:'ไม่พบ "{q}" ในระบบ',
+    loginBackBtn:'กลับ',
+    loginDesc:'กรอกข้อมูลพนักงานก่อนเข้าใช้งานระบบค้นหาสินค้า',
+    fieldNameLabel:'ชื่อ-นามสกุล',
+    fieldNamePlaceholder:'เช่น สมชาย ใจดี',
+    fieldDeptLabel:'แผนก',
+    fieldDeptDefaultOption:'เลือกแผนก',
+    fieldPinLabel:'รหัส PIN พนักงาน',
+    fieldPinPlaceholder:'ใส่รหัส PIN 4 หลัก',
+    loginSubmitBtn:'เข้าใช้งาน',
+    loginErrName:'กรุณากรอกชื่อ-นามสกุล',
+    loginErrDept:'กรุณาเลือกแผนก',
+    loginErrPin:'กรุณากรอกรหัส PIN',
+    loginErrInvalidPin:'รหัส PIN ไม่ถูกต้อง เฉพาะพนักงานที่ได้รับรหัสเท่านั้น',
+    grGreetingTemplate:'สวัสดี {name} · GR — เลือกฟังก์ชันที่ต้องการ',
+    grPalletMgmtName:'จัดการพาเลท',
+    grPalletMgmtDesc:'สร้าง/ปิดพาเลท เพิ่ม-ลบ-ปรับจำนวนสินค้า',
+    grFindInPalletName:'หาสินค้าตามพาเลท',
+    grFindInPalletDesc:'ค้นหาสินค้าว่าตอนนี้อยู่ในพาเลทไหนบ้าง',
+    grGoToMainSearchBtn:'ไปหน้าค้นหาสินค้าทั่วไป',
+    empBarPrefix:'พนักงาน',
+    palletMgmtGRBtn:'จัดการพาเลท (GR)',
+    empFeedbackTitle:'ข้อเสนอแนะจากลูกค้า',
+    empFeedbackExportBtn:'ส่งออกเป็น Excel',
+    fbLoadingText:'กำลังโหลด...',
+    fbEmptyText:'ยังไม่มีข้อเสนอแนะจากลูกค้า',
+    fbCountSuffix:'รายการ',
+    fbExportEmptyAlert:'ยังไม่มีข้อเสนอแนะให้ส่งออก',
+    empStockLabel:'สำหรับพนักงาน · ข้อมูลจัดวางสินค้า',
+    empEditBtn:'แก้ไข',
+    empDeleteBtn:'ลบ',
+    newItemModalTitle:'เพิ่มรายการ Item ใหม่',
+    itemNoFieldLabel:'เลข Item',
+    barcodeLabel:'บาร์โค้ด',
+    barcodeOptionalPlaceholder:'บาร์โค้ด (ไม่บังคับ)',
+    locOptionalPlaceholder:'เช่น 025 (ไม่บังคับ)',
+    locationOptionalPlaceholder:'เช่น 025-209 (ไม่บังคับ)',
+    productImageLabel:'รูปภาพสินค้า',
+    takeAttachPhotoBtn:'ถ่าย/แนบรูปสินค้า',
+    cancelBtn:'ยกเลิก',
+    saveBtn:'บันทึก',
+    newItemMissingFields:'กรุณากรอกชื่อสินค้าและเลข Item ให้ครบ',
+    newItemMissingPhoto:'กรุณาแนบรูปภาพสินค้า',
+    newItemDupe:'มีเลข Item นี้อยู่ในระบบแล้ว กรุณาตรวจสอบ',
+    newItemAddedToast:'เพิ่ม Item ใหม่ {desc} แล้ว',
+    editProductModalTitle:'แก้ไขข้อมูลสินค้า',
+    changePhotoBtn:'เปลี่ยนรูปสินค้า',
+    deleteProductSectionLabel:'ลบสินค้านี้ออกจากระบบ (ต้องใส่รหัส PIN พนักงาน)',
+    pin4DigitsPlaceholder:'รหัส PIN 4 หลัก',
+    editProductMissingDesc:'กรุณากรอกชื่อสินค้า',
+    editProductSavedToast:'บันทึกข้อมูลสินค้าแล้ว',
+    deleteMissingPin:'กรุณาใส่รหัส PIN เพื่อยืนยันการลบ',
+    deleteInvalidPin:'รหัส PIN ไม่ถูกต้อง',
+    deleteConfirmMsg:'ยืนยันลบสินค้านี้ออกจากระบบถาวร? การกระทำนี้ย้อนกลับไม่ได้',
+    productDeletedToast:'ลบสินค้าออกจากระบบแล้ว',
+    locMissingFields:'กรุณาระบุ Loc และ Location ให้ครบ',
+    removeLocConfirm:'ยืนยันลบตำแหน่ง Loc {loc} / Location {location} ?',
+    editMapBtn:'แก้ไขแผนที่',
+    resetViewBtn:'รีเซ็ตมุมมอง',
+    mapEditHintNoDb:'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · ลากพื้นหลังเพื่อหมุนมุมมอง · แตะกล่องเพื่อเลือกและแก้สี/ความสูง/ข้อความ · ยังไม่ได้เชื่อมฐานข้อมูลกลาง บันทึกนี้จะเก็บไว้เฉพาะเครื่องนี้เท่านั้น',
+    mapEditHintDb:'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · ลากพื้นหลังเพื่อหมุนมุมมอง · แตะกล่องเพื่อเลือกและแก้สี/ความสูง/ข้อความ · บันทึกแล้วทุกคนจะเห็นเหมือนกัน',
+    bgColorLabel:'พื้นหลัง',
+    addBoxBtn:'เพิ่มกล่อง',
+    boxColorLabel:'สีกล่อง',
+    boxHeightLabel:'ความสูง',
+    editTextColorSizeBtn:'แก้ข้อความ/สี/ขนาด',
+    deleteBoxBtn:'ลบกล่อง',
+    setGpsOriginBtn:'ตั้งจุดอ้างอิง GPS ที่นี่',
+    gpsNotSetStatus:'ยังไม่ได้ตั้งจุดอ้างอิง',
+    gpsSetStatus:'ตั้งจุดอ้างอิงแล้ว',
+    buildingBearingLabel:'มุมทิศอาคาร',
+    addPromoBtn:'เพิ่มโปรโมชั่น',
+    promoDateModalTitle:'ช่วงเวลาโปรโมชั่น',
+    promoStartLabel:'เริ่มแสดง (ไม่ระบุ = เริ่มทันที)',
+    promoEndLabel:'สิ้นสุด (ระบบจะลบให้อัตโนมัติหลังวันนี้)',
+    promoConfirmPickFile:'ตกลง เลือกไฟล์',
+    promoMissingEndDateAlert:'กรุณาระบุวันที่สิ้นสุดโปรโมชั่น',
+    promoPastDateAlert:'กรุณาเลือกวันที่สิ้นสุดที่ยังไม่ผ่านไปแล้ว'
   },
   en:{
     roleIntro:'Please choose how you want to use the app',
@@ -1015,7 +1100,84 @@ const I18N={
     foundCount:'Found {n} item(s)',
     showFirst50:'(showing the first 50)',
     notFoundInCategory:'No items found in category "{label}"',
-    notFoundQuery:'No results found for "{q}"'
+    notFoundQuery:'No results found for "{q}"',
+    loginBackBtn:'Back',
+    loginDesc:'Enter your employee details before using the product search system',
+    fieldNameLabel:'Full name',
+    fieldNamePlaceholder:'e.g. John Smith',
+    fieldDeptLabel:'Department',
+    fieldDeptDefaultOption:'Select department',
+    fieldPinLabel:'Employee PIN',
+    fieldPinPlaceholder:'Enter your 4-digit PIN',
+    loginSubmitBtn:'Sign in',
+    loginErrName:'Please enter your full name',
+    loginErrDept:'Please select a department',
+    loginErrPin:'Please enter your PIN',
+    loginErrInvalidPin:'Incorrect PIN — only staff with an assigned PIN can sign in',
+    grGreetingTemplate:'Hi {name} · GR — choose a function',
+    grPalletMgmtName:'Pallet management',
+    grPalletMgmtDesc:'Create/close pallets, add/remove/adjust item quantities',
+    grFindInPalletName:'Find item in pallets',
+    grFindInPalletDesc:'Search which pallet an item is currently in',
+    grGoToMainSearchBtn:'Go to general product search',
+    empBarPrefix:'Employee',
+    palletMgmtGRBtn:'Pallet management (GR)',
+    empFeedbackTitle:'Customer feedback',
+    empFeedbackExportBtn:'Export to Excel',
+    fbLoadingText:'Loading...',
+    fbEmptyText:'No customer feedback yet',
+    fbCountSuffix:'item(s)',
+    fbExportEmptyAlert:'No feedback to export yet',
+    empStockLabel:'Staff only · Stock placement info',
+    empEditBtn:'Edit',
+    empDeleteBtn:'Delete',
+    newItemModalTitle:'Add new item',
+    itemNoFieldLabel:'Item No',
+    barcodeLabel:'Barcode',
+    barcodeOptionalPlaceholder:'Barcode (optional)',
+    locOptionalPlaceholder:'e.g. 025 (optional)',
+    locationOptionalPlaceholder:'e.g. 025-209 (optional)',
+    productImageLabel:'Product image',
+    takeAttachPhotoBtn:'Take/attach product photo',
+    cancelBtn:'Cancel',
+    saveBtn:'Save',
+    newItemMissingFields:'Please fill in the product name and Item No',
+    newItemMissingPhoto:'Please attach a product photo',
+    newItemDupe:'This Item No already exists — please check',
+    newItemAddedToast:'Added new item {desc}',
+    editProductModalTitle:'Edit product',
+    changePhotoBtn:'Change product photo',
+    deleteProductSectionLabel:'Delete this product permanently (requires employee PIN)',
+    pin4DigitsPlaceholder:'4-digit PIN',
+    editProductMissingDesc:'Please enter the product name',
+    editProductSavedToast:'Product info saved',
+    deleteMissingPin:'Please enter a PIN to confirm deletion',
+    deleteInvalidPin:'Incorrect PIN',
+    deleteConfirmMsg:'Permanently delete this product? This cannot be undone',
+    productDeletedToast:'Product deleted',
+    locMissingFields:'Please fill in both Loc and Location',
+    removeLocConfirm:'Remove location Loc {loc} / Location {location}?',
+    editMapBtn:'Edit map',
+    resetViewBtn:'Reset view',
+    mapEditHintNoDb:'Drag a box to move it · drag the bottom-right corner to resize · drag the background to rotate the view · tap a box to select and edit color/height/text · not yet connected to a shared database — this save is local to this device only',
+    mapEditHintDb:'Drag a box to move it · drag the bottom-right corner to resize · drag the background to rotate the view · tap a box to select and edit color/height/text · once saved, everyone will see the same layout',
+    bgColorLabel:'Background',
+    addBoxBtn:'Add box',
+    boxColorLabel:'Box color',
+    boxHeightLabel:'Height',
+    editTextColorSizeBtn:'Edit text/color/size',
+    deleteBoxBtn:'Delete box',
+    setGpsOriginBtn:'Set GPS reference point here',
+    gpsNotSetStatus:'Reference point not set',
+    gpsSetStatus:'Reference point set',
+    buildingBearingLabel:'Building orientation angle',
+    addPromoBtn:'Add promotion',
+    promoDateModalTitle:'Promotion period',
+    promoStartLabel:'Start showing (blank = show immediately)',
+    promoEndLabel:'End date (removed automatically after this date)',
+    promoConfirmPickFile:'OK, choose file',
+    promoMissingEndDateAlert:'Please set the promotion end date',
+    promoPastDateAlert:'Please choose an end date that has not already passed'
   },
   cn:{
     roleIntro:'请选择使用模式',
@@ -1069,7 +1231,84 @@ const I18N={
     foundCount:'找到 {n} 项',
     showFirst50:'（仅显示前 50 项）',
     notFoundInCategory:'该分类"{label}"中未找到商品',
-    notFoundQuery:'未找到"{q}"相关商品'
+    notFoundQuery:'未找到"{q}"相关商品',
+    loginBackBtn:'返回',
+    loginDesc:'请填写员工信息后再使用商品搜索系统',
+    fieldNameLabel:'姓名',
+    fieldNamePlaceholder:'例如：王小明',
+    fieldDeptLabel:'部门',
+    fieldDeptDefaultOption:'选择部门',
+    fieldPinLabel:'员工 PIN 码',
+    fieldPinPlaceholder:'输入 4 位 PIN 码',
+    loginSubmitBtn:'登录',
+    loginErrName:'请填写姓名',
+    loginErrDept:'请选择部门',
+    loginErrPin:'请输入 PIN 码',
+    loginErrInvalidPin:'PIN 码不正确，仅限已获授权的员工',
+    grGreetingTemplate:'您好 {name} · GR — 请选择功能',
+    grPalletMgmtName:'托盘管理',
+    grPalletMgmtDesc:'创建/关闭托盘，添加/删除/调整商品数量',
+    grFindInPalletName:'按托盘查找商品',
+    grFindInPalletDesc:'查询商品目前位于哪个托盘',
+    grGoToMainSearchBtn:'前往一般商品搜索页面',
+    empBarPrefix:'员工',
+    palletMgmtGRBtn:'托盘管理 (GR)',
+    empFeedbackTitle:'顾客意见',
+    empFeedbackExportBtn:'导出为 Excel',
+    fbLoadingText:'加载中...',
+    fbEmptyText:'暂无顾客意见',
+    fbCountSuffix:'项',
+    fbExportEmptyAlert:'暂无可导出的意见',
+    empStockLabel:'仅限员工 · 商品摆放信息',
+    empEditBtn:'编辑',
+    empDeleteBtn:'删除',
+    newItemModalTitle:'添加新商品',
+    itemNoFieldLabel:'商品编号',
+    barcodeLabel:'条形码',
+    barcodeOptionalPlaceholder:'条形码（非必填）',
+    locOptionalPlaceholder:'例如 025（非必填）',
+    locationOptionalPlaceholder:'例如 025-209（非必填）',
+    productImageLabel:'商品图片',
+    takeAttachPhotoBtn:'拍摄/附加商品照片',
+    cancelBtn:'取消',
+    saveBtn:'保存',
+    newItemMissingFields:'请填写完整的商品名称和商品编号',
+    newItemMissingPhoto:'请附加商品照片',
+    newItemDupe:'该商品编号已存在，请检查',
+    newItemAddedToast:'已添加新商品 {desc}',
+    editProductModalTitle:'编辑商品信息',
+    changePhotoBtn:'更换商品照片',
+    deleteProductSectionLabel:'永久删除该商品（需输入员工 PIN 码）',
+    pin4DigitsPlaceholder:'4 位 PIN 码',
+    editProductMissingDesc:'请填写商品名称',
+    editProductSavedToast:'商品信息已保存',
+    deleteMissingPin:'请输入 PIN 码以确认删除',
+    deleteInvalidPin:'PIN 码不正确',
+    deleteConfirmMsg:'确定要永久删除该商品吗？此操作无法撤销',
+    productDeletedToast:'商品已删除',
+    locMissingFields:'请填写完整的 Loc 与 Location',
+    removeLocConfirm:'确定删除位置 Loc {loc} / Location {location} 吗？',
+    editMapBtn:'编辑地图',
+    resetViewBtn:'重置视角',
+    mapEditHintNoDb:'拖动方块可移动位置 · 拖动右下角可调整大小 · 拖动背景可旋转视角 · 点击方块可选中并编辑颜色/高度/文字 · 尚未连接共享数据库，此保存仅限本设备',
+    mapEditHintDb:'拖动方块可移动位置 · 拖动右下角可调整大小 · 拖动背景可旋转视角 · 点击方块可选中并编辑颜色/高度/文字 · 保存后所有人将看到相同的布局',
+    bgColorLabel:'背景',
+    addBoxBtn:'添加方块',
+    boxColorLabel:'方块颜色',
+    boxHeightLabel:'高度',
+    editTextColorSizeBtn:'编辑文字/颜色/大小',
+    deleteBoxBtn:'删除方块',
+    setGpsOriginBtn:'在此设置 GPS 参考点',
+    gpsNotSetStatus:'尚未设置参考点',
+    gpsSetStatus:'已设置参考点',
+    buildingBearingLabel:'建筑朝向角度',
+    addPromoBtn:'添加促销',
+    promoDateModalTitle:'促销时间段',
+    promoStartLabel:'开始显示（留空 = 立即开始）',
+    promoEndLabel:'结束（结束后系统将自动删除）',
+    promoConfirmPickFile:'确定，选择文件',
+    promoMissingEndDateAlert:'请设置促销结束日期',
+    promoPastDateAlert:'请选择尚未过去的结束日期'
   },
   mm:{
     roleIntro:'အသုံးပြုမည့်မုဒ်ကို ရွေးချယ်ပါ',
@@ -1123,7 +1362,84 @@ const I18N={
     foundCount:'{n} ခု တွေ့ရှိသည်',
     showFirst50:'(ပထမဆုံး ၅၀ ကိုသာ ပြသသည်)',
     notFoundInCategory:'"{label}" အမျိုးအစားတွင် ပစ္စည်းမတွေ့ပါ',
-    notFoundQuery:'"{q}" ကို စနစ်တွင်မတွေ့ပါ'
+    notFoundQuery:'"{q}" ကို စနစ်တွင်မတွေ့ပါ',
+    loginBackBtn:'နောက်သို့',
+    loginDesc:'ပစ္စည်းရှာဖွေမှုစနစ်ကို အသုံးမပြုမီ ဝန်ထမ်းအချက်အလက်များ ဖြည့်ပါ',
+    fieldNameLabel:'အမည်-မျိုးနွယ်အမည်',
+    fieldNamePlaceholder:'ဥပမာ- စမ်ချထိုင်',
+    fieldDeptLabel:'ဌာန',
+    fieldDeptDefaultOption:'ဌာနရွေးချယ်ပါ',
+    fieldPinLabel:'ဝန်ထမ်း PIN နံပါတ်',
+    fieldPinPlaceholder:'PIN ဂဏန်း ၄ လုံးထည့်ပါ',
+    loginSubmitBtn:'ဝင်ရောက်ရန်',
+    loginErrName:'အမည်ဖြည့်ပါ',
+    loginErrDept:'ဌာနရွေးချယ်ပါ',
+    loginErrPin:'PIN နံပါတ်ဖြည့်ပါ',
+    loginErrInvalidPin:'PIN နံပါတ်မှားနေပါသည် — ခွင့်ပြုထားသောဝန်ထမ်းသာ ဝင်ရောက်နိုင်ပါသည်',
+    grGreetingTemplate:'မင်္ဂလာပါ {name} · GR — လိုအပ်သောလုပ်ဆောင်ချက်ကိုရွေးပါ',
+    grPalletMgmtName:'ပလက်ဖောင်းစီမံခန့်ခွဲမှု',
+    grPalletMgmtDesc:'ပလက်ဖောင်းဖန်တီး/ပိတ်ရန်၊ ပစ္စည်းအရေအတွက် ထည့်/ဖြုတ်/ချိန်ညှိရန်',
+    grFindInPalletName:'ပလက်ဖောင်းအလိုက် ပစ္စည်းရှာဖွေရန်',
+    grFindInPalletDesc:'ပစ္စည်းတစ်ခု မည်သည့်ပလက်ဖောင်းတွင်ရှိသည်ကို ရှာဖွေရန်',
+    grGoToMainSearchBtn:'ယေဘုယျပစ္စည်းရှာဖွေမှုစာမျက်နှာသို့',
+    empBarPrefix:'ဝန်ထမ်း',
+    palletMgmtGRBtn:'ပလက်ဖောင်းစီမံခန့်ခွဲမှု (GR)',
+    empFeedbackTitle:'ဖောက်သည်မှတ်ချက်များ',
+    empFeedbackExportBtn:'Excel သို့ ထုတ်ယူရန်',
+    fbLoadingText:'ဖွင့်နေသည်...',
+    fbEmptyText:'ဖောက်သည်မှတ်ချက်မရှိသေးပါ',
+    fbCountSuffix:'ခု',
+    fbExportEmptyAlert:'ထုတ်ယူရန် မှတ်ချက်မရှိသေးပါ',
+    empStockLabel:'ဝန်ထမ်းသီးသန့် · ပစ္စည်းအထားအသိုအချက်အလက်',
+    empEditBtn:'ပြင်ဆင်ရန်',
+    empDeleteBtn:'ဖျက်ရန်',
+    newItemModalTitle:'ပစ္စည်းအသစ်ထည့်ရန်',
+    itemNoFieldLabel:'ပစ္စည်းနံပါတ်',
+    barcodeLabel:'ဘားကုဒ်',
+    barcodeOptionalPlaceholder:'ဘားကုဒ် (မဖြစ်မနေမလိုပါ)',
+    locOptionalPlaceholder:'ဥပမာ 025 (မဖြစ်မနေမလိုပါ)',
+    locationOptionalPlaceholder:'ဥပမာ 025-209 (မဖြစ်မနေမလိုပါ)',
+    productImageLabel:'ပစ္စည်းဓာတ်ပုံ',
+    takeAttachPhotoBtn:'ပစ္စည်းဓာတ်ပုံရိုက်/တွဲရန်',
+    cancelBtn:'ယင်ပယ်ရန်',
+    saveBtn:'သိမ်းဆည်းရန်',
+    newItemMissingFields:'ပစ္စည်းအမည်နှင့် ပစ္စည်းနံပါတ်ကို ပြည့်စုံစွာဖြည့်ပါ',
+    newItemMissingPhoto:'ပစ္စည်းဓာတ်ပုံတွဲပါ',
+    newItemDupe:'ဤပစ္စည်းနံပါတ် စနစ်တွင်ရှိပြီးဖြစ်သည် စစ်ဆေးပါ',
+    newItemAddedToast:'ပစ္စည်းအသစ် {desc} ထည့်ပြီးပါပြီ',
+    editProductModalTitle:'ပစ္စည်းအချက်အလက် ပြင်ဆင်ရန်',
+    changePhotoBtn:'ပစ္စည်းဓာတ်ပုံပြောင်းရန်',
+    deleteProductSectionLabel:'ဤပစ္စည်းကို စနစ်မှအပြီးဖျက်ရန် (ဝန်ထမ်း PIN လိုအပ်သည်)',
+    pin4DigitsPlaceholder:'PIN ဂဏန်း ၄ လုံး',
+    editProductMissingDesc:'ပစ္စည်းအမည်ဖြည့်ပါ',
+    editProductSavedToast:'ပစ္စည်းအချက်အလက် သိမ်းဆည်းပြီးပါပြီ',
+    deleteMissingPin:'ဖျက်ရန်အတည်ပြုရန် PIN ဖြည့်ပါ',
+    deleteInvalidPin:'PIN နံပါတ်မှားနေပါသည်',
+    deleteConfirmMsg:'ဤပစ္စည်းကို စနစ်မှအပြီးဖျက်လိုသည်မှာ သေချာပါသလား? ဤလုပ်ဆောင်ချက်ကို ပြန်ပြင်၍မရပါ',
+    productDeletedToast:'ပစ္စည်းကို စနစ်မှဖျက်ပြီးပါပြီ',
+    locMissingFields:'Loc နှင့် Location ကို ပြည့်စုံစွာဖြည့်ပါ',
+    removeLocConfirm:'တည်နေရာ Loc {loc} / Location {location} ကိုဖျက်မည်မှာ သေချာပါသလား?',
+    editMapBtn:'မြေပုံပြင်ဆင်ရန်',
+    resetViewBtn:'မြင်ကွင်းပြန်လည်သတ်မှတ်ရန်',
+    mapEditHintNoDb:'ရွှေ့ရန် ဘောက်စ်ကိုဆွဲပါ · အရွယ်အစားပြောင်းရန် အောက်ညာဘက်ထောင့်ကိုဆွဲပါ · မြင်ကွင်းလှည့်ရန် နောက်ခံကိုဆွဲပါ · ရွေးရန်နှင့် အရောင်/အမြင့်/စာသားပြင်ရန် ဘောက်စ်ကိုတို့ပါ · မျှဝေဒေတာဘေ့စ်နှင့် မချိတ်ဆက်ရသေးပါ ဤသိမ်းဆည်းမှုသည် ဤစက်တွင်သာရှိမည်',
+    mapEditHintDb:'ရွှေ့ရန် ဘောက်စ်ကိုဆွဲပါ · အရွယ်အစားပြောင်းရန် အောက်ညာဘက်ထောင့်ကိုဆွဲပါ · မြင်ကွင်းလှည့်ရန် နောက်ခံကိုဆွဲပါ · ရွေးရန်နှင့် အရောင်/အမြင့်/စာသားပြင်ရန် ဘောက်စ်ကိုတို့ပါ · သိမ်းဆည်းပြီးပါက အားလုံးတူညီစွာမြင်ရမည်',
+    bgColorLabel:'နောက်ခံ',
+    addBoxBtn:'ဘောက်စ်ထည့်ရန်',
+    boxColorLabel:'ဘောက်စ်အရောင်',
+    boxHeightLabel:'အမြင့်',
+    editTextColorSizeBtn:'စာသား/အရောင်/အရွယ်အစား ပြင်ရန်',
+    deleteBoxBtn:'ဘောက်စ်ဖျက်ရန်',
+    setGpsOriginBtn:'ဤနေရာတွင် GPS ရည်ညွှန်းအမှတ်သတ်မှတ်ရန်',
+    gpsNotSetStatus:'ရည်ညွှန်းအမှတ် မသတ်မှတ်ရသေးပါ',
+    gpsSetStatus:'ရည်ညွှန်းအမှတ် သတ်မှတ်ပြီးပါပြီ',
+    buildingBearingLabel:'အဆောက်အအုံ မျက်နှာမူထောင့်',
+    addPromoBtn:'ပရိုမိုးရှင်းထည့်ရန်',
+    promoDateModalTitle:'ပရိုမိုးရှင်းကာလ',
+    promoStartLabel:'စတင်ပြသရန် (မဖြည့်ပါက ချက်ချင်းပြသမည်)',
+    promoEndLabel:'ကုန်ဆုံးရက် (ဤရက်နောက်ပိုင်း စနစ်မှအလိုအလျောက်ဖျက်မည်)',
+    promoConfirmPickFile:'အိုကေ၊ ဖိုင်ရွေးရန်',
+    promoMissingEndDateAlert:'ပရိုမိုးရှင်း ကုန်ဆုံးရက်ကို သတ်မှတ်ပါ',
+    promoPastDateAlert:'မကုန်ဆုံးသေးသော ကုန်ဆုံးရက်ကို ရွေးချယ်ပါ'
   },
   kr:{
     roleIntro:'사용 모드를 선택해 주세요',
@@ -1177,7 +1493,84 @@ const I18N={
     foundCount:'{n}개 발견',
     showFirst50:'(처음 50개만 표시)',
     notFoundInCategory:'"{label}" 카테고리에서 상품을 찾을 수 없습니다',
-    notFoundQuery:'"{q}"에 대한 검색 결과가 없습니다'
+    notFoundQuery:'"{q}"에 대한 검색 결과가 없습니다',
+    loginBackBtn:'뒤로',
+    loginDesc:'상품 검색 시스템을 이용하기 전에 직원 정보를 입력하세요',
+    fieldNameLabel:'성명',
+    fieldNamePlaceholder:'예: 홍길동',
+    fieldDeptLabel:'부서',
+    fieldDeptDefaultOption:'부서 선택',
+    fieldPinLabel:'직원 PIN 번호',
+    fieldPinPlaceholder:'4자리 PIN 번호 입력',
+    loginSubmitBtn:'로그인',
+    loginErrName:'성명을 입력하세요',
+    loginErrDept:'부서를 선택하세요',
+    loginErrPin:'PIN 번호를 입력하세요',
+    loginErrInvalidPin:'PIN 번호가 올바르지 않습니다 — 승인된 직원만 로그인할 수 있습니다',
+    grGreetingTemplate:'안녕하세요 {name}님 · GR — 원하는 기능을 선택하세요',
+    grPalletMgmtName:'팔레트 관리',
+    grPalletMgmtDesc:'팔레트 생성/마감, 상품 수량 추가/삭제/조정',
+    grFindInPalletName:'팔레트별 상품 찾기',
+    grFindInPalletDesc:'상품이 현재 어느 팔레트에 있는지 검색',
+    grGoToMainSearchBtn:'일반 상품 검색 화면으로 이동',
+    empBarPrefix:'직원',
+    palletMgmtGRBtn:'팔레트 관리 (GR)',
+    empFeedbackTitle:'고객 피드백',
+    empFeedbackExportBtn:'Excel로 내보내기',
+    fbLoadingText:'불러오는 중...',
+    fbEmptyText:'아직 고객 피드백이 없습니다',
+    fbCountSuffix:'건',
+    fbExportEmptyAlert:'내보낼 피드백이 없습니다',
+    empStockLabel:'직원 전용 · 재고 배치 정보',
+    empEditBtn:'수정',
+    empDeleteBtn:'삭제',
+    newItemModalTitle:'신규 상품 추가',
+    itemNoFieldLabel:'상품 번호',
+    barcodeLabel:'바코드',
+    barcodeOptionalPlaceholder:'바코드 (선택 사항)',
+    locOptionalPlaceholder:'예: 025 (선택 사항)',
+    locationOptionalPlaceholder:'예: 025-209 (선택 사항)',
+    productImageLabel:'상품 이미지',
+    takeAttachPhotoBtn:'상품 사진 촬영/첨부',
+    cancelBtn:'취소',
+    saveBtn:'저장',
+    newItemMissingFields:'상품명과 상품 번호를 모두 입력하세요',
+    newItemMissingPhoto:'상품 사진을 첨부하세요',
+    newItemDupe:'이미 등록된 상품 번호입니다. 확인해 주세요',
+    newItemAddedToast:'신규 상품 {desc} 추가됨',
+    editProductModalTitle:'상품 정보 수정',
+    changePhotoBtn:'상품 사진 변경',
+    deleteProductSectionLabel:'이 상품을 영구 삭제 (직원 PIN 필요)',
+    pin4DigitsPlaceholder:'4자리 PIN 번호',
+    editProductMissingDesc:'상품명을 입력하세요',
+    editProductSavedToast:'상품 정보가 저장되었습니다',
+    deleteMissingPin:'삭제를 확인하려면 PIN을 입력하세요',
+    deleteInvalidPin:'PIN 번호가 올바르지 않습니다',
+    deleteConfirmMsg:'이 상품을 영구적으로 삭제하시겠습니까? 되돌릴 수 없습니다',
+    productDeletedToast:'상품이 삭제되었습니다',
+    locMissingFields:'Loc과 Location을 모두 입력하세요',
+    removeLocConfirm:'위치 Loc {loc} / Location {location}을(를) 삭제하시겠습니까?',
+    editMapBtn:'지도 편집',
+    resetViewBtn:'보기 초기화',
+    mapEditHintNoDb:'박스를 드래그하여 이동 · 오른쪽 아래 모서리를 드래그하여 크기 조절 · 배경을 드래그하여 화면 회전 · 박스를 탭하여 선택 후 색상/높이/텍스트 편집 · 아직 공유 데이터베이스에 연결되지 않아 이 저장은 이 기기에만 적용됩니다',
+    mapEditHintDb:'박스를 드래그하여 이동 · 오른쪽 아래 모서리를 드래그하여 크기 조절 · 배경을 드래그하여 화면 회전 · 박스를 탭하여 선택 후 색상/높이/텍스트 편집 · 저장하면 모두에게 동일하게 보입니다',
+    bgColorLabel:'배경',
+    addBoxBtn:'박스 추가',
+    boxColorLabel:'박스 색상',
+    boxHeightLabel:'높이',
+    editTextColorSizeBtn:'텍스트/색상/크기 편집',
+    deleteBoxBtn:'박스 삭제',
+    setGpsOriginBtn:'여기에 GPS 기준점 설정',
+    gpsNotSetStatus:'기준점이 설정되지 않음',
+    gpsSetStatus:'기준점 설정됨',
+    buildingBearingLabel:'건물 방향 각도',
+    addPromoBtn:'프로모션 추가',
+    promoDateModalTitle:'프로모션 기간',
+    promoStartLabel:'노출 시작 (비워두면 즉시 시작)',
+    promoEndLabel:'종료일 (이후 자동 삭제됩니다)',
+    promoConfirmPickFile:'확인, 파일 선택',
+    promoMissingEndDateAlert:'프로모션 종료일을 설정하세요',
+    promoPastDateAlert:'아직 지나지 않은 종료일을 선택하세요'
   },
   jp:{
     roleIntro:'利用モードを選択してください',
@@ -1231,7 +1624,84 @@ const I18N={
     foundCount:'{n}件見つかりました',
     showFirst50:'（最初の50件を表示）',
     notFoundInCategory:'カテゴリー「{label}」に商品が見つかりません',
-    notFoundQuery:'「{q}」に一致する商品が見つかりません'
+    notFoundQuery:'「{q}」に一致する商品が見つかりません',
+    loginBackBtn:'戻る',
+    loginDesc:'商品検索システムをご利用の前に従業員情報を入力してください',
+    fieldNameLabel:'氏名',
+    fieldNamePlaceholder:'例：山田太郎',
+    fieldDeptLabel:'部署',
+    fieldDeptDefaultOption:'部署を選択',
+    fieldPinLabel:'従業員PIN番号',
+    fieldPinPlaceholder:'4桁のPIN番号を入力',
+    loginSubmitBtn:'ログイン',
+    loginErrName:'氏名を入力してください',
+    loginErrDept:'部署を選択してください',
+    loginErrPin:'PIN番号を入力してください',
+    loginErrInvalidPin:'PIN番号が正しくありません。許可された従業員のみログインできます',
+    grGreetingTemplate:'こんにちは {name} さん · GR — 機能を選択してください',
+    grPalletMgmtName:'パレット管理',
+    grPalletMgmtDesc:'パレットの作成/終了、商品数量の追加・削除・調整',
+    grFindInPalletName:'パレットから商品を探す',
+    grFindInPalletDesc:'商品が現在どのパレットにあるかを検索',
+    grGoToMainSearchBtn:'通常の商品検索画面へ',
+    empBarPrefix:'従業員',
+    palletMgmtGRBtn:'パレット管理 (GR)',
+    empFeedbackTitle:'お客様からのご意見',
+    empFeedbackExportBtn:'Excelに出力',
+    fbLoadingText:'読み込み中...',
+    fbEmptyText:'まだお客様からのご意見はありません',
+    fbCountSuffix:'件',
+    fbExportEmptyAlert:'出力できるご意見がまだありません',
+    empStockLabel:'従業員専用 · 商品配置情報',
+    empEditBtn:'編集',
+    empDeleteBtn:'削除',
+    newItemModalTitle:'新規商品を追加',
+    itemNoFieldLabel:'商品番号',
+    barcodeLabel:'バーコード',
+    barcodeOptionalPlaceholder:'バーコード（任意）',
+    locOptionalPlaceholder:'例：025（任意）',
+    locationOptionalPlaceholder:'例：025-209（任意）',
+    productImageLabel:'商品画像',
+    takeAttachPhotoBtn:'商品写真を撮影/添付',
+    cancelBtn:'キャンセル',
+    saveBtn:'保存',
+    newItemMissingFields:'商品名と商品番号を入力してください',
+    newItemMissingPhoto:'商品写真を添付してください',
+    newItemDupe:'この商品番号は既に登録されています。ご確認ください',
+    newItemAddedToast:'新規商品「{desc}」を追加しました',
+    editProductModalTitle:'商品情報を編集',
+    changePhotoBtn:'商品写真を変更',
+    deleteProductSectionLabel:'この商品を完全に削除（従業員PINが必要）',
+    pin4DigitsPlaceholder:'4桁のPIN番号',
+    editProductMissingDesc:'商品名を入力してください',
+    editProductSavedToast:'商品情報を保存しました',
+    deleteMissingPin:'削除を確認するためPINを入力してください',
+    deleteInvalidPin:'PIN番号が正しくありません',
+    deleteConfirmMsg:'この商品を完全に削除しますか？この操作は元に戻せません',
+    productDeletedToast:'商品を削除しました',
+    locMissingFields:'LocとLocationの両方を入力してください',
+    removeLocConfirm:'位置 Loc {loc} / Location {location} を削除しますか？',
+    editMapBtn:'地図を編集',
+    resetViewBtn:'表示をリセット',
+    mapEditHintNoDb:'ボックスをドラッグして移動 · 右下角をドラッグしてサイズ変更 · 背景をドラッグして視点を回転 · ボックスをタップして選択し色/高さ/テキストを編集 · まだ共有データベースに接続されていないため、この保存はこの端末のみに適用されます',
+    mapEditHintDb:'ボックスをドラッグして移動 · 右下角をドラッグしてサイズ変更 · 背景をドラッグして視点を回転 · ボックスをタップして選択し色/高さ/テキストを編集 · 保存すると全員に同じ配置が表示されます',
+    bgColorLabel:'背景',
+    addBoxBtn:'ボックスを追加',
+    boxColorLabel:'ボックスの色',
+    boxHeightLabel:'高さ',
+    editTextColorSizeBtn:'テキスト/色/サイズを編集',
+    deleteBoxBtn:'ボックスを削除',
+    setGpsOriginBtn:'ここにGPS基準点を設定',
+    gpsNotSetStatus:'基準点が未設定',
+    gpsSetStatus:'基準点設定済み',
+    buildingBearingLabel:'建物の方位角',
+    addPromoBtn:'プロモーションを追加',
+    promoDateModalTitle:'プロモーション期間',
+    promoStartLabel:'表示開始（未入力の場合は即時開始）',
+    promoEndLabel:'終了日（この日以降は自動削除されます）',
+    promoConfirmPickFile:'OK、ファイルを選択',
+    promoMissingEndDateAlert:'プロモーションの終了日を設定してください',
+    promoPastDateAlert:'まだ過ぎていない終了日を選択してください'
   }
 };
 let currentLang=(function(){ try{ return localStorage.getItem('mf_lang')||'th'; }catch(e){ return 'th'; } })();
@@ -2024,7 +2494,7 @@ function onGpsBearingChange(val){
 }
 function updateGpsCalibrationUI(){
   const status=document.getElementById('gpsCalibStatus');
-  if(status) status.textContent=gpsOrigin ? 'ตั้งจุดอ้างอิงแล้ว' : 'ยังไม่ได้ตั้งจุดอ้างอิง';
+  if(status) status.textContent=gpsOrigin ? t('gpsSetStatus') : t('gpsNotSetStatus');
   const slider=document.getElementById('gpsBearingSlider');
   if(slider) slider.value=gpsBearingOffset;
   const val=document.getElementById('gpsBearingValue');
@@ -2094,7 +2564,7 @@ function renderProductNavInfo(item){
     '<rect x="5.5" y="9.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="9.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="9.3" width="3.2" height="3.2" rx="0.5"/>'+
     '<rect x="5.5" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="15.3" width="3.2" height="3.2" rx="0.5"/>'+
   '</svg>';
-  const shelfLine='<div class="nav-info-line">'+shelfIconSvg+' '+t('shelfTier')+' : <b>'+(item.shelf?escapeHtml(item.shelf):t('notYetAvailable'))+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">แก้</button>':'')+'</div>';
+  const shelfLine='<div class="nav-info-line">'+shelfIconSvg+' '+t('shelfTier')+' : <b>'+(item.shelf?escapeHtml(item.shelf):t('notYetAvailable'))+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">'+t('empEditBtn')+'</button>':'')+'</div>';
   if(item.locations && item.locations.length){
     body.innerHTML='<div class="nav-info-name">'+t('productNameLabel')+' : '+escapeHtml(item.desc)+'</div>'+
       item.locations.map(l=>
@@ -2107,8 +2577,8 @@ function renderProductNavInfo(item){
   } else {
     const canAdd=isEmployee();
     body.innerHTML='<div class="nav-info-loc-group">'+
-      '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> '+t('locLabel')+' : <b>'+t('notYetAvailable')+'</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>'+
-      '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> '+t('locationLabel')+' : <b>'+t('notYetAvailable')+'</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">แก้ไข</button>':'')+'</div>'+
+      '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> '+t('locLabel')+' : <b>'+t('notYetAvailable')+'</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">'+t('empEditBtn')+'</button>':'')+'</div>'+
+      '<div class="nav-info-line"><i class="ti ti-map-2" aria-hidden="true"></i> '+t('locationLabel')+' : <b>'+t('notYetAvailable')+'</b>'+(canAdd?' <button type="button" class="nav-info-edit-btn" onclick="addItemLocation('+jsStr(item.itemNo)+')">'+t('empEditBtn')+'</button>':'')+'</div>'+
       shelfLine+
     '</div>';
   }
@@ -2274,7 +2744,7 @@ function openPromoAddFlow(){
   editingPromoId=null;
   document.getElementById('promoDateStart').value='';
   document.getElementById('promoDateEnd').value='';
-  document.getElementById('promoDateConfirmBtn').textContent='ตกลง เลือกไฟล์';
+  document.getElementById('promoDateConfirmBtn').textContent=t('promoConfirmPickFile');
   document.getElementById('promoDateOverlay').style.display='flex';
 }
 function parseThaiDateShortToISO(str){
@@ -2309,7 +2779,7 @@ function openPromoDateEdit(id){
   const parts=label.split(' - ');
   document.getElementById('promoDateStart').value=parts.length>1?parseThaiDateShortToISO(parts[0]):'';
   document.getElementById('promoDateEnd').value=p.expiresAt?new Date(p.expiresAt).toISOString().slice(0,10):parseThaiDateShortToISO(parts[parts.length-1]);
-  document.getElementById('promoDateConfirmBtn').textContent='บันทึก';
+  document.getElementById('promoDateConfirmBtn').textContent=t('saveBtn');
   document.getElementById('promoDateOverlay').style.display='flex';
 }
 function cancelPromoDatePick(){
@@ -2342,9 +2812,9 @@ function promoDisplayPeriodLabel(p){
 async function confirmPromoDatePick(){
   const startVal=document.getElementById('promoDateStart').value;
   const endVal=document.getElementById('promoDateEnd').value;
-  if(!endVal){ alert('กรุณาระบุวันที่สิ้นสุดโปรโมชั่น'); return; }
+  if(!endVal){ alert(t('promoMissingEndDateAlert')); return; }
   const expiresAt=new Date(endVal+'T23:59:59').getTime();
-  if(isNaN(expiresAt)||expiresAt<Date.now()){ alert('กรุณาเลือกวันที่สิ้นสุดที่ยังไม่ผ่านไปแล้ว'); return; }
+  if(isNaN(expiresAt)||expiresAt<Date.now()){ alert(t('promoPastDateAlert')); return; }
   const periodLabel=startVal?(formatThaiDateShort(startVal)+' - '+formatThaiDateShort(endVal)):('ถึง '+formatThaiDateShort(endVal));
   if(editingPromoId){
     const p=PROMO_GALLERY_CACHE.find(x=>x.id===editingPromoId);
@@ -3161,7 +3631,7 @@ async function submitEditProduct(){
   const item=getItemByNo(editProdItemNo);
   if(!item)return;
   const desc=document.getElementById('editProdDesc').value.trim();
-  if(!desc){ alert('กรุณากรอกชื่อสินค้า'); return; }
+  if(!desc){ alert(t('editProductMissingDesc')); return; }
   if(!ITEM_OVERRIDES[editProdItemNo])ITEM_OVERRIDES[editProdItemNo]={};
   ITEM_OVERRIDES[editProdItemNo].desc=desc;
   if(editProdPhotoDataUrl) ITEM_OVERRIDES[editProdItemNo].image=editProdPhotoDataUrl;
@@ -3169,23 +3639,23 @@ async function submitEditProduct(){
   await persistItemOverrides();
   const updated=getItemByNo(editProdItemNo);
   closeEditProductModal();
-  showPalletToast('บันทึกข้อมูลสินค้าแล้ว');
+  showPalletToast(t('editProductSavedToast'));
   if(updated) renderDetail(updated);
 }
 async function confirmDeleteProduct(){
   if(!isEmployee()||!editProdItemNo)return;
   const pin=document.getElementById('editProdDeletePin').value.trim();
-  if(!pin){ alert('กรุณาใส่รหัส PIN เพื่อยืนยันการลบ'); return; }
+  if(!pin){ alert(t('deleteMissingPin')); return; }
   const sessDept=(getSession()||{}).dept;
-  if(!isValidEmpPin(pin,sessDept)){ alert('รหัส PIN ไม่ถูกต้อง'); return; }
-  if(!confirm('ยืนยันลบสินค้านี้ออกจากระบบถาวร? การกระทำนี้ย้อนกลับไม่ได้'))return;
+  if(!isValidEmpPin(pin,sessDept)){ alert(t('deleteInvalidPin')); return; }
+  if(!confirm(t('deleteConfirmMsg')))return;
   const itemNo=editProdItemNo;
   if(!ITEM_OVERRIDES[itemNo])ITEM_OVERRIDES[itemNo]={};
   ITEM_OVERRIDES[itemNo].deleted=true;
   applyItemOverridesToProducts();
   await persistItemOverrides();
   closeEditProductModal();
-  showPalletToast('ลบสินค้าออกจากระบบแล้ว');
+  showPalletToast(t('productDeletedToast'));
   clearSearch();
 }
 function openNewItemBarcodeScan(){
@@ -3199,9 +3669,9 @@ async function submitNewItem(){
   const barcode=document.getElementById('newItemBarcode').value.trim();
   const loc=document.getElementById('newItemLoc').value.trim();
   const location=document.getElementById('newItemLocation').value.trim();
-  if(!desc||!itemNo){ alert('กรุณากรอกชื่อสินค้าและเลข Item ให้ครบ'); return; }
-  if(!newItemPhotoDataUrl){ alert('กรุณาแนบรูปภาพสินค้า'); return; }
-  if(PRODUCTS_INDEX[itemNo]){ alert('มีเลข Item นี้อยู่ในระบบแล้ว กรุณาตรวจสอบ'); return; }
+  if(!desc||!itemNo){ alert(t('newItemMissingFields')); return; }
+  if(!newItemPhotoDataUrl){ alert(t('newItemMissingPhoto')); return; }
+  if(PRODUCTS_INDEX[itemNo]){ alert(t('newItemDupe')); return; }
   await saveCustomItem(desc,itemNo,barcode,newItemPhotoDataUrl);
   if(loc&&location){
     addItemLocationOverride(itemNo,loc,location);
@@ -3210,7 +3680,7 @@ async function submitNewItem(){
     await persistLocationOverrides();
   }
   closeNewItemForm();
-  showPalletToast('เพิ่ม Item ใหม่ '+desc+' แล้ว');
+  showPalletToast(t('newItemAddedToast',{desc:desc}));
   promptAddQty(itemNo);
 }
 
@@ -3528,8 +3998,8 @@ function openMapEditor(){
   mapEditRotationSnapshot=currentMapRotation;
   rerenderMapEditorSVG();
   document.getElementById('mapEditHint').textContent=mapFirestoreDocRef
-    ? 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · ลากพื้นหลังเพื่อหมุนมุมมอง · แตะกล่องเพื่อเลือกและแก้สี/ความสูง/ข้อความ · บันทึกแล้วทุกคนจะเห็นเหมือนกัน'
-    : 'ลากตัวกล่องเพื่อย้าย · ลากมุมล่างขวาเพื่อปรับขนาด · ลากพื้นหลังเพื่อหมุนมุมมอง · แตะกล่องเพื่อเลือกและแก้สี/ความสูง/ข้อความ · ยังไม่ได้เชื่อมฐานข้อมูลกลาง บันทึกนี้จะเก็บไว้เฉพาะเครื่องนี้เท่านั้น';
+    ? t('mapEditHintDb')
+    : t('mapEditHintNoDb');
   document.getElementById('mapBgColorInput').value=currentMapBgColor;
   updateSelectedBlockUI();
   updateMapRotationUI();
@@ -4012,7 +4482,7 @@ function addItemLocation(itemNo){
   const location=prompt('Location:','');
   if(location===null)return;
   const trimmedLoc=loc.trim(),trimmedLocation=location.trim();
-  if(!trimmedLoc||!trimmedLocation){ alert('กรุณาระบุ Loc และ Location ให้ครบ'); return; }
+  if(!trimmedLoc||!trimmedLocation){ alert(t('locMissingFields')); return; }
   addItemLocationOverride(itemNo,trimmedLoc,trimmedLocation);
   applyLocationOverridesToProducts();
   applyStockOverridesToProducts();
@@ -4028,7 +4498,7 @@ function editItemLocation(itemNo,loc,location){
   const newLocation=prompt('Location:',location);
   if(newLocation===null)return;
   const trimmedLoc=newLoc.trim(),trimmedLocation=newLocation.trim();
-  if(!trimmedLoc||!trimmedLocation){ alert('กรุณาระบุ Loc และ Location ให้ครบ'); return; }
+  if(!trimmedLoc||!trimmedLocation){ alert(t('locMissingFields')); return; }
   if(trimmedLoc===loc&&trimmedLocation===location)return;
   const existing=item.locations.find(x=>x.loc===loc&&x.location===location)||{};
   if(!LOCATION_OVERRIDES[itemNo])LOCATION_OVERRIDES[itemNo]={adds:[],removes:[]};
@@ -4044,7 +4514,7 @@ function editItemLocation(itemNo,loc,location){
 }
 function removeLocationFromItem(itemNo,loc,location){
   if(!isEmployee())return;
-  if(!confirm('ยืนยันลบตำแหน่ง Loc '+loc+' / Location '+location+' ?'))return;
+  if(!confirm(t('removeLocConfirm',{loc:loc,location:location})))return;
   const item=getItemByNo(itemNo);
   if(!item)return;
   if(!LOCATION_OVERRIDES[itemNo])LOCATION_OVERRIDES[itemNo]={adds:[],removes:[]};
@@ -4325,10 +4795,10 @@ function renderDetail(item,fromList){
     const rows=item.locations.map(l=>{
       return '<div class="emp-loc-item">'+
         '<div class="emp-loc-item-row">'+
-          '<div class="emp-loc-text">Loc '+escapeHtml(l.loc)+' / Location '+escapeHtml(l.location)+' — Facing '+escapeHtml(l.facing||'-')+' · Max Qty '+escapeHtml(l.maxQty||'-')+'</div>'+
+          '<div class="emp-loc-text">'+t('locLabel')+' '+escapeHtml(l.loc)+' / '+t('locationLabel')+' '+escapeHtml(l.location)+' — Facing '+escapeHtml(l.facing||'-')+' · Max Qty '+escapeHtml(l.maxQty||'-')+'</div>'+
           '<div class="emp-loc-actions">'+
-            '<button class="emp-loc-btn" onclick="openStockEditor('+jsStr(item.itemNo)+','+jsStr(l.loc)+','+jsStr(l.location)+')">แก้ไข</button>'+
-            '<button class="emp-loc-btn danger" onclick="removeLocationFromItem('+jsStr(item.itemNo)+','+jsStr(l.loc)+','+jsStr(l.location)+')">ลบ</button>'+
+            '<button class="emp-loc-btn" onclick="openStockEditor('+jsStr(item.itemNo)+','+jsStr(l.loc)+','+jsStr(l.location)+')">'+t('empEditBtn')+'</button>'+
+            '<button class="emp-loc-btn danger" onclick="removeLocationFromItem('+jsStr(item.itemNo)+','+jsStr(l.loc)+','+jsStr(l.location)+')">'+t('empDeleteBtn')+'</button>'+
           '</div>'+
         '</div>'+
       '</div>';
@@ -4411,7 +4881,7 @@ function showGRHome(sess){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('mainApp').style.display='none';
   document.getElementById('grHomeScreen').style.display='flex';
-  document.getElementById('grHomeGreeting').textContent='สวัสดี '+sess.name+' · GR — เลือกฟังก์ชันที่ต้องการ';
+  document.getElementById('grHomeGreeting').textContent=t('grGreetingTemplate',{name:sess.name});
 }
 function grGoToPalletManager(){
   const sess=getSession();
@@ -4455,7 +4925,7 @@ function showMain(sess){
   document.getElementById('mainApp').style.display='flex';
   const bar=document.getElementById('empBarText');
   if(sess.role==='employee'){
-    bar.innerHTML='พนักงาน: <b>'+sess.name+' · '+sess.dept+'</b>';
+    bar.innerHTML='<span data-i18n="empBarPrefix">'+t('empBarPrefix')+'</span>: <b>'+sess.name+' · '+sess.dept+'</b>';
     document.getElementById('customerFeedbackSection').style.display='none';
     document.getElementById('employeeFeedbackSection').style.display='block';
     renderFeedbackList();
@@ -4543,11 +5013,11 @@ async function loadAllFeedback(){
 }
 async function renderFeedbackList(){
   const wrap=document.getElementById('fbList');
-  wrap.innerHTML='<div class="fb-empty">กำลังโหลด...</div>';
+  wrap.innerHTML='<div class="fb-empty">'+t('fbLoadingText')+'</div>';
   const list=await loadAllFeedback();
-  document.getElementById('fbCount').textContent=list.length+' รายการ';
+  document.getElementById('fbCount').textContent=list.length+' '+t('fbCountSuffix');
   if(!list.length){
-    wrap.innerHTML='<div class="fb-empty">ยังไม่มีข้อเสนอแนะจากลูกค้า</div>';
+    wrap.innerHTML='<div class="fb-empty">'+t('fbEmptyText')+'</div>';
     return;
   }
   wrap.innerHTML=list.map(item=>{
@@ -4560,7 +5030,7 @@ async function renderFeedbackList(){
 }
 async function exportFeedbackExcel(){
   const list=(await loadAllFeedback()).slice().sort((a,b)=>a.ts-b.ts);
-  if(!list.length){alert('ยังไม่มีข้อเสนอแนะให้ส่งออก');return;}
+  if(!list.length){alert(t('fbExportEmptyAlert'));return;}
   const rows=list.map(item=>{
     const d=new Date(item.ts);
     return {
@@ -4585,10 +5055,10 @@ function submitLogin(){
   const dept=document.getElementById('empDept').value;
   const pin=document.getElementById('empPin').value.trim();
   const err=document.getElementById('loginError');
-  if(!name){err.textContent='กรุณากรอกชื่อ-นามสกุล';err.style.display='block';return;}
-  if(!dept){err.textContent='กรุณาเลือกแผนก';err.style.display='block';return;}
-  if(!pin){err.textContent='กรุณากรอกรหัส PIN';err.style.display='block';return;}
-  if(!isValidEmpPin(pin,dept)){err.textContent='รหัส PIN ไม่ถูกต้อง เฉพาะพนักงานที่ได้รับรหัสเท่านั้น';err.style.display='block';return;}
+  if(!name){err.textContent=t('loginErrName');err.style.display='block';return;}
+  if(!dept){err.textContent=t('loginErrDept');err.style.display='block';return;}
+  if(!pin){err.textContent=t('loginErrPin');err.style.display='block';return;}
+  if(!isValidEmpPin(pin,dept)){err.textContent=t('loginErrInvalidPin');err.style.display='block';return;}
   err.style.display='none';
   const sess={role:'employee',name,dept,ts:Date.now()};
   localStorage.setItem('mf_session',JSON.stringify(sess));
