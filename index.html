@@ -2384,7 +2384,7 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
 function refreshInlineMap(){
   const el=document.getElementById('showOnMapSvg');
   if(!el)return;
-  el.innerHTML='<img src="store-3d-photo.jpg" alt="ผังร้าน 3D" style="display:block;width:100%;height:auto;border-radius:10px">';
+  el.innerHTML=renderMapSVG(currentMapBlocks,false,currentMapRotation,mapHighlightBlockId);
 }
 
 // ==== หาตำแหน่งสินค้าบนแผนที่ ====
@@ -2433,7 +2433,7 @@ function updateShowOnMapButton(item){
   showOnMapMatch=findMapBlockForItem(item);
   mapHighlightBlockId=showOnMapMatch?showOnMapMatch.blockId:null;
   approx.style.display=(showOnMapMatch&&!showOnMapMatch.exact)?'block':'none';
-  svgHost.innerHTML='<img src="store-3d-photo.jpg" alt="ผังร้าน 3D" style="display:block;width:100%;height:auto;border-radius:10px">';
+  svgHost.innerHTML=renderMapSVG(currentMapBlocks,false,currentMapRotation,mapHighlightBlockId);
   updateMapEditBarVisibility();
   updateLiveGpsBtnUI();
 }
@@ -3960,7 +3960,11 @@ function rerenderMapEditorSVG(){
       if(svgEl) svgEl.insertAdjacentHTML('beforeend', liveDotMarkup(liveGpsMapXY,liveGpsAccuracyM,currentMapRotation));
     }
   } else {
-    content.innerHTML='<img src="store-3d-photo.jpg" alt="ผังร้าน 3D" style="display:block;width:100%;height:auto;border-radius:10px">';
+    content.innerHTML=renderMapSVG(currentMapBlocks,false,currentMapRotation,mapHighlightBlockId);
+    if(liveGpsMapXY){
+      const svgEl=content.querySelector('svg');
+      if(svgEl) svgEl.insertAdjacentHTML('beforeend', liveDotMarkup(liveGpsMapXY,liveGpsAccuracyM,currentMapRotation));
+    }
   }
 }
 function updateSelectedBlockUI(){
