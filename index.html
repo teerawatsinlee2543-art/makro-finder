@@ -144,6 +144,8 @@ body{margin:0;padding:0;touch-action:manipulation}
 .lang-flag{width:26px;height:17px;border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,0.08)}
 #langModalList{display:flex;flex-direction:column;gap:8px}
 .hdr-icon.lang-btn{font-size:18px}
+.lang-btn-icon{display:flex;align-items:center;justify-content:center}
+.lang-btn-icon svg{width:22px;height:15px;border-radius:3px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,0.12)}
 .promo-date-box input[type=text]{padding:10px 12px;border-radius:10px;border:1px solid var(--color-border-tertiary);font-size:16px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary)}
 .new-item-barcode-row{display:flex;gap:8px;align-items:center}
 .new-item-barcode-row input{flex:1;min-width:0}
@@ -429,7 +431,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
   <div class="role-screen" id="roleScreen">
     <div class="role-card-wrap">
-      <button type="button" class="role-lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><i class="ti ti-language" aria-hidden="true"></i></button>
+      <button type="button" class="role-lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
       <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
         <circle cx="170" cy="140" r="108" fill="#ffffff" stroke="#E8192C" stroke-width="18"/>
@@ -539,7 +541,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div class="hdr-icons">
-        <button class="hdr-icon lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><i class="ti ti-language" aria-hidden="true"></i></button>
+        <button class="hdr-icon lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
         <button class="hdr-icon scan-btn" onclick="openScanner()" data-i18n-title="scanTitle" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
       </div>
     </div>
@@ -1216,6 +1218,7 @@ function applyI18n(root){
   scope.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ el.placeholder=t(el.getAttribute('data-i18n-placeholder')); });
   scope.querySelectorAll('[data-i18n-title]').forEach(el=>{ const v=t(el.getAttribute('data-i18n-title')); el.title=v; el.setAttribute('aria-label',v); });
   scope.querySelectorAll('[data-i18n-alt]').forEach(el=>{ el.alt=t(el.getAttribute('data-i18n-alt')); });
+  scope.querySelectorAll('.lang-btn-icon').forEach(el=>{ el.innerHTML=flagSvg(currentLang); });
 }
 function setLang(code){
   if(!I18N[code])return;
