@@ -52,9 +52,12 @@ body{margin:0;padding:0;touch-action:manipulation}
 .hdr-logotext{font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
 .hdr-logotext i{font-size:18px}
 .hdr-sub{font-size:13px;font-weight:500;color:rgba(255,255,255,.8);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hdr-icons{display:flex;align-items:center;gap:8px}
+.hdr-icons{display:flex;align-items:flex-start;gap:8px}
 .hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;cursor:pointer;border:none;flex-shrink:0}
 .hdr-icon.scan-btn{width:38px;height:38px;font-size:22px}
+.hdr-icon.lang-btn{width:38px;height:38px}
+.hdr-icon-col{display:flex;flex-direction:column;align-items:center;gap:3px}
+.hdr-icon-caption{font-size:9.5px;color:rgba(255,255,255,.85);font-weight:600;white-space:nowrap;line-height:1}
 .search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin:12px auto 0;border:0.5px solid rgba(255,255,255,0.2);max-width:min(1100px,94vw)}
 .search-box input{background:transparent;border:none;outline:none;color:#fff;font-size:16px;flex:1;font-family:inherit}
 .search-box input::placeholder{color:rgba(255,255,255,0.5)}
@@ -541,7 +544,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div class="hdr-icons">
-        <button class="hdr-icon lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
+        <div class="hdr-icon-col">
+          <button class="hdr-icon lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
+          <span class="hdr-icon-caption" data-i18n="changeLanguageLabel">เปลี่ยนภาษา</span>
+        </div>
         <button class="hdr-icon scan-btn" onclick="openScanner()" data-i18n-title="scanTitle" title="สแกน QR" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i></button>
       </div>
     </div>
@@ -905,6 +911,7 @@ const I18N={
     switchView:'เปลี่ยนมุมมอง',
     customerViewLabel:'มุมมองลูกค้า',
     languageBtn:'ภาษา',
+    changeLanguageLabel:'เปลี่ยนภาษา',
     languageModalTitle:'เลือกภาษา',
     promoLabel:'โปรโมชั่น',
     promoEmpty:'ยังไม่มีโปรโมชั่นในขณะนี้',
@@ -957,6 +964,7 @@ const I18N={
     switchView:'Switch view',
     customerViewLabel:'Customer view',
     languageBtn:'Language',
+    changeLanguageLabel:'Change language',
     languageModalTitle:'Select language',
     promoLabel:'Promotions',
     promoEmpty:'No promotions at the moment',
@@ -1009,6 +1017,7 @@ const I18N={
     switchView:'切换视图',
     customerViewLabel:'顾客视图',
     languageBtn:'语言',
+    changeLanguageLabel:'切换语言',
     languageModalTitle:'选择语言',
     promoLabel:'促销活动',
     promoEmpty:'暂无促销活动',
@@ -1061,6 +1070,7 @@ const I18N={
     switchView:'မုဒ်ပြောင်းရန်',
     customerViewLabel:'ဖောက်သည်မြင်ကွင်း',
     languageBtn:'ဘာသာစကား',
+    changeLanguageLabel:'ဘာသာစကားပြောင်းရန်',
     languageModalTitle:'ဘာသာစကားရွေးချယ်ပါ',
     promoLabel:'ပရိုမိုးရှင်း',
     promoEmpty:'လောလောဆယ် ပရိုမိုးရှင်းမရှိသေးပါ',
@@ -1113,6 +1123,7 @@ const I18N={
     switchView:'모드 전환',
     customerViewLabel:'고객 화면',
     languageBtn:'언어',
+    changeLanguageLabel:'언어 변경',
     languageModalTitle:'언어 선택',
     promoLabel:'프로모션',
     promoEmpty:'현재 진행 중인 프로모션이 없습니다',
@@ -1165,6 +1176,7 @@ const I18N={
     switchView:'表示切替',
     customerViewLabel:'お客様表示',
     languageBtn:'言語',
+    changeLanguageLabel:'言語を変更',
     languageModalTitle:'言語を選択',
     promoLabel:'プロモーション',
     promoEmpty:'現在プロモーションはありません',
