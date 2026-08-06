@@ -300,6 +300,9 @@ body{margin:0;padding:0;touch-action:manipulation}
 .scan-guide{position:absolute;inset:12%;border:3px solid #fff;border-radius:16px;box-shadow:0 0 0 2000px rgba(0,0,0,.35)}
 .scan-hint{color:rgba(255,255,255,.75);font-size:13px;text-align:center;margin-top:14px}
 .scan-error{color:#ffb3b3;font-size:13px;text-align:center;margin-top:14px}
+.line-camera-notice{background:#fff;color:#23201B;border-radius:14px;padding:18px 16px;max-width:320px;margin:14px auto 0;box-shadow:0 8px 24px rgba(0,0,0,.35);text-align:center;font-size:13.5px;line-height:1.5}
+.line-open-browser-btn{display:block;margin:12px auto 0;padding:10px 20px;border-radius:10px;border:none;background:var(--brand-red);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.line-open-browser-hint{color:#8A8175;font-size:11.5px;text-align:center;margin-top:8px}
 .login-screen{position:fixed;inset:0;background:var(--brand-red);display:none;align-items:center;justify-content:center;padding:24px;z-index:1500;overflow-y:auto}
 .login-card{position:relative;background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center;margin:auto}
 .brand-logo{width:150px;height:auto;display:block;margin:0 auto 8px}
@@ -784,15 +787,15 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
 <div class="promo-date-overlay" id="movePalletOverlay">
   <div class="promo-date-box" style="max-width:380px" onclick="event.stopPropagation()">
-    <div class="promo-date-title" id="movePalletModalTitle" style="white-space:nowrap"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้ายสินค้าไปพาเลทอื่น</div>
-    <label>เลขพาเลทปลายทาง</label>
+    <div class="promo-date-title" id="movePalletModalTitle" style="white-space:nowrap"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> <span data-i18n="moveToPalletTitle">ย้ายสินค้าไปพาเลทอื่น</span></div>
+    <label data-i18n="targetPalletLabel">เลขพาเลทปลายทาง</label>
     <div class="new-item-barcode-row">
-      <input type="text" id="movePalletTarget" placeholder="พิมพ์เลขพาเลท หรือสแกน">
+      <input type="text" id="movePalletTarget" data-i18n-placeholder="targetPalletPlaceholder" placeholder="พิมพ์เลขพาเลท หรือสแกน">
       <button type="button" class="new-item-scan-btn" onclick="openMovePalletScan()" aria-label="สแกนเลขพาเลท"><i class="ti ti-scan" aria-hidden="true"></i></button>
     </div>
     <div class="promo-date-actions">
-      <button class="promo-date-cancel" onclick="closeMovePalletPrompt()">ยกเลิก</button>
-      <button class="promo-date-confirm" onclick="confirmMovePalletItem()">ย้าย</button>
+      <button class="promo-date-cancel" onclick="closeMovePalletPrompt()" data-i18n="cancelBtn">ยกเลิก</button>
+      <button class="promo-date-confirm" onclick="confirmMovePalletItem()" data-i18n="moveBtn">ย้าย</button>
     </div>
   </div>
 </div>
@@ -869,7 +872,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <video id="palletScanVideo" playsinline autoplay muted></video>
         <div class="pallet-scan-guide"></div>
       </div>
-      <p style="font-size:13px;color:var(--color-text-secondary);text-align:center" id="palletScanHint">เล็งกล้องไปที่บาร์โค้ดสินค้า</p>
+      <p style="font-size:13px;color:var(--color-text-secondary);text-align:center" id="palletScanHint" data-i18n="scanBarcodeHint">เล็งกล้องไปที่บาร์โค้ดสินค้า</p>
       <p style="font-size:13px;color:#A32D2D;text-align:center;display:none" id="palletScanError"></p>
     </div>
   </div>
@@ -880,14 +883,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div class="scan-overlay" id="scanOverlay">
   <div class="scan-box">
     <div class="scan-header">
-      <span>สแกน QR โค้ดสินค้า</span>
+      <span data-i18n="scanQrModalTitle">สแกน QR โค้ดสินค้า</span>
       <i class="ti ti-x" onclick="closeScanner()" aria-label="ปิด"></i>
     </div>
     <div class="scan-video-wrap">
       <video id="scanVideo" playsinline autoplay muted></video>
       <div class="scan-guide"></div>
     </div>
-    <p class="scan-hint">เล็งกล้องไปที่ QR โค้ดบนป้ายสินค้า</p>
+    <p class="scan-hint" data-i18n="scanQrHint">เล็งกล้องไปที่ QR โค้ดบนป้ายสินค้า</p>
     <p class="scan-error" id="scanError" style="display:none"></p>
   </div>
 </div>
@@ -1046,7 +1049,88 @@ const I18N={
     promoEndLabel:'สิ้นสุด (ระบบจะลบให้อัตโนมัติหลังวันนี้)',
     promoConfirmPickFile:'ตกลง เลือกไฟล์',
     promoMissingEndDateAlert:'กรุณาระบุวันที่สิ้นสุดโปรโมชั่น',
-    promoPastDateAlert:'กรุณาเลือกวันที่สิ้นสุดที่ยังไม่ผ่านไปแล้ว'
+    promoPastDateAlert:'กรุณาเลือกวันที่สิ้นสุดที่ยังไม่ผ่านไปแล้ว',
+    moveToPalletTitle:'ย้ายสินค้าไปพาเลทอื่น',
+    moveAllToPalletTitle:'ย้ายสินค้าทั้งหมดไปพาเลทอื่น',
+    targetPalletLabel:'เลขพาเลทปลายทาง',
+    targetPalletPlaceholder:'พิมพ์เลขพาเลท หรือสแกน',
+    moveBtn:'ย้าย',
+    scanQrModalTitle:'สแกน QR โค้ดสินค้า',
+    scanQrHint:'เล็งกล้องไปที่ QR โค้ดบนป้ายสินค้า',
+    scanBarcodeHint:'เล็งกล้องไปที่บาร์โค้ดสินค้า',
+    loadingPalletsText:'กำลังโหลดข้อมูลพาเลท...',
+    searchPalletPlaceholder:'ค้นหาพาเลท ชื่อ / Loc / Location',
+    createNewPalletBtn:'สร้างพาเลทใหม่',
+    palletNotFoundSearch:'ไม่พบพาเลทที่ค้นหา',
+    noPalletsYet:'ยังไม่มีพาเลทในระบบ',
+    itemsCountLabel:'รายการ',
+    muTotalLabel:'MU รวม',
+    createdByLabel:'สร้างโดย',
+    palletLocatedAtPrefix:'พาเลทนี้อยู่ที่',
+    addItemToPalletBtn:'เพิ่มสินค้าเข้าพาเลท',
+    scanToAddEditBtn:'สแกนบาร์โค้ดเพื่อเพิ่ม/แก้ไข',
+    scanToDeleteBtn:'สแกนบาร์โค้ดเพื่อลบสินค้า',
+    noPalletItemsYet:'ยังไม่มีสินค้าในพาเลทนี้',
+    moveAllItemsBtn:'โยกย้ายสินค้าในพาเลททั้งหมด',
+    palletLocationNotSet:'ยังไม่ระบุตำแหน่งพาเลท',
+    savePalletBtn:'บันทึกพาเลท',
+    deletePalletPermBtn:'ลบพาเลทนี้ทิ้งถาวร',
+    downloadAsImageBtn:'ดาวน์โหลดเป็นรูปภาพ (ถ้าพิมพ์ไม่ได้)',
+    printAllItemsBtn:'พิมพ์รายการสินค้าทั้งหมด',
+    renamePalletPrompt:'ตั้งชื่อพาเลท (เว้นว่างเพื่อล้างชื่อ)',
+    palletLocPrompt:'พาเลทนี้อยู่ Loc ไหน?',
+    palletLocationPrompt:'พาเลทนี้อยู่ Location ไหน?',
+    palletSavedToast:'บันทึกพาเลท {id} แล้ว',
+    moveToOtherPalletAria:'ย้ายไปพาเลทอื่น',
+    movePalletBtnShort:'ย้ายพาเลท',
+    qtyMuLabel:'จำนวน {qty} MU',
+    noItemsToMoveAlert:'พาเลทนี้ยังไม่มีสินค้าให้ย้าย',
+    enterTargetPalletAlert:'กรุณาพิมพ์หรือสแกนเลขพาเลทปลายทาง',
+    palletNotFoundAlert:'ไม่พบพาเลทเลข "{code}" ในระบบ',
+    samePalletAlert:'นี่คือพาเลทเดิม กรุณาเลือกพาเลทอื่น',
+    movedAllToPalletToast:'ย้ายสินค้าทั้งหมดไปพาเลท {name} แล้ว',
+    movedItemToPalletToast:'ย้าย {desc} ไปพาเลท {name} แล้ว',
+    deletePalletConfirm:'ลบพาเลท {id} ทิ้งถาวร?\nการกระทำนี้ย้อนกลับไม่ได้',
+    palletDeletedToast:'ลบพาเลท {id} แล้ว',
+    searchByNameItemBarcodePlaceholder:'ค้นหาชื่อ/Item No/บาร์โค้ด',
+    notFoundAddNewItemBtn:'ไม่พบสินค้า? เพิ่มรายการ Item ใหม่',
+    backToListBtn:'กลับไปดูรายการ',
+    itemNotFoundText:'ไม่พบสินค้า',
+    enterQtyPrompt:'ใส่จำนวนของ "{desc}"',
+    invalidQtyAlert:'กรุณาใส่จำนวนที่ถูกต้อง',
+    addedQtyToast:'เพิ่ม {desc} x{qty} แล้ว',
+    qtyInThisPalletLabel:'จำนวนในพาเลทนี้ {qty} MU',
+    qtyInThisPalletLabelOnly:'จำนวนในพาเลทนี้',
+    notFoundInAnyPalletText:'ไม่พบสินค้านี้ในพาเลทใดเลย',
+    scanTitleManage:'สแกนเพื่อเพิ่ม/แก้ไข',
+    scanTitleFind:'สแกนเพื่อค้นหา',
+    scanTitleBay:'สแกนบาร์โค้ด Bay เพื่อค้นหาพาเลท',
+    scanTitleNewItemBarcode:'สแกนบาร์โค้ดสินค้าใหม่',
+    scanTitleMoveTarget:'สแกนเลขพาเลทปลายทาง',
+    scanTitleDelete:'สแกนเพื่อลบสินค้า',
+    cameraNotSupportedError:'เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง กรุณาเปิดในเบราว์เซอร์ (Safari/Chrome) แทน',
+    cameraAccessDeniedError:'ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้อง',
+    itemNotInSystemToast:'ไม่พบสินค้านี้ในระบบ',
+    itemNotInPalletToast:'ไม่พบสินค้านี้ในพาเลท',
+    focusLockNotice:'ล็อกรายการอื่นชั่วคราว แก้ได้เฉพาะสินค้าที่สแกน',
+    deleteOneMuBtn:'ลบ 1 MU',
+    deleteAllMuBtn:'ลบทั้งหมด ({qty} MU)',
+    deletedOneMuToast:'ลบแล้ว 1 MU: {desc}',
+    confirmDeleteAllMu:'แน่ใจว่าจะลบ "{desc}" ทั้งหมด {qty} MU ออกจากพาเลทนี้ใช่หรือไม่?',
+    deletedAllToast:'ลบทั้งหมดแล้ว: {desc}',
+    removeFromPalletBtn:'ลบออกจากพาเลท',
+    doneScanNextBtn:'เสร็จแล้ว สแกนชิ้นต่อไป',
+    confirmRemoveFromPallet:'ลบสินค้านี้ออกจากพาเลท?',
+    palletPrintHeaderTemplate:'พาเลทเลข {name}',
+    signedByLabel:'ลงชื่อ',
+    printDateLabel:'วันที่',
+    printTimeSuffix:'ที่ปริ้นท์',
+    pageLabelTemplate:'หน้า {p}/{total}',
+    syncSaveFailedToast:'บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)',
+    syncDeleteFailedToast:'ลบจากส่วนกลางไม่สำเร็จ (ลบจากเครื่องนี้แล้ว)',
+    lineAndroidCameraNotice:'การสแกนผ่านแอป LINE บน Android มักไม่รองรับกล้อง กรุณาเปิดในเบราว์เซอร์ (Chrome) แทน',
+    openInBrowserBtn:'เปิดในเบราว์เซอร์',
+    lineOpenBrowserHint:'หรือแตะเมนู ⋮ มุมขวาบน แล้วเลือก "เปิดในเบราว์เซอร์"'
   },
   en:{
     roleIntro:'Please choose how you want to use the app',
@@ -1177,7 +1261,88 @@ const I18N={
     promoEndLabel:'End date (removed automatically after this date)',
     promoConfirmPickFile:'OK, choose file',
     promoMissingEndDateAlert:'Please set the promotion end date',
-    promoPastDateAlert:'Please choose an end date that has not already passed'
+    promoPastDateAlert:'Please choose an end date that has not already passed',
+    moveToPalletTitle:'Move item to another pallet',
+    moveAllToPalletTitle:'Move all items to another pallet',
+    targetPalletLabel:'Destination pallet number',
+    targetPalletPlaceholder:'Type or scan the pallet number',
+    moveBtn:'Move',
+    scanQrModalTitle:'Scan product QR code',
+    scanQrHint:'Point the camera at the QR code on the product tag',
+    scanBarcodeHint:'Point the camera at the product barcode',
+    loadingPalletsText:'Loading pallet data...',
+    searchPalletPlaceholder:'Search pallet name / Loc / Location',
+    createNewPalletBtn:'Create new pallet',
+    palletNotFoundSearch:'No pallets found',
+    noPalletsYet:'No pallets in the system yet',
+    itemsCountLabel:'items',
+    muTotalLabel:'Total MU',
+    createdByLabel:'Created by',
+    palletLocatedAtPrefix:'This pallet is at',
+    addItemToPalletBtn:'Add item to pallet',
+    scanToAddEditBtn:'Scan barcode to add/edit',
+    scanToDeleteBtn:'Scan barcode to remove item',
+    noPalletItemsYet:'No items in this pallet yet',
+    moveAllItemsBtn:'Move all items in this pallet',
+    palletLocationNotSet:'Pallet location not set',
+    savePalletBtn:'Save pallet',
+    deletePalletPermBtn:'Delete this pallet permanently',
+    downloadAsImageBtn:'Download as image (if printing fails)',
+    printAllItemsBtn:'Print full item list',
+    renamePalletPrompt:'Name this pallet (leave blank to clear)',
+    palletLocPrompt:'Which Loc is this pallet at?',
+    palletLocationPrompt:'Which Location is this pallet at?',
+    palletSavedToast:'Saved pallet {id}',
+    moveToOtherPalletAria:'Move to another pallet',
+    movePalletBtnShort:'Move pallet',
+    qtyMuLabel:'Qty {qty} MU',
+    noItemsToMoveAlert:'This pallet has no items to move',
+    enterTargetPalletAlert:'Please type or scan the destination pallet number',
+    palletNotFoundAlert:'Pallet "{code}" was not found in the system',
+    samePalletAlert:'That is the same pallet — please choose a different one',
+    movedAllToPalletToast:'Moved all items to pallet {name}',
+    movedItemToPalletToast:'Moved {desc} to pallet {name}',
+    deletePalletConfirm:'Permanently delete pallet {id}?\nThis cannot be undone',
+    palletDeletedToast:'Deleted pallet {id}',
+    searchByNameItemBarcodePlaceholder:'Search by name / Item No / barcode',
+    notFoundAddNewItemBtn:'Item not found? Add a new item',
+    backToListBtn:'Back to list',
+    itemNotFoundText:'No items found',
+    enterQtyPrompt:'Enter quantity for "{desc}"',
+    invalidQtyAlert:'Please enter a valid quantity',
+    addedQtyToast:'Added {desc} x{qty}',
+    qtyInThisPalletLabel:'Qty in this pallet: {qty} MU',
+    qtyInThisPalletLabelOnly:'Qty in this pallet',
+    notFoundInAnyPalletText:'This item was not found in any pallet',
+    scanTitleManage:'Scan to add/edit',
+    scanTitleFind:'Scan to search',
+    scanTitleBay:'Scan the Bay barcode to find a pallet',
+    scanTitleNewItemBarcode:'Scan new item barcode',
+    scanTitleMoveTarget:'Scan destination pallet number',
+    scanTitleDelete:'Scan to remove item',
+    cameraNotSupportedError:'This browser does not support camera access — please open in Safari/Chrome instead',
+    cameraAccessDeniedError:'Could not access the camera — please allow camera permission',
+    itemNotInSystemToast:'This item was not found in the system',
+    itemNotInPalletToast:'This item was not found in the pallet',
+    focusLockNotice:'Other items are temporarily locked — only the scanned item can be edited',
+    deleteOneMuBtn:'Remove 1 MU',
+    deleteAllMuBtn:'Remove all ({qty} MU)',
+    deletedOneMuToast:'Removed 1 MU: {desc}',
+    confirmDeleteAllMu:'Remove all {qty} MU of "{desc}" from this pallet?',
+    deletedAllToast:'Removed all: {desc}',
+    removeFromPalletBtn:'Remove from pallet',
+    doneScanNextBtn:'Done — scan next item',
+    confirmRemoveFromPallet:'Remove this item from the pallet?',
+    palletPrintHeaderTemplate:'Pallet {name}',
+    signedByLabel:'Signed',
+    printDateLabel:'Date',
+    printTimeSuffix:'printed at',
+    pageLabelTemplate:'Page {p}/{total}',
+    syncSaveFailedToast:'Failed to save to shared storage (saved on this device instead)',
+    syncDeleteFailedToast:'Failed to delete from shared storage (deleted on this device instead)',
+    lineAndroidCameraNotice:'Scanning inside the LINE app on Android usually cannot access the camera. Please open this page in your browser (Chrome) instead.',
+    openInBrowserBtn:'Open in browser',
+    lineOpenBrowserHint:'Or tap the ⋮ menu in the top right and choose "Open in browser"'
   },
   cn:{
     roleIntro:'请选择使用模式',
@@ -1308,7 +1473,88 @@ const I18N={
     promoEndLabel:'结束（结束后系统将自动删除）',
     promoConfirmPickFile:'确定，选择文件',
     promoMissingEndDateAlert:'请设置促销结束日期',
-    promoPastDateAlert:'请选择尚未过去的结束日期'
+    promoPastDateAlert:'请选择尚未过去的结束日期',
+    moveToPalletTitle:'将商品移到其他托盘',
+    moveAllToPalletTitle:'将所有商品移到其他托盘',
+    targetPalletLabel:'目标托盘编号',
+    targetPalletPlaceholder:'输入或扫描托盘编号',
+    moveBtn:'移动',
+    scanQrModalTitle:'扫描商品二维码',
+    scanQrHint:'将镜头对准商品标签上的二维码',
+    scanBarcodeHint:'将镜头对准商品条形码',
+    loadingPalletsText:'正在加载托盘数据...',
+    searchPalletPlaceholder:'搜索托盘名称 / Loc / Location',
+    createNewPalletBtn:'新建托盘',
+    palletNotFoundSearch:'未找到相符的托盘',
+    noPalletsYet:'系统中尚无托盘',
+    itemsCountLabel:'项',
+    muTotalLabel:'MU 总数',
+    createdByLabel:'创建人',
+    palletLocatedAtPrefix:'该托盘位于',
+    addItemToPalletBtn:'添加商品到托盘',
+    scanToAddEditBtn:'扫描条形码以添加/编辑',
+    scanToDeleteBtn:'扫描条形码以删除商品',
+    noPalletItemsYet:'该托盘暂无商品',
+    moveAllItemsBtn:'转移该托盘所有商品',
+    palletLocationNotSet:'尚未设置托盘位置',
+    savePalletBtn:'保存托盘',
+    deletePalletPermBtn:'永久删除该托盘',
+    downloadAsImageBtn:'下载为图片（如无法打印）',
+    printAllItemsBtn:'打印全部商品清单',
+    renamePalletPrompt:'为托盘命名（留空可清除名称）',
+    palletLocPrompt:'该托盘位于哪个 Loc？',
+    palletLocationPrompt:'该托盘位于哪个 Location？',
+    palletSavedToast:'已保存托盘 {id}',
+    moveToOtherPalletAria:'移到其他托盘',
+    movePalletBtnShort:'移动托盘',
+    qtyMuLabel:'数量 {qty} MU',
+    noItemsToMoveAlert:'该托盘暂无商品可移动',
+    enterTargetPalletAlert:'请输入或扫描目标托盘编号',
+    palletNotFoundAlert:'系统中未找到托盘 "{code}"',
+    samePalletAlert:'这是同一个托盘，请选择其他托盘',
+    movedAllToPalletToast:'已将所有商品移至托盘 {name}',
+    movedItemToPalletToast:'已将 {desc} 移至托盘 {name}',
+    deletePalletConfirm:'确定要永久删除托盘 {id} 吗？\n此操作无法撤销',
+    palletDeletedToast:'已删除托盘 {id}',
+    searchByNameItemBarcodePlaceholder:'按名称/商品编号/条形码搜索',
+    notFoundAddNewItemBtn:'找不到商品？添加新商品',
+    backToListBtn:'返回列表',
+    itemNotFoundText:'未找到商品',
+    enterQtyPrompt:'输入 "{desc}" 的数量',
+    invalidQtyAlert:'请输入有效数量',
+    addedQtyToast:'已添加 {desc} x{qty}',
+    qtyInThisPalletLabel:'该托盘中数量 {qty} MU',
+    qtyInThisPalletLabelOnly:'该托盘中数量',
+    notFoundInAnyPalletText:'任何托盘中都未找到该商品',
+    scanTitleManage:'扫描以添加/编辑',
+    scanTitleFind:'扫描以搜索',
+    scanTitleBay:'扫描 Bay 条形码以查找托盘',
+    scanTitleNewItemBarcode:'扫描新商品条形码',
+    scanTitleMoveTarget:'扫描目标托盘编号',
+    scanTitleDelete:'扫描以删除商品',
+    cameraNotSupportedError:'此浏览器不支持相机访问，请改用 Safari/Chrome 打开',
+    cameraAccessDeniedError:'无法访问相机，请允许相机权限',
+    itemNotInSystemToast:'系统中未找到该商品',
+    itemNotInPalletToast:'托盘中未找到该商品',
+    focusLockNotice:'其他项目已临时锁定，仅可编辑扫描到的商品',
+    deleteOneMuBtn:'删除 1 MU',
+    deleteAllMuBtn:'全部删除（{qty} MU）',
+    deletedOneMuToast:'已删除 1 MU：{desc}',
+    confirmDeleteAllMu:'确定要从该托盘中删除全部 {qty} MU 的 "{desc}" 吗？',
+    deletedAllToast:'已全部删除：{desc}',
+    removeFromPalletBtn:'从托盘中删除',
+    doneScanNextBtn:'完成，扫描下一件',
+    confirmRemoveFromPallet:'确定要将该商品从托盘中删除吗？',
+    palletPrintHeaderTemplate:'托盘编号 {name}',
+    signedByLabel:'签名',
+    printDateLabel:'日期',
+    printTimeSuffix:'打印时间',
+    pageLabelTemplate:'第 {p}/{total} 页',
+    syncSaveFailedToast:'保存到中央数据库失败（已保存在本机）',
+    syncDeleteFailedToast:'从中央数据库删除失败（已从本机删除）',
+    lineAndroidCameraNotice:'在 Android 的 LINE 应用内通常无法使用相机扫描，请改用浏览器（Chrome）打开此页面',
+    openInBrowserBtn:'在浏览器中打开',
+    lineOpenBrowserHint:'或点击右上角 ⋮ 菜单，选择"在浏览器中打开"'
   },
   mm:{
     roleIntro:'အသုံးပြုမည့်မုဒ်ကို ရွေးချယ်ပါ',
@@ -1439,7 +1685,88 @@ const I18N={
     promoEndLabel:'ကုန်ဆုံးရက် (ဤရက်နောက်ပိုင်း စနစ်မှအလိုအလျောက်ဖျက်မည်)',
     promoConfirmPickFile:'အိုကေ၊ ဖိုင်ရွေးရန်',
     promoMissingEndDateAlert:'ပရိုမိုးရှင်း ကုန်ဆုံးရက်ကို သတ်မှတ်ပါ',
-    promoPastDateAlert:'မကုန်ဆုံးသေးသော ကုန်ဆုံးရက်ကို ရွေးချယ်ပါ'
+    promoPastDateAlert:'မကုန်ဆုံးသေးသော ကုန်ဆုံးရက်ကို ရွေးချယ်ပါ',
+    moveToPalletTitle:'ပစ္စည်းကို အခြားပလက်ဖောင်းသို့ ရွှေ့ရန်',
+    moveAllToPalletTitle:'ပစ္စည်းအားလုံးကို အခြားပလက်ဖောင်းသို့ ရွှေ့ရန်',
+    targetPalletLabel:'ရွှေ့မည့်ပလက်ဖောင်းနံပါတ်',
+    targetPalletPlaceholder:'ပလက်ဖောင်းနံပါတ်ရိုက်ထည့် သို့မဟုတ် စကန်ဖတ်ပါ',
+    moveBtn:'ရွှေ့ရန်',
+    scanQrModalTitle:'ပစ္စည်း QR ကုဒ်စကန်ဖတ်ရန်',
+    scanQrHint:'ပစ္စည်းလေဘယ်ပေါ်ရှိ QR ကုဒ်ကို ကင်မရာဖြင့်ရိုက်ပါ',
+    scanBarcodeHint:'ပစ္စည်းဘားကုဒ်ကို ကင်မရာဖြင့်ရိုက်ပါ',
+    loadingPalletsText:'ပလက်ဖောင်းအချက်အလက် ဖွင့်နေသည်...',
+    searchPalletPlaceholder:'ပလက်ဖောင်းအမည် / Loc / Location ရှာရန်',
+    createNewPalletBtn:'ပလက်ဖောင်းအသစ်ဖန်တီးရန်',
+    palletNotFoundSearch:'ရှာဖွေမှုနှင့်ကိုက်ညီသော ပလက်ဖောင်းမရှိပါ',
+    noPalletsYet:'စနစ်တွင် ပလက်ဖောင်းမရှိသေးပါ',
+    itemsCountLabel:'ခု',
+    muTotalLabel:'MU စုစုပေါင်း',
+    createdByLabel:'ဖန်တီးသူ',
+    palletLocatedAtPrefix:'ဤပလက်ဖောင်းရှိရာနေရာမှာ',
+    addItemToPalletBtn:'ပလက်ဖောင်းထဲသို့ ပစ္စည်းထည့်ရန်',
+    scanToAddEditBtn:'ထည့်/ပြင်ရန် ဘားကုဒ်စကန်ဖတ်ရန်',
+    scanToDeleteBtn:'ပစ္စည်းဖျက်ရန် ဘားကုဒ်စကန်ဖတ်ရန်',
+    noPalletItemsYet:'ဤပလက်ဖောင်းတွင် ပစ္စည်းမရှိသေးပါ',
+    moveAllItemsBtn:'ပလက်ဖောင်းရှိ ပစ္စည်းအားလုံးကို ရွှေ့ရန်',
+    palletLocationNotSet:'ပလက်ဖောင်းတည်နေရာ မသတ်မှတ်ရသေးပါ',
+    savePalletBtn:'ပလက်ဖောင်းသိမ်းဆည်းရန်',
+    deletePalletPermBtn:'ဤပလက်ဖောင်းကို အပြီးဖျက်ရန်',
+    downloadAsImageBtn:'ပုံအဖြစ်ဒေါင်းလုဒ်လုပ်ရန် (ပရင့်မထွက်လျှင်)',
+    printAllItemsBtn:'ပစ္စည်းစာရင်းအားလုံး ပရင့်ထုတ်ရန်',
+    renamePalletPrompt:'ပလက်ဖောင်းအမည်ပေးရန် (ရှင်းရန် အလွတ်ထားပါ)',
+    palletLocPrompt:'ဤပလက်ဖောင်းသည် မည်သည့် Loc တွင်ရှိသနည်း?',
+    palletLocationPrompt:'ဤပလက်ဖောင်းသည် မည်သည့် Location တွင်ရှိသနည်း?',
+    palletSavedToast:'ပလက်ဖောင်း {id} သိမ်းဆည်းပြီးပါပြီ',
+    moveToOtherPalletAria:'အခြားပလက်ဖောင်းသို့ ရွှေ့ရန်',
+    movePalletBtnShort:'ပလက်ဖောင်းရွှေ့ရန်',
+    qtyMuLabel:'အရေအတွက် {qty} MU',
+    noItemsToMoveAlert:'ဤပလက်ဖောင်းတွင် ရွှေ့ရန်ပစ္စည်းမရှိပါ',
+    enterTargetPalletAlert:'ရွှေ့မည့်ပလက်ဖောင်းနံပါတ်ကို ရိုက်ထည့် သို့မဟုတ် စကန်ဖတ်ပါ',
+    palletNotFoundAlert:'ပလက်ဖောင်းနံပါတ် "{code}" ကို စနစ်တွင်မတွေ့ပါ',
+    samePalletAlert:'ဤသည်မှာ ပလက်ဖောင်းအဟောင်းဖြစ်သည် အခြားတစ်ခုရွေးချယ်ပါ',
+    movedAllToPalletToast:'ပစ္စည်းအားလုံးကို ပလက်ဖောင်း {name} သို့ ရွှေ့ပြီးပါပြီ',
+    movedItemToPalletToast:'{desc} ကို ပလက်ဖောင်း {name} သို့ ရွှေ့ပြီးပါပြီ',
+    deletePalletConfirm:'ပလက်ဖောင်း {id} ကို အပြီးဖျက်မည်မှာ သေချာပါသလား?\nဤလုပ်ဆောင်ချက်ကို ပြန်ပြင်၍မရပါ',
+    palletDeletedToast:'ပလက်ဖောင်း {id} ဖျက်ပြီးပါပြီ',
+    searchByNameItemBarcodePlaceholder:'အမည်/ပစ္စည်းနံပါတ်/ဘားကုဒ်ဖြင့်ရှာရန်',
+    notFoundAddNewItemBtn:'ပစ္စည်းရှာမတွေ့ဘူးလား? ပစ္စည်းအသစ်ထည့်ရန်',
+    backToListBtn:'စာရင်းသို့ ပြန်သွားရန်',
+    itemNotFoundText:'ပစ္စည်းရှာမတွေ့ပါ',
+    enterQtyPrompt:'"{desc}" ၏ အရေအတွက်ထည့်ပါ',
+    invalidQtyAlert:'မှန်ကန်သော အရေအတွက်ထည့်ပါ',
+    addedQtyToast:'{desc} x{qty} ထည့်ပြီးပါပြီ',
+    qtyInThisPalletLabel:'ဤပလက်ဖောင်းရှိ အရေအတွက် {qty} MU',
+    qtyInThisPalletLabelOnly:'ဤပလက်ဖောင်းရှိ အရေအတွက်',
+    notFoundInAnyPalletText:'မည်သည့်ပလက်ဖောင်းတွင်မျှ ဤပစ္စည်းကိုမတွေ့ပါ',
+    scanTitleManage:'ထည့်/ပြင်ရန် စကန်ဖတ်ရန်',
+    scanTitleFind:'ရှာဖွေရန် စကန်ဖတ်ရန်',
+    scanTitleBay:'ပလက်ဖောင်းရှာရန် Bay ဘားကုဒ်စကန်ဖတ်ရန်',
+    scanTitleNewItemBarcode:'ပစ္စည်းအသစ် ဘားကုဒ်စကန်ဖတ်ရန်',
+    scanTitleMoveTarget:'ရွှေ့မည့်ပလက်ဖောင်းနံပါတ် စကန်ဖတ်ရန်',
+    scanTitleDelete:'ပစ္စည်းဖျက်ရန် စကန်ဖတ်ရန်',
+    cameraNotSupportedError:'ဤဘရောက်ဇာသည် ကင်မရာအသုံးပြုခွင့်ကို မထောက်ပံ့ပါ Safari/Chrome ဖြင့်ဖွင့်ပါ',
+    cameraAccessDeniedError:'ကင်မရာသုံးခွင့်မရပါ ကင်မရာခွင့်ပြုပါ',
+    itemNotInSystemToast:'ဤပစ္စည်းကို စနစ်တွင်မတွေ့ပါ',
+    itemNotInPalletToast:'ဤပစ္စည်းကို ပလက်ဖောင်းတွင်မတွေ့ပါ',
+    focusLockNotice:'အခြားပစ္စည်းများကို ယာယီပိတ်ထားသည် စကန်ဖတ်ထားသောပစ္စည်းကိုသာ ပြင်ဆင်နိုင်သည်',
+    deleteOneMuBtn:'1 MU ဖျက်ရန်',
+    deleteAllMuBtn:'အားလုံးဖျက်ရန် ({qty} MU)',
+    deletedOneMuToast:'1 MU ဖျက်ပြီးပါပြီ: {desc}',
+    confirmDeleteAllMu:'"{desc}" အားလုံး {qty} MU ကို ဤပလက်ဖောင်းမှ ဖျက်မည်မှာ သေချာပါသလား?',
+    deletedAllToast:'အားလုံးဖျက်ပြီးပါပြီ: {desc}',
+    removeFromPalletBtn:'ပလက်ဖောင်းမှ ဖျက်ရန်',
+    doneScanNextBtn:'ပြီးပါပြီ နောက်တစ်ခုစကန်ဖတ်ရန်',
+    confirmRemoveFromPallet:'ဤပစ္စည်းကို ပလက်ဖောင်းမှ ဖျက်မည်မှာ သေချာပါသလား?',
+    palletPrintHeaderTemplate:'ပလက်ဖောင်းနံပါတ် {name}',
+    signedByLabel:'လက်မှတ်ရေးသူ',
+    printDateLabel:'ရက်စွဲ',
+    printTimeSuffix:'ပရင့်ထုတ်ချိန်',
+    pageLabelTemplate:'စာမျက်နှာ {p}/{total}',
+    syncSaveFailedToast:'ဗဟိုစနစ်သို့ သိမ်းဆည်းမရပါ (ဤစက်တွင်သိမ်းထားပါပြီ)',
+    syncDeleteFailedToast:'ဗဟိုစနစ်မှ ဖျက်၍မရပါ (ဤစက်မှ ဖျက်ပြီးပါပြီ)',
+    lineAndroidCameraNotice:'Android တွင် LINE အက်ပ်အတွင်းမှ စကန်ဖတ်ခြင်းသည် များသောအားဖြင့် ကင်မရာကိုသုံး၍မရပါ ကျေးဇူးပြု၍ ဤစာမျက်နှာကို ဘရောက်ဇာ (Chrome) ဖြင့်ဖွင့်ပါ',
+    openInBrowserBtn:'ဘရောက်ဇာဖြင့်ဖွင့်ရန်',
+    lineOpenBrowserHint:'သို့မဟုတ် ညာဘက်အပေါ်ရှိ ⋮ မီနူးကိုတို့ပြီး "ဘရောက်ဇာဖြင့်ဖွင့်ရန်" ကိုရွေးပါ'
   },
   kr:{
     roleIntro:'사용 모드를 선택해 주세요',
@@ -1570,7 +1897,88 @@ const I18N={
     promoEndLabel:'종료일 (이후 자동 삭제됩니다)',
     promoConfirmPickFile:'확인, 파일 선택',
     promoMissingEndDateAlert:'프로모션 종료일을 설정하세요',
-    promoPastDateAlert:'아직 지나지 않은 종료일을 선택하세요'
+    promoPastDateAlert:'아직 지나지 않은 종료일을 선택하세요',
+    moveToPalletTitle:'다른 팔레트로 상품 이동',
+    moveAllToPalletTitle:'모든 상품을 다른 팔레트로 이동',
+    targetPalletLabel:'대상 팔레트 번호',
+    targetPalletPlaceholder:'팔레트 번호 입력 또는 스캔',
+    moveBtn:'이동',
+    scanQrModalTitle:'상품 QR 코드 스캔',
+    scanQrHint:'상품 태그의 QR 코드에 카메라를 맞추세요',
+    scanBarcodeHint:'상품 바코드에 카메라를 맞추세요',
+    loadingPalletsText:'팔레트 데이터 불러오는 중...',
+    searchPalletPlaceholder:'팔레트 이름 / Loc / Location 검색',
+    createNewPalletBtn:'새 팔레트 생성',
+    palletNotFoundSearch:'검색된 팔레트가 없습니다',
+    noPalletsYet:'아직 시스템에 팔레트가 없습니다',
+    itemsCountLabel:'건',
+    muTotalLabel:'총 MU',
+    createdByLabel:'생성자',
+    palletLocatedAtPrefix:'이 팔레트의 위치',
+    addItemToPalletBtn:'팔레트에 상품 추가',
+    scanToAddEditBtn:'바코드 스캔으로 추가/수정',
+    scanToDeleteBtn:'바코드 스캔으로 상품 삭제',
+    noPalletItemsYet:'이 팔레트에 상품이 없습니다',
+    moveAllItemsBtn:'팔레트의 모든 상품 이동',
+    palletLocationNotSet:'팔레트 위치가 설정되지 않음',
+    savePalletBtn:'팔레트 저장',
+    deletePalletPermBtn:'이 팔레트 영구 삭제',
+    downloadAsImageBtn:'이미지로 다운로드 (인쇄가 안 될 경우)',
+    printAllItemsBtn:'전체 상품 목록 인쇄',
+    renamePalletPrompt:'팔레트 이름 설정 (비우면 이름 삭제)',
+    palletLocPrompt:'이 팔레트는 어느 Loc에 있습니까?',
+    palletLocationPrompt:'이 팔레트는 어느 Location에 있습니까?',
+    palletSavedToast:'팔레트 {id} 저장됨',
+    moveToOtherPalletAria:'다른 팔레트로 이동',
+    movePalletBtnShort:'팔레트 이동',
+    qtyMuLabel:'수량 {qty} MU',
+    noItemsToMoveAlert:'이 팔레트에는 이동할 상품이 없습니다',
+    enterTargetPalletAlert:'대상 팔레트 번호를 입력하거나 스캔하세요',
+    palletNotFoundAlert:'팔레트 "{code}"를 시스템에서 찾을 수 없습니다',
+    samePalletAlert:'동일한 팔레트입니다. 다른 팔레트를 선택하세요',
+    movedAllToPalletToast:'모든 상품을 팔레트 {name}(으)로 이동했습니다',
+    movedItemToPalletToast:'{desc}을(를) 팔레트 {name}(으)로 이동했습니다',
+    deletePalletConfirm:'팔레트 {id}를 영구적으로 삭제하시겠습니까?\n되돌릴 수 없습니다',
+    palletDeletedToast:'팔레트 {id} 삭제됨',
+    searchByNameItemBarcodePlaceholder:'이름/상품번호/바코드로 검색',
+    notFoundAddNewItemBtn:'상품이 없나요? 신규 상품 추가',
+    backToListBtn:'목록으로 돌아가기',
+    itemNotFoundText:'상품을 찾을 수 없습니다',
+    enterQtyPrompt:'"{desc}"의 수량을 입력하세요',
+    invalidQtyAlert:'올바른 수량을 입력하세요',
+    addedQtyToast:'{desc} x{qty} 추가됨',
+    qtyInThisPalletLabel:'이 팔레트 수량 {qty} MU',
+    qtyInThisPalletLabelOnly:'이 팔레트 수량',
+    notFoundInAnyPalletText:'어느 팔레트에서도 이 상품을 찾을 수 없습니다',
+    scanTitleManage:'추가/수정 스캔',
+    scanTitleFind:'검색 스캔',
+    scanTitleBay:'팔레트 검색을 위한 Bay 바코드 스캔',
+    scanTitleNewItemBarcode:'신규 상품 바코드 스캔',
+    scanTitleMoveTarget:'대상 팔레트 번호 스캔',
+    scanTitleDelete:'상품 삭제를 위한 스캔',
+    cameraNotSupportedError:'이 브라우저는 카메라 접근을 지원하지 않습니다. Safari/Chrome에서 열어주세요',
+    cameraAccessDeniedError:'카메라에 접근할 수 없습니다. 카메라 권한을 허용해주세요',
+    itemNotInSystemToast:'이 상품을 시스템에서 찾을 수 없습니다',
+    itemNotInPalletToast:'이 상품을 팔레트에서 찾을 수 없습니다',
+    focusLockNotice:'다른 항목은 일시적으로 잠겨 있으며 스캔한 상품만 수정할 수 있습니다',
+    deleteOneMuBtn:'1 MU 삭제',
+    deleteAllMuBtn:'전체 삭제 ({qty} MU)',
+    deletedOneMuToast:'1 MU 삭제됨: {desc}',
+    confirmDeleteAllMu:'"{desc}" {qty} MU 전체를 이 팔레트에서 삭제하시겠습니까?',
+    deletedAllToast:'전체 삭제됨: {desc}',
+    removeFromPalletBtn:'팔레트에서 삭제',
+    doneScanNextBtn:'완료 — 다음 상품 스캔',
+    confirmRemoveFromPallet:'이 상품을 팔레트에서 삭제하시겠습니까?',
+    palletPrintHeaderTemplate:'팔레트 번호 {name}',
+    signedByLabel:'서명',
+    printDateLabel:'날짜',
+    printTimeSuffix:'인쇄 시각',
+    pageLabelTemplate:'{p}/{total} 페이지',
+    syncSaveFailedToast:'중앙 저장소에 저장하지 못했습니다 (이 기기에는 저장됨)',
+    syncDeleteFailedToast:'중앙 저장소에서 삭제하지 못했습니다 (이 기기에서는 삭제됨)',
+    lineAndroidCameraNotice:'Android의 LINE 앱 내에서는 보통 카메라를 사용할 수 없습니다. 브라우저(Chrome)에서 이 페이지를 열어주세요',
+    openInBrowserBtn:'브라우저에서 열기',
+    lineOpenBrowserHint:'또는 오른쪽 상단의 ⋮ 메뉴를 눌러 "브라우저에서 열기"를 선택하세요'
   },
   jp:{
     roleIntro:'利用モードを選択してください',
@@ -1701,7 +2109,88 @@ const I18N={
     promoEndLabel:'終了日（この日以降は自動削除されます）',
     promoConfirmPickFile:'OK、ファイルを選択',
     promoMissingEndDateAlert:'プロモーションの終了日を設定してください',
-    promoPastDateAlert:'まだ過ぎていない終了日を選択してください'
+    promoPastDateAlert:'まだ過ぎていない終了日を選択してください',
+    moveToPalletTitle:'商品を別のパレットへ移動',
+    moveAllToPalletTitle:'すべての商品を別のパレットへ移動',
+    targetPalletLabel:'移動先パレット番号',
+    targetPalletPlaceholder:'パレット番号を入力またはスキャン',
+    moveBtn:'移動',
+    scanQrModalTitle:'商品QRコードをスキャン',
+    scanQrHint:'商品タグのQRコードにカメラを向けてください',
+    scanBarcodeHint:'商品のバーコードにカメラを向けてください',
+    loadingPalletsText:'パレットデータを読み込み中...',
+    searchPalletPlaceholder:'パレット名 / Loc / Location で検索',
+    createNewPalletBtn:'新しいパレットを作成',
+    palletNotFoundSearch:'該当するパレットが見つかりません',
+    noPalletsYet:'まだシステムにパレットがありません',
+    itemsCountLabel:'件',
+    muTotalLabel:'合計 MU',
+    createdByLabel:'作成者',
+    palletLocatedAtPrefix:'このパレットの位置',
+    addItemToPalletBtn:'パレットに商品を追加',
+    scanToAddEditBtn:'バーコードをスキャンして追加/編集',
+    scanToDeleteBtn:'バーコードをスキャンして商品を削除',
+    noPalletItemsYet:'このパレットにはまだ商品がありません',
+    moveAllItemsBtn:'このパレットの全商品を移動',
+    palletLocationNotSet:'パレットの位置が未設定です',
+    savePalletBtn:'パレットを保存',
+    deletePalletPermBtn:'このパレットを完全に削除',
+    downloadAsImageBtn:'画像としてダウンロード（印刷できない場合）',
+    printAllItemsBtn:'全商品リストを印刷',
+    renamePalletPrompt:'パレット名を設定（空欄で名前をクリア）',
+    palletLocPrompt:'このパレットはどのLocにありますか？',
+    palletLocationPrompt:'このパレットはどのLocationにありますか？',
+    palletSavedToast:'パレット {id} を保存しました',
+    moveToOtherPalletAria:'別のパレットへ移動',
+    movePalletBtnShort:'パレット移動',
+    qtyMuLabel:'数量 {qty} MU',
+    noItemsToMoveAlert:'このパレットには移動する商品がありません',
+    enterTargetPalletAlert:'移動先のパレット番号を入力またはスキャンしてください',
+    palletNotFoundAlert:'パレット「{code}」がシステム内に見つかりません',
+    samePalletAlert:'同じパレットです。別のパレットを選択してください',
+    movedAllToPalletToast:'すべての商品をパレット {name} へ移動しました',
+    movedItemToPalletToast:'{desc} をパレット {name} へ移動しました',
+    deletePalletConfirm:'パレット {id} を完全に削除しますか？\nこの操作は元に戻せません',
+    palletDeletedToast:'パレット {id} を削除しました',
+    searchByNameItemBarcodePlaceholder:'名前/商品番号/バーコードで検索',
+    notFoundAddNewItemBtn:'商品が見つかりませんか？新規商品を追加',
+    backToListBtn:'リストに戻る',
+    itemNotFoundText:'商品が見つかりません',
+    enterQtyPrompt:'「{desc}」の数量を入力',
+    invalidQtyAlert:'正しい数量を入力してください',
+    addedQtyToast:'{desc} x{qty} を追加しました',
+    qtyInThisPalletLabel:'このパレットの数量 {qty} MU',
+    qtyInThisPalletLabelOnly:'このパレットの数量',
+    notFoundInAnyPalletText:'どのパレットにもこの商品は見つかりません',
+    scanTitleManage:'追加/編集のためスキャン',
+    scanTitleFind:'検索のためスキャン',
+    scanTitleBay:'パレット検索のためBayバーコードをスキャン',
+    scanTitleNewItemBarcode:'新規商品のバーコードをスキャン',
+    scanTitleMoveTarget:'移動先パレット番号をスキャン',
+    scanTitleDelete:'商品削除のためスキャン',
+    cameraNotSupportedError:'このブラウザはカメラアクセスに対応していません。Safari/Chromeで開いてください',
+    cameraAccessDeniedError:'カメラにアクセスできません。カメラの権限を許可してください',
+    itemNotInSystemToast:'この商品はシステムに見つかりません',
+    itemNotInPalletToast:'この商品はパレットに見つかりません',
+    focusLockNotice:'他の項目は一時的にロックされ、スキャンした商品のみ編集できます',
+    deleteOneMuBtn:'1 MU削除',
+    deleteAllMuBtn:'すべて削除（{qty} MU）',
+    deletedOneMuToast:'1 MU削除しました：{desc}',
+    confirmDeleteAllMu:'「{desc}」全{qty} MUをこのパレットから削除しますか？',
+    deletedAllToast:'すべて削除しました：{desc}',
+    removeFromPalletBtn:'パレットから削除',
+    doneScanNextBtn:'完了 — 次をスキャン',
+    confirmRemoveFromPallet:'この商品をパレットから削除しますか？',
+    palletPrintHeaderTemplate:'パレット番号 {name}',
+    signedByLabel:'署名',
+    printDateLabel:'日付',
+    printTimeSuffix:'印刷時刻',
+    pageLabelTemplate:'{p}/{total} ページ',
+    syncSaveFailedToast:'中央データベースへの保存に失敗しました（この端末には保存済み）',
+    syncDeleteFailedToast:'中央データベースからの削除に失敗しました（この端末では削除済み）',
+    lineAndroidCameraNotice:'AndroidのLINEアプリ内ではカメラを利用できないことがほとんどです。ブラウザ（Chrome）でこのページを開いてください',
+    openInBrowserBtn:'ブラウザで開く',
+    lineOpenBrowserHint:'または右上の ⋮ メニューをタップして「ブラウザで開く」を選択してください'
   }
 };
 let currentLang=(function(){ try{ return localStorage.getItem('mf_lang')||'th'; }catch(e){ return 'th'; } })();
@@ -2827,7 +3316,7 @@ async function confirmPromoDatePick(){
     renderPromoGallery();
     if(promoGalleryCollectionRef){
       try{ await promoGalleryCollectionRef.doc(p.id).set(p); }
-      catch(e){ console.error('บันทึกช่วงเวลาโปรโมชั่นไป Firestore ไม่สำเร็จ',e); showPalletToast('บันทึกส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+      catch(e){ console.error('บันทึกช่วงเวลาโปรโมชั่นไป Firestore ไม่สำเร็จ',e); showPalletToast(t('syncSaveFailedToast')); }
     }
     return;
   }
@@ -2911,7 +3400,7 @@ async function savePromoItem(dataUrl,addedBy,period){
   savePromoGalleryLocal(PROMO_GALLERY_CACHE);
   if(promoGalleryCollectionRef){
     try{ await promoGalleryCollectionRef.doc(item.id).set(item); }
-    catch(e){ console.error('บันทึกโปรโมชั่นไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+    catch(e){ console.error('บันทึกโปรโมชั่นไป Firestore ไม่สำเร็จ',e); alert(t('syncSaveFailedToast')); }
   }
 }
 function deletePromoItem(id){
@@ -2982,7 +3471,7 @@ async function savePallet(pallet){
   savePalletsLocal(local);
   if(palletsCollectionRef){
     try{ await palletsCollectionRef.doc('pallet_'+pallet.id).set(Object.assign({type:'pallet'},pallet)); }
-    catch(e){ console.error('บันทึกพาเลทไป Firestore ไม่สำเร็จ',e); showPalletToast('บันทึกส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+    catch(e){ console.error('บันทึกพาเลทไป Firestore ไม่สำเร็จ',e); showPalletToast(t('syncSaveFailedToast')); }
   }
 }
 function palletTotals(pallet){
@@ -3006,9 +3495,9 @@ function openPalletManager(){
   document.getElementById('palletFindScanBtn').style.display='none';
   currentPallet=null;
   palletListFilterText='';
-  document.getElementById('palletHeaderTitle').textContent='จัดการพาเลท';
+  document.getElementById('palletHeaderTitle').textContent=t('grPalletMgmtName');
   document.getElementById('palletHeaderSub').textContent='';
-  document.getElementById('palletBody').innerHTML='<p style="text-align:center;color:var(--color-text-secondary);font-size:13px;padding:20px 0">กำลังโหลด...</p>';
+  document.getElementById('palletBody').innerHTML='<p style="text-align:center;color:var(--color-text-secondary);font-size:13px;padding:20px 0">'+t('fbLoadingText')+'</p>';
   loadAllPallets().then(renderPalletListView);
 }
 function closePalletManager(){
@@ -3020,7 +3509,7 @@ function palletGoBack(){
   document.getElementById('palletBackBtn').style.display='none';
   document.getElementById('palletRenameBtn').style.display='none';
   document.getElementById('palletFindScanBtn').style.display='none';
-  document.getElementById('palletHeaderTitle').textContent='จัดการพาเลท';
+  document.getElementById('palletHeaderTitle').textContent=t('grPalletMgmtName');
   document.getElementById('palletHeaderSub').textContent='';
   renderPalletListView(PALLETS_CACHE);
 }
@@ -3029,11 +3518,11 @@ function renderPalletListView(pallets){
   const body=document.getElementById('palletBody');
   let html='<div class="pallet-search-bar">'+
     '<i class="ti ti-search" aria-hidden="true"></i>'+
-    '<input type="text" id="palletSearchInput" class="pallet-search-input" placeholder="ค้นหาพาเลท ชื่อ / Loc / Location" value="'+escapeHtml(palletListFilterText)+'" oninput="filterPalletList(this.value)">'+
-    '<i class="ti ti-scan" aria-hidden="true" onclick="openPalletLocScan()" aria-label="สแกนบาร์โค้ด Bay เพื่อค้นหา"></i>'+
+    '<input type="text" id="palletSearchInput" class="pallet-search-input" placeholder="'+escapeHtml(t('searchPalletPlaceholder'))+'" value="'+escapeHtml(palletListFilterText)+'" oninput="filterPalletList(this.value)">'+
+    '<i class="ti ti-scan" aria-hidden="true" onclick="openPalletLocScan()" aria-label="'+escapeHtml(t('scanTitleBay'))+'"></i>'+
   '</div>';
   if(isGR()){
-    html+='<div class="pallet-new-btn" onclick="createNewPallet()"><i class="ti ti-plus" aria-hidden="true"></i> สร้างพาเลทใหม่</div>';
+    html+='<div class="pallet-new-btn" onclick="createNewPallet()"><i class="ti ti-plus" aria-hidden="true"></i> '+t('createNewPalletBtn')+'</div>';
   }
   html+='<div id="palletGridContainer"></div>';
   body.innerHTML=html;
@@ -3044,7 +3533,7 @@ function renderPalletGrid(pallets){
   if(!container)return;
   const filtered=filterPalletsByText(pallets,palletListFilterText);
   if(!filtered.length){
-    container.innerHTML='<div class="pallet-empty">'+(palletListFilterText.trim()?'ไม่พบพาเลทที่ค้นหา':'ยังไม่มีพาเลทในระบบ')+'</div>';
+    container.innerHTML='<div class="pallet-empty">'+(palletListFilterText.trim()?t('palletNotFoundSearch'):t('noPalletsYet'))+'</div>';
   } else {
     container.innerHTML='<div class="pallet-grid">'+filtered.map(palletCardHtml).join('')+'</div>';
   }
@@ -3068,12 +3557,12 @@ function openPalletLocScan(){
   openPalletScan('palletloc');
 }
 function palletCardHtml(p){
-  const t=palletTotals(p);
+  const tot=palletTotals(p);
   const titleLine=p.name ? escapeHtml(p.name)+'<div style="font-size:11px;color:var(--color-text-secondary);font-weight:400;margin-top:1px">'+p.id+'</div>' : p.id;
-  const locLine=(p.loc||p.location) ? ('<div class="pallet-card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i>พาเลทนี้อยู่ที่ Loc '+escapeHtml(p.loc||'-')+' / Location '+escapeHtml(p.location||'-')+'</div>') : '';
+  const locLine=(p.loc||p.location) ? ('<div class="pallet-card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i>'+t('palletLocatedAtPrefix')+' '+t('locLabel')+' '+escapeHtml(p.loc||'-')+' / '+t('locationLabel')+' '+escapeHtml(p.location||'-')+'</div>') : '';
   return '<div class="pallet-card" onclick="openPalletDetail(\''+p.id+'\')">'+
     '<div class="pallet-card-id">'+titleLine+'</div>'+
-    '<div class="pallet-card-meta">'+t.skuCount+' รายการ · '+t.unitCount+' MU · สร้างโดย '+escapeHtml(p.createdBy||'-')+'</div>'+
+    '<div class="pallet-card-meta">'+tot.skuCount+' '+t('itemsCountLabel')+' · '+tot.unitCount+' MU · '+t('createdByLabel')+' '+escapeHtml(p.createdBy||'-')+'</div>'+
     locLine+
   '</div>';
 }
@@ -3107,12 +3596,12 @@ function openPalletDetail(id){
 function updatePalletHeader(pallet){
   document.getElementById('palletHeaderTitle').textContent=pallet.name||pallet.id;
   const idLine=pallet.name?pallet.id+' · ':'';
-  document.getElementById('palletHeaderSub').textContent=idLine+'สร้างโดย '+(pallet.createdBy||'-')+' · '+new Date(pallet.createdAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
+  document.getElementById('palletHeaderSub').textContent=idLine+t('createdByLabel')+' '+(pallet.createdBy||'-')+' · '+new Date(pallet.createdAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
   document.getElementById('palletRenameBtn').style.display=isEmployee()?'block':'none';
 }
 function renamePallet(){
   if(!currentPallet||!isEmployee())return;
-  const name=prompt('ตั้งชื่อพาเลท (เว้นว่างเพื่อล้างชื่อ)',currentPallet.name||'');
+  const name=prompt(t('renamePalletPrompt'),currentPallet.name||'');
   if(name===null)return;
   currentPallet.name=name.trim();
   savePallet(currentPallet);
@@ -3120,9 +3609,9 @@ function renamePallet(){
 }
 function editPalletLocation(){
   if(!currentPallet||!isEmployee())return;
-  const loc=prompt('พาเลทนี้อยู่ Loc ไหน?',currentPallet.loc||'');
+  const loc=prompt(t('palletLocPrompt'),currentPallet.loc||'');
   if(loc===null)return;
-  const location=prompt('พาเลทนี้อยู่ Location ไหน?',currentPallet.location||'');
+  const location=prompt(t('palletLocationPrompt'),currentPallet.location||'');
   if(location===null)return;
   currentPallet.loc=loc.trim();
   currentPallet.location=location.trim();
@@ -3132,46 +3621,46 @@ function editPalletLocation(){
 function savePalletAndBack(){
   if(!currentPallet||!isEmployee())return;
   savePallet(currentPallet);
-  showPalletToast('บันทึกพาเลท '+currentPallet.id+' แล้ว');
+  showPalletToast(t('palletSavedToast',{id:currentPallet.id}));
   palletGoBack();
 }
 
 function renderPalletDetailView(pallet){
   const body=document.getElementById('palletBody');
-  const t=palletTotals(pallet);
+  const tot=palletTotals(pallet);
   const canEdit=isEmployee();
   let html='<div class="pallet-stats">'+
-    '<div class="pallet-stat"><div class="pallet-stat-label">รายการ</div><div class="pallet-stat-val">'+t.skuCount+'</div></div>'+
-    '<div class="pallet-stat"><div class="pallet-stat-label">MU รวม</div><div class="pallet-stat-val">'+t.unitCount+'</div></div>'+
+    '<div class="pallet-stat"><div class="pallet-stat-label">'+t('itemsCountLabel')+'</div><div class="pallet-stat-val">'+tot.skuCount+'</div></div>'+
+    '<div class="pallet-stat"><div class="pallet-stat-label">'+t('muTotalLabel')+'</div><div class="pallet-stat-val">'+tot.unitCount+'</div></div>'+
   '</div>';
   if(canEdit){
     html+='<div class="pallet-action-row">'+
-      '<div class="pallet-scan-btn green" onclick="openAddItemToPallet()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มสินค้าเข้าพาเลท</div>'+
-      '<div class="pallet-scan-btn" onclick="openPalletScan(\'manage\')"><i class="ti ti-scan" aria-hidden="true"></i> สแกนบาร์โค้ดเพื่อเพิ่ม/แก้ไข</div>'+
+      '<div class="pallet-scan-btn green" onclick="openAddItemToPallet()"><i class="ti ti-plus" aria-hidden="true"></i> '+t('addItemToPalletBtn')+'</div>'+
+      '<div class="pallet-scan-btn" onclick="openPalletScan(\'manage\')"><i class="ti ti-scan" aria-hidden="true"></i> '+t('scanToAddEditBtn')+'</div>'+
     '</div>';
   } else {
-    html+='<div class="pallet-scan-btn" onclick="openPalletScan(\'delete-only\')"><i class="ti ti-scan" aria-hidden="true"></i> สแกนบาร์โค้ดเพื่อลบสินค้า</div>';
+    html+='<div class="pallet-scan-btn" onclick="openPalletScan(\'delete-only\')"><i class="ti ti-scan" aria-hidden="true"></i> '+t('scanToDeleteBtn')+'</div>';
   }
   if(!pallet.items.length){
-    html+='<div class="pallet-empty">ยังไม่มีสินค้าในพาเลทนี้</div>';
+    html+='<div class="pallet-empty">'+t('noPalletItemsYet')+'</div>';
   } else {
     html+=pallet.items.map((it,i)=>palletItemRowHtml(it,i,canEdit)).join('');
   }
   if(canEdit){
-    html+='<div class="pallet-add-btn purple" onclick="openMovePalletAllPrompt()"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> โยกย้ายสินค้าในพาเลททั้งหมด</div>';
+    html+='<div class="pallet-add-btn purple" onclick="openMovePalletAllPrompt()"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> '+t('moveAllItemsBtn')+'</div>';
   }
-  const locText=(pallet.loc||pallet.location) ? ('Loc '+escapeHtml(pallet.loc||'-')+' / Location '+escapeHtml(pallet.location||'-')) : 'ยังไม่ระบุตำแหน่งพาเลท';
-  html+='<div class="pallet-loc-box" style="margin-top:12px'+(canEdit?';cursor:pointer':'')+'"'+(canEdit?' onclick="editPalletLocation()"':'')+'><i class="ti ti-map-pin" aria-hidden="true"></i> พาเลทนี้อยู่ที่ '+locText+(canEdit?' <i class="ti ti-pencil" aria-hidden="true" style="margin-left:auto"></i>':'')+'</div>';
+  const locText=(pallet.loc||pallet.location) ? (t('locLabel')+' '+escapeHtml(pallet.loc||'-')+' / '+t('locationLabel')+' '+escapeHtml(pallet.location||'-')) : t('palletLocationNotSet');
+  html+='<div class="pallet-loc-box" style="margin-top:12px'+(canEdit?';cursor:pointer':'')+'"'+(canEdit?' onclick="editPalletLocation()"':'')+'><i class="ti ti-map-pin" aria-hidden="true"></i> '+t('palletLocatedAtPrefix')+' '+locText+(canEdit?' <i class="ti ti-pencil" aria-hidden="true" style="margin-left:auto"></i>':'')+'</div>';
   if(canEdit){
-    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#E3F6E8;color:#1D6B3F;border-style:solid;border-color:#9AD8AE" onclick="savePalletAndBack()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึกพาเลท</div>';
+    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#E3F6E8;color:#1D6B3F;border-style:solid;border-color:#9AD8AE" onclick="savePalletAndBack()"><i class="ti ti-device-floppy" aria-hidden="true"></i> '+t('savePalletBtn')+'</div>';
   }
   if(canEdit){
-    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#FFF0F1;color:#A32D2D;border-style:solid;border-color:#F09595" onclick="deleteCurrentPallet()"><i class="ti ti-trash" aria-hidden="true"></i> ลบพาเลทนี้ทิ้งถาวร</div>';
+    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#FFF0F1;color:#A32D2D;border-style:solid;border-color:#F09595" onclick="deleteCurrentPallet()"><i class="ti ti-trash" aria-hidden="true"></i> '+t('deletePalletPermBtn')+'</div>';
   }
   if(isEmployee()){
     html+='<div class="pallet-action-row" style="margin-top:8px;margin-bottom:0">'+
-      '<div class="pallet-add-btn" style="background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="downloadPalletPrintImage()"><i class="ti ti-download" aria-hidden="true"></i> ดาวน์โหลดเป็นรูปภาพ (ถ้าพิมพ์ไม่ได้)</div>'+
-      '<div class="pallet-add-btn" style="background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="printPalletList()"><i class="ti ti-printer" aria-hidden="true"></i> พิมพ์รายการสินค้าทั้งหมด</div>'+
+      '<div class="pallet-add-btn" style="background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="downloadPalletPrintImage()"><i class="ti ti-download" aria-hidden="true"></i> '+t('downloadAsImageBtn')+'</div>'+
+      '<div class="pallet-add-btn" style="background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="printPalletList()"><i class="ti ti-printer" aria-hidden="true"></i> '+t('printAllItemsBtn')+'</div>'+
     '</div>';
   }
   body.innerHTML=html;
@@ -3344,7 +3833,7 @@ async function downloadPalletPrintImage(){
 function palletItemRowHtml(it,i,canEdit){
   const actions=canEdit
     ? '<div class="pallet-item-actions">'+
-        '<button type="button" class="pallet-item-move" onclick="openMovePalletPrompt(\''+it.itemNo+'\')" aria-label="ย้ายไปพาเลทอื่น"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้ายพาเลท</button>'+
+        '<button type="button" class="pallet-item-move" onclick="openMovePalletPrompt(\''+it.itemNo+'\')" aria-label="'+escapeHtml(t('moveToOtherPalletAria'))+'"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> '+t('movePalletBtnShort')+'</button>'+
         '<i class="ti ti-minus" aria-hidden="true" onclick="adjustPalletItemQty(\''+it.itemNo+'\',-1)"></i>'+
         '<i class="ti ti-plus" aria-hidden="true" onclick="adjustPalletItemQty(\''+it.itemNo+'\',1)"></i>'+
         '<i class="ti ti-trash danger" aria-hidden="true" onclick="removePalletItem(\''+it.itemNo+'\')"></i>'+
@@ -3355,7 +3844,7 @@ function palletItemRowHtml(it,i,canEdit){
     '<div class="pallet-item-photo" id="palletPhoto'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
     '<div class="pallet-item-info">'+
       '<div class="pallet-item-name">'+escapeHtml(it.desc)+'</div>'+
-      '<div class="pallet-item-meta">Item '+escapeHtml(it.itemNo)+' · จำนวน '+it.qty+' MU</div>'+
+      '<div class="pallet-item-meta">Item '+escapeHtml(it.itemNo)+' · '+t('qtyMuLabel',{qty:it.qty})+'</div>'+
     '</div>'+
     actions+
   '</div>';
@@ -3374,7 +3863,7 @@ function adjustPalletItemQty(itemNo,delta){
 }
 function removePalletItem(itemNo){
   if(!currentPallet||!isEmployee())return;
-  if(!confirm('ลบสินค้านี้ออกจากพาเลท?'))return;
+  if(!confirm(t('confirmRemoveFromPallet')))return;
   currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==itemNo);
   savePallet(currentPallet);
   renderPalletDetailView(currentPallet);
@@ -3383,16 +3872,16 @@ function openMovePalletPrompt(itemNo){
   if(!currentPallet||!isEmployee())return;
   movePalletMoveAll=false;
   movePalletItemNo=itemNo;
-  document.getElementById('movePalletModalTitle').innerHTML='<i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้ายสินค้าไปพาเลทอื่น';
+  document.getElementById('movePalletModalTitle').innerHTML='<i class="ti ti-arrows-right-left" aria-hidden="true"></i> '+t('moveToPalletTitle');
   document.getElementById('movePalletTarget').value='';
   document.getElementById('movePalletOverlay').style.display='flex';
 }
 function openMovePalletAllPrompt(){
   if(!currentPallet||!isEmployee())return;
-  if(!currentPallet.items.length){ alert('พาเลทนี้ยังไม่มีสินค้าให้ย้าย'); return; }
+  if(!currentPallet.items.length){ alert(t('noItemsToMoveAlert')); return; }
   movePalletMoveAll=true;
   movePalletItemNo=null;
-  document.getElementById('movePalletModalTitle').innerHTML='<i class="ti ti-arrows-right-left" aria-hidden="true"></i> ย้ายสินค้าทั้งหมดไปพาเลทอื่น';
+  document.getElementById('movePalletModalTitle').innerHTML='<i class="ti ti-arrows-right-left" aria-hidden="true"></i> '+t('moveAllToPalletTitle');
   document.getElementById('movePalletTarget').value='';
   document.getElementById('movePalletOverlay').style.display='flex';
 }
@@ -3407,10 +3896,10 @@ async function confirmMovePalletItem(){
   if(!currentPallet||!isEmployee())return;
   if(!movePalletMoveAll&&!movePalletItemNo)return;
   const code=document.getElementById('movePalletTarget').value.trim();
-  if(!code){ alert('กรุณาพิมพ์หรือสแกนเลขพาเลทปลายทาง'); return; }
+  if(!code){ alert(t('enterTargetPalletAlert')); return; }
   const target=PALLETS_CACHE.find(p=>(p.name&&p.name===code)||p.id===code);
-  if(!target){ alert('ไม่พบพาเลทเลข "'+code+'" ในระบบ'); return; }
-  if(target.id===currentPallet.id){ alert('นี่คือพาเลทเดิม กรุณาเลือกพาเลทอื่น'); return; }
+  if(!target){ alert(t('palletNotFoundAlert',{code:code})); return; }
+  if(target.id===currentPallet.id){ alert(t('samePalletAlert')); return; }
   if(movePalletMoveAll){
     const moved=currentPallet.items;
     currentPallet.items=[];
@@ -3422,7 +3911,7 @@ async function confirmMovePalletItem(){
     await savePallet(currentPallet);
     await savePallet(target);
     closeMovePalletPrompt();
-    showPalletToast('ย้ายสินค้าทั้งหมดไปพาเลท '+(target.name||target.id)+' แล้ว');
+    showPalletToast(t('movedAllToPalletToast',{name:(target.name||target.id)}));
     renderPalletDetailView(currentPallet);
     return;
   }
@@ -3435,20 +3924,20 @@ async function confirmMovePalletItem(){
   await savePallet(currentPallet);
   await savePallet(target);
   closeMovePalletPrompt();
-  showPalletToast('ย้าย '+it.desc+' ไปพาเลท '+(target.name||target.id)+' แล้ว');
+  showPalletToast(t('movedItemToPalletToast',{desc:it.desc,name:(target.name||target.id)}));
   renderPalletDetailView(currentPallet);
 }
 async function deleteCurrentPallet(){
   if(!currentPallet||!isEmployee())return;
-  if(!confirm('ลบพาเลท '+currentPallet.id+' ทิ้งถาวร?\nการกระทำนี้ย้อนกลับไม่ได้'))return;
+  if(!confirm(t('deletePalletConfirm',{id:currentPallet.id})))return;
   const id=currentPallet.id;
   PALLETS_CACHE=PALLETS_CACHE.filter(p=>p.id!==id);
   savePalletsLocal(loadPalletsLocal().filter(p=>p.id!==id));
   if(palletsCollectionRef){
     try{ await palletsCollectionRef.doc('pallet_'+id).delete(); }
-    catch(e){ console.error('ลบพาเลทจาก Firestore ไม่สำเร็จ',e); showPalletToast('ลบจากส่วนกลางไม่สำเร็จ (ลบจากเครื่องนี้แล้ว)'); }
+    catch(e){ console.error('ลบพาเลทจาก Firestore ไม่สำเร็จ',e); showPalletToast(t('syncDeleteFailedToast')); }
   }
-  showPalletToast('ลบพาเลท '+id+' แล้ว');
+  showPalletToast(t('palletDeletedToast',{id:id}));
   palletGoBack();
 }
 
@@ -3463,10 +3952,10 @@ function addItemToPalletData(item,qty){
 function openAddItemToPallet(){
   if(!currentPallet||!isEmployee())return;
   const body=document.getElementById('palletBody');
-  body.innerHTML='<input type="text" id="palletAddSearch" class="inp" placeholder="ค้นหาชื่อ/Item No/บาร์โค้ด" oninput="renderPalletAddResults(this.value)" style="margin-bottom:12px">'+
-    '<div class="pallet-add-btn" style="margin-bottom:12px" onclick="openNewItemForm()"><i class="ti ti-package" aria-hidden="true"></i> ไม่พบสินค้า? เพิ่มรายการ Item ใหม่</div>'+
+  body.innerHTML='<input type="text" id="palletAddSearch" class="inp" placeholder="'+escapeHtml(t('searchByNameItemBarcodePlaceholder'))+'" oninput="renderPalletAddResults(this.value)" style="margin-bottom:12px">'+
+    '<div class="pallet-add-btn" style="margin-bottom:12px" onclick="openNewItemForm()"><i class="ti ti-package" aria-hidden="true"></i> '+t('notFoundAddNewItemBtn')+'</div>'+
     '<div id="palletAddResults"></div>'+
-    '<div class="pallet-add-btn" style="margin-top:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary)" onclick="closeAddItemToPallet()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับไปดูรายการ</div>';
+    '<div class="pallet-add-btn" style="margin-top:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-style:solid;border-color:var(--color-border-tertiary)" onclick="closeAddItemToPallet()"><i class="ti ti-arrow-left" aria-hidden="true"></i> '+t('backToListBtn')+'</div>';
   document.getElementById('palletAddSearch').focus();
   const scanBtn=document.getElementById('palletFindScanBtn');
   scanBtn.onclick=function(){ openPalletScan('manage'); };
@@ -3482,7 +3971,7 @@ function renderPalletAddResults(q){
   const box=document.getElementById('palletAddResults');
   if(!q||!q.trim()){ box.innerHTML=''; return; }
   const matches=findMatches(q).slice(0,20);
-  if(!matches.length){ box.innerHTML='<div class="pallet-empty">ไม่พบสินค้า</div>'; return; }
+  if(!matches.length){ box.innerHTML='<div class="pallet-empty">'+t('itemNotFoundText')+'</div>'; return; }
   box.innerHTML=matches.map((it,i)=>
     '<div class="pallet-item-row" style="cursor:pointer" onclick="promptAddQty(\''+it.itemNo+'\')">'+
       '<div class="pallet-item-photo" id="palletAddPhoto'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
@@ -3527,7 +4016,7 @@ async function saveCustomItem(desc,itemNo,barcode,image){
   PRODUCTS_INDEX[itemNo]=item;
   if(customItemsCollectionRef){
     try{ await customItemsCollectionRef.doc(data.id).set(data); }
-    catch(e){ console.error('บันทึก Item ใหม่ไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้ชั่วคราว)'); }
+    catch(e){ console.error('บันทึก Item ใหม่ไป Firestore ไม่สำเร็จ',e); alert(t('syncSaveFailedToast')); }
   }
   return item;
 }
@@ -3755,6 +4244,29 @@ function promptAddQty(itemNo){
   renderPalletDetailView(currentPallet);
 }
 
+// ==== ตรวจจับ LINE in-app browser บน Android — เวอร์ชันนี้มักบล็อก/ปฏิเสธสิทธิ์กล้องเสมอ
+// ทำให้สแกนไม่ได้แม้ผู้ใช้กด "อนุญาต" ต้องแนะนำให้เปิดในเบราว์เซอร์จริง (Chrome) แทน ====
+function isLineAndroidBrowser(){
+  const ua=navigator.userAgent||'';
+  return /Line\//.test(ua) && /Android/i.test(ua);
+}
+function lineExternalBrowserUrl(){
+  try{
+    const url=new URL(window.location.href);
+    url.searchParams.set('openExternalBrowser','1');
+    return url.toString();
+  }catch(e){
+    return window.location.href+(window.location.href.indexOf('?')>=0?'&':'?')+'openExternalBrowser=1';
+  }
+}
+function lineCameraErrorHtml(){
+  return '<div class="line-camera-notice">'+
+    '<div>'+escapeHtml(t('lineAndroidCameraNotice'))+'</div>'+
+    '<button type="button" class="line-open-browser-btn" onclick="location.href=lineExternalBrowserUrl()">'+escapeHtml(t('openInBrowserBtn'))+'</button>'+
+    '<div class="line-open-browser-hint">'+escapeHtml(t('lineOpenBrowserHint'))+'</div>'+
+  '</div>';
+}
+
 // ==== สแกนบาร์โค้ดสำหรับพาเลท ====
 let palletScanControls=null,palletScanMode=null;
 function openPalletScan(mode){
@@ -3764,10 +4276,16 @@ function openPalletScan(mode){
   const hint=document.getElementById('palletScanHint');
   err.style.display='none';
   hint.style.display='block';
-  document.getElementById('palletScanTitle').textContent=mode==='manage'?'สแกนเพื่อเพิ่ม/แก้ไข':(mode==='find'?'สแกนเพื่อค้นหา':(mode==='palletloc'?'สแกนบาร์โค้ด Bay เพื่อค้นหาพาเลท':(mode==='newitembarcode'?'สแกนบาร์โค้ดสินค้าใหม่':(mode==='movepallettarget'?'สแกนเลขพาเลทปลายทาง':'สแกนเพื่อลบสินค้า'))));
+  document.getElementById('palletScanTitle').textContent=mode==='manage'?t('scanTitleManage'):(mode==='find'?t('scanTitleFind'):(mode==='palletloc'?t('scanTitleBay'):(mode==='newitembarcode'?t('scanTitleNewItemBarcode'):(mode==='movepallettarget'?t('scanTitleMoveTarget'):t('scanTitleDelete')))));
   overlay.style.display='flex';
+  if(isLineAndroidBrowser()){
+    err.innerHTML=lineCameraErrorHtml();
+    err.style.display='block';
+    hint.style.display='none';
+    return;
+  }
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง กรุณาเปิดในเบราว์เซอร์ (Safari/Chrome) แทน';
+    err.textContent=t('cameraNotSupportedError');
     err.style.display='block';
     hint.style.display='none';
     return;
@@ -3781,7 +4299,11 @@ function openPalletScan(mode){
     palletScanControls=controls;
     if(overlay.style.display==='none'){ controls.stop(); palletScanControls=null; }
   }).catch(()=>{
-    err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้อง';
+    if(isLineAndroidBrowser()){
+      err.innerHTML=lineCameraErrorHtml();
+    } else {
+      err.textContent=t('cameraAccessDeniedError');
+    }
     err.style.display='block';
     hint.style.display='none';
   });
@@ -3917,7 +4439,7 @@ function focusAdjustQty(itemNo,delta){
   document.getElementById('palletFocusQtyVal').textContent=it.qty;
 }
 function focusRemoveItem(itemNo){
-  if(!confirm('ลบสินค้านี้ออกจากพาเลท?'))return;
+  if(!confirm(t('confirmRemoveFromPallet')))return;
   currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==itemNo);
   savePallet(currentPallet);
   renderPalletDetailView(currentPallet);
@@ -4408,14 +4930,14 @@ async function persistLocationOverrides(){
   try{ localStorage.setItem('mf_location_overrides',JSON.stringify(LOCATION_OVERRIDES)); }catch(e){}
   if(locationOverridesDocRef){
     try{ await locationOverridesDocRef.set({data:LOCATION_OVERRIDES,updatedAt:Date.now()}); }
-    catch(e){ console.error('บันทึกตำแหน่งจัดเก็บไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+    catch(e){ console.error('บันทึกตำแหน่งจัดเก็บไป Firestore ไม่สำเร็จ',e); alert(t('syncSaveFailedToast')); }
   }
 }
 async function persistItemOverrides(){
   try{ localStorage.setItem('mf_item_overrides',JSON.stringify(ITEM_OVERRIDES)); }catch(e){}
   if(itemOverridesDocRef){
     try{ await itemOverridesDocRef.set({data:ITEM_OVERRIDES,updatedAt:Date.now()}); }
-    catch(e){ console.error('บันทึกข้อมูลสินค้าไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+    catch(e){ console.error('บันทึกข้อมูลสินค้าไป Firestore ไม่สำเร็จ',e); alert(t('syncSaveFailedToast')); }
   }
 }
 function applyItemOverridesToProducts(){
@@ -4435,7 +4957,7 @@ async function persistStockOverrides(){
   try{ localStorage.setItem('mf_stock_overrides',JSON.stringify(STOCK_OVERRIDES)); }catch(e){}
   if(stockOverridesDocRef){
     try{ await stockOverridesDocRef.set({data:STOCK_OVERRIDES,updatedAt:Date.now()}); }
-    catch(e){ console.error('บันทึก facing/max qty ไป Firestore ไม่สำเร็จ',e); alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว)'); }
+    catch(e){ console.error('บันทึก facing/max qty ไป Firestore ไม่สำเร็จ',e); alert(t('syncSaveFailedToast')); }
   }
 }
 function applyLocationOverridesToProducts(){
@@ -4838,8 +5360,13 @@ function openScanner(){
   const err=document.getElementById('scanError');
   err.style.display='none';err.textContent='';
   overlay.style.display='flex';
+  if(isLineAndroidBrowser()){
+    err.innerHTML=lineCameraErrorHtml();
+    err.style.display='block';
+    return;
+  }
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    err.textContent='เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง กรุณาเปิดลิงก์นี้ในเบราว์เซอร์ (Safari/Chrome) แทน';
+    err.textContent=t('cameraNotSupportedError');
     err.style.display='block';
     return;
   }
@@ -4854,7 +5381,11 @@ function openScanner(){
     scanControls=controls;
     if(overlay.style.display==='none'){ controls.stop(); scanControls=null; }
   }).catch(()=>{
-    err.textContent='ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้กล้องในเบราว์เซอร์';
+    if(isLineAndroidBrowser()){
+      err.innerHTML=lineCameraErrorHtml();
+    } else {
+      err.textContent=t('cameraAccessDeniedError');
+    }
     err.style.display='block';
   });
 }
