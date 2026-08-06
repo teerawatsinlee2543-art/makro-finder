@@ -1131,7 +1131,24 @@ const I18N={
     lineAndroidCameraNotice:'การสแกนผ่านแอป LINE บน Android มักไม่รองรับกล้อง กรุณาเปิดในเบราว์เซอร์ (Chrome) แทน',
     openInBrowserBtn:'เปิดในเบราว์เซอร์',
     lineOpenBrowserHint:'หรือแตะเมนู ⋮ มุมขวาบน แล้วเลือก "เปิดในเบราว์เซอร์"',
-    printTimeLabel:'เวลา'
+    printTimeLabel:'เวลา',
+    addZonePrompt:'ใส่ชื่อโซน/กล่องใหม่',
+    newZoneDefaultName:'โซนใหม่',
+    deleteBoxConfirm:'ลบกล่องนี้?',
+    mainTextPrompt:'ข้อความหลัก:',
+    mainTextSizePrompt:'ขนาดตัวอักษรหลัก (px):',
+    mainTextColorPrompt:'สีตัวอักษรหลัก (เช่น #333333):',
+    subTextPrompt:'ข้อความรอง (เว้นว่างเพื่อไม่แสดง):',
+    subTextSizePrompt:'ขนาดตัวอักษรรอง (px):',
+    subTextColorPrompt:'สีตัวอักษรรอง:',
+    addSubTextPrompt:'เพิ่มข้อความรอง (เว้นว่างถ้าไม่ต้องการ):',
+    gpsNotSupportedAlert:'อุปกรณ์นี้ไม่รองรับ GPS',
+    confirmGpsOriginPrompt:'ยืนยันว่าตอนนี้คุณยืนอยู่ที่ "หน้าทางเข้าร้าน" ใช่ไหม? จุดนี้จะถูกใช้เป็นจุดอ้างอิงตำแหน่ง GPS ของแผนที่ (ใช้ร่วมกันทุกเครื่อง)',
+    gpsOriginSetSuccessAlert:'ตั้งจุดอ้างอิง GPS สำเร็จ (ความแม่นยำของสัญญาณตอนนี้ ±{accuracy} เมตร)\nถ้าเปิด "แสดงตำแหน่งฉัน" แล้วจุดหมุนไปผิดทิศ ลองปรับ "มุมทิศอาคาร" ด้านล่าง',
+    gpsReadFailedAlert:'อ่านตำแหน่ง GPS ไม่สำเร็จ: {msg}',
+    gpsOriginNotSetAlert:'ร้านนี้ยังไม่ได้ตั้งจุดอ้างอิง GPS กรุณาแจ้งพนักงานให้ตั้งค่าก่อน (ปุ่ม "ตั้งจุดอ้างอิง GPS" ตอนแก้ไขแผนที่)',
+    gpsLocateFailedAlert:'อ่านตำแหน่งไม่สำเร็จ: {msg}',
+    syncSaveFailedRetryAlert:'บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'
   },
   en:{
     roleIntro:'Please choose how you want to use the app',
@@ -1344,7 +1361,24 @@ const I18N={
     lineAndroidCameraNotice:'Scanning inside the LINE app on Android usually cannot access the camera. Please open this page in your browser (Chrome) instead.',
     openInBrowserBtn:'Open in browser',
     lineOpenBrowserHint:'Or tap the ⋮ menu in the top right and choose "Open in browser"',
-    printTimeLabel:'Time'
+    printTimeLabel:'Time',
+    addZonePrompt:'Enter a name for the new zone/box',
+    newZoneDefaultName:'New zone',
+    deleteBoxConfirm:'Delete this box?',
+    mainTextPrompt:'Main text:',
+    mainTextSizePrompt:'Main text size (px):',
+    mainTextColorPrompt:'Main text color (e.g. #333333):',
+    subTextPrompt:'Sub text (leave blank to hide):',
+    subTextSizePrompt:'Sub text size (px):',
+    subTextColorPrompt:'Sub text color:',
+    addSubTextPrompt:'Add sub text (leave blank if not needed):',
+    gpsNotSupportedAlert:'This device does not support GPS',
+    confirmGpsOriginPrompt:'Confirm you are standing at the "store entrance" right now? This point will be used as the map\'s GPS reference (shared across all devices)',
+    gpsOriginSetSuccessAlert:'GPS reference point set successfully (current signal accuracy ±{accuracy} m)\nIf "Show my location" points the wrong way after this, try adjusting "Building orientation angle" below',
+    gpsReadFailedAlert:'Could not read GPS location: {msg}',
+    gpsOriginNotSetAlert:'This store has not set a GPS reference point yet. Please ask staff to set it up first (the "Set GPS reference point" button in map editing)',
+    gpsLocateFailedAlert:'Could not read your location: {msg}',
+    syncSaveFailedRetryAlert:'Failed to save to shared storage (saved on this device instead). Please check your internet connection and try again'
   },
   cn:{
     roleIntro:'请选择使用模式',
@@ -1557,7 +1591,24 @@ const I18N={
     lineAndroidCameraNotice:'在 Android 的 LINE 应用内通常无法使用相机扫描，请改用浏览器（Chrome）打开此页面',
     openInBrowserBtn:'在浏览器中打开',
     lineOpenBrowserHint:'或点击右上角 ⋮ 菜单，选择"在浏览器中打开"',
-    printTimeLabel:'时间'
+    printTimeLabel:'时间',
+    addZonePrompt:'输入新分区/方块的名称',
+    newZoneDefaultName:'新分区',
+    deleteBoxConfirm:'删除该方块？',
+    mainTextPrompt:'主要文字：',
+    mainTextSizePrompt:'主要文字大小（px）：',
+    mainTextColorPrompt:'主要文字颜色（例如 #333333）：',
+    subTextPrompt:'次要文字（留空则不显示）：',
+    subTextSizePrompt:'次要文字大小（px）：',
+    subTextColorPrompt:'次要文字颜色：',
+    addSubTextPrompt:'添加次要文字（不需要可留空）：',
+    gpsNotSupportedAlert:'此设备不支持 GPS',
+    confirmGpsOriginPrompt:'确认您现在站在"店铺入口"吗？此位置将作为地图的 GPS 参考点（所有设备共用）',
+    gpsOriginSetSuccessAlert:'GPS 参考点设置成功（当前信号精度 ±{accuracy} 米）\n如果启用"显示我的位置"后方向不对，请尝试调整下方的"建筑朝向角度"',
+    gpsReadFailedAlert:'读取 GPS 位置失败：{msg}',
+    gpsOriginNotSetAlert:'该门店尚未设置 GPS 参考点，请先联系员工设置（在编辑地图时点击"设置 GPS 参考点"按钮）',
+    gpsLocateFailedAlert:'读取您的位置失败：{msg}',
+    syncSaveFailedRetryAlert:'保存到中央数据库失败（已保存在本机），请检查网络连接后重试'
   },
   mm:{
     roleIntro:'အသုံးပြုမည့်မုဒ်ကို ရွေးချယ်ပါ',
@@ -1770,7 +1821,24 @@ const I18N={
     lineAndroidCameraNotice:'Android တွင် LINE အက်ပ်အတွင်းမှ စကန်ဖတ်ခြင်းသည် များသောအားဖြင့် ကင်မရာကိုသုံး၍မရပါ ကျေးဇူးပြု၍ ဤစာမျက်နှာကို ဘရောက်ဇာ (Chrome) ဖြင့်ဖွင့်ပါ',
     openInBrowserBtn:'ဘရောက်ဇာဖြင့်ဖွင့်ရန်',
     lineOpenBrowserHint:'သို့မဟုတ် ညာဘက်အပေါ်ရှိ ⋮ မီနူးကိုတို့ပြီး "ဘရောက်ဇာဖြင့်ဖွင့်ရန်" ကိုရွေးပါ',
-    printTimeLabel:'အချိန်'
+    printTimeLabel:'အချိန်',
+    addZonePrompt:'ဇုန်/ဘောက်စ်အသစ်အမည်ထည့်ပါ',
+    newZoneDefaultName:'ဇုန်အသစ်',
+    deleteBoxConfirm:'ဤဘောက်စ်ကိုဖျက်မလား?',
+    mainTextPrompt:'အဓိကစာသား:',
+    mainTextSizePrompt:'အဓိကစာသားအရွယ်အစား (px):',
+    mainTextColorPrompt:'အဓိကစာသားအရောင် (ဥပမာ #333333):',
+    subTextPrompt:'အပိုစာသား (မပြရန် အလွတ်ထားပါ):',
+    subTextSizePrompt:'အပိုစာသားအရွယ်အစား (px):',
+    subTextColorPrompt:'အပိုစာသားအရောင်:',
+    addSubTextPrompt:'အပိုစာသားထည့်ရန် (မလိုအပ်ပါက အလွတ်ထားပါ):',
+    gpsNotSupportedAlert:'ဤစက်သည် GPS ကိုမထောက်ပံ့ပါ',
+    confirmGpsOriginPrompt:'သင်ယခု "ဆိုင်ဝင်ပေါက်" တွင်ရပ်နေသည်ကို သေချာပါသလား? ဤနေရာကို မြေပုံ၏ GPS ရည်ညွှန်းအမှတ်အဖြစ် အသုံးပြုမည် (စက်အားလုံးတွင် မျှဝေအသုံးပြုမည်)',
+    gpsOriginSetSuccessAlert:'GPS ရည်ညွှန်းအမှတ် အောင်မြင်စွာသတ်မှတ်ပြီးပါပြီ (လက်ရှိအချက်ပြတိကျမှု ±{accuracy} မီတာ)\n"ကျွန်ုပ်၏တည်နေရာပြရန်" ဖွင့်ပြီးနောက် အမှတ်သည် လွဲမှားနေပါက အောက်ရှိ "အဆောက်အအုံ မျက်နှာမူထောင့်" ကိုချိန်ညှိကြည့်ပါ',
+    gpsReadFailedAlert:'GPS တည်နေရာဖတ်ရှု၍မရပါ: {msg}',
+    gpsOriginNotSetAlert:'ဤဆိုင်တွင် GPS ရည်ညွှန်းအမှတ် မသတ်မှတ်ရသေးပါ ဝန်ထမ်းကို အရင်သတ်မှတ်ခိုင်းပါ (မြေပုံပြင်ဆင်ချိန် "GPS ရည်ညွှန်းအမှတ်သတ်မှတ်ရန်" ခလုတ်)',
+    gpsLocateFailedAlert:'သင့်တည်နေရာဖတ်ရှု၍မရပါ: {msg}',
+    syncSaveFailedRetryAlert:'ဗဟိုစနစ်သို့ သိမ်းဆည်းမရပါ (ဤစက်တွင်သိမ်းထားပါပြီ) အင်တာနက်ကို စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါ'
   },
   kr:{
     roleIntro:'사용 모드를 선택해 주세요',
@@ -1983,7 +2051,24 @@ const I18N={
     lineAndroidCameraNotice:'Android의 LINE 앱 내에서는 보통 카메라를 사용할 수 없습니다. 브라우저(Chrome)에서 이 페이지를 열어주세요',
     openInBrowserBtn:'브라우저에서 열기',
     lineOpenBrowserHint:'또는 오른쪽 상단의 ⋮ 메뉴를 눌러 "브라우저에서 열기"를 선택하세요',
-    printTimeLabel:'시간'
+    printTimeLabel:'시간',
+    addZonePrompt:'새 구역/박스 이름을 입력하세요',
+    newZoneDefaultName:'새 구역',
+    deleteBoxConfirm:'이 박스를 삭제하시겠습니까?',
+    mainTextPrompt:'기본 텍스트:',
+    mainTextSizePrompt:'기본 텍스트 크기 (px):',
+    mainTextColorPrompt:'기본 텍스트 색상 (예: #333333):',
+    subTextPrompt:'보조 텍스트 (비워두면 표시 안 함):',
+    subTextSizePrompt:'보조 텍스트 크기 (px):',
+    subTextColorPrompt:'보조 텍스트 색상:',
+    addSubTextPrompt:'보조 텍스트 추가 (필요 없으면 비워두세요):',
+    gpsNotSupportedAlert:'이 기기는 GPS를 지원하지 않습니다',
+    confirmGpsOriginPrompt:'지금 "매장 입구"에 서 계신 것이 맞습니까? 이 지점은 지도의 GPS 기준점으로 사용됩니다 (모든 기기에서 공유됨)',
+    gpsOriginSetSuccessAlert:'GPS 기준점이 설정되었습니다 (현재 신호 정확도 ±{accuracy}m)\n"내 위치 표시" 사용 시 방향이 어긋난다면 아래의 "건물 방향 각도"를 조정해 보세요',
+    gpsReadFailedAlert:'GPS 위치를 읽지 못했습니다: {msg}',
+    gpsOriginNotSetAlert:'이 매장은 아직 GPS 기준점이 설정되지 않았습니다. 직원에게 먼저 설정을 요청하세요 (지도 편집 중 "GPS 기준점 설정" 버튼)',
+    gpsLocateFailedAlert:'위치를 읽지 못했습니다: {msg}',
+    syncSaveFailedRetryAlert:'중앙 저장소에 저장하지 못했습니다 (이 기기에는 저장됨). 인터넷 연결을 확인한 후 다시 시도해주세요'
   },
   jp:{
     roleIntro:'利用モードを選択してください',
@@ -2196,7 +2281,24 @@ const I18N={
     lineAndroidCameraNotice:'AndroidのLINEアプリ内ではカメラを利用できないことがほとんどです。ブラウザ（Chrome）でこのページを開いてください',
     openInBrowserBtn:'ブラウザで開く',
     lineOpenBrowserHint:'または右上の ⋮ メニューをタップして「ブラウザで開く」を選択してください',
-    printTimeLabel:'時刻'
+    printTimeLabel:'時刻',
+    addZonePrompt:'新しいゾーン/ボックスの名前を入力',
+    newZoneDefaultName:'新しいゾーン',
+    deleteBoxConfirm:'このボックスを削除しますか？',
+    mainTextPrompt:'メインテキスト：',
+    mainTextSizePrompt:'メインテキストサイズ（px）：',
+    mainTextColorPrompt:'メインテキストの色（例：#333333）：',
+    subTextPrompt:'サブテキスト（空欄で非表示）：',
+    subTextSizePrompt:'サブテキストサイズ（px）：',
+    subTextColorPrompt:'サブテキストの色：',
+    addSubTextPrompt:'サブテキストを追加（不要な場合は空欄）：',
+    gpsNotSupportedAlert:'この端末はGPSに対応していません',
+    confirmGpsOriginPrompt:'現在「店舗入口」に立っていますか？この地点は地図のGPS基準点として使用されます（全端末で共有）',
+    gpsOriginSetSuccessAlert:'GPS基準点の設定に成功しました（現在の信号精度 ±{accuracy}m）\n「現在地を表示」で位置がずれる場合は、下の「建物の方位角」を調整してください',
+    gpsReadFailedAlert:'GPS位置の読み取りに失敗しました：{msg}',
+    gpsOriginNotSetAlert:'この店舗はまだGPS基準点が設定されていません。従業員に設定を依頼してください（地図編集中の「GPS基準点を設定」ボタン）',
+    gpsLocateFailedAlert:'現在地の読み取りに失敗しました：{msg}',
+    syncSaveFailedRetryAlert:'中央データベースへの保存に失敗しました（この端末には保存済み）。インターネット接続を確認して再度お試しください'
   }
 };
 let currentLang=(function(){ try{ return localStorage.getItem('mf_lang')||'th'; }catch(e){ return 'th'; } })();
@@ -2971,15 +3073,15 @@ async function persistGpsCalibration(){
 }
 function setGpsOriginHere(){
   if(!isEmployee())return;
-  if(!navigator.geolocation){ alert('อุปกรณ์นี้ไม่รองรับ GPS'); return; }
-  if(!confirm('ยืนยันว่าตอนนี้คุณยืนอยู่ที่ "หน้าทางเข้าร้าน" ใช่ไหม? จุดนี้จะถูกใช้เป็นจุดอ้างอิงตำแหน่ง GPS ของแผนที่ (ใช้ร่วมกันทุกเครื่อง)'))return;
+  if(!navigator.geolocation){ alert(t('gpsNotSupportedAlert')); return; }
+  if(!confirm(t('confirmGpsOriginPrompt')))return;
   navigator.geolocation.getCurrentPosition(function(pos){
     gpsOrigin={lat:pos.coords.latitude,lon:pos.coords.longitude};
     persistGpsCalibration();
-    alert('ตั้งจุดอ้างอิง GPS สำเร็จ (ความแม่นยำของสัญญาณตอนนี้ ±'+Math.round(pos.coords.accuracy)+' เมตร)\nถ้าเปิด "แสดงตำแหน่งฉัน" แล้วจุดหมุนไปผิดทิศ ลองปรับ "มุมทิศอาคาร" ด้านล่าง');
+    alert(t('gpsOriginSetSuccessAlert',{accuracy:Math.round(pos.coords.accuracy)}));
     updateGpsCalibrationUI();
   },function(err){
-    alert('อ่านตำแหน่ง GPS ไม่สำเร็จ: '+err.message);
+    alert(t('gpsReadFailedAlert',{msg:err.message}));
   },{enableHighAccuracy:true,timeout:15000});
 }
 function onGpsBearingChange(val){
@@ -3025,15 +3127,15 @@ function updateLiveGpsBtnUI(){
 }
 function toggleLiveGps(){
   if(liveGpsWatchId){ stopLiveGps(); return; }
-  if(!navigator.geolocation){ alert('อุปกรณ์นี้ไม่รองรับ GPS'); return; }
-  if(!gpsOrigin){ alert('ร้านนี้ยังไม่ได้ตั้งจุดอ้างอิง GPS กรุณาแจ้งพนักงานให้ตั้งค่าก่อน (ปุ่ม "ตั้งจุดอ้างอิง GPS" ตอนแก้ไขแผนที่)'); return; }
+  if(!navigator.geolocation){ alert(t('gpsNotSupportedAlert')); return; }
+  if(!gpsOrigin){ alert(t('gpsOriginNotSetAlert')); return; }
   liveGpsWatchId=navigator.geolocation.watchPosition(function(pos){
     liveGpsMapXY=gpsToMapXY(pos.coords.latitude,pos.coords.longitude);
     liveGpsAccuracyM=pos.coords.accuracy;
     refreshInlineMap();
     if(document.getElementById('mapOverlay').style.display==='flex') rerenderMapEditorSVG();
   },function(err){
-    alert('อ่านตำแหน่งไม่สำเร็จ: '+err.message);
+    alert(t('gpsLocateFailedAlert',{msg:err.message}));
     stopLiveGps();
   },{enableHighAccuracy:true,maximumAge:2000,timeout:20000});
   updateLiveGpsBtnUI();
@@ -4567,10 +4669,10 @@ async function saveMapEdit(){
   await persistMapBlocks(currentMapBlocks,currentMapBgColor,currentMapRotation);
 }
 function addMapBlock(){
-  const text=prompt('ใส่ชื่อโซน/กล่องใหม่','โซนใหม่');
+  const text=prompt(t('addZonePrompt'),t('newZoneDefaultName'));
   if(text===null)return;
   const id='block_'+Date.now();
-  const newBlock={id:id,x:56,y:56,w:168,h:112,height:76,fill:'#4b5563',lines:[{dx:11,dy:42,size:16,weight:800,text:text||'โซนใหม่',color:'#ffffff'}]};
+  const newBlock={id:id,x:56,y:56,w:168,h:112,height:76,fill:'#4b5563',lines:[{dx:11,dy:42,size:16,weight:800,text:text||t('newZoneDefaultName'),color:'#ffffff'}]};
   currentMapBlocks.push(newBlock);
   selectedBlockId=id;
   rerenderMapEditorSVG();
@@ -4578,7 +4680,7 @@ function addMapBlock(){
 }
 function deleteSelectedBlock(){
   if(!selectedBlockId)return;
-  if(!confirm('ลบกล่องนี้?'))return;
+  if(!confirm(t('deleteBoxConfirm')))return;
   currentMapBlocks=currentMapBlocks.filter(b=>b.id!==selectedBlockId);
   selectedBlockId=null;
   rerenderMapEditorSVG();
@@ -4589,31 +4691,31 @@ function editSelectedBlockText(){
   if(!block)return;
   if(!block.lines.length) block.lines=[{dx:8,dy:30,size:16,weight:800,text:'',color:'#333333'}];
   const main=block.lines[0];
-  let v=prompt('ข้อความหลัก:',main.text||'');
+  let v=prompt(t('mainTextPrompt'),main.text||'');
   if(v===null)return;
   main.text=v;
-  v=prompt('ขนาดตัวอักษรหลัก (px):',main.size||16);
+  v=prompt(t('mainTextSizePrompt'),main.size||16);
   if(v===null)return;
   main.size=Math.max(6,Math.min(60,parseFloat(v)||main.size||16));
-  v=prompt('สีตัวอักษรหลัก (เช่น #333333):',main.color||'#333333');
+  v=prompt(t('mainTextColorPrompt'),main.color||'#333333');
   if(v===null)return;
   main.color=v.trim()||main.color;
   if(block.lines[1]){
     const sub=block.lines[1];
-    v=prompt('ข้อความรอง (เว้นว่างเพื่อไม่แสดง):',sub.text||'');
+    v=prompt(t('subTextPrompt'),sub.text||'');
     if(v===null)return;
     if(!v){ block.lines.splice(1,1); }
     else{
       sub.text=v;
-      v=prompt('ขนาดตัวอักษรรอง (px):',sub.size||12);
+      v=prompt(t('subTextSizePrompt'),sub.size||12);
       if(v===null)return;
       sub.size=Math.max(6,Math.min(40,parseFloat(v)||sub.size||12));
-      v=prompt('สีตัวอักษรรอง:',sub.color||'#666666');
+      v=prompt(t('subTextColorPrompt'),sub.color||'#666666');
       if(v===null)return;
       sub.color=v.trim()||sub.color;
     }
   } else {
-    v=prompt('เพิ่มข้อความรอง (เว้นว่างถ้าไม่ต้องการ):','');
+    v=prompt(t('addSubTextPrompt'),'');
     if(v===null)return;
     if(v) block.lines.push({dx:main.dx,dy:main.dy+18,size:11,weight:600,text:v,color:'#666666'});
   }
@@ -4783,7 +4885,7 @@ async function persistMapBlocks(blocks,bgColor,rotation){
       await mapFirestoreDocRef.set({blocks:blocks,bgColor:bgColor,rotation:rotation,layoutVersion:MAP_LAYOUT_VERSION,updatedAt:Date.now(),updatedBy:updatedBy});
     }catch(e){
       console.error('บันทึกผังไป Firestore ไม่สำเร็จ',e);
-      alert('บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
+      alert(t('syncSaveFailedRetryAlert'));
     }
   }
 }
