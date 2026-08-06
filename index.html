@@ -1755,8 +1755,8 @@ function closeLangModal(){
   if(modal)modal.style.display='none';
 }
 /* ---------- Store map: data model, rendering, employee editing ---------- */
-const MAP_VB_W=896, MAP_VB_H=763, MAP_MIN_W=56, MAP_MIN_H=42, MAP_MIN_HEIGHT=28, MAP_MAX_HEIGHT=182;
-const MAP_FLOOR={x:11,y:11,w:874,h:731};
+const MAP_VB_W=1158, MAP_VB_H=763, MAP_MIN_W=56, MAP_MIN_H=42, MAP_MIN_HEIGHT=28, MAP_MAX_HEIGHT=182;
+const MAP_FLOOR={x:11,y:11,w:1136,h:731};
 const MAP_FLOOR_CX=MAP_FLOOR.x+MAP_FLOOR.w/2, MAP_FLOOR_CY=MAP_FLOOR.y+MAP_FLOOR.h/2;
 const MAP_ISO_COS=Math.cos(Math.PI/6), MAP_ISO_SIN=Math.sin(Math.PI/6);
 function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textColor,height){
@@ -1785,53 +1785,53 @@ function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textCo
 }
 const MAP_MAIN_SIZE=16, MAP_SUB_SIZE=12;
 const DEFAULT_MAP_BLOCKS=[
-  {id:'butchery',x:28,y:28,w:266,h:105,fill:'#FBE4E4',height:76,anchor:'middle',lines:[
+  {id:'butchery',x:36,y:28,w:346,h:105,fill:'#FBE4E4',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'เนื้อสัตว์และแช่แข็ง',color:'#8B3A3A'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Butchery & Frozen',color:'#B06A6A'}]},
-  {id:'snack',x:308,y:28,w:105,h:105,fill:'#E3F6E8',height:76,anchor:'middle',lines:[
+  {id:'snack',x:400,y:28,w:137,h:105,fill:'#E3F6E8',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ขนม',color:'#2F6B44'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Snack',color:'#5A9470'}]},
-  {id:'winebeer',x:427,y:28,w:119,h:105,fill:'#DFF3F3',height:76,anchor:'middle',lines:[
+  {id:'winebeer',x:555,y:28,w:155,h:105,fill:'#DFF3F3',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ไวน์/เบียร์',color:'#1F6B6B'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Wine & Beer',color:'#4A9494'}]},
-  {id:'drink',x:560,y:28,w:189,h:105,fill:'#EAE4F8',height:76,anchor:'middle',lines:[
+  {id:'drink',x:728,y:28,w:246,h:105,fill:'#EAE4F8',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องดื่ม',color:'#5B3E96'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Drink',color:'#8A72C0'}]},
-  {id:'fishseafood',x:28,y:147,w:266,h:119,fill:'#DEEBFA',height:76,anchor:'middle',lines:[
+  {id:'fishseafood',x:36,y:147,w:346,h:119,fill:'#DEEBFA',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ปลา/อาหารทะเล',color:'#2A5C93'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fish & Seafood',color:'#5F8CC0'}]},
-  {id:'grilledchicken',x:308,y:147,w:133,h:91,fill:'#FAEBDA',height:76,anchor:'middle',lines:[
+  {id:'grilledchicken',x:400,y:147,w:346,h:91,fill:'#FAEBDA',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ไก่ย่าง',color:'#8A5A25'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Grilled Chicken',color:'#B3874F'}]},
-  {id:'condiments',x:28,y:280,w:266,h:70,fill:'#FAE0D8',height:76,anchor:'middle',lines:[
+  {id:'condiments',x:36,y:280,w:346,h:70,fill:'#FAE0D8',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:31,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องเทศ',color:'#9A4A2E'},
     {fx:0.5,dy:56,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Condiments / Spices',color:'#C17A58'}]},
-  {id:'fruitveg',x:28,y:364,w:266,h:189,fill:'#E5F3DC',height:76,anchor:'middle',lines:[
+  {id:'fruitveg',x:36,y:364,w:346,h:189,fill:'#E5F3DC',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ผัก-ผลไม้',color:'#4C7A2A'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fruit & Veg',color:'#7CA858'}]},
-  {id:'o2o',x:763,y:147,w:105,h:406,fill:'#FBEED9',height:98,anchor:'middle',lines:[
+  {id:'o2o',x:992,y:147,w:137,h:406,fill:'#FBEED9',height:98,anchor:'middle',lines:[
     {fx:0.5,dy:189,size:MAP_MAIN_SIZE,weight:800,text:'O2O',color:'#97701E'},
     {fx:0.5,dy:214,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'แผนกออนไลน์',color:'#B3934F'},
     {fx:0.5,dy:237,size:MAP_SUB_SIZE,weight:600,opacity:.9,text:'Makro Pro',color:'#C3AB78'}]},
-  {id:'bakery',x:28,y:567,w:154,h:119,fill:'#F3E7D6',height:76,anchor:'middle',lines:[
+  {id:'bakery',x:36,y:567,w:200,h:119,fill:'#F3E7D6',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'เบเกอรี่',color:'#8A6A3C'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Bakery',color:'#B3966A'}]},
-  {id:'infopoint',x:189,y:567,w:56,h:119,fill:'#DFE9F5',height:42,anchor:'middle',lines:[
+  {id:'infopoint',x:246,y:567,w:73,h:119,fill:'#DFE9F5',height:42,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_SUB_SIZE,weight:800,text:'จุดประชาสัมพันธ์',color:'#3E5F86'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.9,text:'Information',color:'#6E8FB6'}]},
-  {id:'cashier',x:252,y:567,w:308,h:119,fill:'#DFF4EA',height:42,anchor:'middle',lines:[
+  {id:'cashier',x:328,y:567,w:400,h:119,fill:'#DFF4EA',height:42,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'แคชเชียร์',color:'#237A56'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Cashier',color:'#5AA684'}]},
-  {id:'icecream',x:574,y:567,w:133,h:119,fill:'#DBF1F4',height:76,anchor:'middle',lines:[
+  {id:'icecream',x:746,y:567,w:173,h:119,fill:'#DBF1F4',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ไอศกรีม',color:'#1C7086'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Ice Cream',color:'#4FA0B4'}]},
-  {id:'premium',x:721,y:567,w:147,h:119,fill:'#EAE7F0',height:76,anchor:'middle',lines:[
+  {id:'premium',x:937,y:567,w:191,h:119,fill:'#EAE7F0',height:76,anchor:'middle',lines:[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'จุดของแถม',color:'#5C5470'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Premium',color:'#8A82A0'}]},
 ].concat(
-  generateAisleGroup('dryfood_',455,147,749,336,29,44,'#FBE1EC','#99406B',84)
+  generateAisleGroup('dryfood_',592,147,974,336,29,44,'#FBE1EC','#99406B',84)
 ).concat(
-  generateAisleGroup('nonfood_',308,350,749,553,1,25,'#E7E4F8','#5749A0',84)
+  generateAisleGroup('nonfood_',400,350,974,553,1,25,'#E7E4F8','#5749A0',84)
 );
 const MAP_ZONE_LABELS={
   dryfood_:{main:'Dry Food',sub:'Loc. 29-44',color:'#99406B',subColor:'#C36B96'},
@@ -2284,7 +2284,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
-  else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,10)+signAt((x0+x1)/2,y0,H+30,rotationDeg,th,en,tint,true);
+  else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,8)+signAt((x0+x1)/2,y0,H+30,rotationDeg,th,en,tint,true);
   else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rotationDeg,th,en);
   else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rotationDeg,tint,H,th,en,skin.kind);
   else skinMarkup=rackUnit(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en,true);
@@ -2364,8 +2364,8 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
       allPts.push(isoProject(x,y,z,rot));
     });
   });
-  const entrance=isoProject(MAP_FLOOR.x+252,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
-  const exit=isoProject(MAP_FLOOR.x+588,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
+  const entrance=isoProject(MAP_FLOOR.x+328,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
+  const exit=isoProject(MAP_FLOOR.x+764,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
   allPts.push(entrance,exit);
   const minX=Math.min(...allPts.map(p=>p[0])), maxX=Math.max(...allPts.map(p=>p[0]));
   const minY=Math.min(...allPts.map(p=>p[1])), maxY=Math.max(...allPts.map(p=>p[1]));
@@ -4209,23 +4209,9 @@ function mergeMissingDefaultBlocks(blocks){
   const missing=DEFAULT_MAP_BLOCKS.filter(b=>!existingIds.has(b.id));
   return missing.length ? blocks.concat(JSON.parse(JSON.stringify(missing))) : blocks;
 }
-// เดือนก.ค. 2569 ขยายพิกัดทั้งระบบ (พื้น/บล็อก) ขึ้น 1.4 เท่าเพื่อให้ผังโล่งขึ้น ผังที่เคยบันทึกไว้ก่อนหน้านี้
-// ยังเป็นพิกัดสเกลเก่าอยู่ ต้องคูณ 1.4 ให้ตอนโหลดเข้ามา (เฉพาะตอนโหลด ไม่บันทึกทับอัตโนมัติ) โดยดูจาก layoutVersion
-// เป็นตัวบอกว่าเคยแปลงแล้วหรือยัง กันไม่ให้คูณซ้ำหลายรอบ — จะกลายเป็นสเกลถาวรก็ต่อเมื่อพนักงานกดบันทึกผังจริง ๆ ครั้งถัดไป
-const MAP_LAYOUT_VERSION=2, MAP_LAYOUT_LEGACY_SCALE=1.4;
-function rescaleMapBlocks(blocks,factor){
-  return blocks.map(b=>{
-    const nb=JSON.parse(JSON.stringify(b));
-    nb.x=Math.round(b.x*factor); nb.y=Math.round(b.y*factor);
-    nb.w=Math.round(b.w*factor); nb.h=Math.round(b.h*factor);
-    if(typeof b.height==='number') nb.height=Math.round(b.height*factor);
-    if(Array.isArray(nb.lines)) nb.lines.forEach(l=>{
-      if(typeof l.dy==='number') l.dy=Math.round(l.dy*factor);
-      if(typeof l.dx==='number') l.dx=Math.round(l.dx*factor);
-    });
-    return nb;
-  });
-}
+// ส.ค. 2569 ปรับผังใหม่ทั้งหมดให้ตรงสัดส่วนร้านจริง (พื้นกว้างขึ้น + ตำแหน่งแต่ละโซนเปลี่ยนแบบไม่เป็นสัดส่วนเดียวกับของเดิม)
+// จึงไม่สามารถคูณสเกลแปลงจากผังเก่าได้ตรง ๆ แบบรอบก่อน — ผังที่บันทึกไว้ก่อน v3 จะถูกละทิ้งแล้วใช้ค่าเริ่มต้นชุดใหม่แทน
+const MAP_LAYOUT_VERSION=3;
 async function loadMapBlocksFromStorage(){
   if(mapFirestoreDocRef){
     try{
@@ -4233,7 +4219,7 @@ async function loadMapBlocksFromStorage(){
       if(doc.exists){
         const data=doc.data();
         if(data && Array.isArray(data.blocks) && data.blocks.length){
-          const blocks=(data.layoutVersion>=MAP_LAYOUT_VERSION)?data.blocks:rescaleMapBlocks(data.blocks,MAP_LAYOUT_LEGACY_SCALE);
+          const blocks=(data.layoutVersion>=MAP_LAYOUT_VERSION)?data.blocks:JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
           currentMapBlocks=mergeMissingDefaultBlocks(blocks);
           if(data.bgColor) currentMapBgColor=data.bgColor;
           if(typeof data.rotation==='number'){ savedMapRotation=data.rotation; currentMapRotation=data.rotation; }
@@ -4247,9 +4233,9 @@ async function loadMapBlocksFromStorage(){
     if(raw){
       const parsed=JSON.parse(raw);
       if(Array.isArray(parsed) && parsed.length){
-        currentMapBlocks=mergeMissingDefaultBlocks(rescaleMapBlocks(parsed,MAP_LAYOUT_LEGACY_SCALE));
+        currentMapBlocks=mergeMissingDefaultBlocks(JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS)));
       } else if(parsed && Array.isArray(parsed.blocks) && parsed.blocks.length){
-        const blocks=(parsed.layoutVersion>=MAP_LAYOUT_VERSION)?parsed.blocks:rescaleMapBlocks(parsed.blocks,MAP_LAYOUT_LEGACY_SCALE);
+        const blocks=(parsed.layoutVersion>=MAP_LAYOUT_VERSION)?parsed.blocks:JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
         currentMapBlocks=mergeMissingDefaultBlocks(blocks);
         if(parsed.bgColor) currentMapBgColor=parsed.bgColor;
         if(typeof parsed.rotation==='number'){ savedMapRotation=parsed.rotation; currentMapRotation=parsed.rotation; }
