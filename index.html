@@ -4399,9 +4399,10 @@ function openPalletScan(mode){
     return;
   }
   const video=document.getElementById('palletScanVideo');
-  getZXingReader().decodeFromConstraints({video:{facingMode:{ideal:'environment'}}},video,(result)=>{
-    if(result){
-      handlePalletScanCode(result.getText().trim());
+  getZXingReader().decodeFromConstraints({video:SCAN_VIDEO_CONSTRAINTS},video,(result)=>{
+    const r=result||tryRotatedDecode(video);
+    if(r){
+      handlePalletScanCode(r.getText().trim());
     }
   }).then(controls=>{
     palletScanControls=controls;
@@ -5458,9 +5459,36 @@ function getZXingReader(){
       ZXing.BarcodeFormat.CODE_128,
       ZXing.BarcodeFormat.CODE_39
     ]);
-    zxingReader=new ZXing.BrowserMultiFormatReader(hints);
+    hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+    zxingReader=new ZXing.BrowserMultiFormatReader(hints,80);
   }
   return zxingReader;
+}
+const SCAN_VIDEO_CONSTRAINTS={facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720},advanced:[{focusMode:'continuous'}]};
+let scanRotateCanvas=null,scanRotateCtx=null,scanRotateToggle=false;
+function tryRotatedDecode(video){
+  if(!video||!video.videoWidth||!video.videoHeight) return null;
+  const angle=scanRotateToggle?270:90;
+  scanRotateToggle=!scanRotateToggle;
+  const vw=video.videoWidth,vh=video.videoHeight;
+  if(!scanRotateCanvas){
+    scanRotateCanvas=document.createElement('canvas');
+    scanRotateCtx=scanRotateCanvas.getContext('2d',{willReadFrequently:true});
+  }
+  scanRotateCanvas.width=vh;
+  scanRotateCanvas.height=vw;
+  scanRotateCtx.save();
+  scanRotateCtx.translate(scanRotateCanvas.width/2,scanRotateCanvas.height/2);
+  scanRotateCtx.rotate(angle*Math.PI/180);
+  scanRotateCtx.drawImage(video,-vw/2,-vh/2,vw,vh);
+  scanRotateCtx.restore();
+  try{
+    const luminanceSource=new ZXing.HTMLCanvasElementLuminanceSource(scanRotateCanvas,false);
+    const bitmap=new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminanceSource));
+    return getZXingReader().decodeBitmap(bitmap);
+  }catch(e){
+    return null;
+  }
 }
 let scanControls=null;
 function openScanner(){
@@ -5479,9 +5507,10 @@ function openScanner(){
     return;
   }
   const video=document.getElementById('scanVideo');
-  getZXingReader().decodeFromConstraints({video:{facingMode:{ideal:'environment'}}},video,(result)=>{
-    if(result){
-      const code=result.getText().trim();
+  getZXingReader().decodeFromConstraints({video:SCAN_VIDEO_CONSTRAINTS},video,(result)=>{
+    const r=result||tryRotatedDecode(video);
+    if(r){
+      const code=r.getText().trim();
       closeScanner();
       search(code);
     }
