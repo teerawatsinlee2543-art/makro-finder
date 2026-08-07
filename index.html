@@ -4450,7 +4450,8 @@ function handlePalletScanCode(code){
     document.getElementById('movePalletOverlay').style.display='flex';
     return;
   }
-  const item=PRODUCTS_BY_KEY.find(x=>x.barcode===code||x.itemNo===code);
+  let item=PRODUCTS_BY_KEY.find(x=>x.barcode===code||x.itemNo===code);
+  if(!item&&ALT_BARCODES[code])item=PRODUCTS_INDEX[ALT_BARCODES[code]];
   if(!item){
     showPalletToast(t('itemNotInSystemToast'));
     openPalletScan(palletScanMode);
@@ -4920,6 +4921,19 @@ function loadEmployeeOnlyItems(){
     .catch(()=>{ EMPLOYEE_ONLY_ITEMS={}; EMPLOYEE_ONLY_ITEMS_READY=true; });
 }
 loadEmployeeOnlyItems();
+
+// ==== บาร์โค้ดสำรอง: สินค้าบางตัวมีหลายบาร์โค้ด (บาร์โค้ดลัง/บาร์โค้ดชิ้น) ====
+// alt_barcodes.json คือ {barcode: itemNo} รวมบาร์โค้ดทุกแบบที่พบใน Item Master
+let ALT_BARCODES={};
+let ALT_BARCODES_READY=false;
+function loadAltBarcodes(){
+  return fetch('alt_barcodes.json',{cache:'no-store'})
+    .then(r=>r.ok?r.json():{})
+    .then(data=>{ ALT_BARCODES=data||{}; ALT_BARCODES_READY=true; })
+    .catch(()=>{ ALT_BARCODES={}; ALT_BARCODES_READY=true; });
+}
+loadAltBarcodes();
+
 function applyEmployeeOnlyVisibility(){
   if(!PRODUCTS_READY||!EMPLOYEE_ONLY_ITEMS_READY)return;
   const shouldShow=isEmployee();
@@ -5240,6 +5254,10 @@ function findMatches(query){
     } else if(item.locations&&item.locations.some(l=>(l.loc&&l.loc.toLowerCase().includes(lower))||(l.location&&l.location.toLowerCase().includes(lower)))){
       locPartial.push(item);
     }
+  }
+  if(ALT_BARCODES[q]){
+    const altItem=PRODUCTS_INDEX[ALT_BARCODES[q]];
+    if(altItem&&!exact.includes(altItem))exact.unshift(altItem);
   }
   return exact.concat(partial,locExact,locPartial);
 }
