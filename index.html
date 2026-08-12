@@ -4377,6 +4377,8 @@ function lineCameraErrorHtml(){
 
 // ==== สแกนบาร์โค้ดสำหรับพาเลท ====
 let palletScanControls=null,palletScanMode=null;
+let lastPalletScanCode=null,lastPalletScanAt=0;
+const SCAN_DEBOUNCE_MS=1500;
 function openPalletScan(mode){
   palletScanMode=mode;
   const overlay=document.getElementById('palletScanOverlay');
@@ -4428,6 +4430,9 @@ function closePalletScan(){
   }
 }
 function handlePalletScanCode(code){
+  const now=Date.now();
+  if(code===lastPalletScanCode&&(now-lastPalletScanAt)<SCAN_DEBOUNCE_MS)return;
+  lastPalletScanCode=code;lastPalletScanAt=now;
   if(palletScanControls){ palletScanControls.stop(); palletScanControls=null; }
   if(palletScanMode==='palletloc'){
     closePalletScan();
@@ -4454,7 +4459,9 @@ function handlePalletScanCode(code){
   if(!item&&ALT_BARCODES[code])item=PRODUCTS_INDEX[ALT_BARCODES[code]];
   if(!item){
     showPalletToast(t('itemNotInSystemToast'));
-    openPalletScan(palletScanMode);
+    setTimeout(()=>{
+      if(document.getElementById('palletScanOverlay').style.display!=='none')openPalletScan(palletScanMode);
+    },SCAN_DEBOUNCE_MS);
     return;
   }
   if(palletScanMode==='find'){
@@ -4467,7 +4474,9 @@ function handlePalletScanCode(code){
     const existing=currentPallet && currentPallet.items.find(x=>x.itemNo===item.itemNo);
     if(!existing){
       showPalletToast(t('itemNotInPalletToast'));
-      openPalletScan(palletScanMode);
+      setTimeout(()=>{
+        if(document.getElementById('palletScanOverlay').style.display!=='none')openPalletScan(palletScanMode);
+      },SCAN_DEBOUNCE_MS);
       return;
     }
     renderPalletDeleteFocusCard(item);
