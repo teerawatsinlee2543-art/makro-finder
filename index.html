@@ -1195,7 +1195,8 @@ const I18N={
     noLocationForLabelToast:'กรุณาตั้งตำแหน่งพาเลทก่อนพิมพ์ป้าย',
     unsupportedLabelCharsToast:'รหัสตำแหน่งมีอักขระที่พิมพ์บาร์โค้ดไม่ได้',
     lineAndroidPrintNotice:'การพิมพ์ผ่านแอป LINE บน Android มักไม่รองรับ กรุณาเปิดในเบราว์เซอร์ (Chrome) แทน',
-    palletNumberLabelBtn:'เลขพาเลท'
+    palletNumberLabelBtn:'เลขพาเลท',
+    translatedNameLabel:'ชื่อสินค้า (แปล)'
   },
   en:{
     roleIntro:'Please choose how you want to use the app',
@@ -1433,7 +1434,8 @@ const I18N={
     noLocationForLabelToast:'Please set the pallet location before printing a label',
     unsupportedLabelCharsToast:'The location code contains characters that cannot be barcoded',
     lineAndroidPrintNotice:'Printing inside the LINE app on Android usually is not supported. Please open this page in your browser (Chrome) instead.',
-    palletNumberLabelBtn:'Pallet No.'
+    palletNumberLabelBtn:'Pallet No.',
+    translatedNameLabel:'Product name (translated)'
   },
   cn:{
     roleIntro:'请选择使用模式',
@@ -1671,7 +1673,8 @@ const I18N={
     noLocationForLabelToast:'请先设置托盘位置再打印标签',
     unsupportedLabelCharsToast:'位置代码包含无法生成条码的字符',
     lineAndroidPrintNotice:'在 Android 的 LINE 应用内通常无法打印，请改用浏览器（Chrome）打开此页面',
-    palletNumberLabelBtn:'托盘编号'
+    palletNumberLabelBtn:'托盘编号',
+    translatedNameLabel:'商品名称（翻译）'
   },
   mm:{
     roleIntro:'အသုံးပြုမည့်မုဒ်ကို ရွေးချယ်ပါ',
@@ -1909,7 +1912,8 @@ const I18N={
     noLocationForLabelToast:'တံဆိပ်မပုံနှိပ်မီ ပလက်ဖောင်းတည်နေရာကို အရင်သတ်မှတ်ပါ',
     unsupportedLabelCharsToast:'တည်နေရာကုဒ်တွင် ဘားကုဒ်ပြုလုပ်၍မရသော အက္ခရာများပါရှိသည်',
     lineAndroidPrintNotice:'Android ပေါ်ရှိ LINE အက်ပ်တွင်း ပုံနှိပ်ခြင်းကို များသောအားဖြင့် မထောက်ပံ့ပါ ကျေးဇူးပြု၍ ဤစာမျက်နှာကို browser (Chrome) တွင် ဖွင့်ပါ',
-    palletNumberLabelBtn:'ပလက်ဖောင်းနံပါတ်'
+    palletNumberLabelBtn:'ပလက်ဖောင်းနံပါတ်',
+    translatedNameLabel:'ကုန်ပစ္စည်းအမည် (ဘာသာပြန်)'
   },
   kr:{
     roleIntro:'사용 모드를 선택해 주세요',
@@ -2147,7 +2151,8 @@ const I18N={
     noLocationForLabelToast:'라벨을 인쇄하기 전에 팔레트 위치를 먼저 설정하세요',
     unsupportedLabelCharsToast:'위치 코드에 바코드로 표현할 수 없는 문자가 포함되어 있습니다',
     lineAndroidPrintNotice:'Android의 LINE 앱 내에서는 인쇄가 지원되지 않는 경우가 많습니다. 브라우저(Chrome)에서 이 페이지를 열어주세요',
-    palletNumberLabelBtn:'팔레트 번호'
+    palletNumberLabelBtn:'팔레트 번호',
+    translatedNameLabel:'상품명 (번역)'
   },
   jp:{
     roleIntro:'利用モードを選択してください',
@@ -2385,7 +2390,8 @@ const I18N={
     noLocationForLabelToast:'ラベルを印刷する前にパレットの位置を設定してください',
     unsupportedLabelCharsToast:'位置コードにバーコード化できない文字が含まれています',
     lineAndroidPrintNotice:'Android版LINEアプリ内では印刷が利用できない場合があります。ブラウザ（Chrome）でこのページを開いてください',
-    palletNumberLabelBtn:'パレット番号'
+    palletNumberLabelBtn:'パレット番号',
+    translatedNameLabel:'商品名（翻訳）'
   }
 };
 let currentLang=(function(){ try{ return localStorage.getItem('mf_lang')||'th'; }catch(e){ return 'th'; } })();
@@ -3249,8 +3255,10 @@ function renderProductNavInfo(item){
     '<rect x="5.5" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="15.3" width="3.2" height="3.2" rx="0.5"/>'+
   '</svg>';
   const shelfLine='<div class="nav-info-line">'+shelfIconSvg+' '+t('shelfTier')+' : <b>'+(item.shelf?escapeHtml(item.shelf):t('notYetAvailable'))+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">'+t('empEditBtn')+'</button>':'')+'</div>';
+  const translatedNameLine=(currentLang!=='th')?('<div class="nav-info-name" id="navInfoTranslatedName" data-itemno="'+escapeHtml(item.itemNo)+'">'+t('translatedNameLabel')+' : …</div>'):'';
   if(item.locations && item.locations.length){
     body.innerHTML='<div class="nav-info-name">'+t('productNameLabel')+' : '+escapeHtml(item.desc)+'</div>'+
+      translatedNameLine+
       item.locations.map(l=>
         '<div class="nav-info-loc-group">'+
           '<div class="nav-info-line"><i class="ti ti-map-pin" aria-hidden="true"></i> '+t('productIsAt')+' : '+t('locFull')+' : <b>'+escapeHtml(l.loc)+'</b></div>'+
@@ -3258,6 +3266,17 @@ function renderProductNavInfo(item){
         '</div>'
       ).join('')+
       '<div class="nav-info-loc-group">'+shelfLine+'</div>';
+    if(currentLang!=='th'){
+      translateItemName(item.itemNo,item.desc,currentLang).then(translated=>{
+        const el=document.getElementById('navInfoTranslatedName');
+        if(!el||el.getAttribute('data-itemno')!==item.itemNo)return;
+        if(translated){
+          el.innerHTML=t('translatedNameLabel')+' : '+escapeHtml(translated);
+        } else {
+          el.remove();
+        }
+      });
+    }
   } else {
     const canAdd=isEmployee();
     body.innerHTML='<div class="nav-info-loc-group">'+
@@ -5142,6 +5161,46 @@ function saveImageCacheSoon(){
     try{localStorage.setItem(IMG_CACHE_KEY,JSON.stringify(ITEM_IMAGE_CACHE));}catch(e){}
     imgCacheDirty=false;
   },500);
+}
+
+// (ทางเลือกเสริม) แปลชื่อสินค้าเป็นภาษาที่เลือกอัตโนมัติด้วย Google Cloud Translation API
+// สมัคร/เปิดใช้งาน Cloud Translation API ที่ https://console.cloud.google.com แล้วใส่ API key ด้านล่าง
+// แนะนำให้จำกัดสิทธิ์ key ด้วย HTTP referrer เป็นโดเมนเว็บนี้เท่านั้น กัน key ถูกแอบใช้ (key จะมองเห็นได้จาก view-source เพราะรันฝั่ง browser)
+// ไม่งั้นปล่อยว่างไว้ได้ (จะไม่มีบรรทัดชื่อแปลขึ้น)
+const GOOGLE_TRANSLATE_API_KEY='';
+const TRANSLATE_LANG_MAP={en:'en',cn:'zh-CN',mm:'my',kr:'ko',jp:'ja'};
+const TRANSLATE_CACHE_KEY='makroFinderNameTranslateCache_v1';
+let ITEM_NAME_TRANSLATE_CACHE={};
+try{ITEM_NAME_TRANSLATE_CACHE=JSON.parse(localStorage.getItem(TRANSLATE_CACHE_KEY)||'{}');}catch(e){ITEM_NAME_TRANSLATE_CACHE={};}
+let translateCacheDirty=false;
+function saveTranslateCacheSoon(){
+  if(translateCacheDirty)return;
+  translateCacheDirty=true;
+  setTimeout(()=>{
+    try{localStorage.setItem(TRANSLATE_CACHE_KEY,JSON.stringify(ITEM_NAME_TRANSLATE_CACHE));}catch(e){}
+    translateCacheDirty=false;
+  },500);
+}
+function translateItemName(itemNo,text,lang){
+  const targetCode=TRANSLATE_LANG_MAP[lang];
+  if(!targetCode||!GOOGLE_TRANSLATE_API_KEY||!text)return Promise.resolve(null);
+  const cacheKey=itemNo+'_'+lang;
+  if(Object.prototype.hasOwnProperty.call(ITEM_NAME_TRANSLATE_CACHE,cacheKey)){
+    return Promise.resolve(ITEM_NAME_TRANSLATE_CACHE[cacheKey]);
+  }
+  return fetch('https://translation.googleapis.com/language/translate2?key='+encodeURIComponent(GOOGLE_TRANSLATE_API_KEY),{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({q:text,target:targetCode,source:'th',format:'text'})
+  })
+    .then(r=>r.ok?r.json():null)
+    .then(data=>{
+      const translated=(data&&data.data&&data.data.translations&&data.data.translations[0]&&data.data.translations[0].translatedText)||null;
+      ITEM_NAME_TRANSLATE_CACHE[cacheKey]=translated;
+      saveTranslateCacheSoon();
+      return translated;
+    })
+    .catch(()=>null);
 }
 function resolveItemImage(item){
   if(item.customImage) return Promise.resolve(item.customImage);
