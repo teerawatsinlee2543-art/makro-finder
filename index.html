@@ -208,6 +208,8 @@ body{margin:0;padding:0;touch-action:manipulation}
 .pallet-overlay-content{width:100%;max-width:480px;max-height:92vh;background:var(--color-background-primary);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
 .pallet-header{background:var(--brand-red);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .pallet-header i{font-size:20px;cursor:pointer;flex-shrink:0}
+.pallet-header-print-btn{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:600;cursor:pointer;flex-shrink:0;white-space:nowrap}
+.pallet-header-print-btn i{font-size:18px}
 .pallet-header-title{flex:1;font-size:15px;font-weight:500;min-width:0}
 .pallet-header-sub{font-size:11px;opacity:.85}
 .pallet-body{padding:14px 16px;overflow-y:auto;flex:1}
@@ -884,7 +886,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
         <div class="pallet-header-sub" id="palletHeaderSub"></div>
       </div>
-      <i class="ti ti-printer" id="palletLocLabelBtn" aria-hidden="true" onclick="openPalletLocLabel()" style="display:none"></i>
+      <div class="pallet-header-print-btn" id="palletLocLabelBtn" onclick="openPalletLocLabel()" style="display:none"><i class="ti ti-printer" aria-hidden="true"></i><span data-i18n="palletNumberLabelBtn">เลขพาเลท</span></div>
       <i class="ti ti-scan" id="palletFindScanBtn" aria-hidden="true" onclick="openFindPalletScan()" style="display:none"></i>
       <i class="ti ti-x" id="palletCloseBtn" aria-hidden="true" onclick="closePalletManager()"></i>
     </div>
@@ -1193,7 +1195,8 @@ const I18N={
     printLabelBtn:'พิมพ์',
     noLocationForLabelToast:'กรุณาตั้งตำแหน่งพาเลทก่อนพิมพ์ป้าย',
     unsupportedLabelCharsToast:'รหัสตำแหน่งมีอักขระที่พิมพ์บาร์โค้ดไม่ได้',
-    lineAndroidPrintNotice:'การพิมพ์ผ่านแอป LINE บน Android มักไม่รองรับ กรุณาเปิดในเบราว์เซอร์ (Chrome) แทน'
+    lineAndroidPrintNotice:'การพิมพ์ผ่านแอป LINE บน Android มักไม่รองรับ กรุณาเปิดในเบราว์เซอร์ (Chrome) แทน',
+    palletNumberLabelBtn:'เลขพาเลท'
   },
   en:{
     roleIntro:'Please choose how you want to use the app',
@@ -1430,7 +1433,8 @@ const I18N={
     printLabelBtn:'Print',
     noLocationForLabelToast:'Please set the pallet location before printing a label',
     unsupportedLabelCharsToast:'The location code contains characters that cannot be barcoded',
-    lineAndroidPrintNotice:'Printing inside the LINE app on Android usually is not supported. Please open this page in your browser (Chrome) instead.'
+    lineAndroidPrintNotice:'Printing inside the LINE app on Android usually is not supported. Please open this page in your browser (Chrome) instead.',
+    palletNumberLabelBtn:'Pallet No.'
   },
   cn:{
     roleIntro:'请选择使用模式',
@@ -1667,7 +1671,8 @@ const I18N={
     printLabelBtn:'打印',
     noLocationForLabelToast:'请先设置托盘位置再打印标签',
     unsupportedLabelCharsToast:'位置代码包含无法生成条码的字符',
-    lineAndroidPrintNotice:'在 Android 的 LINE 应用内通常无法打印，请改用浏览器（Chrome）打开此页面'
+    lineAndroidPrintNotice:'在 Android 的 LINE 应用内通常无法打印，请改用浏览器（Chrome）打开此页面',
+    palletNumberLabelBtn:'托盘编号'
   },
   mm:{
     roleIntro:'အသုံးပြုမည့်မုဒ်ကို ရွေးချယ်ပါ',
@@ -1904,7 +1909,8 @@ const I18N={
     printLabelBtn:'ပုံနှိပ်ရန်',
     noLocationForLabelToast:'တံဆိပ်မပုံနှိပ်မီ ပလက်ဖောင်းတည်နေရာကို အရင်သတ်မှတ်ပါ',
     unsupportedLabelCharsToast:'တည်နေရာကုဒ်တွင် ဘားကုဒ်ပြုလုပ်၍မရသော အက္ခရာများပါရှိသည်',
-    lineAndroidPrintNotice:'Android ပေါ်ရှိ LINE အက်ပ်တွင်း ပုံနှိပ်ခြင်းကို များသောအားဖြင့် မထောက်ပံ့ပါ ကျေးဇူးပြု၍ ဤစာမျက်နှာကို browser (Chrome) တွင် ဖွင့်ပါ'
+    lineAndroidPrintNotice:'Android ပေါ်ရှိ LINE အက်ပ်တွင်း ပုံနှိပ်ခြင်းကို များသောအားဖြင့် မထောက်ပံ့ပါ ကျေးဇူးပြု၍ ဤစာမျက်နှာကို browser (Chrome) တွင် ဖွင့်ပါ',
+    palletNumberLabelBtn:'ပလက်ဖောင်းနံပါတ်'
   },
   kr:{
     roleIntro:'사용 모드를 선택해 주세요',
@@ -2141,7 +2147,8 @@ const I18N={
     printLabelBtn:'인쇄',
     noLocationForLabelToast:'라벨을 인쇄하기 전에 팔레트 위치를 먼저 설정하세요',
     unsupportedLabelCharsToast:'위치 코드에 바코드로 표현할 수 없는 문자가 포함되어 있습니다',
-    lineAndroidPrintNotice:'Android의 LINE 앱 내에서는 인쇄가 지원되지 않는 경우가 많습니다. 브라우저(Chrome)에서 이 페이지를 열어주세요'
+    lineAndroidPrintNotice:'Android의 LINE 앱 내에서는 인쇄가 지원되지 않는 경우가 많습니다. 브라우저(Chrome)에서 이 페이지를 열어주세요',
+    palletNumberLabelBtn:'팔레트 번호'
   },
   jp:{
     roleIntro:'利用モードを選択してください',
@@ -2378,7 +2385,8 @@ const I18N={
     printLabelBtn:'印刷',
     noLocationForLabelToast:'ラベルを印刷する前にパレットの位置を設定してください',
     unsupportedLabelCharsToast:'位置コードにバーコード化できない文字が含まれています',
-    lineAndroidPrintNotice:'Android版LINEアプリ内では印刷が利用できない場合があります。ブラウザ（Chrome）でこのページを開いてください'
+    lineAndroidPrintNotice:'Android版LINEアプリ内では印刷が利用できない場合があります。ブラウザ（Chrome）でこのページを開いてください',
+    palletNumberLabelBtn:'パレット番号'
   }
 };
 let currentLang=(function(){ try{ return localStorage.getItem('mf_lang')||'th'; }catch(e){ return 'th'; } })();
@@ -3788,7 +3796,7 @@ function updatePalletHeader(pallet){
   const idLine=pallet.name?pallet.id+' · ':'';
   document.getElementById('palletHeaderSub').textContent=idLine+t('createdByLabel')+' '+(pallet.createdBy||'-')+' · '+new Date(pallet.createdAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
   document.getElementById('palletRenameBtn').style.display=isEmployee()?'block':'none';
-  document.getElementById('palletLocLabelBtn').style.display=(isEmployee()&&(pallet.loc||pallet.location))?'block':'none';
+  document.getElementById('palletLocLabelBtn').style.display=(isEmployee()&&(pallet.loc||pallet.location))?'flex':'none';
 }
 function renamePallet(){
   if(!currentPallet||!isEmployee())return;
@@ -3892,7 +3900,9 @@ function renderPalletDetailView(pallet){
   const body=document.getElementById('palletBody');
   const tot=palletTotals(pallet);
   const canEdit=isEmployee();
-  let html='<div class="pallet-stats">'+
+  const locText=(pallet.loc||pallet.location) ? (t('locLabel')+' '+escapeHtml(pallet.loc||'-')+' / '+t('locationLabel')+' '+escapeHtml(pallet.location||'-')) : t('palletLocationNotSet');
+  let html='<div class="pallet-loc-box"'+(canEdit?' style="cursor:pointer" onclick="editPalletLocation()"':'')+'><i class="ti ti-map-pin" aria-hidden="true"></i> '+t('palletLocatedAtPrefix')+' '+locText+(canEdit?' <i class="ti ti-pencil" aria-hidden="true" style="margin-left:auto"></i>':'')+'</div>';
+  html+='<div class="pallet-stats" style="margin-top:12px">'+
     '<div class="pallet-stat"><div class="pallet-stat-label">'+t('itemsCountLabel')+'</div><div class="pallet-stat-val">'+tot.skuCount+'</div></div>'+
     '<div class="pallet-stat"><div class="pallet-stat-label">'+t('muTotalLabel')+'</div><div class="pallet-stat-val">'+tot.unitCount+'</div></div>'+
   '</div>';
@@ -3912,22 +3922,17 @@ function renderPalletDetailView(pallet){
   if(canEdit){
     html+='<div class="pallet-add-btn purple" onclick="openMovePalletAllPrompt()"><i class="ti ti-arrows-right-left" aria-hidden="true"></i> '+t('moveAllItemsBtn')+'</div>';
   }
-  const locText=(pallet.loc||pallet.location) ? (t('locLabel')+' '+escapeHtml(pallet.loc||'-')+' / '+t('locationLabel')+' '+escapeHtml(pallet.location||'-')) : t('palletLocationNotSet');
-  html+='<div class="pallet-loc-box" style="margin-top:12px'+(canEdit?';cursor:pointer':'')+'"'+(canEdit?' onclick="editPalletLocation()"':'')+'><i class="ti ti-map-pin" aria-hidden="true"></i> '+t('palletLocatedAtPrefix')+' '+locText+(canEdit?' <i class="ti ti-pencil" aria-hidden="true" style="margin-left:auto"></i>':'')+'</div>';
-  if(canEdit&&(pallet.loc||pallet.location)){
-    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#F3EEFF;color:#5B3FA3;border-style:solid;border-color:#C9B8F0" onclick="openPalletLocLabel()"><i class="ti ti-printer" aria-hidden="true"></i> '+t('printLocationLabelBtn')+'</div>';
-  }
   if(canEdit){
     html+='<div class="pallet-add-btn" style="margin-top:8px;background:#E3F6E8;color:#1D6B3F;border-style:solid;border-color:#9AD8AE" onclick="savePalletAndBack()"><i class="ti ti-device-floppy" aria-hidden="true"></i> '+t('savePalletBtn')+'</div>';
-  }
-  if(canEdit){
-    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#FFF0F1;color:#A32D2D;border-style:solid;border-color:#F09595" onclick="deleteCurrentPallet()"><i class="ti ti-trash" aria-hidden="true"></i> '+t('deletePalletPermBtn')+'</div>';
   }
   if(isEmployee()){
     html+='<div class="pallet-action-row" style="margin-top:8px;margin-bottom:0">'+
       '<div class="pallet-add-btn" style="background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="downloadPalletPrintImage()"><i class="ti ti-download" aria-hidden="true"></i> '+t('downloadAsImageBtn')+'</div>'+
       '<div class="pallet-add-btn" style="background:#EAF2FF;color:#1D4FA3;border-style:solid;border-color:#A9C9F5" onclick="printPalletList()"><i class="ti ti-printer" aria-hidden="true"></i> '+t('printAllItemsBtn')+'</div>'+
     '</div>';
+  }
+  if(canEdit){
+    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#FFF0F1;color:#A32D2D;border-style:solid;border-color:#F09595" onclick="deleteCurrentPallet()"><i class="ti ti-trash" aria-hidden="true"></i> '+t('deletePalletPermBtn')+'</div>';
   }
   body.innerHTML=html;
   pallet.items.forEach((it,i)=>{
