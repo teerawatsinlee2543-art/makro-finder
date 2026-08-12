@@ -5163,11 +5163,9 @@ function saveImageCacheSoon(){
   },500);
 }
 
-// (ทางเลือกเสริม) แปลชื่อสินค้าเป็นภาษาที่เลือกอัตโนมัติด้วย Google Cloud Translation API
-// สมัคร/เปิดใช้งาน Cloud Translation API ที่ https://console.cloud.google.com แล้วใส่ API key ด้านล่าง
-// แนะนำให้จำกัดสิทธิ์ key ด้วย HTTP referrer เป็นโดเมนเว็บนี้เท่านั้น กัน key ถูกแอบใช้ (key จะมองเห็นได้จาก view-source เพราะรันฝั่ง browser)
-// ไม่งั้นปล่อยว่างไว้ได้ (จะไม่มีบรรทัดชื่อแปลขึ้น)
-const GOOGLE_TRANSLATE_API_KEY='';
+// (ทางเลือกเสริม) แปลชื่อสินค้าเป็นภาษาที่เลือกอัตโนมัติด้วย MyMemory Translation API (ฟรี ไม่ต้องสมัคร ไม่ต้องมี API key)
+// โควต้าฟรีมาตรฐาน ~5,000 คำ/วัน ต่อ IP — ถ้าใส่อีเมลไว้ที่ MYMEMORY_EMAIL ด้านล่าง โควต้าจะเพิ่มเป็น ~50,000 คำ/วัน (ไม่บังคับ)
+const MYMEMORY_EMAIL='';
 const TRANSLATE_LANG_MAP={en:'en',cn:'zh-CN',mm:'my',kr:'ko',jp:'ja'};
 const TRANSLATE_CACHE_KEY='makroFinderNameTranslateCache_v1';
 let ITEM_NAME_TRANSLATE_CACHE={};
@@ -5183,19 +5181,19 @@ function saveTranslateCacheSoon(){
 }
 function translateItemName(itemNo,text,lang){
   const targetCode=TRANSLATE_LANG_MAP[lang];
-  if(!targetCode||!GOOGLE_TRANSLATE_API_KEY||!text)return Promise.resolve(null);
+  if(!targetCode||!text)return Promise.resolve(null);
   const cacheKey=itemNo+'_'+lang;
   if(Object.prototype.hasOwnProperty.call(ITEM_NAME_TRANSLATE_CACHE,cacheKey)){
     return Promise.resolve(ITEM_NAME_TRANSLATE_CACHE[cacheKey]);
   }
-  return fetch('https://translation.googleapis.com/language/translate2?key='+encodeURIComponent(GOOGLE_TRANSLATE_API_KEY),{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({q:text,target:targetCode,source:'th',format:'text'})
-  })
+  let url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=th|'+encodeURIComponent(targetCode);
+  if(MYMEMORY_EMAIL)url+='&de='+encodeURIComponent(MYMEMORY_EMAIL);
+  return fetch(url)
     .then(r=>r.ok?r.json():null)
     .then(data=>{
-      const translated=(data&&data.data&&data.data.translations&&data.data.translations[0]&&data.data.translations[0].translatedText)||null;
+      const raw=data&&data.responseData&&data.responseData.translatedText;
+      const ok=data&&data.responseStatus===200&&raw&&raw.toUpperCase().indexOf('MYMEMORY WARNING')===-1;
+      const translated=ok?raw:null;
       ITEM_NAME_TRANSLATE_CACHE[cacheKey]=translated;
       saveTranslateCacheSoon();
       return translated;
