@@ -416,11 +416,22 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .pallet-grid .pallet-card{margin-bottom:0}
 }
 .pallet-print-area{display:none}
+.pallet-loc-label-print-area{display:none}
+.loc-label-box{width:100%;height:100%;box-sizing:border-box;padding:6mm;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;color:#000;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;overflow:hidden}
+.loc-label-code{font-size:16mm;font-weight:800;letter-spacing:.5px;line-height:1.1;margin-bottom:3mm;white-space:nowrap}
+.loc-label-barcode{width:88%;height:32mm}
+.loc-label-barcode svg{display:block;width:100%;height:100%}
+.loc-label-human{font-family:'Courier New',monospace;font-size:6mm;letter-spacing:3px;margin-top:2mm}
+.loc-label-preview-frame{width:100mm;height:150mm;zoom:.55;border:1px dashed var(--color-border-tertiary);overflow:hidden;flex:0 0 auto}
+.loc-label-print-page{width:210mm;height:297mm;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4mm}
+.loc-label-cell{width:100mm;height:140mm;flex:0 0 auto}
+.loc-label-cut-line{width:100mm;border-top:1px dashed #999;flex:0 0 auto}
 @page{size:A3 landscape;margin:6mm}
 @media print{
-  html,body{width:408mm;height:285mm}
-  body>*:not(#palletPrintArea){display:none !important}
+  html.printing-pallet-list,html.printing-pallet-list body{width:408mm;height:285mm}
+  body>*:not(#palletPrintArea):not(#palletLocLabelPrintArea){display:none !important}
   #palletPrintArea{display:block !important;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;color:#000}
+  #palletLocLabelPrintArea{display:block !important;width:210mm;height:297mm;margin:0;padding:0;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif}
   .pallet-print-page{display:flex;flex-direction:column;width:408mm;height:285mm;page-break-after:always}
   .pallet-print-page:last-child{page-break-after:auto}
   .pallet-print-header{font-size:40px;font-weight:800;margin-bottom:14px;flex:0 0 auto}
@@ -800,6 +811,22 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   </div>
 </div>
 
+<div class="promo-date-overlay" id="palletLocLabelOverlay">
+  <div class="promo-date-box" style="max-width:340px" onclick="event.stopPropagation()">
+    <div class="promo-date-title"><i class="ti ti-printer" aria-hidden="true"></i> <span data-i18n="locLabelModalTitle">ป้ายบาร์โค้ดตำแหน่งพาเลท</span></div>
+    <div style="display:flex;justify-content:center;padding:10px 0">
+      <div class="loc-label-preview-frame">
+        <div class="loc-label-box" id="locLabelPreviewBox"></div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--color-text-secondary)" data-i18n="locLabelSizeNote">ขนาดจริง 100 x 150 มม.</p>
+    <div class="promo-date-actions">
+      <button class="promo-date-cancel" onclick="closePalletLocLabelOverlay()" data-i18n="cancelBtn">ยกเลิก</button>
+      <button class="promo-date-confirm" onclick="printPalletLocLabel()"><i class="ti ti-printer" aria-hidden="true"></i> <span data-i18n="printLabelBtn">พิมพ์</span></button>
+    </div>
+  </div>
+</div>
+
 <div class="promo-date-overlay" id="langModal" onclick="closeLangModal()">
   <div class="promo-date-box" onclick="event.stopPropagation()">
     <div class="promo-date-title"><i class="ti ti-language" aria-hidden="true"></i> <span data-i18n="languageModalTitle">เลือกภาษา</span></div>
@@ -853,6 +880,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <div id="palletHeaderTitle">จัดการพาเลท</div>
         <div class="pallet-header-sub" id="palletHeaderSub"></div>
       </div>
+      <i class="ti ti-printer" id="palletLocLabelBtn" aria-hidden="true" onclick="openPalletLocLabel()" style="display:none"></i>
       <i class="ti ti-pencil" id="palletRenameBtn" aria-hidden="true" onclick="renamePallet()" style="display:none"></i>
       <i class="ti ti-scan" id="palletFindScanBtn" aria-hidden="true" onclick="openFindPalletScan()" style="display:none"></i>
       <i class="ti ti-x" id="palletCloseBtn" aria-hidden="true" onclick="closePalletManager()"></i>
@@ -896,6 +924,13 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 </div>
 <canvas id="scanCanvas" style="display:none"></canvas>
 <div id="palletPrintArea" class="pallet-print-area"></div>
+<div id="palletLocLabelPrintArea" class="pallet-loc-label-print-area">
+  <div class="loc-label-print-page">
+    <div class="loc-label-cell"><div class="loc-label-box" id="locLabelPrintBox1"></div></div>
+    <div class="loc-label-cut-line"></div>
+    <div class="loc-label-cell"><div class="loc-label-box" id="locLabelPrintBox2"></div></div>
+  </div>
+</div>
 
 <script>
 /* ---------- ระบบหลายภาษา (i18n) — เฉพาะฝั่งลูกค้าในเวอร์ชันนี้ ---------- */
@@ -1148,7 +1183,13 @@ const I18N={
     gpsReadFailedAlert:'อ่านตำแหน่ง GPS ไม่สำเร็จ: {msg}',
     gpsOriginNotSetAlert:'ร้านนี้ยังไม่ได้ตั้งจุดอ้างอิง GPS กรุณาแจ้งพนักงานให้ตั้งค่าก่อน (ปุ่ม "ตั้งจุดอ้างอิง GPS" ตอนแก้ไขแผนที่)',
     gpsLocateFailedAlert:'อ่านตำแหน่งไม่สำเร็จ: {msg}',
-    syncSaveFailedRetryAlert:'บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'
+    syncSaveFailedRetryAlert:'บันทึกไปยังส่วนกลางไม่สำเร็จ (บันทึกไว้ในเครื่องนี้แล้ว) กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่',
+    printLocationLabelBtn:'พิมพ์ป้ายบาร์โค้ดตำแหน่ง',
+    locLabelModalTitle:'ป้ายบาร์โค้ดตำแหน่งพาเลท',
+    locLabelSizeNote:'ขนาดจริง 100 x 150 มม.',
+    printLabelBtn:'พิมพ์',
+    noLocationForLabelToast:'กรุณาตั้งตำแหน่งพาเลทก่อนพิมพ์ป้าย',
+    unsupportedLabelCharsToast:'รหัสตำแหน่งมีอักขระที่พิมพ์บาร์โค้ดไม่ได้'
   },
   en:{
     roleIntro:'Please choose how you want to use the app',
@@ -1378,7 +1419,13 @@ const I18N={
     gpsReadFailedAlert:'Could not read GPS location: {msg}',
     gpsOriginNotSetAlert:'This store has not set a GPS reference point yet. Please ask staff to set it up first (the "Set GPS reference point" button in map editing)',
     gpsLocateFailedAlert:'Could not read your location: {msg}',
-    syncSaveFailedRetryAlert:'Failed to save to shared storage (saved on this device instead). Please check your internet connection and try again'
+    syncSaveFailedRetryAlert:'Failed to save to shared storage (saved on this device instead). Please check your internet connection and try again',
+    printLocationLabelBtn:'Print location label',
+    locLabelModalTitle:'Pallet Location Barcode Label',
+    locLabelSizeNote:'Actual size 100 x 150 mm',
+    printLabelBtn:'Print',
+    noLocationForLabelToast:'Please set the pallet location before printing a label',
+    unsupportedLabelCharsToast:'The location code contains characters that cannot be barcoded'
   },
   cn:{
     roleIntro:'请选择使用模式',
@@ -1608,7 +1655,13 @@ const I18N={
     gpsReadFailedAlert:'读取 GPS 位置失败：{msg}',
     gpsOriginNotSetAlert:'该门店尚未设置 GPS 参考点，请先联系员工设置（在编辑地图时点击"设置 GPS 参考点"按钮）',
     gpsLocateFailedAlert:'读取您的位置失败：{msg}',
-    syncSaveFailedRetryAlert:'保存到中央数据库失败（已保存在本机），请检查网络连接后重试'
+    syncSaveFailedRetryAlert:'保存到中央数据库失败（已保存在本机），请检查网络连接后重试',
+    printLocationLabelBtn:'打印位置条码标签',
+    locLabelModalTitle:'托盘位置条码标签',
+    locLabelSizeNote:'实际尺寸 100 x 150 毫米',
+    printLabelBtn:'打印',
+    noLocationForLabelToast:'请先设置托盘位置再打印标签',
+    unsupportedLabelCharsToast:'位置代码包含无法生成条码的字符'
   },
   mm:{
     roleIntro:'အသုံးပြုမည့်မုဒ်ကို ရွေးချယ်ပါ',
@@ -1838,7 +1891,13 @@ const I18N={
     gpsReadFailedAlert:'GPS တည်နေရာဖတ်ရှု၍မရပါ: {msg}',
     gpsOriginNotSetAlert:'ဤဆိုင်တွင် GPS ရည်ညွှန်းအမှတ် မသတ်မှတ်ရသေးပါ ဝန်ထမ်းကို အရင်သတ်မှတ်ခိုင်းပါ (မြေပုံပြင်ဆင်ချိန် "GPS ရည်ညွှန်းအမှတ်သတ်မှတ်ရန်" ခလုတ်)',
     gpsLocateFailedAlert:'သင့်တည်နေရာဖတ်ရှု၍မရပါ: {msg}',
-    syncSaveFailedRetryAlert:'ဗဟိုစနစ်သို့ သိမ်းဆည်းမရပါ (ဤစက်တွင်သိမ်းထားပါပြီ) အင်တာနက်ကို စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါ'
+    syncSaveFailedRetryAlert:'ဗဟိုစနစ်သို့ သိမ်းဆည်းမရပါ (ဤစက်တွင်သိမ်းထားပါပြီ) အင်တာနက်ကို စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါ',
+    printLocationLabelBtn:'တည်နေရာဘားကုဒ်တံဆိပ် ပုံနှိပ်ရန်',
+    locLabelModalTitle:'ပလက်ဖောင်းတည်နေရာ ဘားကုဒ်တံဆိပ်',
+    locLabelSizeNote:'အမှန်အရွယ်အစား 100 x 150 မမ',
+    printLabelBtn:'ပုံနှိပ်ရန်',
+    noLocationForLabelToast:'တံဆိပ်မပုံနှိပ်မီ ပလက်ဖောင်းတည်နေရာကို အရင်သတ်မှတ်ပါ',
+    unsupportedLabelCharsToast:'တည်နေရာကုဒ်တွင် ဘားကုဒ်ပြုလုပ်၍မရသော အက္ခရာများပါရှိသည်'
   },
   kr:{
     roleIntro:'사용 모드를 선택해 주세요',
@@ -2068,7 +2127,13 @@ const I18N={
     gpsReadFailedAlert:'GPS 위치를 읽지 못했습니다: {msg}',
     gpsOriginNotSetAlert:'이 매장은 아직 GPS 기준점이 설정되지 않았습니다. 직원에게 먼저 설정을 요청하세요 (지도 편집 중 "GPS 기준점 설정" 버튼)',
     gpsLocateFailedAlert:'위치를 읽지 못했습니다: {msg}',
-    syncSaveFailedRetryAlert:'중앙 저장소에 저장하지 못했습니다 (이 기기에는 저장됨). 인터넷 연결을 확인한 후 다시 시도해주세요'
+    syncSaveFailedRetryAlert:'중앙 저장소에 저장하지 못했습니다 (이 기기에는 저장됨). 인터넷 연결을 확인한 후 다시 시도해주세요',
+    printLocationLabelBtn:'위치 바코드 라벨 인쇄',
+    locLabelModalTitle:'팔레트 위치 바코드 라벨',
+    locLabelSizeNote:'실제 크기 100 x 150 mm',
+    printLabelBtn:'인쇄',
+    noLocationForLabelToast:'라벨을 인쇄하기 전에 팔레트 위치를 먼저 설정하세요',
+    unsupportedLabelCharsToast:'위치 코드에 바코드로 표현할 수 없는 문자가 포함되어 있습니다'
   },
   jp:{
     roleIntro:'利用モードを選択してください',
@@ -2298,7 +2363,13 @@ const I18N={
     gpsReadFailedAlert:'GPS位置の読み取りに失敗しました：{msg}',
     gpsOriginNotSetAlert:'この店舗はまだGPS基準点が設定されていません。従業員に設定を依頼してください（地図編集中の「GPS基準点を設定」ボタン）',
     gpsLocateFailedAlert:'現在地の読み取りに失敗しました：{msg}',
-    syncSaveFailedRetryAlert:'中央データベースへの保存に失敗しました（この端末には保存済み）。インターネット接続を確認して再度お試しください'
+    syncSaveFailedRetryAlert:'中央データベースへの保存に失敗しました（この端末には保存済み）。インターネット接続を確認して再度お試しください',
+    printLocationLabelBtn:'位置バーコードラベルを印刷',
+    locLabelModalTitle:'パレット位置バーコードラベル',
+    locLabelSizeNote:'実寸 100 x 150 mm',
+    printLabelBtn:'印刷',
+    noLocationForLabelToast:'ラベルを印刷する前にパレットの位置を設定してください',
+    unsupportedLabelCharsToast:'位置コードにバーコード化できない文字が含まれています'
   }
 };
 let currentLang=(function(){ try{ return localStorage.getItem('mf_lang')||'th'; }catch(e){ return 'th'; } })();
@@ -3600,6 +3671,7 @@ function openPalletManager(){
   document.getElementById('palletOverlay').style.display='flex';
   document.getElementById('palletBackBtn').style.display='none';
   document.getElementById('palletRenameBtn').style.display='none';
+  document.getElementById('palletLocLabelBtn').style.display='none';
   document.getElementById('palletFindScanBtn').style.display='none';
   currentPallet=null;
   palletListFilterText='';
@@ -3616,6 +3688,7 @@ function palletGoBack(){
   currentPallet=null;
   document.getElementById('palletBackBtn').style.display='none';
   document.getElementById('palletRenameBtn').style.display='none';
+  document.getElementById('palletLocLabelBtn').style.display='none';
   document.getElementById('palletFindScanBtn').style.display='none';
   document.getElementById('palletHeaderTitle').textContent=t('grPalletMgmtName');
   document.getElementById('palletHeaderSub').textContent='';
@@ -3706,6 +3779,7 @@ function updatePalletHeader(pallet){
   const idLine=pallet.name?pallet.id+' · ':'';
   document.getElementById('palletHeaderSub').textContent=idLine+t('createdByLabel')+' '+(pallet.createdBy||'-')+' · '+new Date(pallet.createdAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
   document.getElementById('palletRenameBtn').style.display=isEmployee()?'block':'none';
+  document.getElementById('palletLocLabelBtn').style.display=(isEmployee()&&(pallet.loc||pallet.location))?'block':'none';
 }
 function renamePallet(){
   if(!currentPallet||!isEmployee())return;
@@ -3714,6 +3788,69 @@ function renamePallet(){
   currentPallet.name=name.trim();
   savePallet(currentPallet);
   updatePalletHeader(currentPallet);
+}
+// ==== ป้ายบาร์โค้ดตำแหน่งพาเลท (Code 39, ขนาดจริง 50x30 มม.) ====
+const CODE39_PATTERNS={
+  '0':'NNNWWNWNN','1':'WNNWNNNNW','2':'NNWWNNNNW','3':'WNWWNNNNN','4':'NNNWWNNNW',
+  '5':'WNNWWNNNN','6':'NNWWWNNNN','7':'NNNWNNWNW','8':'WNNWNNWNN','9':'NNWWNNWNN',
+  'A':'WNNNNWNNW','B':'NNWNNWNNW','C':'WNWNNWNNN','D':'NNNNWWNNW','E':'WNNNWWNNN',
+  'F':'NNWNWWNNN','G':'NNNNNWWNW','H':'WNNNNWWNN','I':'NNWNNWWNN','J':'NNNNWWWNN',
+  'K':'WNNNNNNWW','L':'NNWNNNNWW','M':'WNWNNNNWN','N':'NNNNWNNWW','O':'WNNNWNNWN',
+  'P':'NNWNWNNWN','Q':'NNNNNNWWW','R':'WNNNNNWWN','S':'NNWNNNWWN','T':'NNNNWNWWN',
+  'U':'WWNNNNNNW','V':'NWWNNNNNW','W':'WWWNNNNNN','X':'NWNNWNNNW','Y':'WWNNWNNNN',
+  'Z':'NWWNWNNNN','-':'NWNNNNWNW','.':'WWNNNNWNN',' ':'NWWNNNWNN','$':'NWNWNWNNN',
+  '/':'NWNWNNNWN','+':'NWNNNWNWN','%':'NNNWNWNWN','*':'NWNNWNWNN'
+};
+function code39Bars(text){
+  const chars=('*'+text.toUpperCase()+'*').split('');
+  const bars=[];
+  chars.forEach((ch,idx)=>{
+    const pattern=CODE39_PATTERNS[ch];
+    if(!pattern)throw new Error('unsupported char: '+ch);
+    for(let i=0;i<pattern.length;i++){ bars.push({isBar:i%2===0,wide:pattern[i]==='W'}); }
+    if(idx<chars.length-1){ bars.push({isBar:false,wide:false}); }
+  });
+  return bars;
+}
+function code39SVG(text,heightMm){
+  const wideRatio=2;
+  const bars=code39Bars(text);
+  let totalModules=0;
+  bars.forEach(b=>{ totalModules+=b.wide?wideRatio:1; });
+  let x=0,rects='';
+  bars.forEach(b=>{
+    const w=b.wide?wideRatio:1;
+    if(b.isBar){ rects+='<rect x="'+x.toFixed(3)+'" y="0" width="'+w.toFixed(3)+'" height="'+heightMm+'" fill="#000"/>'; }
+    x+=w;
+  });
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+totalModules.toFixed(3)+' '+heightMm+'" preserveAspectRatio="none">'+rects+'</svg>';
+}
+function buildLocLabelInnerHTML(code){
+  const svg=code39SVG(code,32);
+  return '<div class="loc-label-code">'+escapeHtml(code)+'</div><div class="loc-label-barcode">'+svg+'</div><div class="loc-label-human">*'+escapeHtml(code.toUpperCase())+'*</div>';
+}
+function openPalletLocLabel(){
+  if(!currentPallet||!isEmployee())return;
+  const code=(currentPallet.location||currentPallet.loc||'').trim();
+  if(!code){ showPalletToast(t('noLocationForLabelToast')); return; }
+  let html;
+  try{ html=buildLocLabelInnerHTML(code); }
+  catch(e){ showPalletToast(t('unsupportedLabelCharsToast')); return; }
+  document.getElementById('locLabelPreviewBox').innerHTML=html;
+  document.getElementById('locLabelPrintBox1').innerHTML=html;
+  document.getElementById('locLabelPrintBox2').innerHTML=html;
+  document.getElementById('palletLocLabelOverlay').style.display='flex';
+}
+function closePalletLocLabelOverlay(){
+  document.getElementById('palletLocLabelOverlay').style.display='none';
+}
+function printPalletLocLabel(){
+  const styleTag=document.createElement('style');
+  styleTag.textContent='@page{size:A4;margin:0}';
+  document.head.appendChild(styleTag);
+  const cleanup=()=>{ styleTag.remove(); window.removeEventListener('afterprint',cleanup); };
+  window.addEventListener('afterprint',cleanup);
+  window.print();
 }
 function editPalletLocation(){
   if(!currentPallet||!isEmployee())return;
@@ -3724,6 +3861,7 @@ function editPalletLocation(){
   currentPallet.loc=loc.trim();
   currentPallet.location=location.trim();
   savePallet(currentPallet);
+  updatePalletHeader(currentPallet);
   renderPalletDetailView(currentPallet);
 }
 function savePalletAndBack(){
@@ -3759,6 +3897,9 @@ function renderPalletDetailView(pallet){
   }
   const locText=(pallet.loc||pallet.location) ? (t('locLabel')+' '+escapeHtml(pallet.loc||'-')+' / '+t('locationLabel')+' '+escapeHtml(pallet.location||'-')) : t('palletLocationNotSet');
   html+='<div class="pallet-loc-box" style="margin-top:12px'+(canEdit?';cursor:pointer':'')+'"'+(canEdit?' onclick="editPalletLocation()"':'')+'><i class="ti ti-map-pin" aria-hidden="true"></i> '+t('palletLocatedAtPrefix')+' '+locText+(canEdit?' <i class="ti ti-pencil" aria-hidden="true" style="margin-left:auto"></i>':'')+'</div>';
+  if(canEdit&&(pallet.loc||pallet.location)){
+    html+='<div class="pallet-add-btn" style="margin-top:8px;background:#F3EEFF;color:#5B3FA3;border-style:solid;border-color:#C9B8F0" onclick="openPalletLocLabel()"><i class="ti ti-printer" aria-hidden="true"></i> '+t('printLocationLabelBtn')+'</div>';
+  }
   if(canEdit){
     html+='<div class="pallet-add-btn" style="margin-top:8px;background:#E3F6E8;color:#1D6B3F;border-style:solid;border-color:#9AD8AE" onclick="savePalletAndBack()"><i class="ti ti-device-floppy" aria-hidden="true"></i> '+t('savePalletBtn')+'</div>';
   }
@@ -3817,6 +3958,9 @@ function printPalletList(){
     html+='</div>';
   }
   area.innerHTML=html;
+  document.documentElement.classList.add('printing-pallet-list');
+  const cleanup=()=>{ document.documentElement.classList.remove('printing-pallet-list'); window.removeEventListener('afterprint',cleanup); };
+  window.addEventListener('afterprint',cleanup);
   window.print();
 }
 function buildPalletPrintCanvas(pallet,chunk,startNum,pageLabel){
