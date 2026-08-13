@@ -5936,14 +5936,12 @@ function renderDetail(item,fromList){
       ).join('')+
       '</div>'+
       '<div class="loc-group-row">'+
-      '<div class="loc-photo-box"><i class="ti ti-package" aria-hidden="true"></i></div>'+
       renderLocSignHTML(g.loc)+
       g.locations.map(loc=>
         renderLocationStickerHTML(loc,canEditLoc,canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')
       ).join('')+
       '</div>'
     ).join('');
-    rLoc.querySelectorAll('.loc-photo-box').forEach(box=>applyItemImage(box,item));
   } else {
     const canAddLoc=isEmployee();
     rLoc.innerHTML='<div class="loc-group-row">'+
