@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>Makro Finder - ค้นหาสินค้า Store 42</title>
+<title data-i18n="pageTitleTag">Makro Finder - ค้นหาสินค้า Store 42</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +37,7 @@ body{margin:0;padding:0;touch-action:manipulation}
 </style>
 </head>
 <body>
-<h2 class="sr-only">Makro Finder — แอปค้นหาสินค้าและดูแผนที่ภายใน Makro Store 42 สาขา Ramintra</h2>
+<h2 class="sr-only" data-i18n="srOnlyHeading">Makro Finder — แอปค้นหาสินค้าและดูแผนที่ภายใน Makro Store 42 สาขา Ramintra</h2>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 .frame{background:var(--color-background-secondary);min-height:100dvh;width:100%;display:flex;flex-direction:column}
@@ -568,7 +568,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="hdr">
     <div class="hdr-row">
       <div class="hdr-logo">
-        <button class="hdr-icon" onclick="switchRole()" title="กลับ" aria-label="กลับไปหน้าเลือกมุมมอง"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="hdr-icon" onclick="switchRole()" data-i18n-title="backBtnAria" title="กลับ" aria-label="กลับไปหน้าเลือกมุมมอง"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
         <div class="hdr-logo-badge">
           <img src="logo-makro-finder.png" alt="makro">
         </div>
@@ -608,8 +608,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div class="section-label" data-i18n="promoLabel">โปรโมชั่น</div>
       <div class="promo-carousel" id="promoCarousel" style="display:none">
         <div class="promo-track" id="promoTrack"></div>
-        <button class="promo-arrow left" onclick="event.stopPropagation();movePromo(-1)" aria-label="ก่อนหน้า"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
-        <button class="promo-arrow right" onclick="event.stopPropagation();movePromo(1)" aria-label="ถัดไป"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+        <button class="promo-arrow left" onclick="event.stopPropagation();movePromo(-1)" data-i18n-title="prevBtnAria" aria-label="ก่อนหน้า"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+        <button class="promo-arrow right" onclick="event.stopPropagation();movePromo(1)" data-i18n-title="nextBtnAria" aria-label="ถัดไป"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
       </div>
       <div class="promo-dots" id="promoDots" style="display:none"></div>
       <div class="promo-gallery-empty" id="promoEmptyMsg" style="display:none" data-i18n="promoEmpty">ยังไม่มีโปรโมชั่นในขณะนี้</div>
@@ -637,8 +637,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
               <span class="fb-photo-hint" data-i18n="feedbackPhotoHint">ไม่บังคับ ไม่แนบก็ส่งได้</span>
             </div>
             <div class="fb-photo-preview-wrap" id="fbPhotoPreviewWrap" style="display:none">
-              <img class="fb-photo-preview" id="fbPhotoPreview" alt="รูปที่แนบ">
-              <button class="fb-photo-remove" onclick="removeFbPhoto()" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
+              <img class="fb-photo-preview" id="fbPhotoPreview" data-i18n-alt="attachedPhotoAlt" alt="รูปที่แนบ">
+              <button class="fb-photo-remove" onclick="removeFbPhoto()" data-i18n-title="removePhotoAria" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
             </div>
             <button class="fb-submit" onclick="submitFeedback()" data-i18n="feedbackSubmit">ส่งความคิดเห็น</button>
             <p class="fb-thanks" id="fbThanks" style="display:none" data-i18n="feedbackThanks">ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ</p>
@@ -711,7 +711,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <i class="ti ti-mood-sad" aria-hidden="true"></i>
         <p id="nfText"></p>
         <p style="margin-top:6px;font-size:12px" data-i18n="tryOtherWord">ลองคำอื่น หรือถามพนักงาน</p>
-        <button id="notFoundAddItemBtn" class="pallet-open-btn yellow compact" style="display:none;margin-top:14px" onclick="openNewItemFromNotFound()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มสินค้าใหม่</button>
+        <button id="notFoundAddItemBtn" class="pallet-open-btn yellow compact" style="display:none;margin-top:14px" onclick="openNewItemFromNotFound()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addNewItemBtn">เพิ่มสินค้าใหม่</span></button>
       </div>
     </div>
 
@@ -721,7 +721,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 </div>
 
 <div class="promo-view-overlay" id="promoViewOverlay" onclick="closePromoViewer()">
-  <button class="map-overlay-close" onclick="closePromoViewer()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
+  <button class="map-overlay-close" onclick="closePromoViewer()" data-i18n-title="closeBtnAria" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
   <div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;align-items:center;max-width:100%;max-height:100%">
     <img id="promoViewImg">
     <div id="promoViewCaption" class="promo-view-caption"></div>
@@ -752,7 +752,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <label data-i18n="barcodeLabel">บาร์โค้ด</label>
     <div class="new-item-barcode-row">
       <input type="text" id="newItemBarcode" data-i18n-placeholder="barcodeOptionalPlaceholder" placeholder="บาร์โค้ด (ไม่บังคับ)">
-      <button type="button" class="new-item-scan-btn" onclick="openNewItemBarcodeScan()" aria-label="สแกนบาร์โค้ด"><i class="ti ti-scan" aria-hidden="true"></i></button>
+      <button type="button" class="new-item-scan-btn" onclick="openNewItemBarcodeScan()" data-i18n-title="scanBarcodeAria" aria-label="สแกนบาร์โค้ด"><i class="ti ti-scan" aria-hidden="true"></i></button>
     </div>
     <label>Loc</label>
     <input type="text" id="newItemLoc" data-i18n-placeholder="locOptionalPlaceholder" placeholder="เช่น 025 (ไม่บังคับ)">
@@ -762,8 +762,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <label class="new-item-photo-btn" for="newItemPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> <span data-i18n="takeAttachPhotoBtn">ถ่าย/แนบรูปสินค้า</span></label>
     <input type="file" id="newItemPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleNewItemPhotoSelect(event)">
     <div class="new-item-photo-preview-wrap" id="newItemPhotoPreviewWrap" style="display:none">
-      <img id="newItemPhotoPreview" alt="รูปสินค้า">
-      <button type="button" class="new-item-photo-remove" onclick="removeNewItemPhoto()" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
+      <img id="newItemPhotoPreview" data-i18n-alt="productPhotoAlt" alt="รูปสินค้า">
+      <button type="button" class="new-item-photo-remove" onclick="removeNewItemPhoto()" data-i18n-title="removePhotoAria" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
     <div class="promo-date-actions">
       <button class="promo-date-cancel" onclick="closeNewItemForm()" data-i18n="cancelBtn">ยกเลิก</button>
@@ -781,8 +781,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <label class="new-item-photo-btn" for="editProdPhotoInput"><i class="ti ti-camera" aria-hidden="true"></i> <span data-i18n="changePhotoBtn">เปลี่ยนรูปสินค้า</span></label>
     <input type="file" id="editProdPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleEditProdPhotoSelect(event)">
     <div class="new-item-photo-preview-wrap" id="editProdPhotoPreviewWrap" style="display:none">
-      <img id="editProdPhotoPreview" alt="รูปสินค้า">
-      <button type="button" class="new-item-photo-remove" onclick="removeEditProdPhoto()" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
+      <img id="editProdPhotoPreview" data-i18n-alt="productPhotoAlt" alt="รูปสินค้า">
+      <button type="button" class="new-item-photo-remove" onclick="removeEditProdPhoto()" data-i18n-title="removePhotoAria" aria-label="ลบรูป"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
     <div class="promo-date-actions">
       <button class="promo-date-cancel" onclick="closeEditProductModal()" data-i18n="cancelBtn">ยกเลิก</button>
@@ -792,7 +792,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <label style="color:#A32D2D" data-i18n="deleteProductSectionLabel">ลบสินค้านี้ออกจากระบบ (ต้องใส่รหัส PIN พนักงาน)</label>
       <div class="new-item-barcode-row">
         <input type="password" id="editProdDeletePin" data-i18n-placeholder="pin4DigitsPlaceholder" placeholder="รหัส PIN 4 หลัก" maxlength="4">
-        <button type="button" class="new-item-scan-btn" style="background:#FFF0F1;color:#A32D2D;border-color:#F09595" onclick="confirmDeleteProduct()" aria-label="ลบสินค้า"><i class="ti ti-trash" aria-hidden="true"></i></button>
+        <button type="button" class="new-item-scan-btn" style="background:#FFF0F1;color:#A32D2D;border-color:#F09595" onclick="confirmDeleteProduct()" data-i18n-title="deleteProductAria" aria-label="ลบสินค้า"><i class="ti ti-trash" aria-hidden="true"></i></button>
       </div>
     </div>
   </div>
@@ -804,7 +804,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <label data-i18n="targetPalletLabel">เลขพาเลทปลายทาง</label>
     <div class="new-item-barcode-row">
       <input type="text" id="movePalletTarget" data-i18n-placeholder="targetPalletPlaceholder" placeholder="พิมพ์เลขพาเลท หรือสแกน">
-      <button type="button" class="new-item-scan-btn" onclick="openMovePalletScan()" aria-label="สแกนเลขพาเลท"><i class="ti ti-scan" aria-hidden="true"></i></button>
+      <button type="button" class="new-item-scan-btn" onclick="openMovePalletScan()" data-i18n-title="scanPalletNoAria" aria-label="สแกนเลขพาเลท"><i class="ti ti-scan" aria-hidden="true"></i></button>
     </div>
     <div class="promo-date-actions">
       <button class="promo-date-cancel" onclick="closeMovePalletPrompt()" data-i18n="cancelBtn">ยกเลิก</button>
@@ -838,12 +838,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 </div>
 
 <div class="map-overlay" id="mapOverlay" onclick="closeMapFullscreen()">
-  <button class="map-overlay-close" onclick="closeMapFullscreen()" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
+  <button class="map-overlay-close" onclick="closeMapFullscreen()" data-i18n-title="closeBtnAria" aria-label="ปิด"><i class="ti ti-x" aria-hidden="true"></i></button>
   <div class="map-overlay-content" id="mapOverlayContent" onclick="event.stopPropagation()"></div>
   <div class="map-rotate-bar" id="mapRotateBar" onclick="event.stopPropagation()">
-    <button class="map-rotate-btn" onclick="rotateMapBy(-15)" aria-label="หมุนซ้าย"><i class="ti ti-rotate-2" aria-hidden="true" style="transform:scaleX(-1);display:inline-block"></i></button>
+    <button class="map-rotate-btn" onclick="rotateMapBy(-15)" data-i18n-title="rotateLeftAria" aria-label="หมุนซ้าย"><i class="ti ti-rotate-2" aria-hidden="true" style="transform:scaleX(-1);display:inline-block"></i></button>
     <input type="range" id="mapRotationSlider" min="0" max="360" value="25" oninput="onMapRotationSlider(this.value)">
-    <button class="map-rotate-btn" onclick="rotateMapBy(15)" aria-label="หมุนขวา"><i class="ti ti-rotate-clockwise-2" aria-hidden="true"></i></button>
+    <button class="map-rotate-btn" onclick="rotateMapBy(15)" data-i18n-title="rotateRightAria" aria-label="หมุนขวา"><i class="ti ti-rotate-clockwise-2" aria-hidden="true"></i></button>
     <span class="map-rotate-value" id="mapRotationValue">25°</span>
     <button class="map-rotate-reset" onclick="resetMapRotation()" data-i18n="resetViewBtn">รีเซ็ตมุมมอง</button>
     <button class="map-rotate-reset" id="liveGpsBtn" onclick="toggleLiveGps()"><i class="ti ti-current-location" aria-hidden="true"></i> <span data-i18n="showMyLocation">แสดงตำแหน่งฉัน</span></button>
@@ -917,7 +917,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="scan-box">
     <div class="scan-header">
       <span data-i18n="scanQrModalTitle">สแกน QR โค้ดสินค้า</span>
-      <i class="ti ti-x" onclick="closeScanner()" aria-label="ปิด"></i>
+      <i class="ti ti-x" onclick="closeScanner()" data-i18n-title="closeBtnAria" aria-label="ปิด"></i>
     </div>
     <div class="scan-video-wrap">
       <video id="scanVideo" playsinline autoplay muted></video>
@@ -1197,7 +1197,38 @@ const I18N={
     unsupportedLabelCharsToast:'รหัสตำแหน่งมีอักขระที่พิมพ์บาร์โค้ดไม่ได้',
     lineAndroidPrintNotice:'การพิมพ์ผ่านแอป LINE บน Android มักไม่รองรับ กรุณาเปิดในเบราว์เซอร์ (Chrome) แทน',
     palletNumberLabelBtn:'เลขพาเลท',
-    translatedNameLabel:'ชื่อสินค้า (แปล)'
+    translatedNameLabel:'ชื่อสินค้า (แปล)',
+    mapAriaLabel:'ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042 แบบ 3 มิติ',
+    addNewItemBtn:'เพิ่มสินค้าใหม่',
+    backBtnAria:'กลับไปหน้าเลือกมุมมอง',
+    prevBtnAria:'ก่อนหน้า',
+    nextBtnAria:'ถัดไป',
+    attachedPhotoAlt:'รูปที่แนบ',
+    removePhotoAria:'ลบรูป',
+    closeBtnAria:'ปิด',
+    scanBarcodeAria:'สแกนบาร์โค้ด',
+    productPhotoAlt:'รูปสินค้า',
+    deleteProductAria:'ลบสินค้า',
+    scanPalletNoAria:'สแกนเลขพาเลท',
+    rotateLeftAria:'หมุนซ้าย',
+    rotateRightAria:'หมุนขวา',
+    pageTitleTag:'Makro Finder - ค้นหาสินค้า Store 42',
+    srOnlyHeading:'Makro Finder — แอปค้นหาสินค้าและดูแผนที่ภายใน Makro Store 42 สาขา Ramintra',
+    promoUnspecifiedPeriod:'ไม่ระบุช่วงเวลา',
+    promoUntilPrefix:'ถึง',
+    promoExpiresTodayLabel:'โปรโมชั่น หมดวันนี้',
+    promoExpiresInDaysTemplate:'โปรโมชั่น จะหมดอีกใน {days} วัน',
+    promoLabelGeneric:'โปรโมชั่น',
+    promoByPrefix:'โดย',
+    unknownNameFallback:'ไม่ทราบ',
+    deletePromoConfirmMsg:'ลบโปรโมชั่นนี้ทิ้งใช่หรือไม่?',
+    fileReadErrorTemplate:'ไม่สามารถอ่านไฟล์ "{filename}" ได้ กรุณาลองไฟล์อื่น',
+    pdfLoaderUnavailableAlert:'ไม่สามารถโหลดตัวอ่านไฟล์ PDF ได้ กรุณาตรวจสอบอินเทอร์เน็ต',
+    shelfTierPrompt:'อยู่ชั้นที่ (นับจากบนลงล่าง) เช่น 1, 2, 3:',
+    fbDateColLabel:'วันที่',
+    fbTimeColLabel:'เวลา',
+    fbTextColLabel:'ข้อเสนอแนะ / ความคิดเห็น',
+    fbSheetName:'ข้อเสนอแนะ'
   },
   en:{
     roleIntro:'Please choose how you want to use the app',
@@ -1436,7 +1467,38 @@ const I18N={
     unsupportedLabelCharsToast:'The location code contains characters that cannot be barcoded',
     lineAndroidPrintNotice:'Printing inside the LINE app on Android usually is not supported. Please open this page in your browser (Chrome) instead.',
     palletNumberLabelBtn:'Pallet No.',
-    translatedNameLabel:'Product name (translated)'
+    translatedNameLabel:'Product name (translated)',
+    mapAriaLabel:'Makro Ramintra St.042 store map by department, in 3D',
+    addNewItemBtn:'Add new item',
+    backBtnAria:'Back to view selection',
+    prevBtnAria:'Previous',
+    nextBtnAria:'Next',
+    attachedPhotoAlt:'Attached photo',
+    removePhotoAria:'Remove photo',
+    closeBtnAria:'Close',
+    scanBarcodeAria:'Scan barcode',
+    productPhotoAlt:'Product photo',
+    deleteProductAria:'Delete product',
+    scanPalletNoAria:'Scan pallet number',
+    rotateLeftAria:'Rotate left',
+    rotateRightAria:'Rotate right',
+    pageTitleTag:'Makro Finder - Product Search Store 42',
+    srOnlyHeading:'Makro Finder — a product search and in-store map app for Makro Store 42, Ramintra branch',
+    promoUnspecifiedPeriod:'Period not specified',
+    promoUntilPrefix:'Until',
+    promoExpiresTodayLabel:'Promotion ends today',
+    promoExpiresInDaysTemplate:'Promotion ends in {days} days',
+    promoLabelGeneric:'Promotion',
+    promoByPrefix:'By',
+    unknownNameFallback:'Unknown',
+    deletePromoConfirmMsg:'Delete this promotion?',
+    fileReadErrorTemplate:'Could not read the file "{filename}". Please try a different file.',
+    pdfLoaderUnavailableAlert:'Could not load the PDF reader. Please check your internet connection.',
+    shelfTierPrompt:'Shelf tier (counted top to bottom), e.g. 1, 2, 3:',
+    fbDateColLabel:'Date',
+    fbTimeColLabel:'Time',
+    fbTextColLabel:'Feedback / Comments',
+    fbSheetName:'Feedback'
   },
   cn:{
     roleIntro:'请选择使用模式',
@@ -1675,7 +1737,38 @@ const I18N={
     unsupportedLabelCharsToast:'位置代码包含无法生成条码的字符',
     lineAndroidPrintNotice:'在 Android 的 LINE 应用内通常无法打印，请改用浏览器（Chrome）打开此页面',
     palletNumberLabelBtn:'托盘编号',
-    translatedNameLabel:'商品名称（翻译）'
+    translatedNameLabel:'商品名称（翻译）',
+    mapAriaLabel:'万客隆兰印塔 St.042 门店按部门划分的3D地图',
+    addNewItemBtn:'新增商品',
+    backBtnAria:'返回选择视角页面',
+    prevBtnAria:'上一个',
+    nextBtnAria:'下一个',
+    attachedPhotoAlt:'附加图片',
+    removePhotoAria:'删除图片',
+    closeBtnAria:'关闭',
+    scanBarcodeAria:'扫描条码',
+    productPhotoAlt:'商品图片',
+    deleteProductAria:'删除商品',
+    scanPalletNoAria:'扫描托盘编号',
+    rotateLeftAria:'向左旋转',
+    rotateRightAria:'向右旋转',
+    pageTitleTag:'Makro Finder - 商品搜索 Store 42',
+    srOnlyHeading:'Makro Finder — 万客隆 Store 42 Ramintra 分店的商品搜索与店内地图应用',
+    promoUnspecifiedPeriod:'未指定时间段',
+    promoUntilPrefix:'至',
+    promoExpiresTodayLabel:'促销今日截止',
+    promoExpiresInDaysTemplate:'促销将在 {days} 天后结束',
+    promoLabelGeneric:'促销',
+    promoByPrefix:'由',
+    unknownNameFallback:'未知',
+    deletePromoConfirmMsg:'确定要删除此促销吗？',
+    fileReadErrorTemplate:'无法读取文件 "{filename}"，请尝试其他文件',
+    pdfLoaderUnavailableAlert:'无法加载 PDF 阅读器，请检查网络连接',
+    shelfTierPrompt:'所在层数（从上往下数），例如 1、2、3：',
+    fbDateColLabel:'日期',
+    fbTimeColLabel:'时间',
+    fbTextColLabel:'反馈 / 意见',
+    fbSheetName:'反馈'
   },
   mm:{
     roleIntro:'အသုံးပြုမည့်မုဒ်ကို ရွေးချယ်ပါ',
@@ -1914,7 +2007,38 @@ const I18N={
     unsupportedLabelCharsToast:'တည်နေရာကုဒ်တွင် ဘားကုဒ်ပြုလုပ်၍မရသော အက္ခရာများပါရှိသည်',
     lineAndroidPrintNotice:'Android ပေါ်ရှိ LINE အက်ပ်တွင်း ပုံနှိပ်ခြင်းကို များသောအားဖြင့် မထောက်ပံ့ပါ ကျေးဇူးပြု၍ ဤစာမျက်နှာကို browser (Chrome) တွင် ဖွင့်ပါ',
     palletNumberLabelBtn:'ပလက်ဖောင်းနံပါတ်',
-    translatedNameLabel:'ကုန်ပစ္စည်းအမည် (ဘာသာပြန်)'
+    translatedNameLabel:'ကုန်ပစ္စည်းအမည် (ဘာသာပြန်)',
+    mapAriaLabel:'Makro Ramintra St.042 ဆိုင်ရဲ့ ဌာနအလိုက် 3D မြေပုံ',
+    addNewItemBtn:'ပစ္စည်းအသစ်ထည့်ရန်',
+    backBtnAria:'ရှုထောင့်ရွေးချယ်မှုသို့ ပြန်သွားရန်',
+    prevBtnAria:'ယခင်',
+    nextBtnAria:'နောက်',
+    attachedPhotoAlt:'ပူးတွဲပုံ',
+    removePhotoAria:'ပုံဖျက်ရန်',
+    closeBtnAria:'ပိတ်ရန်',
+    scanBarcodeAria:'ဘားကုဒ်စကန်ဖတ်ရန်',
+    productPhotoAlt:'ကုန်ပစ္စည်းပုံ',
+    deleteProductAria:'ကုန်ပစ္စည်းဖျက်ရန်',
+    scanPalletNoAria:'ပလက်ဖောင်းနံပါတ် စကန်ဖတ်ရန်',
+    rotateLeftAria:'ဘယ်ဘက်လှည့်ရန်',
+    rotateRightAria:'ညာဘက်လှည့်ရန်',
+    pageTitleTag:'Makro Finder - ကုန်ပစ္စည်းရှာဖွေရန် Store 42',
+    srOnlyHeading:'Makro Finder — Makro Store 42 Ramintra ဆိုင်ခွဲအတွက် ကုန်ပစ္စည်းရှာဖွေရေးနှင့် ဆိုင်တွင်းမြေပုံ အက်ပ်',
+    promoUnspecifiedPeriod:'အချိန်ကာလ မသတ်မှတ်ရသေးပါ',
+    promoUntilPrefix:'အထိ',
+    promoExpiresTodayLabel:'ပရိုမိုးရှင်း ယနေ့ကုန်ဆုံးမည်',
+    promoExpiresInDaysTemplate:'ပရိုမိုးရှင်း {days} ရက်အတွင်း ကုန်ဆုံးမည်',
+    promoLabelGeneric:'ပရိုမိုးရှင်း',
+    promoByPrefix:'မှ',
+    unknownNameFallback:'မသိပါ',
+    deletePromoConfirmMsg:'ဤပရိုမိုးရှင်းကို ဖျက်မှာ သေချာပါသလား?',
+    fileReadErrorTemplate:'ဖိုင် "{filename}" ကို ဖတ်၍မရပါ အခြားဖိုင်တစ်ခုကို ကြိုးစားကြည့်ပါ',
+    pdfLoaderUnavailableAlert:'PDF ဖတ်ရှုစနစ်ကို တင်၍မရပါ အင်တာနက်ကို စစ်ဆေးပါ',
+    shelfTierPrompt:'အပေါ်မှအောက်သို့ရေတွက်၍ ဆိုင်ရာအထပ် ဥပမာ 1, 2, 3:',
+    fbDateColLabel:'ရက်စွဲ',
+    fbTimeColLabel:'အချိန်',
+    fbTextColLabel:'အကြံပြုချက် / မှတ်ချက်',
+    fbSheetName:'အကြံပြုချက်'
   },
   kr:{
     roleIntro:'사용 모드를 선택해 주세요',
@@ -2153,7 +2277,38 @@ const I18N={
     unsupportedLabelCharsToast:'위치 코드에 바코드로 표현할 수 없는 문자가 포함되어 있습니다',
     lineAndroidPrintNotice:'Android의 LINE 앱 내에서는 인쇄가 지원되지 않는 경우가 많습니다. 브라우저(Chrome)에서 이 페이지를 열어주세요',
     palletNumberLabelBtn:'팔레트 번호',
-    translatedNameLabel:'상품명 (번역)'
+    translatedNameLabel:'상품명 (번역)',
+    mapAriaLabel:'Makro 라민트라 St.042 매장 부서별 3D 지도',
+    addNewItemBtn:'새 상품 추가',
+    backBtnAria:'보기 선택 화면으로 돌아가기',
+    prevBtnAria:'이전',
+    nextBtnAria:'다음',
+    attachedPhotoAlt:'첨부된 사진',
+    removePhotoAria:'사진 삭제',
+    closeBtnAria:'닫기',
+    scanBarcodeAria:'바코드 스캔',
+    productPhotoAlt:'상품 사진',
+    deleteProductAria:'상품 삭제',
+    scanPalletNoAria:'팔레트 번호 스캔',
+    rotateLeftAria:'왼쪽으로 회전',
+    rotateRightAria:'오른쪽으로 회전',
+    pageTitleTag:'Makro Finder - 상품 검색 Store 42',
+    srOnlyHeading:'Makro Finder — Makro Store 42 라민트라 지점의 상품 검색 및 매장 지도 앱',
+    promoUnspecifiedPeriod:'기간 미지정',
+    promoUntilPrefix:'까지',
+    promoExpiresTodayLabel:'프로모션 오늘 종료',
+    promoExpiresInDaysTemplate:'프로모션이 {days}일 후 종료됩니다',
+    promoLabelGeneric:'프로모션',
+    promoByPrefix:'작성자',
+    unknownNameFallback:'알 수 없음',
+    deletePromoConfirmMsg:'이 프로모션을 삭제하시겠습니까?',
+    fileReadErrorTemplate:'파일 "{filename}"을(를) 읽을 수 없습니다. 다른 파일을 시도해주세요',
+    pdfLoaderUnavailableAlert:'PDF 리더를 불러올 수 없습니다. 인터넷 연결을 확인해주세요',
+    shelfTierPrompt:'선반 단수 (위에서부터 세어서), 예: 1, 2, 3:',
+    fbDateColLabel:'날짜',
+    fbTimeColLabel:'시간',
+    fbTextColLabel:'피드백 / 의견',
+    fbSheetName:'피드백'
   },
   jp:{
     roleIntro:'利用モードを選択してください',
@@ -2392,7 +2547,38 @@ const I18N={
     unsupportedLabelCharsToast:'位置コードにバーコード化できない文字が含まれています',
     lineAndroidPrintNotice:'Android版LINEアプリ内では印刷が利用できない場合があります。ブラウザ（Chrome）でこのページを開いてください',
     palletNumberLabelBtn:'パレット番号',
-    translatedNameLabel:'商品名（翻訳）'
+    translatedNameLabel:'商品名（翻訳）',
+    mapAriaLabel:'Makro ラミントラ St.042 店舗の部門別3Dマップ',
+    addNewItemBtn:'新しい商品を追加',
+    backBtnAria:'表示選択画面に戻る',
+    prevBtnAria:'前へ',
+    nextBtnAria:'次へ',
+    attachedPhotoAlt:'添付写真',
+    removePhotoAria:'写真を削除',
+    closeBtnAria:'閉じる',
+    scanBarcodeAria:'バーコードをスキャン',
+    productPhotoAlt:'商品写真',
+    deleteProductAria:'商品を削除',
+    scanPalletNoAria:'パレット番号をスキャン',
+    rotateLeftAria:'左に回転',
+    rotateRightAria:'右に回転',
+    pageTitleTag:'Makro Finder - 商品検索 Store 42',
+    srOnlyHeading:'Makro Finder — Makro Store 42 ラミントラ店の商品検索・店内マップアプリ',
+    promoUnspecifiedPeriod:'期間未指定',
+    promoUntilPrefix:'まで',
+    promoExpiresTodayLabel:'プロモーション本日終了',
+    promoExpiresInDaysTemplate:'プロモーションは残り{days}日で終了します',
+    promoLabelGeneric:'プロモーション',
+    promoByPrefix:'投稿者',
+    unknownNameFallback:'不明',
+    deletePromoConfirmMsg:'このプロモーションを削除しますか？',
+    fileReadErrorTemplate:'ファイル「{filename}」を読み込めませんでした。別のファイルをお試しください',
+    pdfLoaderUnavailableAlert:'PDFリーダーを読み込めませんでした。インターネット接続を確認してください',
+    shelfTierPrompt:'棚の段数（上から数えて）例: 1, 2, 3:',
+    fbDateColLabel:'日付',
+    fbTimeColLabel:'時間',
+    fbTextColLabel:'フィードバック・コメント',
+    fbSheetName:'フィードバック'
   }
 };
 let currentLang=(function(){ try{ return localStorage.getItem('mf_lang')||'th'; }catch(e){ return 'th'; } })();
@@ -2426,6 +2612,8 @@ function refreshCurrentViewForLangChange(){
       else if(q&&q.trim()){ search(q); }
     }
     if(typeof renderPromoGallery==='function') renderPromoGallery();
+    if(typeof refreshInlineMap==='function') refreshInlineMap();
+    if(typeof rerenderMapEditorSVG==='function') rerenderMapEditorSVG();
   }catch(e){}
 }
 let pendingCategoryKeyForLang=null;
@@ -2525,8 +2713,37 @@ const DEFAULT_MAP_BLOCKS=[
   generateAisleGroup('nonfood_',400,350,974,553,1,25,'#E7E4F8','#5749A0',84)
 );
 const MAP_ZONE_LABELS={
-  dryfood_:{main:'Dry Food',sub:'Loc. 29-44',color:'#99406B',subColor:'#C36B96'},
-  nonfood_:{main:'Non-Food',sub:'Loc. 1-25',color:'#5749A0',subColor:'#8B80C8'}
+  dryfood_:{main:{th:'Dry Food',en:'Dry Food',cn:'干货食品',mm:'အခြောက်စာ',kr:'건조식품',jp:'乾物'},sub:'Loc. 29-44',color:'#99406B',subColor:'#C36B96'},
+  nonfood_:{main:{th:'Non-Food',en:'Non-Food',cn:'非食品',mm:'အစားအသောက်မဟုတ်သော',kr:'비식품',jp:'非食品'},sub:'Loc. 1-25',color:'#5749A0',subColor:'#8B80C8'}
+};
+// แปลชื่อโซนแผนที่หลักตามภาษาที่เลือก (ค่าเดิมในบล็อกยังเป็นภาษาไทย/อังกฤษเสมอ ใช้เป็นค่าเริ่มต้น/ข้อมูลดิบตอนแก้ไข)
+const MAP_ZONE_LABELS_I18N={
+  butchery:{th:'เนื้อสัตว์และแช่แข็ง',en:'Butchery & Frozen',cn:'肉类及冷冻食品',mm:'အသားနှင့် အေးခဲ',kr:'육류 및 냉동식품',jp:'精肉・冷凍食品'},
+  snack:{th:'ขนม',en:'Snack',cn:'零食',mm:'သကြားလုံး',kr:'스낵',jp:'スナック'},
+  winebeer:{th:'ไวน์/เบียร์',en:'Wine & Beer',cn:'葡萄酒/啤酒',mm:'ဝိုင်/ဘီယာ',kr:'와인/맥주',jp:'ワイン・ビール'},
+  drink:{th:'เครื่องดื่ม',en:'Drink',cn:'饮料',mm:'သောက်စရာ',kr:'음료',jp:'飲み物'},
+  fishseafood:{th:'ปลา/อาหารทะเล',en:'Fish & Seafood',cn:'鱼类/海鲜',mm:'ငါးနှင့် ပင်လယ်စာ',kr:'생선/해산물',jp:'魚・シーフード'},
+  grilledchicken:{th:'ไก่ย่าง',en:'Grilled Chicken',cn:'烤鸡',mm:'ကြက်ကင်',kr:'통닭구이',jp:'焼き鳥'},
+  condiments:{th:'เครื่องเทศ',en:'Condiments / Spices',cn:'调味品/香料',mm:'ဟင်းခတ်အမွှေးအကြိုင်',kr:'조미료/향신료',jp:'調味料・香辛料'},
+  fruitveg:{th:'ผัก-ผลไม้',en:'Fruit & Veg',cn:'蔬果',mm:'ဟင်းသီးဟင်းရွက်နှင့် သစ်သီး',kr:'과일/채소',jp:'野菜・果物'},
+  o2o:{th:'แผนกออนไลน์',en:'Online Dept.',cn:'线上部门',mm:'အွန်လိုင်းဌာန',kr:'온라인 부서',jp:'オンライン部門'},
+  bakery:{th:'เบเกอรี่',en:'Bakery',cn:'烘焙坊',mm:'မုန့်ဖုတ်ဆိုင်',kr:'베이커리',jp:'ベーカリー'},
+  infopoint:{th:'จุดประชาสัมพันธ์',en:'Information',cn:'服务台',mm:'အချက်အလက်ရယူရန်နေရာ',kr:'안내소',jp:'案内所'},
+  cashier:{th:'แคชเชียร์',en:'Cashier',cn:'收银台',mm:'ငွေရှင်းကောင်တာ',kr:'계산대',jp:'レジ'},
+  icecream:{th:'ไอศกรีม',en:'Ice Cream',cn:'冰淇淋',mm:'အိုက်စကရင်',kr:'아이스크림',jp:'アイスクリーム'},
+  premium:{th:'จุดของแถม',en:'Premium',cn:'赠品专区',mm:'လက်ဆောင်ပစ္စည်းနေရာ',kr:'사은품 코너',jp:'景品コーナー'}
+};
+const MAP_ENTRANCE_EXIT_I18N={
+  th:['ทางเข้า · IN','ทางออก · OUT'],
+  en:['Entrance · IN','Exit · OUT'],
+  cn:['入口 · IN','出口 · OUT'],
+  mm:['ဝင်ပေါက် · IN','ထွက်ပေါက် · OUT'],
+  kr:['입구 · IN','출구 · OUT'],
+  jp:['入口 · IN','出口 · OUT']
+};
+const PRODUCE_ROW_LABELS_I18N={
+  importedFruit:{th:'ผลไม้นำเข้า',en:'Imported Fruit',cn:'进口水果',mm:'တင်သွင်းသစ်သီး',kr:'수입 과일',jp:'輸入フルーツ'},
+  freshVeg:{th:'ผักสด',en:'Fresh Veg',cn:'新鲜蔬菜',mm:'လတ်ဆတ်သောဟင်းသီးဟင်းရွက်',kr:'신선 채소',jp:'新鮮野菜'}
 };
 
 let currentMapBlocks=JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
@@ -2789,11 +3006,12 @@ function bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en){
 function produceStall(x0,y0,x1,y1,rot,tint,H,th,en){
   const parts=[];
   const crateGreen='#2E7D4A', crateGreenL='#4FA167', crateRib='#1F5C36';
+  const importedFruitI18n=PRODUCE_ROW_LABELS_I18N.importedFruit, freshVegI18n=PRODUCE_ROW_LABELS_I18N.freshVeg;
   const rows=[
-    {th:'ผลไม้นำเข้า', en:'Imported Fruit', palette:[
+    {th:importedFruitI18n[currentLang]||importedFruitI18n.th, en:(currentLang==='th')?importedFruitI18n.en:importedFruitI18n.th, palette:[
       {c:'#E8912E',shade:'#C06E12'},{c:'#D9463A',shade:'#B22E22'},{c:'#E8DA6A',shade:'#C2B23E'}
     ]},
-    {th:'ผักสด', en:'Fresh Veg', palette:[
+    {th:freshVegI18n[currentLang]||freshVegI18n.th, en:(currentLang==='th')?freshVegI18n.en:freshVegI18n.th, palette:[
       {c:'#EDEDE0',shade:'#C9C9B4'},{c:'#CFE8B0',shade:'#9FC97A'},{c:'#4FA85A',shade:'#357040'}
     ]}
   ];
@@ -2967,8 +3185,19 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   const H=isHighlighted ? baseH*1.2 : baseH;
   const x0=b.x,y0=b.y,x1=b.x+b.w,y1=b.y+b.h;
   const tint=b.fill;
-  const th=(b.lines&&b.lines[0]&&b.lines[0].text)||'';
-  const en=(b.lines&&b.lines[1]&&b.lines[1].text)||'';
+  const rawTh=(b.lines&&b.lines[0]&&b.lines[0].text)||'';
+  const rawEn=(b.lines&&b.lines[1]&&b.lines[1].text)||'';
+  const zoneI18n=MAP_ZONE_LABELS_I18N[b.id];
+  let th=rawTh, en=rawEn;
+  if(zoneI18n){
+    if(b.id==='o2o'){
+      // o2o: line0 "O2O" is a fixed universal acronym, line1 "แผนกออนไลน์" is the translatable part
+      en=(currentLang==='th')?rawEn:(zoneI18n[currentLang]||zoneI18n.th);
+    } else {
+      th=zoneI18n[currentLang]||zoneI18n.th;
+      en=(currentLang==='th')?rawEn:zoneI18n.th;
+    }
+  }
   const skin=getBlockSkin(b);
   let skinMarkup;
   if(skin.type==='freezer') skinMarkup=freezerCase(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
@@ -3043,8 +3272,9 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     const minX=Math.min(...group.map(b=>b.x)), maxX=Math.max(...group.map(b=>b.x+b.w));
     const minY=Math.min(...group.map(b=>b.y)), maxH=Math.max(...group.map(b=>b.height||54));
     const info=MAP_ZONE_LABELS[prefix];
+    const mainText=info.main[currentLang]||info.main.th;
     const p=isoProject((minX+maxX)/2, minY+22, maxH, rot);
-    return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="'+MAP_MAIN_SIZE+'" font-weight="800" letter-spacing="0.4" fill="'+info.color+'">'+escapeHtml(info.main)+'</text>'+
+    return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="'+MAP_MAIN_SIZE+'" font-weight="800" letter-spacing="0.4" fill="'+info.color+'">'+escapeHtml(mainText)+'</text>'+
       '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+17).toFixed(1)+'" text-anchor="middle" font-size="'+MAP_SUB_SIZE+'" font-weight="600" letter-spacing="0.4" fill="'+info.subColor+'">'+escapeHtml(info.sub)+'</text>';
   }).join('');
 
@@ -3063,12 +3293,13 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
   const pad=26;
   const vbX=minX-pad, vbY=minY-pad, vbW=(maxX-minX)+pad*2, vbH=(maxY-minY)+pad*2+18;
 
-  return '<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042 แบบ 3 มิติ">'+
+  const doorLabels=MAP_ENTRANCE_EXIT_I18N[currentLang]||MAP_ENTRANCE_EXIT_I18N.th;
+  return '<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+escapeHtml(t('mapAriaLabel'))+'">'+
     '<polygon points="'+polyPts(floorTop)+'" fill="'+currentMapBgColor+'"/>'+
     wallsMarkup+
     '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+zoneLabels+'</g>'+
-    glassDoor(entrance,'ทางเข้า · IN','#3FAE6E')+
-    glassDoor(exit,'ทางออก · OUT','#FF6B4A')+
+    glassDoor(entrance,doorLabels[0],'#3FAE6E')+
+    glassDoor(exit,doorLabels[1],'#FF6B4A')+
     '</svg>';
 }
 
@@ -3291,7 +3522,7 @@ function editItemShelf(itemNo){
   if(!isEmployee())return;
   const item=getItemByNo(itemNo);
   if(!item)return;
-  const val=prompt('อยู่ชั้นที่ (นับจากบนลงล่าง) เช่น 1, 2, 3:',item.shelf||'');
+  const val=prompt(t('shelfTierPrompt'),item.shelf||'');
   if(val===null)return;
   const trimmed=val.trim();
   if(!ITEM_OVERRIDES[itemNo])ITEM_OVERRIDES[itemNo]={};
@@ -3354,8 +3585,8 @@ async function loadAllPromoItems(){
 function promoCountdownLabel(expiresAt){
   const diffMs=expiresAt-Date.now();
   const days=Math.ceil(diffMs/86400000);
-  if(days<=1) return 'โปรโมชั่น หมดวันนี้';
-  return 'โปรโมชั่น จะหมดอีกใน '+days+' วัน';
+  if(days<=1) return t('promoExpiresTodayLabel');
+  return t('promoExpiresInDaysTemplate',{days:days});
 }
 let promoCarouselIndex=0;
 let promoAutoTimer=null;
@@ -3382,14 +3613,14 @@ function renderPromoGallery(){
   document.querySelectorAll('.promo-arrow').forEach(a=>a.style.display=multi?'flex':'none');
   track.innerHTML=PROMO_GALLERY_CACHE.map(p=>{
     const soon=p.expiresAt&&(p.expiresAt-Date.now())<=2*86400000;
-    const badgeText=p.expiresAt?promoCountdownLabel(p.expiresAt):'โปรโมชั่น';
+    const badgeText=p.expiresAt?promoCountdownLabel(p.expiresAt):t('promoLabelGeneric');
     return '<div class="promo-slide" onclick="openPromoViewer('+jsStr(p.id)+')">'+
-      '<img src="'+p.image+'" alt="โปรโมชั่น" loading="lazy" draggable="false" onload="promoMatchBg(this)">'+
+      '<img src="'+p.image+'" alt="'+escapeHtml(t('promoLabelGeneric'))+'" loading="lazy" draggable="false" onload="promoMatchBg(this)">'+
       '<div class="promo-scrim"></div>'+
       '<div class="promo-date'+(isEmployee()?'':' customer-pos')+'"'+(isEmployee()?' onclick="event.stopPropagation();openPromoDateEdit('+jsStr(p.id)+')" style="cursor:pointer"':'')+'>'+escapeHtml(promoDisplayPeriodLabel(p))+(isEmployee()?' <i class="ti ti-pencil" aria-hidden="true" style="font-size:11px"></i>':'')+'</div>'+
-      '<div class="promo-by">โดย '+escapeHtml(p.addedBy||'-')+'</div>'+
+      '<div class="promo-by">'+escapeHtml(t('promoByPrefix'))+' '+escapeHtml(p.addedBy||'-')+'</div>'+
       '<div class="promo-badge'+(soon?' soon':'')+'">'+badgeText+'</div>'+
-      (isEmployee()?'<button class="promo-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="ลบ"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
+      (isEmployee()?'<button class="promo-del" onclick="event.stopPropagation();deletePromoItem('+jsStr(p.id)+')" aria-label="'+escapeHtml(t('empDeleteBtn'))+'"><i class="ti ti-trash" aria-hidden="true"></i></button>':'')+
     '</div>';
   }).join('');
   dots.innerHTML=PROMO_GALLERY_CACHE.map((_,i)=>'<span'+(i===promoCarouselIndex?' class="active"':'')+'></span>').join('');
@@ -3491,25 +3722,41 @@ function cancelPromoDatePick(){
   document.getElementById('promoDateOverlay').style.display='none';
 }
 const THAI_MONTH_SHORT=['ม.ค','ก.พ','มี.ค','เม.ย','พ.ค','มิ.ย','ก.ค','ส.ค','ก.ย','ต.ค','พ.ย','ธ.ค'];
+// รูปแบบวันที่ที่เก็บใน periodLabel (ฐานข้อมูลกลาง) เป็นภาษาไทยเสมอเพื่อให้ parseThaiDateShortToISO อ่านกลับได้ทุกเครื่อง
+// ไม่ว่าจะตั้งภาษาอะไรตอนบันทึกก็ตาม — ฟังก์ชันด้านล่างนี้แปลแค่ตอน "แสดงผล" เท่านั้น ไม่แตะรูปแบบที่เก็บจริง
+const MONTH_SHORT_I18N={
+  th:THAI_MONTH_SHORT,
+  en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+  cn:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+  mm:['ဇန်','ဖေ','မတ်','ဧ','မေ','ဇွန်','ဇူ','သြ','စက်','အောက်','နို','ဒီ'],
+  kr:['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+  jp:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+};
 function formatThaiDateShort(isoDate){
   const d=new Date(isoDate+'T00:00:00');
   const beYear=(d.getFullYear()+543)%100;
   return d.getDate()+' '+THAI_MONTH_SHORT[d.getMonth()]+' '+String(beYear).padStart(2,'0');
 }
+function formatDateShortForDisplay(isoDate){
+  if(currentLang==='th')return formatThaiDateShort(isoDate);
+  const d=new Date(isoDate+'T00:00:00');
+  const months=MONTH_SHORT_I18N[currentLang]||MONTH_SHORT_I18N.en;
+  return d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+}
 function promoDisplayPeriodLabel(p){
   const label=p.periodLabel;
-  if(!label)return 'ไม่ระบุช่วงเวลา';
+  if(!label)return t('promoUnspecifiedPeriod');
   if(label.indexOf(' - ')>=0){
     const parts=label.split(' - ');
     const startIso=parseThaiDateShortToISO(parts[0]);
     const endIso=parseThaiDateShortToISO(parts[1]);
-    if(startIso&&endIso) return formatThaiDateShort(startIso)+' - '+formatThaiDateShort(endIso);
+    if(startIso&&endIso) return formatDateShortForDisplay(startIso)+' - '+formatDateShortForDisplay(endIso);
     return label;
   }
   const m=label.match(/^ถึง\s*(.+)$/);
   if(m){
     const endIso=parseThaiDateShortToISO(m[1]);
-    if(endIso) return 'ถึง '+formatThaiDateShort(endIso);
+    if(endIso) return t('promoUntilPrefix')+' '+formatDateShortForDisplay(endIso);
   }
   return label;
 }
@@ -3546,7 +3793,7 @@ async function handlePromoFileSelect(evt){
   pendingPromoPeriod=null;
   if(!files.length||!period)return;
   const sess=getSession();
-  const addedBy=sess?(sess.name+' · '+sess.dept):'ไม่ทราบ';
+  const addedBy=sess?(sess.name+' · '+sess.dept):t('unknownNameFallback');
   for(const file of files){
     try{
       if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
@@ -3556,7 +3803,7 @@ async function handlePromoFileSelect(evt){
       }
     }catch(e){
       console.error('เพิ่มโปรโมชั่นไม่สำเร็จ',e);
-      alert('ไม่สามารถอ่านไฟล์ "'+file.name+'" ได้ กรุณาลองไฟล์อื่น');
+      alert(t('fileReadErrorTemplate',{filename:file.name}));
     }
   }
   renderPromoGallery();
@@ -3591,7 +3838,7 @@ function withTimeout(promise,ms,message){
   ]);
 }
 async function addPromoFromPdf(file,addedBy,period){
-  if(!window.pdfjsLib){ alert('ไม่สามารถโหลดตัวอ่านไฟล์ PDF ได้ กรุณาตรวจสอบอินเทอร์เน็ต'); return; }
+  if(!window.pdfjsLib){ alert(t('pdfLoaderUnavailableAlert')); return; }
   const buf=await file.arrayBuffer();
   const pdf=await withTimeout(pdfjsLib.getDocument({data:buf}).promise,20000,'อ่านไฟล์ PDF ไม่สำเร็จ (ใช้เวลานานเกินไป)');
   for(let i=1;i<=pdf.numPages;i++){
@@ -3620,7 +3867,7 @@ async function savePromoItem(dataUrl,addedBy,period){
 }
 function deletePromoItem(id){
   if(!isEmployee())return;
-  if(!confirm('ลบโปรโมชั่นนี้ทิ้งใช่หรือไม่?'))return;
+  if(!confirm(t('deletePromoConfirmMsg')))return;
   PROMO_GALLERY_CACHE=PROMO_GALLERY_CACHE.filter(p=>p.id!==id);
   savePromoGalleryLocal(PROMO_GALLERY_CACHE);
   renderPromoGallery();
@@ -4301,7 +4548,7 @@ function mergeCustomItemsIntoProducts(){
 }
 async function saveCustomItem(desc,itemNo,barcode,image){
   const sess=getSession();
-  const addedBy=sess?(sess.name+' · '+sess.dept):'ไม่ทราบ';
+  const addedBy=sess?(sess.name+' · '+sess.dept):t('unknownNameFallback');
   const data={id:newCustomItemId(),type:'customItem',itemNo,barcode:barcode||'',desc,image:image||null,addedBy,ts:Date.now()};
   CUSTOM_ITEMS_CACHE.push(data);
   const item={itemNo,barcode:barcode||'',desc,remark:'',locations:[],baseLocations:[],customImage:image||null,isCustom:true};
@@ -5933,7 +6180,7 @@ async function renderFeedbackList(){
   wrap.innerHTML=list.map(item=>{
     const d=new Date(item.ts);
     const dateStr=d.toLocaleDateString('th-TH')+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-    const photoHtml=item.photo ? '<img class="fb-item-photo" src="'+item.photo+'" alt="รูปแนบ" onclick="window.open(this.src,\'_blank\')">' : '';
+    const photoHtml=item.photo ? '<img class="fb-item-photo" src="'+item.photo+'" alt="'+escapeHtml(t('attachedPhotoAlt'))+'" onclick="window.open(this.src,\'_blank\')">' : '';
     return '<div class="fb-item"><div class="fb-item-meta">'+dateStr+'</div><div class="fb-item-text">'+
       escapeHtml(item.text)+'</div>'+photoHtml+'</div>';
   }).join('');
@@ -5943,16 +6190,16 @@ async function exportFeedbackExcel(){
   if(!list.length){alert(t('fbExportEmptyAlert'));return;}
   const rows=list.map(item=>{
     const d=new Date(item.ts);
-    return {
-      'วันที่':d.toLocaleDateString('th-TH'),
-      'เวลา':d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
-      'ข้อเสนอแนะ / ความคิดเห็น':item.text,
-    };
+    const row={};
+    row[t('fbDateColLabel')]=d.toLocaleDateString('th-TH');
+    row[t('fbTimeColLabel')]=d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    row[t('fbTextColLabel')]=item.text;
+    return row;
   });
   const ws=XLSX.utils.json_to_sheet(rows);
   ws['!cols']=[{wch:12},{wch:10},{wch:60}];
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'ข้อเสนอแนะ');
+  XLSX.utils.book_append_sheet(wb,ws,t('fbSheetName'));
   XLSX.writeFile(wb,'makro_finder_feedback_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 const STAFF_PINS=['0042','4200','4242'];
