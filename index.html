@@ -117,16 +117,18 @@ body{margin:0;padding:0;touch-action:manipulation}
 .loc-pill i{font-size:15px}
 .loc-pill-editable{cursor:pointer}
 .loc-pill-editable i.ti-pencil{font-size:11px;margin-left:2px;opacity:.7}
-.loc-sign{display:inline-flex;flex-direction:column;border-radius:9px;overflow:hidden;box-shadow:0 2px 6px -2px rgba(0,0,0,.35);flex-shrink:0}
-.loc-sign-num{background:var(--brand-red);color:#fff;font-weight:800;font-size:16px;line-height:1.15;letter-spacing:.01em;text-align:center;padding:7px 12px 6px;min-width:30px}
-.loc-sign-foot{background:#fff;border-top:2px solid rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;padding:4px 0 5px;color:var(--brand-red)}
+.loc-sign{display:inline-flex;flex-direction:column;border-radius:9px;overflow:hidden;box-shadow:0 2px 6px -2px rgba(0,0,0,.35);flex-shrink:0;height:56px;box-sizing:border-box}
+.loc-sign-num{background:var(--brand-red);color:#fff;font-weight:800;font-size:16px;line-height:1.15;letter-spacing:.01em;text-align:center;padding:0 12px;min-width:30px;flex:1;display:flex;align-items:center;justify-content:center}
+.loc-sign-foot{background:#fff;border-top:2px solid rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;height:18px;flex-shrink:0;color:var(--brand-red)}
 .loc-sign-foot i{font-size:13px}
-.loc-sticker{display:inline-flex;flex-direction:column;align-items:center;gap:3px;background:#DCEFEA;border:1px solid #B9D9CF;border-radius:6px;padding:6px 11px 5px;position:relative}
+.loc-sticker{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:#DCEFEA;border:1px solid #B9D9CF;border-radius:6px;padding:0 11px;position:relative;height:56px;box-sizing:border-box}
 .loc-sticker-code{font-size:12.5px;font-weight:800;color:#161616;letter-spacing:.02em;font-family:'Courier New',monospace;white-space:nowrap}
 .loc-sticker-bars{width:66px;height:14px}
 .loc-sticker-bars svg{display:block;width:100%;height:100%}
 .loc-pill-editable.loc-sticker{cursor:pointer}
 .loc-sticker-edit{position:absolute;top:-6px;right:-6px;background:var(--brand-red);color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:9px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.loc-photo-box{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:9px;overflow:hidden;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);flex-shrink:0;color:var(--color-text-tertiary);font-size:22px;box-sizing:border-box}
+.loc-photo-box img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
@@ -400,9 +402,13 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .cat-card span{font-size:13.5px}
   .result-name{font-size:19px}
   .loc-pill{font-size:14.5px;padding:7px 14px}
-  .loc-sign-num{font-size:18px;padding:8px 14px 7px}
+  .loc-sign{height:62px}
+  .loc-sign-num{font-size:18px;padding:0 14px}
+  .loc-sign-foot{height:20px}
+  .loc-sticker{height:62px}
   .loc-sticker-code{font-size:14px}
   .loc-sticker-bars{width:78px;height:16px}
+  .loc-photo-box{width:62px;height:62px}
   .nav-info-title{font-size:17px}
   .nav-info-name{font-size:16px}
   .nav-info-line{font-size:14px}
@@ -5921,12 +5927,14 @@ function renderDetail(item,fromList){
     const canEditLoc=isEmployee();
     rLoc.innerHTML=locGroups.map(g=>
       '<div class="loc-group-row">'+
+      '<div class="loc-photo-box"><i class="ti ti-package" aria-hidden="true"></i></div>'+
       renderLocSignHTML(g.loc)+
       g.locations.map(loc=>
         renderLocationStickerHTML(loc,canEditLoc,canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')
       ).join('')+
       '</div>'
     ).join('');
+    rLoc.querySelectorAll('.loc-photo-box').forEach(box=>applyItemImage(box,item));
   } else {
     const canAddLoc=isEmployee();
     rLoc.innerHTML='<div class="loc-group-row">'+
