@@ -5926,6 +5926,15 @@ function renderDetail(item,fromList){
     });
     const canEditLoc=isEmployee();
     rLoc.innerHTML=locGroups.map(g=>
+      '<div class="loc-group-row loc-summary-row">'+
+      '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>'+t('locLabel')+' '+escapeHtml(g.loc)+'</div>'+
+      g.locations.map(loc=>
+        '<div class="loc-pill sec'+(canEditLoc?' loc-pill-editable':'')+'"'+(canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')+'>'+
+          '<i class="ti ti-map-2" aria-hidden="true"></i>'+t('locationLabel')+' '+escapeHtml(loc)+
+          (canEditLoc?'<i class="ti ti-pencil" aria-hidden="true"></i>':'')+
+        '</div>'
+      ).join('')+
+      '</div>'+
       '<div class="loc-group-row">'+
       '<div class="loc-photo-box"><i class="ti ti-package" aria-hidden="true"></i></div>'+
       renderLocSignHTML(g.loc)+
