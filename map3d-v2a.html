@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ผังร้าน 3D — แบบ A: Realistic Render</title>
+<style>
+:root{
+  --bg:#151210; --ink:#F2ECE0; --muted:#A79C8C; --line:#332B22;
+  --card-bg:#1C1712; --card-line:#3A3024; --accent:#FF5A4E; --chip-bg:#241E17;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#F7F4EC; --ink:#23201B; --muted:#8A8175; --line:#E7E1D6;
+    --card-bg:#FCFBF9; --card-line:#E4DCC9; --accent:#D2241F; --chip-bg:#F1ECE0;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F7F4EC; --ink:#23201B; --muted:#8A8175; --line:#E7E1D6;
+  --card-bg:#FCFBF9; --card-line:#E4DCC9; --accent:#D2241F; --chip-bg:#F1ECE0;
+}
+:root[data-theme="dark"]{
+  --bg:#151210; --ink:#F2ECE0; --muted:#A79C8C; --line:#332B22;
+  --card-bg:#1C1712; --card-line:#3A3024; --accent:#FF5A4E; --chip-bg:#241E17;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Sarabun,"Leelawadee UI","Segoe UI",Tahoma,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1180px;margin:0 auto;padding:36px 24px 56px;display:flex;flex-direction:column;gap:20px}
+header.top{display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line);padding-bottom:18px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0;font-size:clamp(22px,3.6vw,30px);font-weight:800;letter-spacing:-.01em;text-wrap:balance}
+.sub{margin:0;color:var(--muted);font-size:14.5px;max-width:66ch;line-height:1.55}
+
+.toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.toolbar .rot-group{display:flex;align-items:center;gap:10px;flex:1;min-width:200px}
+.toolbar label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.toolbar input[type="range"]{flex:1;accent-color:var(--accent)}
+.toolbar .deg{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--muted);width:3.2em;text-align:right}
+button.btn{
+  font:inherit;font-size:13px;font-weight:700;color:var(--ink);
+  background:var(--card-bg);border:1px solid var(--card-line);border-radius:10px;
+  padding:8px 14px;cursor:pointer;white-space:nowrap;
+}
+button.btn:hover{background:var(--chip-bg)}
+button.btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+
+.floor-wrap{
+  position:relative;background:#0E0C0A;border:1px solid var(--card-line);border-radius:16px;
+  padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.4),0 30px 60px -30px rgba(0,0,0,.7);
+}
+.svg-host{width:100%;line-height:0;touch-action:none;cursor:grab}
+.svg-host:active{cursor:grabbing}
+.svg-host svg{display:block;width:100%;height:auto}
+
+aside.legend{
+  display:flex;flex-direction:column;gap:12px;background:var(--card-bg);border:1px solid var(--card-line);
+  border-radius:16px;padding:16px 16px 18px;box-shadow:0 1px 2px rgba(0,0,0,.2),0 24px 48px -28px rgba(0,0,0,.5);
+}
+aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.legend-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:560px;overflow-y:auto}
+.legend-list li{display:flex;align-items:center;gap:9px;font-size:13px}
+.legend-list .swatch{width:13px;height:13px;border-radius:4px;flex:none;border:1px solid rgba(0,0,0,.2)}
+.legend-list .txt{display:flex;flex-direction:column;line-height:1.22;min-width:0}
+.legend-list .th{font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend-list .en{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.badge{display:inline-flex;align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--accent);padding:4px 10px;border-radius:999px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <span class="badge">Concept A</span>
+    <span class="eyebrow">3D Store Map &middot; Realistic Render &middot; Makro รามอินทรา St.042</span>
+    <h1>ผังร้าน 3D — สไตล์ Realistic Render</h1>
+    <p class="sub">แสงไฟเพดาน เงาตกกระทบ ชั้นวางสินค้าหลากสี ให้ความรู้สึกใกล้เคียงภาพเรนเดอร์ 3D จริง &middot; ลากบนผังเพื่อหมุนรอบตัวเอง 360° &middot; Shift+ลาก เพื่อเลื่อนมุมมอง &middot; สกรอลล์/พินช์เพื่อซูม</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="rot-group">
+      <label for="rot">หมุนผัง</label>
+      <input id="rot" type="range" min="0" max="359" value="25" step="1" />
+      <span class="deg" id="rotDeg">25&deg;</span>
+    </div>
+    <button class="btn" type="button" id="spinBtn">▶ หมุนอัตโนมัติ</button>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="floor-wrap">
+        <div class="svg-host" id="svgHost"></div>
+      </div>
+    </div>
+    <aside class="legend">
+      <h2>แผนกในร้าน</h2>
+      <ul class="legend-list" id="legendList"></ul>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  const MAP_FLOOR={x:8,y:15,w:1293,h:773};
+  const MAP_FLOOR_CX=MAP_FLOOR.x+MAP_FLOOR.w/2, MAP_FLOOR_CY=MAP_FLOOR.y+MAP_FLOOR.h/2;
+  const MAP_ISO_COS=Math.cos(Math.PI/6), MAP_ISO_SIN=Math.sin(Math.PI/6);
+  const MAP_MAIN_SIZE=16, MAP_SUB_SIZE=12;
+  const FLOOR_BG='#B9AF9E';
+  const MAP_ZONE_LABELS={
+    dryfood_:{main:'Dry Food',sub:'Loc. 29-44',color:'#FFB0D6',subColor:'#FFDCEE'},
+    nonfood_:{main:'Non-Food',sub:'Loc. 1-25',color:'#C7BBFF',subColor:'#E5DDFF'}
+  };
+  const PRODUCT_PALETTE=['#C0392B','#D68910','#B7950B','#229954','#2874A6','#7D3C98','#CA6F1E','#186A3B','#A93226','#1F618D','#B03A2E','#7E5109'];
+
+  function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function isoProject(x,y,z,rotationDeg){
+    const theta=(rotationDeg||0)*Math.PI/180;
+    const rx=x-MAP_FLOOR_CX, ry=y-MAP_FLOOR_CY;
+    const rotX=rx*Math.cos(theta)-ry*Math.sin(theta);
+    const rotY=rx*Math.sin(theta)+ry*Math.cos(theta);
+    return [ (rotX-rotY)*MAP_ISO_COS, (rotX+rotY)*MAP_ISO_SIN - z ];
+  }
+  function shadeColor(hex,amt){
+    const c=String(hex).replace('#','');
+    if(c.length!==6) return hex;
+    const num=parseInt(c,16);
+    let r=(num>>16)&255, g=(num>>8)&255, b=num&255;
+    r=Math.max(0,Math.round(r*(1-amt))); g=Math.max(0,Math.round(g*(1-amt))); b=Math.max(0,Math.round(b*(1-amt)));
+    return 'rgb('+r+','+g+','+b+')';
+  }
+  function lightenColor(hex,amt){
+    const c=String(hex).replace('#','');
+    if(c.length!==6) return hex;
+    const num=parseInt(c,16);
+    let r=(num>>16)&255, g=(num>>8)&255, b=num&255;
+    r=Math.round(r+(255-r)*amt); g=Math.round(g+(255-g)*amt); b=Math.round(b+(255-b)*amt);
+    return 'rgb('+r+','+g+','+b+')';
+  }
+  function polyPts(pts){ return pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '); }
+  function hash(n){ const x=Math.sin(n*127.1)*43758.5453; return x-Math.floor(x); }
+
+  // realistic box: gradient faces with rim highlight + ambient occlusion at base
+  function aoShadow(x0,y0,x1,y1,rot){
+    // soft, slightly enlarged + offset toward the "front" so it reads as a cast shadow, not a flat outline
+    const pad=(x1-x0)*0.08;
+    const p=[isoProject(x0-pad,y0-pad*0.4,0.1,rot),isoProject(x1+pad,y0-pad*0.4,0.1,rot),isoProject(x1+pad*1.6,y1+pad*1.4,0.1,rot),isoProject(x0-pad*0.6,y1+pad*1.4,0.1,rot)];
+    return '<polygon points="'+polyPts(p)+'" fill="rgba(15,12,8,.28)" filter="url(#softShadow)"/>';
+  }
+  function boxFaces(x0,y0,x1,y1,z0,z1,rot,fillTop,fillRight,fillFront){
+    const top=[isoProject(x0,y0,z1,rot),isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x0,y1,z1,rot)];
+    const right=[isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x1,y1,z0,rot),isoProject(x1,y0,z0,rot)];
+    const front=[isoProject(x0,y1,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x1,y1,z0,rot),isoProject(x0,y1,z0,rot)];
+    return ''
+      +'<polygon points="'+polyPts(right)+'" fill="'+shadeColor(fillRight,0.1)+'" stroke="rgba(0,0,0,.4)" stroke-width="0.5"/>'
+      +'<polygon points="'+polyPts(front)+'" fill="'+shadeColor(fillFront,0.14)+'" stroke="rgba(0,0,0,.4)" stroke-width="0.5"/>'
+      +'<polygon points="'+polyPts(top)+'" fill="'+lightenColor(fillTop,0.06)+'" stroke="rgba(255,255,255,.35)" stroke-width="0.6"/>'
+      +'<polygon points="'+polyPts([top[0],top[1]])+'"/>'
+      +'<line x1="'+top[0][0].toFixed(1)+'" y1="'+top[0][1].toFixed(1)+'" x2="'+top[1][0].toFixed(1)+'" y2="'+top[1][1].toFixed(1)+'" stroke="rgba(255,255,255,.55)" stroke-width="1"/>';
+  }
+  function signAt(x,y,z,rot,th,en,tint,big){
+    const p=isoProject(x,y,z,rot);
+    const poleTop=[p[0],p[1]-(big?18:10)];
+    const w=Math.max(big?72:42, Math.max((th||'').length,(en||'').length)*(big?7.8:5.3));
+    const h=big?34:20;
+    const top=poleTop[1]-h;
+    return '<line x1="'+p[0].toFixed(1)+'" y1="'+p[1].toFixed(1)+'" x2="'+poleTop[0].toFixed(1)+'" y2="'+poleTop[1].toFixed(1)+'" stroke="#6b6255" stroke-width="1.3"/>'
+      +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?9:6)+'" fill="'+shadeColor(tint,0.35)+'" stroke="'+lightenColor(tint,0.4)+'" stroke-width="1"/>'
+      +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?15:12)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?11.5:8.5)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
+      +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+27).toFixed(1)+'" text-anchor="middle" font-size="8.5" font-weight="600" fill="'+lightenColor(tint,0.7)+'" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
+  }
+  function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,seed,th,en,big){
+    const inset=big?4:2.4;
+    x0+=inset; x1-=inset; y0+=inset; y1-=inset;
+    const parts=[aoShadow(x0,y0,x1,y1,rot)];
+    const postColor='#3A3F45', postColorL='#5C636B';
+    const fp=[isoProject(x0,y1,0.4,rot),isoProject(x1,y1,0.4,rot),isoProject(x1,y0,0.4,rot),isoProject(x0,y0,0.4,rot)];
+    parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.2)"/>');
+    const postW=big?4:2.2;
+    [[x0,y1],[x1,y1],[x1,y0]].forEach(([px,py])=>{
+      parts.push(boxFaces(px-postW/2,py-postW/2,px+postW/2,py+postW/2,0,H,rot,postColorL,postColor,shadeColor(postColor,0.2)));
+    });
+    levels=Math.max(1,levels||3);
+    for(let li=0; li<levels; li++){
+      const z=H*((li+1)/(levels+0.15));
+      const beamFront=[isoProject(x0,y1,z,rot),isoProject(x1,y1,z,rot)];
+      const beamRight=[isoProject(x1,y1,z,rot),isoProject(x1,y0,z,rot)];
+      parts.push('<line x1="'+beamFront[0][0].toFixed(1)+'" y1="'+beamFront[0][1].toFixed(1)+'" x2="'+beamFront[1][0].toFixed(1)+'" y2="'+beamFront[1][1].toFixed(1)+'" stroke="#E2802F" stroke-width="'+(big?3:1.6)+'"/>');
+      parts.push('<line x1="'+beamRight[0][0].toFixed(1)+'" y1="'+beamRight[0][1].toFixed(1)+'" x2="'+beamRight[1][0].toFixed(1)+'" y2="'+beamRight[1][1].toFixed(1)+'" stroke="#F4A24F" stroke-width="'+(big?2.4:1.3)+'"/>');
+      if(big){
+        // price-tag rail: thin white strip with tick marks, like the real shelf-edge labels
+        const railZ=z-2.2;
+        const ra=isoProject(x0,y1,railZ,rot), rb=isoProject(x1,y1,railZ,rot);
+        parts.push('<line x1="'+ra[0].toFixed(1)+'" y1="'+ra[1].toFixed(1)+'" x2="'+rb[0].toFixed(1)+'" y2="'+rb[1].toFixed(1)+'" stroke="#F5F1E6" stroke-width="1.4" opacity="0.85"/>');
+        const tagN=Math.max(3,Math.round((x1-x0)/22));
+        for(let ti=0; ti<tagN; ti++){
+          const tx=x0+(x1-x0)*((ti+0.5)/tagN);
+          const t0=isoProject(tx,y1,railZ-1.6,rot), t1=isoProject(tx,y1,railZ+1.6,rot);
+          parts.push('<line x1="'+t0[0].toFixed(1)+'" y1="'+t0[1].toFixed(1)+'" x2="'+t1[0].toFixed(1)+'" y2="'+t1[1].toFixed(1)+'" stroke="#D8CFAE" stroke-width="0.7" opacity="0.6"/>');
+        }
+      }
+      if(li<levels-1||levels===1){
+        const density=big?6:4;
+        const cw=(x1-x0-6)/density;
+        for(let ci=0; ci<density; ci++){
+          const cx0=x0+3+ci*cw+cw*0.1, cx1=cx0+cw*0.82;
+          const cy0=y1-cw*0.55, cy1=y1-2;
+          const boxH=big?(8+((seed+li*7+ci)%4)*2):5;
+          const tone=PRODUCT_PALETTE[Math.floor(hash(seed*13+li*7+ci)*PRODUCT_PALETTE.length)];
+          parts.push(boxFaces(cx0,cy0,cx1,cy1,z,z+boxH,rot,lightenColor(tone,0.22),shadeColor(tone,0.1),shadeColor(tone,0.28)));
+        }
+      }
+    }
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function freezerCase(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[aoShadow(x0,y0,x1,y1,rot)];
+    parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,lightenColor(tint,0.12),shadeColor(tint,0.32),shadeColor(tint,0.16)));
+    const frontTop=[isoProject(x0,y1,H,rot),isoProject(x1,y1,H,rot)];
+    const frontBot=[isoProject(x0,y1,0,rot),isoProject(x1,y1,0,rot)];
+    parts.push('<polygon points="'+polyPts([frontTop[0],frontTop[1],frontBot[1],frontBot[0]])+'" fill="rgba(200,235,255,.32)" stroke="rgba(255,255,255,.55)" stroke-width="0.8"/>');
+    for(let s=0;s<2;s++){
+      const t0=0.15+s*0.32, t1=t0+0.18;
+      const bx=frontTop[0][0]+(frontTop[1][0]-frontTop[0][0])*t1, by=frontTop[0][1]+(frontBot[0][1]-frontTop[0][1])*0.75;
+      const ax=frontTop[0][0]+(frontTop[1][0]-frontTop[0][0])*t0, ay=frontTop[0][1]+(frontBot[0][1]-frontTop[0][1])*0.15;
+      parts.push('<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+bx.toFixed(1)+'" y2="'+by.toFixed(1)+'" stroke="rgba(255,255,255,.5)" stroke-width="4" stroke-linecap="round"/>');
+    }
+    for(let li=1; li<=2; li++){
+      const z=H*li/3;
+      const a=isoProject(x0,y1,z,rot), b=isoProject(x1,y1,z,rot);
+      parts.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(255,255,255,.4)" stroke-width="1"/>');
+      for(let ci=0; ci<4; ci++){
+        const cw=(x1-x0-8)/4, cx0=x0+4+ci*cw+cw*0.15, cx1=cx0+cw*0.7;
+        const tone=PRODUCT_PALETTE[(ci+li*3)%PRODUCT_PALETTE.length];
+        parts.push(boxFaces(cx0,y1-6,cx1,y1-2,z,z+6,rot,lightenColor(tone,0.14),shadeColor(tone,0.12),shadeColor(tone,0.22)));
+      }
+    }
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[aoShadow(x0,y0,x1,y1,rot)];
+    parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,'#F4F6F8',shadeColor(tint,0.28),tint));
+    const tubColors=['#F4C9DE','#EADCAA','#C9A27E','#EDEAE0','#D9E9C9'];
+    const sy=y0+2, gBot=H*0.45;
+    const tubN=Math.max(3,Math.round((x1-x0)/18)-1);
+    for(let i=0;i<tubN;i++){
+      const cx=x0+(x1-x0)*((i+0.6)/(tubN+1));
+      const p=isoProject(cx,sy,gBot+3,rot);
+      parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="5.4" ry="2.4" fill="'+tubColors[i%tubColors.length]+'" stroke="rgba(0,0,0,.15)" stroke-width="0.5"/>');
+    }
+    if(th) parts.push(signAt((x0+x1)/2,y1,H+30,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[aoShadow(x0,y0,x1,y1,rot)];
+    const wood='#C9A56A';
+    const tiers=3, tierDepth=(y1-y0)/tiers;
+    const wraps=['#F4C9DE','#EADCAA','#C9E8D9','#F4E0B8','#E8CFE0'];
+    for(let ti=0; ti<tiers; ti++){
+      const ty0=y0+ti*tierDepth+2, ty1=ty0+tierDepth-5;
+      const zTop=H*0.32+(tiers-1-ti)*H*0.26;
+      parts.push(boxFaces(x0,ty0,x1,ty1,zTop-8,zTop,rot,lightenColor(wood,0.15),shadeColor(wood,0.2),wood));
+      const nItems=Math.max(3,Math.round((x1-x0)/16));
+      for(let ii=0; ii<nItems; ii++){
+        const cx=x0+(x1-x0)*((ii+0.5)/nItems);
+        const p=isoProject(cx,(ty0+ty1)/2,zTop+2.4,rot);
+        parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="4.5" ry="3" fill="'+wraps[(ii+ti)%wraps.length]+'"/>');
+      }
+    }
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+10,rot,'#C0272D',en,tint,true));
+    return parts.join('');
+  }
+  function produceStall(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[aoShadow(x0,y0,x1,y1,rot)];
+    const rows=[
+      {th:'ผลไม้นำเข้า', en:'Imported Fruit', palette:['#E8912E','#D9463A','#E8DA6A']},
+      {th:'ผักสด', en:'Fresh Veg', palette:['#EDEDE0','#CFE8B0','#4FA85A']}
+    ];
+    const rowDepth=(y1-y0)/rows.length;
+    rows.forEach((rowDef,ri)=>{
+      const ry0=y0+ri*rowDepth, ry1=ry0+rowDepth-6;
+      const bands=3, bandDepth=(ry1-ry0)/bands;
+      for(let bi=0; bi<bands; bi++){
+        const by0=ry0+bi*bandDepth+2, by1=by0+bandDepth-5;
+        const zTop=H*0.34+(bands-1-bi)*H*0.24;
+        parts.push(boxFaces(x0,by0,x1,by1,zTop-8,zTop,rot,'#2E7D4A','#1F5C36',shadeColor('#2E7D4A',0.15)));
+        const set=rowDef.palette[bi%rowDef.palette.length];
+        const nItems=Math.max(3,Math.round((x1-x0)/15));
+        for(let ii=0; ii<nItems; ii++){
+          const cx=x0+(x1-x0)*((ii+0.5)/nItems);
+          const p=isoProject(cx,(by0+by1)/2,zTop+2.6,rot);
+          parts.push('<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.8" fill="'+set+'" stroke="'+shadeColor(set,0.2)+'" stroke-width="0.4"/>');
+        }
+      }
+      parts.push(signAt((x0+x1)/2,ry0-3,H+16,rot,rowDef.th,rowDef.en,ri===0?'#E8912E':'#4FA85A',true));
+    });
+    if(th) parts.push(signAt((x0+x1)/2,y0-2,H+42,rot,th,en,'#2E7D4A',true));
+    return parts.join('');
+  }
+  function cashierRow(x0,y0,x1,y1,rot,H,lanes){
+    lanes=lanes||8;
+    const parts=[aoShadow(x0,y0,x1,y1,rot)];
+    const laneW=(x1-x0)/lanes;
+    const red='#E30613', steel='#C7CDD3', dark='#181B20';
+    for(let i=0;i<lanes;i++){
+      const inset=3.5;
+      const lx0=x0+i*laneW+inset, lx1=x0+(i+1)*laneW-inset;
+      parts.push(boxFaces(lx0,y0,lx1,y1,0,H,rot,steel,shadeColor(steel,0.28),red));
+      const beltY0=y0+(y1-y0)*0.12, beltY1=y0+(y1-y0)*0.66;
+      const a=isoProject(lx0+1.5,beltY0,H,rot), b=isoProject(lx1-1.5,beltY0,H,rot), c=isoProject(lx1-1.5,beltY1,H,rot), d=isoProject(lx0+1.5,beltY1,H,rot);
+      parts.push('<polygon points="'+polyPts([a,b,c,d])+'" fill="'+dark+'" opacity="0.92"/>');
+      const pp=isoProject(lx1-3,y1-4,H,rot);
+      parts.push('<line x1="'+pp[0].toFixed(1)+'" y1="'+pp[1].toFixed(1)+'" x2="'+pp[0].toFixed(1)+'" y2="'+(pp[1]-12).toFixed(1)+'" stroke="#8892a0" stroke-width="1.3"/>');
+      parts.push('<rect x="'+(pp[0]-5.5).toFixed(1)+'" y="'+(pp[1]-19.5).toFixed(1)+'" width="11" height="7.5" rx="1.3" fill="'+lightenColor('#fff',0)+'" stroke="'+red+'" stroke-width="1"/>');
+      parts.push('<text x="'+pp[0].toFixed(1)+'" y="'+(pp[1]-14.2).toFixed(1)+'" text-anchor="middle" font-size="6.5" font-weight="800" fill="'+red+'">'+(i+1)+'</text>');
+    }
+    return parts.join('');
+  }
+  function counterUnit(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[aoShadow(x0,y0,x1,y1,rot)];
+    parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,'#C7CDD3',shadeColor(tint,0.15),tint));
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function aisleHeadUnit(x0,y0,x1,y1,rot,n1,n2,seed){
+    const parts=[rackUnit(x0,y0,x1,y1,rot,'#B9C4CE',34,2,seed,'','',false)];
+    const cx=(x0+x1)/2;
+    const baseP=isoProject(cx,y1,34,rot);
+    const poleTopY=baseP[1]-58;
+    parts.push('<line x1="'+baseP[0].toFixed(1)+'" y1="'+baseP[1].toFixed(1)+'" x2="'+baseP[0].toFixed(1)+'" y2="'+poleTopY.toFixed(1)+'" stroke="#8892a0" stroke-width="2"/>');
+    const bw=24, bh=n2?44:28;
+    const bx=baseP[0]-bw/2, by=poleTopY-bh;
+    parts.push('<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw+'" height="'+bh+'" rx="4" fill="#E30613" stroke="#fff" stroke-width="1.4"/>');
+    if(n2){
+      parts.push('<line x1="'+bx.toFixed(1)+'" y1="'+(by+bh*0.5).toFixed(1)+'" x2="'+(bx+bw).toFixed(1)+'" y2="'+(by+bh*0.5).toFixed(1)+'" stroke="rgba(255,255,255,.4)" stroke-width="1"/>');
+      if(n1) parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.36).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
+      parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.86).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">'+escapeHtml(n2)+'</text>');
+    } else if(n1){
+      parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="16" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
+    }
+    return parts.join('');
+  }
+  function glassDoor(pt,label,tint){
+    const w=54,h=34;
+    return '<g transform="translate('+pt[0].toFixed(1)+','+(pt[1]-6).toFixed(1)+')">'
+      +'<rect x="'+(-w/2)+'" y="'+(-h)+'" width="'+w+'" height="'+h+'" rx="3" fill="rgba(255,255,255,.1)" stroke="'+tint+'" stroke-width="2"/>'
+      +'<line x1="0" y1="'+(-h)+'" x2="0" y2="0" stroke="'+tint+'" stroke-width="1.6"/>'
+      +'<text x="0" y="14" text-anchor="middle" font-size="10.5" font-weight="700" fill="'+tint+'">'+escapeHtml(label)+'</text>'
+      +'</g>';
+  }
+  function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textColor,height){
+    const total=endNum-startNum+1;
+    const blockCount=Math.ceil(total/2);
+    const gap=4;
+    const w=((bx1-bx0)-gap*(blockCount-1))/blockCount;
+    const arr=[];
+    let cur=startNum;
+    for(let i=0;i<blockCount;i++){
+      const x0=Math.round(bx0+i*(w+gap));
+      const isSingle=(endNum-cur)<1;
+      const n1=cur, n2=isSingle?null:cur+1;
+      const idSuffix=isSingle?String(n1):(n1+'_'+n2);
+      const lines=isSingle?[{text:String(n1)}]:[{text:String(n1)},{text:String(n2)}];
+      arr.push({ id:idPrefix+idSuffix, x:x0, y:by0, w:Math.round(w), h:by1-by0, fill:fill, height:height, lines:lines });
+      cur+=isSingle?1:2;
+    }
+    return arr;
+  }
+  const MAP_BLOCK_SKIN={
+    cashier:{type:'cashier'}, infopoint:{type:'counter'},
+    butchery:{type:'freezer'}, fishseafood:{type:'freezer'},
+    fruitveg:{type:'produce'}, bakery:{type:'bakery'}, icecream:{type:'icecream'}
+  };
+  function getBlockSkin(b){
+    if(MAP_BLOCK_SKIN[b.id]) return MAP_BLOCK_SKIN[b.id];
+    if(b.id.indexOf('dryfood_')===0||b.id.indexOf('nonfood_')===0) return {type:'aisle'};
+    return {type:'rack',levels:3};
+  }
+  function blockText(b){
+    if(b.th!==undefined) return [b.th||'', b.en||''];
+    if(b.lines) return [(b.lines[0]&&b.lines[0].text)||'', (b.lines[1]&&b.lines[1].text)||''];
+    return ['',''];
+  }
+  function seedFromId(id){
+    let h=0;
+    for(let i=0;i<id.length;i++) h=(h*31+id.charCodeAt(i))>>>0;
+    return h%9973;
+  }
+  function mapBlockPieces(b,rot){
+    const H=b.height||54;
+    const x0=b.x,y0=b.y,x1=b.x+b.w,y1=b.y+b.h;
+    const tint=b.fill;
+    const [th,en]=blockText(b);
+    const skin=getBlockSkin(b);
+    const seed=seedFromId(b.id);
+    let skinMarkup;
+    if(skin.type==='freezer') skinMarkup=freezerCase(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rot,H,8)+signAt((x0+x1)/2,y0,H+30,rot,th,en,'#E30613',true);
+    else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rot,th,en,seed);
+    else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rot,tint,H,th,en);
+    else skinMarkup=rackUnit(x0,y0,x1,y1,rot,tint,H,skin.levels||3,seed,th,en,true);
+    const baseMarkup=boxFaces(x0,y0,x1,y1,-6,0,rot,'#4A4E54','#1C1E21','#2C2F33');
+    skinMarkup=baseMarkup+skinMarkup;
+    const depth=(function(){
+      const rTheta=(rot||0)*Math.PI/180;
+      const rx=((x0+x1)/2)-MAP_FLOOR_CX, ry=((y0+y1)/2)-MAP_FLOOR_CY;
+      const rotX=rx*Math.cos(rTheta)-ry*Math.sin(rTheta), rotY=rx*Math.sin(rTheta)+ry*Math.cos(rTheta);
+      return rotX+rotY;
+    })();
+    return {depth, skinMarkup};
+  }
+  function renderMapSVG(zones,rot,zoom,panX,panY){
+    zoom=zoom||1; panX=panX||0; panY=panY||0;
+    const aisleBlocks=generateAisleGroup('dryfood_',470,85,1180,300,29,44,'#FBE1EC','#99406B',84)
+      .concat(generateAisleGroup('nonfood_',335,335,1220,550,1,25,'#E7E4F8','#5749A0',84));
+    const blocks=zones.concat(aisleBlocks);
+    const pieces=blocks.map(b=>mapBlockPieces(b,rot));
+    const sortedPieces=pieces.slice().sort((a,b)=>a.depth-b.depth);
+    const blockMarkup=sortedPieces.map(p=>p.skinMarkup).join('');
+
+    const F=MAP_FLOOR;
+    const floorTop=[isoProject(F.x,F.y,0,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
+    const wallH=36;
+    const leftWall=[isoProject(F.x,F.y,wallH,rot),isoProject(F.x,F.y+F.h,wallH,rot),isoProject(F.x,F.y+F.h,0,rot),isoProject(F.x,F.y,0,rot)];
+    const backWall=[isoProject(F.x,F.y,wallH,rot),isoProject(F.x+F.w,F.y,wallH,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x,F.y,0,rot)];
+    const rightWall=[isoProject(F.x+F.w,F.y,wallH,rot),isoProject(F.x+F.w,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x+F.w,F.y,0,rot)];
+    const frontWall=[isoProject(F.x,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
+    const wallCandidates=[
+      {poly:leftWall, normal:[-1,0]},{poly:backWall, normal:[0,-1]},
+      {poly:rightWall, normal:[1,0]},{poly:frontWall, normal:[0,1]}
+    ];
+    const theta=rot*Math.PI/180;
+    const camDir=[Math.sin(theta),Math.cos(theta)];
+    const wallsMarkup=wallCandidates.filter(w=>{
+      const dot=w.normal[0]*camDir[0]+w.normal[1]*camDir[1];
+      return dot<-0.05;
+    }).map(w=>'<polygon points="'+polyPts(w.poly)+'" fill="'+shadeColor(FLOOR_BG,0.35)+'" stroke="rgba(0,0,0,.25)" stroke-width="0.6"/>').join('');
+
+    const zoneLabels=Object.keys(MAP_ZONE_LABELS).map(prefix=>{
+      const group=blocks.filter(b=>b.id.indexOf(prefix)===0);
+      if(!group.length) return '';
+      const minX=Math.min(...group.map(b=>b.x)), maxX=Math.max(...group.map(b=>b.x+b.w));
+      const minY=Math.min(...group.map(b=>b.y)), maxH=Math.max(...group.map(b=>b.height||54));
+      const info=MAP_ZONE_LABELS[prefix];
+      const p=isoProject((minX+maxX)/2, minY+22, maxH, rot);
+      return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="'+MAP_MAIN_SIZE+'" font-weight="800" letter-spacing="0.4" fill="'+info.color+'">'+escapeHtml(info.main)+'</text>'+
+        '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+17).toFixed(1)+'" text-anchor="middle" font-size="'+MAP_SUB_SIZE+'" font-weight="600" letter-spacing="0.4" fill="'+info.subColor+'">'+escapeHtml(info.sub)+'</text>';
+    }).join('');
+
+    // ceiling fluorescent tube fixtures, evoking the store's real overhead lighting rows
+    const lightGlows=[];
+    for(let gx=F.x+80; gx<F.x+F.w; gx+=180){
+      for(let gy=F.y+70; gy<F.y+F.h; gy+=260){
+        const a=isoProject(gx-38,gy,44,rot), b=isoProject(gx+38,gy,44,rot);
+        const glow=isoProject(gx,gy,44,rot);
+        lightGlows.push('<ellipse cx="'+glow[0].toFixed(1)+'" cy="'+glow[1].toFixed(1)+'" rx="52" ry="24" fill="url(#lightGlow)"/>');
+        lightGlows.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="#FFF9E8" stroke-width="4" stroke-linecap="round" filter="url(#tubeBlur)" opacity="0.95"/>');
+        lightGlows.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="#FFFDF5" stroke-width="1.6" stroke-linecap="round"/>');
+      }
+    }
+
+    const allPts=[floorTop,leftWall,backWall,rightWall,frontWall].reduce((a,p)=>a.concat(p),[]);
+    blocks.forEach(b=>{
+      const H=b.height||54;
+      [[b.x,b.y,H],[b.x+b.w,b.y,H],[b.x+b.w,b.y+b.h,H],[b.x,b.y+b.h,H],[b.x,b.y+b.h,0],[b.x+b.w,b.y+b.h,0]].forEach(([x,y,z])=>{
+        allPts.push(isoProject(x,y,z,rot));
+      });
+    });
+    const entrance=isoProject(MAP_FLOOR.x+339,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
+    const exit=isoProject(MAP_FLOOR.x+870,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
+    allPts.push(entrance,exit);
+    const minX=Math.min(...allPts.map(p=>p[0])), maxX=Math.max(...allPts.map(p=>p[0]));
+    const minY=Math.min(...allPts.map(p=>p[1])), maxY=Math.max(...allPts.map(p=>p[1]));
+    const pad=26;
+    const baseX=minX-pad, baseY=minY-pad, baseW=(maxX-minX)+pad*2, baseH=(maxY-minY)+pad*2+18;
+    const cx=baseX+baseW/2, cy=baseY+baseH/2;
+    const vbW=baseW/zoom, vbH=baseH/zoom;
+    const vbX=cx-vbW/2+panX, vbY=cy-vbH/2+panY;
+
+    const defs='<defs>'
+      +'<radialGradient id="floorGlow" cx="50%" cy="42%" r="70%"><stop offset="0%" stop-color="'+lightenColor(FLOOR_BG,0.2)+'"/><stop offset="100%" stop-color="'+shadeColor(FLOOR_BG,0.16)+'"/></radialGradient>'
+      +'<linearGradient id="floorSheen" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff" stop-opacity="0.16"/><stop offset="35%" stop-color="#fff" stop-opacity="0"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></linearGradient>'
+      +'<radialGradient id="lightGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFF6DE" stop-opacity="0.5"/><stop offset="100%" stop-color="#FFF6DE" stop-opacity="0"/></radialGradient>'
+      +'<radialGradient id="vignette" cx="50%" cy="46%" r="72%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.32"/></radialGradient>'
+      +'<filter id="softShadow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2"/></filter>'
+      +'<filter id="tubeBlur" x="-80%" y="-200%" width="260%" height="500%"><feGaussianBlur stdDeviation="2.6"/></filter>'
+      +'</defs>';
+
+    // polished-concrete expansion joints
+    const jointLines=[];
+    for(let gx=F.x; gx<=F.x+F.w; gx+=97){
+      const a=isoProject(gx,F.y,0.05,rot), b=isoProject(gx,F.y+F.h,0.05,rot);
+      jointLines.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(0,0,0,.05)" stroke-width="1"/>');
+    }
+    for(let gy=F.y; gy<=F.y+F.h; gy+=97){
+      const a=isoProject(F.x,gy,0.05,rot), b=isoProject(F.x+F.w,gy,0.05,rot);
+      jointLines.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(0,0,0,.05)" stroke-width="1"/>');
+    }
+
+    return '<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้าน Makro รามอินทรา St.042 แบบ 3 มิติ สไตล์ realistic render">'+
+      defs+
+      '<polygon points="'+polyPts(floorTop)+'" fill="url(#floorGlow)"/>'+
+      jointLines.join('')+
+      '<polygon points="'+polyPts(floorTop)+'" fill="url(#floorSheen)"/>'+
+      wallsMarkup+
+      '<g font-family="Sarabun,Segoe UI,sans-serif">'+blockMarkup+lightGlows.join('')+zoneLabels+'</g>'+
+      glassDoor(entrance,'ทางเข้า · IN','#3FAE6E')+
+      glassDoor(exit,'ทางออก · OUT','#FF6B4A')+
+      '<rect x="'+vbX.toFixed(1)+'" y="'+vbY.toFixed(1)+'" width="'+vbW.toFixed(1)+'" height="'+vbH.toFixed(1)+'" fill="url(#vignette)" pointer-events="none"/>'+
+      '</svg>';
+  }
+
+  function defaultItems(){
+    return [
+      {id:'fruitveg',x:190,y:240,w:160,h:75,height:60,fill:'#E5F3DC',th:'ผัก-ผลไม้',en:'Fruit & Veg'},
+      {id:'infopoint',x:85,y:530,w:90,h:65,height:50,fill:'#DFE9F5',th:'จุดประชาสัมพันธ์',en:'Information'},
+      {id:'cashier',x:460,y:620,w:300,h:90,height:42,fill:'#DFF4EA',th:'แคชเชียร์',en:'Cashier'},
+      {id:'bulkpallet',x:690,y:660,w:595,h:120,height:90,fill:'#EAE7F0',th:'พาเลทสินค้ากองรวม',en:'Bulk Pallet Display'},
+      {id:'butchery',x:8,y:18,w:158,h:103,height:70,fill:'#FBE4E4',th:'เนื้อสัตว์และแช่แข็ง',en:'Butchery & Frozen'},
+      {id:'snack',x:174,y:18,w:158,h:103,height:70,fill:'#E3F6E8',th:'ขนม',en:'Snack'},
+      {id:'winebeer',x:8,y:128,w:158,h:103,height:70,fill:'#DFF3F3',th:'ไวน์/เบียร์',en:'Wine & Beer'},
+      {id:'drink',x:174,y:128,w:158,h:103,height:70,fill:'#EAE4F8',th:'เครื่องดื่ม',en:'Drink'},
+      {id:'fishseafood',x:8,y:318,w:158,h:100,height:70,fill:'#DEEBFA',th:'ปลา/อาหารทะเล',en:'Fish & Seafood'},
+      {id:'grilledchicken',x:174,y:318,w:158,h:100,height:70,fill:'#FAEBDA',th:'ไก่ย่าง',en:'Grilled Chicken'},
+      {id:'o2o',x:8,y:425,w:158,h:98,height:85,fill:'#FBEED9',th:'O2O แผนกออนไลน์',en:'Makro Pro'},
+      {id:'condiments',x:174,y:425,w:158,h:98,height:60,fill:'#FAE0D8',th:'เครื่องเทศ',en:'Condiments / Spices'},
+      {id:'bakery',x:8,y:600,w:158,h:178,height:70,fill:'#F3E7D6',th:'เบเกอรี่',en:'Bakery'},
+      {id:'icecream',x:174,y:600,w:158,h:178,height:70,fill:'#DBF1F4',th:'ไอศกรีม',en:'Ice Cream'}
+    ];
+  }
+
+  const svgHost=document.getElementById('svgHost');
+  const rotInput=document.getElementById('rot');
+  const rotDeg=document.getElementById('rotDeg');
+  const legendList=document.getElementById('legendList');
+  const spinBtn=document.getElementById('spinBtn');
+  const zones=defaultItems();
+
+  let currentRot=Number(rotInput.value)||25;
+  let zoomLevel=1, panX=0, panY=0;
+
+  function renderLegend(){
+    legendList.innerHTML=zones.map(function(z){
+      return '<li><span class="swatch" style="background:'+z.fill+'"></span>'
+        +'<span class="txt"><span class="th">'+escapeHtml(z.th)+'</span><span class="en">'+escapeHtml(z.en)+'</span></span></li>';
+    }).join('');
+  }
+  function renderMap(){
+    rotInput.value=String(Math.round(currentRot)%360);
+    rotDeg.textContent=Math.round(currentRot)%360+'°';
+    svgHost.innerHTML=renderMapSVG(zones,currentRot,zoomLevel,panX,panY);
+  }
+  rotInput.addEventListener('input', function(){ currentRot=Number(rotInput.value); renderMap(); });
+
+  (function(){
+    let dragging=false, panMode=false, lastX=0, lastY=0;
+    const ROT_SENS=0.45;
+    function svgViewScale(){
+      const svgEl=svgHost.querySelector('svg');
+      if(!svgEl) return 1;
+      const vb=svgEl.viewBox.baseVal;
+      const rect=svgEl.getBoundingClientRect();
+      if(!rect.width) return 1;
+      return vb.width/rect.width;
+    }
+    svgHost.addEventListener('pointerdown', function(e){
+      dragging=true; panMode=!!e.shiftKey;
+      lastX=e.clientX; lastY=e.clientY;
+      svgHost.setPointerCapture(e.pointerId);
+    });
+    svgHost.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      const dx=e.clientX-lastX, dy=e.clientY-lastY;
+      lastX=e.clientX; lastY=e.clientY;
+      if(panMode){ const s=svgViewScale(); panX-=dx*s; panY-=dy*s; }
+      else { currentRot=(currentRot+dx*ROT_SENS+360*100)%360; }
+      renderMap();
+    });
+    function endDrag(e){ if(!dragging) return; dragging=false; try{ svgHost.releasePointerCapture(e.pointerId); }catch(err){} }
+    svgHost.addEventListener('pointerup', endDrag);
+    svgHost.addEventListener('pointercancel', endDrag);
+    svgHost.addEventListener('wheel', function(e){
+      e.preventDefault();
+      const factor=e.deltaY<0?1.08:1/1.08;
+      zoomLevel=Math.max(0.5,Math.min(3.5,zoomLevel*factor));
+      renderMap();
+    }, {passive:false});
+  })();
+
+  let spinning=false, spinRaf=null;
+  function spinStep(){
+    currentRot=(currentRot+0.25)%360;
+    renderMap();
+    spinRaf=requestAnimationFrame(spinStep);
+  }
+  spinBtn.addEventListener('click', function(){
+    spinning=!spinning;
+    spinBtn.classList.toggle('active', spinning);
+    spinBtn.textContent = spinning ? '⏸ หยุดหมุน' : '▶ หมุนอัตโนมัติ';
+    if(spinning) spinStep(); else if(spinRaf) cancelAnimationFrame(spinRaf);
+  });
+
+  renderLegend();
+  renderMap();
+})();
+</script>
+</body>
+</html>
