@@ -110,7 +110,6 @@ body{margin:0;padding:0;touch-action:manipulation}
 .result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
 .loc-row{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-.loc-combined-box{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:14px;padding:12px;display:flex;flex-direction:row;flex-wrap:wrap;gap:10px}
 .loc-combo{border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .loc-combo-green{background:var(--color-background-success);border:0.5px solid var(--color-border-success)}
 .loc-combo-gray{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary)}
@@ -119,6 +118,7 @@ body{margin:0;padding:0;touch-action:manipulation}
 .loc-combo-green .loc-combo-label{color:var(--color-text-success)}
 .loc-combo-gray .loc-combo-label{color:var(--color-text-secondary)}
 .loc-combo-label i.ti-pencil{font-size:11px;opacity:.7}
+.loc-combo-caption{font-size:10.5px;color:var(--color-text-tertiary);padding-left:2px}
 .loc-group-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .loc-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success)}
 #showOnMapInline{margin-bottom:16px}
@@ -1034,6 +1034,7 @@ const I18N={
     itemNoLabel:'Item No',
     locLabel:'Loc',
     locationLabel:'Location',
+    locSampleImageLabel:'ภาพตัวอย่าง',
     notYetAvailable:'ยังไม่มี',
     productNameLabel:'ชื่อสินค้า',
     productIsAt:'สินค้าอยู่ตรง',
@@ -1304,6 +1305,7 @@ const I18N={
     itemNoLabel:'Item No',
     locLabel:'Loc',
     locationLabel:'Location',
+    locSampleImageLabel:'Example image',
     notYetAvailable:'Not yet available',
     productNameLabel:'Product name',
     productIsAt:'Item is at',
@@ -1574,6 +1576,7 @@ const I18N={
     itemNoLabel:'商品编号',
     locLabel:'区域',
     locationLabel:'位置',
+    locSampleImageLabel:'示例图片',
     notYetAvailable:'暂无',
     productNameLabel:'商品名称',
     productIsAt:'商品位于',
@@ -1844,6 +1847,7 @@ const I18N={
     itemNoLabel:'ပစ္စည်းနံပါတ်',
     locLabel:'ဇုန်',
     locationLabel:'တည်နေရာ',
+    locSampleImageLabel:'နမူနာပုံ',
     notYetAvailable:'မရှိသေးပါ',
     productNameLabel:'ပစ္စည်းအမည်',
     productIsAt:'ပစ္စည်းရှိသည့်နေရာ',
@@ -2114,6 +2118,7 @@ const I18N={
     itemNoLabel:'상품 번호',
     locLabel:'구역',
     locationLabel:'위치',
+    locSampleImageLabel:'예시 이미지',
     notYetAvailable:'아직 없음',
     productNameLabel:'상품명',
     productIsAt:'상품 위치',
@@ -2384,6 +2389,7 @@ const I18N={
     itemNoLabel:'商品番号',
     locLabel:'ロケ',
     locationLabel:'ロケーション',
+    locSampleImageLabel:'サンプル画像',
     notYetAvailable:'未登録',
     productNameLabel:'商品名',
     productIsAt:'商品の位置',
@@ -5935,15 +5941,17 @@ function renderDetail(item,fromList){
     });
     const canEditLoc=isEmployee();
     rLoc.innerHTML=locGroups.map(g=>
-      '<div class="loc-combined-box">'+
+      '<div class="loc-group-row">'+
       '<div class="loc-combo loc-combo-green">'+
       '<div class="loc-combo-label"><i class="ti ti-map-pin" aria-hidden="true"></i>'+t('locLabel')+' '+escapeHtml(g.loc)+'</div>'+
       renderLocSignHTML(g.loc)+
+      '<div class="loc-combo-caption">'+t('locSampleImageLabel')+'</div>'+
       '</div>'+
       g.locations.map(loc=>
         '<div class="loc-combo loc-combo-gray'+(canEditLoc?' loc-pill-editable':'')+'"'+(canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')+'>'+
         '<div class="loc-combo-label"><i class="ti ti-map-2" aria-hidden="true"></i>'+t('locationLabel')+' '+escapeHtml(loc)+(canEditLoc?'<i class="ti ti-pencil" aria-hidden="true"></i>':'')+'</div>'+
         renderLocationStickerHTML(loc,false,'')+
+        '<div class="loc-combo-caption">'+t('locSampleImageLabel')+'</div>'+
         '</div>'
       ).join('')+
       '</div>'
