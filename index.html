@@ -58,11 +58,12 @@ body{margin:0;padding:0;touch-action:manipulation}
 .hdr-icon.lang-btn{width:38px;height:38px}
 .hdr-icon-col{display:flex;flex-direction:column;align-items:center;gap:3px}
 .hdr-icon-caption{font-size:9.5px;color:rgba(255,255,255,.85);font-weight:600;white-space:nowrap;line-height:1}
-.search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;margin:12px auto 0;border:0.5px solid rgba(255,255,255,0.2);max-width:min(1100px,94vw)}
+.search-row{display:flex;align-items:stretch;gap:8px;margin:12px auto 0;max-width:min(1100px,94vw)}
+.search-box{background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;gap:8px;padding:9px 12px;border:0.5px solid rgba(255,255,255,0.2);flex:1;min-width:0}
 .search-box input{background:transparent;border:none;outline:none;color:#fff;font-size:16px;flex:1;min-width:0;font-family:inherit}
 .search-box input::placeholder{color:rgba(255,255,255,0.5)}
 .search-box i{color:rgba(255,255,255,0.6);font-size:17px;flex-shrink:0}
-.search-scan-btn{display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;color:#fff;font-size:13px;font-weight:600;white-space:nowrap}
+.search-scan-btn{background:rgba(255,255,255,0.12);border-radius:10px;border:0.5px solid rgba(255,255,255,0.2);padding:9px 12px;display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;color:#fff;font-size:13px;font-weight:600;white-space:nowrap}
 .search-scan-btn i{font-size:20px;color:#fff}
 .body{padding:16px clamp(16px,4vw,40px) 40px;flex:1;max-width:min(1100px,94vw);margin:0 auto;width:100%}
 .section-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
@@ -401,7 +402,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .nav-info-line{font-size:15px}
   .nav-info-line i{font-size:17px}
   .nav-info-line svg.shelf-icon{width:17px;height:17px}
-  .hdr-row,.search-box,.body{max-width:min(1100px,90vw)}
+  .hdr-row,.search-row,.body{max-width:min(1100px,90vw)}
   .cat-row{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
   .map-overlay-content{max-width:min(1700px,94vw)}
   .map-overlay-content svg{max-height:calc(100dvh - 90px)}
@@ -584,10 +585,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
     </div>
-    <div class="search-box">
-      <i class="ti ti-search" aria-hidden="true"></i>
-      <input type="text" id="si" data-i18n-placeholder="searchPlaceholder" placeholder="ค้นหาสินค้า..." oninput="search(this.value)">
-      <i class="ti ti-x" id="clr" style="display:none;cursor:pointer" onclick="clearSearch()" data-i18n-title="clearAria" aria-label="ล้าง"></i>
+    <div class="search-row">
+      <div class="search-box">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input type="text" id="si" data-i18n-placeholder="searchPlaceholder" placeholder="ค้นหาสินค้า..." oninput="search(this.value)">
+        <i class="ti ti-x" id="clr" style="display:none;cursor:pointer" onclick="clearSearch()" data-i18n-title="clearAria" aria-label="ล้าง"></i>
+      </div>
       <span class="search-scan-btn" onclick="openScanner()" data-i18n-title="scanTitle" title="สแกน QR" role="button" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i><span data-i18n="scanCaption">สแกน</span></span>
     </div>
   </div>
