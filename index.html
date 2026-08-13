@@ -110,6 +110,7 @@ body{margin:0;padding:0;touch-action:manipulation}
 .result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
 .loc-row{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.loc-combined-box{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
 .loc-group-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .loc-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--color-background-success);color:var(--color-text-success);border:0.5px solid var(--color-border-success)}
 #showOnMapInline{margin-bottom:16px}
@@ -198,12 +199,12 @@ body{margin:0;padding:0;touch-action:manipulation}
 .back-to-list{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
 .loc-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
 .loc-group-idx{font-size:11px;color:var(--color-text-tertiary);width:100%}
-.emp-loc-item{background:#fff;border:1px solid #FFD9A0;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px;color:#6b4306}
+.emp-loc-item{background:#fff;border:1px solid #FFD9A0;border-radius:8px;padding:8px 78px 8px 10px;margin-bottom:6px;font-size:12.5px;color:#6b4306;position:relative}
 .emp-loc-item:last-child{margin-bottom:0}
-.emp-loc-item-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.emp-loc-item-row{display:block}
 .emp-loc-text{min-width:0}
-.emp-loc-actions{display:flex;gap:6px;flex-shrink:0}
-.emp-loc-btn{font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid #F0B95C;background:#fff;color:#95610A;cursor:pointer;font-family:inherit}
+.emp-loc-actions{position:absolute;top:8px;right:8px;display:flex;gap:5px}
+.emp-loc-btn{font-size:10.5px;padding:4px 7px;border-radius:6px;border:1px solid #F0B95C;background:#fff;color:#95610A;cursor:pointer;font-family:inherit;white-space:nowrap}
 .emp-loc-btn.danger{border-color:#E3897A;color:#B33A2A}
 .map-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;z-index:2000;padding:16px}
 .map-overlay-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.14);border:none;color:#fff;width:40px;height:40px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1}
@@ -5926,6 +5927,7 @@ function renderDetail(item,fromList){
     });
     const canEditLoc=isEmployee();
     rLoc.innerHTML=locGroups.map(g=>
+      '<div class="loc-combined-box">'+
       '<div class="loc-group-row loc-summary-row">'+
       '<div class="loc-pill"><i class="ti ti-map-pin" aria-hidden="true"></i>'+t('locLabel')+' '+escapeHtml(g.loc)+'</div>'+
       g.locations.map(loc=>
@@ -5940,6 +5942,7 @@ function renderDetail(item,fromList){
       g.locations.map(loc=>
         renderLocationStickerHTML(loc,canEditLoc,canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')
       ).join('')+
+      '</div>'+
       '</div>'
     ).join('');
   } else {
