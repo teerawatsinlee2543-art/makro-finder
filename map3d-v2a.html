@@ -105,9 +105,12 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
 (function(){
   const MAP_FLOOR={x:8,y:15,w:1293,h:773};
   const MAP_FLOOR_CX=MAP_FLOOR.x+MAP_FLOOR.w/2, MAP_FLOOR_CY=MAP_FLOOR.y+MAP_FLOOR.h/2;
-  const MAP_ISO_COS=Math.cos(Math.PI/6), MAP_ISO_SIN=Math.sin(Math.PI/6);
+  // steeper, closer-to-top-down camera (18° instead of 30°) plus height compression,
+  // to read like a near-overhead store-planner render rather than a boxy isometric diagram
+  const MAP_ISO_COS=Math.cos(Math.PI/10), MAP_ISO_SIN=Math.sin(Math.PI/10);
+  const MAP_Z_SCALE=0.4;
   const MAP_MAIN_SIZE=16, MAP_SUB_SIZE=12;
-  const FLOOR_BG='#B9AF9E';
+  const FLOOR_BG='#C7BEAC';
   const MAP_ZONE_LABELS={
     dryfood_:{main:'Dry Food',sub:'Loc. 29-44',color:'#FFB0D6',subColor:'#FFDCEE'},
     nonfood_:{main:'Non-Food',sub:'Loc. 1-25',color:'#C7BBFF',subColor:'#E5DDFF'}
@@ -120,7 +123,7 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
     const rx=x-MAP_FLOOR_CX, ry=y-MAP_FLOOR_CY;
     const rotX=rx*Math.cos(theta)-ry*Math.sin(theta);
     const rotY=rx*Math.sin(theta)+ry*Math.cos(theta);
-    return [ (rotX-rotY)*MAP_ISO_COS, (rotX+rotY)*MAP_ISO_SIN - z ];
+    return [ (rotX-rotY)*MAP_ISO_COS, (rotX+rotY)*MAP_ISO_SIN - z*MAP_Z_SCALE ];
   }
   function shadeColor(hex,amt){
     const c=String(hex).replace('#','');
@@ -343,12 +346,18 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
     }
     return parts.join('');
   }
-  function glassDoor(pt,label,tint){
-    const w=54,h=34;
-    return '<g transform="translate('+pt[0].toFixed(1)+','+(pt[1]-6).toFixed(1)+')">'
-      +'<rect x="'+(-w/2)+'" y="'+(-h)+'" width="'+w+'" height="'+h+'" rx="3" fill="rgba(255,255,255,.1)" stroke="'+tint+'" stroke-width="2"/>'
-      +'<line x1="0" y1="'+(-h)+'" x2="0" y2="0" stroke="'+tint+'" stroke-width="1.6"/>'
-      +'<text x="0" y="14" text-anchor="middle" font-size="10.5" font-weight="700" fill="'+tint+'">'+escapeHtml(label)+'</text>'
+  function glassDoor(pt,label,tint,arrowDir){
+    // circular arrow badge + white label pill, matching the real in-store entrance/exit signage
+    const r=15;
+    const arrowPath = arrowDir==='up'
+      ? 'M0,-7.5 L6.5,2.5 L2.4,2.5 L2.4,8 L-2.4,8 L-2.4,2.5 L-6.5,2.5 Z'
+      : 'M0,7.5 L6.5,-2.5 L2.4,-2.5 L2.4,-8 L-2.4,-8 L-2.4,-2.5 L-6.5,-2.5 Z';
+    return '<g transform="translate('+pt[0].toFixed(1)+','+(pt[1]-4).toFixed(1)+')">'
+      +'<ellipse cx="2" cy="4" rx="'+(r+4)+'" ry="'+(r*0.6)+'" fill="rgba(0,0,0,.28)" filter="url(#softShadow)"/>'
+      +'<rect x="-34" y="-38" width="68" height="17" rx="4" fill="#fff" stroke="rgba(0,0,0,.12)" stroke-width="0.8"/>'
+      +'<text x="0" y="-25.5" text-anchor="middle" font-size="10.5" font-weight="800" fill="#232323">'+escapeHtml(label)+'</text>'
+      +'<circle cx="0" cy="0" r="'+r+'" fill="'+tint+'" stroke="#fff" stroke-width="2.2"/>'
+      +'<path d="'+arrowPath+'" fill="#fff"/>'
       +'</g>';
   }
   function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textColor,height){
@@ -510,8 +519,8 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
       '<polygon points="'+polyPts(floorTop)+'" fill="url(#floorSheen)"/>'+
       wallsMarkup+
       '<g font-family="Sarabun,Segoe UI,sans-serif">'+blockMarkup+lightGlows.join('')+zoneLabels+'</g>'+
-      glassDoor(entrance,'ทางเข้า · IN','#3FAE6E')+
-      glassDoor(exit,'ทางออก · OUT','#FF6B4A')+
+      glassDoor(entrance,'ทางเข้า · IN','#3FAE6E','up')+
+      glassDoor(exit,'ทางออก · OUT','#E0332B','down')+
       '<rect x="'+vbX.toFixed(1)+'" y="'+vbY.toFixed(1)+'" width="'+vbW.toFixed(1)+'" height="'+vbH.toFixed(1)+'" fill="url(#vignette)" pointer-events="none"/>'+
       '</svg>';
   }
