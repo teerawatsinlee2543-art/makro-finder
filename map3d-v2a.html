@@ -346,6 +346,27 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
     }
     return parts.join('');
   }
+  function doorPanel(cxWorld,rot,tint){
+    // a real glass sliding-door gate set into the front wall, matching the store's actual entry gates
+    const y=MAP_FLOOR.y+MAP_FLOOR.h;
+    const x0=cxWorld-34, x1=cxWorld+34;
+    const doorH=32;
+    const top0=isoProject(x0,y,doorH,rot), top1=isoProject(x1,y,doorH,rot);
+    const bot0=isoProject(x0,y,0,rot), bot1=isoProject(x1,y,0,rot);
+    let s='<polygon points="'+polyPts([top0,top1,bot1,bot0])+'" fill="rgba(200,225,240,.30)" stroke="#8A96A3" stroke-width="1.6"/>';
+    s+='<polygon points="'+polyPts([top0,top1,bot1,bot0])+'" fill="'+tint+'" opacity="0.06"/>';
+    for(let i=1;i<3;i++){
+      const mx=x0+(x1-x0)*i/3;
+      const mt=isoProject(mx,y,doorH,rot), mb=isoProject(mx,y,0,rot);
+      s+='<line x1="'+mt[0].toFixed(1)+'" y1="'+mt[1].toFixed(1)+'" x2="'+mb[0].toFixed(1)+'" y2="'+mb[1].toFixed(1)+'" stroke="#7C8794" stroke-width="1.6"/>';
+    }
+    const topRailA=isoProject(x0,y,doorH,rot), topRailB=isoProject(x1,y,doorH,rot);
+    s+='<line x1="'+topRailA[0].toFixed(1)+'" y1="'+topRailA[1].toFixed(1)+'" x2="'+topRailB[0].toFixed(1)+'" y2="'+topRailB[1].toFixed(1)+'" stroke="#5C636B" stroke-width="2.4"/>';
+    // faint reflective streak across the glass, like the reference photo's door highlights
+    const ga=isoProject(x0+10,y,doorH*0.8,rot), gb=isoProject(x0+22,y,doorH*0.15,rot);
+    s+='<line x1="'+ga[0].toFixed(1)+'" y1="'+ga[1].toFixed(1)+'" x2="'+gb[0].toFixed(1)+'" y2="'+gb[1].toFixed(1)+'" stroke="rgba(255,255,255,.5)" stroke-width="3" stroke-linecap="round"/>';
+    return s;
+  }
   function glassDoor(pt,label,tint,arrowDir){
     // circular arrow badge + white label pill, matching the real in-store entrance/exit signage
     const r=15;
@@ -519,6 +540,8 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
       '<polygon points="'+polyPts(floorTop)+'" fill="url(#floorSheen)"/>'+
       wallsMarkup+
       '<g font-family="Sarabun,Segoe UI,sans-serif">'+blockMarkup+lightGlows.join('')+zoneLabels+'</g>'+
+      doorPanel(MAP_FLOOR.x+339,rot,'#3FAE6E')+
+      doorPanel(MAP_FLOOR.x+870,rot,'#E0332B')+
       glassDoor(entrance,'ทางเข้า · IN','#3FAE6E','up')+
       glassDoor(exit,'ทางออก · OUT','#E0332B','down')+
       '<rect x="'+vbX.toFixed(1)+'" y="'+vbY.toFixed(1)+'" width="'+vbW.toFixed(1)+'" height="'+vbH.toFixed(1)+'" fill="url(#vignette)" pointer-events="none"/>'+
