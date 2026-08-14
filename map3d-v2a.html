@@ -539,7 +539,7 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
       jointLines.join('')+
       '<polygon points="'+polyPts(floorTop)+'" fill="url(#floorSheen)"/>'+
       wallsMarkup+
-      '<g font-family="Sarabun,Segoe UI,sans-serif">'+blockMarkup+lightGlows.join('')+zoneLabels+'</g>'+
+      '<g font-family="Sarabun,Segoe UI,sans-serif">'+blockMarkup+lightGlows.join('')+'</g>'+
       doorPanel(MAP_FLOOR.x+339,rot,'#3FAE6E')+
       doorPanel(MAP_FLOOR.x+870,rot,'#E0332B')+
       glassDoor(entrance,'ทางเข้า · IN','#3FAE6E','up')+
@@ -549,21 +549,21 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
   }
 
   function defaultItems(){
+    // positions/shapes re-derived from the reference store photo's actual layout
+    // (top-left glass fridge alcove, shelf rows stepping down the left wall, produce
+    // bin, small info counter, back office) — labels intentionally blank for this pass
     return [
-      {id:'fruitveg',x:190,y:240,w:160,h:75,height:60,fill:'#E5F3DC',th:'ผัก-ผลไม้',en:'Fruit & Veg'},
-      {id:'infopoint',x:85,y:530,w:90,h:65,height:50,fill:'#DFE9F5',th:'จุดประชาสัมพันธ์',en:'Information'},
-      {id:'cashier',x:460,y:620,w:300,h:90,height:42,fill:'#DFF4EA',th:'แคชเชียร์',en:'Cashier'},
-      {id:'bulkpallet',x:690,y:660,w:595,h:120,height:90,fill:'#EAE7F0',th:'พาเลทสินค้ากองรวม',en:'Bulk Pallet Display'},
-      {id:'butchery',x:8,y:18,w:158,h:103,height:70,fill:'#FBE4E4',th:'เนื้อสัตว์และแช่แข็ง',en:'Butchery & Frozen'},
-      {id:'snack',x:174,y:18,w:158,h:103,height:70,fill:'#E3F6E8',th:'ขนม',en:'Snack'},
-      {id:'winebeer',x:8,y:128,w:158,h:103,height:70,fill:'#DFF3F3',th:'ไวน์/เบียร์',en:'Wine & Beer'},
-      {id:'drink',x:174,y:128,w:158,h:103,height:70,fill:'#EAE4F8',th:'เครื่องดื่ม',en:'Drink'},
-      {id:'fishseafood',x:8,y:318,w:158,h:100,height:70,fill:'#DEEBFA',th:'ปลา/อาหารทะเล',en:'Fish & Seafood'},
-      {id:'grilledchicken',x:174,y:318,w:158,h:100,height:70,fill:'#FAEBDA',th:'ไก่ย่าง',en:'Grilled Chicken'},
-      {id:'o2o',x:8,y:425,w:158,h:98,height:85,fill:'#FBEED9',th:'O2O แผนกออนไลน์',en:'Makro Pro'},
-      {id:'condiments',x:174,y:425,w:158,h:98,height:60,fill:'#FAE0D8',th:'เครื่องเทศ',en:'Condiments / Spices'},
-      {id:'bakery',x:8,y:600,w:158,h:178,height:70,fill:'#F3E7D6',th:'เบเกอรี่',en:'Bakery'},
-      {id:'icecream',x:174,y:600,w:158,h:178,height:70,fill:'#DBF1F4',th:'ไอศกรีม',en:'Ice Cream'}
+      {id:'butchery',x:30,y:18,w:280,h:85,height:55,fill:'#DCEEF7',th:'',en:''},
+      {id:'fishseafood',x:320,y:55,w:55,h:165,height:60,fill:'#DCEEF7',th:'',en:''},
+      {id:'snack',x:70,y:120,w:185,h:70,height:55,fill:'#E3F6E8',th:'',en:''},
+      {id:'winebeer',x:18,y:210,w:135,h:60,height:55,fill:'#DFF3F3',th:'',en:''},
+      {id:'drink',x:18,y:280,w:135,h:70,height:55,fill:'#EAE4F8',th:'',en:''},
+      {id:'grilledchicken',x:18,y:360,w:135,h:50,height:55,fill:'#FAEBDA',th:'',en:''},
+      {id:'redbin',x:95,y:425,w:85,h:60,height:45,fill:'#D9463A',th:'',en:''},
+      {id:'o2o',x:22,y:530,w:105,h:50,height:55,fill:'#FBEED9',th:'',en:''},
+      {id:'infopoint',x:205,y:215,w:95,h:60,height:50,fill:'#DFE9F5',th:'',en:''},
+      {id:'cashier',x:460,y:620,w:300,h:90,height:42,fill:'#DFF4EA',th:'',en:''},
+      {id:'bulkpallet',x:842,y:541,w:459,h:200,height:90,fill:'#EAE7F0',th:'',en:''}
     ];
   }
 
