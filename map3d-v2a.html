@@ -326,7 +326,7 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
   function counterUnit(x0,y0,x1,y1,rot,tint,H,th,en){
     const parts=[aoShadow(x0,y0,x1,y1,rot)];
     parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,'#C7CDD3',shadeColor(tint,0.15),tint));
-    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+    if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+6,rot,th,en,tint,true));
     return parts.join('');
   }
   function aisleHeadUnit(x0,y0,x1,y1,rot,n1,n2,seed){
