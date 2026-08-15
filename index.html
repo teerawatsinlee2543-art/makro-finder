@@ -95,11 +95,15 @@ body{margin:0;padding:0;touch-action:manipulation}
 .cat-card span{font-size:12px;color:var(--color-text-secondary);font-weight:500}
 .result-wrap{display:none}
 .result-wrap.show{display:block}
-.result-grid{display:grid;grid-template-columns:1fr;grid-template-areas:"edit" "img" "name" "loc";row-gap:14px;margin-bottom:14px}
-.result-grid .result-image-banner{grid-area:img}
-.result-grid .result-name-block{grid-area:name;min-width:0}
-.result-grid .loc-row{grid-area:loc;margin-bottom:0}
-.result-edit-btn{grid-area:edit;justify-self:end;border-radius:20px;background:color-mix(in srgb, var(--brand-red) 8%, white);border:1px solid color-mix(in srgb, var(--brand-red) 22%, white);color:var(--brand-red);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;cursor:pointer;flex-shrink:0;font-size:15px;padding:8px 14px;transition:background .15s,border-color .15s}
+.edit-btn-mobile-slot{display:flex;justify-content:center;margin-bottom:12px}
+.edit-btn-mobile-slot:empty{display:none}
+.edit-btn-desktop-slot{display:flex;margin-left:auto}
+.result-flex{display:flex;flex-direction:column;gap:14px;align-items:stretch;margin-bottom:14px}
+.result-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.result-name-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.result-name-block{min-width:0}
+.result-info .loc-row{margin-bottom:0}
+.result-edit-btn{border-radius:20px;background:color-mix(in srgb, var(--brand-red) 8%, white);border:1px solid color-mix(in srgb, var(--brand-red) 22%, white);color:var(--brand-red);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;cursor:pointer;flex-shrink:0;font-size:15px;padding:8px 14px;transition:background .15s,border-color .15s}
 .result-edit-btn:hover{background:color-mix(in srgb, var(--brand-red) 14%, white);border-color:color-mix(in srgb, var(--brand-red) 32%, white)}
 .result-edit-btn:active{background:color-mix(in srgb, var(--brand-red) 20%, white)}
 .result-edit-btn span{font-size:12.5px;font-weight:700;line-height:1.1;white-space:nowrap}
@@ -405,7 +409,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .pallet-item-actions{flex-basis:100%;justify-content:flex-end;margin-top:8px}
   .promo-badge{font-size:8.5px;padding:3px 7px;gap:3px;top:8px}
   /* จอมือถือ: ให้ปุ่มแก้ไขกว้างเท่ารูปสินค้าพอดี (min(260px,100%) เหมือนกัน) แล้ววางกึ่งกลาง ปุ่มจะได้ชิดขอบขวาบนของรูปจริงๆ ไม่ใช่ขอบขวาของการ์ดทั้งใบ */
-  .result-grid .result-edit-btn{justify-self:center;width:min(260px,100%)}
+  .edit-btn-mobile-slot .result-edit-btn{width:min(260px,100%)}
 }
 @media (min-width:720px){
   body{font-size:15px}
@@ -431,7 +435,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .nav-info-line i{font-size:15px}
   .nav-info-line svg.shelf-icon{width:15px;height:15px}
   /* จอแล็ปท็อป/โน้ตบุ๊กขึ้นไป: ปุ่มแก้ไขกลับไปอยู่แถวเดียวกับชื่อสินค้า (ชิดขวา) แทนที่จะลอยเป็นแถวแยกเหมือนจอมือถือ */
-  .result-grid{grid-template-columns:260px 1fr auto;column-gap:20px;row-gap:14px;grid-template-areas:"img name edit" "img loc loc";align-items:start}
+  .result-flex{flex-direction:row}
   .result-image-banner{width:260px;margin:0}
 }
 @media (min-width:1024px){
@@ -710,15 +714,21 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
       <div id="resultsList" style="display:none"></div>
       <div id="foundCard" style="display:none">
-        <div class="result-grid">
+        <div id="editBtnMobileSlot" class="edit-btn-mobile-slot"></div>
+        <div class="result-flex">
           <div class="result-image-banner" id="rIconWrap"><i class="ti ti-package" aria-hidden="true"></i></div>
-          <button type="button" class="result-edit-btn" id="rEditBtn" style="display:none" aria-label="แก้ไขข้อมูลสินค้า"><i class="ti ti-pencil" aria-hidden="true"></i><span data-i18n="editProductModalTitle">แก้ไขข้อมูลสินค้า</span></button>
-          <div class="result-name-block">
-            <div class="result-name" id="rName"></div>
-            <span class="result-cat-badge" id="rBadge"></span>
+          <div class="result-info">
+            <div class="result-name-row">
+              <div class="result-name-block">
+                <div class="result-name" id="rName"></div>
+                <span class="result-cat-badge" id="rBadge"></span>
+              </div>
+              <span id="editBtnDesktopSlot" class="edit-btn-desktop-slot"></span>
+            </div>
+            <div class="loc-row" id="rLoc"></div>
           </div>
-          <div class="loc-row" id="rLoc"></div>
         </div>
+        <button type="button" class="result-edit-btn" id="rEditBtn" style="display:none" aria-label="แก้ไขข้อมูลสินค้า"><i class="ti ti-pencil" aria-hidden="true"></i><span data-i18n="editProductModalTitle">แก้ไขข้อมูลสินค้า</span></button>
         <div class="nav-info-box" id="navInfoBlock">
           <div class="nav-info-title"><i class="ti ti-map-pin" aria-hidden="true"></i> <span data-i18n="navInfoTitle">รายละเอียดเพิ่มเติมสินค้า</span></div>
           <div id="navInfoBody"></div>
@@ -6508,6 +6518,21 @@ document.addEventListener('focusin', function(e){
     try{ el.scrollIntoView({block:'center', behavior:'smooth'}); }catch(err){}
   }, 300);
 });
+
+// ปุ่ม "แก้ไขข้อมูลสินค้า" ต้องอยู่คนละตำแหน่งกันระหว่างจอมือถือ (แถวแยก เหนือรูปสินค้า) กับจอแล็ปท็อป (แถวเดียวกับชื่อสินค้า)
+// CSS grid ล้วนๆ ทำไม่ได้สะอาด เพราะรูปสินค้าที่ span ข้ามแถวจะดันให้แถวชื่อ/Loc ห่างกันผิดปกติ — ย้าย element จริงระหว่าง 2 ช่องที่เตรียมไว้แทน
+const EDIT_BTN_MOBILE_QUERY=window.matchMedia('(max-width:719px)');
+function placeEditBtn(){
+  const btn=document.getElementById('rEditBtn');
+  const mobileSlot=document.getElementById('editBtnMobileSlot');
+  const desktopSlot=document.getElementById('editBtnDesktopSlot');
+  if(!btn||!mobileSlot||!desktopSlot) return;
+  const targetSlot=EDIT_BTN_MOBILE_QUERY.matches?mobileSlot:desktopSlot;
+  if(btn.parentElement!==targetSlot) targetSlot.appendChild(btn);
+}
+placeEditBtn();
+if(EDIT_BTN_MOBILE_QUERY.addEventListener) EDIT_BTN_MOBILE_QUERY.addEventListener('change', placeEditBtn);
+else EDIT_BTN_MOBILE_QUERY.addListener(placeEditBtn);
 </script>
 </body>
 </html>
