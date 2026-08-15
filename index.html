@@ -467,6 +467,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .loc-label-print-page{width:210mm;height:297mm;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4mm}
 .loc-label-cell{width:100mm;height:140mm;flex:0 0 auto}
 .loc-label-cut-line{width:100mm;border-top:1px dashed #999;flex:0 0 auto}
+.quick-tools{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:900}
+.quick-tool-btn{width:48px;height:48px;border-radius:50%;border:none;background:#fff;color:var(--brand-red);box-shadow:0 2px 6px rgba(0,0,0,.18),0 8px 20px rgba(0,0,0,.16);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
+.quick-tool-btn:active{transform:scale(.94)}
+.quick-tool-btn.logout{background:var(--brand-red);color:#fff}
+@media print{.quick-tools{display:none}}
 @page{size:A3 landscape;margin:6mm}
 @media print{
   html.printing-pallet-list,html.printing-pallet-list body{width:408mm;height:285mm}
@@ -757,6 +762,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
 
   </div>
+  </div>
+
+  <div class="quick-tools" id="quickTools">
+    <button type="button" class="quick-tool-btn" onclick="goToHomeView()" data-i18n-title="goHomeAria" aria-label="ไปหน้าแรก" title="ไปหน้าแรก"><i class="ti ti-home" aria-hidden="true"></i></button>
+    <button type="button" class="quick-tool-btn logout" onclick="confirmLogout()" data-i18n-title="logoutAria" aria-label="ออกจากระบบ" title="ออกจากระบบ"><i class="ti ti-logout" aria-hidden="true"></i></button>
   </div>
 </div>
 </div>
@@ -1109,6 +1119,9 @@ const I18N={
     deleteInvalidPin:'รหัส PIN ไม่ถูกต้อง',
     deleteConfirmMsg:'ยืนยันลบสินค้านี้ออกจากระบบถาวร? การกระทำนี้ย้อนกลับไม่ได้',
     productDeletedToast:'ลบสินค้าออกจากระบบแล้ว',
+    goHomeAria:'ไปหน้าแรก',
+    logoutAria:'ออกจากระบบ',
+    logoutConfirmMsg:'ต้องการออกจากระบบใช่หรือไม่?',
     locMissingFields:'กรุณาระบุ Loc และ Location ให้ครบ',
     removeLocConfirm:'ยืนยันลบตำแหน่ง Loc {loc} / Location {location} ?',
     editMapBtn:'แก้ไขแผนที่',
@@ -1380,6 +1393,9 @@ const I18N={
     deleteInvalidPin:'Incorrect PIN',
     deleteConfirmMsg:'Permanently delete this product? This cannot be undone',
     productDeletedToast:'Product deleted',
+    goHomeAria:'Go to home',
+    logoutAria:'Log out',
+    logoutConfirmMsg:'Log out of the app?',
     locMissingFields:'Please fill in both Loc and Location',
     removeLocConfirm:'Remove location Loc {loc} / Location {location}?',
     editMapBtn:'Edit map',
@@ -1651,6 +1667,9 @@ const I18N={
     deleteInvalidPin:'PIN 码不正确',
     deleteConfirmMsg:'确定要永久删除该商品吗？此操作无法撤销',
     productDeletedToast:'商品已删除',
+    goHomeAria:'返回首页',
+    logoutAria:'退出登录',
+    logoutConfirmMsg:'确定要退出登录吗？',
     locMissingFields:'请填写完整的 Loc 与 Location',
     removeLocConfirm:'确定删除位置 Loc {loc} / Location {location} 吗？',
     editMapBtn:'编辑地图',
@@ -1922,6 +1941,9 @@ const I18N={
     deleteInvalidPin:'PIN နံပါတ်မှားနေပါသည်',
     deleteConfirmMsg:'ဤပစ္စည်းကို စနစ်မှအပြီးဖျက်လိုသည်မှာ သေချာပါသလား? ဤလုပ်ဆောင်ချက်ကို ပြန်ပြင်၍မရပါ',
     productDeletedToast:'ပစ္စည်းကို စနစ်မှဖျက်ပြီးပါပြီ',
+    goHomeAria:'ပင်မစာမျက်နှာသို့',
+    logoutAria:'ထွက်မည်',
+    logoutConfirmMsg:'အက်ပ်မှ ထွက်လိုသည်မှာ သေချာပါသလား?',
     locMissingFields:'Loc နှင့် Location ကို ပြည့်စုံစွာဖြည့်ပါ',
     removeLocConfirm:'တည်နေရာ Loc {loc} / Location {location} ကိုဖျက်မည်မှာ သေချာပါသလား?',
     editMapBtn:'မြေပုံပြင်ဆင်ရန်',
@@ -2193,6 +2215,9 @@ const I18N={
     deleteInvalidPin:'PIN 번호가 올바르지 않습니다',
     deleteConfirmMsg:'이 상품을 영구적으로 삭제하시겠습니까? 되돌릴 수 없습니다',
     productDeletedToast:'상품이 삭제되었습니다',
+    goHomeAria:'홈으로',
+    logoutAria:'로그아웃',
+    logoutConfirmMsg:'로그아웃하시겠습니까?',
     locMissingFields:'Loc과 Location을 모두 입력하세요',
     removeLocConfirm:'위치 Loc {loc} / Location {location}을(를) 삭제하시겠습니까?',
     editMapBtn:'지도 편집',
@@ -2464,6 +2489,9 @@ const I18N={
     deleteInvalidPin:'PIN番号が正しくありません',
     deleteConfirmMsg:'この商品を完全に削除しますか？この操作は元に戻せません',
     productDeletedToast:'商品を削除しました',
+    goHomeAria:'ホームへ',
+    logoutAria:'ログアウト',
+    logoutConfirmMsg:'ログアウトしますか？',
     locMissingFields:'LocとLocationの両方を入力してください',
     removeLocConfirm:'位置 Loc {loc} / Location {location} を削除しますか？',
     editMapBtn:'地図を編集',
@@ -6021,6 +6049,13 @@ function clearSearch(){
   document.getElementById('resultView').classList.remove('show');
   mapHighlightBlockId=null;
   showOnMapMatch=null;
+}
+function goToHomeView(){
+  clearSearch();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function confirmLogout(){
+  if(window.confirm(t('logoutConfirmMsg'))) switchRole();
 }
 
 let zxingReader=null;
