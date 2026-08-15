@@ -2715,6 +2715,7 @@ function refreshCurrentViewForLangChange(){
 }
 let pendingCategoryKeyForLang=null;
 let lastDetailItem=null;
+let lastDetailFromList=false;
 function openLangModal(){
   const modal=document.getElementById('langModal');
   if(!modal)return;
@@ -5912,6 +5913,7 @@ const CATEGORY_KEYWORDS={
 };
 function searchByCategory(key){
   pendingCategoryKeyForLang=key;
+  lastDetailFromList=false;
   const home=document.getElementById('homeView');
   const rv=document.getElementById('resultView');
   home.style.display='none';
@@ -5950,6 +5952,7 @@ function searchByCategory(key){
 
 function search(q){
   pendingCategoryKeyForLang=null;
+  lastDetailFromList=false;
   const inp=document.getElementById('si');
   if(inp.value!==q)inp.value=q;
   document.getElementById('clr').style.display=q?'block':'none';
@@ -6011,6 +6014,7 @@ function selectResult(i){
   const item=rl._matches&&rl._matches[i];
   if(!item)return;
   rl.style.display='none';
+  lastDetailFromList=true;
   renderDetail(item,true);
 }
 
@@ -6404,10 +6408,18 @@ function switchRole(){
   showRoleScreen();
 }
 function goBackOneStep(){
-  // ปุ่มลูกศรย้อนกลับที่หัวหน้าจอ: ถ้ากำลังดูผลค้นหา/รายละเอียดสินค้าอยู่ ให้ถอยกลับไปหน้าแรกของการค้นหาแค่ขั้นเดียว
-  // ไม่ใช่ออกจากระบบไปหน้าเลือกมุมมองทันทีเหมือนเดิม (ซึ่งข้ามไปหลายขั้นเกินไป)
+  // ปุ่มลูกศรย้อนกลับที่หัวหน้าจอ: ถอยกลับทีละขั้นจริงๆ — รายละเอียดสินค้าที่มาจากรายการ → กลับไปที่รายการก่อน
+  // รายการ/หน้าแรกของการค้นหา → กลับไปหน้าแรก → หน้าแรกอยู่แล้วถึงจะออกจากระบบไปหน้าเลือกมุมมอง
   const rv=document.getElementById('resultView');
   if(rv&&rv.classList.contains('show')){
+    const fc=document.getElementById('foundCard');
+    const rl=document.getElementById('resultsList');
+    if(fc&&fc.style.display!=='none'&&lastDetailFromList){
+      fc.style.display='none';
+      rl.style.display='block';
+      lastDetailFromList=false;
+      return;
+    }
     goToHomeView();
     return;
   }
