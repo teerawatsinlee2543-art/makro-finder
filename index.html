@@ -403,6 +403,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .pallet-item-row{flex-wrap:wrap}
   .pallet-item-actions{flex-basis:100%;justify-content:flex-end;margin-top:8px}
   .promo-badge{font-size:8.5px;padding:3px 7px;gap:3px;top:8px}
+  /* จอมือถือ: ให้แถวปุ่มแก้ไขกว้างเท่ารูปสินค้าพอดี (min(260px,100%) เหมือนกัน) ปุ่มจะได้ชิดขอบขวาบนของรูปจริงๆ ไม่ใช่ขอบขวาของการ์ดทั้งใบ */
+  .result-edit-btn-row{width:min(260px,100%);margin-left:auto;margin-right:auto}
 }
 @media (min-width:720px){
   body{font-size:15px}
