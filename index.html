@@ -368,6 +368,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .role-name{font-size:15px;font-weight:600;color:var(--color-text-primary)}
 .role-desc{font-size:12px;color:var(--color-text-tertiary);margin-top:2px}
 .login-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
+.login-back.framed{border:1.5px solid var(--color-border-secondary);border-radius:14px;padding:12px 14px;background:none;transition:border-color .15s,background .15s}
+.login-back.framed:hover{border-color:var(--color-text-tertiary)}
 .emp-stock-box{background:#FFF4E5;border:1px solid #FFD9A0;border-radius:10px;padding:10px 12px;margin-bottom:16px}
 .emp-stock-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
 .emp-stock-label{font-size:11px;font-weight:600;color:#95610A;text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:5px}
@@ -557,7 +559,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <div class="role-desc" data-i18n="grFindInPalletDesc">ค้นหาสินค้าว่าตอนนี้อยู่ในพาเลทไหนบ้าง</div>
         </div>
       </button>
-      <button class="login-back" style="margin:6px auto 0;justify-content:center;width:100%" onclick="grGoToMainSearch()"><span data-i18n="grGoToMainSearchBtn">ไปหน้าค้นหาสินค้าทั่วไป</span> <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      <button class="login-back framed" style="margin:6px auto 0;justify-content:center;width:100%" onclick="grGoToMainSearch()"><span data-i18n="grGoToMainSearchBtn">ไปหน้าค้นหาสินค้าทั่วไป</span> <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
     </div>
   </div>
 
