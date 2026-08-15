@@ -1017,7 +1017,7 @@ const FLAG_SVG_INNER={
   jp:'<rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#BC002D"/>'
 };
 function flagSvg(code){
-  return '<svg class="lang-flag" viewBox="0 0 30 20" aria-hidden="true">'+(FLAG_SVG_INNER[code]||'')+'</svg>';
+  return '<svg class="lang-flag" viewBox="0 0 30 20" preserveAspectRatio="none" aria-hidden="true">'+(FLAG_SVG_INNER[code]||'')+'</svg>';
 }
 const I18N={
   th:{
