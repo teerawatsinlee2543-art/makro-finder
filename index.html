@@ -334,6 +334,7 @@ body{margin:0;padding:0;touch-action:manipulation}
 .scan-error{color:#ffb3b3;font-size:13px;text-align:center;margin-top:14px}
 .line-camera-notice{background:#fff;color:#23201B;border-radius:14px;padding:18px 16px;max-width:320px;margin:14px auto 0;box-shadow:0 8px 24px rgba(0,0,0,.35);text-align:center;font-size:13.5px;line-height:1.5}
 .line-open-browser-btn{display:block;margin:12px auto 0;padding:10px 20px;border-radius:10px;border:none;background:var(--brand-red);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.line-open-browser-btn.secondary{background:none;border:1px solid #D8D2C4;color:#5B5346;margin-top:8px}
 .line-open-browser-hint{color:#8A8175;font-size:11.5px;text-align:center;margin-top:8px}
 .login-screen{position:fixed;inset:0;background:var(--brand-red);display:none;align-items:center;justify-content:center;padding:24px;z-index:1500;overflow-y:auto}
 .login-card{position:relative;background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center;margin:auto}
@@ -1229,6 +1230,8 @@ const I18N={
     lineAndroidCameraNotice:'การสแกนผ่านแอป LINE บน Android มักไม่รองรับกล้อง กรุณาเปิดในเบราว์เซอร์ (Chrome) แทน',
     openInBrowserBtn:'เปิดในเบราว์เซอร์',
     lineOpenBrowserHint:'หรือแตะเมนู ⋮ มุมขวาบน แล้วเลือก "เปิดในเบราว์เซอร์"',
+    copyLinkBtn:'คัดลอกลิงก์',
+    linkCopiedToast:'คัดลอกลิงก์แล้ว วางในเบราว์เซอร์ได้เลย',
     printTimeLabel:'เวลา',
     addZonePrompt:'ใส่ชื่อโซน/กล่องใหม่',
     newZoneDefaultName:'โซนใหม่',
@@ -1503,6 +1506,8 @@ const I18N={
     lineAndroidCameraNotice:'Scanning inside the LINE app on Android usually cannot access the camera. Please open this page in your browser (Chrome) instead.',
     openInBrowserBtn:'Open in browser',
     lineOpenBrowserHint:'Or tap the ⋮ menu in the top right and choose "Open in browser"',
+    copyLinkBtn:'Copy link',
+    linkCopiedToast:'Link copied — paste it into your browser',
     printTimeLabel:'Time',
     addZonePrompt:'Enter a name for the new zone/box',
     newZoneDefaultName:'New zone',
@@ -1777,6 +1782,8 @@ const I18N={
     lineAndroidCameraNotice:'在 Android 的 LINE 应用内通常无法使用相机扫描，请改用浏览器（Chrome）打开此页面',
     openInBrowserBtn:'在浏览器中打开',
     lineOpenBrowserHint:'或点击右上角 ⋮ 菜单，选择"在浏览器中打开"',
+    copyLinkBtn:'复制链接',
+    linkCopiedToast:'已复制链接，请粘贴到浏览器中打开',
     printTimeLabel:'时间',
     addZonePrompt:'输入新分区/方块的名称',
     newZoneDefaultName:'新分区',
@@ -2051,6 +2058,8 @@ const I18N={
     lineAndroidCameraNotice:'Android တွင် LINE အက်ပ်အတွင်းမှ စကန်ဖတ်ခြင်းသည် များသောအားဖြင့် ကင်မရာကိုသုံး၍မရပါ ကျေးဇူးပြု၍ ဤစာမျက်နှာကို ဘရောက်ဇာ (Chrome) ဖြင့်ဖွင့်ပါ',
     openInBrowserBtn:'ဘရောက်ဇာဖြင့်ဖွင့်ရန်',
     lineOpenBrowserHint:'သို့မဟုတ် ညာဘက်အပေါ်ရှိ ⋮ မီနူးကိုတို့ပြီး "ဘရောက်ဇာဖြင့်ဖွင့်ရန်" ကိုရွေးပါ',
+    copyLinkBtn:'လင့်ခ်ကူးယူရန်',
+    linkCopiedToast:'လင့်ခ်ကူးယူပြီးပါပြီ ဘရောက်ဇာတွင် ကူးထည့်နိုင်ပါပြီ',
     printTimeLabel:'အချိန်',
     addZonePrompt:'ဇုန်/ဘောက်စ်အသစ်အမည်ထည့်ပါ',
     newZoneDefaultName:'ဇုန်အသစ်',
@@ -2325,6 +2334,8 @@ const I18N={
     lineAndroidCameraNotice:'Android의 LINE 앱 내에서는 보통 카메라를 사용할 수 없습니다. 브라우저(Chrome)에서 이 페이지를 열어주세요',
     openInBrowserBtn:'브라우저에서 열기',
     lineOpenBrowserHint:'또는 오른쪽 상단의 ⋮ 메뉴를 눌러 "브라우저에서 열기"를 선택하세요',
+    copyLinkBtn:'링크 복사',
+    linkCopiedToast:'링크가 복사되었습니다. 브라우저에 붙여넣으세요',
     printTimeLabel:'시간',
     addZonePrompt:'새 구역/박스 이름을 입력하세요',
     newZoneDefaultName:'새 구역',
@@ -2599,6 +2610,8 @@ const I18N={
     lineAndroidCameraNotice:'AndroidのLINEアプリ内ではカメラを利用できないことがほとんどです。ブラウザ（Chrome）でこのページを開いてください',
     openInBrowserBtn:'ブラウザで開く',
     lineOpenBrowserHint:'または右上の ⋮ メニューをタップして「ブラウザで開く」を選択してください',
+    copyLinkBtn:'リンクをコピー',
+    linkCopiedToast:'リンクをコピーしました。ブラウザに貼り付けてください',
     printTimeLabel:'時刻',
     addZonePrompt:'新しいゾーン/ボックスの名前を入力',
     newZoneDefaultName:'新しいゾーン',
@@ -4889,7 +4902,8 @@ function promptAddQty(itemNo){
 // ทำให้สแกนไม่ได้แม้ผู้ใช้กด "อนุญาต" ต้องแนะนำให้เปิดในเบราว์เซอร์จริง (Chrome) แทน ====
 function isLineAndroidBrowser(){
   const ua=navigator.userAgent||'';
-  return /Line\//.test(ua) && /Android/i.test(ua);
+  // จับแบบไม่สนตัวพิมพ์เล็ก-ใหญ่ เพราะ UA ของ LINE บางเวอร์ชัน/บางรุ่นเครื่องสะกดไม่ตรงกันเป๊ะ
+  return /line\//i.test(ua) && /android/i.test(ua);
 }
 function lineExternalBrowserUrl(){
   try{
@@ -4900,10 +4914,37 @@ function lineExternalBrowserUrl(){
     return window.location.href+(window.location.href.indexOf('?')>=0?'&':'?')+'openExternalBrowser=1';
   }
 }
+// สำรองไว้เผื่อปุ่ม "เปิดในเบราว์เซอร์" เด้งไม่ออกในบางเวอร์ชันของ LINE — ให้คัดลอกลิงก์ไปวางในเบราว์เซอร์เองได้เลย
+function copyLineLink(btn){
+  const url=window.location.href;
+  const done=()=>{
+    const original=btn.textContent;
+    btn.textContent=t('linkCopiedToast');
+    setTimeout(()=>{ btn.textContent=original; },1800);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done).catch(()=>fallbackCopyLineLink(url,done));
+  } else {
+    fallbackCopyLineLink(url,done);
+  }
+}
+function fallbackCopyLineLink(url,done){
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=url;
+    ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    done();
+  }catch(e){}
+}
 function lineCameraErrorHtml(){
   return '<div class="line-camera-notice">'+
     '<div>'+escapeHtml(t('lineAndroidCameraNotice'))+'</div>'+
     '<button type="button" class="line-open-browser-btn" onclick="location.href=lineExternalBrowserUrl()">'+escapeHtml(t('openInBrowserBtn'))+'</button>'+
+    '<button type="button" class="line-open-browser-btn secondary" onclick="copyLineLink(this)">'+escapeHtml(t('copyLinkBtn'))+'</button>'+
     '<div class="line-open-browser-hint">'+escapeHtml(t('lineOpenBrowserHint'))+'</div>'+
   '</div>';
 }
