@@ -5456,16 +5456,20 @@ function loadItemImages(){
 loadItemImages();
 
 // ==== สินค้าจาก Item Master ที่ยังไม่มีตำแหน่งจัดเก็บ (เห็นเฉพาะโหมดพนักงาน) ====
+// ไฟล์นี้ใหญ่มาก (~17MB) เดิมโหลดพร้อมกับข้อมูลสินค้าหลักทุกครั้งที่เปิดหน้าเว็บ ไม่ว่าจะเป็นลูกค้าหรือพนักงาน
+// ทำให้แย่งแบนด์วิดท์/ทำให้หน้าโหลดสินค้าช้าลงโดยไม่จำเป็นสำหรับลูกค้าทั่วไปซึ่งไม่ได้ใช้ข้อมูลนี้เลย
+// เปลี่ยนเป็นโหลดแบบ lazy เฉพาะตอนเข้าโหมดพนักงานจริงๆ ผ่าน applyEmployeeOnlyVisibility() ด้านล่าง
 let EMPLOYEE_ONLY_ITEMS={};
 let EMPLOYEE_ONLY_ITEMS_READY=false;
 let employeeOnlyItemsApplied=false;
+let employeeOnlyItemsLoadStarted=false;
 function loadEmployeeOnlyItems(){
+  employeeOnlyItemsLoadStarted=true;
   return fetch('employee_only_items.json',{cache:'no-store'})
     .then(r=>r.ok?r.json():{})
-    .then(data=>{ EMPLOYEE_ONLY_ITEMS=data||{}; EMPLOYEE_ONLY_ITEMS_READY=true; })
-    .catch(()=>{ EMPLOYEE_ONLY_ITEMS={}; EMPLOYEE_ONLY_ITEMS_READY=true; });
+    .then(data=>{ EMPLOYEE_ONLY_ITEMS=data||{}; EMPLOYEE_ONLY_ITEMS_READY=true; applyEmployeeOnlyVisibility(); })
+    .catch(()=>{ EMPLOYEE_ONLY_ITEMS={}; EMPLOYEE_ONLY_ITEMS_READY=true; applyEmployeeOnlyVisibility(); });
 }
-loadEmployeeOnlyItems();
 
 // ==== บาร์โค้ดสำรอง: สินค้าบางตัวมีหลายบาร์โค้ด (บาร์โค้ดลัง/บาร์โค้ดชิ้น) ====
 // alt_barcodes.json คือ {barcode: itemNo} รวมบาร์โค้ดทุกแบบที่พบใน Item Master
@@ -5480,8 +5484,10 @@ function loadAltBarcodes(){
 loadAltBarcodes();
 
 function applyEmployeeOnlyVisibility(){
-  if(!PRODUCTS_READY||!EMPLOYEE_ONLY_ITEMS_READY)return;
+  if(!PRODUCTS_READY)return;
   const shouldShow=isEmployee();
+  if(shouldShow&&!employeeOnlyItemsLoadStarted){ loadEmployeeOnlyItems(); return; }
+  if(!EMPLOYEE_ONLY_ITEMS_READY)return;
   if(shouldShow===employeeOnlyItemsApplied)return;
   if(shouldShow){
     Object.keys(EMPLOYEE_ONLY_ITEMS).forEach(itemNo=>{
