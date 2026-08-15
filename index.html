@@ -4909,6 +4909,7 @@ function lineCameraErrorHtml(){
 let palletScanControls=null,palletScanMode=null;
 let lastPalletScanCode=null,lastPalletScanAt=0;
 const SCAN_DEBOUNCE_MS=1500;
+let palletScanConfirmCode=null,palletScanConfirmCount=0;
 function openPalletScan(mode){
   palletScanMode=mode;
   const overlay=document.getElementById('palletScanOverlay');
@@ -4916,6 +4917,7 @@ function openPalletScan(mode){
   const hint=document.getElementById('palletScanHint');
   err.style.display='none';
   hint.style.display='block';
+  palletScanConfirmCode=null;palletScanConfirmCount=0;
   document.getElementById('palletScanTitle').textContent=mode==='manage'?t('scanTitleManage'):(mode==='find'?t('scanTitleFind'):(mode==='palletloc'?t('scanTitleBay'):(mode==='newitembarcode'?t('scanTitleNewItemBarcode'):(mode==='movepallettarget'?t('scanTitleMoveTarget'):t('scanTitleDelete')))));
   overlay.style.display='flex';
   if(isLineAndroidBrowser()){
@@ -4933,8 +4935,11 @@ function openPalletScan(mode){
   const video=document.getElementById('palletScanVideo');
   getZXingReader().decodeFromConstraints({video:SCAN_VIDEO_CONSTRAINTS},video,(result)=>{
     const r=result||tryRotatedDecode(video);
-    if(r){
-      handlePalletScanCode(r.getText().trim());
+    if(!r){ palletScanConfirmCode=null;palletScanConfirmCount=0; return; }
+    const code=r.getText().trim();
+    if(code===palletScanConfirmCode){ palletScanConfirmCount++; } else { palletScanConfirmCode=code; palletScanConfirmCount=1; }
+    if(palletScanConfirmCount>=2){
+      handlePalletScanCode(code);
     }
   }).then(controls=>{
     palletScanControls=controls;
@@ -6062,6 +6067,8 @@ let zxingReader=null;
 function getZXingReader(){
   if(!zxingReader){
     const hints=new Map();
+    // ตัด ITF/CODABAR ออก และปิด TRY_HARDER เพราะสองอย่างนี้เป็นสาเหตุหลักที่กล้องอ่านลายเส้น/พื้นผิวทั่วไป
+    // ผิดเป็นบาร์โค้ดปลอมระหว่างสแกนสด (false positive) ทั้งที่ยังไม่ได้เล็งไปที่บาร์โค้ดจริงเลย
     hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[
       ZXing.BarcodeFormat.QR_CODE,
       ZXing.BarcodeFormat.EAN_13,
@@ -6069,11 +6076,8 @@ function getZXingReader(){
       ZXing.BarcodeFormat.UPC_A,
       ZXing.BarcodeFormat.UPC_E,
       ZXing.BarcodeFormat.CODE_128,
-      ZXing.BarcodeFormat.CODE_39,
-      ZXing.BarcodeFormat.ITF,
-      ZXing.BarcodeFormat.CODABAR
+      ZXing.BarcodeFormat.CODE_39
     ]);
-    hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
     zxingReader=new ZXing.BrowserMultiFormatReader(hints,80);
   }
   return zxingReader;
@@ -6105,11 +6109,13 @@ function tryRotatedDecode(video){
   }
 }
 let scanControls=null;
+let scanConfirmCode=null,scanConfirmCount=0;
 function openScanner(){
   const overlay=document.getElementById('scanOverlay');
   const err=document.getElementById('scanError');
   err.style.display='none';err.textContent='';
   overlay.style.display='flex';
+  scanConfirmCode=null;scanConfirmCount=0;
   if(isLineAndroidBrowser()){
     err.innerHTML=lineCameraErrorHtml();
     err.style.display='block';
@@ -6123,8 +6129,11 @@ function openScanner(){
   const video=document.getElementById('scanVideo');
   getZXingReader().decodeFromConstraints({video:SCAN_VIDEO_CONSTRAINTS},video,(result)=>{
     const r=result||tryRotatedDecode(video);
-    if(r){
-      const code=r.getText().trim();
+    if(!r){ scanConfirmCode=null;scanConfirmCount=0; return; }
+    const code=r.getText().trim();
+    // ต้องอ่านค่าเดียวกันซ้ำ 2 ครั้งติดกันก่อนถึงจะยอมรับผล กันกรณีกล้องอ่านลายเส้น/สิ่งของทั่วไปผิดเป็นบาร์โค้ดแบบครั้งเดียว
+    if(code===scanConfirmCode){ scanConfirmCount++; } else { scanConfirmCode=code; scanConfirmCount=1; }
+    if(scanConfirmCount>=2){
       closeScanner();
       search(code);
     }
