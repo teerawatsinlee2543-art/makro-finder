@@ -99,7 +99,8 @@ body{margin:0;padding:0;touch-action:manipulation}
 .result-header-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .result-header-info .result-top{margin-bottom:10px}
 .result-header-info .loc-row{margin-bottom:0}
-.result-top{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:14px}
+.result-top{margin-bottom:14px}
+.result-edit-btn-row{display:flex;justify-content:flex-end;margin-bottom:12px}
 .result-edit-btn{border-radius:20px;background:color-mix(in srgb, var(--brand-red) 8%, white);border:1px solid color-mix(in srgb, var(--brand-red) 22%, white);color:var(--brand-red);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;cursor:pointer;flex-shrink:0;font-size:15px;padding:8px 14px;transition:background .15s,border-color .15s}
 .result-edit-btn:hover{background:color-mix(in srgb, var(--brand-red) 14%, white);border-color:color-mix(in srgb, var(--brand-red) 32%, white)}
 .result-edit-btn:active{background:color-mix(in srgb, var(--brand-red) 20%, white)}
@@ -428,8 +429,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .nav-info-line svg.shelf-icon{width:15px;height:15px}
   .result-header-flex{flex-direction:row}
   .result-image-banner{width:260px;margin:0}
-  .result-top{flex-direction:row;align-items:center}
-  .result-edit-btn{margin-left:auto}
 }
 @media (min-width:1024px){
   .nav-info-title{font-size:19px}
@@ -707,6 +706,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
       <div id="resultsList" style="display:none"></div>
       <div id="foundCard" style="display:none">
+        <div class="result-edit-btn-row">
+          <button type="button" class="result-edit-btn" id="rEditBtn" style="display:none" aria-label="แก้ไขข้อมูลสินค้า"><i class="ti ti-pencil" aria-hidden="true"></i><span data-i18n="editProductModalTitle">แก้ไขข้อมูลสินค้า</span></button>
+        </div>
         <div class="result-header-flex">
           <div class="result-image-banner" id="rIconWrap"><i class="ti ti-package" aria-hidden="true"></i></div>
           <div class="result-header-info">
@@ -715,7 +717,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
                 <div class="result-name" id="rName"></div>
                 <span class="result-cat-badge" id="rBadge"></span>
               </div>
-              <button type="button" class="result-edit-btn" id="rEditBtn" style="display:none" aria-label="แก้ไขข้อมูลสินค้า"><i class="ti ti-pencil" aria-hidden="true"></i><span data-i18n="editProductModalTitle">แก้ไขข้อมูลสินค้า</span></button>
             </div>
             <div class="loc-row" id="rLoc"></div>
           </div>
