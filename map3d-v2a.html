@@ -67,8 +67,25 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
 .legend-list .txt{display:flex;flex-direction:column;line-height:1.22;min-width:0}
 .legend-list .th{font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .legend-list .en{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend-empty{font-size:12.5px;color:var(--muted)}
 
 .badge{display:inline-flex;align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--accent);padding:4px 10px;border-radius:999px}
+
+.saved-tag{font-size:11.5px;color:var(--muted);opacity:0;transition:opacity .25s}
+.saved-tag.show{opacity:1}
+.add-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:999px;z-index:5;display:none;pointer-events:none;white-space:nowrap}
+.zone-hit{cursor:grab}
+.zone-hit:active{cursor:grabbing}
+.edit-panel{position:absolute;right:14px;top:14px;width:220px;max-width:calc(100% - 28px);background:var(--card-bg);border:1px solid var(--card-line);border-radius:14px;padding:14px;box-shadow:0 10px 30px -10px rgba(0,0,0,.5);display:none;flex-direction:column;gap:10px;z-index:6}
+.edit-panel.open{display:flex}
+.edit-panel .panel-title{font-size:13px;font-weight:800;color:var(--ink)}
+.edit-panel .field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.edit-panel .field input[type="text"]{font:inherit;font-size:13px;padding:7px 9px;border-radius:8px;border:1px solid var(--card-line);background:var(--bg);color:var(--ink)}
+.edit-panel .field input[type="color"]{width:100%;height:32px;border:1px solid var(--card-line);border-radius:8px;background:none;padding:2px}
+.edit-panel .actions{display:flex;gap:8px;flex-wrap:wrap}
+.edit-panel .actions .btn{flex:1}
+button.btn.danger{color:#fff;background:#C0392B;border-color:#C0392B}
+button.btn.danger:hover{background:#A93226}
 </style>
 </head>
 <body>
@@ -77,7 +94,7 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
     <span class="badge">Concept A</span>
     <span class="eyebrow">3D Store Map &middot; Realistic Render &middot; Makro รามอินทรา St.042</span>
     <h1>ผังร้าน 3D — สไตล์ Realistic Render</h1>
-    <p class="sub">แสงไฟเพดาน เงาตกกระทบ ชั้นวางสินค้าหลากสี ให้ความรู้สึกใกล้เคียงภาพเรนเดอร์ 3D จริง &middot; ลากบนผังเพื่อหมุนรอบตัวเอง 360° &middot; Shift+ลาก เพื่อเลื่อนมุมมอง &middot; สกรอลล์/พินช์เพื่อซูม</p>
+    <p class="sub">แสงไฟเพดาน เงาตกกระทบ ชั้นวางสินค้าหลากสี ให้ความรู้สึกใกล้เคียงภาพเรนเดอร์ 3D จริง &middot; ลากบนผังเพื่อหมุนรอบตัวเอง 360° &middot; Shift+ลาก เพื่อเลื่อนมุมมอง &middot; สกรอลล์/พินช์เพื่อซูม &middot; คลิกที่ชั้นวางเพื่อแก้ไขชื่อ/สี &middot; ลากชั้นวางเพื่อย้ายตำแหน่ง &middot; กด "+ เพิ่มแผนกใหม่" เพื่อวางแผนกเพิ่ม — บันทึกไว้ในเบราว์เซอร์อัตโนมัติ</p>
   </header>
 
   <div class="toolbar">
@@ -87,12 +104,27 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
       <span class="deg" id="rotDeg">25&deg;</span>
     </div>
     <button class="btn" type="button" id="spinBtn">▶ หมุนอัตโนมัติ</button>
+    <button class="btn" type="button" id="addBtn">+ เพิ่มแผนกใหม่</button>
+    <button class="btn" type="button" id="resetBtn">รีเซ็ตเป็นค่าเริ่มต้น</button>
+    <span class="saved-tag" id="savedTag">บันทึกแล้ว</span>
   </div>
 
   <div class="layout">
     <div>
       <div class="floor-wrap">
+        <div class="add-hint" id="addHint">คลิกตำแหน่งบนผังเพื่อวางแผนกใหม่ &middot; Esc ยกเลิก</div>
         <div class="svg-host" id="svgHost"></div>
+        <div class="edit-panel" id="editPanel">
+          <div class="panel-title">แก้ไขแผนก</div>
+          <label class="field"><span>ชื่อแผนก (ไทย)</span><input type="text" id="thInput" /></label>
+          <label class="field"><span>English name</span><input type="text" id="enInput" /></label>
+          <label class="field"><span>สี</span><input type="color" id="colorInput" /></label>
+          <div class="actions">
+            <button class="btn" type="button" id="saveBtn">บันทึก</button>
+            <button class="btn danger" type="button" id="delBtn">ลบแผนกนี้</button>
+            <button class="btn" type="button" id="closeBtn">ปิด</button>
+          </div>
+        </div>
       </div>
     </div>
     <aside class="legend">
@@ -125,6 +157,23 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
     const rotX=rx*Math.cos(theta)-ry*Math.sin(theta);
     const rotY=rx*Math.sin(theta)+ry*Math.cos(theta);
     return [ (rotX-rotY)*MAP_ISO_COS, (rotX+rotY)*MAP_ISO_SIN - z*MAP_Z_SCALE ];
+  }
+  function isoUnproject(screenX,screenY,z,rotationDeg){
+    const theta=(rotationDeg||0)*Math.PI/180;
+    const a=screenX/MAP_ISO_COS;
+    const b=(screenY+z*MAP_Z_SCALE)/MAP_ISO_SIN;
+    const rotX=(a+b)/2, rotY=(b-a)/2;
+    const worldX=rotX*Math.cos(-theta)-rotY*Math.sin(-theta)+MAP_FLOOR_CX;
+    const worldY=rotX*Math.sin(-theta)+rotY*Math.cos(-theta)+MAP_FLOOR_CY;
+    return [worldX,worldY];
+  }
+  function svgPointFromEvent(svgEl, evt){
+    const pt=svgEl.createSVGPoint();
+    pt.x=evt.clientX; pt.y=evt.clientY;
+    const ctm=svgEl.getScreenCTM();
+    if(!ctm) return {x:0,y:0};
+    const loc=pt.matrixTransform(ctm.inverse());
+    return {x:loc.x, y:loc.y};
   }
   function shadeColor(hex,amt){
     const c=String(hex).replace('#','');
@@ -534,6 +583,13 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
       jointLines.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(0,0,0,.05)" stroke-width="1"/>');
     }
 
+    // invisible top-face overlay per editable zone, for click-to-edit / drag-to-move
+    const zoneHits=zones.map(function(b){
+      const H=b.height||54;
+      const top=[isoProject(b.x,b.y,H,rot),isoProject(b.x+b.w,b.y,H,rot),isoProject(b.x+b.w,b.y+b.h,H,rot),isoProject(b.x,b.y+b.h,H,rot)];
+      return '<polygon class="zone-hit" data-id="'+escapeHtml(b.id)+'" points="'+polyPts(top)+'" fill="rgba(0,0,0,0)" style="pointer-events:all"/>';
+    }).join('');
+
     return '<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้าน Makro รามอินทรา St.042 แบบ 3 มิติ สไตล์ realistic render">'+
       defs+
       '<polygon points="'+polyPts(floorTop)+'" fill="url(#floorGlow)"/>'+
@@ -545,6 +601,7 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
       doorPanel(MAP_FLOOR.x+870,rot,'#E0332B')+
       glassDoor(entrance,'ทางเข้า · IN','#3FAE6E','up')+
       glassDoor(exit,'ทางออก · OUT','#E0332B','down')+
+      '<g>'+zoneHits+'</g>'+
       '<rect x="'+vbX.toFixed(1)+'" y="'+vbY.toFixed(1)+'" width="'+vbW.toFixed(1)+'" height="'+vbH.toFixed(1)+'" fill="url(#vignette)" pointer-events="none"/>'+
       '</svg>';
   }
@@ -568,20 +625,52 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
     ];
   }
 
+  const STORAGE_KEY='makroMap3Dv2aZones';
+  function loadZones(){
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY);
+      if(raw){ const parsed=JSON.parse(raw); if(Array.isArray(parsed)&&parsed.length) return parsed; }
+    }catch(e){}
+    return defaultItems();
+  }
+
   const svgHost=document.getElementById('svgHost');
   const rotInput=document.getElementById('rot');
   const rotDeg=document.getElementById('rotDeg');
   const legendList=document.getElementById('legendList');
   const spinBtn=document.getElementById('spinBtn');
-  const zones=defaultItems();
+  const addBtn=document.getElementById('addBtn');
+  const resetBtn=document.getElementById('resetBtn');
+  const savedTag=document.getElementById('savedTag');
+  const addHint=document.getElementById('addHint');
+  const editPanel=document.getElementById('editPanel');
+  const thInput=document.getElementById('thInput');
+  const enInput=document.getElementById('enInput');
+  const colorInput=document.getElementById('colorInput');
+  const saveBtn=document.getElementById('saveBtn');
+  const delBtn=document.getElementById('delBtn');
+  const closeBtn=document.getElementById('closeBtn');
 
+  let zones=loadZones();
   let currentRot=Number(rotInput.value)||25;
   let zoomLevel=1, panX=0, panY=0;
 
+  let savedTimer=null;
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(zones)); }catch(e){}
+    savedTag.classList.add('show');
+    if(savedTimer) clearTimeout(savedTimer);
+    savedTimer=setTimeout(function(){ savedTag.classList.remove('show'); }, 1200);
+  }
+
   function renderLegend(){
+    if(!zones.length){
+      legendList.innerHTML='<li class="legend-empty">ยังไม่มีแผนก — กด "+ เพิ่มแผนกใหม่" เพื่อเริ่ม</li>';
+      return;
+    }
     legendList.innerHTML=zones.map(function(z){
       return '<li><span class="swatch" style="background:'+z.fill+'"></span>'
-        +'<span class="txt"><span class="th">'+escapeHtml(z.th)+'</span><span class="en">'+escapeHtml(z.en)+'</span></span></li>';
+        +'<span class="txt"><span class="th">'+escapeHtml(z.th||'(ไม่มีชื่อ)')+'</span><span class="en">'+escapeHtml(z.en||'')+'</span></span></li>';
     }).join('');
   }
   function renderMap(){
@@ -589,10 +678,71 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
     rotDeg.textContent=Math.round(currentRot)%360+'°';
     svgHost.innerHTML=renderMapSVG(zones,currentRot,zoomLevel,panX,panY);
   }
+  function refresh(){ renderMap(); renderLegend(); }
   rotInput.addEventListener('input', function(){ currentRot=Number(rotInput.value); renderMap(); });
 
+  // ==== add / edit / delete แผนก ====
+  let addMode=false;
+  function setAddMode(on){
+    addMode=on;
+    addBtn.classList.toggle('active', on);
+    addBtn.textContent = on ? 'กำลังวางแผนก…' : '+ เพิ่มแผนกใหม่';
+    addHint.style.display = on ? 'block' : 'none';
+    svgHost.style.cursor = on ? 'copy' : '';
+  }
+  addBtn.addEventListener('click', function(){ setAddMode(!addMode); });
+
+  let editingId=null;
+  function openEditor(id){
+    const item=zones.find(function(z){ return z.id===id; });
+    if(!item) return;
+    editingId=id;
+    editPanel.classList.add('open');
+    thInput.value=item.th||'';
+    enInput.value=item.en||'';
+    colorInput.value=/^#[0-9a-fA-F]{6}$/.test(item.fill||'')?item.fill:'#cccccc';
+    thInput.focus();
+    thInput.select();
+  }
+  function closeEditor(){ editPanel.classList.remove('open'); editingId=null; }
+  function commitEditor(){
+    if(!editingId) return;
+    const item=zones.find(function(z){ return z.id===editingId; });
+    if(!item) return;
+    item.th=thInput.value; item.en=enInput.value; item.fill=colorInput.value;
+    save(); refresh(); closeEditor();
+  }
+  function deleteEditing(){
+    if(!editingId) return;
+    zones=zones.filter(function(z){ return z.id!==editingId; });
+    save(); refresh(); closeEditor();
+  }
+  saveBtn.addEventListener('click', commitEditor);
+  delBtn.addEventListener('click', deleteEditing);
+  closeBtn.addEventListener('click', closeEditor);
+  [thInput,enInput].forEach(function(inp){
+    inp.addEventListener('keydown', function(ev){
+      if(ev.key==='Enter'){ ev.preventDefault(); commitEditor(); }
+    });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){
+      if(addMode) setAddMode(false);
+      if(editPanel.classList.contains('open')) closeEditor();
+    }
+  });
+  resetBtn.addEventListener('click', function(){
+    if(window.confirm('รีเซ็ตแผนกทั้งหมดกลับเป็นค่าเริ่มต้น? การแก้ไขที่ทำไว้จะหายไป')){
+      zones=defaultItems();
+      save(); refresh(); closeEditor(); setAddMode(false);
+    }
+  });
+
+  // ==== มุมมอง 3D: ลาก = หมุนรอบตัวเอง, Shift+ลาก = เลื่อนมุมมอง, สกรอลล์/พินช์ = ซูม ====
+  // ลากที่ตัวชั้นวาง (.zone-hit) = ย้ายตำแหน่งแผนกนั้นแทนการหมุนกล้อง, คลิกเฉยๆ (ไม่ลาก) = เปิดแผงแก้ไข
   (function(){
     let dragging=false, panMode=false, lastX=0, lastY=0;
+    let blockDrag=null;
     const ROT_SENS=0.45;
     function svgViewScale(){
       const svgEl=svgHost.querySelector('svg');
@@ -603,11 +753,41 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
       return vb.width/rect.width;
     }
     svgHost.addEventListener('pointerdown', function(e){
+      if(addMode) return;
+      const hit=e.target.closest ? e.target.closest('.zone-hit') : null;
+      if(hit){
+        const svgEl=svgHost.querySelector('svg');
+        if(!svgEl) return;
+        const loc=svgPointFromEvent(svgEl, e);
+        const world=isoUnproject(loc.x, loc.y, 0, currentRot);
+        const item=zones.find(function(z){ return z.id===hit.getAttribute('data-id'); });
+        if(item){
+          blockDrag={id:item.id, startWorldX:world[0], startWorldY:world[1], startItemX:item.x, startItemY:item.y, moved:false, startClientX:e.clientX, startClientY:e.clientY};
+          svgHost.setPointerCapture(e.pointerId);
+        }
+        return;
+      }
       dragging=true; panMode=!!e.shiftKey;
       lastX=e.clientX; lastY=e.clientY;
       svgHost.setPointerCapture(e.pointerId);
     });
     svgHost.addEventListener('pointermove', function(e){
+      if(blockDrag){
+        const dx=e.clientX-blockDrag.startClientX, dy=e.clientY-blockDrag.startClientY;
+        if(Math.abs(dx)>3||Math.abs(dy)>3) blockDrag.moved=true;
+        const svgEl=svgHost.querySelector('svg');
+        if(!svgEl) return;
+        const loc=svgPointFromEvent(svgEl, e);
+        const world=isoUnproject(loc.x, loc.y, 0, currentRot);
+        const item=zones.find(function(z){ return z.id===blockDrag.id; });
+        if(item){
+          const F=MAP_FLOOR;
+          item.x=Math.max(F.x-item.w+20, Math.min(F.x+F.w-20, blockDrag.startItemX+(world[0]-blockDrag.startWorldX)));
+          item.y=Math.max(F.y-item.h+20, Math.min(F.y+F.h-20, blockDrag.startItemY+(world[1]-blockDrag.startWorldY)));
+          renderMap();
+        }
+        return;
+      }
       if(!dragging) return;
       const dx=e.clientX-lastX, dy=e.clientY-lastY;
       lastX=e.clientX; lastY=e.clientY;
@@ -615,7 +795,18 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
       else { currentRot=(currentRot+dx*ROT_SENS+360*100)%360; }
       renderMap();
     });
-    function endDrag(e){ if(!dragging) return; dragging=false; try{ svgHost.releasePointerCapture(e.pointerId); }catch(err){} }
+    function endDrag(e){
+      if(blockDrag){
+        const wasMoved=blockDrag.moved, id=blockDrag.id;
+        try{ svgHost.releasePointerCapture(e.pointerId); }catch(err){}
+        blockDrag=null;
+        if(wasMoved) save(); else openEditor(id);
+        return;
+      }
+      if(!dragging) return;
+      dragging=false;
+      try{ svgHost.releasePointerCapture(e.pointerId); }catch(err){}
+    }
     svgHost.addEventListener('pointerup', endDrag);
     svgHost.addEventListener('pointercancel', endDrag);
     svgHost.addEventListener('wheel', function(e){
@@ -624,6 +815,17 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
       zoomLevel=Math.max(0.5,Math.min(3.5,zoomLevel*factor));
       renderMap();
     }, {passive:false});
+    svgHost.addEventListener('click', function(e){
+      if(!addMode) return;
+      const svgEl=svgHost.querySelector('svg');
+      if(!svgEl) return;
+      const loc=svgPointFromEvent(svgEl, e);
+      const world=isoUnproject(loc.x, loc.y, 0, currentRot);
+      const id='zone-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+      const w=140, h=80;
+      zones.push({id:id, x:world[0]-w/2, y:world[1]-h/2, w:w, h:h, height:55, fill:'#DDE3EA', th:'แผนกใหม่', en:''});
+      save(); refresh(); setAddMode(false); openEditor(id);
+    });
   })();
 
   let spinning=false, spinRaf=null;
@@ -639,8 +841,7 @@ aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text
     if(spinning) spinStep(); else if(spinRaf) cancelAnimationFrame(spinRaf);
   });
 
-  renderLegend();
-  renderMap();
+  refresh();
 })();
 </script>
 </body>
