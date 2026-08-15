@@ -2654,9 +2654,15 @@ function refreshCurrentViewForLangChange(){
   try{
     const rv=document.getElementById('resultView');
     if(rv&&rv.classList.contains('show')){
-      const q=document.getElementById('si').value;
-      if(pendingCategoryKeyForLang){ searchByCategory(pendingCategoryKeyForLang); }
-      else if(q&&q.trim()){ search(q); }
+      const fc=document.getElementById('foundCard');
+      if(fc&&fc.style.display!=='none'&&lastDetailItem){
+        // อยู่หน้ารายละเอียดสินค้าอยู่แล้ว — เรนเดอร์สินค้าตัวเดิมซ้ำ ไม่ต้องค้นหาใหม่ จะได้ไม่หลุดไปหน้าอื่น
+        renderDetail(lastDetailItem);
+      } else {
+        const q=document.getElementById('si').value;
+        if(pendingCategoryKeyForLang){ searchByCategory(pendingCategoryKeyForLang); }
+        else if(q&&q.trim()){ search(q); }
+      }
     }
     if(typeof renderPromoGallery==='function') renderPromoGallery();
     if(typeof refreshInlineMap==='function') refreshInlineMap();
@@ -2664,6 +2670,7 @@ function refreshCurrentViewForLangChange(){
   }catch(e){}
 }
 let pendingCategoryKeyForLang=null;
+let lastDetailItem=null;
 function openLangModal(){
   const modal=document.getElementById('langModal');
   if(!modal)return;
@@ -5925,6 +5932,7 @@ function selectResult(i){
 }
 
 function renderDetail(item,fromList){
+  lastDetailItem=item;
   const fc=document.getElementById('foundCard');
   fc.style.display='block';
   document.getElementById('rName').textContent=item.desc;
