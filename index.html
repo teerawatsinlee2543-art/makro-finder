@@ -611,7 +611,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="hdr">
     <div class="hdr-row">
       <div class="hdr-logo">
-        <button class="hdr-icon" onclick="switchRole()" data-i18n-title="backBtnAria" title="กลับ" aria-label="กลับไปหน้าเลือกมุมมอง"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="hdr-icon" onclick="goBackOneStep()" data-i18n-title="backBtnAria" title="กลับ" aria-label="กลับไปหน้าก่อนหน้า"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
         <div class="hdr-logo-badge">
           <img src="logo-makro-finder.png" alt="makro">
         </div>
@@ -1261,7 +1261,7 @@ const I18N={
     translatedNameLabel:'ชื่อสินค้า (แปล)',
     mapAriaLabel:'ผังร้านแบ่งสีตามแผนก Makro รามอินทรา St.042 แบบ 3 มิติ',
     addNewItemBtn:'เพิ่มสินค้าใหม่',
-    backBtnAria:'กลับไปหน้าเลือกมุมมอง',
+    backBtnAria:'กลับไปหน้าก่อนหน้า',
     prevBtnAria:'ก่อนหน้า',
     nextBtnAria:'ถัดไป',
     attachedPhotoAlt:'รูปที่แนบ',
@@ -1537,7 +1537,7 @@ const I18N={
     translatedNameLabel:'Product name (translated)',
     mapAriaLabel:'Makro Ramintra St.042 store map by department, in 3D',
     addNewItemBtn:'Add new item',
-    backBtnAria:'Back to view selection',
+    backBtnAria:'Go back',
     prevBtnAria:'Previous',
     nextBtnAria:'Next',
     attachedPhotoAlt:'Attached photo',
@@ -1813,7 +1813,7 @@ const I18N={
     translatedNameLabel:'商品名称（翻译）',
     mapAriaLabel:'万客隆兰印塔 St.042 门店按部门划分的3D地图',
     addNewItemBtn:'新增商品',
-    backBtnAria:'返回选择视角页面',
+    backBtnAria:'返回上一页',
     prevBtnAria:'上一个',
     nextBtnAria:'下一个',
     attachedPhotoAlt:'附加图片',
@@ -2089,7 +2089,7 @@ const I18N={
     translatedNameLabel:'ကုန်ပစ္စည်းအမည် (ဘာသာပြန်)',
     mapAriaLabel:'Makro Ramintra St.042 ဆိုင်ရဲ့ ဌာနအလိုက် 3D မြေပုံ',
     addNewItemBtn:'ပစ္စည်းအသစ်ထည့်ရန်',
-    backBtnAria:'ရှုထောင့်ရွေးချယ်မှုသို့ ပြန်သွားရန်',
+    backBtnAria:'နောက်သို့ပြန်သွားရန်',
     prevBtnAria:'ယခင်',
     nextBtnAria:'နောက်',
     attachedPhotoAlt:'ပူးတွဲပုံ',
@@ -2365,7 +2365,7 @@ const I18N={
     translatedNameLabel:'상품명 (번역)',
     mapAriaLabel:'Makro 라민트라 St.042 매장 부서별 3D 지도',
     addNewItemBtn:'새 상품 추가',
-    backBtnAria:'보기 선택 화면으로 돌아가기',
+    backBtnAria:'뒤로 가기',
     prevBtnAria:'이전',
     nextBtnAria:'다음',
     attachedPhotoAlt:'첨부된 사진',
@@ -2641,7 +2641,7 @@ const I18N={
     translatedNameLabel:'商品名（翻訳）',
     mapAriaLabel:'Makro ラミントラ St.042 店舗の部門別3Dマップ',
     addNewItemBtn:'新しい商品を追加',
-    backBtnAria:'表示選択画面に戻る',
+    backBtnAria:'前の画面に戻る',
     prevBtnAria:'前へ',
     nextBtnAria:'次へ',
     attachedPhotoAlt:'添付写真',
@@ -6402,6 +6402,16 @@ function switchRole(){
   document.getElementById('empPin').value='';
   clearSearch();
   showRoleScreen();
+}
+function goBackOneStep(){
+  // ปุ่มลูกศรย้อนกลับที่หัวหน้าจอ: ถ้ากำลังดูผลค้นหา/รายละเอียดสินค้าอยู่ ให้ถอยกลับไปหน้าแรกของการค้นหาแค่ขั้นเดียว
+  // ไม่ใช่ออกจากระบบไปหน้าเลือกมุมมองทันทีเหมือนเดิม (ซึ่งข้ามไปหลายขั้นเกินไป)
+  const rv=document.getElementById('resultView');
+  if(rv&&rv.classList.contains('show')){
+    goToHomeView();
+    return;
+  }
+  switchRole();
 }
 function checkSession(){
   // ถ้ามี session ค้างอยู่ (เพิ่งใส่ PIN ไปแล้ว) ให้กลับเข้าหน้าเดิมทันที ไม่บังคับให้ใส่รหัสซ้ำ
