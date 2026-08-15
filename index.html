@@ -55,7 +55,7 @@ body{margin:0;padding:0;touch-action:manipulation}
 .hdr-icons{display:flex;align-items:flex-start;gap:8px}
 .hdr-icon{width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;cursor:pointer;border:none;flex-shrink:0}
 .hdr-icon.scan-btn{width:38px;height:38px;font-size:26px}
-.hdr-icon.lang-btn{width:38px;height:38px}
+.hdr-icon.lang-btn{width:39px;height:26px;border-radius:6px}
 .hdr-icon-col{display:flex;flex-direction:column;align-items:center;gap:3px}
 .hdr-icon-caption{font-size:9.5px;color:rgba(255,255,255,.85);font-weight:600;white-space:nowrap;line-height:1}
 .search-row{display:flex;align-items:stretch;gap:8px;margin:12px auto 0;max-width:min(1100px,94vw)}
@@ -179,8 +179,8 @@ body{margin:0;padding:0;touch-action:manipulation}
 .hdr-icon.lang-btn{font-size:18px}
 .lang-btn-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
 .lang-btn-icon svg{border-radius:4px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,0.12)}
-.hdr-icon .lang-btn-icon svg{width:100%;height:100%;border-radius:8px}
-.role-lang-btn .lang-btn-icon svg{width:100%;height:100%;border-radius:11px}
+.hdr-icon .lang-btn-icon svg{width:100%;height:100%;border-radius:6px}
+.role-lang-btn .lang-btn-icon svg{width:100%;height:100%;border-radius:8px}
 .promo-date-box input[type=text]{padding:10px 12px;border-radius:10px;border:1px solid var(--color-border-tertiary);font-size:16px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary)}
 .new-item-barcode-row{display:flex;gap:8px;align-items:center}
 .new-item-barcode-row input{flex:1;min-width:0}
@@ -358,7 +358,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .role-screen{position:fixed;inset:0;background:var(--brand-red);display:flex;align-items:center;justify-content:center;padding:24px;z-index:1500}
 .role-card-wrap{position:relative;background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
 .role-lang-col{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;align-items:center;gap:4px}
-.role-lang-btn{width:44px;height:44px;border-radius:11px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);color:var(--color-text-secondary);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.role-lang-btn{width:48px;height:32px;border-radius:8px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);color:var(--color-text-secondary);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .role-lang-caption{font-size:10px;color:var(--color-text-tertiary);font-weight:600;white-space:nowrap;line-height:1}
 .role-intro-desc{font-size:13px;color:var(--color-text-secondary);margin-bottom:22px;line-height:1.5}
 .role-option{display:flex;align-items:center;gap:14px;text-align:left;border:1.5px solid var(--color-border-secondary);border-radius:14px;padding:14px;cursor:pointer;margin-bottom:12px;transition:border-color .15s,background .15s;background:none;width:100%;font-family:inherit}
@@ -1017,7 +1017,7 @@ const FLAG_SVG_INNER={
   jp:'<rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#BC002D"/>'
 };
 function flagSvg(code){
-  return '<svg class="lang-flag" viewBox="0 0 30 20" preserveAspectRatio="none" aria-hidden="true">'+(FLAG_SVG_INNER[code]||'')+'</svg>';
+  return '<svg class="lang-flag" viewBox="0 0 30 20" aria-hidden="true">'+(FLAG_SVG_INNER[code]||'')+'</svg>';
 }
 const I18N={
   th:{
