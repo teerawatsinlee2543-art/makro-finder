@@ -2738,8 +2738,8 @@ function closeLangModal(){
   if(modal)modal.style.display='none';
 }
 /* ---------- Store map: data model, rendering, employee editing ---------- */
-const MAP_VB_W=1158, MAP_VB_H=763, MAP_MIN_W=56, MAP_MIN_H=42, MAP_MIN_HEIGHT=28, MAP_MAX_HEIGHT=182;
-const MAP_FLOOR={x:11,y:11,w:1136,h:731};
+const MAP_VB_W=1242, MAP_VB_H=847, MAP_MIN_W=56, MAP_MIN_H=42, MAP_MIN_HEIGHT=28, MAP_MAX_HEIGHT=182;
+const MAP_FLOOR={x:11,y:11,w:1220,h:815};
 const MAP_FLOOR_CX=MAP_FLOOR.x+MAP_FLOOR.w/2, MAP_FLOOR_CY=MAP_FLOOR.y+MAP_FLOOR.h/2;
 const MAP_ISO_COS=Math.cos(Math.PI/6), MAP_ISO_SIN=Math.sin(Math.PI/6);
 function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textColor,height){
@@ -2768,49 +2768,49 @@ function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textCo
 }
 const MAP_MAIN_SIZE=16, MAP_SUB_SIZE=12;
 const DEFAULT_MAP_BLOCKS=[
-  {id:'butchery',x:36,y:28,w:346,h:105,fill:'#FBE4E4',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'เนื้อสัตว์และแช่แข็ง',color:'#8B3A3A'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Butchery & Frozen',color:'#B06A6A'}]},
-  {id:'snack',x:400,y:28,w:137,h:105,fill:'#E3F6E8',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ขนม',color:'#2F6B44'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Snack',color:'#5A9470'}]},
-  {id:'winebeer',x:555,y:28,w:155,h:105,fill:'#DFF3F3',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ไวน์/เบียร์',color:'#1F6B6B'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Wine & Beer',color:'#4A9494'}]},
-  {id:'drink',x:728,y:28,w:246,h:105,fill:'#EAE4F8',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องดื่ม',color:'#5B3E96'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Drink',color:'#8A72C0'}]},
-  {id:'fishseafood',x:36,y:147,w:346,h:119,fill:'#DEEBFA',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ปลา/อาหารทะเล',color:'#2A5C93'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fish & Seafood',color:'#5F8CC0'}]},
-  {id:'grilledchicken',x:400,y:147,w:346,h:91,fill:'#FAEBDA',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ไก่ย่าง',color:'#8A5A25'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Grilled Chicken',color:'#B3874F'}]},
-  {id:'condiments',x:36,y:280,w:346,h:70,fill:'#FAE0D8',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:31,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องเทศ',color:'#9A4A2E'},
-    {fx:0.5,dy:56,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Condiments / Spices',color:'#C17A58'}]},
-  {id:'fruitveg',x:36,y:364,w:346,h:189,fill:'#E5F3DC',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ผัก-ผลไม้',color:'#4C7A2A'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fruit & Veg',color:'#7CA858'}]},
-  {id:'o2o',x:992,y:147,w:137,h:406,fill:'#FBEED9',height:98,anchor:'middle',lines:[
-    {fx:0.5,dy:189,size:MAP_MAIN_SIZE,weight:800,text:'O2O',color:'#97701E'},
-    {fx:0.5,dy:214,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'แผนกออนไลน์',color:'#B3934F'},
-    {fx:0.5,dy:237,size:MAP_SUB_SIZE,weight:600,opacity:.9,text:'Makro Pro',color:'#C3AB78'}]},
-  {id:'bakery',x:36,y:567,w:200,h:119,fill:'#F3E7D6',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'เบเกอรี่',color:'#8A6A3C'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Bakery',color:'#B3966A'}]},
-  {id:'infopoint',x:246,y:567,w:73,h:119,fill:'#DFE9F5',height:42,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_SUB_SIZE,weight:800,text:'จุดประชาสัมพันธ์',color:'#3E5F86'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.9,text:'Information',color:'#6E8FB6'}]},
-  {id:'cashier',x:328,y:567,w:400,h:119,fill:'#DFF4EA',height:42,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'แคชเชียร์',color:'#237A56'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Cashier',color:'#5AA684'}]},
-  {id:'icecream',x:746,y:567,w:173,h:119,fill:'#DBF1F4',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ไอศกรีม',color:'#1C7086'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Ice Cream',color:'#4FA0B4'}]},
-  {id:'premium',x:937,y:567,w:191,h:119,fill:'#EAE7F0',height:76,anchor:'middle',lines:[
-    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'จุดของแถม',color:'#5C5470'},
-    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Premium',color:'#8A82A0'}]},
+  {id:'butchery',x:36,y:28,w:346,h:105,fill:'#F6E2E0',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'เนื้อสัตว์และแช่แข็ง',color:'#A15550'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Butchery & Frozen',color:'#C68B85'}]},
+  {id:'snack',x:400,y:28,w:137,h:105,fill:'#E9F1E4',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ขนม',color:'#4C7A52'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Snack',color:'#82A886'}]},
+  {id:'winebeer',x:555,y:28,w:155,h:105,fill:'#E3F0EE',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ไวน์/เบียร์',color:'#35726C'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Wine & Beer',color:'#6BA39C'}]},
+  {id:'drink',x:728,y:28,w:246,h:105,fill:'#EEE8F5',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องดื่ม',color:'#6C4F96'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Drink',color:'#9C82BE'}]},
+  {id:'fishseafood',x:36,y:147,w:346,h:119,fill:'#E3EDF7',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ปลา/อาหารทะเล',color:'#3E699A'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fish & Seafood',color:'#7CA0C4'}]},
+  {id:'grilledchicken',x:400,y:147,w:346,h:91,fill:'#F8ECDD',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ไก่ย่าง',color:'#9C6B33'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Grilled Chicken',color:'#C79A5F'}]},
+  {id:'condiments',x:36,y:280,w:346,h:70,fill:'#F7E5DD',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:31,size:MAP_MAIN_SIZE,weight:800,text:'เครื่องเทศ',color:'#A85A3C'},
+    {fx:0.5,dy:56,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Condiments / Spices',color:'#CB8A6C'}]},
+  {id:'fruitveg',x:36,y:364,w:346,h:189,fill:'#E8F2E0',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ผัก-ผลไม้',color:'#567A38'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Fruit & Veg',color:'#8AAD68'}]},
+  {id:'o2o',x:992,y:147,w:137,h:406,fill:'#F9EFD9',height:98,anchor:'middle',lines:[
+    {fx:0.5,dy:189,size:MAP_MAIN_SIZE,weight:800,text:'O2O',color:'#9C7A2E'},
+    {fx:0.5,dy:214,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'แผนกออนไลน์',color:'#C2A25E'},
+    {fx:0.5,dy:237,size:MAP_SUB_SIZE,weight:600,opacity:.9,text:'Makro Pro',color:'#CDB98A'}]},
+  {id:'bakery',x:36,y:567,w:200,h:119,fill:'#F5EADA',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'เบเกอรี่',color:'#93714A'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Bakery',color:'#BC9C72'}]},
+  {id:'infopoint',x:246,y:567,w:73,h:119,fill:'#E3EBF5',height:42,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_SUB_SIZE,weight:800,text:'จุดประชาสัมพันธ์',color:'#4A6C93'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.9,text:'Information',color:'#7FA0C2'}]},
+  {id:'cashier',x:328,y:567,w:400,h:119,fill:'#E3F3EA',height:42,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'แคชเชียร์',color:'#2E7C5C'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Cashier',color:'#63A688'}]},
+  {id:'icecream',x:746,y:567,w:173,h:119,fill:'#E1F1F4',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'ไอศกรีม',color:'#2C7B90'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Ice Cream',color:'#63AABC'}]},
+  {id:'premium',x:937,y:567,w:191,h:119,fill:'#ECE8F0',height:76,anchor:'middle',lines:[
+    {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'จุดของแถม',color:'#695F82'},
+    {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Premium',color:'#9C90AF'}]},
 ].concat(
   generateAisleGroup('dryfood_',592,147,974,336,29,44,'#FBE1EC','#99406B',84)
 ).concat(
@@ -2948,25 +2948,35 @@ function lightenColor(hex,amt){
 function polyPts(pts){ return pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '); }
 
 // ==== ผังร้านสไตล์ 3D เสมือนจริง: กล่องพื้นฐาน + ป้ายแขวน + ยูนิตแต่ละประเภท (ตู้แช่/ชั้นวาง/แผงผัก-ผลไม้/เบเกอรี่/ไอศกรีม/แคชเชียร์) ====
+let __mapGradCounter=0;
 function boxFaces(x0,y0,x1,y1,z0,z1,rot,fillTop,fillRight,fillFront){
   const top=[isoProject(x0,y0,z1,rot),isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x0,y1,z1,rot)];
   const right=[isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x1,y1,z0,rot),isoProject(x1,y0,z0,rot)];
   const front=[isoProject(x0,y1,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x1,y1,z0,rot),isoProject(x0,y1,z0,rot)];
-  return ''
-    +'<polygon points="'+polyPts(right)+'" fill="'+fillRight+'" stroke="rgba(0,0,0,.28)" stroke-width="0.5"/>'
-    +'<polygon points="'+polyPts(front)+'" fill="'+fillFront+'" stroke="rgba(0,0,0,.28)" stroke-width="0.5"/>'
-    +'<polygon points="'+polyPts(top)+'" fill="'+fillTop+'" stroke="rgba(255,255,255,.3)" stroke-width="0.5"/>';
+  // ไล่เฉดสีอ่อน-เข้มในแต่ละหน้า (บนสว่างกว่า, ล่างเข้มกว่า) ให้ดูมีมิติสมจริงขึ้น โดยไม่ต้องแก้จุดเรียกใช้เดิม
+  const gid=(__mapGradCounter++);
+  const topG='bfg-t'+gid, rightG='bfg-r'+gid, frontG='bfg-f'+gid;
+  const grads='<linearGradient id="'+topG+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+lightenColor(fillTop,0.2)+'"/><stop offset="1" stop-color="'+fillTop+'"/></linearGradient>'
+    +'<linearGradient id="'+rightG+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+fillRight+'"/><stop offset="1" stop-color="'+shadeColor(fillRight,0.24)+'"/></linearGradient>'
+    +'<linearGradient id="'+frontG+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+fillFront+'"/><stop offset="1" stop-color="'+shadeColor(fillFront,0.24)+'"/></linearGradient>';
+  return grads
+    +'<polygon points="'+polyPts(right)+'" fill="url(#'+rightG+')" stroke="rgba(0,0,0,.28)" stroke-width="0.5"/>'
+    +'<polygon points="'+polyPts(front)+'" fill="url(#'+frontG+')" stroke="rgba(0,0,0,.28)" stroke-width="0.5"/>'
+    +'<polygon points="'+polyPts(top)+'" fill="url(#'+topG+')" stroke="rgba(255,255,255,.3)" stroke-width="0.5"/>';
 }
 function signAt(x,y,z,rot,th,en,tint,big){
   const p=isoProject(x,y,z,rot);
   const poleTop=[p[0],p[1]-(big?18:10)];
-  const w=Math.max(big?70:40, Math.max((th||'').length,(en||'').length)*(big?7.6:5.2));
-  const h=big?34:20;
+  const w=Math.max(big?76:44, Math.max((th||'').length,(en||'').length)*(big?7.8:5.4));
+  const h=big?37:22;
   const top=poleTop[1]-h;
-  return '<line x1="'+p[0].toFixed(1)+'" y1="'+p[1].toFixed(1)+'" x2="'+poleTop[0].toFixed(1)+'" y2="'+poleTop[1].toFixed(1)+'" stroke="#8892a0" stroke-width="1.2"/>'
-    +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?9:6)+'" fill="'+shadeColor(tint,0.55)+'" stroke="'+lightenColor(tint,0.35)+'" stroke-width="1"/>'
-    +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?15:12)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?11.5:8.5)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
-    +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+27).toFixed(1)+'" text-anchor="middle" font-size="8.5" font-weight="600" fill="'+lightenColor(tint,0.6)+'" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
+  const gid='sg'+(__mapGradCounter++);
+  return '<line x1="'+p[0].toFixed(1)+'" y1="'+p[1].toFixed(1)+'" x2="'+poleTop[0].toFixed(1)+'" y2="'+poleTop[1].toFixed(1)+'" stroke="rgba(255,255,255,.6)" stroke-width="1.2"/>'
+    +'<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+shadeColor(tint,0.4)+'"/><stop offset="1" stop-color="'+shadeColor(tint,0.62)+'"/></linearGradient>'
+    +'<rect x="'+(p[0]-w/2+0.8).toFixed(1)+'" y="'+(top+1.6).toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?11:8)+'" fill="rgba(10,12,16,.22)" filter="url(#signBlur)"/>'
+    +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?11:8)+'" fill="url(#'+gid+')" stroke="'+lightenColor(tint,0.42)+'" stroke-width="1"/>'
+    +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?16.5:13)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?12:9)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
+    +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+29).toFixed(1)+'" text-anchor="middle" font-size="9" font-weight="600" fill="'+lightenColor(tint,0.68)+'" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
 }
 // ชั้นวางสไตล์คลังสินค้า: เสาสีน้ำเงิน + คานสีส้ม + ลังสินค้าเรียงซ้อน + ป้ายแขวนด้านบน
 function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en,big){
@@ -3312,8 +3322,17 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rotationDeg,th,en);
   else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rotationDeg,tint,H,th,en,skin.kind);
   else skinMarkup=rackUnit(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en,true);
-  // ฐานรองสีดำ-เทาใต้ทุกยูนิต ให้ดูตั้งอยู่บนแท่นจริง ๆ แทนที่จะลอยอยู่บนพื้น
-  const baseMarkup=boxFaces(x0,y0,x1,y1,-6,0,rotationDeg,'#4A4E54','#1C1E21','#2C2F33');
+  // ฐานรองทุกยูนิต: เงานุ่มบางๆ ใต้แท่น + แท่นทึบสีเดียวกันทุกโซน (ไล่เฉดอัตโนมัติจาก boxFaces)
+  // ให้แท่นทุกโซนดูเป็นชุดเดียวกัน สม่ำเสมอ ไม่ขึ้นกับขนาดของแต่ละโซน (ต่างจากเงาเบลอล้วนที่ดูไม่เท่ากันเมื่อโซนใหญ่เล็กไม่เท่ากัน)
+  const shadowFp=[
+    isoProject(x0-2,y0-2,0,rotationDeg),
+    isoProject(x1+2,y0-2,0,rotationDeg),
+    isoProject(x1+2,y1+2,0,rotationDeg),
+    isoProject(x0-2,y1+2,0,rotationDeg)
+  ];
+  const ambientShadow='<polygon points="'+polyPts(shadowFp)+'" fill="rgba(20,22,28,.16)" filter="url(#groundBlur)"/>';
+  const pedestal=boxFaces(x0,y0,x1,y1,-7,0,rotationDeg,'#5B6068','#24272C','#2F3338');
+  const baseMarkup=ambientShadow+pedestal;
   skinMarkup=baseMarkup+skinMarkup;
   // depth is based purely on the block's world-space (x,y) footprint (never its height), so a tall
   // block's own faces always share one consistent stacking position relative to other blocks
@@ -3399,6 +3418,8 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
 
   const doorLabels=MAP_ENTRANCE_EXIT_I18N[currentLang]||MAP_ENTRANCE_EXIT_I18N.th;
   return '<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+escapeHtml(t('mapAriaLabel'))+'">'+
+    '<defs><filter id="groundBlur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2"/></filter>'+
+    '<filter id="signBlur" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>'+
     '<polygon points="'+polyPts(floorTop)+'" fill="'+currentMapBgColor+'"/>'+
     wallsMarkup+
     '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+zoneLabels+'</g>'+
@@ -5437,7 +5458,11 @@ function mergeMissingDefaultBlocks(blocks){
 }
 // ส.ค. 2569 ปรับผังใหม่ทั้งหมดให้ตรงสัดส่วนร้านจริง (พื้นกว้างขึ้น + ตำแหน่งแต่ละโซนเปลี่ยนแบบไม่เป็นสัดส่วนเดียวกับของเดิม)
 // จึงไม่สามารถคูณสเกลแปลงจากผังเก่าได้ตรง ๆ แบบรอบก่อน — ผังที่บันทึกไว้ก่อน v3 จะถูกละทิ้งแล้วใช้ค่าเริ่มต้นชุดใหม่แทน
-const MAP_LAYOUT_VERSION=3;
+// v3->v4: ปรับโทนสี/เงา/ป้ายใหม่ทั้งหมด + ขยายพื้นที่ผัง — ผังที่บันทึกไว้เก็บสีเดิมของแต่ละบล็อกไว้ด้วย
+// ถ้าไม่บั๊มเวอร์ชัน ผังที่เคยบันทึกไว้ (v3) จะบังค่าสีชุดใหม่นี้ไปเลย จึงต้องละทิ้งแล้วใช้ค่าเริ่มต้นชุดใหม่เหมือนรอบก่อน
+// v4->v5: สลับแถวเนื้อหมู/ขนม/ไวน์-เบียร์/เครื่องดื่ม มาอยู่เหนือแคชเชียร์ (ใกล้ทางเข้า-ออก) แคชเชียร์ขยับลง เปิดพื้นที่แถวใหม่
+// v5->v6: ย้อนกลับตำแหน่งเดิม (v4) ตามคำขอ + ปรับฐานใต้ยูนิตใหม่ให้ดูสม่ำเสมอสวยงามขึ้น
+const MAP_LAYOUT_VERSION=6;
 async function loadMapBlocksFromStorage(){
   if(mapFirestoreDocRef){
     try{
