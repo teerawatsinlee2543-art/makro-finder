@@ -3025,6 +3025,10 @@ function facingRackBox(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,frontIsY1){
   const frontY=frontIsY1?y1:y0, backY=frontIsY1?y0:y1;
   const fp=[isoProject(x0,y1,0.4,rot),isoProject(x1,y1,0.4,rot),isoProject(x1,y0,0.4,rot),isoProject(x0,y0,0.4,rot)];
   parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.14)"/>');
+  // ผนังทึบด้านหลังชั้นวาง (ฝั่งตรงข้ามทางเดิน)
+  const wallColor='#E7EAED', wallColorL='#F4F6F7', wallColorD='#B7C0C6';
+  const wallY0=frontIsY1?backY-2.5:backY, wallY1=frontIsY1?backY:backY+2.5;
+  parts.push(boxFaces(x0-1,wallY0,x1+1,wallY1,0,H*1.06,rot,wallColorL,shadeColor(wallColorD,0.15),wallColor));
   const postW=2.2;
   [[x0,frontY],[x1,frontY],[x1,backY]].forEach(([px,py])=>{
     parts.push(boxFaces(px-postW/2,py-postW/2,px+postW/2,py+postW/2,0,H,rot,postColorL,postColor,shadeColor(postColor,0.2)));
@@ -3053,15 +3057,19 @@ function facingRackBox(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,frontIsY1){
 function facingRackPair(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en){
   const parts=[];
   const depth=y1-y0;
-  const walkway=depth*0.24;
+  const walkway=depth*0.4;
   const boxDepth=(depth-walkway)/2;
   const aY0=y0, aY1=y0+boxDepth;
   const bY0=y1-boxDepth, bY1=y1;
   parts.push(facingRackBox(x0,aY0,x1,aY1,rot,tint,H,levels,crateDensity,true));
   parts.push(facingRackBox(x0,bY0,x1,bY1,rot,tint,H,levels,crateDensity,false));
-  // ทางเดินตรงกลาง: พื้นสว่างกว่ารอบข้างให้ดูเป็นช่องเดิน
+  // ทางเดินตรงกลาง: พื้นสว่างกว่ารอบข้าง มีเส้นขอบให้เห็นชัดว่าเป็นช่องเดิน
   const walkPts=[isoProject(x0,aY1,0.2,rot),isoProject(x1,aY1,0.2,rot),isoProject(x1,bY0,0.2,rot),isoProject(x0,bY0,0.2,rot)];
-  parts.push('<polygon points="'+polyPts(walkPts)+'" fill="rgba(255,255,255,.5)"/>');
+  parts.push('<polygon points="'+polyPts(walkPts)+'" fill="rgba(255,255,255,.6)"/>');
+  const walkEdgeA=[isoProject(x0,aY1,0.3,rot),isoProject(x1,aY1,0.3,rot)];
+  const walkEdgeB=[isoProject(x0,bY0,0.3,rot),isoProject(x1,bY0,0.3,rot)];
+  parts.push('<line x1="'+walkEdgeA[0][0].toFixed(1)+'" y1="'+walkEdgeA[0][1].toFixed(1)+'" x2="'+walkEdgeA[1][0].toFixed(1)+'" y2="'+walkEdgeA[1][1].toFixed(1)+'" stroke="rgba(0,0,0,.18)" stroke-width="1"/>');
+  parts.push('<line x1="'+walkEdgeB[0][0].toFixed(1)+'" y1="'+walkEdgeB[0][1].toFixed(1)+'" x2="'+walkEdgeB[1][0].toFixed(1)+'" y2="'+walkEdgeB[1][1].toFixed(1)+'" stroke="rgba(0,0,0,.18)" stroke-width="1"/>');
   if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+16,rot,th,en,tint,true));
   return parts.join('');
 }
@@ -3349,7 +3357,7 @@ const MAP_BLOCK_SKIN={
   icecream:{type:'icecream'}, fruitveg:{type:'produce'}, bakery:{type:'bakery'}, cashier:{type:'cashier'},
   snack:{type:'rack',levels:3,density:2}, winebeer:{type:'rack',levels:3,density:2},
   drink:{type:'rack',levels:3,density:3}, grilledchicken:{type:'rack',levels:2,density:2},
-  condiments:{type:'facingRack',levels:2,density:4}, premium:{type:'rack',levels:3,density:3},
+  condiments:{type:'facingRack',levels:4,density:4}, premium:{type:'rack',levels:3,density:3},
   o2o:{type:'rack',levels:3,density:2}, infopoint:{type:'counter',kind:'info'}
 };
 function getBlockSkin(b){
