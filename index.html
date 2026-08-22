@@ -2815,7 +2815,10 @@ const DEFAULT_MAP_BLOCKS=[
   generateAisleGroup('dryfood_',592,147,974,336,29,44,'#FBE1EC','#99406B',84)
 ).concat(
   generateAisleGroup('nonfood_',400,350,974,553,1,25,'#E7E4F8','#5749A0',84)
-);
+).concat([
+  {id:'entrance_door',x:406.7,y:806,w:20,h:20,fill:'#00C853',height:0,anchor:'middle',lines:[]},
+  {id:'exit_door',x:765,y:806,w:20,h:20,fill:'#FF3D00',height:0,anchor:'middle',lines:[]}
+]);
 const MAP_ZONE_LABELS={
   dryfood_:{main:{th:'Dry Food',en:'Dry Food',cn:'干货食品',mm:'အခြောက်စာ',kr:'건조식품',jp:'乾物'},sub:'Loc. 29-44',color:'#99406B',subColor:'#C36B96'},
   nonfood_:{main:{th:'Non-Food',en:'Non-Food',cn:'非食品',mm:'အစားအသောက်မဟုတ်သော',kr:'비식품',jp:'非食品'},sub:'Loc. 1-25',color:'#5749A0',subColor:'#8B80C8'}
@@ -3464,7 +3467,8 @@ const MAP_BLOCK_SKIN={
   snack:{type:'rack',levels:3,density:2}, winebeer:{type:'rack',levels:3,density:2},
   drink:{type:'rack',levels:3,density:3}, grilledchicken:{type:'rack',levels:2,density:2},
   condiments:{type:'facingRack',levels:4,density:4}, premium:{type:'rack',levels:3,density:3},
-  o2o:{type:'rack',levels:3,density:2}, infopoint:{type:'counter',kind:'info'}
+  o2o:{type:'rack',levels:3,density:2}, infopoint:{type:'counter',kind:'info'},
+  entrance_door:{type:'door',color:'#00C853',labelIdx:0}, exit_door:{type:'door',color:'#FF3D00',labelIdx:1}
 };
 function getBlockSkin(b){
   if(MAP_BLOCK_SKIN[b.id]) return MAP_BLOCK_SKIN[b.id];
@@ -3518,19 +3522,21 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rotationDeg,isHighlighted?'':th,isHighlighted?'':en,H);
   else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rotationDeg,tint,H,th,en,skin.kind);
   else if(skin.type==='facingRack') skinMarkup=facingRackPair(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en);
+  else if(skin.type==='door') skinMarkup=glassDoor(isoProject((x0+x1)/2,y1,0,rotationDeg),(MAP_ENTRANCE_EXIT_I18N[currentLang]||MAP_ENTRANCE_EXIT_I18N.th)[skin.labelIdx],skin.color);
   else skinMarkup=rackUnit(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en,true);
-  // ฐานรองทุกยูนิต: เงานุ่มบางๆ ใต้แท่น + แท่นทึบสีเดียวกันทุกโซน (ไล่เฉดอัตโนมัติจาก boxFaces)
+  // ฐานรองทุกยูนิต: เงานุ่มบางๆ ใต้แท่น + แท่นทึบสีเดียวกันทุกโซน (ไล่เฉดอัตโนมัติจาก boxFaces) ยกเว้นประตู (ไม่มีแท่น)
   // ให้แท่นทุกโซนดูเป็นชุดเดียวกัน สม่ำเสมอ ไม่ขึ้นกับขนาดของแต่ละโซน (ต่างจากเงาเบลอล้วนที่ดูไม่เท่ากันเมื่อโซนใหญ่เล็กไม่เท่ากัน)
-  const shadowFp=[
-    isoProject(x0-2,y0-2,0,rotationDeg),
-    isoProject(x1+2,y0-2,0,rotationDeg),
-    isoProject(x1+2,y1+2,0,rotationDeg),
-    isoProject(x0-2,y1+2,0,rotationDeg)
-  ];
-  const ambientShadow='<polygon points="'+polyPts(shadowFp)+'" fill="rgba(20,22,28,.16)" filter="url(#groundBlur)"/>';
-  const pedestal=boxFaces(x0,y0,x1,y1,-7,0,rotationDeg,'#5B6068','#24272C','#2F3338');
-  const baseMarkup=ambientShadow+pedestal;
-  skinMarkup=baseMarkup+skinMarkup;
+  if(skin.type!=='door'){
+    const shadowFp=[
+      isoProject(x0-2,y0-2,0,rotationDeg),
+      isoProject(x1+2,y0-2,0,rotationDeg),
+      isoProject(x1+2,y1+2,0,rotationDeg),
+      isoProject(x0-2,y1+2,0,rotationDeg)
+    ];
+    const ambientShadow='<polygon points="'+polyPts(shadowFp)+'" fill="rgba(20,22,28,.16)" filter="url(#groundBlur)"/>';
+    const pedestal=boxFaces(x0,y0,x1,y1,-7,0,rotationDeg,'#5B6068','#24272C','#2F3338');
+    skinMarkup=ambientShadow+pedestal+skinMarkup;
+  }
   // depth is based purely on the block's world-space (x,y) footprint (never its height), so a tall
   // block's own faces always share one consistent stacking position relative to other blocks
   const depth=(function(){
@@ -3545,8 +3551,10 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
     const isSelected=b.id===selectedBlockId;
     const selStroke=isSelected ? ' stroke="#1a1a1a" stroke-width="2.5" stroke-dasharray="6 4"' : ' stroke="none"';
     topMarkup+='<polygon class="map-block-rect" data-id="'+b.id+'" points="'+polyPts(hitTop)+'" fill="rgba(0,0,0,0)"'+selStroke+' style="cursor:move;touch-action:none;pointer-events:all"/>';
-    const handlePt=isoProject(x1,y1,H,rotationDeg);
-    topMarkup+='<circle class="resize-handle" data-id="'+b.id+'" cx="'+handlePt[0].toFixed(1)+'" cy="'+handlePt[1].toFixed(1)+'" r="8" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>';
+    if(skin.type!=='door'){
+      const handlePt=isoProject(x1,y1,H,rotationDeg);
+      topMarkup+='<circle class="resize-handle" data-id="'+b.id+'" cx="'+handlePt[0].toFixed(1)+'" cy="'+handlePt[1].toFixed(1)+'" r="8" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>';
+    }
   }
   if(isHighlighted){
     // กรอบสีแดงรอบกล่องที่ไฮไลต์: เส้นขอบหน้าบน + เส้นขอบตั้งทั้ง 4 มุม ลงถึงพื้น
@@ -3620,23 +3628,17 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
       allPts.push(isoProject(x,y,z,rot));
     });
   });
-  const entrance=isoProject(MAP_FLOOR.x+328,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
-  const exit=isoProject(MAP_FLOOR.x+764,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
-  allPts.push(entrance,exit);
   const minX=Math.min(...allPts.map(p=>p[0])), maxX=Math.max(...allPts.map(p=>p[0]));
   const minY=Math.min(...allPts.map(p=>p[1])), maxY=Math.max(...allPts.map(p=>p[1]));
   const pad=26;
   const vbX=minX-pad, vbY=minY-pad, vbW=(maxX-minX)+pad*2, vbH=(maxY-minY)+pad*2+18;
 
-  const doorLabels=MAP_ENTRANCE_EXIT_I18N[currentLang]||MAP_ENTRANCE_EXIT_I18N.th;
   return '<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+escapeHtml(t('mapAriaLabel'))+'">'+
     '<defs><filter id="groundBlur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2"/></filter>'+
     '<filter id="signBlur" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>'+
     '<polygon points="'+polyPts(floorTop)+'" fill="'+currentMapBgColor+'"/>'+
     wallsMarkup+
     '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+zoneLabels+'</g>'+
-    glassDoor(entrance,doorLabels[0],'#00C853')+
-    glassDoor(exit,doorLabels[1],'#FF3D00')+
     '</svg>';
 }
 
