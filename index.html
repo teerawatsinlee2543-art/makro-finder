@@ -3364,11 +3364,11 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   }
   if(isHighlighted){
     // หมุดไฮไลต์: ดาวสีเหลืองขนาดใหญ่กระพริบ (เดิมเป็นวงกลมสีแดง)
-    const pinPt=isoProject((x0+x1)/2,(y0+y1)/2,H,rotationDeg);
+    const pinPt=isoProject((x0+x1)/2,(y0+y1)/2,H*0.55,rotationDeg);
     const starColor='#FFC72C';
     topMarkup+='<g transform="translate('+pinPt[0].toFixed(1)+','+pinPt[1].toFixed(1)+')">'
-      +'<polygon points="'+starPoints(0,0,18,7,5)+'" fill="'+starColor+'" fill-opacity="0.55"><animateTransform attributeName="transform" type="scale" values="1;2.1;1" dur="1.8s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.6;0;0.6" dur="1.8s" repeatCount="indefinite"/></polygon>'
-      +'<polygon points="'+starPoints(0,0,15,6,5)+'" fill="'+starColor+'" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>'
+      +'<polygon points="'+starPoints(0,0,36,14,5)+'" fill="'+starColor+'" fill-opacity="0.55"><animateTransform attributeName="transform" type="scale" values="1;2.1;1" dur="1.8s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.6;0;0.6" dur="1.8s" repeatCount="indefinite"/></polygon>'
+      +'<polygon points="'+starPoints(0,0,30,12,5)+'" fill="'+starColor+'" stroke="#fff" stroke-width="2.8" stroke-linejoin="round"/>'
       +'</g>';
   }
   return {depth, skinMarkup, topMarkup};
