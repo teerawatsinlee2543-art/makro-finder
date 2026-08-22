@@ -3100,6 +3100,109 @@ function freezerCase(x0,y0,x1,y1,rot,tint,H,th,en){
   if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+6,rot,th,en,tint,true));
   return parts.join('');
 }
+// แผนกปลา: ถาดน้ำแข็งสี่เหลี่ยมจัตุรัส 3 ถาด (ปลา/กุ้ง/ปู กองพูนกลางถาด) + ตู้กระจกปลาไหว้ 1 ตู้ติดถาดปู
+function fishStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  const parts=[];
+  const iceBaseL='#F0FAFD', iceBaseD='#B9D8E4';
+  const steel='#C7CDD3', steelD='#9AA6AA';
+  const fishColor={c:'#93AAB8',shade:'#5C7484',belly:'#E8EEF0'};
+  const shrimpColor={c:'#E8916E',shade:'#C06A45'};
+  const crabColor={c:'#D9724A',shade:'#A8502C'};
+  const depth=y1-y0;
+  const cabDepth=Math.min(30, depth*0.28);
+  const rowGap=10;
+  const cabY0=y0, cabY1=y0+cabDepth;
+  const trayY0=cabY1+rowGap, trayY1=y1;
+
+  const n=3, gap=14;
+  const trayDepth=trayY1-trayY0;
+  const squareSide=Math.min(((x1-x0)-gap*(n-1))/n, trayDepth-4);
+  const totalW=n*squareSide+(n-1)*gap;
+  const startX=x0+((x1-x0)-totalW)/2;
+  const ty0=trayY0+(trayDepth-squareSide)/2, ty1=ty0+squareSide;
+  const zTop=H*0.62;
+  const trayX=[];
+  for(let ti=0; ti<n; ti++) trayX.push(startX+ti*(squareSide+gap));
+
+  // ตู้ปลาไหว้ 1 ตู้ ขนาดเท่าถาด วางติดกับถาดปู (ถาดที่ 3)
+  const cabX0=trayX[2], cabX1=cabX0+squareSide;
+  const caseH=H*0.85;
+  parts.push(boxFaces(cabX0,cabY0,cabX1,cabY1,0,caseH,rot,lightenColor(steel,0.12),shadeColor(steelD,0.28),steelD));
+  const frontTop=[isoProject(cabX0,cabY1,caseH,rot),isoProject(cabX1,cabY1,caseH,rot)];
+  const frontBot=[isoProject(cabX0,cabY1,caseH*0.08,rot),isoProject(cabX1,cabY1,caseH*0.08,rot)];
+  parts.push('<polygon points="'+polyPts([frontTop[0],frontTop[1],frontBot[1],frontBot[0]])+'" fill="rgba(200,235,255,.24)" stroke="rgba(255,255,255,.55)" stroke-width="1"/>');
+  parts.push('<polygon points="'+polyPts([frontTop[0],frontTop[1],frontBot[1],frontBot[0]])+'" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.4"/>');
+  const midX=(cabX0+cabX1)/2;
+  const hTop=isoProject(midX,cabY1,caseH*0.75,rot), hBot=isoProject(midX,cabY1,caseH*0.25,rot);
+  parts.push('<line x1="'+hTop[0].toFixed(1)+'" y1="'+hTop[1].toFixed(1)+'" x2="'+hBot[0].toFixed(1)+'" y2="'+hBot[1].toFixed(1)+'" stroke="rgba(255,255,255,.8)" stroke-width="2" stroke-linecap="round"/>');
+  const shelfZ=caseH*0.42;
+  parts.push(boxFaces(cabX0+2,cabY0+2,cabX1-2,cabY1-2,shelfZ-2,shelfZ,rot,'#FAFCFB',shadeColor('#C7D0CC',0.2),'#C7D0CC'));
+  const pcx=midX, pcy=(cabY0+cabY1)/2;
+  const plateP=isoProject(pcx,pcy,shelfZ+1,rot);
+  parts.push('<ellipse cx="'+plateP[0].toFixed(1)+'" cy="'+plateP[1].toFixed(1)+'" rx="15" ry="7" fill="#C0272D" stroke="#8f1c20" stroke-width="0.6"/>');
+  const fp2=isoProject(pcx,pcy,shelfZ+3,rot);
+  parts.push('<ellipse cx="'+fp2[0].toFixed(1)+'" cy="'+fp2[1].toFixed(1)+'" rx="12.5" ry="4.8" fill="'+fishColor.c+'" stroke="'+fishColor.shade+'" stroke-width="0.6"/>'
+    +'<ellipse cx="'+(fp2[0]-1.6).toFixed(1)+'" cy="'+(fp2[1]+1.3).toFixed(1)+'" rx="7.5" ry="2.1" fill="'+fishColor.belly+'" opacity="0.85"/>'
+    +'<polygon points="'+(fp2[0]+11.8).toFixed(1)+','+fp2[1].toFixed(1)+' '+(fp2[0]+19).toFixed(1)+','+(fp2[1]-4).toFixed(1)+' '+(fp2[0]+19).toFixed(1)+','+(fp2[1]+4).toFixed(1)+'" fill="'+fishColor.c+'" stroke="'+fishColor.shade+'" stroke-width="0.5"/>'
+    +'<circle cx="'+(fp2[0]-11).toFixed(1)+'" cy="'+(fp2[1]-0.6).toFixed(1)+'" r="0.9" fill="#20262d"/>');
+  const bowP=isoProject(pcx-12.5,pcy,shelfZ+4.5,rot);
+  parts.push('<circle cx="'+bowP[0].toFixed(1)+'" cy="'+bowP[1].toFixed(1)+'" r="2.2" fill="#E8192C"/>'
+    +'<polygon points="'+(bowP[0]-3.8).toFixed(1)+','+(bowP[1]-2.5).toFixed(1)+' '+bowP[0].toFixed(1)+','+bowP[1].toFixed(1)+' '+(bowP[0]-3.8).toFixed(1)+','+(bowP[1]+2.5).toFixed(1)+'" fill="#C0272D"/>'
+    +'<polygon points="'+(bowP[0]+3.8).toFixed(1)+','+(bowP[1]-2.5).toFixed(1)+' '+bowP[0].toFixed(1)+','+bowP[1].toFixed(1)+' '+(bowP[0]+3.8).toFixed(1)+','+(bowP[1]+2.5).toFixed(1)+'" fill="#C0272D"/>');
+  parts.push(boxFaces(cabX0-1,cabY0-1,cabX1+1,cabY1+1,caseH,caseH+4,rot,'#F0F3F2',shadeColor('#AEB8B4',0.15),'#AEB8B4'));
+
+  // ถาดน้ำแข็ง 3 ถาด: ปลา / กุ้ง / ปู กองพูนกลางถาดแบบสุ่มตำแหน่ง
+  for(let ti=0; ti<n; ti++){
+    const tx0=trayX[ti], tx1=tx0+squareSide;
+    const iceH=6, rimH=2.2;
+    parts.push(boxFaces(tx0-1.5,ty0-1.5,tx1+1.5,ty1+1.5,zTop-iceH-rimH,zTop-iceH,rot,lightenColor(steel,0.12),shadeColor(steelD,0.25),steelD));
+    parts.push(boxFaces(tx0,ty0,tx1,ty1,zTop-iceH,zTop,rot,iceBaseL,shadeColor(iceBaseD,0.2),iceBaseD));
+    const cx0=(tx0+tx1)/2, cy0=(ty0+ty1)/2;
+    const domeW=squareSide*0.42, domeD=squareSide*0.42;
+    parts.push(boxFaces(cx0-domeW,cy0-domeD,cx0+domeW,cy0+domeD,zTop,zTop+4,rot,'#FAFEFF',shadeColor(iceBaseD,0.12),iceBaseL));
+    const iceN=Math.max(8,Math.round(squareSide/7));
+    for(let ii=0; ii<iceN; ii++){
+      const icx=tx0+squareSide*Math.random();
+      const icy=ty0+squareSide*Math.random();
+      const ip=isoProject(icx,icy,zTop+0.6,rot);
+      parts.push('<polygon points="'+(ip[0]-2.2).toFixed(1)+','+(ip[1]+1).toFixed(1)+' '+ip[0].toFixed(1)+','+(ip[1]-1.6).toFixed(1)+' '+(ip[0]+2.2).toFixed(1)+','+(ip[1]+0.8).toFixed(1)+' '+(ip[0]+0.4).toFixed(1)+','+(ip[1]+2).toFixed(1)+'" fill="rgba(255,255,255,.8)" stroke="rgba(180,220,235,.6)" stroke-width="0.3"/>');
+    }
+    const kind=ti%3;
+    const nItems=Math.max(28,Math.round(squareSide/2.4));
+    for(let ii=0; ii<nItems; ii++){
+      const ang=Math.random()*Math.PI*2;
+      const rad=Math.random();
+      const cx=cx0+Math.cos(ang)*domeW*0.92*rad;
+      const cyw=cy0+Math.sin(ang)*domeD*0.92*rad;
+      const pileZ=zTop+1.4+(1-rad)*4.5;
+      const p=isoProject(cx,cyw,pileZ,rot);
+      const rotDeg=Math.floor(Math.random()*360);
+      if(kind===0){
+        const len=6, bh=2.1;
+        parts.push('<g transform="rotate('+rotDeg+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">'
+          +'<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="'+len+'" ry="'+bh+'" fill="'+fishColor.c+'" stroke="'+fishColor.shade+'" stroke-width="0.4"/>'
+          +'<ellipse cx="'+(p[0]-0.6).toFixed(1)+'" cy="'+(p[1]+0.5).toFixed(1)+'" rx="'+(len*0.6)+'" ry="'+(bh*0.4)+'" fill="'+fishColor.belly+'" opacity="0.85"/>'
+          +'<polygon points="'+(p[0]+len-0.8).toFixed(1)+','+p[1].toFixed(1)+' '+(p[0]+len+2.8).toFixed(1)+','+(p[1]-1.6).toFixed(1)+' '+(p[0]+len+2.8).toFixed(1)+','+(p[1]+1.6).toFixed(1)+'" fill="'+fishColor.c+'" stroke="'+fishColor.shade+'" stroke-width="0.3"/>'
+          +'</g>');
+      } else if(kind===1){
+        const r=3.2;
+        parts.push('<g transform="rotate('+rotDeg+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">'
+          +'<path d="M'+(p[0]-r).toFixed(1)+' '+(p[1]+r*0.3).toFixed(1)+' Q'+p[0].toFixed(1)+' '+(p[1]-r).toFixed(1)+' '+(p[0]+r).toFixed(1)+' '+(p[1]+r*0.5).toFixed(1)+'" stroke="'+shrimpColor.c+'" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
+          +'</g>');
+      } else {
+        parts.push('<g transform="rotate('+rotDeg+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">'
+          +'<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="3.5" ry="2.7" fill="'+crabColor.c+'" stroke="'+crabColor.shade+'" stroke-width="0.4"/>'
+          +'<circle cx="'+(p[0]-4).toFixed(1)+'" cy="'+(p[1]-2.1).toFixed(1)+'" r="1.3" fill="'+crabColor.c+'" stroke="'+crabColor.shade+'" stroke-width="0.3"/>'
+          +'<circle cx="'+(p[0]+4).toFixed(1)+'" cy="'+(p[1]-2.1).toFixed(1)+'" r="1.3" fill="'+crabColor.c+'" stroke="'+crabColor.shade+'" stroke-width="0.3"/>'
+          +'</g>');
+      }
+    }
+    const ga=isoProject(tx0,ty1,zTop+0.3,rot), gb=isoProject(tx1,ty1,zTop+0.3,rot);
+    parts.push('<line x1="'+ga[0].toFixed(1)+'" y1="'+ga[1].toFixed(1)+'" x2="'+gb[0].toFixed(1)+'" y2="'+gb[1].toFixed(1)+'" stroke="#BFEFE4" stroke-width="1.6" opacity="0.6"/>');
+  }
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H*0.85+18,rot,th,en,'#3E699A',true));
+  return parts.join('');
+}
 // ร้านไอศกรีม: เคาน์เตอร์ + ตู้โชว์ถังไอศกรีม + เครื่องซอฟต์เสิร์ฟ
 function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
   const parts=[];
@@ -3353,7 +3456,7 @@ function glassDoor(pt,label,tint){
 }
 // จับคู่ id ของบล็อกจริงใน DEFAULT_MAP_BLOCKS กับสไตล์การวาด (ไม่แก้ข้อมูลบล็อกเดิม แค่เลือกวิธีวาด)
 const MAP_BLOCK_SKIN={
-  butchery:{type:'freezer'}, fishseafood:{type:'freezer'},
+  butchery:{type:'freezer'}, fishseafood:{type:'fish'},
   icecream:{type:'icecream'}, fruitveg:{type:'produce'}, bakery:{type:'bakery'}, cashier:{type:'cashier'},
   snack:{type:'rack',levels:3,density:2}, winebeer:{type:'rack',levels:3,density:2},
   drink:{type:'rack',levels:3,density:3}, grilledchicken:{type:'rack',levels:2,density:2},
@@ -3404,6 +3507,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   const skin=getBlockSkin(b);
   let skinMarkup;
   if(skin.type==='freezer') skinMarkup=freezerCase(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
+  else if(skin.type==='fish') skinMarkup=fishStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
