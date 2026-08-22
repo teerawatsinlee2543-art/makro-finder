@@ -3424,13 +3424,16 @@ function aisleLocLabel(x0,y0,x1,y1,rot,n1,n2,scale,rackH){
   const baseP=isoProject(cx,y1,rackH,rot);
   const poleTopY=baseP[1]-58*scale;
   parts.push('<line x1="'+baseP[0].toFixed(1)+'" y1="'+baseP[1].toFixed(1)+'" x2="'+baseP[0].toFixed(1)+'" y2="'+poleTopY.toFixed(1)+'" stroke="#8892a0" stroke-width="'+(2*scale).toFixed(1)+'"/>');
-  const bw=(n2?40:24)*scale, bh=28*scale;
+  const bw=(n2?58:24)*scale, bh=28*scale;
   const bx=baseP[0]-bw/2, by=poleTopY-bh;
   parts.push('<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="'+(4*scale).toFixed(1)+'" fill="#E30613" stroke="#fff" stroke-width="'+(1.4*scale).toFixed(1)+'"/>');
   const fs2=16*scale;
   if(n2){
-    const fs3=13*scale;
-    parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="'+fs3.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n1)+'-'+escapeHtml(n2)+'</text>');
+    const fs3=14*scale;
+    const midX=baseP[0];
+    parts.push('<line x1="'+midX.toFixed(1)+'" y1="'+by.toFixed(1)+'" x2="'+midX.toFixed(1)+'" y2="'+(by+bh).toFixed(1)+'" stroke="rgba(255,255,255,.55)" stroke-width="'+(1.2*scale).toFixed(1)+'"/>');
+    parts.push('<text x="'+(midX-bw*0.24).toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="'+fs3.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
+    parts.push('<text x="'+(midX+bw*0.24).toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="'+fs3.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n2)+'</text>');
   } else if(n1){
     parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="'+fs2.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
   }
