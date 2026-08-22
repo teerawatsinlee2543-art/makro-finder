@@ -3416,42 +3416,41 @@ function counterUnit(x0,y0,x1,y1,rot,tint,H,th,en,kind){
   return parts.join('');
 }
 // หัวล็อคเลขทางเดิน: ชั้นเหล็กเตี้ย + เสาป้ายแดงตัวเลขขาวตัวใหญ่ ติดที่ขอบหน้าล็อค สไตล์ป้ายเลขทางเดิน Makro จริง
-function aisleLocLabel(x0,y0,x1,y1,rot,n1,n2,scale){
+function aisleLocLabel(x0,y0,x1,y1,rot,n1,n2,scale,rackH){
   scale=scale||1;
+  rackH=rackH||58;
   const parts=[];
-  const rackH=58;
   const cx=(x0+x1)/2;
   const baseP=isoProject(cx,y1,rackH,rot);
   const poleTopY=baseP[1]-58*scale;
   parts.push('<line x1="'+baseP[0].toFixed(1)+'" y1="'+baseP[1].toFixed(1)+'" x2="'+baseP[0].toFixed(1)+'" y2="'+poleTopY.toFixed(1)+'" stroke="#8892a0" stroke-width="'+(2*scale).toFixed(1)+'"/>');
-  const bw=24*scale, bh=(n2?44:28)*scale;
+  const bw=(n2?40:24)*scale, bh=28*scale;
   const bx=baseP[0]-bw/2, by=poleTopY-bh;
   parts.push('<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="'+(4*scale).toFixed(1)+'" fill="#E30613" stroke="#fff" stroke-width="'+(1.4*scale).toFixed(1)+'"/>');
-  const fs1=15*scale, fs2=16*scale;
+  const fs2=16*scale;
   if(n2){
-    parts.push('<line x1="'+bx.toFixed(1)+'" y1="'+(by+bh*0.5).toFixed(1)+'" x2="'+(bx+bw).toFixed(1)+'" y2="'+(by+bh*0.5).toFixed(1)+'" stroke="rgba(255,255,255,.4)" stroke-width="1"/>');
-    if(n1) parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.36).toFixed(1)+'" text-anchor="middle" font-size="'+fs1.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
-    parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.86).toFixed(1)+'" text-anchor="middle" font-size="'+fs1.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n2)+'</text>');
+    const fs3=13*scale;
+    parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="'+fs3.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n1)+'-'+escapeHtml(n2)+'</text>');
   } else if(n1){
     parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="'+fs2.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
   }
   return parts.join('');
 }
-function aisleHeadUnit(x0,y0,x1,y1,rot,n1,n2){
+function aisleHeadUnit(x0,y0,x1,y1,rot,n1,n2,H){
   const parts=[];
-  const rackH=58;
+  const rackH=H||58;
   parts.push(rackUnit(x0,y0,x1,y1,rot,'#B9C4CE',rackH,3,3,'','',false));
-  if(n1) parts.push(aisleLocLabel(x0,y0,x1,y1,rot,n1,n2,1));
+  if(n1) parts.push(aisleLocLabel(x0,y0,x1,y1,rot,n1,n2,1,rackH));
   return parts.join('');
 }
 // ป้ายประตูทางเข้า/ทางออก แบบกรอบกระจก
 function glassDoor(pt,label,tint){
-  const w=54,h=34;
-  return '<g transform="translate('+pt[0].toFixed(1)+','+(pt[1]-6).toFixed(1)+')">'
-    +'<rect x="'+(-w/2)+'" y="'+(-h)+'" width="'+w+'" height="'+h+'" rx="3" fill="rgba(255,255,255,.14)" stroke="'+tint+'" stroke-width="2"/>'
-    +'<line x1="0" y1="'+(-h)+'" x2="0" y2="0" stroke="'+tint+'" stroke-width="1.6"/>'
-    +'<circle cx="-6" cy="'+(-h/2)+'" r="1.6" fill="'+tint+'"/><circle cx="6" cy="'+(-h/2)+'" r="1.6" fill="'+tint+'"/>'
-    +'<text x="0" y="14" text-anchor="middle" font-size="10.5" font-weight="700" fill="'+tint+'">'+escapeHtml(label)+'</text>'
+  const w=108,h=68;
+  return '<g transform="translate('+pt[0].toFixed(1)+','+(pt[1]-12).toFixed(1)+')">'
+    +'<rect x="'+(-w/2)+'" y="'+(-h)+'" width="'+w+'" height="'+h+'" rx="6" fill="rgba(255,255,255,.3)" stroke="'+tint+'" stroke-width="4"/>'
+    +'<line x1="0" y1="'+(-h)+'" x2="0" y2="0" stroke="'+tint+'" stroke-width="3.2"/>'
+    +'<circle cx="-12" cy="'+(-h/2)+'" r="3.2" fill="'+tint+'"/><circle cx="12" cy="'+(-h/2)+'" r="3.2" fill="'+tint+'"/>'
+    +'<text x="0" y="28" text-anchor="middle" font-size="21" font-weight="800" fill="'+tint+'">'+escapeHtml(label)+'</text>'
     +'</g>';
 }
 // จับคู่ id ของบล็อกจริงใน DEFAULT_MAP_BLOCKS กับสไตล์การวาด (ไม่แก้ข้อมูลบล็อกเดิม แค่เลือกวิธีวาด)
@@ -3512,7 +3511,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,8)+signAt((x0+x1)/2,(y0+y1)/2,H+30,rotationDeg,th,en,tint,true);
-  else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rotationDeg,isHighlighted?'':th,isHighlighted?'':en);
+  else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rotationDeg,isHighlighted?'':th,isHighlighted?'':en,H);
   else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rotationDeg,tint,H,th,en,skin.kind);
   else if(skin.type==='facingRack') skinMarkup=facingRackPair(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en);
   else skinMarkup=rackUnit(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en,true);
@@ -3556,7 +3555,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
       +'<line x1="'+topC[0].toFixed(1)+'" y1="'+topC[1].toFixed(1)+'" x2="'+botC[0].toFixed(1)+'" y2="'+botC[1].toFixed(1)+'" stroke="'+frameColor+'" stroke-width="3"/>'
       +'<line x1="'+topD[0].toFixed(1)+'" y1="'+topD[1].toFixed(1)+'" x2="'+botD[0].toFixed(1)+'" y2="'+botD[1].toFixed(1)+'" stroke="'+frameColor+'" stroke-width="3"/>';
     // วาดป้ายเลขล็อคซ้ำด้านบนสุด (ใหญ่ขึ้น) กันไม่ให้กรอบสีแดงบังเลขล็อค
-    if(skin.type==='aisle' && th) topMarkup+=aisleLocLabel(x0,y0,x1,y1,rotationDeg,th,en,1.5);
+    if(skin.type==='aisle' && th) topMarkup+=aisleLocLabel(x0,y0,x1,y1,rotationDeg,th,en,1.5,H);
     // หมุดไฮไลต์: ดาวสีเหลืองขนาดใหญ่กระพริบ (เดิมเป็นวงกลมสีแดง)
     const pinPt=isoProject((x0+x1)/2,(y0+y1)/2,H*0.55,rotationDeg);
     const starColor='#FFC72C';
@@ -3632,8 +3631,8 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     '<polygon points="'+polyPts(floorTop)+'" fill="'+currentMapBgColor+'"/>'+
     wallsMarkup+
     '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+blockMarkup+zoneLabels+'</g>'+
-    glassDoor(entrance,doorLabels[0],'#3FAE6E')+
-    glassDoor(exit,doorLabels[1],'#FF6B4A')+
+    glassDoor(entrance,doorLabels[0],'#00C853')+
+    glassDoor(exit,doorLabels[1],'#FF3D00')+
     '</svg>';
 }
 
