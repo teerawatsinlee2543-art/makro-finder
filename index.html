@@ -2845,11 +2845,6 @@ const MAP_ENTRANCE_EXIT_I18N={
   kr:['입구 · IN','출구 · OUT'],
   jp:['入口 · IN','出口 · OUT']
 };
-const PRODUCE_ROW_LABELS_I18N={
-  importedFruit:{th:'ผลไม้นำเข้า',en:'Imported Fruit',cn:'进口水果',mm:'တင်သွင်းသစ်သီး',kr:'수입 과일',jp:'輸入フルーツ'},
-  freshVeg:{th:'ผักสด',en:'Fresh Veg',cn:'新鲜蔬菜',mm:'လတ်ဆတ်သောဟင်းသီးဟင်းရွက်',kr:'신선 채소',jp:'新鮮野菜'}
-};
-
 let currentMapBlocks=JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
 let currentMapBgColor='#FCFBF9';
 let savedMapRotation=25;
@@ -3132,52 +3127,66 @@ function bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en){
 }
 // แผงผัก-ผลไม้ 2 แถว (ผลไม้นำเข้า/ผักสด) แบบลังเขียวเรียงกอง สไตล์ภาพอ้างอิง "ส่งตรงจากสวน"
 function produceStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  // ตู้เย็นกระจก 3 ตู้: ตู้ 1-2 หันบานกระจกเข้าหากันตรงกลาง ตู้ 3 ต่อท้ายหันออกทางเดิน
+  // แต่ละตู้มีชั้นวางขาวยื่นออกมา 3 ชั้น ป้ายชื่อรวมเป็นป้ายเดียวของทั้งบล็อก
   const parts=[];
-  const crateGreen='#2E7D4A', crateGreenL='#4FA167', crateRib='#1F5C36';
-  const importedFruitI18n=PRODUCE_ROW_LABELS_I18N.importedFruit, freshVegI18n=PRODUCE_ROW_LABELS_I18N.freshVeg;
   const rows=[
-    {th:importedFruitI18n[currentLang]||importedFruitI18n.th, en:(currentLang==='th')?importedFruitI18n.en:importedFruitI18n.th, palette:[
+    {palette:[
       {c:'#E8912E',shade:'#C06E12'},{c:'#D9463A',shade:'#B22E22'},{c:'#E8DA6A',shade:'#C2B23E'}
-    ]},
-    {th:freshVegI18n[currentLang]||freshVegI18n.th, en:(currentLang==='th')?freshVegI18n.en:freshVegI18n.th, palette:[
+    ], tint:'#F3D9C2'},
+    {palette:[
       {c:'#EDEDE0',shade:'#C9C9B4'},{c:'#CFE8B0',shade:'#9FC97A'},{c:'#4FA85A',shade:'#357040'}
-    ]}
+    ], tint:'#DCEAD0'},
+    {palette:[
+      {c:'#8E5AA8',shade:'#6B4080'},{c:'#C9463A',shade:'#A02E22'},{c:'#A8C25A',shade:'#7C9C3A'}
+    ], tint:'#E6D9EE'}
   ];
+  const caseH=H*1.5;
   const rowDepth=(y1-y0)/rows.length;
   rows.forEach((rowDef,ri)=>{
     const ry0=y0+ri*rowDepth, ry1=ry0+rowDepth-6;
+    const frontY=(ri%2===0)?ry1:ry0;
     const fp=[isoProject(x0,ry1,0.4,rot),isoProject(x1,ry1,0.4,rot),isoProject(x1,ry0,0.4,rot),isoProject(x0,ry0,0.4,rot)];
-    parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.13)"/>');
-    const bands=3, bandDepth=(ry1-ry0)/bands;
-    for(let bi=0; bi<bands; bi++){
-      const by0=ry0+bi*bandDepth+2, by1=by0+bandDepth-5;
-      const zTop=H*0.34+(bands-1-bi)*H*0.24;
-      const crateH=8;
-      parts.push(boxFaces(x0,by0,x1,by1,zTop-crateH,zTop,rot,crateGreenL,shadeColor(crateGreen,0.25),crateGreen));
-      for(let r=1;r<=3;r++){
-        const rz=zTop-crateH+(crateH*r/4);
-        const ra=isoProject(x0,by1,rz,rot), rb=isoProject(x1,by1,rz,rot);
-        parts.push('<line x1="'+ra[0].toFixed(1)+'" y1="'+ra[1].toFixed(1)+'" x2="'+rb[0].toFixed(1)+'" y2="'+rb[1].toFixed(1)+'" stroke="'+crateRib+'" stroke-width="0.7" opacity="0.6"/>');
-      }
-      const set=rowDef.palette[bi%rowDef.palette.length];
+    parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.15)"/>');
+    parts.push(boxFaces(x0,ry0,x1,ry1,0,caseH,rot,lightenColor(rowDef.tint,0.12),shadeColor(rowDef.tint,0.32),shadeColor(rowDef.tint,0.16)));
+    const frontTop=[isoProject(x0,frontY,caseH,rot),isoProject(x1,frontY,caseH,rot)];
+    const frontBot=[isoProject(x0,frontY,caseH*0.06,rot),isoProject(x1,frontY,caseH*0.06,rot)];
+    parts.push('<polygon points="'+polyPts([frontTop[0],frontTop[1],frontBot[1],frontBot[0]])+'" fill="rgba(200,235,255,.24)" stroke="rgba(255,255,255,.55)" stroke-width="1"/>');
+    parts.push('<polygon points="'+polyPts([frontTop[0],frontTop[1],frontBot[1],frontBot[0]])+'" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.6"/>');
+    const midX=(x0+x1)/2;
+    const handleTop=isoProject(midX,frontY,caseH*0.78,rot), handleBot=isoProject(midX,frontY,caseH*0.22,rot);
+    parts.push('<line x1="'+handleTop[0].toFixed(1)+'" y1="'+handleTop[1].toFixed(1)+'" x2="'+handleBot[0].toFixed(1)+'" y2="'+handleBot[1].toFixed(1)+'" stroke="rgba(255,255,255,.85)" stroke-width="2.4" stroke-linecap="round"/>');
+    for(let s=0;s<2;s++){
+      const t0=0.12+s*0.4, t1=t0+0.14;
+      const ax=frontTop[0][0]+(frontTop[1][0]-frontTop[0][0])*t0, ay=frontTop[0][1]+(frontBot[0][1]-frontTop[0][1])*0.12;
+      const bx=frontTop[0][0]+(frontTop[1][0]-frontTop[0][0])*t1, by=frontTop[0][1]+(frontBot[0][1]-frontTop[0][1])*0.8;
+      parts.push('<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+bx.toFixed(1)+'" y2="'+by.toFixed(1)+'" stroke="rgba(255,255,255,.4)" stroke-width="3.5" stroke-linecap="round"/>');
+    }
+    const shelves=3;
+    for(let si=0; si<shelves; si++){
+      const sz=caseH*0.1+(caseH*0.82)*(si+1)/(shelves+0.5);
+      parts.push(boxFaces(x0+2,ry0+3,x1-2,ry1-3,sz-2.2,sz,rot,'#FAFCFB',shadeColor('#C7D0CC',0.2),'#C7D0CC'));
+      const set=rowDef.palette[si%rowDef.palette.length];
+      const round=(si%2===0);
       const nItems=Math.max(3,Math.round((x1-x0)/15));
-      const round=(bi%2===0);
+      const itemY=(ri%2===0)?(ry1-6):(ry0+6);
       for(let ii=0; ii<nItems; ii++){
         const cx=x0+(x1-x0)*((ii+0.5)/nItems)+((ii%2)?1:-1);
-        const p=isoProject(cx,(by0+by1)/2,zTop+2.6,rot);
+        const p=isoProject(cx,itemY,sz+2.4,rot);
         if(round){
-          const r=2.6+((ii+bi)%2)*0.5;
+          const r=2.6+((ii+si)%2)*0.5;
           parts.push('<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+r+'" fill="'+set.c+'" stroke="'+set.shade+'" stroke-width="0.5"/>'
             +'<circle cx="'+(p[0]-r*0.35).toFixed(1)+'" cy="'+(p[1]-r*0.35).toFixed(1)+'" r="'+(r*0.32).toFixed(1)+'" fill="rgba(255,255,255,.45)"/>');
         } else {
-          const len=6+((ii+bi)%3);
-          parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="'+len+'" ry="3" fill="'+set.c+'" stroke="'+set.shade+'" stroke-width="0.5" transform="rotate('+((ii%2?6:-6))+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')"/>'
-            +'<ellipse cx="'+(p[0]-len*0.3).toFixed(1)+'" cy="'+(p[1]-1).toFixed(1)+'" rx="'+(len*0.4).toFixed(1)+'" ry="0.9" fill="rgba(255,255,255,.4)"/>');
+          const len=5.6+((ii+si)%3);
+          parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="'+len+'" ry="2.7" fill="'+set.c+'" stroke="'+set.shade+'" stroke-width="0.5" transform="rotate('+((ii%2?6:-6))+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')"/>'
+            +'<ellipse cx="'+(p[0]-len*0.3).toFixed(1)+'" cy="'+(p[1]-1).toFixed(1)+'" rx="'+(len*0.4).toFixed(1)+'" ry="0.8" fill="rgba(255,255,255,.4)"/>');
         }
       }
     }
-    parts.push(signAt((x0+x1)/2,(ry0+ry1)/2,H+16,rot,rowDef.th,rowDef.en,ri===0?'#E8912E':'#4FA85A',true));
+    parts.push(boxFaces(x0-2,ry0-2,x1+2,ry1+2,caseH,caseH+5,rot,'#F0F3F2',shadeColor('#AEB8B4',0.15),'#AEB8B4'));
   });
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,caseH+16,rot,th,en,'#4C7A38',true));
   return parts.join('');
 }
 // แถวแคชเชียร์สไตล์ Makro: หลายช่องแดง/ขาว มีสายพาน + จอ POS
