@@ -2946,6 +2946,17 @@ function lightenColor(hex,amt){
   return 'rgb('+r+','+g+','+b+')';
 }
 function polyPts(pts){ return pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '); }
+function starPoints(cx,cy,outerR,innerR,points){
+  points=points||5;
+  const step=Math.PI/points;
+  const pts=[];
+  for(let i=0;i<points*2;i++){
+    const r=(i%2===0)?outerR:innerR;
+    const angle=i*step-Math.PI/2;
+    pts.push((cx+r*Math.cos(angle)).toFixed(1)+','+(cy+r*Math.sin(angle)).toFixed(1));
+  }
+  return pts.join(' ');
+}
 
 // ==== ผังร้านสไตล์ 3D เสมือนจริง: กล่องพื้นฐาน + ป้ายแขวน + ยูนิตแต่ละประเภท (ตู้แช่/ชั้นวาง/แผงผัก-ผลไม้/เบเกอรี่/ไอศกรีม/แคชเชียร์) ====
 let __mapGradCounter=0;
@@ -3352,9 +3363,13 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
     topMarkup+='<circle class="resize-handle" data-id="'+b.id+'" cx="'+handlePt[0].toFixed(1)+'" cy="'+handlePt[1].toFixed(1)+'" r="8" fill="#fff" fill-opacity="0.95" stroke="#1a1a1a" stroke-width="1.5" style="cursor:nwse-resize;touch-action:none"/>';
   }
   if(isHighlighted){
+    // หมุดไฮไลต์: ดาวสีเหลืองขนาดใหญ่กระพริบ (เดิมเป็นวงกลมสีแดง)
     const pinPt=isoProject((x0+x1)/2,(y0+y1)/2,H,rotationDeg);
-    topMarkup+='<circle cx="'+pinPt[0].toFixed(1)+'" cy="'+pinPt[1].toFixed(1)+'" r="6" fill="#E8192C" fill-opacity="0.55"><animate attributeName="r" values="6;22;6" dur="1.8s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.6;0;0.6" dur="1.8s" repeatCount="indefinite"/></circle>'+
-      '<circle cx="'+pinPt[0].toFixed(1)+'" cy="'+pinPt[1].toFixed(1)+'" r="6" fill="#E8192C" stroke="#fff" stroke-width="1.6"/>';
+    const starColor='#FFC72C';
+    topMarkup+='<g transform="translate('+pinPt[0].toFixed(1)+','+pinPt[1].toFixed(1)+')">'
+      +'<polygon points="'+starPoints(0,0,18,7,5)+'" fill="'+starColor+'" fill-opacity="0.55"><animateTransform attributeName="transform" type="scale" values="1;2.1;1" dur="1.8s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.6;0;0.6" dur="1.8s" repeatCount="indefinite"/></polygon>'
+      +'<polygon points="'+starPoints(0,0,15,6,5)+'" fill="'+starColor+'" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>'
+      +'</g>';
   }
   return {depth, skinMarkup, topMarkup};
 }
