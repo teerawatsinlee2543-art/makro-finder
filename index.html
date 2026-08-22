@@ -3093,37 +3093,41 @@ function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
 // แผงเบเกอรี่แบบลังไม้เอียงบนล้อเข็น เรียงขนมปังห่อถุง 3 ชั้น + ป้ายแดงแขวนเหนือหัว
 // สไตล์ตรงกับภาพหน้าร้านเบเกอรี่ Makro จริง (ป้าย "แม็คโครเบเกอรี่ คุ้มค่าคุ้มราคา" สีแดง + ชั้นไม้เอียงมีล้อ)
 function bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  // ตู้กระจกโชว์ขนม: กรอบไม้ + กระจกหน้า/ข้างโปร่งแสง + ชั้นวางขนม 2 ชั้นในตู้
   const parts=[];
-  const wood='#C9A56A', woodL='#E0C48F', woodRib='#7A5A30';
-  const bannerRed='#C0272D';
-  const fp=[isoProject(x0,y1,0.4,rot),isoProject(x1,y1,0.4,rot),isoProject(x1,y0,0.4,rot),isoProject(x0,y0,0.4,rot)];
-  parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.13)"/>');
-  [[x0+4,y1-3],[x1-4,y1-3]].forEach(([wx,wy])=>{
-    const p=isoProject(wx,wy,3,rot);
-    parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+(p[1]+3).toFixed(1)+'" rx="3.6" ry="2.1" fill="#2A2E33"/>');
-  });
-  const wraps=['#F4C9DE','#EADCAA','#C9E8D9','#F4E0B8','#E8CFE0'];
-  const tiers=3, tierDepth=(y1-y0)/tiers;
-  for(let ti=0; ti<tiers; ti++){
-    const ty0=y0+ti*tierDepth+2, ty1=ty0+tierDepth-5;
-    const zTop=H*0.32+(tiers-1-ti)*H*0.26;
-    const crateH=8;
-    parts.push(boxFaces(x0,ty0,x1,ty1,zTop-crateH,zTop,rot,woodL,shadeColor(wood,0.25),wood));
-    for(let r=1;r<=3;r++){
-      const rz=zTop-crateH+(crateH*r/4);
-      const ra=isoProject(x0,ty1,rz,rot), rb=isoProject(x1,ty1,rz,rot);
-      parts.push('<line x1="'+ra[0].toFixed(1)+'" y1="'+ra[1].toFixed(1)+'" x2="'+rb[0].toFixed(1)+'" y2="'+rb[1].toFixed(1)+'" stroke="'+woodRib+'" stroke-width="0.7" opacity="0.6"/>');
-    }
-    const nItems=Math.max(3,Math.round((x1-x0)/16));
+  const wood='#8a6535', woodL='#a97f45', bannerRed='#C0272D';
+  parts.push(boxFaces(x0,y0,x1,y1,0,H*0.42,rot,'#E8CFA0',shadeColor(wood,0.1),wood));
+  const frontTop=[isoProject(x0,y1,H,rot),isoProject(x1,y1,H,rot)];
+  const frontMid=[isoProject(x0,y1,H*0.42,rot),isoProject(x1,y1,H*0.42,rot)];
+  const glassPts=[frontTop[0],frontTop[1],frontMid[1],frontMid[0]];
+  parts.push('<polygon points="'+polyPts(glassPts)+'" fill="rgba(255,224,168,.22)" stroke="rgba(255,255,255,.55)" stroke-width="1"/>');
+  const rightTop=[isoProject(x1,y1,H,rot),isoProject(x1,y0,H,rot)];
+  const rightMid=[isoProject(x1,y1,H*0.42,rot),isoProject(x1,y0,H*0.42,rot)];
+  parts.push('<polygon points="'+polyPts([rightTop[0],rightTop[1],rightMid[1],rightMid[0]])+'" fill="rgba(255,224,168,.14)" stroke="rgba(255,255,255,.4)" stroke-width="0.8"/>');
+  parts.push('<line x1="'+frontMid[0][0].toFixed(1)+'" y1="'+frontMid[0][1].toFixed(1)+'" x2="'+frontMid[1][0].toFixed(1)+'" y2="'+frontMid[1][1].toFixed(1)+'" stroke="#FFC77A" stroke-width="2" opacity="0.8"/>');
+  const wraps=['#F4C9DE','#EADCAA','#C9E8D9','#F4E0B8'];
+  const shelves=2;
+  for(let li=0; li<shelves; li++){
+    const z=H*0.42*(li+1)/(shelves+0.3);
+    const a=isoProject(x0,y1,z,rot), b=isoProject(x1,y1,z,rot);
+    parts.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(255,255,255,.5)" stroke-width="1"/>');
+    const nItems=Math.max(3,Math.round((x1-x0)/18));
     for(let ii=0; ii<nItems; ii++){
-      const cx=x0+(x1-x0)*((ii+0.5)/nItems);
-      const p=isoProject(cx,(ty0+ty1)/2,zTop+2.4,rot);
-      const wrapC=wraps[(ii+ti)%wraps.length];
-      parts.push('<rect x="'+(p[0]-4.5).toFixed(1)+'" y="'+(p[1]-3).toFixed(1)+'" width="9" height="6" rx="2.5" fill="'+wrapC+'" stroke="'+shadeColor(wrapC,0.25)+'" stroke-width="0.4"/>'
-        +'<ellipse cx="'+(p[0]-1.2).toFixed(1)+'" cy="'+(p[1]-1.4).toFixed(1)+'" rx="1.6" ry="0.8" fill="rgba(255,255,255,.5)"/>');
+      const cx=x0+4+(x1-x0-8)*((ii+0.5)/nItems);
+      const p=isoProject(cx,y1-4,z+3,rot);
+      const kind=(ii+li)%3;
+      if(kind===0){
+        parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="4.6" ry="3.2" fill="#D8A661" stroke="#A87538" stroke-width="0.4"/>');
+      } else if(kind===1){
+        parts.push('<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="6" ry="1.9" fill="#E4B36B" stroke="#A87538" stroke-width="0.4" transform="rotate(-14 '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')"/>');
+      } else {
+        const wrapC=wraps[(ii+li)%wraps.length];
+        parts.push('<rect x="'+(p[0]-4).toFixed(1)+'" y="'+(p[1]-2.6).toFixed(1)+'" width="8" height="5.2" rx="2" fill="'+wrapC+'" stroke="'+shadeColor(wrapC,0.25)+'" stroke-width="0.35"/>');
+      }
     }
   }
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+10,rot,th,en,bannerRed,true));
+  parts.push(boxFaces(x0-2,y0-2,x1+2,y1+2,H,H+5,rot,woodL,shadeColor(wood,0.2),wood));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+14,rot,th,en,bannerRed,true));
   return parts.join('');
 }
 // แผงผัก-ผลไม้ 2 แถว (ผลไม้นำเข้า/ผักสด) แบบลังเขียวเรียงกอง สไตล์ภาพอ้างอิง "ส่งตรงจากสวน"
