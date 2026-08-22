@@ -2966,17 +2966,16 @@ function boxFaces(x0,y0,x1,y1,z0,z1,rot,fillTop,fillRight,fillFront){
 }
 function signAt(x,y,z,rot,th,en,tint,big){
   const p=isoProject(x,y,z,rot);
-  const poleTop=[p[0],p[1]-(big?18:10)];
-  const w=Math.max(big?76:44, Math.max((th||'').length,(en||'').length)*(big?7.8:5.4));
-  const h=big?37:22;
-  const top=poleTop[1]-h;
+  // ป้ายลอยตัวตรงกลางกล่องแบบไม่มีเส้นชี้ ขยายใหญ่ขึ้นอีกรอบให้อ่านง่ายชัดเจนขึ้น
+  const w=Math.max(big?130:76, Math.max((th||'').length,(en||'').length)*(big?13:9));
+  const h=big?62:36;
+  const top=p[1]-h/2;
   const gid='sg'+(__mapGradCounter++);
-  return '<line x1="'+p[0].toFixed(1)+'" y1="'+p[1].toFixed(1)+'" x2="'+poleTop[0].toFixed(1)+'" y2="'+poleTop[1].toFixed(1)+'" stroke="rgba(255,255,255,.6)" stroke-width="1.2"/>'
-    +'<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+shadeColor(tint,0.4)+'"/><stop offset="1" stop-color="'+shadeColor(tint,0.62)+'"/></linearGradient>'
-    +'<rect x="'+(p[0]-w/2+0.8).toFixed(1)+'" y="'+(top+1.6).toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?11:8)+'" fill="rgba(10,12,16,.22)" filter="url(#signBlur)"/>'
-    +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?11:8)+'" fill="url(#'+gid+')" stroke="'+lightenColor(tint,0.42)+'" stroke-width="1"/>'
-    +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?16.5:13)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?12:9)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
-    +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+29).toFixed(1)+'" text-anchor="middle" font-size="9" font-weight="600" fill="'+lightenColor(tint,0.68)+'" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
+  return '<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+shadeColor(tint,0.4)+'"/><stop offset="1" stop-color="'+shadeColor(tint,0.62)+'"/></linearGradient>'
+    +'<rect x="'+(p[0]-w/2+0.8).toFixed(1)+'" y="'+(top+1.6).toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?18:13)+'" fill="rgba(10,12,16,.22)" filter="url(#signBlur)"/>'
+    +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?18:13)+'" fill="url(#'+gid+')" stroke="'+lightenColor(tint,0.42)+'" stroke-width="1"/>'
+    +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?27:23)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?21:15)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
+    +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+48).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="600" fill="'+lightenColor(tint,0.68)+'" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
 }
 // ชั้นวางสไตล์คลังสินค้า: เสาสีน้ำเงิน + คานสีส้ม + ลังสินค้าเรียงซ้อน + ป้ายแขวนด้านบน
 function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en,big){
@@ -3008,7 +3007,7 @@ function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en,big){
       }
     }
   }
-  if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,big));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+6,rot,th,en,tint,big));
   return parts.join('');
 }
 // ตู้แช่กระจก: กล่องทึบ + กระจกหน้าโปร่งแสง + ชั้นวางในตู้
@@ -3035,7 +3034,7 @@ function freezerCase(x0,y0,x1,y1,rot,tint,H,th,en){
       parts.push(boxFaces(cx0,y1-6,cx1,y1-2,z,z+6,rot,lightenColor(tone,0.1),shadeColor(tone,0.2),shadeColor(tone,0.05)));
     }
   }
-  if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+6,rot,th,en,tint,true));
   return parts.join('');
 }
 // ร้านไอศกรีม: เคาน์เตอร์ + ตู้โชว์ถังไอศกรีม + เครื่องซอฟต์เสิร์ฟ
@@ -3077,7 +3076,7 @@ function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
     +'<path d="M '+(swirlX-4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' L '+swirlX.toFixed(1)+' '+(swirlY+9).toFixed(1)+' L '+(swirlX+4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' Z" fill="#D9A65F"/>'
     +'<path d="M '+(swirlX-4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' L '+swirlX.toFixed(1)+' '+(swirlY+9).toFixed(1)+' L '+(swirlX+4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' Z" fill="none" stroke="#B9834A" stroke-width="0.5"/>'
   );
-  if(th) parts.push(signAt((x0+x1)/2,y1,H+mH+10,rot,th,en,tint,true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+mH+10,rot,th,en,tint,true));
   return parts.join('');
 }
 // แผงเบเกอรี่แบบลังไม้เอียงบนล้อเข็น เรียงขนมปังห่อถุง 3 ชั้น + ป้ายแดงแขวนเหนือหัว
@@ -3113,7 +3112,7 @@ function bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en){
         +'<ellipse cx="'+(p[0]-1.2).toFixed(1)+'" cy="'+(p[1]-1.4).toFixed(1)+'" rx="1.6" ry="0.8" fill="rgba(255,255,255,.5)"/>');
     }
   }
-  if(th) parts.push(signAt((x0+x1)/2,y0,H+10,rot,th,en,bannerRed,true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+10,rot,th,en,bannerRed,true));
   return parts.join('');
 }
 // แผงผัก-ผลไม้ 2 แถว (ผลไม้นำเข้า/ผักสด) แบบลังเขียวเรียงกอง สไตล์ภาพอ้างอิง "ส่งตรงจากสวน"
@@ -3162,7 +3161,7 @@ function produceStall(x0,y0,x1,y1,rot,tint,H,th,en){
         }
       }
     }
-    parts.push(signAt((x0+x1)/2,ry0-3,H+16,rot,rowDef.th,rowDef.en,ri===0?'#E8912E':'#4FA85A',true));
+    parts.push(signAt((x0+x1)/2,(ry0+ry1)/2,H+16,rot,rowDef.th,rowDef.en,ri===0?'#E8912E':'#4FA85A',true));
   });
   return parts.join('');
 }
@@ -3229,15 +3228,16 @@ function counterUnit(x0,y0,x1,y1,rot,tint,H,th,en,kind){
       parts.push('<polygon points="'+polyPts([a,b,c,d])+'" fill="none" stroke="'+shadeColor(tint,0.35)+'" stroke-width="1.4"/>');
     }
   }
-  if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+6,rot,th,en,tint,true));
   return parts.join('');
 }
 // หัวล็อคเลขทางเดิน: ชั้นเหล็กเตี้ย + เสาป้ายแดงตัวเลขขาวตัวใหญ่ ติดที่ขอบหน้าล็อค สไตล์ป้ายเลขทางเดิน Makro จริง
 function aisleHeadUnit(x0,y0,x1,y1,rot,n1,n2){
   const parts=[];
-  parts.push(rackUnit(x0,y0,x1,y1,rot,'#B9C4CE',34,2,2,'','',false));
+  const rackH=58;
+  parts.push(rackUnit(x0,y0,x1,y1,rot,'#B9C4CE',rackH,3,3,'','',false));
   const cx=(x0+x1)/2;
-  const baseP=isoProject(cx,y1,34,rot);
+  const baseP=isoProject(cx,y1,rackH,rot);
   const poleTopY=baseP[1]-58;
   parts.push('<line x1="'+baseP[0].toFixed(1)+'" y1="'+baseP[1].toFixed(1)+'" x2="'+baseP[0].toFixed(1)+'" y2="'+poleTopY.toFixed(1)+'" stroke="#8892a0" stroke-width="2"/>');
   const bw=24, bh=n2?44:28;
@@ -3318,7 +3318,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
-  else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,8)+signAt((x0+x1)/2,y0,H+30,rotationDeg,th,en,tint,true);
+  else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,8)+signAt((x0+x1)/2,(y0+y1)/2,H+30,rotationDeg,th,en,tint,true);
   else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rotationDeg,th,en);
   else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rotationDeg,tint,H,th,en,skin.kind);
   else skinMarkup=rackUnit(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en,true);
@@ -3393,12 +3393,12 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     const group=blocks.filter(b=>b.id.indexOf(prefix)===0);
     if(!group.length) return '';
     const minX=Math.min(...group.map(b=>b.x)), maxX=Math.max(...group.map(b=>b.x+b.w));
-    const minY=Math.min(...group.map(b=>b.y)), maxH=Math.max(...group.map(b=>b.height||54));
+    const minY=Math.min(...group.map(b=>b.y)), maxY=Math.max(...group.map(b=>b.y+b.h));
+    const maxH=Math.max(...group.map(b=>b.height||54));
     const info=MAP_ZONE_LABELS[prefix];
     const mainText=info.main[currentLang]||info.main.th;
-    const p=isoProject((minX+maxX)/2, minY+22, maxH, rot);
-    return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="'+MAP_MAIN_SIZE+'" font-weight="800" letter-spacing="0.4" fill="'+info.color+'">'+escapeHtml(mainText)+'</text>'+
-      '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+17).toFixed(1)+'" text-anchor="middle" font-size="'+MAP_SUB_SIZE+'" font-weight="600" letter-spacing="0.4" fill="'+info.subColor+'">'+escapeHtml(info.sub)+'</text>';
+    // ใช้ป้ายแบบเดียวกับทุกโซนอื่น (แต่เดิม Dry Food/Non-Food เป็นแค่ตัวหนังสือลอยเฉยๆ ไม่มีป้าย) ยึดจุดกึ่งกลางกลุ่ม
+    return signAt((minX+maxX)/2,(minY+maxY)/2,maxH+14,rot,mainText,info.sub,info.color,true);
   }).join('');
 
   const allPts=[floorTop,leftWall,backWall,rightWall,frontWall].reduce((a,p)=>a.concat(p),[]);
@@ -5414,15 +5414,23 @@ document.addEventListener('pointermove',function(e){
   if(!mapDragState)return;
   const block=currentMapBlocks.find(b=>b.id===mapDragState.id);
   if(!block)return;
-  const pt=mapDragState.pt;
+  // rerenderMapEditorSVG() แทนที่ innerHTML ทั้งก้อนทุกครั้ง ทำให้ mapDragState.svg เดิมหลุดจาก DOM
+  // (getScreenCTM() บน element ที่หลุดไปแล้วจะคืนค่าผิด/null) ต้องดึง svg ตัวล่าสุดใหม่ทุกครั้งก่อนใช้
+  const liveSvg=document.querySelector('#mapOverlayContent svg');
+  if(!liveSvg)return;
+  mapDragState.svg=liveSvg;
+  const pt=liveSvg.createSVGPoint();
   pt.x=e.clientX;pt.y=e.clientY;
-  const loc=pt.matrixTransform(mapDragState.svg.getScreenCTM().inverse());
+  const ctm=liveSvg.getScreenCTM();
+  if(!ctm)return;
+  const loc=pt.matrixTransform(ctm.inverse());
   if(mapDragState.mode==='resize'){
     const [wx,wy]=isoUnproject(loc.x,loc.y,block.height||54,currentMapRotation);
     let newW=Math.round(wx-block.x);
     let newH=Math.round(wy-block.y);
-    newW=Math.max(MAP_MIN_W,Math.min(newW,MAP_VB_W-22-block.x));
-    newH=Math.max(MAP_MIN_H,Math.min(newH,MAP_VB_H-56-block.y));
+    // ยึดขอบเขตจากพื้นผังจริง (MAP_FLOOR) แทนตัวเลขคงที่เดิม กัน "ลากไม่สุด/ลากไม่ไปตามทิศ" ถ้าพื้นผังเปลี่ยนขนาดในอนาคต
+    newW=Math.max(MAP_MIN_W,Math.min(newW,MAP_FLOOR.x+MAP_FLOOR.w-block.x));
+    newH=Math.max(MAP_MIN_H,Math.min(newH,MAP_FLOOR.y+MAP_FLOOR.h-block.y));
     block.w=newW;block.h=newH;
     rerenderMapEditorSVG();
   } else if(mapDragState.mode==='move'){
@@ -5431,8 +5439,8 @@ document.addEventListener('pointermove',function(e){
     const [wx,wy]=isoUnproject(loc.x,loc.y,0,currentMapRotation);
     let newX=Math.round(wx-mapDragState.offsetX);
     let newY=Math.round(wy-mapDragState.offsetY);
-    newX=Math.max(11,Math.min(newX,MAP_VB_W-22-block.w));
-    newY=Math.max(11,Math.min(newY,MAP_VB_H-56-block.h));
+    newX=Math.max(MAP_FLOOR.x,Math.min(newX,MAP_FLOOR.x+MAP_FLOOR.w-block.w));
+    newY=Math.max(MAP_FLOOR.y,Math.min(newY,MAP_FLOOR.y+MAP_FLOOR.h-block.h));
     block.x=newX;block.y=newY;
     rerenderMapEditorSVG();
   }
