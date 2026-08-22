@@ -3076,31 +3076,106 @@ function facingRackPair(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en){
   if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+16,rot,th,en,tint,true));
   return parts.join('');
 }
-// ตู้แช่กระจก: กล่องทึบ + กระจกหน้าโปร่งแสง + ชั้นวางในตู้
-function freezerCase(x0,y0,x1,y1,rot,tint,H,th,en){
-  const parts=[];
-  parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,lightenColor(tint,0.12),shadeColor(tint,0.32),shadeColor(tint,0.16)));
-  const frontTop=[isoProject(x0,y1,H,rot),isoProject(x1,y1,H,rot)];
-  const frontBot=[isoProject(x0,y1,0,rot),isoProject(x1,y1,0,rot)];
-  const glassPts=[frontTop[0],frontTop[1],frontBot[1],frontBot[0]];
-  parts.push('<polygon points="'+polyPts(glassPts)+'" fill="rgba(200,235,255,.28)" stroke="rgba(255,255,255,.5)" stroke-width="0.8"/>');
-  for(let s=0;s<2;s++){
-    const t0=0.15+s*0.32, t1=t0+0.18;
-    const bx=frontTop[0][0]+(frontTop[1][0]-frontTop[0][0])*t1, by=frontTop[0][1]+(frontBot[0][1]-frontTop[0][1])*0.75;
-    const ax=frontTop[0][0]+(frontTop[1][0]-frontTop[0][0])*t0, ay=frontTop[0][1]+(frontBot[0][1]-frontTop[0][1])*0.15;
-    parts.push('<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+bx.toFixed(1)+'" y2="'+by.toFixed(1)+'" stroke="rgba(255,255,255,.45)" stroke-width="4" stroke-linecap="round"/>');
+// ชิ้นเนื้อสด: วงรีสีแดง + ลายมันแทรก
+function meatCut(cx,cy,z,rot,scale,seedRot){
+  scale=scale||1;
+  const p=isoProject(cx,cy,z,rot);
+  const rx=7*scale, ry=4.2*scale;
+  const meatC='#C1443B', meatSh='#8E2E28', fatC='#F3D9CB';
+  return '<g transform="rotate('+seedRot+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">'
+    +'<ellipse cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" rx="'+rx.toFixed(1)+'" ry="'+ry.toFixed(1)+'" fill="'+meatC+'" stroke="'+meatSh+'" stroke-width="0.5"/>'
+    +'<path d="M'+(p[0]-rx*0.7).toFixed(1)+' '+(p[1]-ry*0.2).toFixed(1)+' Q'+p[0].toFixed(1)+' '+(p[1]+ry*0.5).toFixed(1)+' '+(p[0]+rx*0.65).toFixed(1)+' '+(p[1]-ry*0.15).toFixed(1)+'" stroke="'+fatC+'" stroke-width="1" fill="none" opacity="0.85"/>'
+    +'<path d="M'+(p[0]-rx*0.4).toFixed(1)+' '+(p[1]-ry*0.6).toFixed(1)+' Q'+(p[0]+rx*0.1).toFixed(1)+' '+(p[1]-ry*0.1).toFixed(1)+' '+(p[0]-rx*0.1).toFixed(1)+' '+(p[1]+ry*0.6).toFixed(1)+'" stroke="'+fatC+'" stroke-width="0.7" fill="none" opacity="0.7"/>'
+    +'</g>';
+}
+// ไส้กรอกแขวนเป็นพวง
+function sausageLink(x0,y0,z,rot,n,angleDeg){
+  n=n||4;
+  const linkC='#B5583A', linkSh='#7C3820';
+  const p0=isoProject(x0,y0,z,rot);
+  let out='<g transform="rotate('+angleDeg+' '+p0[0].toFixed(1)+' '+p0[1].toFixed(1)+')">';
+  for(let i=0;i<n;i++){
+    const cx=p0[0]+i*7.5, cy=p0[1];
+    out+='<ellipse cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" rx="4.6" ry="3.4" fill="'+linkC+'" stroke="'+linkSh+'" stroke-width="0.5"/>';
+    if(i<n-1) out+='<line x1="'+(cx+4.2).toFixed(1)+'" y1="'+(cy-3.6).toFixed(1)+'" x2="'+(cx+4.2).toFixed(1)+'" y2="'+(cy+3.6).toFixed(1)+'" stroke="'+linkSh+'" stroke-width="1"/>';
   }
-  for(let li=1; li<=2; li++){
-    const z=H*li/3;
-    const a=isoProject(x0,y1,z,rot), b=isoProject(x1,y1,z,rot);
-    parts.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(255,255,255,.4)" stroke-width="1"/>');
-    for(let ci=0; ci<3; ci++){
-      const cw=(x1-x0-8)/3, cx0=x0+4+ci*cw+cw*0.15, cx1=cx0+cw*0.65;
-      const tone=ci%2===0?lightenColor(tint,0.1):shadeColor(tint,0.1);
-      parts.push(boxFaces(cx0,y1-6,cx1,y1-2,z,z+6,rot,lightenColor(tone,0.1),shadeColor(tone,0.2),shadeColor(tone,0.05)));
+  out+='</g>';
+  return out;
+}
+// ตู้แช่เนื้อสด: กระจกหน้า + ไส้กรอกแขวนราว + ชิ้นเนื้อวางเรียง 2 ชั้น
+function freshMeatCase(fx0,fy0,fx1,fy1,rot,H){
+  const parts=[];
+  const meatTint='#F6E2E0';
+  parts.push(boxFaces(fx0,fy0,fx1,fy1,0,H,rot,lightenColor(meatTint,0.1),shadeColor(meatTint,0.34),shadeColor(meatTint,0.18)));
+  const frontTop=[isoProject(fx0,fy1,H,rot),isoProject(fx1,fy1,H,rot)];
+  const frontBot=[isoProject(fx0,fy1,0,rot),isoProject(fx1,fy1,0,rot)];
+  parts.push('<polygon points="'+polyPts([frontTop[0],frontTop[1],frontBot[1],frontBot[0]])+'" fill="rgba(200,235,255,.26)" stroke="rgba(255,255,255,.5)" stroke-width="0.8"/>');
+  const railZ=H*0.86;
+  const railA=isoProject(fx0+6,fy1-6,railZ,rot), railB=isoProject(fx1-6,fy1-6,railZ,rot);
+  parts.push('<line x1="'+railA[0].toFixed(1)+'" y1="'+railA[1].toFixed(1)+'" x2="'+railB[0].toFixed(1)+'" y2="'+railB[1].toFixed(1)+'" stroke="#8a6a4a" stroke-width="1.3"/>');
+  parts.push(sausageLink((fx0+fx1)/2-7,fy1-6,railZ-11,rot,3,90));
+  for(let li=0; li<2; li++){
+    const z=H*(0.18+li*0.32);
+    const a=isoProject(fx0+3,fy1-4,z,rot), b=isoProject(fx1-3,fy1-4,z,rot);
+    parts.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(255,255,255,.35)" stroke-width="1"/>');
+    const rowW=fx1-fx0-14, cols=2;
+    for(let ci=0; ci<cols; ci++){
+      const cx=fx0+7+rowW*(ci+0.5)/cols;
+      const cy=fy1-8-((ci%2)*3);
+      parts.push(meatCut(cx,cy,z+2,rot,0.8,(ci*41)%40-20));
     }
   }
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+6,rot,th,en,tint,true));
+  return parts.join('');
+}
+// เครื่องแช่แข็งแบบกล่องเตี้ย (chest freezer): ขาตั้ง + ฝาเลื่อนกระจกฝ้า + แผงควบคุม + ไอเย็น
+function chestFreezer(x0,y0,x1,y1,rot,H){
+  const parts=[];
+  const steel='#C7CDD3', steelD='#9AA6AA', steelDD='#7C878C';
+  const legH=6;
+  const bodyTopZ=H*0.55;
+  [[x0+4,y0+4],[x1-4,y0+4],[x1-4,y1-4],[x0+4,y1-4]].forEach(([lx,ly])=>{
+    const top=isoProject(lx,ly,legH,rot), bot=isoProject(lx,ly,0,rot);
+    parts.push('<line x1="'+top[0].toFixed(1)+'" y1="'+top[1].toFixed(1)+'" x2="'+bot[0].toFixed(1)+'" y2="'+bot[1].toFixed(1)+'" stroke="'+steelDD+'" stroke-width="2.4"/>');
+  });
+  parts.push(boxFaces(x0,y0,x1,y1,legH,bodyTopZ,rot,lightenColor(steel,0.1),shadeColor(steelD,0.28),steelD));
+  const lidZ0=bodyTopZ, lidZ1=bodyTopZ+3;
+  parts.push(boxFaces(x0+2,y0+2,x1-2,y1-2,lidZ0,lidZ1,rot,'#E4F3F8',shadeColor('#AFCEDA',0.2),'#AFCEDA'));
+  const lidTopA=isoProject(x0+2,y0+2,lidZ1,rot), lidTopB=isoProject(x1-2,y0+2,lidZ1,rot), lidTopC=isoProject(x1-2,y1-2,lidZ1,rot), lidTopD=isoProject(x0+2,y1-2,lidZ1,rot);
+  parts.push('<polygon points="'+polyPts([lidTopA,lidTopB,lidTopC,lidTopD])+'" fill="rgba(220,245,255,.55)" stroke="rgba(255,255,255,.7)" stroke-width="0.8"/>');
+  const handleZ=lidZ1+1;
+  const hA=isoProject((x0+x1)/2-10,y1-3,handleZ,rot), hB=isoProject((x0+x1)/2+10,y1-3,handleZ,rot);
+  parts.push('<line x1="'+hA[0].toFixed(1)+'" y1="'+hA[1].toFixed(1)+'" x2="'+hB[0].toFixed(1)+'" y2="'+hB[1].toFixed(1)+'" stroke="'+steelDD+'" stroke-width="2.2" stroke-linecap="round"/>');
+  const panelP=isoProject(x0+10,y1-1,bodyTopZ*0.7,rot);
+  parts.push('<rect x="'+(panelP[0]-8).toFixed(1)+'" y="'+(panelP[1]-5).toFixed(1)+'" width="16" height="10" rx="1.5" fill="#3A3F44" stroke="#22262a" stroke-width="0.6"/>'
+    +'<circle cx="'+(panelP[0]-3).toFixed(1)+'" cy="'+panelP[1].toFixed(1)+'" r="1.4" fill="#3EDC7A"/>'
+    +'<circle cx="'+(panelP[0]+3).toFixed(1)+'" cy="'+panelP[1].toFixed(1)+'" r="1.4" fill="#3EA8DC"/>');
+  for(let i=0;i<4;i++){
+    const mx=x0+8+Math.random()*(x1-x0-16), my=y0+6+Math.random()*(y1-y0-12);
+    const mp=isoProject(mx,my,lidZ1+2+Math.random()*4,rot);
+    parts.push('<ellipse cx="'+mp[0].toFixed(1)+'" cy="'+mp[1].toFixed(1)+'" rx="5" ry="2.2" fill="rgba(255,255,255,.35)"/>');
+  }
+  return parts.join('');
+}
+// แผนกเนื้อสัตว์: รอบๆ เป็นตู้แช่เนื้อสด 2 ฝั่ง ตรงกลางเป็นเครื่องแช่แข็ง
+function butcherStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  const parts=[];
+  const gap=8;
+  const segW=((x1-x0)-gap*2)/3;
+  const s1x0=x0, s1x1=s1x0+segW;
+  const s2x0=s1x1+gap, s2x1=s2x0+segW;
+  const s3x0=s2x1+gap, s3x1=x1;
+
+  parts.push(freshMeatCase(s1x0,y0,s1x1,y1,rot,H));
+  const d1Top=isoProject(s1x1+gap/2,y1-2,H*0.9,rot), d1Bot=isoProject(s1x1+gap/2,y1-2,0,rot);
+  parts.push('<line x1="'+d1Top[0].toFixed(1)+'" y1="'+d1Top[1].toFixed(1)+'" x2="'+d1Bot[0].toFixed(1)+'" y2="'+d1Bot[1].toFixed(1)+'" stroke="#8A939A" stroke-width="3"/>');
+
+  parts.push(chestFreezer(s2x0,y0,s2x1,y1,rot,H));
+  const d2Top=isoProject(s2x1+gap/2,y1-2,H*0.9,rot), d2Bot=isoProject(s2x1+gap/2,y1-2,0,rot);
+  parts.push('<line x1="'+d2Top[0].toFixed(1)+'" y1="'+d2Top[1].toFixed(1)+'" x2="'+d2Bot[0].toFixed(1)+'" y2="'+d2Bot[1].toFixed(1)+'" stroke="#8A939A" stroke-width="3"/>');
+
+  parts.push(freshMeatCase(s3x0,y0,s3x1,y1,rot,H));
+
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+8,rot,th,en,tint,true));
   return parts.join('');
 }
 // แผนกปลา: ถาดน้ำแข็งสี่เหลี่ยมจัตุรัส 3 ถาด (ปลา/กุ้ง/ปู กองพูนกลางถาด) + ตู้กระจกปลาไหว้ 1 ตู้ติดถาดปู
@@ -3462,7 +3537,7 @@ function glassDoor(pt,label,tint){
 }
 // จับคู่ id ของบล็อกจริงใน DEFAULT_MAP_BLOCKS กับสไตล์การวาด (ไม่แก้ข้อมูลบล็อกเดิม แค่เลือกวิธีวาด)
 const MAP_BLOCK_SKIN={
-  butchery:{type:'freezer'}, fishseafood:{type:'fish'},
+  butchery:{type:'butcher'}, fishseafood:{type:'fish'},
   icecream:{type:'icecream'}, fruitveg:{type:'produce'}, bakery:{type:'bakery'}, cashier:{type:'cashier'},
   snack:{type:'rack',levels:3,density:2}, winebeer:{type:'rack',levels:3,density:2},
   drink:{type:'rack',levels:3,density:3}, grilledchicken:{type:'rack',levels:2,density:2},
@@ -3513,7 +3588,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   }
   const skin=getBlockSkin(b);
   let skinMarkup;
-  if(skin.type==='freezer') skinMarkup=freezerCase(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
+  if(skin.type==='butcher') skinMarkup=butcherStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='fish') skinMarkup=fishStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
