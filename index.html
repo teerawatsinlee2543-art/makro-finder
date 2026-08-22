@@ -3016,6 +3016,55 @@ function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en,big){
   if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+6,rot,th,en,tint,big));
   return parts.join('');
 }
+// ชั้นวาง 1 ฝั่ง หันหน้า (ป้าย/ลัง) เข้าหา frontY ที่กำหนดได้ ใช้คู่กับ facingRackPair เพื่อทำ 2 ชั้นหันเข้าหากัน
+function facingRackBox(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,frontIsY1){
+  const inset=2.4;
+  x0+=inset; x1-=inset; y0+=inset; y1-=inset;
+  const parts=[];
+  const postColor='#2E5C94', postColorL='#4A7FC0', beamColor='#E2802F', beamColorL='#F4A24F';
+  const frontY=frontIsY1?y1:y0, backY=frontIsY1?y0:y1;
+  const fp=[isoProject(x0,y1,0.4,rot),isoProject(x1,y1,0.4,rot),isoProject(x1,y0,0.4,rot),isoProject(x0,y0,0.4,rot)];
+  parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.14)"/>');
+  const postW=2.2;
+  [[x0,frontY],[x1,frontY],[x1,backY]].forEach(([px,py])=>{
+    parts.push(boxFaces(px-postW/2,py-postW/2,px+postW/2,py+postW/2,0,H,rot,postColorL,postColor,shadeColor(postColor,0.2)));
+  });
+  levels=Math.max(1,levels||2); crateDensity=Math.max(1,crateDensity||2);
+  for(let li=0; li<levels; li++){
+    const z=H*((li+1)/(levels+0.15));
+    const beamFront=[isoProject(x0,frontY,z,rot),isoProject(x1,frontY,z,rot)];
+    const beamSide=[isoProject(x1,frontY,z,rot),isoProject(x1,backY,z,rot)];
+    parts.push('<line x1="'+beamFront[0][0].toFixed(1)+'" y1="'+beamFront[0][1].toFixed(1)+'" x2="'+beamFront[1][0].toFixed(1)+'" y2="'+beamFront[1][1].toFixed(1)+'" stroke="'+beamColor+'" stroke-width="1.6"/>');
+    parts.push('<line x1="'+beamSide[0][0].toFixed(1)+'" y1="'+beamSide[0][1].toFixed(1)+'" x2="'+beamSide[1][0].toFixed(1)+'" y2="'+beamSide[1][1].toFixed(1)+'" stroke="'+beamColorL+'" stroke-width="1.3"/>');
+    if(li<levels-1||levels===1){
+      const cw=(x1-x0-6)/crateDensity;
+      const cyEdge=frontIsY1?[frontY-cw*0.55,frontY-2]:[frontY+2,frontY+cw*0.55];
+      for(let ci=0; ci<crateDensity; ci++){
+        const cx0=x0+3+ci*cw+cw*0.12, cx1=cx0+cw*0.76;
+        const boxH=5;
+        const tone=ci%3===0?lightenColor(tint,0.18):(ci%3===1?tint:shadeColor(tint,0.14));
+        parts.push(boxFaces(cx0,cyEdge[0],cx1,cyEdge[1],z,z+boxH,rot,lightenColor(tone,0.12),shadeColor(tone,0.22),shadeColor(tone,0.08)));
+      }
+    }
+  }
+  return parts.join('');
+}
+// เครื่องเทศ: ชั้นวาง 2 ฝั่งหันหน้าเข้าหากัน คั่นกลางด้วยช่องทางเดิน
+function facingRackPair(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en){
+  const parts=[];
+  const depth=y1-y0;
+  const walkway=depth*0.24;
+  const boxDepth=(depth-walkway)/2;
+  const aY0=y0, aY1=y0+boxDepth;
+  const bY0=y1-boxDepth, bY1=y1;
+  parts.push(facingRackBox(x0,aY0,x1,aY1,rot,tint,H,levels,crateDensity,true));
+  parts.push(facingRackBox(x0,bY0,x1,bY1,rot,tint,H,levels,crateDensity,false));
+  // ทางเดินตรงกลาง: พื้นสว่างกว่ารอบข้างให้ดูเป็นช่องเดิน
+  const walkPts=[isoProject(x0,aY1,0.2,rot),isoProject(x1,aY1,0.2,rot),isoProject(x1,bY0,0.2,rot),isoProject(x0,bY0,0.2,rot)];
+  parts.push('<polygon points="'+polyPts(walkPts)+'" fill="rgba(255,255,255,.5)"/>');
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+16,rot,th,en,tint,true));
+  return parts.join('');
+}
 // ตู้แช่กระจก: กล่องทึบ + กระจกหน้าโปร่งแสง + ชั้นวางในตู้
 function freezerCase(x0,y0,x1,y1,rot,tint,H,th,en){
   const parts=[];
@@ -3300,7 +3349,7 @@ const MAP_BLOCK_SKIN={
   icecream:{type:'icecream'}, fruitveg:{type:'produce'}, bakery:{type:'bakery'}, cashier:{type:'cashier'},
   snack:{type:'rack',levels:3,density:2}, winebeer:{type:'rack',levels:3,density:2},
   drink:{type:'rack',levels:3,density:3}, grilledchicken:{type:'rack',levels:2,density:2},
-  condiments:{type:'rack',levels:2,density:4}, premium:{type:'rack',levels:3,density:3},
+  condiments:{type:'facingRack',levels:2,density:4}, premium:{type:'rack',levels:3,density:3},
   o2o:{type:'rack',levels:3,density:2}, infopoint:{type:'counter',kind:'info'}
 };
 function getBlockSkin(b){
@@ -3353,6 +3402,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,8)+signAt((x0+x1)/2,(y0+y1)/2,H+30,rotationDeg,th,en,tint,true);
   else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rotationDeg,isHighlighted?'':th,isHighlighted?'':en);
   else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rotationDeg,tint,H,th,en,skin.kind);
+  else if(skin.type==='facingRack') skinMarkup=facingRackPair(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en);
   else skinMarkup=rackUnit(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en,true);
   // ฐานรองทุกยูนิต: เงานุ่มบางๆ ใต้แท่น + แท่นทึบสีเดียวกันทุกโซน (ไล่เฉดอัตโนมัติจาก boxFaces)
   // ให้แท่นทุกโซนดูเป็นชุดเดียวกัน สม่ำเสมอ ไม่ขึ้นกับขนาดของแต่ละโซน (ต่างจากเงาเบลอล้วนที่ดูไม่เท่ากันเมื่อโซนใหญ่เล็กไม่เท่ากัน)
