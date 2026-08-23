@@ -4130,7 +4130,8 @@ function renderProductNavInfo(item){
     '<rect x="5.5" y="9.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="9.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="9.3" width="3.2" height="3.2" rx="0.5"/>'+
     '<rect x="5.5" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="10.4" y="15.3" width="3.2" height="3.2" rx="0.5"/><rect x="15.3" y="15.3" width="3.2" height="3.2" rx="0.5"/>'+
   '</svg>';
-  const shelfLine='<div class="nav-info-line">'+shelfIconSvg+' '+t('shelfTier')+' : <b>'+(item.shelf?escapeHtml(item.shelf):t('notYetAvailable'))+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">'+t('empEditBtn')+'</button>':'')+'</div>';
+  const shelfVal=item.shelf||computeShelfFallback(item);
+  const shelfLine='<div class="nav-info-line">'+shelfIconSvg+' '+t('shelfTier')+' : <b>'+(shelfVal?escapeHtml(shelfVal):t('notYetAvailable'))+'</b>'+(canEditShelf?' <button type="button" class="nav-info-edit-btn" onclick="editItemShelf('+jsStr(item.itemNo)+')">'+t('empEditBtn')+'</button>':'')+'</div>';
   const translatedNameLine=(currentLang!=='th')?('<div class="nav-info-name" id="navInfoTranslatedName" data-itemno="'+escapeHtml(item.itemNo)+'">'+t('translatedNameLabel')+' : …</div>'):'';
   if(item.locations && item.locations.length){
     body.innerHTML='<div class="nav-info-name">'+t('productNameLabel')+' : '+escapeHtml(item.desc)+'</div>'+
@@ -4161,6 +4162,15 @@ function renderProductNavInfo(item){
       shelfLine+
     '</div>';
   }
+}
+// ยังไม่มีคนกรอกชั้นด้วยมือ: เดาจากรหัส Location เช่น "023-052" เอาเลขตัวสุดท้ายของท่อนหลังสุด (052 -> 2)
+function computeShelfFallback(item){
+  if(!item.locations||!item.locations.length)return '';
+  const loc=item.locations[0].location||'';
+  const parts=loc.split('-');
+  const lastPart=parts[parts.length-1]||'';
+  const digit=lastPart.slice(-1);
+  return /[0-9]/.test(digit)?digit:'';
 }
 function editItemShelf(itemNo){
   if(!isEmployee())return;
@@ -6370,34 +6380,51 @@ function openStockEditor(itemNo,loc,location){
 function loadProductData(){
   const overridesPromise=loadOverridesData();
   const customItemsPromise=loadCustomItems();
-  const xlsxPromise=fetch('ItemLocation_10_Jul_2026.xlsx')
+  const xlsxPromise=fetch('ItemLocation_23_Aug_2026.xlsx')
     .then(r=>{ if(!r.ok) throw new Error('fetch failed: '+r.status); return r.arrayBuffer(); })
     .then(buf=>{
       const wb=XLSX.read(buf,{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-      const map=new Map();
+      // ไฟล์ต้นทางมีข้อมูลตำแหน่งปนกันหลายปี: ต่อ 1 item ให้ยึดปี 2026 (ปีล่าสุด) ถ้ามี
+      // ถ้า item นั้นไม่มีแถวปี 2026 เลย ค่อยใช้ปีเก่า (2025) แทน กันไม่ให้ item หายไปจากระบบ
+      // และห้ามมีตำแหน่งซ้ำข้ามปีของ item เดียวกัน (เลือกทีละ item ว่าจะใช้ปีไหน ไม่ผสมสองปี)
+      const rowsByItem=new Map();
       rows.forEach(r=>{
         const itemNo=String(r['Item No']||'').trim();
         const desc=String(r['Item Desc']||'').trim();
         if(!itemNo||!desc)return;
-        const barcode=String(r['Barcode']||'').trim();
-        const loc=String(r['Loc']||'').trim();
-        const location=String(r['Location']||'').trim();
-        const facing=r['Facing'];
-        const maxQty=r['Max Qty'];
-        const remark=String(r['Remark']||'').trim();
-        let item=map.get(itemNo);
-        if(!item){
-          item={itemNo,barcode,desc,remark,locations:[]};
-          map.set(itemNo,item);
-        }
-        if(!item.barcode&&barcode)item.barcode=barcode;
-        if(!item.remark&&remark)item.remark=remark;
-        const dupe=item.locations.some(l=>l.loc===loc&&l.location===location);
-        if(!dupe&&(loc||location)){
-          item.locations.push({loc,location,facing,maxQty});
-        }
+        const dateSerial=r['Date'];
+        if(typeof dateSerial!=='number')return;
+        const rowYear=new Date(Math.floor(dateSerial-25569)*86400*1000).getUTCFullYear();
+        let bucket=rowsByItem.get(itemNo);
+        if(!bucket){ bucket={y2026:[],yOld:[]}; rowsByItem.set(itemNo,bucket); }
+        (rowYear===2026?bucket.y2026:bucket.yOld).push(r);
+      });
+      const map=new Map();
+      rowsByItem.forEach(bucket=>{
+        const chosenRows=bucket.y2026.length?bucket.y2026:bucket.yOld;
+        chosenRows.forEach(r=>{
+          const itemNo=String(r['Item No']||'').trim();
+          const desc=String(r['Item Desc']||'').trim();
+          const barcode=String(r['Barcode']||'').trim();
+          const loc=String(r['Loc']||'').trim();
+          const location=String(r['Location']||'').trim();
+          const facing=r['Facing'];
+          const maxQty=r['Max Qty'];
+          const remark=String(r['Remark']||'').trim();
+          let item=map.get(itemNo);
+          if(!item){
+            item={itemNo,barcode,desc,remark,locations:[]};
+            map.set(itemNo,item);
+          }
+          if(!item.barcode&&barcode)item.barcode=barcode;
+          if(!item.remark&&remark)item.remark=remark;
+          const dupe=item.locations.some(l=>l.loc===loc&&l.location===location);
+          if(!dupe&&(loc||location)){
+            item.locations.push({loc,location,facing,maxQty});
+          }
+        });
       });
       PRODUCTS_BY_KEY=Array.from(map.values());
       PRODUCTS_BY_KEY.forEach(item=>{ item.baseLocations=item.locations.slice(); });
