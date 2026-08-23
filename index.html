@@ -2849,11 +2849,13 @@ const MAP_ENTRANCE_EXIT_I18N={
   jp:['入口 · IN','出口 · OUT']
 };
 let currentMapBlocks=JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+let currentMapDeletedIds=[]; // เก็บ id ของกล่องเริ่มต้นที่ผู้ใช้ลบทิ้งไปแล้ว กันไม่ให้ mergeMissingDefaultBlocks เอากลับมาใหม่ตอนโหลดครั้งถัดไป
 let currentMapBgColor='#FCFBF9';
 let savedMapRotation=25;
 let currentMapRotation=25;
 let mapEditMode=false;
 let mapEditSnapshot=null;
+let mapEditDeletedIdsSnapshot=null;
 let mapEditBgSnapshot=null;
 let mapEditRotationSnapshot=25;
 let mapDragState=null;
@@ -5780,6 +5782,7 @@ function openMapEditor(){
   mapEditMode=true;
   selectedBlockId=null;
   mapEditSnapshot=JSON.parse(JSON.stringify(currentMapBlocks));
+  mapEditDeletedIdsSnapshot=currentMapDeletedIds.slice();
   mapEditBgSnapshot=currentMapBgColor;
   mapEditRotationSnapshot=currentMapRotation;
   rerenderMapEditorSVG();
@@ -5797,6 +5800,7 @@ function openMapEditor(){
 }
 function cancelMapEdit(){
   currentMapBlocks=mapEditSnapshot || JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+  currentMapDeletedIds=mapEditDeletedIdsSnapshot || [];
   currentMapBgColor=mapEditBgSnapshot || '#FCFBF9';
   currentMapRotation=mapEditRotationSnapshot;
   mapEditMode=false;
@@ -5818,7 +5822,7 @@ async function saveMapEdit(){
   document.getElementById('mapOverlay').classList.remove('editing');
   document.getElementById('mapOverlay').style.display='none';
   refreshInlineMap();
-  await persistMapBlocks(currentMapBlocks,currentMapBgColor,currentMapRotation);
+  await persistMapBlocks(currentMapBlocks,currentMapBgColor,currentMapRotation,currentMapDeletedIds);
 }
 function addMapBlock(){
   const text=prompt(t('addZonePrompt'),t('newZoneDefaultName'));
@@ -5833,6 +5837,9 @@ function addMapBlock(){
 function deleteSelectedBlock(){
   if(!selectedBlockId)return;
   if(!confirm(t('deleteBoxConfirm')))return;
+  if(DEFAULT_MAP_BLOCKS.some(b=>b.id===selectedBlockId) && !currentMapDeletedIds.includes(selectedBlockId)){
+    currentMapDeletedIds.push(selectedBlockId);
+  }
   currentMapBlocks=currentMapBlocks.filter(b=>b.id!==selectedBlockId);
   selectedBlockId=null;
   rerenderMapEditorSVG();
@@ -5994,9 +6001,10 @@ document.addEventListener('pointercancel',function(){ mapDragState=null; mapRota
 
 // เติมบล็อกใหม่ที่เพิ่งเพิ่มใน DEFAULT_MAP_BLOCKS (เช่น infopoint) เข้าไปในผังที่เคยบันทึกไว้แล้ว
 // โดยไม่แตะบล็อกเดิมที่พนักงานเคยย้าย/ปรับแต่งเอง — กันไม่ให้ของใหม่หายไปเงียบ ๆ สำหรับสาขาที่มีผังบันทึกอยู่ก่อน
-function mergeMissingDefaultBlocks(blocks){
+function mergeMissingDefaultBlocks(blocks,deletedIds){
   const existingIds=new Set(blocks.map(b=>b.id));
-  const missing=DEFAULT_MAP_BLOCKS.filter(b=>!existingIds.has(b.id));
+  const deletedSet=new Set(deletedIds||[]);
+  const missing=DEFAULT_MAP_BLOCKS.filter(b=>!existingIds.has(b.id)&&!deletedSet.has(b.id));
   return missing.length ? blocks.concat(JSON.parse(JSON.stringify(missing))) : blocks;
 }
 // ส.ค. 2569 ปรับผังใหม่ทั้งหมดให้ตรงสัดส่วนร้านจริง (พื้นกว้างขึ้น + ตำแหน่งแต่ละโซนเปลี่ยนแบบไม่เป็นสัดส่วนเดียวกับของเดิม)
@@ -6013,8 +6021,10 @@ async function loadMapBlocksFromStorage(){
       if(doc.exists){
         const data=doc.data();
         if(data && Array.isArray(data.blocks) && data.blocks.length){
-          const blocks=(data.layoutVersion>=MAP_LAYOUT_VERSION)?data.blocks:JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
-          currentMapBlocks=mergeMissingDefaultBlocks(blocks);
+          const sameVersion=data.layoutVersion>=MAP_LAYOUT_VERSION;
+          const blocks=sameVersion?data.blocks:JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+          currentMapDeletedIds=(sameVersion && Array.isArray(data.deletedIds))?data.deletedIds:[];
+          currentMapBlocks=mergeMissingDefaultBlocks(blocks,currentMapDeletedIds);
           if(data.bgColor) currentMapBgColor=data.bgColor;
           if(typeof data.rotation==='number'){ savedMapRotation=data.rotation; currentMapRotation=data.rotation; }
           return;
@@ -6027,18 +6037,21 @@ async function loadMapBlocksFromStorage(){
     if(raw){
       const parsed=JSON.parse(raw);
       if(Array.isArray(parsed) && parsed.length){
-        currentMapBlocks=mergeMissingDefaultBlocks(JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS)));
+        currentMapDeletedIds=[];
+        currentMapBlocks=mergeMissingDefaultBlocks(JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS)),currentMapDeletedIds);
       } else if(parsed && Array.isArray(parsed.blocks) && parsed.blocks.length){
-        const blocks=(parsed.layoutVersion>=MAP_LAYOUT_VERSION)?parsed.blocks:JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
-        currentMapBlocks=mergeMissingDefaultBlocks(blocks);
+        const sameVersion=parsed.layoutVersion>=MAP_LAYOUT_VERSION;
+        const blocks=sameVersion?parsed.blocks:JSON.parse(JSON.stringify(DEFAULT_MAP_BLOCKS));
+        currentMapDeletedIds=(sameVersion && Array.isArray(parsed.deletedIds))?parsed.deletedIds:[];
+        currentMapBlocks=mergeMissingDefaultBlocks(blocks,currentMapDeletedIds);
         if(parsed.bgColor) currentMapBgColor=parsed.bgColor;
         if(typeof parsed.rotation==='number'){ savedMapRotation=parsed.rotation; currentMapRotation=parsed.rotation; }
       }
     }
   }catch(e){}
 }
-async function persistMapBlocks(blocks,bgColor,rotation){
-  try{ localStorage.setItem('mf_map_layout',JSON.stringify({blocks:blocks,bgColor:bgColor,rotation:rotation,layoutVersion:MAP_LAYOUT_VERSION})); }catch(e){}
+async function persistMapBlocks(blocks,bgColor,rotation,deletedIds){
+  try{ localStorage.setItem('mf_map_layout',JSON.stringify({blocks:blocks,bgColor:bgColor,rotation:rotation,layoutVersion:MAP_LAYOUT_VERSION,deletedIds:deletedIds||[]})); }catch(e){}
   if(mapFirestoreDocRef){
     let updatedBy='unknown';
     try{
@@ -6046,7 +6059,7 @@ async function persistMapBlocks(blocks,bgColor,rotation){
       if(sess && sess.name) updatedBy=sess.name+' · '+(sess.dept||'');
     }catch(e){}
     try{
-      await mapFirestoreDocRef.set({blocks:blocks,bgColor:bgColor,rotation:rotation,layoutVersion:MAP_LAYOUT_VERSION,updatedAt:Date.now(),updatedBy:updatedBy});
+      await mapFirestoreDocRef.set({blocks:blocks,bgColor:bgColor,rotation:rotation,layoutVersion:MAP_LAYOUT_VERSION,deletedIds:deletedIds||[],updatedAt:Date.now(),updatedBy:updatedBy});
     }catch(e){
       console.error('บันทึกผังไป Firestore ไม่สำเร็จ',e);
       alert(t('syncSaveFailedRetryAlert'));
