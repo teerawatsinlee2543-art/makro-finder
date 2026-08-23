@@ -3644,6 +3644,12 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
     const frameColor='#E8192C';
     const topA=isoProject(x0,y0,H,rotationDeg), topB=isoProject(x1,y0,H,rotationDeg), topC=isoProject(x1,y1,H,rotationDeg), topD=isoProject(x0,y1,H,rotationDeg);
     const botA=isoProject(x0,y0,0,rotationDeg), botB=isoProject(x1,y0,0,rotationDeg), botC=isoProject(x1,y1,0,rotationDeg), botD=isoProject(x0,y1,0,rotationDeg);
+    // ระบายทั้งกล่องด้วยสีแดงโปร่งเบลอๆ (ไม่ใช่สีแดงจัด) ทั้ง 3 หน้าที่มองเห็น
+    topMarkup+='<g filter="url(#groundBlur)">'
+      +'<polygon points="'+polyPts([topB,topC,botC,botB])+'" fill="rgba(216,32,40,.34)"/>'
+      +'<polygon points="'+polyPts([topD,topC,botC,botD])+'" fill="rgba(216,32,40,.34)"/>'
+      +'<polygon points="'+polyPts([topA,topB,topC,topD])+'" fill="rgba(216,32,40,.34)"/>'
+      +'</g>';
     topMarkup+='<polygon points="'+polyPts([topA,topB,topC,topD])+'" fill="none" stroke="'+frameColor+'" stroke-width="3" stroke-linejoin="round"/>'
       +'<line x1="'+topA[0].toFixed(1)+'" y1="'+topA[1].toFixed(1)+'" x2="'+botA[0].toFixed(1)+'" y2="'+botA[1].toFixed(1)+'" stroke="'+frameColor+'" stroke-width="3"/>'
       +'<line x1="'+topB[0].toFixed(1)+'" y1="'+topB[1].toFixed(1)+'" x2="'+botB[0].toFixed(1)+'" y2="'+botB[1].toFixed(1)+'" stroke="'+frameColor+'" stroke-width="3"/>'
