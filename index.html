@@ -3822,7 +3822,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rotationDeg,tint,H,th,en,skin.kind);
   else if(skin.type==='facingRack') skinMarkup=facingRackPair(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en);
   else if(skin.type==='door') skinMarkup=glassDoor(isoProject((x0+x1)/2,y1,0,rotationDeg),(MAP_ENTRANCE_EXIT_I18N[currentLang]||MAP_ENTRANCE_EXIT_I18N.th)[skin.labelIdx],skin.color);
-  else skinMarkup=rackUnit(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en,true);
+  else skinMarkup=rackUnit(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,b.id==='o2o'?'':th,b.id==='o2o'?'':en,true);
   // ฐานรองทุกยูนิต: เงานุ่มบางๆ ใต้แท่น + แท่นทึบสีเดียวกันทุกโซน (ไล่เฉดอัตโนมัติจาก boxFaces) ยกเว้นประตู (ไม่มีแท่น)
   // ให้แท่นทุกโซนดูเป็นชุดเดียวกัน สม่ำเสมอ ไม่ขึ้นกับขนาดของแต่ละโซน (ต่างจากเงาเบลอล้วนที่ดูไม่เท่ากันเมื่อโซนใหญ่เล็กไม่เท่ากัน)
   if(skin.type!=='door'){
