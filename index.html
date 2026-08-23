@@ -2958,6 +2958,7 @@ function starPoints(cx,cy,outerR,innerR,points){
 
 // ==== ผังร้านสไตล์ 3D เสมือนจริง: กล่องพื้นฐาน + ป้ายแขวน + ยูนิตแต่ละประเภท (ตู้แช่/ชั้นวาง/แผงผัก-ผลไม้/เบเกอรี่/ไอศกรีม/แคชเชียร์) ====
 let __mapGradCounter=0;
+let __mapSignHighlighted=false;
 function boxFaces(x0,y0,x1,y1,z0,z1,rot,fillTop,fillRight,fillFront){
   const top=[isoProject(x0,y0,z1,rot),isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x0,y1,z1,rot)];
   const right=[isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x1,y1,z0,rot),isoProject(x1,y0,z0,rot)];
@@ -2983,14 +2984,17 @@ function signAt(x,y,z,rot,th,en,tint,big,pointToZ){
   let leader='';
   if(pointToZ!==undefined){
     const tgt=isoProject(x,y,pointToZ,rot);
-    const leaderColor=shadeColor(tint,0.3);
+    const leaderColor=__mapSignHighlighted?'#E8192C':shadeColor(tint,0.3);
     leader='<line x1="'+p[0].toFixed(1)+'" y1="'+(top+h).toFixed(1)+'" x2="'+tgt[0].toFixed(1)+'" y2="'+tgt[1].toFixed(1)+'" stroke="'+leaderColor+'" stroke-width="1.6" stroke-dasharray="3 2"/>'
       +'<circle cx="'+tgt[0].toFixed(1)+'" cy="'+tgt[1].toFixed(1)+'" r="2.6" fill="'+leaderColor+'"/>';
   }
+  const hlBorder=__mapSignHighlighted;
+  const hlGlow=hlBorder?'<rect x="'+(p[0]-w/2-3).toFixed(1)+'" y="'+(top-3).toFixed(1)+'" width="'+(w+6)+'" height="'+(h+6)+'" rx="'+(big?21:16)+'" fill="none" stroke="rgba(232,25,44,.45)" stroke-width="5" filter="url(#signBlur)"/>':'';
   return leader
+    +hlGlow
     +'<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+shadeColor(tint,0.4)+'"/><stop offset="1" stop-color="'+shadeColor(tint,0.62)+'"/></linearGradient>'
     +'<rect x="'+(p[0]-w/2+0.8).toFixed(1)+'" y="'+(top+1.6).toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?18:13)+'" fill="rgba(10,12,16,.22)" filter="url(#signBlur)"/>'
-    +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?18:13)+'" fill="url(#'+gid+')" stroke="'+lightenColor(tint,0.42)+'" stroke-width="1"/>'
+    +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?18:13)+'" fill="url(#'+gid+')" stroke="'+(hlBorder?'#E8192C':lightenColor(tint,0.42))+'" stroke-width="'+(hlBorder?2.5:1)+'"/>'
     +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?27:23)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?21:15)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
     +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+48).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="600" fill="'+lightenColor(tint,0.68)+'" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
 }
@@ -3809,6 +3813,8 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   }
   const skin=getBlockSkin(b);
   let skinMarkup;
+  // ตอนไฮไลต์กล่อง (ค้นหาแล้วเจอ) ให้ป้ายลอยของโซนนั้นมีกรอบแดงด้วย จะได้ดูเป็นชุดเดียวกับกรอบแดงรอบกล่อง ไม่ใช่เส้นแดงพุ่งทะลุป้ายเฉยๆ
+  __mapSignHighlighted=!!isHighlighted;
   if(skin.type==='butcher') skinMarkup=butcherStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='fish') skinMarkup=fishStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
