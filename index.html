@@ -2973,14 +2973,22 @@ function boxFaces(x0,y0,x1,y1,z0,z1,rot,fillTop,fillRight,fillFront){
     +'<polygon points="'+polyPts(front)+'" fill="url(#'+frontG+')" stroke="rgba(0,0,0,.28)" stroke-width="0.5"/>'
     +'<polygon points="'+polyPts(top)+'" fill="url(#'+topG+')" stroke="rgba(255,255,255,.3)" stroke-width="0.5"/>';
 }
-function signAt(x,y,z,rot,th,en,tint,big){
+function signAt(x,y,z,rot,th,en,tint,big,pointToZ){
   const p=isoProject(x,y,z,rot);
-  // ป้ายลอยตัวตรงกลางกล่องแบบไม่มีเส้นชี้ ขยายใหญ่ขึ้นอีกรอบให้อ่านง่ายชัดเจนขึ้น
+  // ป้ายลอยเหนือกล่อง มีเส้นประชี้ลงไปที่ตัวกล่อง (pointToZ) ให้เห็นชัดว่าป้ายนี้คู่กับกล่องไหน
   const w=Math.max(big?130:76, Math.max((th||'').length,(en||'').length)*(big?13:9));
   const h=big?62:36;
   const top=p[1]-h/2;
   const gid='sg'+(__mapGradCounter++);
-  return '<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+shadeColor(tint,0.4)+'"/><stop offset="1" stop-color="'+shadeColor(tint,0.62)+'"/></linearGradient>'
+  let leader='';
+  if(pointToZ!==undefined){
+    const tgt=isoProject(x,y,pointToZ,rot);
+    const leaderColor=shadeColor(tint,0.3);
+    leader='<line x1="'+p[0].toFixed(1)+'" y1="'+(top+h).toFixed(1)+'" x2="'+tgt[0].toFixed(1)+'" y2="'+tgt[1].toFixed(1)+'" stroke="'+leaderColor+'" stroke-width="1.6" stroke-dasharray="3 2"/>'
+      +'<circle cx="'+tgt[0].toFixed(1)+'" cy="'+tgt[1].toFixed(1)+'" r="2.6" fill="'+leaderColor+'"/>';
+  }
+  return leader
+    +'<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+shadeColor(tint,0.4)+'"/><stop offset="1" stop-color="'+shadeColor(tint,0.62)+'"/></linearGradient>'
     +'<rect x="'+(p[0]-w/2+0.8).toFixed(1)+'" y="'+(top+1.6).toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?18:13)+'" fill="rgba(10,12,16,.22)" filter="url(#signBlur)"/>'
     +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?18:13)+'" fill="url(#'+gid+')" stroke="'+lightenColor(tint,0.42)+'" stroke-width="1"/>'
     +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?27:23)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?21:15)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
@@ -3016,7 +3024,7 @@ function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en,big){
       }
     }
   }
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+6,rot,th,en,tint,big));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+72,rot,th,en,tint,big,H));
   return parts.join('');
 }
 // ชั้นวาง 1 ฝั่ง หันหน้า (ป้าย/ลัง) เข้าหา frontY ที่กำหนดได้ ใช้คู่กับ facingRackPair เพื่อทำ 2 ชั้นหันเข้าหากัน
@@ -3073,7 +3081,7 @@ function facingRackPair(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en){
   const walkEdgeB=[isoProject(x0,bY0,0.3,rot),isoProject(x1,bY0,0.3,rot)];
   parts.push('<line x1="'+walkEdgeA[0][0].toFixed(1)+'" y1="'+walkEdgeA[0][1].toFixed(1)+'" x2="'+walkEdgeA[1][0].toFixed(1)+'" y2="'+walkEdgeA[1][1].toFixed(1)+'" stroke="rgba(0,0,0,.18)" stroke-width="1"/>');
   parts.push('<line x1="'+walkEdgeB[0][0].toFixed(1)+'" y1="'+walkEdgeB[0][1].toFixed(1)+'" x2="'+walkEdgeB[1][0].toFixed(1)+'" y2="'+walkEdgeB[1][1].toFixed(1)+'" stroke="rgba(0,0,0,.18)" stroke-width="1"/>');
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+16,rot,th,en,tint,true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+82,rot,th,en,tint,true,H));
   return parts.join('');
 }
 // ชิ้นเนื้อสด: วงรีสีแดง + ลายมันแทรก
@@ -3175,7 +3183,7 @@ function butcherStall(x0,y0,x1,y1,rot,tint,H,th,en){
 
   parts.push(freshMeatCase(s3x0,y0,s3x1,y1,rot,H));
 
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+8,rot,th,en,tint,true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+74,rot,th,en,tint,true,H));
   return parts.join('');
 }
 // แผนกปลา: ถาดน้ำแข็งสี่เหลี่ยมจัตุรัส 3 ถาด (ปลา/กุ้ง/ปู กองพูนกลางถาด) + ตู้กระจกปลาไหว้ 1 ตู้ติดถาดปู
@@ -3278,7 +3286,7 @@ function fishStall(x0,y0,x1,y1,rot,tint,H,th,en){
     const ga=isoProject(tx0,ty1,zTop+0.3,rot), gb=isoProject(tx1,ty1,zTop+0.3,rot);
     parts.push('<line x1="'+ga[0].toFixed(1)+'" y1="'+ga[1].toFixed(1)+'" x2="'+gb[0].toFixed(1)+'" y2="'+gb[1].toFixed(1)+'" stroke="#BFEFE4" stroke-width="1.6" opacity="0.6"/>');
   }
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H*0.85+18,rot,th,en,'#3E699A',true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H*0.85+84,rot,th,en,'#3E699A',true,H*0.85));
   return parts.join('');
 }
 // ร้านไอศกรีม: เคาน์เตอร์ + ตู้โชว์ถังไอศกรีม + เครื่องซอฟต์เสิร์ฟ
@@ -3320,7 +3328,7 @@ function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
     +'<path d="M '+(swirlX-4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' L '+swirlX.toFixed(1)+' '+(swirlY+9).toFixed(1)+' L '+(swirlX+4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' Z" fill="#D9A65F"/>'
     +'<path d="M '+(swirlX-4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' L '+swirlX.toFixed(1)+' '+(swirlY+9).toFixed(1)+' L '+(swirlX+4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' Z" fill="none" stroke="#B9834A" stroke-width="0.5"/>'
   );
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+mH+10,rot,th,en,tint,true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+mH+76,rot,th,en,tint,true,H+mH));
   return parts.join('');
 }
 // แผงเบเกอรี่แบบลังไม้เอียงบนล้อเข็น เรียงขนมปังห่อถุง 3 ชั้น + ป้ายแดงแขวนเหนือหัว
@@ -3360,7 +3368,7 @@ function bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en){
     }
   }
   parts.push(boxFaces(x0-2,y0-2,x1+2,y1+2,H,H+5,rot,woodL,shadeColor(wood,0.2),wood));
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+14,rot,th,en,bannerRed,true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+80,rot,th,en,bannerRed,true,H));
   return parts.join('');
 }
 // แผงผัก-ผลไม้ 2 แถว (ผลไม้นำเข้า/ผักสด) แบบลังเขียวเรียงกอง สไตล์ภาพอ้างอิง "ส่งตรงจากสวน"
@@ -3424,7 +3432,7 @@ function produceStall(x0,y0,x1,y1,rot,tint,H,th,en){
     }
     parts.push(boxFaces(x0-2,ry0-2,x1+2,ry1+2,caseH,caseH+5,rot,'#F0F3F2',shadeColor('#AEB8B4',0.15),'#AEB8B4'));
   });
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,caseH+16,rot,th,en,'#4C7A38',true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,caseH+82,rot,th,en,'#4C7A38',true,caseH));
   return parts.join('');
 }
 // แถวแคชเชียร์สไตล์ Makro: หลายช่องแดง/ขาว มีสายพาน + จอ POS
@@ -3490,7 +3498,7 @@ function counterUnit(x0,y0,x1,y1,rot,tint,H,th,en,kind){
       parts.push('<polygon points="'+polyPts([a,b,c,d])+'" fill="none" stroke="'+shadeColor(tint,0.35)+'" stroke-width="1.4"/>');
     }
   }
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+6,rot,th,en,tint,true));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+72,rot,th,en,tint,true,H));
   return parts.join('');
 }
 // หัวล็อคเลขทางเดิน: ชั้นเหล็กเตี้ย + เสาป้ายแดงตัวเลขขาวตัวใหญ่ ติดที่ขอบหน้าล็อค สไตล์ป้ายเลขทางเดิน Makro จริง
@@ -3593,7 +3601,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
-  else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,8)+signAt((x0+x1)/2,(y0+y1)/2,H+30,rotationDeg,th,en,tint,true);
+  else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,8)+signAt((x0+x1)/2,(y0+y1)/2,H+95,rotationDeg,th,en,tint,true,H);
   else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rotationDeg,isHighlighted?'':th,isHighlighted?'':en,H);
   else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rotationDeg,tint,H,th,en,skin.kind);
   else if(skin.type==='facingRack') skinMarkup=facingRackPair(x0,y0,x1,y1,rotationDeg,tint,H,skin.levels||2,skin.density||2,th,en);
@@ -3693,7 +3701,7 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     const info=MAP_ZONE_LABELS[prefix];
     const mainText=info.main[currentLang]||info.main.th;
     // ใช้ป้ายแบบเดียวกับทุกโซนอื่น (แต่เดิม Dry Food/Non-Food เป็นแค่ตัวหนังสือลอยเฉยๆ ไม่มีป้าย) ยึดจุดกึ่งกลางกลุ่ม
-    return signAt((minX+maxX)/2,(minY+maxY)/2,maxH+14,rot,mainText,info.sub,info.color,true);
+    return signAt((minX+maxX)/2,(minY+maxY)/2,maxH+80,rot,mainText,info.sub,info.color,true,maxH);
   }).join('');
 
   const allPts=[floorTop,leftWall,backWall,rightWall,frontWall].reduce((a,p)=>a.concat(p),[]);
