@@ -3027,6 +3027,66 @@ function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en,big){
   if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+72,rot,th,en,tint,big,H));
   return parts.join('');
 }
+// ถุงขนมทรงพอง: สีสันหลากหลายแทนแบรนด์จริง
+function chipBag(cx,cy,z,rot,color,scale,rotDeg){
+  scale=scale||1;
+  const p=isoProject(cx,cy,z,rot);
+  const w=7*scale, h=15*scale;
+  const shade=shadeColor(color,0.28), hi=lightenColor(color,0.3);
+  return '<g transform="rotate('+rotDeg+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">'
+    +'<path d="M'+(p[0]-w/2).toFixed(1)+' '+(p[1]-h*0.38).toFixed(1)+
+      ' Q'+(p[0]-w*0.62).toFixed(1)+' '+(p[1]+h*0.1).toFixed(1)+' '+(p[0]-w/2).toFixed(1)+' '+(p[1]+h*0.5).toFixed(1)+
+      ' L'+(p[0]+w/2).toFixed(1)+' '+(p[1]+h*0.5).toFixed(1)+
+      ' Q'+(p[0]+w*0.62).toFixed(1)+' '+(p[1]+h*0.1).toFixed(1)+' '+(p[0]+w/2).toFixed(1)+' '+(p[1]-h*0.38).toFixed(1)+
+      ' Z" fill="'+color+'" stroke="'+shade+'" stroke-width="0.5"/>'
+    +'<rect x="'+(p[0]-w*0.4).toFixed(1)+'" y="'+(p[1]-h*0.5).toFixed(1)+'" width="'+(w*0.8).toFixed(1)+'" height="'+(h*0.14).toFixed(1)+'" fill="'+shade+'"/>'
+    +'<rect x="'+(p[0]-w*0.36).toFixed(1)+'" y="'+(p[1]+h*0.42).toFixed(1)+'" width="'+(w*0.72).toFixed(1)+'" height="'+(h*0.1).toFixed(1)+'" fill="'+shade+'"/>'
+    +'<line x1="'+(p[0]-w*0.15).toFixed(1)+'" y1="'+(p[1]-h*0.3).toFixed(1)+'" x2="'+(p[0]-w*0.15).toFixed(1)+'" y2="'+(p[1]+h*0.35).toFixed(1)+'" stroke="'+hi+'" stroke-width="1.2" opacity="0.6"/>'
+    +'</g>';
+}
+// แผนกขนม: ถุงขนมทรงพองสีสันหลากหลาย ตั้งเรียงบนชั้นวางเสาน้ำเงิน-คานส้มแบบ Makro
+function snackStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  const inset=4;
+  x0+=inset; x1-=inset; y0+=inset; y1-=inset;
+  const parts=[];
+  const postColor='#2E5C94', postColorL='#4A7FC0', beamColor='#E2802F', beamColorL='#F4A24F';
+  const fp=[isoProject(x0,y1,0.4,rot),isoProject(x1,y1,0.4,rot),isoProject(x1,y0,0.4,rot),isoProject(x0,y0,0.4,rot)];
+  parts.push('<polygon points="'+polyPts(fp)+'" fill="rgba(0,0,0,.14)"/>');
+  const postW=4;
+  [[x0,y1],[x1,y1],[x1,y0]].forEach(([px,py])=>{
+    parts.push(boxFaces(px-postW/2,py-postW/2,px+postW/2,py+postW/2,0,H,rot,postColorL,postColor,shadeColor(postColor,0.2)));
+  });
+  const bagColors=['#F2C230','#D9342B','#2E6FD9','#3FA34D','#E8791E','#8E44AD'];
+  const levels=4;
+  const bagW=6.2, bagStepX=bagW*0.9;
+  const rowStepY=9;
+  const maxRows=3;
+  const depthAvail=(y1-y0)-6;
+  const rows=Math.min(maxRows, Math.max(1, Math.floor(depthAvail/rowStepY)));
+  const colsN=Math.max(1, Math.floor((x1-x0-4)/bagStepX));
+  let colorIdx=0;
+  for(let li=0; li<levels; li++){
+    const z=H*((li+1)/(levels+0.15));
+    const beamFront=[isoProject(x0,y1,z,rot),isoProject(x1,y1,z,rot)];
+    const beamRight=[isoProject(x1,y1,z,rot),isoProject(x1,y0,z,rot)];
+    parts.push('<line x1="'+beamFront[0][0].toFixed(1)+'" y1="'+beamFront[0][1].toFixed(1)+'" x2="'+beamFront[1][0].toFixed(1)+'" y2="'+beamFront[1][1].toFixed(1)+'" stroke="'+beamColor+'" stroke-width="3"/>');
+    parts.push('<line x1="'+beamRight[0][0].toFixed(1)+'" y1="'+beamRight[0][1].toFixed(1)+'" x2="'+beamRight[1][0].toFixed(1)+'" y2="'+beamRight[1][1].toFixed(1)+'" stroke="'+beamColorL+'" stroke-width="2.4"/>');
+    if(li<levels-1){
+      const rowW=colsN*bagStepX;
+      const startX=x0+2+((x1-x0-4)-rowW)/2;
+      for(let ri=0; ri<rows; ri++){
+        const cy=y1-4-ri*rowStepY;
+        for(let ci=0; ci<colsN; ci++){
+          const cx=startX+ci*bagStepX+bagStepX/2;
+          const color=bagColors[colorIdx%bagColors.length]; colorIdx++;
+          parts.push(chipBag(cx,cy,z+2,rot,color,0.92,(ci%2===0?-4:4)));
+        }
+      }
+    }
+  }
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+72,rot,th,en,tint,true,H));
+  return parts.join('');
+}
 // ชั้นวาง 1 ฝั่ง หันหน้า (ป้าย/ลัง) เข้าหา frontY ที่กำหนดได้ ใช้คู่กับ facingRackPair เพื่อทำ 2 ชั้นหันเข้าหากัน
 function facingRackBox(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,frontIsY1){
   const inset=2.4;
@@ -3384,6 +3444,64 @@ function chickenStall(x0,y0,x1,y1,rot,tint,H,th,en){
   if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+90,rot,th,en,'#B5651D',true,roofZ1));
   return parts.join('');
 }
+function wineBottle(cx,cy,z,rot,color,scale,rotDeg){
+  scale=scale||1;
+  const p=isoProject(cx,cy,z,rot);
+  const w=5*scale, bodyH=14*scale, neckW=1.8*scale, neckH=6*scale;
+  const dark=shadeColor(color,0.35);
+  let out='<g transform="rotate('+rotDeg+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">';
+  out+='<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+(p[1]-bodyH).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+bodyH.toFixed(1)+'" rx="'+(scale*0.8).toFixed(1)+'" fill="'+color+'" stroke="'+dark+'" stroke-width="0.5"/>'
+    +'<rect x="'+(p[0]-neckW/2).toFixed(1)+'" y="'+(p[1]-bodyH-neckH).toFixed(1)+'" width="'+neckW.toFixed(1)+'" height="'+neckH.toFixed(1)+'" fill="'+color+'" stroke="'+dark+'" stroke-width="0.5"/>'
+    +'<rect x="'+(p[0]-neckW/2-0.3).toFixed(1)+'" y="'+(p[1]-bodyH-neckH-1).toFixed(1)+'" width="'+(neckW+0.6).toFixed(1)+'" height="1.6" fill="#5a4632"/>'
+    +'<rect x="'+(p[0]-w*0.36).toFixed(1)+'" y="'+(p[1]-bodyH*0.55).toFixed(1)+'" width="'+(w*0.72).toFixed(1)+'" height="'+(bodyH*0.32).toFixed(1)+'" fill="rgba(255,255,255,.85)" stroke="rgba(0,0,0,.1)" stroke-width="0.3"/>'
+    +'<line x1="'+(p[0]-w*0.28).toFixed(1)+'" y1="'+(p[1]-bodyH*0.9).toFixed(1)+'" x2="'+(p[0]-w*0.28).toFixed(1)+'" y2="'+(p[1]-bodyH*0.1).toFixed(1)+'" stroke="'+lightenColor(color,0.4)+'" stroke-width="0.8" opacity="0.5"/>'
+    +'</g>';
+  return out;
+}
+function beerCan(cx,cy,z,rot,color,scale,rotDeg){
+  scale=scale||1;
+  const p=isoProject(cx,cy,z,rot);
+  const w=3.8*scale, h=7.5*scale;
+  const dark=shadeColor(color,0.4);
+  let out='<g transform="rotate('+rotDeg+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">';
+  out+='<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+(p[1]-h).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+(scale*0.5).toFixed(1)+'" fill="'+color+'" stroke="'+dark+'" stroke-width="0.4"/>'
+    +'<rect x="'+(p[0]-w/2-0.2).toFixed(1)+'" y="'+(p[1]-h-0.6).toFixed(1)+'" width="'+(w+0.4).toFixed(1)+'" height="0.9" fill="#C8CCCE"/>'
+    +'<rect x="'+(p[0]-w/2-0.2).toFixed(1)+'" y="'+(p[1]-0.6).toFixed(1)+'" width="'+(w+0.4).toFixed(1)+'" height="0.9" fill="#C8CCCE"/>'
+    +'<line x1="'+(p[0]-w*0.18).toFixed(1)+'" y1="'+(p[1]-h*0.82).toFixed(1)+'" x2="'+(p[0]-w*0.18).toFixed(1)+'" y2="'+(p[1]-h*0.12).toFixed(1)+'" stroke="'+lightenColor(color,0.5)+'" stroke-width="0.7" opacity="0.6"/>'
+    +'</g>';
+  return out;
+}
+// แผนกไวน์/เบียร์: ตู้กระจกโทนเย็น ขวดไวน์ 2 ชั้นบน + กระป๋องเบียร์ชั้นล่าง วางบนเส้นชั้นบาง (ไม่ใช้กล่อง 3 มิติกันบังขวด)
+function wineStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  const parts=[];
+  const steel='#C7CDD3', steelD='#9AA6AA';
+  parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,lightenColor(steel,0.12),shadeColor(steelD,0.28),steelD));
+  const wineColors=['#5B1A2E','#7A2438','#3D2B1F'];
+  const beerColors=['#D9A62E','#C0272D','#2E6FD9'];
+  const shelfZs=[H*0.74, H*0.42];
+  shelfZs.forEach((z,si)=>{
+    const lineA=isoProject(x0+2,y1-4,z,rot), lineB=isoProject(x1-2,y1-4,z,rot);
+    parts.push('<line x1="'+lineA[0].toFixed(1)+'" y1="'+lineA[1].toFixed(1)+'" x2="'+lineB[0].toFixed(1)+'" y2="'+lineB[1].toFixed(1)+'" stroke="'+steelD+'" stroke-width="2"/>');
+    const n=6, rowW=x1-x0-10;
+    for(let i=0;i<n;i++){
+      const cx=x0+5+rowW*(i+0.5)/n;
+      parts.push(wineBottle(cx,y1-7,z,rot,wineColors[i%wineColors.length],1.6,(i%2===0?-3:3)));
+    }
+  });
+  const frontTop=[isoProject(x0,y1,H,rot),isoProject(x1,y1,H,rot)];
+  const frontBot=[isoProject(x0,y1,H*0.08,rot),isoProject(x1,y1,H*0.08,rot)];
+  parts.push('<polygon points="'+polyPts([frontTop[0],frontTop[1],frontBot[1],frontBot[0]])+'" fill="rgba(160,220,255,.1)" stroke="rgba(255,255,255,.6)" stroke-width="1"/>');
+  const canZ=H*0.14;
+  const lineCA=isoProject(x0+2,y1-4,canZ,rot), lineCB=isoProject(x1-2,y1-4,canZ,rot);
+  parts.push('<line x1="'+lineCA[0].toFixed(1)+'" y1="'+lineCA[1].toFixed(1)+'" x2="'+lineCB[0].toFixed(1)+'" y2="'+lineCB[1].toFixed(1)+'" stroke="'+steelD+'" stroke-width="2"/>');
+  const nc=7, rowWc=x1-x0-10;
+  for(let i=0;i<nc;i++){
+    const cx=x0+5+rowWc*(i+0.5)/nc;
+    parts.push(beerCan(cx,y1-7,canZ,rot,beerColors[i%beerColors.length],1.3,(i%2===0?-3:3)));
+  }
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+72,rot,th,en,'#2C7B90',true,H));
+  return parts.join('');
+}
 // ร้านไอศกรีม: เคาน์เตอร์ + ตู้โชว์ถังไอศกรีม + เครื่องซอฟต์เสิร์ฟ
 function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
   const parts=[];
@@ -3642,7 +3760,7 @@ function glassDoor(pt,label,tint){
 const MAP_BLOCK_SKIN={
   butchery:{type:'butcher'}, fishseafood:{type:'fish'},
   icecream:{type:'icecream'}, fruitveg:{type:'produce'}, bakery:{type:'bakery'}, cashier:{type:'cashier'},
-  snack:{type:'rack',levels:3,density:2}, winebeer:{type:'rack',levels:3,density:2},
+  snack:{type:'snackbags'}, winebeer:{type:'wine'},
   drink:{type:'rack',levels:3,density:3}, grilledchicken:{type:'chicken'},
   condiments:{type:'facingRack',levels:4,density:4}, premium:{type:'rack',levels:3,density:3},
   o2o:{type:'rack',levels:3,density:2}, infopoint:{type:'counter',kind:'info'},
@@ -3695,6 +3813,8 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='fish') skinMarkup=fishStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='chicken') skinMarkup=chickenStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
+  else if(skin.type==='snackbags') skinMarkup=snackStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
+  else if(skin.type==='wine') skinMarkup=wineStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,8)+signAt((x0+x1)/2,(y0+y1)/2,H+95,rotationDeg,th,en,tint,true,H);
