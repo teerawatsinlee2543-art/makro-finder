@@ -3206,7 +3206,7 @@ function fishStall(x0,y0,x1,y1,rot,tint,H,th,en){
   const totalW=n*squareSide+(n-1)*gap;
   const startX=x0+((x1-x0)-totalW)/2;
   const ty0=trayY0+(trayDepth-squareSide)/2, ty1=ty0+squareSide;
-  const zTop=H*0.62;
+  const zTop=H*0.4;
   const trayX=[];
   for(let ti=0; ti<n; ti++) trayX.push(startX+ti*(squareSide+gap));
 
@@ -3241,6 +3241,12 @@ function fishStall(x0,y0,x1,y1,rot,tint,H,th,en){
   for(let ti=0; ti<n; ti++){
     const tx0=trayX[ti], tx1=tx0+squareSide;
     const iceH=6, rimH=2.2;
+    // ขาตั้งถาด 4 มุม ลงถึงพื้น กันถาดดูลอยเหนือแท่น
+    const legInset=4, legTopZ=zTop-iceH-rimH;
+    [[tx0+legInset,ty0+legInset],[tx1-legInset,ty0+legInset],[tx1-legInset,ty1-legInset],[tx0+legInset,ty1-legInset]].forEach(([lx,ly])=>{
+      const legTop=isoProject(lx,ly,legTopZ,rot), legBot=isoProject(lx,ly,0,rot);
+      parts.push('<line x1="'+legTop[0].toFixed(1)+'" y1="'+legTop[1].toFixed(1)+'" x2="'+legBot[0].toFixed(1)+'" y2="'+legBot[1].toFixed(1)+'" stroke="'+steelD+'" stroke-width="2.6"/>');
+    });
     parts.push(boxFaces(tx0-1.5,ty0-1.5,tx1+1.5,ty1+1.5,zTop-iceH-rimH,zTop-iceH,rot,lightenColor(steel,0.12),shadeColor(steelD,0.25),steelD));
     parts.push(boxFaces(tx0,ty0,tx1,ty1,zTop-iceH,zTop,rot,iceBaseL,shadeColor(iceBaseD,0.2),iceBaseD));
     const cx0=(tx0+tx1)/2, cy0=(ty0+ty1)/2;
