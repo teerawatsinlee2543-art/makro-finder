@@ -2986,8 +2986,8 @@ function boxFaces(x0,y0,x1,y1,z0,z1,rot,fillTop,fillRight,fillFront){
 function signAt(x,y,z,rot,th,en,tint,big,pointToZ){
   const p=isoProject(x,y,z,rot);
   // ป้ายลอยเหนือกล่อง มีเส้นประชี้ลงไปที่ตัวกล่อง (pointToZ) ให้เห็นชัดว่าป้ายนี้คู่กับกล่องไหน
-  const w=Math.max(big?130:76, Math.max((th||'').length,(en||'').length)*(big?13:9));
-  const h=big?62:36;
+  const w=Math.max(big?154:76, Math.max((th||'').length,(en||'').length)*(big?15:9));
+  const h=big?76:36;
   const top=p[1]-h/2;
   const gid='sg'+(__mapGradCounter++);
   let leader='';
@@ -2998,14 +2998,14 @@ function signAt(x,y,z,rot,th,en,tint,big,pointToZ){
       +'<circle cx="'+tgt[0].toFixed(1)+'" cy="'+tgt[1].toFixed(1)+'" r="2.6" fill="'+leaderColor+'"/>';
   }
   const hlBorder=__mapSignHighlighted;
-  const hlGlow=hlBorder?'<rect x="'+(p[0]-w/2-3).toFixed(1)+'" y="'+(top-3).toFixed(1)+'" width="'+(w+6)+'" height="'+(h+6)+'" rx="'+(big?21:16)+'" fill="none" stroke="rgba(232,25,44,.45)" stroke-width="5" filter="url(#signBlur)"/>':'';
+  const hlGlow=hlBorder?'<rect x="'+(p[0]-w/2-3).toFixed(1)+'" y="'+(top-3).toFixed(1)+'" width="'+(w+6)+'" height="'+(h+6)+'" rx="'+(big?23:16)+'" fill="none" stroke="rgba(232,25,44,.45)" stroke-width="5" filter="url(#signBlur)"/>':'';
   return leader
     +hlGlow
     +'<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+shadeColor(tint,0.4)+'"/><stop offset="1" stop-color="'+shadeColor(tint,0.62)+'"/></linearGradient>'
-    +'<rect x="'+(p[0]-w/2+0.8).toFixed(1)+'" y="'+(top+1.6).toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?18:13)+'" fill="rgba(10,12,16,.22)" filter="url(#signBlur)"/>'
-    +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?18:13)+'" fill="url(#'+gid+')" stroke="'+(hlBorder?'#E8192C':lightenColor(tint,0.42))+'" stroke-width="'+(hlBorder?2.5:1)+'"/>'
-    +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?27:23)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?21:15)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
-    +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+48).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="600" fill="'+lightenColor(tint,0.68)+'" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
+    +'<rect x="'+(p[0]-w/2+0.8).toFixed(1)+'" y="'+(top+1.6).toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?20:13)+'" fill="rgba(10,12,16,.22)" filter="url(#signBlur)"/>'
+    +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?20:13)+'" fill="url(#'+gid+')" stroke="'+(hlBorder?'#E8192C':lightenColor(tint,0.42))+'" stroke-width="'+(hlBorder?2.5:1)+'"/>'
+    +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?32:23)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?24:15)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
+    +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+58).toFixed(1)+'" text-anchor="middle" font-size="17" font-weight="600" fill="'+lightenColor(tint,0.68)+'" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
 }
 // ชั้นวางสไตล์คลังสินค้า: เสาสีน้ำเงิน + คานสีส้ม + ลังสินค้าเรียงซ้อน + ป้ายแขวนด้านบน
 function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,crateDensity,th,en,big){
@@ -4218,7 +4218,7 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     });
     // ป้ายลอยของแต่ละโซนลอยสูงกว่าตัวกล่องมาก (สูงสุดที่เจอในโค้ดคือ H+95) เผื่อระยะพอให้ป้ายไม่โดนตัดขอบจอด้านบน
     const signAnchor=isoProject((b.x+b.w/2),(b.y+b.h/2),H+95,rot);
-    allPts.push([signAnchor[0],signAnchor[1]-40]);
+    allPts.push([signAnchor[0],signAnchor[1]-55]);
   });
   Object.keys(MAP_ZONE_LABELS).forEach(prefix=>{
     const group=blocks.filter(b=>b.id.indexOf(prefix)===0);
@@ -4227,7 +4227,7 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     const minGY=Math.min(...group.map(b=>b.y)), maxGY=Math.max(...group.map(b=>b.y+b.h));
     const maxH=Math.max(...group.map(b=>b.height||54));
     const signAnchor=isoProject((minGX+maxGX)/2,(minGY+maxGY)/2,maxH+80,rot);
-    allPts.push([signAnchor[0],signAnchor[1]-40]);
+    allPts.push([signAnchor[0],signAnchor[1]-55]);
   });
   const minX=Math.min(...allPts.map(p=>p[0])), maxX=Math.max(...allPts.map(p=>p[0]));
   const minY=Math.min(...allPts.map(p=>p[1])), maxY=Math.max(...allPts.map(p=>p[1]));
