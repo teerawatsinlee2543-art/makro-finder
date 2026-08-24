@@ -4162,6 +4162,15 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
       +'<line x1="'+topB[0].toFixed(1)+'" y1="'+topB[1].toFixed(1)+'" x2="'+botB[0].toFixed(1)+'" y2="'+botB[1].toFixed(1)+'" stroke="'+frameColor+'" stroke-width="3"/>'
       +'<line x1="'+topC[0].toFixed(1)+'" y1="'+topC[1].toFixed(1)+'" x2="'+botC[0].toFixed(1)+'" y2="'+botC[1].toFixed(1)+'" stroke="'+frameColor+'" stroke-width="3"/>'
       +'<line x1="'+topD[0].toFixed(1)+'" y1="'+topD[1].toFixed(1)+'" x2="'+botD[0].toFixed(1)+'" y2="'+botD[1].toFixed(1)+'" stroke="'+frameColor+'" stroke-width="3"/>';
+    // กระพริบสีเหลืองรอบกล่องทั้งหมด (ให้เข้าชุดกับป้ายที่กระพริบอยู่แล้ว)
+    topMarkup+='<g fill="none" stroke="#FFC72C" stroke-width="2.4" stroke-linejoin="round" opacity="0.9">'
+      +'<animate attributeName="opacity" values="0.9;0.1;0.9" dur="0.9s" repeatCount="indefinite"/>'
+      +'<polygon points="'+polyPts([topA,topB,topC,topD])+'"/>'
+      +'<line x1="'+topA[0].toFixed(1)+'" y1="'+topA[1].toFixed(1)+'" x2="'+botA[0].toFixed(1)+'" y2="'+botA[1].toFixed(1)+'"/>'
+      +'<line x1="'+topB[0].toFixed(1)+'" y1="'+topB[1].toFixed(1)+'" x2="'+botB[0].toFixed(1)+'" y2="'+botB[1].toFixed(1)+'"/>'
+      +'<line x1="'+topC[0].toFixed(1)+'" y1="'+topC[1].toFixed(1)+'" x2="'+botC[0].toFixed(1)+'" y2="'+botC[1].toFixed(1)+'"/>'
+      +'<line x1="'+topD[0].toFixed(1)+'" y1="'+topD[1].toFixed(1)+'" x2="'+botD[0].toFixed(1)+'" y2="'+botD[1].toFixed(1)+'"/>'
+      +'</g>';
     // วาดป้ายเลขล็อคซ้ำด้านบนสุด (ใหญ่ขึ้น) กันไม่ให้กรอบสีแดงบังเลขล็อค
     if(skin.type==='aisle' && th) topMarkup+=aisleLocLabel(x0,y0,x1,y1,rotationDeg,th,en,1.5,H);
     // หมุดไฮไลต์: ดาวสีเหลืองขนาดใหญ่กระพริบ (เดิมเป็นวงกลมสีแดง)
