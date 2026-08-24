@@ -3958,10 +3958,13 @@ function aisleLocLabel(x0,y0,x1,y1,rot,n1,n2,scale,rackH){
   const cx=(x0+x1)/2;
   const baseP=isoProject(cx,y1,rackH,rot);
   const poleTopY=baseP[1]-58*scale;
-  parts.push('<line x1="'+baseP[0].toFixed(1)+'" y1="'+baseP[1].toFixed(1)+'" x2="'+baseP[0].toFixed(1)+'" y2="'+poleTopY.toFixed(1)+'" stroke="#8892a0" stroke-width="'+(2*scale).toFixed(1)+'"/>');
+  parts.push('<line x1="'+baseP[0].toFixed(1)+'" y1="'+baseP[1].toFixed(1)+'" x2="'+baseP[0].toFixed(1)+'" y2="'+poleTopY.toFixed(1)+'" stroke="'+(__mapSignHighlighted?'#E8192C':'#8892a0')+'" stroke-width="'+(2*scale).toFixed(1)+'"/>');
   const cellW=(scale>1?58:40);
   const bw=(n2?cellW:24)*scale, bh=28*scale;
   const bx=baseP[0]-bw/2, by=poleTopY-bh;
+  if(__mapSignHighlighted){
+    parts.push('<rect x="'+(bx-4).toFixed(1)+'" y="'+(by-4).toFixed(1)+'" width="'+(bw+8).toFixed(1)+'" height="'+(bh+8).toFixed(1)+'" rx="'+(4*scale+4).toFixed(1)+'" fill="none" stroke="rgba(232,25,44,.5)" stroke-width="5" filter="url(#signBlur)"/>');
+  }
   parts.push('<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="'+(4*scale).toFixed(1)+'" fill="#E30613" stroke="#fff" stroke-width="'+(1.4*scale).toFixed(1)+'"/>');
   const fs2=16*scale;
   if(n2){
@@ -3972,6 +3975,10 @@ function aisleLocLabel(x0,y0,x1,y1,rot,n1,n2,scale,rackH){
     parts.push('<text x="'+(midX+bw*0.24).toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="'+fs3.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n2)+'</text>');
   } else if(n1){
     parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="'+fs2.toFixed(1)+'" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
+  }
+  if(__mapSignHighlighted){
+    parts.push('<rect x="'+(bx-3).toFixed(1)+'" y="'+(by-3).toFixed(1)+'" width="'+(bw+6).toFixed(1)+'" height="'+(bh+6).toFixed(1)+'" rx="'+(4*scale+3).toFixed(1)+'" fill="none" stroke="#FFC72C" stroke-width="'+(2.4*scale).toFixed(1)+'"><animate attributeName="opacity" values="1;0.15;1" dur="0.9s" repeatCount="indefinite"/></rect>'
+      +'<rect x="'+(bx-6).toFixed(1)+'" y="'+(by-6).toFixed(1)+'" width="'+(bw+12).toFixed(1)+'" height="'+(bh+12).toFixed(1)+'" rx="'+(4*scale+6).toFixed(1)+'" fill="none" stroke="#FFC72C" stroke-width="3" opacity="0.5" filter="url(#signBlur)"><animate attributeName="opacity" values="0.6;0;0.6" dur="0.9s" repeatCount="indefinite"/></rect>');
   }
   return parts.join('');
 }
