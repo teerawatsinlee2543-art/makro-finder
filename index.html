@@ -4616,6 +4616,14 @@ function deletePromoItem(id){
     promoGalleryCollectionRef.doc(id).delete().catch(e=>console.error('ลบโปรโมชั่นจาก Firestore ไม่สำเร็จ',e));
   }
 }
+function openPalletItemPhotoViewer(i,itemNo){
+  const wrap=document.getElementById('palletPhoto'+i);
+  const img=wrap&&wrap.querySelector('img');
+  if(!img)return;
+  document.getElementById('promoViewImg').src=img.src;
+  document.getElementById('promoViewCaption').textContent='Item '+itemNo;
+  document.getElementById('promoViewOverlay').style.display='flex';
+}
 function openPromoViewer(id){
   const item=PROMO_GALLERY_CACHE.find(p=>p.id===id);
   if(!item)return;
@@ -5138,7 +5146,7 @@ function palletItemRowHtml(it,i,canEdit){
     : '';
   return '<div class="pallet-item-row">'+
     '<div class="pallet-item-num">'+(i+1)+'</div>'+
-    '<div class="pallet-item-photo" id="palletPhoto'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'+
+    '<div class="pallet-item-photo" id="palletPhoto'+i+'" style="cursor:pointer" onclick="openPalletItemPhotoViewer('+i+','+jsStr(it.itemNo)+')"><i class="ti ti-package" aria-hidden="true"></i></div>'+
     '<div class="pallet-item-info">'+
       '<div class="pallet-item-name">'+escapeHtml(it.desc)+'</div>'+
       '<div class="pallet-item-meta">Item '+escapeHtml(it.itemNo)+' · '+t('qtyMuLabel',{qty:it.qty})+'</div>'+
