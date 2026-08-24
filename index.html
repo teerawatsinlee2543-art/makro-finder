@@ -3515,6 +3515,37 @@ function wineStall(x0,y0,x1,y1,rot,tint,H,th,en){
   if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+72,rot,th,en,'#2C7B90',true,H));
   return parts.join('');
 }
+// แผนกเครื่องดื่ม: ตู้แช่กระจกกว้าง 3 ชั้น น้ำขวด/น้ำผลไม้ด้านบน กระป๋องน้ำอัดลมด้านล่าง (เส้นบางกันบังขวดแบบเดียวกับตู้ไวน์)
+function drinkStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  const parts=[];
+  const steel='#C7CDD3', steelD='#9AA6AA';
+  parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,lightenColor(steel,0.12),shadeColor(steelD,0.28),steelD));
+  const bottleColors=['#2E86C1','#3FA34D','#E8791E'];
+  const canColors=['#C0272D','#E8791E','#4CAF50','#7B5EA7'];
+  const shelfZs=[H*0.74, H*0.42];
+  shelfZs.forEach((z)=>{
+    const lineA=isoProject(x0+2,y1-4,z,rot), lineB=isoProject(x1-2,y1-4,z,rot);
+    parts.push('<line x1="'+lineA[0].toFixed(1)+'" y1="'+lineA[1].toFixed(1)+'" x2="'+lineB[0].toFixed(1)+'" y2="'+lineB[1].toFixed(1)+'" stroke="'+steelD+'" stroke-width="2"/>');
+    const n=11, rowW=x1-x0-10;
+    for(let i=0;i<n;i++){
+      const cx=x0+5+rowW*(i+0.5)/n;
+      parts.push(wineBottle(cx,y1-7,z,rot,bottleColors[i%bottleColors.length],1.3,(i%2===0?-3:3)));
+    }
+  });
+  const frontTop=[isoProject(x0,y1,H,rot),isoProject(x1,y1,H,rot)];
+  const frontBot=[isoProject(x0,y1,H*0.08,rot),isoProject(x1,y1,H*0.08,rot)];
+  parts.push('<polygon points="'+polyPts([frontTop[0],frontTop[1],frontBot[1],frontBot[0]])+'" fill="rgba(160,220,255,.1)" stroke="rgba(255,255,255,.6)" stroke-width="1"/>');
+  const canZ=H*0.14;
+  const lineCA=isoProject(x0+2,y1-4,canZ,rot), lineCB=isoProject(x1-2,y1-4,canZ,rot);
+  parts.push('<line x1="'+lineCA[0].toFixed(1)+'" y1="'+lineCA[1].toFixed(1)+'" x2="'+lineCB[0].toFixed(1)+'" y2="'+lineCB[1].toFixed(1)+'" stroke="'+steelD+'" stroke-width="2"/>');
+  const nc=13, rowWc=x1-x0-10;
+  for(let i=0;i<nc;i++){
+    const cx=x0+5+rowWc*(i+0.5)/nc;
+    parts.push(beerCan(cx,y1-7,canZ,rot,canColors[i%canColors.length],1.2,(i%2===0?-3:3)));
+  }
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+72,rot,th,en,'#2C7B90',true,H));
+  return parts.join('');
+}
 function giftBox(cx,cy,z,rot,color,scale,rotDeg){
   scale=scale||1;
   const p=isoProject(cx,cy,z,rot);
@@ -3856,7 +3887,7 @@ const MAP_BLOCK_SKIN={
   butchery:{type:'butcher'}, fishseafood:{type:'fish'},
   icecream:{type:'icecream'}, fruitveg:{type:'produce'}, bakery:{type:'bakery'}, cashier:{type:'cashier'},
   snack:{type:'snackbags'}, winebeer:{type:'wine'},
-  drink:{type:'rack',levels:3,density:3}, grilledchicken:{type:'chicken'},
+  drink:{type:'drinkfridge'}, grilledchicken:{type:'chicken'},
   condiments:{type:'facingRack',levels:4,density:4}, premium:{type:'giftbooth'},
   o2o:{type:'rack',levels:3,density:2}, infopoint:{type:'counter',kind:'info'},
   entrance_door:{type:'door',color:'#00C853',labelIdx:0}, exit_door:{type:'door',color:'#FF3D00',labelIdx:1}
@@ -3914,6 +3945,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='chicken') skinMarkup=chickenStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='snackbags') skinMarkup=snackStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='wine') skinMarkup=wineStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
+  else if(skin.type==='drinkfridge') skinMarkup=drinkStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='giftbooth') skinMarkup=premiumBoothStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='salesdesk') skinMarkup=salesDeskStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
