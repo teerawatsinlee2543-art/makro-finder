@@ -3628,6 +3628,49 @@ function salesDeskStall(x0,y0,x1,y1,rot,tint,H,th,en){
   if(th) parts.push(signAt(cx,cy,H+72,rot,th,en,'#4b5563',true,H));
   return parts.join('');
 }
+function parcelBox3D(cx,cy,z0,h,rot,color,size){
+  const half=size/2;
+  const parts=[];
+  parts.push(boxFaces(cx-half,cy-half,cx+half,cy+half,z0,z0+h,rot,lightenColor(color,0.14),shadeColor(color,0.26),color));
+  const tape=lightenColor(color,0.65);
+  const tA=isoProject(cx-half,cy,z0+h,rot), tB=isoProject(cx+half,cy,z0+h,rot);
+  const tC=isoProject(cx,cy-half,z0+h,rot), tD=isoProject(cx,cy+half,z0+h,rot);
+  parts.push('<line x1="'+tA[0].toFixed(1)+'" y1="'+tA[1].toFixed(1)+'" x2="'+tB[0].toFixed(1)+'" y2="'+tB[1].toFixed(1)+'" stroke="'+tape+'" stroke-width="1.6" opacity="0.9"/>'
+    +'<line x1="'+tC[0].toFixed(1)+'" y1="'+tC[1].toFixed(1)+'" x2="'+tD[0].toFixed(1)+'" y2="'+tD[1].toFixed(1)+'" stroke="'+tape+'" stroke-width="1.6" opacity="0.9"/>');
+  return parts.join('');
+}
+// เคาน์เตอร์ O2O: โต๊ะรับพัสดุยาว + แถบหน้าเคาน์เตอร์สีเขียว + จอรับออเดอร์ + กองกล่องพัสดุ 3 มิติเรียงตามความยาว
+function o2oCounterStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  const parts=[];
+  const counterH=H*0.55;
+  const cx=(x0+x1)/2, cy=(y0+y1)/2;
+  parts.push(boxFaces(x0,y0,x1,y1,0,counterH,rot,'#EDEDED',shadeColor('#B9C4CE',0.24),'#B9C4CE'));
+  const kickZ0=counterH*0.62, kickZ1=counterH*0.98;
+  const kickFront=[isoProject(x0,y1,kickZ1,rot),isoProject(x1,y1,kickZ1,rot),isoProject(x1,y1,kickZ0,rot),isoProject(x0,y1,kickZ0,rot)];
+  parts.push('<polygon points="'+polyPts(kickFront)+'" fill="#4CAF50"/>');
+  const monColors=['#4CAF50','#2E86C1','#E8791E','#7B5EA7'];
+  const nMon=4;
+  for(let m=0;m<nMon;m++){
+    const py=y0+18+(y1-y0-36)*(m/(nMon-1));
+    const monP=isoProject(cx,py,counterH,rot);
+    const mc=monColors[m%monColors.length];
+    parts.push('<rect x="'+(monP[0]-7).toFixed(1)+'" y="'+(monP[1]-15.5).toFixed(1)+'" width="14" height="9" rx="1" fill="#20262d" stroke="#8892a0" stroke-width="0.8"/>'
+      +'<rect x="'+(monP[0]-5.5).toFixed(1)+'" y="'+(monP[1]-14.2).toFixed(1)+'" width="11" height="6.4" fill="'+mc+'"/>'
+      +'<rect x="'+(monP[0]-1.6).toFixed(1)+'" y="'+(monP[1]-6.5).toFixed(1)+'" width="3.2" height="3" fill="#8892a0"/>'
+      +'<rect x="'+(monP[0]-8).toFixed(1)+'" y="'+(monP[1]-3.5).toFixed(1)+'" width="16" height="2.6" rx="0.6" fill="#3a3f45"/>'
+      +'<rect x="'+(monP[0]-6).toFixed(1)+'" y="'+(monP[1]+3).toFixed(1)+'" width="12" height="4" rx="0.8" fill="#EAEAEA" stroke="#B0B0B0" stroke-width="0.4"/>');
+  }
+  const parcelColors=['#C69A6D','#B5865A','#D2AC7C'];
+  const nP=3;
+  for(let i=0;i<nP;i++){
+    const py=y0+18+(y1-y0-36)*((i+0.5)/(nMon-1));
+    const px=cx-24;
+    const size=14+(i%2)*3;
+    parts.push(parcelBox3D(px,py,counterH,size*0.8,rot,parcelColors[i%parcelColors.length],size));
+  }
+  if(th) parts.push(signAt(cx,cy,H+72,rot,th,en,'#4b5563',true,H));
+  return parts.join('');
+}
 // ร้านไอศกรีม: เคาน์เตอร์ + ตู้โชว์ถังไอศกรีม + เครื่องซอฟต์เสิร์ฟ
 function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
   const parts=[];
@@ -3897,6 +3940,7 @@ function getBlockSkin(b){
   if(b.id.indexOf('dryfood_')===0||b.id.indexOf('nonfood_')===0) return {type:'aisle'};
   const mainText=(b.lines&&b.lines[0]&&b.lines[0].text)||'';
   if(mainText==='ฝ่ายขาย') return {type:'salesdesk'};
+  if(mainText==='O2O') return {type:'o2ocounter'};
   return {type:'rack',levels:2,density:2};
 }
 
@@ -3946,6 +3990,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='snackbags') skinMarkup=snackStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='wine') skinMarkup=wineStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='drinkfridge') skinMarkup=drinkStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
+  else if(skin.type==='o2ocounter') skinMarkup=o2oCounterStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='giftbooth') skinMarkup=premiumBoothStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='salesdesk') skinMarkup=salesDeskStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
