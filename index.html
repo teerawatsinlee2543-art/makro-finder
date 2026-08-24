@@ -3703,6 +3703,41 @@ function riceStall(x0,y0,x1,y1,rot,tint,H,th,en){
   if(th) parts.push(signAt(cx,cy,H+72,rot,th,en,'#7A5C2E',true,baseH));
   return parts.join('');
 }
+function lollipop(cx,cy,z,rot,color,scale,rotDeg){
+  scale=scale||1;
+  const p=isoProject(cx,cy,z,rot);
+  const r=4.6*scale, stickLen=r*2.6, ballCy=p[1]-stickLen-r*0.5;
+  let out='<g transform="rotate('+rotDeg+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">';
+  out+='<line x1="'+p[0].toFixed(1)+'" y1="'+p[1].toFixed(1)+'" x2="'+p[0].toFixed(1)+'" y2="'+(p[1]-stickLen).toFixed(1)+'" stroke="#F0E4D0" stroke-width="1.1"/>'
+    +'<circle cx="'+p[0].toFixed(1)+'" cy="'+ballCy.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+color+'" stroke="'+shadeColor(color,0.3)+'" stroke-width="0.6"/>'
+    +'<path d="M'+(p[0]-r*0.55).toFixed(1)+' '+(ballCy-r*0.4).toFixed(1)+' Q'+p[0].toFixed(1)+' '+ballCy.toFixed(1)+' '+(p[0]+r*0.55).toFixed(1)+' '+(ballCy-r*0.4).toFixed(1)+' M'+(p[0]-r*0.4).toFixed(1)+' '+(ballCy+r*0.15).toFixed(1)+' Q'+p[0].toFixed(1)+' '+(ballCy+r*0.5).toFixed(1)+' '+(p[0]+r*0.4).toFixed(1)+' '+(ballCy+r*0.15).toFixed(1)+'" stroke="rgba(255,255,255,.65)" stroke-width="0.8" fill="none"/>'
+    +'</g>';
+  return out;
+}
+// แผนกลูกอม: เคาน์เตอร์สีสันสดใส + โหลลูกอมหลากสี + อมยิ้มปักในกล่องโชว์
+function candyStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  const parts=[];
+  const counterH=H*0.5;
+  const cx=(x0+x1)/2, cy=(y0+y1)/2;
+  parts.push(boxFaces(x0,y0,x1,y1,0,counterH,rot,'#FFE1EC',shadeColor('#F48FB1',0.2),'#F48FB1'));
+  const lanes=3, perLane=4;
+  const laneW=(x1-x0)/lanes;
+  for(let ln=1;ln<lanes;ln++){
+    const divX=x0+laneW*ln;
+    const dA=isoProject(divX,y0+2,counterH,rot), dB=isoProject(divX,y1-2,counterH,rot);
+    parts.push('<line x1="'+dA[0].toFixed(1)+'" y1="'+dA[1].toFixed(1)+'" x2="'+dB[0].toFixed(1)+'" y2="'+dB[1].toFixed(1)+'" stroke="#F48FB1" stroke-width="1.4" opacity="0.85"/>');
+  }
+  const lolColors=['#E91E63','#42A5F5','#FFCA28','#66BB6A'];
+  for(let ln=0;ln<lanes;ln++){
+    const lx=x0+laneW*(ln+0.5);
+    for(let i=0;i<perLane;i++){
+      const ly=y0+18+(y1-y0-36)*(i/(perLane-1));
+      parts.push(lollipop(lx,ly,counterH,rot,lolColors[(i+ln)%lolColors.length],0.85,(i%2===0?-8:8)));
+    }
+  }
+  if(th) parts.push(signAt(cx,cy,H+72,rot,th,en,'#E91E63',true,counterH));
+  return parts.join('');
+}
 // ร้านไอศกรีม: เคาน์เตอร์ + ตู้โชว์ถังไอศกรีม + เครื่องซอฟต์เสิร์ฟ
 function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
   const parts=[];
@@ -3974,6 +4009,7 @@ function getBlockSkin(b){
   if(mainText==='ฝ่ายขาย') return {type:'salesdesk'};
   if(mainText==='O2O') return {type:'o2ocounter'};
   if(mainText==='Rice') return {type:'rice'};
+  if(mainText==='Candy') return {type:'candy'};
   return {type:'rack',levels:2,density:2};
 }
 
@@ -4025,6 +4061,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='drinkfridge') skinMarkup=drinkStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='o2ocounter') skinMarkup=o2oCounterStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='rice') skinMarkup=riceStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
+  else if(skin.type==='candy') skinMarkup=candyStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='giftbooth') skinMarkup=premiumBoothStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='salesdesk') skinMarkup=salesDeskStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
