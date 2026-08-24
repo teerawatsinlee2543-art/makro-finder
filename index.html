@@ -4009,7 +4009,7 @@ function aisleHeadUnit(x0,y0,x1,y1,rot,n1,n2,H,tint){
     parts.push('<line x1="'+beamA[0].toFixed(1)+'" y1="'+beamA[1].toFixed(1)+'" x2="'+beamB[0].toFixed(1)+'" y2="'+beamB[1].toFixed(1)+'" stroke="'+beamColor+'" stroke-width="1.6"/>');
     parts.push('<line x1="'+beamB[0].toFixed(1)+'" y1="'+beamB[1].toFixed(1)+'" x2="'+beamC[0].toFixed(1)+'" y2="'+beamC[1].toFixed(1)+'" stroke="'+beamColorL+'" stroke-width="1.3"/>');
     parts.push('<line x1="'+beamD[0].toFixed(1)+'" y1="'+beamD[1].toFixed(1)+'" x2="'+beamC[0].toFixed(1)+'" y2="'+beamC[1].toFixed(1)+'" stroke="'+beamColor+'" stroke-width="1.6"/>');
-    if(li<levels-1){
+    if(li===0){
       const cellLen=28;
       const nCells=Math.max(1,Math.round((by1-by0)/cellLen));
       for(let ci=0;ci<nCells;ci++){
