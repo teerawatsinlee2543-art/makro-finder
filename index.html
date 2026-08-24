@@ -3571,6 +3571,32 @@ function premiumBoothStall(x0,y0,x1,y1,rot,tint,H,th,en){
   if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+76,rot,th,en,'#695F82',true,roofZ1));
   return parts.join('');
 }
+// โต๊ะทำงานฝ่ายขาย: โต๊ะไม้ + จอคอมพิวเตอร์ + คีย์บอร์ด + เอกสารกอง + เก้าอี้สำนักงานด้านหลัง
+function salesDeskStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  const parts=[];
+  const deskH=H*0.55;
+  const cx=(x0+x1)/2, cy=(y0+y1)/2;
+  parts.push(boxFaces(x0,y0,x1,y1,0,deskH,rot,'#D8B98A',shadeColor('#A9814F',0.24),'#C4A06A'));
+  const monBase=isoProject(cx,y0+3,deskH,rot);
+  parts.push('<rect x="'+(monBase[0]-7).toFixed(1)+'" y="'+(monBase[1]-15.5).toFixed(1)+'" width="14" height="9" rx="1" fill="#20262d" stroke="#8892a0" stroke-width="0.8"/>'
+    +'<rect x="'+(monBase[0]-5.5).toFixed(1)+'" y="'+(monBase[1]-14.2).toFixed(1)+'" width="11" height="6.4" fill="#4A90D9"/>'
+    +'<rect x="'+(monBase[0]-1.6).toFixed(1)+'" y="'+(monBase[1]-6.5).toFixed(1)+'" width="3.2" height="3" fill="#8892a0"/>'
+    +'<rect x="'+(monBase[0]-8).toFixed(1)+'" y="'+(monBase[1]-3.5).toFixed(1)+'" width="16" height="2.6" rx="0.6" fill="#3a3f45"/>');
+  const kbP=isoProject(cx,y1-6,deskH,rot);
+  parts.push('<rect x="'+(kbP[0]-9).toFixed(1)+'" y="'+(kbP[1]-3).toFixed(1)+'" width="18" height="5.5" rx="1" fill="#EAEAEA" stroke="#B0B0B0" stroke-width="0.5"/>');
+  const papP=isoProject(x0+7,y1-9,deskH,rot);
+  parts.push('<g transform="rotate(-8 '+papP[0].toFixed(1)+' '+papP[1].toFixed(1)+')">'
+    +'<rect x="'+(papP[0]-6).toFixed(1)+'" y="'+(papP[1]-7.5).toFixed(1)+'" width="12" height="8" fill="#fff" stroke="#ccc" stroke-width="0.5"/>'
+    +'<line x1="'+(papP[0]-4).toFixed(1)+'" y1="'+(papP[1]-5.5).toFixed(1)+'" x2="'+(papP[0]+4).toFixed(1)+'" y2="'+(papP[1]-5.5).toFixed(1)+'" stroke="#ccc" stroke-width="0.4"/>'
+    +'<line x1="'+(papP[0]-4).toFixed(1)+'" y1="'+(papP[1]-3.5).toFixed(1)+'" x2="'+(papP[0]+4).toFixed(1)+'" y2="'+(papP[1]-3.5).toFixed(1)+'" stroke="#ccc" stroke-width="0.4"/>'
+    +'</g>');
+  const chairP=isoProject(cx,y0-9,0,rot);
+  parts.push('<line x1="'+chairP[0].toFixed(1)+'" y1="'+chairP[1].toFixed(1)+'" x2="'+chairP[0].toFixed(1)+'" y2="'+(chairP[1]-13).toFixed(1)+'" stroke="#8892a0" stroke-width="2"/>'
+    +'<ellipse cx="'+chairP[0].toFixed(1)+'" cy="'+(chairP[1]-14.5).toFixed(1)+'" rx="7.5" ry="3.6" fill="#3a3f45"/>'
+    +'<rect x="'+(chairP[0]-7).toFixed(1)+'" y="'+(chairP[1]-28.5).toFixed(1)+'" width="14" height="14" rx="3" fill="#3a3f45"/>');
+  if(th) parts.push(signAt(cx,cy,H+72,rot,th,en,'#4b5563',true,H));
+  return parts.join('');
+}
 // ร้านไอศกรีม: เคาน์เตอร์ + ตู้โชว์ถังไอศกรีม + เครื่องซอฟต์เสิร์ฟ
 function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
   const parts=[];
@@ -3838,6 +3864,8 @@ const MAP_BLOCK_SKIN={
 function getBlockSkin(b){
   if(MAP_BLOCK_SKIN[b.id]) return MAP_BLOCK_SKIN[b.id];
   if(b.id.indexOf('dryfood_')===0||b.id.indexOf('nonfood_')===0) return {type:'aisle'};
+  const mainText=(b.lines&&b.lines[0]&&b.lines[0].text)||'';
+  if(mainText==='ฝ่ายขาย') return {type:'salesdesk'};
   return {type:'rack',levels:2,density:2};
 }
 
@@ -3887,6 +3915,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='snackbags') skinMarkup=snackStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='wine') skinMarkup=wineStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='giftbooth') skinMarkup=premiumBoothStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
+  else if(skin.type==='salesdesk') skinMarkup=salesDeskStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rotationDeg,H,8)+signAt((x0+x1)/2,(y0+y1)/2,H+95,rotationDeg,th,en,tint,true,H);
