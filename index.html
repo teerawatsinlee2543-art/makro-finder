@@ -4232,8 +4232,8 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     [[b.x,b.y,H],[b.x+b.w,b.y,H],[b.x+b.w,b.y+b.h,H],[b.x,b.y+b.h,H],[b.x,b.y+b.h,0],[b.x+b.w,b.y+b.h,0]].forEach(([x,y,z])=>{
       allPts.push(isoProject(x,y,z,rot));
     });
-    // ป้ายลอยของแต่ละโซนลอยสูงกว่าตัวกล่องมาก (สูงสุดที่เจอในโค้ดคือ H+95) เผื่อระยะพอให้ป้ายไม่โดนตัดขอบจอด้านบน
-    const signAnchor=isoProject((b.x+b.w/2),(b.y+b.h/2),H+95,rot);
+    // ป้ายลอยของแต่ละโซนลอยสูงกว่าตัวกล่องมาก (สูงสุดที่เจอในโค้ดคือ H+145 ของแผนกเนื้อสัตว์) เผื่อระยะพอให้ป้ายไม่โดนตัดขอบจอด้านบน
+    const signAnchor=isoProject((b.x+b.w/2),(b.y+b.h/2),H+145,rot);
     allPts.push([signAnchor[0],signAnchor[1]-55]);
   });
   Object.keys(MAP_ZONE_LABELS).forEach(prefix=>{
