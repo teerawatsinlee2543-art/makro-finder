@@ -4003,6 +4003,18 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     [[b.x,b.y,H],[b.x+b.w,b.y,H],[b.x+b.w,b.y+b.h,H],[b.x,b.y+b.h,H],[b.x,b.y+b.h,0],[b.x+b.w,b.y+b.h,0]].forEach(([x,y,z])=>{
       allPts.push(isoProject(x,y,z,rot));
     });
+    // ป้ายลอยของแต่ละโซนลอยสูงกว่าตัวกล่องมาก (สูงสุดที่เจอในโค้ดคือ H+95) เผื่อระยะพอให้ป้ายไม่โดนตัดขอบจอด้านบน
+    const signAnchor=isoProject((b.x+b.w/2),(b.y+b.h/2),H+95,rot);
+    allPts.push([signAnchor[0],signAnchor[1]-40]);
+  });
+  Object.keys(MAP_ZONE_LABELS).forEach(prefix=>{
+    const group=blocks.filter(b=>b.id.indexOf(prefix)===0);
+    if(!group.length)return;
+    const minGX=Math.min(...group.map(b=>b.x)), maxGX=Math.max(...group.map(b=>b.x+b.w));
+    const minGY=Math.min(...group.map(b=>b.y)), maxGY=Math.max(...group.map(b=>b.y+b.h));
+    const maxH=Math.max(...group.map(b=>b.height||54));
+    const signAnchor=isoProject((minGX+maxGX)/2,(minGY+maxGY)/2,maxH+80,rot);
+    allPts.push([signAnchor[0],signAnchor[1]-40]);
   });
   const minX=Math.min(...allPts.map(p=>p[0])), maxX=Math.max(...allPts.map(p=>p[0]));
   const minY=Math.min(...allPts.map(p=>p[1])), maxY=Math.max(...allPts.map(p=>p[1]));
