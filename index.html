@@ -3671,6 +3671,38 @@ function o2oCounterStall(x0,y0,x1,y1,rot,tint,H,th,en){
   if(th) parts.push(signAt(cx,cy,H+72,rot,th,en,'#4b5563',true,H));
   return parts.join('');
 }
+function riceSack(cx,cy,z,rot,color,scale,rotDeg){
+  scale=scale||1;
+  const p=isoProject(cx,cy,z,rot);
+  const w=13*scale, h=16*scale;
+  const dark=shadeColor(color,0.25);
+  let out='<g transform="rotate('+rotDeg+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">';
+  out+='<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+(p[1]-h).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+(w*0.28).toFixed(1)+'" fill="'+color+'" stroke="'+dark+'" stroke-width="0.6"/>'
+    +'<rect x="'+(p[0]-w*0.42).toFixed(1)+'" y="'+(p[1]-h*0.62).toFixed(1)+'" width="'+(w*0.84).toFixed(1)+'" height="'+(h*0.28).toFixed(1)+'" fill="#C0272D"/>'
+    +'<ellipse cx="'+p[0].toFixed(1)+'" cy="'+(p[1]-h-1).toFixed(1)+'" rx="'+(w*0.22).toFixed(1)+'" ry="2" fill="'+dark+'"/>'
+    +'</g>';
+  return out;
+}
+// แผนกข้าวสาร: กระสอบข้าวสารสีครีมวางเรียงบนแท่นไม้ ตามความยาวโซน
+function riceStall(x0,y0,x1,y1,rot,tint,H,th,en){
+  const parts=[];
+  const baseH=H*0.16;
+  const cx=(x0+x1)/2, cy=(y0+y1)/2;
+  parts.push(boxFaces(x0,y0,x1,y1,0,baseH,rot,'#C9A876',shadeColor('#8f7248',0.2),'#B08A56'));
+  const sackColors=['#E8DCC0','#D9C89A','#EFE6CE'];
+  const zStep=H*0.24;
+  const n=Math.max(3,Math.min(6,Math.round((y1-y0)/60)));
+  for(let i=0;i<n;i++){
+    const py=y0+18+(y1-y0-32)*(n>1?i/(n-1):0);
+    const layers=2+(i%2);
+    for(let li=0;li<layers;li++){
+      const jitter=(li%2===0?-6:6)+((i*7+li*13)%5-2);
+      parts.push(riceSack(cx,py,baseH+zStep*li,rot,sackColors[(i+li)%sackColors.length],1.5,jitter));
+    }
+  }
+  if(th) parts.push(signAt(cx,cy,H+72,rot,th,en,'#7A5C2E',true,baseH));
+  return parts.join('');
+}
 // ร้านไอศกรีม: เคาน์เตอร์ + ตู้โชว์ถังไอศกรีม + เครื่องซอฟต์เสิร์ฟ
 function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
   const parts=[];
@@ -3941,6 +3973,7 @@ function getBlockSkin(b){
   const mainText=(b.lines&&b.lines[0]&&b.lines[0].text)||'';
   if(mainText==='ฝ่ายขาย') return {type:'salesdesk'};
   if(mainText==='O2O') return {type:'o2ocounter'};
+  if(mainText==='Rice') return {type:'rice'};
   return {type:'rack',levels:2,density:2};
 }
 
@@ -3991,6 +4024,7 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   else if(skin.type==='wine') skinMarkup=wineStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='drinkfridge') skinMarkup=drinkStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='o2ocounter') skinMarkup=o2oCounterStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
+  else if(skin.type==='rice') skinMarkup=riceStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='giftbooth') skinMarkup=premiumBoothStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='salesdesk') skinMarkup=salesDeskStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
   else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rotationDeg,tint,H,th,en);
