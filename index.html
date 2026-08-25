@@ -710,8 +710,15 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
     <div id="resultView" class="result-wrap">
       <div id="dataLoading" style="display:none" class="no-result">
-        <i class="ti ti-loader-2" aria-hidden="true"></i>
-        <p data-i18n="loadingProducts">กำลังโหลดข้อมูลสินค้า...</p>
+        <div id="dataLoadingSpinner">
+          <i class="ti ti-loader-2" aria-hidden="true"></i>
+          <p data-i18n="loadingProducts">กำลังโหลดข้อมูลสินค้า...</p>
+        </div>
+        <div id="dataLoadingError" style="display:none">
+          <i class="ti ti-wifi-off" aria-hidden="true"></i>
+          <p data-i18n="productLoadFailedText">โหลดข้อมูลสินค้าไม่สำเร็จ อาจเป็นเพราะอินเทอร์เน็ตช้าหรือหลุด</p>
+          <button type="button" class="pallet-open-btn green compact" style="margin-top:10px" onclick="retryLoadProductData()"><i class="ti ti-refresh" aria-hidden="true"></i> <span data-i18n="retryBtn">ลองใหม่</span></button>
+        </div>
       </div>
       <div id="resultsList" style="display:none"></div>
       <div id="foundCard" style="display:none">
@@ -1052,6 +1059,8 @@ const I18N={
     feedbackSubmit:'ส่งความคิดเห็น',
     feedbackThanks:'ขอบคุณสำหรับความคิดเห็นครับ/ค่ะ',
     loadingProducts:'กำลังโหลดข้อมูลสินค้า...',
+    productLoadFailedText:'โหลดข้อมูลสินค้าไม่สำเร็จ อาจเป็นเพราะอินเทอร์เน็ตช้าหรือหลุด',
+    retryBtn:'ลองใหม่',
     navInfoTitle:'รายละเอียดเพิ่มเติมสินค้า',
     tipWalkSigns:'เดินตามป้ายบอกโซนภายในสาขาเพื่อไปยังตำแหน่งจัดเก็บสินค้า',
     mapThisItem:'ตำแหน่งสินค้านี้',
@@ -1329,6 +1338,8 @@ const I18N={
     feedbackSubmit:'Submit feedback',
     feedbackThanks:'Thank you for your feedback!',
     loadingProducts:'Loading product data...',
+    productLoadFailedText:'Failed to load product data. Your internet connection may be slow or disconnected.',
+    retryBtn:'Try again',
     navInfoTitle:'Additional product details',
     tipWalkSigns:'Follow the zone signs in-store to reach the storage location',
     mapThisItem:'This item\'s location',
@@ -1606,6 +1617,8 @@ const I18N={
     feedbackSubmit:'提交意见',
     feedbackThanks:'感谢您的反馈！',
     loadingProducts:'正在加载商品数据...',
+    productLoadFailedText:'加载商品数据失败，可能是网络较慢或已断开',
+    retryBtn:'重试',
     navInfoTitle:'商品详细信息',
     tipWalkSigns:'请依照店内分区指示牌前往存放位置',
     mapThisItem:'该商品位置',
@@ -1883,6 +1896,8 @@ const I18N={
     feedbackSubmit:'အကြံပြုချက်ပို့ရန်',
     feedbackThanks:'သင့်အကြံပြုချက်အတွက် ကျေးဇူးတင်ပါသည်!',
     loadingProducts:'ပစ္စည်းအချက်အလက် ဖွင့်နေသည်...',
+    productLoadFailedText:'ပစ္စည်းအချက်အလက် ဖွင့်မရပါ အင်တာနက်နှေးခြင်း သို့မဟုတ် အဆက်အသွယ်ပြတ်တောက်ခြင်း ဖြစ်နိုင်ပါသည်',
+    retryBtn:'ထပ်စမ်းရန်',
     navInfoTitle:'ပစ္စည်းအသေးစိတ်အချက်အလက်',
     tipWalkSigns:'သိုလှောင်နေရာသို့ရောက်ရန် ဆိုင်ရှိဇုန်ဆိုင်းဘုတ်များကို လိုက်နာပါ',
     mapThisItem:'ဤပစ္စည်း၏တည်နေရာ',
@@ -2160,6 +2175,8 @@ const I18N={
     feedbackSubmit:'의견 보내기',
     feedbackThanks:'소중한 의견 감사합니다!',
     loadingProducts:'상품 정보를 불러오는 중...',
+    productLoadFailedText:'상품 정보를 불러오지 못했습니다. 인터넷 연결이 느리거나 끊겼을 수 있습니다.',
+    retryBtn:'다시 시도',
     navInfoTitle:'상품 상세 정보',
     tipWalkSigns:'매장 내 구역 표지판을 따라 진열 위치로 이동하세요',
     mapThisItem:'이 상품의 위치',
@@ -2437,6 +2454,8 @@ const I18N={
     feedbackSubmit:'送信する',
     feedbackThanks:'ご意見ありがとうございました！',
     loadingProducts:'商品データを読み込み中...',
+    productLoadFailedText:'商品データの読み込みに失敗しました。インターネット接続が遅いか切断されている可能性があります。',
+    retryBtn:'再試行',
     navInfoTitle:'商品の詳細情報',
     tipWalkSigns:'店内のゾーン案内板に従って保管場所へお進みください',
     mapThisItem:'この商品の位置',
@@ -6569,6 +6588,21 @@ let PRODUCTS_INDEX={};
 let pendingSearchQuery=null;
 let pendingCategoryKey=null;
 let lastNotFoundQuery='';
+let productLoadFailed=false;
+// สลับสถานะในกล่อง #dataLoading ระหว่าง "กำลังโหลด" กับ "โหลดไม่สำเร็จ + ปุ่มลองใหม่"
+// เรียกทุกครั้งที่จะโชว์ #dataLoading (ตอนค้นหา/เลือกหมวดหมู่ก่อนข้อมูลพร้อม) และตอน fetch ล้มเหลว
+function updateDataLoadingUI(){
+  const spinner=document.getElementById('dataLoadingSpinner');
+  const error=document.getElementById('dataLoadingError');
+  if(!spinner||!error)return;
+  spinner.style.display=productLoadFailed?'none':'block';
+  error.style.display=productLoadFailed?'block':'none';
+}
+function retryLoadProductData(){
+  productLoadFailed=false;
+  updateDataLoadingUI();
+  loadProductData();
+}
 
 // ==== ตำแหน่งจัดเก็บ/Facing/Max Qty/จำนวนคงเหลือ ที่พนักงานแก้ไขได้ (sync ผ่าน Firestore) ====
 let LOCATION_OVERRIDES={};
@@ -6737,8 +6771,12 @@ function openStockEditor(itemNo,loc,location){
 function loadProductData(){
   const overridesPromise=loadOverridesData();
   const customItemsPromise=loadCustomItems();
-  const xlsxPromise=fetch('ItemLocation_23_Aug_2026.xlsx')
-    .then(r=>{ if(!r.ok) throw new Error('fetch failed: '+r.status); return r.arrayBuffer(); })
+  // ตั้ง timeout 25 วิให้ fetch ไฟล์ Item Master (~2MB) เพราะเน็ตในโกดังบางจุดสัญญาณอ่อน/หลุดบ่อย
+  // ถ้าไม่ตั้ง timeout ไว้ fetch ค้างได้นานเป็นนาทีหรือค้างตลอดไปโดยไม่มี error ให้ดัก ทำให้หน้าจอค้างที่ไอคอนโหลดตลอดไปไม่มีทางออก
+  const xlsxAbort=new AbortController();
+  const xlsxTimeout=setTimeout(()=>xlsxAbort.abort(),25000);
+  const xlsxPromise=fetch('ItemLocation_23_Aug_2026.xlsx',{signal:xlsxAbort.signal})
+    .then(r=>{ clearTimeout(xlsxTimeout); if(!r.ok) throw new Error('fetch failed: '+r.status); return r.arrayBuffer(); })
     .then(buf=>{
       const wb=XLSX.read(buf,{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
@@ -6809,6 +6847,8 @@ function loadProductData(){
     })
     .catch(err=>{
       console.error('โหลดข้อมูลสินค้าไม่สำเร็จ',err);
+      productLoadFailed=true;
+      updateDataLoadingUI();
     });
 }
 loadProductData();
@@ -6875,6 +6915,7 @@ function searchByCategory(key){
   if(!PRODUCTS_READY){
     pendingCategoryKey=key;
     dl.style.display='block';rl.style.display='none';fc.style.display='none';nf.style.display='none';
+    updateDataLoadingUI();
     return;
   }
   dl.style.display='none';
@@ -6914,6 +6955,7 @@ function search(q){
   if(!PRODUCTS_READY){
     pendingSearchQuery=q;
     dl.style.display='block';rl.style.display='none';fc.style.display='none';nf.style.display='none';
+    updateDataLoadingUI();
     return;
   }
   dl.style.display='none';
