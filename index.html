@@ -4281,16 +4281,9 @@ const DEPT_KEYWORDS={
   premium:['ของแถม','พรีเมียม']
 };
 function findMapBlockForItem(item){
-  // เช็คแผนกเฉพาะทาง (คำนวณจากคำในชื่อสินค้า) ก่อนเสมอ เพราะเลข Loc ไม่ได้กันไว้ให้โซนเลขล็อค 1-44 เท่านั้น
-  // สินค้าแผนกอื่น (เช่น ซอส เบเกอรี่ ไอศกรีม) ก็มีเลข Loc ที่บังเอิญตกอยู่ในช่วง 1-44 ได้เหมือนกัน
-  // ถ้าเช็คเลข Loc ก่อน จะทำให้ป้ายเลขล็อคที่ไม่เกี่ยวข้องติดไฮไลต์ใหญ่ผิดๆ ทุกครั้งที่บังเอิญเลขตรงกัน
-  const desc=item.desc.toLowerCase();
-  let best=null, bestHits=0;
-  Object.keys(DEPT_KEYWORDS).forEach(id=>{
-    const hits=DEPT_KEYWORDS[id].filter(kw=>desc.includes(kw.toLowerCase())).length;
-    if(hits>bestHits){ bestHits=hits; best=id; }
-  });
-  if(best && currentMapBlocks.find(b=>b.id===best)) return {blockId:best, exact:false};
+  // เช็คเลข Loc จริงของสินค้าก่อนเสมอ เพราะเป็นตำแหน่งจัดเก็บจริงที่แม่นกว่าการเดาแผนกจากคำในชื่อสินค้ามาก
+  // (บั๊กที่เจอ: กาแฟที่ Loc 035 จริงๆ ถูกเดาว่าเป็น "เครื่องดื่ม" จากคำว่า "กาแฟ" ในชื่อ ทั้งที่มีเลขล็อคจริงอยู่แล้ว)
+  // ใช้การเดาจากคำในชื่อสินค้าเป็นแค่ตัวสำรอง สำหรับสินค้าที่ไม่มีเลข Loc ตรงกับล็อคไหนเลยเท่านั้น
   if(item.locations&&item.locations.length){
     for(const l of item.locations){
       const locNum=parseInt(String(l.loc).replace(/\D/g,''),10);
@@ -4305,6 +4298,13 @@ function findMapBlockForItem(item){
       }
     }
   }
+  const desc=item.desc.toLowerCase();
+  let best=null, bestHits=0;
+  Object.keys(DEPT_KEYWORDS).forEach(id=>{
+    const hits=DEPT_KEYWORDS[id].filter(kw=>desc.includes(kw.toLowerCase())).length;
+    if(hits>bestHits){ bestHits=hits; best=id; }
+  });
+  if(best && currentMapBlocks.find(b=>b.id===best)) return {blockId:best, exact:false};
   return null;
 }
 let showOnMapMatch=null;
