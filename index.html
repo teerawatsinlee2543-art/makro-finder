@@ -2819,7 +2819,7 @@ const DEFAULT_MAP_BLOCKS=[
     {fx:0.5,dy:41,size:MAP_MAIN_SIZE,weight:800,text:'จุดของแถม',color:'#695F82'},
     {fx:0.5,dy:66,size:MAP_SUB_SIZE,weight:600,opacity:.95,text:'Premium',color:'#9C90AF'}]},
 ].concat(
-  generateAisleGroup('dryfood_',592,147,974,336,29,44,'#FBE1EC','#99406B',84)
+  generateAisleGroup('dryfood_',592,107,974,296,29,44,'#FBE1EC','#99406B',84)
 ).concat(
   generateAisleGroup('nonfood_',400,350,974,553,1,25,'#E7E4F8','#5749A0',84)
 ).concat([
@@ -6338,7 +6338,17 @@ function mergeMissingDefaultBlocks(blocks,deletedIds){
 // v4->v5: สลับแถวเนื้อหมู/ขนม/ไวน์-เบียร์/เครื่องดื่ม มาอยู่เหนือแคชเชียร์ (ใกล้ทางเข้า-ออก) แคชเชียร์ขยับลง เปิดพื้นที่แถวใหม่
 // v5->v6: ย้อนกลับตำแหน่งเดิม (v4) ตามคำขอ + ปรับฐานใต้ยูนิตใหม่ให้ดูสม่ำเสมอสวยงามขึ้น
 const MAP_LAYOUT_VERSION=6;
+// ขยับล็อก 29-44 (dryfood_) ถอยหลังไปอีก 40 หน่วย ให้มีช่องเดินคั่นระหว่างล็อก 1-25 กับ 29-44
+// ทำเป็น migration แยกจาก MAP_LAYOUT_VERSION เพราะไม่อยากบั๊มเวอร์ชันทั้งผัง (จะทำให้บล็อกอื่นที่เคยขยับ/ปรับแต่งไว้ในระบบจริงถูกรีเซ็ตกลับไปเป็นค่าเริ่มต้นไปด้วย)
+// ขยับครั้งเดียวแล้วจำด้วย flag dryfoodShiftV1 กันไม่ให้ขยับซ้ำทุกครั้งที่โหลด (เช่น ถ้าพนักงานลากบล็อกเองทีหลัง)
+const DRYFOOD_SHIFT_Y=40;
+function applyDryfoodShiftMigration(blocks){
+  blocks.forEach(b=>{ if(b.id.indexOf('dryfood_')===0) b.y-=DRYFOOD_SHIFT_Y; });
+}
 async function loadMapBlocksFromStorage(){
+  // needsDryfoodShift เป็น true เฉพาะตอนใช้ข้อมูล blocks เดิมที่เคยบันทึกไว้ (ยังไม่มีการขยับ) เท่านั้น
+  // ถ้าเพิ่ง reset กลับไปใช้ DEFAULT_MAP_BLOCKS สดๆ ไม่ต้องขยับซ้ำ เพราะค่าเริ่มต้นชุดใหม่ขยับมาให้แล้วในซอร์สโค้ด
+  let needsDryfoodShift=false;
   if(mapFirestoreDocRef){
     try{
       const doc=await mapFirestoreDocRef.get();
@@ -6351,6 +6361,8 @@ async function loadMapBlocksFromStorage(){
           currentMapBlocks=mergeMissingDefaultBlocks(blocks,currentMapDeletedIds);
           if(data.bgColor) currentMapBgColor=data.bgColor;
           if(typeof data.rotation==='number'){ savedMapRotation=data.rotation; currentMapRotation=data.rotation; }
+          needsDryfoodShift=sameVersion&&!data.dryfoodShiftV1;
+          if(needsDryfoodShift){ applyDryfoodShiftMigration(currentMapBlocks); await persistMapBlocks(currentMapBlocks,currentMapBgColor,currentMapRotation,currentMapDeletedIds); }
           return;
         }
       }
@@ -6370,12 +6382,14 @@ async function loadMapBlocksFromStorage(){
         currentMapBlocks=mergeMissingDefaultBlocks(blocks,currentMapDeletedIds);
         if(parsed.bgColor) currentMapBgColor=parsed.bgColor;
         if(typeof parsed.rotation==='number'){ savedMapRotation=parsed.rotation; currentMapRotation=parsed.rotation; }
+        needsDryfoodShift=sameVersion&&!parsed.dryfoodShiftV1;
       }
+      if(needsDryfoodShift){ applyDryfoodShiftMigration(currentMapBlocks); await persistMapBlocks(currentMapBlocks,currentMapBgColor,currentMapRotation,currentMapDeletedIds); }
     }
   }catch(e){}
 }
 async function persistMapBlocks(blocks,bgColor,rotation,deletedIds){
-  try{ localStorage.setItem('mf_map_layout',JSON.stringify({blocks:blocks,bgColor:bgColor,rotation:rotation,layoutVersion:MAP_LAYOUT_VERSION,deletedIds:deletedIds||[]})); }catch(e){}
+  try{ localStorage.setItem('mf_map_layout',JSON.stringify({blocks:blocks,bgColor:bgColor,rotation:rotation,layoutVersion:MAP_LAYOUT_VERSION,deletedIds:deletedIds||[],dryfoodShiftV1:true})); }catch(e){}
   if(mapFirestoreDocRef){
     let updatedBy='unknown';
     try{
@@ -6383,7 +6397,7 @@ async function persistMapBlocks(blocks,bgColor,rotation,deletedIds){
       if(sess && sess.name) updatedBy=sess.name+' · '+(sess.dept||'');
     }catch(e){}
     try{
-      await mapFirestoreDocRef.set({blocks:blocks,bgColor:bgColor,rotation:rotation,layoutVersion:MAP_LAYOUT_VERSION,deletedIds:deletedIds||[],updatedAt:Date.now(),updatedBy:updatedBy});
+      await mapFirestoreDocRef.set({blocks:blocks,bgColor:bgColor,rotation:rotation,layoutVersion:MAP_LAYOUT_VERSION,deletedIds:deletedIds||[],dryfoodShiftV1:true,updatedAt:Date.now(),updatedBy:updatedBy});
     }catch(e){
       console.error('บันทึกผังไป Firestore ไม่สำเร็จ',e);
       alert(t('syncSaveFailedRetryAlert'));
