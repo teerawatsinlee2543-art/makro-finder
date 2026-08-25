@@ -2999,8 +2999,12 @@ function signAt(x,y,z,rot,th,en,tint,big,pointToZ){
   }
   const hlBorder=__mapSignHighlighted;
   const hlGlow=hlBorder?'<rect x="'+(p[0]-w/2-3).toFixed(1)+'" y="'+(top-3).toFixed(1)+'" width="'+(w+6)+'" height="'+(h+6)+'" rx="'+(big?23:16)+'" fill="none" stroke="rgba(232,25,44,.45)" stroke-width="5" filter="url(#signBlur)"/>':'';
+  // กระพริบสีเหลืองรอบป้าย ให้เข้าชุดกับกรอบกล่อง/ป้ายเลขล็อคที่กระพริบอยู่แล้วตอนไฮไลท์
+  const hlBlink=hlBorder?'<rect x="'+(p[0]-w/2-6).toFixed(1)+'" y="'+(top-6).toFixed(1)+'" width="'+(w+12).toFixed(1)+'" height="'+(h+12).toFixed(1)+'" rx="'+(big?26:19)+'" fill="none" stroke="#FFC72C" stroke-width="2.6" opacity="0.9"><animate attributeName="opacity" values="0.9;0.1;0.9" dur="0.9s" repeatCount="indefinite"/></rect>'
+    +'<rect x="'+(p[0]-w/2-9).toFixed(1)+'" y="'+(top-9).toFixed(1)+'" width="'+(w+18).toFixed(1)+'" height="'+(h+18).toFixed(1)+'" rx="'+(big?29:22)+'" fill="none" stroke="#FFC72C" stroke-width="3" opacity="0.5" filter="url(#signBlur)"><animate attributeName="opacity" values="0.6;0;0.6" dur="0.9s" repeatCount="indefinite"/></rect>':'';
   return leader
     +hlGlow
+    +hlBlink
     +'<linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+shadeColor(tint,0.4)+'"/><stop offset="1" stop-color="'+shadeColor(tint,0.62)+'"/></linearGradient>'
     +'<rect x="'+(p[0]-w/2+0.8).toFixed(1)+'" y="'+(top+1.6).toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?20:13)+'" fill="rgba(10,12,16,.22)" filter="url(#signBlur)"/>'
     +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?20:13)+'" fill="url(#'+gid+')" stroke="'+(hlBorder?'#E8192C':lightenColor(tint,0.42))+'" stroke-width="'+(hlBorder?2.5:1)+'"/>'
