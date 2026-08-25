@@ -4191,7 +4191,8 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
   // hit-rects/resize-handles/highlight pins are drawn in a separate final pass on top of every skin
   // so they can never end up hidden behind a neighboring block's wall
   const sortedPieces=pieces.slice().sort((a,b)=>a.depth-b.depth);
-  const blockMarkup=sortedPieces.map(p=>p.skinMarkup).join('')+pieces.map(p=>p.topMarkup).join('');
+  const skinMarkupAll=sortedPieces.map(p=>p.skinMarkup).join('');
+  const topMarkupAll=pieces.map(p=>p.topMarkup).join('');
 
   const F=MAP_FLOOR;
   const floorTop=[isoProject(F.x,F.y,0,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
@@ -4255,7 +4256,7 @@ function renderMapSVG(blocks,editable,rotationDeg,highlightId){
     '<filter id="signBlur" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>'+
     '<polygon points="'+polyPts(floorTop)+'" fill="'+currentMapBgColor+'"/>'+
     wallsMarkup+
-    '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+zoneLabels+blockMarkup+'</g>'+
+    '<g font-family="\'Sarabun\',\'Segoe UI\',sans-serif">'+skinMarkupAll+zoneLabels+topMarkupAll+'</g>'+
     '</svg>';
 }
 
