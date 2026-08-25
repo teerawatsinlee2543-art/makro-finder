@@ -5913,8 +5913,12 @@ function handlePalletScanCode(code){
     document.getElementById('movePalletOverlay').style.display='flex';
     return;
   }
-  let item=PRODUCTS_BY_KEY.find(x=>x.barcode===code||x.itemNo===code);
-  if(!item&&ALT_BARCODES[code])item=PRODUCTS_INDEX[ALT_BARCODES[code]];
+  const codeNorm=normBarcode(code);
+  let item=PRODUCTS_BY_KEY.find(x=>x.barcode===code||x.itemNo===code||(x.barcode&&normBarcode(x.barcode)===codeNorm));
+  if(!item){
+    const altKey=ALT_BARCODES[code]!==undefined?code:(ALT_BARCODES[codeNorm]!==undefined?codeNorm:null);
+    if(altKey!==null)item=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
+  }
   if(!item){
     showPalletToast(t('itemNotInSystemToast'));
     setTimeout(()=>{
@@ -6790,13 +6794,17 @@ function loadProductData(){
 }
 loadProductData();
 
+// ตัดเลข 0 นำหน้าบาร์โค้ดออกก่อนเทียบ เพราะ Item Master บางแถวถูก Excel อ่านคอลัมน์ Barcode เป็นตัวเลข
+// ทำให้ 0 นำหน้าหายไปตอนโหลดข้อมูล (เช่น "0123456789012" กลายเป็น "123456789012") แต่กล้องสแกนได้ค่าเต็มที่มี 0 นำหน้าอยู่เสมอ
+function normBarcode(s){ return String(s||'').replace(/^0+(?=\d)/,''); }
 function findMatches(query){
   const q=query.trim();
   if(!q)return[];
   const lower=q.toLowerCase();
+  const qNorm=normBarcode(q);
   const exact=[],partial=[],locExact=[],locPartial=[];
   for(const item of PRODUCTS_BY_KEY){
-    if(item.itemNo===q||item.barcode===q){
+    if(item.itemNo===q||item.barcode===q||(item.barcode&&normBarcode(item.barcode)===qNorm)){
       exact.push(item);
     } else if(item.desc.toLowerCase().includes(lower)||item.itemNo.includes(q)||(item.barcode&&item.barcode.includes(q))){
       partial.push(item);
@@ -6806,8 +6814,9 @@ function findMatches(query){
       locPartial.push(item);
     }
   }
-  if(ALT_BARCODES[q]){
-    const altItem=PRODUCTS_INDEX[ALT_BARCODES[q]];
+  const altKey=ALT_BARCODES[q]!==undefined?q:(ALT_BARCODES[qNorm]!==undefined?qNorm:null);
+  if(altKey!==null){
+    const altItem=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
     if(altItem&&!exact.includes(altItem))exact.unshift(altItem);
   }
   return exact.concat(partial,locExact,locPartial);
@@ -7039,8 +7048,10 @@ let zxingReader=null;
 function getZXingReader(){
   if(!zxingReader){
     const hints=new Map();
-    // ตัด ITF/CODABAR ออก และปิด TRY_HARDER เพราะสองอย่างนี้เป็นสาเหตุหลักที่กล้องอ่านลายเส้น/พื้นผิวทั่วไป
-    // ผิดเป็นบาร์โค้ดปลอมระหว่างสแกนสด (false positive) ทั้งที่ยังไม่ได้เล็งไปที่บาร์โค้ดจริงเลย
+    // ตัด ITF/CODABAR ออกเพื่อลดโอกาสกล้องอ่านลายเส้น/พื้นผิวทั่วไปผิดเป็นบาร์โค้ดปลอม
+    // ส่วน TRY_HARDER เปิดไว้เพราะจำเป็นสำหรับอ่านบาร์โค้ดสินค้าจริงที่โฟกัส/แสง/มุมไม่สมบูรณ์แบบ
+    // ความเสี่ยง false positive ถูกกันด้วย logic "ต้องอ่านค่าเดียวกันซ้ำ 2 ครั้งติดกัน" ที่ openScanner/openPalletScan อยู่แล้ว
+    hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
     hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[
       ZXing.BarcodeFormat.QR_CODE,
       ZXing.BarcodeFormat.EAN_13,
