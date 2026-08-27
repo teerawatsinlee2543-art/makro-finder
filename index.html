@@ -35,6 +35,8 @@ html,body{background:var(--color-background-secondary);height:100%;font-family:'
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 body{margin:0;padding:0;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default}
+/* เปิดให้เลือก/คัดลอกข้อความได้เฉพาะจุดที่มีข้อมูลจริงที่ผู้ใช้อาจอยากคัดลอก (ชื่อสินค้า/Item No/บาร์โค้ด/ตำแหน่งจัดเก็บ/รายละเอียด) แม้ปิด user-select ทั้งแอปไว้เพื่อกันเคอร์เซอร์กระพริบตอนแตะค้างตัวหนังสือทั่วไป */
+#foundCard,#resultsList,#navInfoBody,.pallet-body,.pallet-item-info{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default}
 </style>
 </head>
 <body>
