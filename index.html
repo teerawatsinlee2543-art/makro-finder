@@ -3622,7 +3622,7 @@ function premiumBoothStall(x0,y0,x1,y1,rot,tint,H,th,en){
     const sp=isoProject(sx,y0+1.5,bpZ0+(bpZ1-bpZ0)*(0.3+0.4*((i*37)%5)/5),rot);
     parts.push('<circle cx="'+sp[0].toFixed(1)+'" cy="'+sp[1].toFixed(1)+'" r="1.4" fill="#FFD97A"/>');
   }
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+76,rot,th,en,'#695F82',true,roofZ1));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+106,rot,th,en,'#695F82',true,roofZ1));
   return parts.join('');
 }
 // โต๊ะทำงานฝ่ายขาย: โต๊ะไม้ + จอคอมพิวเตอร์ + คีย์บอร์ด + เอกสารกอง + เก้าอี้สำนักงานด้านหลัง
@@ -3800,7 +3800,7 @@ function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
     +'<path d="M '+(swirlX-4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' L '+swirlX.toFixed(1)+' '+(swirlY+9).toFixed(1)+' L '+(swirlX+4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' Z" fill="#D9A65F"/>'
     +'<path d="M '+(swirlX-4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' L '+swirlX.toFixed(1)+' '+(swirlY+9).toFixed(1)+' L '+(swirlX+4).toFixed(1)+' '+(swirlY+0.5).toFixed(1)+' Z" fill="none" stroke="#B9834A" stroke-width="0.5"/>'
   );
-  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+mH+76,rot,th,en,tint,true,H+mH));
+  if(th) parts.push(signAt((x0+x1)/2,(y0+y1)/2,H+mH+142,rot,th,en,tint,true,H+mH));
   return parts.join('');
 }
 // แผงเบเกอรี่แบบลังไม้เอียงบนล้อเข็น เรียงขนมปังห่อถุง 3 ชั้น + ป้ายแดงแขวนเหนือหัว
