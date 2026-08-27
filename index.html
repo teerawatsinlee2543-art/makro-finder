@@ -4103,16 +4103,29 @@ function mapBlockPieces(b,editable,rotationDeg,isHighlighted){
   const tint=b.fill;
   const rawTh=(b.lines&&b.lines[0]&&b.lines[0].text)||'';
   const rawEn=(b.lines&&b.lines[1]&&b.lines[1].text)||'';
-  const zoneI18n=MAP_ZONE_LABELS_I18N[b.id];
+  // บล็อกที่เพิ่มเองผ่านตัวแก้ผัง (Candy/Rice/O2O/ฝ่ายขาย) id เป็นเลขสุ่ม (Date.now()) ไม่คงที่ ไม่มีทางแมตช์กับ MAP_ZONE_LABELS_I18N ที่ผูกกับ id เดิม
+  // เลยจับคู่จากข้อความแทนเหมือนที่ getBlockSkin() ทำ กันไม่ให้ป้ายพวกนี้ค้างเป็นภาษาเดิมตลอดไม่ว่าจะเปลี่ยนภาษาแอปเป็นอะไรก็ตาม
+  const zoneI18nKey=MAP_ZONE_LABELS_I18N[b.id]?b.id:(rawTh==='O2O'?'o2o':null);
+  const zoneI18n=zoneI18nKey?MAP_ZONE_LABELS_I18N[zoneI18nKey]:null;
   let th=rawTh, en=rawEn;
   if(zoneI18n){
-    if(b.id==='o2o'){
+    if(zoneI18nKey==='o2o'){
       // o2o: line0 "O2O" is a fixed universal acronym, line1 "แผนกออนไลน์" is the translatable part
       en=(currentLang==='th')?rawEn:(zoneI18n[currentLang]||zoneI18n.th);
     } else {
       th=zoneI18n[currentLang]||zoneI18n.th;
       en=(currentLang==='th')?rawEn:zoneI18n.th;
     }
+  } else if(currentLang!=='th'){
+    // Candy/Rice/ฝ่ายขาย ไม่มีในทะเบียนเดิมเลย (ไม่เคยมีในผังเริ่มต้น) เติมคำแปลเฉพาะให้ตรงนี้
+    // Candy/Rice ตั้งใจให้แถวแรกเป็นชื่ออังกฤษเด่นๆ (สลับกับแผนกอื่นที่แถวแรกเป็นไทย) เลยแปลแค่แถวแรก ส่วนคำไทยแถวสองปล่อยไว้เป็นคำอ้างอิงเหมือนแผนกอื่น
+    const CUSTOM_MAIN_I18N={
+      Candy:{en:'Candy',cn:'糖果',mm:'သကြားလုံး',kr:'캔디',jp:'キャンディ'},
+      Rice:{en:'Rice',cn:'大米',mm:'ဆန်',kr:'쌀',jp:'お米'},
+      'ฝ่ายขาย':{en:'Tela Sale',cn:'销售部',mm:'အရောင်းဌာန',kr:'텔라세일',jp:'テラセール'}
+    };
+    const custom=CUSTOM_MAIN_I18N[rawTh];
+    if(custom) th=custom[currentLang]||rawTh;
   }
   const skin=getBlockSkin(b);
   let skinMarkup;
