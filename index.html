@@ -4309,6 +4309,12 @@ function refreshInlineMap(){
   const el=document.getElementById('showOnMapSvg');
   if(!el)return;
   el.innerHTML=renderMapSVG(currentMapBlocks,false,currentMapRotation,mapHighlightBlockId);
+  // เพิ่มจุดตำแหน่ง GPS สด เหมือนที่ rerenderMapEditorSVG() ทำ เดิมฟังก์ชันนี้ไม่มีส่วนนี้เลย
+  // ทำให้กดปุ่ม "แสดงตำแหน่งฉัน" แล้วปุ่มเปลี่ยนสถานะถูกต้อง แต่จุดสีน้ำเงินไม่ขึ้นบนแผนที่ย่อในหน้าสินค้าเลย (ขึ้นเฉพาะตอนเปิดแผนที่เต็มจอเท่านั้น)
+  if(liveGpsMapXY){
+    const svgEl=el.querySelector('svg');
+    if(svgEl) svgEl.insertAdjacentHTML('beforeend', liveDotMarkup(liveGpsMapXY,liveGpsAccuracyM,currentMapRotation));
+  }
 }
 
 // ==== หาตำแหน่งสินค้าบนแผนที่ ====
