@@ -4323,6 +4323,9 @@ function findMapBlockForItem(item){
     }
   }
   const desc=item.desc.toLowerCase();
+  // "fz" (Frozen) เป็นสัญญาณที่หนักแน่นกว่าคำอื่นเสมอ เจอแล้วคือสินค้าแช่แข็งแน่นอน ไม่ต้องรอนับคะแนนแข่งกับคำแผนกอื่น
+  // (ถ้าปล่อยให้แข่งคะแนนกันตามปกติ สินค้าอย่าง "ARO FZปูอัดเนื้อปลาบด" จะแพ้ เพราะมีคำของแผนกอื่นซ้อนกันมากกว่า 1 คำ เช่น "ปู"+"ปลา" ทั้งที่เป็นแค่ส่วนผสม ไม่ใช่แผนกจริงของสินค้า)
+  if(desc.includes('fz') && currentMapBlocks.find(b=>b.id==='butchery')) return {blockId:'butchery', exact:false};
   let best=null, bestHits=0;
   Object.keys(DEPT_KEYWORDS).forEach(id=>{
     const hits=DEPT_KEYWORDS[id].filter(kw=>desc.includes(kw.toLowerCase())).length;
