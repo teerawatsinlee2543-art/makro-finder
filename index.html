@@ -5501,7 +5501,7 @@ async function confirmMovePalletItem(){
     moved.forEach(it=>{
       const existing=target.items.find(x=>x.itemNo===it.itemNo);
       if(existing) existing.qty+=it.qty;
-      else target.items.push({itemNo:it.itemNo,desc:it.desc,qty:it.qty});
+      else target.items.push({itemNo:it.itemNo,desc:it.desc,barcode:it.barcode||'',qty:it.qty});
     });
     await savePallet(currentPallet);
     await savePallet(target);
@@ -5515,7 +5515,7 @@ async function confirmMovePalletItem(){
   currentPallet.items=currentPallet.items.filter(x=>x.itemNo!==movePalletItemNo);
   const existing=target.items.find(x=>x.itemNo===it.itemNo);
   if(existing) existing.qty+=it.qty;
-  else target.items.push({itemNo:it.itemNo,desc:it.desc,qty:it.qty});
+  else target.items.push({itemNo:it.itemNo,desc:it.desc,barcode:it.barcode||'',qty:it.qty});
   await savePallet(currentPallet);
   await savePallet(target);
   closeMovePalletPrompt();
