@@ -287,6 +287,17 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-total-row i.ti-coin{color:#1B5FA8;font-size:18px}
 .waste-total-label{display:flex;align-items:center;gap:6px;font-weight:700;color:#fff;margin-left:auto;background:#123a63;padding:6px 12px;border-radius:8px}
 .waste-total-value{background:#fff;border:1px solid #bfdbf7;border-radius:8px;padding:7px 14px;font-weight:800;color:#123a63;font-variant-numeric:tabular-nums}
+.waste-menu-card{display:flex;align-items:center;gap:14px;padding:18px;border:1.5px solid #bfdbf7;border-radius:12px;cursor:pointer;margin-bottom:12px;background:#f4f9fe}
+.waste-menu-card:hover{background:#eaf2fb;border-color:#1B5FA8}
+.waste-menu-card>i:first-child{font-size:28px;color:#1B5FA8;flex-shrink:0}
+.waste-menu-card-title{font-size:15px;font-weight:800;color:#123a63}
+.waste-menu-card-sub{font-size:12px;color:#5a86ad;margin-top:2px}
+.waste-menu-card-arrow{margin-left:auto;color:#9db3c9;font-size:18px;flex-shrink:0}
+.waste-history-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #e3eefb;border-radius:10px;cursor:pointer;margin-bottom:8px}
+.waste-history-item:hover{background:#f4f9fe;border-color:#bfdbf7}
+.waste-history-item-date{font-weight:800;color:#123a63;font-size:13.5px}
+.waste-history-item-meta{font-size:12px;color:#5a86ad;margin-top:2px}
+.waste-history-item-total{margin-left:auto;font-weight:800;color:#1B5FA8;font-variant-numeric:tabular-nums;flex-shrink:0}
 @media (max-width:640px){
   .waste-table{font-size:11.5px}
   .waste-scan-row{flex-direction:column}
@@ -1050,27 +1061,56 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <i class="ti ti-x waste-close-btn" onclick="closeWasteLog()" aria-label="ปิด"></i>
       </div>
     </div>
-    <div class="waste-scan-row">
-      <div class="waste-scan-input-wrap">
-        <i class="ti ti-focus-2" aria-hidden="true"></i>
-        <input type="text" id="wasteScanInput" placeholder="สแกน (เครื่องสแกน USB) หรือพิมพ์บาร์โค้ดแล้วกด Enter" onkeydown="if(event.key==='Enter')handleWasteScanInput(this.value)">
+    <div id="wasteMenuView">
+      <div class="waste-menu-card" onclick="showWasteRecordView()">
+        <i class="ti ti-clipboard-list" aria-hidden="true"></i>
+        <div>
+          <div class="waste-menu-card-title">บันทึกข้อมูล</div>
+          <div class="waste-menu-card-sub">สแกน/กรอกข้อมูลของเสียประจำวัน</div>
+        </div>
+        <i class="ti ti-chevron-right waste-menu-card-arrow" aria-hidden="true"></i>
       </div>
-      <button type="button" class="waste-btn waste-btn-outline" onclick="openWasteBarcodeScan()"><i class="ti ti-camera" aria-hidden="true"></i> สแกนด้วยกล้อง</button>
+      <div class="waste-menu-card" onclick="showWasteHistoryView()">
+        <i class="ti ti-history" aria-hidden="true"></i>
+        <div>
+          <div class="waste-menu-card-title">ค้นหาข้อมูลย้อนหลัง</div>
+          <div class="waste-menu-card-sub">ดู/ค้นหาข้อมูลที่เคยบันทึกไว้แต่ละวัน</div>
+        </div>
+        <i class="ti ti-chevron-right waste-menu-card-arrow" aria-hidden="true"></i>
+      </div>
     </div>
-    <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> จัดการสินค้า</button>
-    <div class="waste-day-row">
-      <input type="date" id="wasteDateInput" onchange="selectWasteDate(this.value)">
-      <button type="button" class="waste-btn waste-btn-solid" onclick="addWasteDay()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มวันใหม่</button>
+    <div id="wasteHistoryView" style="display:none">
+      <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
+      <div class="waste-scan-input-wrap" style="margin-bottom:14px">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input type="text" id="wasteHistorySearch" placeholder="ค้นหาด้วยรหัสสินค้า/รายละเอียด หรือวันที่ (DD MM YYYY)" oninput="renderWasteHistoryList(this.value)">
+      </div>
+      <div id="wasteHistoryList"></div>
     </div>
-    <div class="waste-table-toolbar">
-      <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> ส่งออกเป็น PDF</button>
-      <button type="button" class="waste-btn waste-btn-green" onclick="importWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> นำเข้าจาก Excel</button>
-    </div>
-    <div id="wasteTableWrap"></div>
-    <div class="waste-total-row">
-      <i class="ti ti-coin" aria-hidden="true"></i>
-      <span class="waste-total-label"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
-      <span class="waste-total-value" id="wasteTotalValue">0.00</span>
+    <div id="wasteRecordView" style="display:none">
+      <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
+      <div class="waste-scan-row" id="wasteScanRow">
+        <div class="waste-scan-input-wrap">
+          <i class="ti ti-focus-2" aria-hidden="true"></i>
+          <input type="text" id="wasteScanInput" placeholder="สแกน (เครื่องสแกน USB) หรือพิมพ์บาร์โค้ดแล้วกด Enter" onkeydown="if(event.key==='Enter')handleWasteScanInput(this.value)">
+        </div>
+        <button type="button" class="pallet-scan-btn" style="width:auto;flex-shrink:0;margin-bottom:0" onclick="openWasteBarcodeScan()"><i class="ti ti-camera" aria-hidden="true"></i> สแกนด้วยกล้อง</button>
+      </div>
+      <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> จัดการสินค้า</button>
+      <div class="waste-day-row">
+        <input type="date" id="wasteDateInput" onchange="selectWasteDate(this.value)">
+        <button type="button" class="waste-btn waste-btn-solid" onclick="addWasteDay()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มวันใหม่</button>
+      </div>
+      <div class="waste-table-toolbar">
+        <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> ส่งออกเป็น PDF</button>
+        <button type="button" class="waste-btn waste-btn-green" onclick="importWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> นำเข้าจาก Excel</button>
+      </div>
+      <div id="wasteTableWrap"></div>
+      <div class="waste-total-row">
+        <i class="ti ti-coin" aria-hidden="true"></i>
+        <span class="waste-total-label"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
+        <span class="waste-total-value" id="wasteTotalValue">0.00</span>
+      </div>
     </div>
   </div>
 </div>
@@ -7561,10 +7601,61 @@ async function openWasteLog(){
   if(!isEmployee())return;
   document.getElementById('wasteLogOverlay').style.display='flex';
   await loadAllWasteLogs();
-  selectWasteDate(todayDateStr());
+  showWasteMenu();
 }
 function closeWasteLog(){
   document.getElementById('wasteLogOverlay').style.display='none';
+}
+function setWasteView(view){
+  document.getElementById('wasteMenuView').style.display=view==='menu'?'block':'none';
+  document.getElementById('wasteRecordView').style.display=view==='record'?'block':'none';
+  document.getElementById('wasteHistoryView').style.display=view==='history'?'block':'none';
+}
+function showWasteMenu(){
+  setWasteView('menu');
+}
+function showWasteRecordView(){
+  setWasteView('record');
+  document.getElementById('wasteScanRow').style.display='flex';
+  if(!currentWasteLog) selectWasteDate(todayDateStr());
+  else renderWasteTable();
+}
+function showWasteHistoryView(){
+  setWasteView('history');
+  document.getElementById('wasteHistorySearch').value='';
+  renderWasteHistoryList('');
+}
+function openWasteHistoryDay(dateStr){
+  selectWasteDate(dateStr);
+  setWasteView('record');
+  document.getElementById('wasteScanRow').style.display='none';
+}
+function formatDateDMY(dateStr){
+  const parts=(dateStr||'').split('-');
+  if(parts.length!==3)return dateStr;
+  return parts[2]+' '+parts[1]+' '+parts[0];
+}
+function renderWasteHistoryList(query){
+  const box=document.getElementById('wasteHistoryList');
+  const q=(query||'').trim().toLowerCase();
+  let logs=WASTE_LOGS_CACHE.slice().sort((a,b)=>b.date<a.date?-1:1);
+  if(q){
+    logs=logs.filter(log=>{
+      if(log.date.toLowerCase().includes(q))return true;
+      if(formatDateDMY(log.date).toLowerCase().includes(q))return true;
+      return (log.rows||[]).some(r=>(r.itemNo||'').toLowerCase().includes(q)||(r.desc||'').toLowerCase().includes(q));
+    });
+  }
+  if(!logs.length){
+    box.innerHTML='<div class="waste-empty-state">ไม่พบข้อมูลย้อนหลัง'+(q?'ที่ตรงกับ "'+escapeHtml(query)+'"':'')+'</div>';
+    return;
+  }
+  box.innerHTML=logs.map(log=>{
+    return '<div class="waste-history-item" onclick="openWasteHistoryDay('+jsStr(log.date)+')">'
+      +'<i class="ti ti-calendar-event" style="font-size:20px;color:#1B5FA8" aria-hidden="true"></i>'
+      +'<div class="waste-history-item-date">วันที่ '+escapeHtml(formatDateDMY(log.date))+'</div>'
+      +'</div>';
+  }).join('');
 }
 function selectWasteDate(dateStr){
   document.getElementById('wasteDateInput').value=dateStr;
