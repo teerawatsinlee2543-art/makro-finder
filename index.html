@@ -270,7 +270,11 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-day-row input[type="date"]{background:#f4f9fe;border:1px solid #bfdbf7;color:#173350;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13.5px}
 .waste-day-field{display:flex;flex-direction:column;gap:4px}
 .waste-day-field label{font-size:11px;font-weight:700;color:#5a86ad}
+.waste-datetime-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.waste-datetime-display{display:flex;align-items:center;gap:8px;background:#f4f9fe;border:1px solid #bfdbf7;color:#123a63;border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.waste-datetime-display i{color:#1B5FA8;font-size:17px}
 .waste-table-toolbar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.waste-section-title{font-size:14px;font-weight:800;color:#123a63;margin-bottom:8px}
 .waste-table-toolbar .waste-btn{flex:1;min-width:180px}
 .waste-table-wrap{overflow-x:auto;border:1px solid #bfdbf7;border-radius:12px}
 .waste-table{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -1087,10 +1091,25 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <i class="ti ti-search" aria-hidden="true"></i>
         <input type="text" id="wasteHistorySearch" placeholder="ค้นหาด้วยรหัสสินค้า/รายละเอียด หรือวันที่ (DD MM YYYY)" oninput="renderWasteHistoryList(this.value)">
       </div>
+      <div class="waste-day-row">
+        <div class="waste-day-field">
+          <label for="wasteHistoryStartDateInput">เริ่ม</label>
+          <input type="date" id="wasteHistoryStartDateInput" lang="en-GB">
+        </div>
+        <div class="waste-day-field">
+          <label for="wasteHistoryEndDateInput">สิ้นสุด</label>
+          <input type="date" id="wasteHistoryEndDateInput" lang="en-GB">
+        </div>
+        <button type="button" class="waste-btn waste-btn-solid" onclick="searchWasteHistoryByRange()"><i class="ti ti-search" aria-hidden="true"></i> ค้นหา</button>
+      </div>
       <div id="wasteHistoryList"></div>
     </div>
     <div id="wasteRecordView" style="display:none">
       <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
+      <div class="waste-datetime-row">
+        <div class="waste-datetime-display"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span id="wasteCurrentDateTimeText"></span></div>
+        <button type="button" class="waste-btn waste-btn-outline" id="wasteManageItemsBtn" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> จัดการสินค้า</button>
+      </div>
       <div class="waste-scan-row" id="wasteScanRow">
         <div class="waste-scan-input-wrap">
           <i class="ti ti-focus-2" aria-hidden="true"></i>
@@ -1098,8 +1117,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
         <button type="button" class="pallet-scan-btn" style="width:auto;flex-shrink:0;margin-bottom:0" onclick="openWasteBarcodeScan()"><i class="ti ti-camera" aria-hidden="true"></i> สแกนด้วยกล้อง</button>
       </div>
-      <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> จัดการสินค้า</button>
-      <div class="waste-day-row">
+      <div class="waste-day-row" id="wasteRecordDayRow">
         <div class="waste-day-field">
           <label for="wasteStartDateInput">เริ่ม</label>
           <input type="date" id="wasteStartDateInput" lang="en-GB" onchange="addWasteDay()">
@@ -1108,16 +1126,20 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <label for="wasteEndDateInput">สิ้นสุด</label>
           <input type="date" id="wasteEndDateInput" lang="en-GB" onchange="addWasteDay()">
         </div>
+        <button type="button" class="waste-btn waste-btn-solid" onclick="addWasteDay()"><i class="ti ti-search" aria-hidden="true"></i> ค้นหา</button>
       </div>
-      <div class="waste-table-toolbar">
-        <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> ส่งออกเป็น PDF</button>
-        <button type="button" class="waste-btn waste-btn-green" onclick="importWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
-      </div>
-      <div id="wasteTableWrap"></div>
-      <div class="waste-total-row">
-        <i class="ti ti-coin" aria-hidden="true"></i>
-        <span class="waste-total-label"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
-        <span class="waste-total-value" id="wasteTotalValue">0.00</span>
+      <div id="wasteRecordResultBlock">
+        <div class="waste-table-toolbar">
+          <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> ส่งออกเป็น PDF</button>
+          <button type="button" class="waste-btn waste-btn-green" onclick="importWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
+        </div>
+        <div class="waste-section-title">แสดงรายการ</div>
+        <div id="wasteTableWrap"></div>
+        <div class="waste-total-row">
+          <i class="ti ti-coin" aria-hidden="true"></i>
+          <span class="waste-total-label"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
+          <span class="waste-total-value" id="wasteTotalValue">0.00</span>
+        </div>
       </div>
     </div>
   </div>
@@ -7605,14 +7627,26 @@ function emptyWasteRow(no){
 function newWasteLog(startDate,endDate){
   return {startDate:startDate,endDate:endDate,rows:[]};
 }
+let wasteDateTimeTimer=null;
+function updateWasteCurrentDateTimeDisplay(){
+  const el=document.getElementById('wasteCurrentDateTimeText');
+  if(!el)return;
+  const d=new Date();
+  const timeStr=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  el.textContent=formatDateDMY(todayDateStr())+' '+timeStr;
+}
 async function openWasteLog(){
   if(!isEmployee())return;
   document.getElementById('wasteLogOverlay').style.display='flex';
+  updateWasteCurrentDateTimeDisplay();
+  clearInterval(wasteDateTimeTimer);
+  wasteDateTimeTimer=setInterval(updateWasteCurrentDateTimeDisplay,30000);
   await loadAllWasteLogs();
   showWasteMenu();
 }
 function closeWasteLog(){
   document.getElementById('wasteLogOverlay').style.display='none';
+  clearInterval(wasteDateTimeTimer);
 }
 function setWasteView(view){
   document.getElementById('wasteMenuView').style.display=view==='menu'?'block':'none';
@@ -7625,18 +7659,31 @@ function showWasteMenu(){
 function showWasteRecordView(){
   setWasteView('record');
   document.getElementById('wasteScanRow').style.display='flex';
+  document.getElementById('wasteRecordDayRow').style.display='none';
+  document.getElementById('wasteRecordResultBlock').style.display='none';
+  document.getElementById('wasteManageItemsBtn').style.display='none';
   if(!currentWasteLog) selectWasteRange(todayDateStr(),todayDateStr());
   else renderWasteTable();
 }
 function showWasteHistoryView(){
   setWasteView('history');
   document.getElementById('wasteHistorySearch').value='';
+  document.getElementById('wasteHistoryStartDateInput').value=todayDateStr();
+  document.getElementById('wasteHistoryEndDateInput').value=todayDateStr();
   renderWasteHistoryList('');
+}
+function searchWasteHistoryByRange(){
+  const startDate=document.getElementById('wasteHistoryStartDateInput').value||todayDateStr();
+  const endDate=document.getElementById('wasteHistoryEndDateInput').value||startDate;
+  openWasteHistoryRange(startDate,endDate);
 }
 function openWasteHistoryRange(startDate,endDate){
   selectWasteRange(startDate,endDate);
   setWasteView('record');
   document.getElementById('wasteScanRow').style.display='none';
+  document.getElementById('wasteRecordDayRow').style.display='flex';
+  document.getElementById('wasteRecordResultBlock').style.display='block';
+  document.getElementById('wasteManageItemsBtn').style.display='inline-flex';
 }
 function formatDateDMY(dateStr){
   const parts=(dateStr||'').split('-');
