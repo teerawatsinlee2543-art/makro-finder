@@ -266,8 +266,10 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-btn-red-outline{background:#fff;border:1.5px solid #D9534F;color:#D9534F}
 .waste-btn-red-outline:hover{background:#fdeeed}
 .waste-btn-block{width:100%;margin-bottom:14px}
-.waste-day-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.waste-day-row{display:flex;align-items:flex-end;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .waste-day-row input[type="date"]{background:#f4f9fe;border:1px solid #bfdbf7;color:#173350;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13.5px}
+.waste-day-field{display:flex;flex-direction:column;gap:4px}
+.waste-day-field label{font-size:11px;font-weight:700;color:#5a86ad}
 .waste-table-toolbar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .waste-table-toolbar .waste-btn{flex:1;min-width:180px}
 .waste-table-wrap{overflow-x:auto;border:1px solid #bfdbf7;border-radius:12px}
@@ -1098,12 +1100,18 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
       <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> จัดการสินค้า</button>
       <div class="waste-day-row">
-        <input type="date" id="wasteDateInput" onchange="selectWasteDate(this.value)">
-        <button type="button" class="waste-btn waste-btn-solid" onclick="addWasteDay()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มวันใหม่</button>
+        <div class="waste-day-field">
+          <label for="wasteStartDateInput">เริ่ม</label>
+          <input type="date" id="wasteStartDateInput" lang="en-GB" onchange="addWasteDay()">
+        </div>
+        <div class="waste-day-field">
+          <label for="wasteEndDateInput">สิ้นสุด</label>
+          <input type="date" id="wasteEndDateInput" lang="en-GB" onchange="addWasteDay()">
+        </div>
       </div>
       <div class="waste-table-toolbar">
         <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> ส่งออกเป็น PDF</button>
-        <button type="button" class="waste-btn waste-btn-green" onclick="importWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> นำเข้าจาก Excel</button>
+        <button type="button" class="waste-btn waste-btn-green" onclick="importWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
       </div>
       <div id="wasteTableWrap"></div>
       <div class="waste-total-row">
@@ -7560,7 +7568,7 @@ function loadWasteLogsLocal(){
 function saveWasteLogsLocal(list){
   try{ localStorage.setItem(wasteLocalKey(),JSON.stringify(list)); }catch(e){}
 }
-function wasteLogDocId(dateStr){ return 'waste_'+dateStr; }
+function wasteLogDocId(startDate,endDate){ return 'waste_'+startDate+'_'+endDate; }
 async function loadAllWasteLogs(){
   if(wasteLogCollectionRef){
     try{
@@ -7577,13 +7585,13 @@ async function loadAllWasteLogs(){
 async function saveWasteLog(log){
   log.updatedAt=Date.now();
   const local=loadWasteLogsLocal();
-  const idx=local.findIndex(l=>l.date===log.date);
+  const idx=local.findIndex(l=>l.startDate===log.startDate&&l.endDate===log.endDate);
   if(idx>=0) local[idx]=log; else local.push(log);
   saveWasteLogsLocal(local);
-  const cidx=WASTE_LOGS_CACHE.findIndex(l=>l.date===log.date);
+  const cidx=WASTE_LOGS_CACHE.findIndex(l=>l.startDate===log.startDate&&l.endDate===log.endDate);
   if(cidx>=0) WASTE_LOGS_CACHE[cidx]=log; else WASTE_LOGS_CACHE.push(log);
   if(wasteLogCollectionRef){
-    try{ await wasteLogCollectionRef.doc(wasteLogDocId(log.date)).set(Object.assign({type:'wasteLog'},log)); }
+    try{ await wasteLogCollectionRef.doc(wasteLogDocId(log.startDate,log.endDate)).set(Object.assign({type:'wasteLog'},log)); }
     catch(e){ console.error('บันทึกข้อมูลของเสียไป Firestore ไม่สำเร็จ',e); }
   }
 }
@@ -7594,8 +7602,8 @@ function todayDateStr(){
 function emptyWasteRow(no){
   return {no:no,itemNo:'',desc:'',image:null,piece:'',weight:'',qtyMU:'',totalAmount:''};
 }
-function newWasteLog(dateStr){
-  return {date:dateStr,rows:[]};
+function newWasteLog(startDate,endDate){
+  return {startDate:startDate,endDate:endDate,rows:[]};
 }
 async function openWasteLog(){
   if(!isEmployee())return;
@@ -7617,7 +7625,7 @@ function showWasteMenu(){
 function showWasteRecordView(){
   setWasteView('record');
   document.getElementById('wasteScanRow').style.display='flex';
-  if(!currentWasteLog) selectWasteDate(todayDateStr());
+  if(!currentWasteLog) selectWasteRange(todayDateStr(),todayDateStr());
   else renderWasteTable();
 }
 function showWasteHistoryView(){
@@ -7625,8 +7633,8 @@ function showWasteHistoryView(){
   document.getElementById('wasteHistorySearch').value='';
   renderWasteHistoryList('');
 }
-function openWasteHistoryDay(dateStr){
-  selectWasteDate(dateStr);
+function openWasteHistoryRange(startDate,endDate){
+  selectWasteRange(startDate,endDate);
   setWasteView('record');
   document.getElementById('wasteScanRow').style.display='none';
 }
@@ -7635,14 +7643,20 @@ function formatDateDMY(dateStr){
   if(parts.length!==3)return dateStr;
   return parts[2]+' '+parts[1]+' '+parts[0];
 }
+function formatWasteRangeDMY(log){
+  const s=formatDateDMY(log.startDate);
+  const e=formatDateDMY(log.endDate);
+  return (log.startDate===log.endDate)?s:(s+' - '+e);
+}
 function renderWasteHistoryList(query){
   const box=document.getElementById('wasteHistoryList');
   const q=(query||'').trim().toLowerCase();
-  let logs=WASTE_LOGS_CACHE.slice().sort((a,b)=>b.date<a.date?-1:1);
+  let logs=WASTE_LOGS_CACHE.slice().sort((a,b)=>b.startDate<a.startDate?-1:1);
   if(q){
     logs=logs.filter(log=>{
-      if(log.date.toLowerCase().includes(q))return true;
-      if(formatDateDMY(log.date).toLowerCase().includes(q))return true;
+      if((log.startDate||'').toLowerCase().includes(q))return true;
+      if((log.endDate||'').toLowerCase().includes(q))return true;
+      if(formatWasteRangeDMY(log).toLowerCase().includes(q))return true;
       return (log.rows||[]).some(r=>(r.itemNo||'').toLowerCase().includes(q)||(r.desc||'').toLowerCase().includes(q));
     });
   }
@@ -7651,21 +7665,24 @@ function renderWasteHistoryList(query){
     return;
   }
   box.innerHTML=logs.map(log=>{
-    return '<div class="waste-history-item" onclick="openWasteHistoryDay('+jsStr(log.date)+')">'
+    return '<div class="waste-history-item" onclick="openWasteHistoryRange('+jsStr(log.startDate)+','+jsStr(log.endDate)+')">'
       +'<i class="ti ti-calendar-event" style="font-size:20px;color:#1B5FA8" aria-hidden="true"></i>'
-      +'<div class="waste-history-item-date">วันที่ '+escapeHtml(formatDateDMY(log.date))+'</div>'
+      +'<div class="waste-history-item-date">วันที่ '+escapeHtml(formatWasteRangeDMY(log))+'</div>'
       +'</div>';
   }).join('');
 }
-function selectWasteDate(dateStr){
-  document.getElementById('wasteDateInput').value=dateStr;
-  const existing=WASTE_LOGS_CACHE.find(l=>l.date===dateStr);
-  currentWasteLog=existing?JSON.parse(JSON.stringify(existing)):newWasteLog(dateStr);
+function selectWasteRange(startDate,endDate){
+  if(endDate<startDate) endDate=startDate;
+  document.getElementById('wasteStartDateInput').value=startDate;
+  document.getElementById('wasteEndDateInput').value=endDate;
+  const existing=WASTE_LOGS_CACHE.find(l=>l.startDate===startDate&&l.endDate===endDate);
+  currentWasteLog=existing?JSON.parse(JSON.stringify(existing)):newWasteLog(startDate,endDate);
   renderWasteTable();
 }
 function addWasteDay(){
-  const dateStr=document.getElementById('wasteDateInput').value||todayDateStr();
-  selectWasteDate(dateStr);
+  const startDate=document.getElementById('wasteStartDateInput').value||todayDateStr();
+  const endDate=document.getElementById('wasteEndDateInput').value||startDate;
+  selectWasteRange(startDate,endDate);
 }
 function removeWasteRow(idx){
   if(!currentWasteLog)return;
@@ -7702,7 +7719,7 @@ function renderWasteTable(){
   const wrap=document.getElementById('wasteTableWrap');
   if(!wrap)return;
   if(!currentWasteLog||!currentWasteLog.rows.length){
-    wrap.innerHTML='<div class="waste-empty-state">ยังไม่มีข้อมูล — เลือกวันที่ด้านบนแล้วกด "+ เพิ่มวันใหม่" หรือสแกนบาร์โค้ดเพื่อเริ่มบันทึก</div>';
+    wrap.innerHTML='<div class="waste-empty-state">ยังไม่มีข้อมูล — เลือกวันที่ด้านบนหรือสแกนบาร์โค้ดเพื่อเริ่มบันทึก</div>';
     updateWasteTotalDisplay();
     return;
   }
@@ -7763,7 +7780,7 @@ function handleWasteScanInput(code){
   applyWasteScanCode(code);
 }
 function applyWasteScanCode(code){
-  if(!currentWasteLog) selectWasteDate(todayDateStr());
+  if(!currentWasteLog) selectWasteRange(todayDateStr(),todayDateStr());
   const codeNorm=normBarcode(code);
   let item=PRODUCTS_BY_KEY.find(x=>x.barcode===code||x.itemNo===code||(x.barcode&&normBarcode(x.barcode)===codeNorm));
   if(!item){
@@ -7784,7 +7801,7 @@ function openWasteManageItems(){
   showWasteToast('ฟังก์ชันนี้จะเพิ่มให้ทีหลังครับ');
 }
 function importWasteExcel(){
-  showWasteToast('ฟังก์ชันนำเข้าจาก Excel จะเพิ่มให้ทีหลังครับ');
+  showWasteToast('ฟังก์ชันส่งออกเป็น Excel จะเพิ่มให้ทีหลังครับ');
 }
 function showWasteToast(msg){
   showPalletToast(msg);
@@ -7798,7 +7815,7 @@ function exportWastePdf(){
   if(!currentWasteLog||!currentWasteLog.rows.length){ alert('ยังไม่มีข้อมูลให้ส่งออก'); return; }
   const area=document.getElementById('palletPrintArea');
   let html='<div class="pallet-print-page">';
-  html+='<div class="pallet-print-header">Weight Loss and Waste O2O — '+escapeHtml(currentWasteLog.date)+'</div>';
+  html+='<div class="pallet-print-header">Weight Loss and Waste O2O — '+escapeHtml(formatWasteRangeDMY(currentWasteLog))+'</div>';
   html+='<table class="pallet-print-table"><thead><tr><th>No.</th><th>Item</th><th>Description</th><th>Piece</th><th>Weight</th><th>Qty (MU)</th><th>Amount</th></tr></thead><tbody>';
   currentWasteLog.rows.forEach(r=>{
     html+='<tr><td>'+r.no+'</td><td>'+escapeHtml(r.itemNo)+'</td><td>'+escapeHtml(r.desc)+'</td><td>'+escapeHtml(r.piece)+'</td><td>'+escapeHtml(r.weight)+'</td><td>'+escapeHtml(r.qtyMU)+'</td><td>'+escapeHtml(r.totalAmount)+'</td></tr>';
