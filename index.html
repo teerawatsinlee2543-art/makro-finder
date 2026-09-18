@@ -8097,8 +8097,8 @@ async function exportWasteExcel(){
   const sheet=wb.addWorksheet('Waste Log');
   sheet.columns=[{width:6},{width:14},{width:35},{width:10},{width:10},{width:14},{width:18}];
 
-  const now=new Date();
-  const nowTimeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const recordedAt=new Date(currentWasteLog.updatedAt||Date.now());
+  const nowTimeStr=String(recordedAt.getHours()).padStart(2,'0')+':'+String(recordedAt.getMinutes()).padStart(2,'0');
   sheet.mergeCells(1,1,1,7);
   const dateCell=sheet.getCell(1,1);
   dateCell.value='วันที่ '+wasteExcelDateStr(currentWasteLog)+' เวลา '+nowTimeStr+' น.';
@@ -8188,8 +8188,8 @@ function exportWastePdf(){
     sums.qty+=parseFloat(r.qtyMU)||0;
   });
   const numFmt=n=>n?n.toLocaleString('th-TH',{maximumFractionDigits:2}):'-';
-  const now=new Date();
-  const nowTimeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const recordedAt=new Date(currentWasteLog.updatedAt||Date.now());
+  const nowTimeStr=String(recordedAt.getHours()).padStart(2,'0')+':'+String(recordedAt.getMinutes()).padStart(2,'0');
   let html='<div class="waste-print-page">';
   html+='<div class="waste-print-topbar"><div class="waste-print-title-text">Weight Loss and Waste O2O</div></div>';
   html+='<div class="waste-print-meta">'
