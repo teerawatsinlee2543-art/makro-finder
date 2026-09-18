@@ -1152,7 +1152,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div id="wasteRecordResultBlock">
         <div class="waste-table-toolbar">
           <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> ส่งออกเป็น PDF</button>
-          <button type="button" class="waste-btn waste-btn-green" onclick="importWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
+          <button type="button" class="waste-btn waste-btn-green" onclick="exportWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
         </div>
         <div class="waste-datetime-display" style="margin-bottom:8px"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text"></span></div>
         <div class="waste-section-title">แสดงรายการ</div>
@@ -8042,8 +8042,22 @@ function openWasteBarcodeScan(){
 function openWasteManageItems(){
   showWasteToast('ฟังก์ชันนี้จะเพิ่มให้ทีหลังครับ');
 }
-function importWasteExcel(){
-  showWasteToast('ฟังก์ชันส่งออกเป็น Excel จะเพิ่มให้ทีหลังครับ');
+function exportWasteExcel(){
+  if(!currentWasteLog||!currentWasteLog.rows.length){ alert('ยังไม่มีข้อมูลให้ส่งออก'); return; }
+  const rows=currentWasteLog.rows.map(r=>({
+    'No.':r.no,
+    'Item':r.itemNo,
+    'Description':r.desc,
+    'Piece':r.piece,
+    'Weight':r.weight,
+    'Quantity (MU)':r.qtyMU,
+    'Total Amount':r.totalAmount
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:6},{wch:14},{wch:35},{wch:10},{wch:10},{wch:14},{wch:14}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Waste Log');
+  XLSX.writeFile(wb,'waste_log_'+currentWasteLog.startDate+'_'+currentWasteLog.endDate+'.xlsx');
 }
 function showWasteToast(msg){
   showPalletToast(msg);
