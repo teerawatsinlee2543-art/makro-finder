@@ -34,7 +34,7 @@
 html,body{background:var(--color-background-secondary);height:100%;font-family:'Sarabun','Segoe UI',sans-serif;overflow-x:hidden}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 body{margin:0;padding:0;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;caret-color:transparent}
-#wasteAddChoiceManualInput{caret-color:#1B5FA8}
+#wasteAddChoiceManualInput,#wasteFieldEditInput{caret-color:#1B5FA8}
 input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default}
 /* เปิดให้เลือก/คัดลอกข้อความได้เฉพาะจุดที่มีข้อมูลจริงที่ผู้ใช้อาจอยากคัดลอก (ชื่อสินค้า/Item No/บาร์โค้ด/ตำแหน่งจัดเก็บ/รายละเอียด) แม้ปิด user-select ทั้งแอปไว้เพื่อกันเคอร์เซอร์กระพริบตอนแตะค้างตัวหนังสือทั่วไป */
 #foundCard,#resultsList,#navInfoBody,.pallet-body,.pallet-item-info{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default}
@@ -1207,6 +1207,21 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <input type="text" id="wasteAddChoiceManualInput" placeholder="พิมพ์รหัสสินค้าหรือค้นหาด้วยชื่อ แล้วกด Enter" oninput="renderWasteManualSearchResults(this.value)" onkeydown="if(event.key==='Enter')handleWasteAddChoiceManualInput(this.value)">
     </div>
     <div id="wasteManualSearchResults"></div>
+  </div>
+</div>
+<div class="waste-overlay" id="wasteFieldEditOverlay" style="display:none;z-index:2460">
+  <div class="waste-panel" style="max-width:340px">
+    <div class="waste-header">
+      <div class="waste-title" style="font-size:17px" id="wasteFieldEditTitle">จำนวน</div>
+      <div class="waste-header-right">
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteFieldEdit()" aria-label="ปิด"></i>
+      </div>
+    </div>
+    <div class="waste-scan-input-wrap" style="margin-bottom:14px">
+      <i class="ti ti-keyboard" aria-hidden="true"></i>
+      <input type="number" id="wasteFieldEditInput" placeholder="ใส่จำนวน" onkeydown="if(event.key==='Enter')confirmWasteFieldEdit()">
+    </div>
+    <button type="button" class="waste-btn waste-btn-green waste-btn-block" onclick="confirmWasteFieldEdit()"><i class="ti ti-check" aria-hidden="true"></i> ตกลง</button>
   </div>
 </div>
 
@@ -7830,34 +7845,37 @@ function updateWasteTotalDisplay(){
     if(el) el.textContent=text;
   });
 }
-let wasteEditingCells=new Set();
 function wasteStepperHtml(idx,field,value,placeholder){
-  const key=idx+':'+field;
-  let valueHtml;
-  if(wasteEditingCells.has(key)){
-    valueHtml='<input type="number" data-cellkey="'+key+'" placeholder="'+placeholder+'" value="'+escapeHtml(value)+'" oninput="updateWasteRowField('+idx+',\''+field+'\',this.value)" onblur="finishWasteValueEdit('+idx+',\''+field+'\')" onkeydown="if(event.key===\'Enter\')this.blur()">';
-  } else {
-    const text=(value===undefined||value===null||value==='')?('<span class="waste-stepper-placeholder">'+placeholder+'</span>'):escapeHtml(value);
-    valueHtml='<span class="waste-stepper-value" onclick="startWasteValueEdit('+idx+',\''+field+'\')">'+text+'</span>';
-  }
+  const text=(value===undefined||value===null||value==='')?('<span class="waste-stepper-placeholder">'+placeholder+'</span>'):escapeHtml(value);
+  const valueHtml='<span class="waste-stepper-value" onclick="startWasteValueEdit('+idx+',\''+field+'\',\''+placeholder+'\')">'+text+'</span>';
   return '<div class="waste-stepper">'
     +'<button type="button" class="waste-stepper-btn" onclick="stepWasteRowField('+idx+',\''+field+'\',-1)"><i class="ti ti-minus" aria-hidden="true"></i></button>'
     +valueHtml
     +'<button type="button" class="waste-stepper-btn" onclick="stepWasteRowField('+idx+',\''+field+'\',1)"><i class="ti ti-plus" aria-hidden="true"></i></button>'
     +'</div>';
 }
-function startWasteValueEdit(idx,field){
-  const key=idx+':'+field;
-  wasteEditingCells.add(key);
-  renderWasteTable();
-  setTimeout(()=>{
-    document.querySelectorAll('[data-cellkey="'+key+'"]').forEach(el=>{
-      if(el.offsetParent!==null){ el.focus(); el.select(); }
-    });
-  },0);
+let wasteFieldEditIdx=null;
+let wasteFieldEditField=null;
+function startWasteValueEdit(idx,field,label){
+  wasteFieldEditIdx=idx;
+  wasteFieldEditField=field;
+  document.getElementById('wasteFieldEditTitle').textContent=label;
+  const row=currentWasteLog&&currentWasteLog.rows[idx];
+  const input=document.getElementById('wasteFieldEditInput');
+  input.value=row?(row[field]||''):'';
+  document.getElementById('wasteFieldEditOverlay').style.display='flex';
+  setTimeout(()=>{ input.focus(); input.select(); },0);
 }
-function finishWasteValueEdit(idx,field){
-  wasteEditingCells.delete(idx+':'+field);
+function closeWasteFieldEdit(){
+  document.getElementById('wasteFieldEditOverlay').style.display='none';
+  wasteFieldEditIdx=null;
+  wasteFieldEditField=null;
+}
+function confirmWasteFieldEdit(){
+  if(wasteFieldEditIdx===null)return;
+  const value=document.getElementById('wasteFieldEditInput').value;
+  updateWasteRowField(wasteFieldEditIdx,wasteFieldEditField,value);
+  closeWasteFieldEdit();
   renderWasteTable();
 }
 function stepWasteRowField(idx,field,delta){
