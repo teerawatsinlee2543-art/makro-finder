@@ -304,6 +304,15 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-history-item-date{font-weight:800;color:#123a63;font-size:13.5px}
 .waste-history-item-meta{font-size:12px;color:#5a86ad;margin-top:2px}
 .waste-history-item-total{margin-left:auto;font-weight:800;color:#1B5FA8;font-variant-numeric:tabular-nums;flex-shrink:0}
+.waste-search-results{margin-top:10px;max-height:260px;overflow-y:auto}
+.waste-search-result-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e3eefb;border-radius:10px;cursor:pointer;margin-bottom:6px}
+.waste-search-result-item:hover{background:#f4f9fe;border-color:#bfdbf7}
+.waste-search-result-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.waste-search-result-itemno{font-weight:800;color:#123a63;font-size:12.5px}
+.waste-search-result-desc{font-size:12px;color:#5a86ad}
+.waste-search-result-thumb{width:40px;height:40px;border-radius:8px;background:#eaf2fb;border:1px solid #cfe2f7;display:flex;align-items:center;justify-content:center;color:#1B5FA8;font-size:18px;flex-shrink:0;overflow:hidden}
+.waste-search-result-thumb img{width:100%;height:100%;object-fit:cover}
+.waste-search-empty{font-size:12.5px;color:#8fa6bd;padding:6px 2px}
 @media (max-width:640px){
   .waste-table{font-size:11.5px}
   .waste-scan-row{flex-direction:column}
@@ -1163,10 +1172,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div><div class="waste-menu-card-title">สแกน Barcode</div><div class="waste-menu-card-sub">ใช้กล้องสแกนบาร์โค้ด</div></div>
       <i class="ti ti-chevron-right waste-menu-card-arrow" aria-hidden="true"></i>
     </div>
-    <div class="waste-scan-input-wrap" id="wasteAddChoiceManualRow" style="display:none;margin-bottom:14px">
-      <i class="ti ti-keyboard" aria-hidden="true"></i>
-      <input type="text" id="wasteAddChoiceManualInput" placeholder="พิมพ์รหัสสินค้าแล้วกด Enter" onkeydown="if(event.key==='Enter')handleWasteAddChoiceManualInput(this.value)">
-    </div>
     <div class="waste-section-title">แสดงรายการ</div>
     <div id="wasteAddChoiceTableWrap"></div>
     <div class="waste-total-row">
@@ -1174,6 +1179,21 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <span class="waste-total-label"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
       <span class="waste-total-value" id="wasteAddChoiceTotalValue">0.00</span>
     </div>
+  </div>
+</div>
+<div class="waste-overlay" id="wasteManualEntryOverlay" style="display:none;z-index:2450">
+  <div class="waste-panel" style="max-width:420px">
+    <div class="waste-header">
+      <div class="waste-title" style="font-size:17px">ป้อนเลขไอเท็ม</div>
+      <div class="waste-header-right">
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteManualEntry()" aria-label="ปิด"></i>
+      </div>
+    </div>
+    <div class="waste-scan-input-wrap" style="margin-bottom:0">
+      <i class="ti ti-keyboard" aria-hidden="true"></i>
+      <input type="text" id="wasteAddChoiceManualInput" placeholder="พิมพ์รหัสสินค้าหรือค้นหาด้วยชื่อ แล้วกด Enter" oninput="renderWasteManualSearchResults(this.value)" onkeydown="if(event.key==='Enter')handleWasteAddChoiceManualInput(this.value)">
+    </div>
+    <div id="wasteManualSearchResults"></div>
   </div>
 </div>
 
@@ -7864,21 +7884,51 @@ function handleWasteScanInput(code){
 }
 function openWasteAddChoice(){
   document.getElementById('wasteAddChoiceOverlay').style.display='flex';
-  document.getElementById('wasteAddChoiceManualRow').style.display='none';
   renderWasteTable();
 }
 function closeWasteAddChoice(){
   document.getElementById('wasteAddChoiceOverlay').style.display='none';
 }
 function chooseWasteAddManual(){
-  document.getElementById('wasteAddChoiceManualRow').style.display='flex';
+  document.getElementById('wasteManualEntryOverlay').style.display='flex';
   document.getElementById('wasteAddChoiceManualInput').focus();
+  renderWasteManualSearchResults('');
+}
+function closeWasteManualEntry(){
+  document.getElementById('wasteManualEntryOverlay').style.display='none';
+  document.getElementById('wasteManualSearchResults').innerHTML='';
 }
 function handleWasteAddChoiceManualInput(code){
   code=(code||'').trim();
   if(!code)return;
   document.getElementById('wasteAddChoiceManualInput').value='';
+  closeWasteManualEntry();
   applyWasteScanCode(code);
+}
+function renderWasteManualSearchResults(query){
+  const box=document.getElementById('wasteManualSearchResults');
+  if(!box)return;
+  const q=(query||'').trim().toLowerCase();
+  if(!q){ box.innerHTML=''; return; }
+  const matches=PRODUCTS_BY_KEY.filter(item=>(item.desc||'').toLowerCase().includes(q)||(item.itemNo||'').toLowerCase().includes(q)).slice(0,8);
+  if(!matches.length){ box.innerHTML='<div class="waste-search-empty">ไม่พบสินค้าที่ตรงกับ "'+escapeHtml(query)+'"</div>'; return; }
+  box.innerHTML='<div class="waste-search-results">'+matches.map((item,i)=>
+    '<div class="waste-search-result-item" onclick="selectWasteManualSearchResult('+jsStr(item.itemNo)+')">'
+      +'<div class="waste-search-result-text">'
+        +'<div class="waste-search-result-itemno">'+escapeHtml(item.itemNo)+'</div>'
+        +'<div class="waste-search-result-desc">'+escapeHtml(item.desc)+'</div>'
+      +'</div>'
+      +'<div class="waste-search-result-thumb" id="wasteSearchResultImg'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'
+    +'</div>'
+  ).join('')+'</div>';
+  matches.forEach((item,i)=>{
+    applyItemImage(document.getElementById('wasteSearchResultImg'+i),item);
+  });
+}
+function selectWasteManualSearchResult(itemNo){
+  document.getElementById('wasteAddChoiceManualInput').value='';
+  closeWasteManualEntry();
+  applyWasteScanCode(itemNo);
 }
 function chooseWasteAddScan(){
   closeWasteAddChoice();
