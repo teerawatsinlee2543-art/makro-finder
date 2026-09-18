@@ -1113,8 +1113,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div class="waste-scan-row" id="wasteScanRow">
         <div class="waste-scan-input-wrap">
           <i class="ti ti-focus-2" aria-hidden="true"></i>
-          <input type="text" id="wasteScanInput" placeholder="สแกน (เครื่องสแกน USB) หรือพิมพ์บาร์โค้ดแล้วกด Enter" onkeydown="if(event.key==='Enter')handleWasteScanInput(this.value)">
+          <input type="text" id="wasteScanInput" placeholder="เพิ่มข้อมูล (สแกนด้วยเครื่องสแกน USB หรือพิมพ์บาร์โค้ดแล้วกด Enter)" onkeydown="if(event.key==='Enter')handleWasteScanInput(this.value)">
         </div>
+        <button type="button" class="waste-btn waste-btn-solid" style="flex-shrink:0" onclick="handleWasteScanInput(document.getElementById('wasteScanInput').value)"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่ม</button>
         <button type="button" class="pallet-scan-btn" style="width:auto;flex-shrink:0;margin-bottom:0" onclick="openWasteBarcodeScan()"><i class="ti ti-camera" aria-hidden="true"></i> สแกนด้วยกล้อง</button>
       </div>
       <div class="waste-day-row" id="wasteRecordDayRow">
