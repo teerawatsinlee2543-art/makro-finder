@@ -286,6 +286,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-table tr:last-child td{border-bottom:none}
 .waste-table td:last-child{border-right:none}
 .waste-table input{width:100%;background:transparent;border:none;outline:none;color:#173350;font-size:12.5px;font-family:inherit;min-width:0;text-align:center}
+.waste-table input.waste-item-input{min-width:82px}
 .waste-table input::placeholder{color:#a9bed3}
 .waste-stepper{display:flex;align-items:center;justify-content:center;gap:3px}
 .waste-stepper input{width:100%;min-width:0}
@@ -7912,7 +7913,7 @@ function renderWasteTable(){
       const photoHtml=r.image?'<img src="'+r.image+'">':'<i class="ti ti-camera-plus" aria-hidden="true"></i>';
       return '<tr>'
         +'<td><div class="waste-row-no">'+r.no+'</div></td>'
-        +'<td><input type="text" placeholder="รหัสสินค้า" value="'+escapeHtml(r.itemNo)+'" oninput="updateWasteRowField('+i+',\'itemNo\',this.value)"></td>'
+        +'<td><input type="text" class="waste-item-input" placeholder="รหัสสินค้า" value="'+escapeHtml(r.itemNo)+'" oninput="updateWasteRowField('+i+',\'itemNo\',this.value)"></td>'
         +'<td><div class="waste-row-photo" onclick="openWasteRowPhotoPicker('+i+')">'+photoHtml+'</div></td>'
         +'<td><input type="text" placeholder="รายละเอียดสินค้า" value="'+escapeHtml(r.desc)+'" oninput="updateWasteRowField('+i+',\'desc\',this.value)"></td>'
         +'<td>'+wasteStepperHtml(i,'piece',r.piece,'ชิ้น')+'</td>'
