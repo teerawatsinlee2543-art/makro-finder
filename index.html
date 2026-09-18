@@ -8090,6 +8090,7 @@ async function exportWasteExcel(){
   sheet.getCell(sumRowIdx,1).value='รวมทั้งหมด';
   sheet.getCell(sumRowIdx,2).value=rowCount;
   sheet.mergeCells(sumRowIdx,3,sumRowIdx,4);
+  sheet.getCell(sumRowIdx,3).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF808080'}};
   sheet.getCell(sumRowIdx,5).value=sums.piece;
   sheet.getCell(sumRowIdx,6).value=sums.weight;
   sheet.getCell(sumRowIdx,7).value=sums.qty;
@@ -8098,6 +8099,7 @@ async function exportWasteExcel(){
     const cell=sheet.getCell(sumRowIdx,c);
     cell.font={bold:true};
     cell.border=thinBorder;
+    if(c>=5) cell.alignment={horizontal:'right'};
   }
 
   const buf=await wb.xlsx.writeBuffer();
