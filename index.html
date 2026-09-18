@@ -8149,13 +8149,13 @@ function exportWastePdf(){
   if(isLineBrowser()){ alert('พิมพ์/บันทึก PDF ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง'); return; }
   const area=document.getElementById('palletPrintArea');
   let html='<div class="pallet-print-page">';
-  html+='<div class="pallet-print-header">Weight Loss and Waste O2O — '+escapeHtml(formatWasteRangeDMY(currentWasteLog))+'</div>';
-  html+='<table class="pallet-print-table"><thead><tr><th>No.</th><th>Item</th><th>Description</th><th>Piece</th><th>Weight</th><th>Qty (MU)</th><th>Amount</th></tr></thead><tbody>';
+  html+='<div class="pallet-print-header">วันที่ '+escapeHtml(wasteExcelDateStr(currentWasteLog))+'</div>';
+  html+='<table class="pallet-print-table"><thead><tr><th>No.</th><th>Item</th><th>Description</th><th>Piece</th><th>Weight</th><th>Quantity (MU)</th><th>Total Amount (บาท)</th></tr></thead><tbody>';
   currentWasteLog.rows.forEach(r=>{
     html+='<tr><td>'+r.no+'</td><td>'+escapeHtml(r.itemNo)+'</td><td>'+escapeHtml(r.desc)+'</td><td>'+escapeHtml(r.piece)+'</td><td>'+escapeHtml(r.weight)+'</td><td>'+escapeHtml(r.qtyMU)+'</td><td>'+escapeHtml(r.totalAmount)+'</td></tr>';
   });
+  html+='<tr><td colspan="6" style="text-align:right;font-weight:700">รวมทั้งหมด</td><td style="font-weight:700">'+wasteLogTotalAmount().toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td></tr>';
   html+='</tbody></table>';
-  html+='<div class="pallet-print-footer"><div>'+escapeHtml(t('signedByLabel'))+' : '+escapeHtml(palletPrintSignerName())+'</div><div>'+escapeHtml(t('printDateLabel'))+' : '+escapeHtml(palletPrintDateStr())+'</div><div>Total Amount : '+wasteLogTotalAmount().toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div></div>';
   html+='</div>';
   area.innerHTML=html;
   document.documentElement.classList.add('printing-pallet-list');
