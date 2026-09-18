@@ -595,6 +595,31 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .pallet-print-table td:nth-child(3){text-align:left;padding-left:6px}
   .pallet-print-table th:last-child,.pallet-print-table td:last-child{width:16%;text-align:center}
   .pallet-print-footer{display:flex;justify-content:space-between;gap:24px;margin-top:16px;font-size:28px;font-weight:600;color:#000;flex:0 0 auto}
+  .waste-print-page{width:100%;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;color:#123a63}
+  .waste-print-topbar{display:flex;align-items:stretch;margin-bottom:16px}
+  .waste-print-title{background:#123a63;color:#fff;display:flex;align-items:center;gap:12px;padding:14px 40px 14px 18px;clip-path:polygon(0 0,100% 0,86% 100%,0 100%);flex:0 0 auto}
+  .waste-print-title i{font-size:34px}
+  .waste-print-title-line1{font-size:19px;font-weight:800;line-height:1.3}
+  .waste-print-title-line2{font-size:12px;font-weight:600;line-height:1.3}
+  .waste-print-scan{background:#dcebfa;color:#123a63;display:flex;align-items:center;gap:12px;padding:14px 30px 14px 40px;margin-left:-22px;clip-path:polygon(8% 0,100% 0,100% 100%,0 100%);flex:1 1 auto}
+  .waste-print-scan>i{font-size:28px}
+  .waste-print-scan-badge{background:#123a63;color:#fff;border-radius:8px;padding:8px 16px;font-weight:800;font-size:14px;display:inline-flex;align-items:center;gap:8px}
+  .waste-print-date{display:flex;align-items:center;gap:8px;padding:14px 22px;font-weight:800;font-size:15px;white-space:nowrap;flex:0 0 auto}
+  .waste-print-date i{font-size:20px}
+  .waste-print-table{width:100%;border-collapse:collapse}
+  .waste-print-table th{background:#123a63;color:#fff;padding:10px 6px;font-size:12px;font-weight:700}
+  .waste-print-table th i{display:block;font-size:18px;margin-bottom:3px}
+  .waste-print-table td{border:1px solid #bfdbf7;padding:12px 8px;text-align:center;font-size:12.5px;height:14px}
+  .waste-print-table td:nth-child(4){text-align:left}
+  .waste-print-total-row td{background:#123a63;color:#fff;font-weight:800;font-size:13px}
+  .waste-print-total-blank{background:#eaf2fb!important;color:#123a63!important}
+  .waste-print-total-label{text-align:right!important;padding-right:16px!important}
+  .waste-print-footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;font-size:13px;gap:24px}
+  .waste-print-note{flex:1;display:flex;align-items:center;gap:6px}
+  .waste-print-dots{flex:1;border-bottom:1px dotted #123a63;margin-left:8px;height:14px}
+  .waste-print-signoff{display:flex;gap:28px;flex:0 0 auto}
+  .waste-print-signoff span{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+  .waste-print-dots-short{display:inline-block;width:100px;border-bottom:1px dotted #123a63;height:14px}
 }
 </style>
 
@@ -8148,18 +8173,54 @@ function exportWastePdf(){
   if(!currentWasteLog||!currentWasteLog.rows.length){ alert('ยังไม่มีข้อมูลให้ส่งออก'); return; }
   if(isLineBrowser()){ alert('พิมพ์/บันทึก PDF ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง'); return; }
   const area=document.getElementById('palletPrintArea');
-  let html='<div class="pallet-print-page">';
-  html+='<div class="pallet-print-header">วันที่ '+escapeHtml(wasteExcelDateStr(currentWasteLog))+'</div>';
-  html+='<table class="pallet-print-table"><thead><tr><th>No.</th><th>Item</th><th>Description</th><th>Piece</th><th>Weight</th><th>Quantity (MU)</th><th>Total Amount (บาท)</th></tr></thead><tbody>';
+  const minRows=5;
+  const rowCount=Math.max(currentWasteLog.rows.length,minRows);
+  let rowsHtml='';
+  for(let i=0;i<rowCount;i++){
+    const r=currentWasteLog.rows[i];
+    rowsHtml+='<tr><td>'+(i+1)+'</td><td>'+(r?escapeHtml(r.itemNo):'')+'</td><td>'+(r&&r.image?'<img src="'+r.image+'" style="width:34px;height:34px;object-fit:cover;border-radius:4px">':'')+'</td><td>'+(r?escapeHtml(r.desc):'')+'</td><td>'+(r?escapeHtml(r.piece):'')+'</td><td>'+(r?escapeHtml(r.weight):'')+'</td><td>'+(r?escapeHtml(r.qtyMU):'')+'</td><td>'+(r?escapeHtml(r.totalAmount):'')+'</td></tr>';
+  }
+  const sums={piece:0,weight:0,qty:0};
   currentWasteLog.rows.forEach(r=>{
-    html+='<tr><td>'+r.no+'</td><td>'+escapeHtml(r.itemNo)+'</td><td>'+escapeHtml(r.desc)+'</td><td>'+escapeHtml(r.piece)+'</td><td>'+escapeHtml(r.weight)+'</td><td>'+escapeHtml(r.qtyMU)+'</td><td>'+escapeHtml(r.totalAmount)+'</td></tr>';
+    sums.piece+=parseFloat(r.piece)||0;
+    sums.weight+=parseFloat(r.weight)||0;
+    sums.qty+=parseFloat(r.qtyMU)||0;
   });
-  html+='<tr><td colspan="6" style="text-align:right;font-weight:700">รวมทั้งหมด</td><td style="font-weight:700">'+wasteLogTotalAmount().toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td></tr>';
-  html+='</tbody></table>';
+  const numFmt=n=>n?n.toLocaleString('th-TH',{maximumFractionDigits:2}):'-';
+  let html='<div class="waste-print-page">';
+  html+='<div class="waste-print-topbar">'
+    +'<div class="waste-print-title"><i class="ti ti-barcode" aria-hidden="true"></i><div><div class="waste-print-title-line1">สแกนบาร์โค้ด</div><div class="waste-print-title-line2">เพื่อกรอกข้อมูลสินค้า</div></div></div>'
+    +'<div class="waste-print-scan"><i class="ti ti-scan" aria-hidden="true"></i><div class="waste-print-scan-badge"><i class="ti ti-barcode" aria-hidden="true"></i> Scan Barcode</div></div>'
+    +'<div class="waste-print-date"><i class="ti ti-calendar-event" aria-hidden="true"></i> วันที่ <b>'+escapeHtml(wasteExcelDateStr(currentWasteLog))+'</b></div>'
+    +'</div>';
+  html+='<table class="waste-print-table"><thead><tr>'
+    +'<th>No.</th>'
+    +'<th><i class="ti ti-barcode" aria-hidden="true"></i>Item</th>'
+    +'<th><i class="ti ti-photo" aria-hidden="true"></i>รูป Item</th>'
+    +'<th><i class="ti ti-file-description" aria-hidden="true"></i>Description</th>'
+    +'<th><i class="ti ti-package" aria-hidden="true"></i>Piece</th>'
+    +'<th><i class="ti ti-scale" aria-hidden="true"></i>Weight</th>'
+    +'<th><i class="ti ti-cube" aria-hidden="true"></i>Quantity (MU)</th>'
+    +'<th><i class="ti ti-calculator" aria-hidden="true"></i>Total Amount (บาท)</th>'
+    +'</tr></thead><tbody>'+rowsHtml
+    +'<tr class="waste-print-total-row">'
+      +'<td colspan="4" class="waste-print-total-label">รวมทั้งหมด</td>'
+      +'<td class="waste-print-total-blank">'+numFmt(sums.piece)+'</td>'
+      +'<td class="waste-print-total-blank">'+numFmt(sums.weight)+'</td>'
+      +'<td class="waste-print-total-blank">'+numFmt(sums.qty)+'</td>'
+      +'<td>'+wasteLogTotalAmount().toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
+    +'</tr>'
+    +'</tbody></table>';
+  html+='<div class="waste-print-footer">'
+    +'<div class="waste-print-note"><i class="ti ti-note" aria-hidden="true"></i> หมายเหตุ : <span class="waste-print-dots"></span></div>'
+    +'<div class="waste-print-signoff"><span>ผู้ตรวจสอบ : <span class="waste-print-dots-short"></span></span><span>วันที่ : <span class="waste-print-dots-short"></span></span></div>'
+    +'</div>';
   html+='</div>';
   area.innerHTML=html;
-  document.documentElement.classList.add('printing-pallet-list');
-  const cleanup=()=>{ document.documentElement.classList.remove('printing-pallet-list'); window.removeEventListener('afterprint',cleanup); };
+  const pageStyleTag=document.createElement('style');
+  pageStyleTag.textContent='@page{size:A4 landscape;margin:10mm}';
+  document.head.appendChild(pageStyleTag);
+  const cleanup=()=>{ pageStyleTag.remove(); window.removeEventListener('afterprint',cleanup); };
   window.addEventListener('afterprint',cleanup);
   window.print();
 }
