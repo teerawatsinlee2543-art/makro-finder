@@ -8225,7 +8225,9 @@ function exportWastePdf(){
   const pageStyleTag=document.createElement('style');
   pageStyleTag.textContent='@page{size:A4 landscape;margin:10mm}';
   document.head.appendChild(pageStyleTag);
-  const cleanup=()=>{ pageStyleTag.remove(); window.removeEventListener('afterprint',cleanup); };
+  const locLabelArea=document.getElementById('palletLocLabelPrintArea');
+  locLabelArea.style.setProperty('display','none','important');
+  const cleanup=()=>{ pageStyleTag.remove(); locLabelArea.style.removeProperty('display'); window.removeEventListener('afterprint',cleanup); };
   window.addEventListener('afterprint',cleanup);
   window.print();
 }
