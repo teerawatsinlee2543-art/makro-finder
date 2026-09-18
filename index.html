@@ -302,6 +302,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-total-row{display:flex;align-items:center;gap:10px;margin-top:14px;padding:10px 14px;border-radius:10px;background:#eaf2fb;font-size:13px}
 .waste-total-row i.ti-coin{color:#1B5FA8;font-size:18px}
 .waste-total-label{display:flex;align-items:center;gap:6px;font-weight:700;color:#fff;margin-left:auto;background:#123a63;padding:6px 12px;border-radius:8px}
+.waste-total-label-inline{margin-left:0}
 .waste-total-value{background:#fff;border:1px solid #bfdbf7;border-radius:8px;padding:7px 14px;font-weight:800;color:#123a63;font-variant-numeric:tabular-nums}
 .waste-menu-card{display:flex;align-items:center;gap:14px;padding:18px;border:1.5px solid #bfdbf7;border-radius:12px;cursor:pointer;margin-bottom:12px;background:#f4f9fe}
 .waste-menu-card:hover{background:#eaf2fb;border-color:#1B5FA8}
@@ -1186,8 +1187,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="wasteAddChoiceTableWrap"></div>
     <div class="waste-total-row">
       <i class="ti ti-coin" aria-hidden="true"></i>
-      <span class="waste-total-label"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
+      <span class="waste-total-label waste-total-label-inline"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
       <span class="waste-total-value" id="wasteAddChoiceTotalValue">0.00</span>
+      <button type="button" class="waste-btn waste-btn-solid" style="margin-left:auto" onclick="saveWasteAddChoiceProgress()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึก</button>
     </div>
   </div>
 </div>
@@ -7935,6 +7937,12 @@ function openWasteAddChoice(){
 }
 function closeWasteAddChoice(){
   document.getElementById('wasteAddChoiceOverlay').style.display='none';
+}
+function saveWasteAddChoiceProgress(){
+  if(!currentWasteLog)return;
+  persistCurrentWasteLog();
+  showWasteToast('บันทึกข้อมูลแล้ว');
+  closeWasteAddChoice();
 }
 function chooseWasteAddManual(){
   document.getElementById('wasteManualEntryOverlay').style.display='flex';
