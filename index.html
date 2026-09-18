@@ -1200,6 +1200,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   </div>
 </div>
 <input type="file" id="wasteRowPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleWasteRowPhotoSelect(event)">
+<input type="file" id="wastePriceCaptureInput" accept="image/*" capture="environment" style="display:none" onchange="handleWastePriceCaptureSelect(event)">
 <div class="waste-overlay" id="wasteAddChoiceOverlay" style="display:none;z-index:2400">
   <div class="waste-panel" style="max-width:900px">
     <div class="waste-header">
@@ -7916,10 +7917,12 @@ function wasteStepperHtml(idx,field,value,placeholder){
     return '<div class="waste-stepper waste-stepper-readonly">'+text+'</div>';
   }
   const valueHtml='<span class="waste-stepper-value" onclick="startWasteValueEdit('+idx+',\''+field+'\',\''+placeholder+'\')">'+text+'</span>';
+  const camBtn=field==='piece'?'<button type="button" class="waste-stepper-btn" onclick="openWastePriceCapture('+idx+')" title="ถ่ายรูปราคา"><i class="ti ti-camera" aria-hidden="true"></i></button>':'';
   return '<div class="waste-stepper">'
     +'<button type="button" class="waste-stepper-btn" onclick="stepWasteRowField('+idx+',\''+field+'\',-1)"><i class="ti ti-minus" aria-hidden="true"></i></button>'
     +valueHtml
     +'<button type="button" class="waste-stepper-btn" onclick="stepWasteRowField('+idx+',\''+field+'\',1)"><i class="ti ti-plus" aria-hidden="true"></i></button>'
+    +camBtn
     +'</div>';
 }
 let wasteFieldEditIdx=null;
@@ -7952,6 +7955,57 @@ function stepWasteRowField(idx,field,delta){
   const next=Math.max(0,cur+delta);
   updateWasteRowField(idx,field,String(next));
   renderWasteTable();
+}
+let _tesseractLoadPromise=null;
+function loadTesseract(){
+  if(window.Tesseract) return Promise.resolve();
+  if(_tesseractLoadPromise) return _tesseractLoadPromise;
+  _tesseractLoadPromise=new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload=()=>resolve();
+    s.onerror=()=>{ _tesseractLoadPromise=null; reject(new Error('load tesseract failed')); };
+    document.head.appendChild(s);
+  });
+  return _tesseractLoadPromise;
+}
+function parseWastePriceFromOcrText(text){
+  let m=text.match(/retail[^\d]{0,20}(\d[\d,]*\.\d{1,2})/i);
+  if(m) return m[1].replace(/,/g,'');
+  m=text.match(/thb\s*([\d,]+\.\d{1,2})/i);
+  if(m) return m[1].replace(/,/g,'');
+  m=text.match(/(\d[\d,]*\.\d{2})/);
+  if(m) return m[1].replace(/,/g,'');
+  return null;
+}
+let wastePriceCaptureIdx=null;
+function openWastePriceCapture(idx){
+  wastePriceCaptureIdx=idx;
+  document.getElementById('wastePriceCaptureInput').click();
+}
+async function handleWastePriceCaptureSelect(evt){
+  const file=evt.target.files&&evt.target.files[0];
+  evt.target.value='';
+  if(!file||wastePriceCaptureIdx==null)return;
+  const idx=wastePriceCaptureIdx;
+  showWasteToast('กำลังอ่านราคาจากรูป...');
+  try{
+    await loadTesseract();
+    const result=await Tesseract.recognize(file,'eng');
+    const text=(result&&result.data&&result.data.text)||'';
+    const price=parseWastePriceFromOcrText(text);
+    startWasteValueEdit(idx,'piece','ราคา');
+    if(price!=null){
+      const input=document.getElementById('wasteFieldEditInput');
+      input.value=price;
+      input.select();
+    } else {
+      showWasteToast('อ่านราคาไม่พบ กรุณากรอกเอง');
+    }
+  }catch(err){
+    showWasteToast('อ่านราคาไม่สำเร็จ กรุณากรอกเอง');
+    startWasteValueEdit(idx,'piece','ราคา');
+  }
 }
 function renderWasteTable(){
   const wraps=['wasteTableWrap','wasteAddChoiceTableWrap'].map(id=>document.getElementById(id)).filter(Boolean);
