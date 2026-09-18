@@ -6096,6 +6096,10 @@ function isLineAndroidBrowser(){
   // จับแบบไม่สนตัวพิมพ์เล็ก-ใหญ่ เพราะ UA ของ LINE บางเวอร์ชัน/บางรุ่นเครื่องสะกดไม่ตรงกันเป๊ะ
   return /line\//i.test(ua) && /android/i.test(ua);
 }
+function isLineBrowser(){
+  // ทุกแพลตฟอร์ม ใช้เช็คก่อนดาวน์โหลดไฟล์/เปิดหน้าต่างพิมพ์ เพราะ LINE in-app browser บล็อกทั้งสองอย่างไม่ว่า Android หรือ iOS
+  return /line\//i.test(navigator.userAgent||'');
+}
 function lineExternalBrowserUrl(){
   try{
     const url=new URL(window.location.href);
@@ -8065,6 +8069,7 @@ function wasteExcelDateStr(log){
 }
 async function exportWasteExcel(){
   if(!currentWasteLog||!currentWasteLog.rows.length){ alert('ยังไม่มีข้อมูลให้ส่งออก'); return; }
+  if(isLineBrowser()){ alert('ดาวน์โหลดไฟล์ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง'); return; }
   const thinBorder={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
   const wb=new ExcelJS.Workbook();
   const sheet=wb.addWorksheet('Waste Log');
@@ -8139,6 +8144,7 @@ function wasteLogTotalAmount(){
 // ไม่ต้องโหลดไลบรารีสร้าง PDF เพิ่ม ใช้กลไก @media print + #palletPrintArea ที่มีอยู่แล้วในระบบ
 function exportWastePdf(){
   if(!currentWasteLog||!currentWasteLog.rows.length){ alert('ยังไม่มีข้อมูลให้ส่งออก'); return; }
+  if(isLineBrowser()){ alert('พิมพ์/บันทึก PDF ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง'); return; }
   const area=document.getElementById('palletPrintArea');
   let html='<div class="pallet-print-page">';
   html+='<div class="pallet-print-header">Weight Loss and Waste O2O — '+escapeHtml(formatWasteRangeDMY(currentWasteLog))+'</div>';
