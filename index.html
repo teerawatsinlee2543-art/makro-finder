@@ -6173,6 +6173,7 @@ function handlePalletScanCode(code){
   if(palletScanMode==='wastelog'){
     closePalletScan();
     applyWasteScanCode(code);
+    openWasteAddChoice();
     return;
   }
   const codeNorm=normBarcode(code);
