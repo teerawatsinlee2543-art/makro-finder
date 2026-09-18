@@ -8202,8 +8202,7 @@ function exportWastePdf(){
   if(!currentWasteLog||!currentWasteLog.rows.length){ alert('ยังไม่มีข้อมูลให้ส่งออก'); return; }
   if(isLineBrowser()){ alert('พิมพ์/บันทึก PDF ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง'); return; }
   const area=document.getElementById('palletPrintArea');
-  const minRows=5;
-  const rowCount=Math.max(currentWasteLog.rows.length,minRows);
+  const rowCount=currentWasteLog.rows.length;
   let rowsHtml='';
   for(let i=0;i<rowCount;i++){
     const r=currentWasteLog.rows[i];
