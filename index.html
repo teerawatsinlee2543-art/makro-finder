@@ -607,6 +607,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .waste-print-table th{background:#f2f2f2;color:#000;padding:8px 6px;font-size:12px;font-weight:700;border:1px solid #000}
   .waste-print-table td{border:1px solid #000;padding:10px 8px;text-align:center;font-size:12.5px;height:14px;overflow:hidden;text-overflow:ellipsis}
   .waste-print-table tbody tr:not(.waste-print-total-row) td:nth-child(3){text-align:left}
+  .waste-print-table tbody tr:not(.waste-print-total-row) td:nth-child(8){height:auto;overflow:visible;padding:4px}
   .waste-print-table th:nth-child(1),.waste-print-table td:nth-child(1){width:5%}
   .waste-print-table th:nth-child(2),.waste-print-table td:nth-child(2){width:11%}
   .waste-print-table th:nth-child(3),.waste-print-table td:nth-child(3){width:30%}
@@ -8206,7 +8207,7 @@ function exportWastePdf(){
   let rowsHtml='';
   for(let i=0;i<rowCount;i++){
     const r=currentWasteLog.rows[i];
-    rowsHtml+='<tr><td>'+(i+1)+'</td><td>'+(r?escapeHtml(r.itemNo):'')+'</td><td>'+(r?escapeHtml(r.desc):'')+'</td><td>'+(r?escapeHtml(r.piece):'')+'</td><td>'+(r?escapeHtml(r.weight):'')+'</td><td>'+(r?escapeHtml(r.qtyMU):'')+'</td><td>'+(r?escapeHtml(r.totalAmount):'')+'</td><td>'+(r&&r.image?'<img src="'+r.image+'" style="width:34px;height:34px;object-fit:cover;border-radius:4px">':'')+'</td></tr>';
+    rowsHtml+='<tr><td>'+(i+1)+'</td><td>'+(r?escapeHtml(r.itemNo):'')+'</td><td>'+(r?escapeHtml(r.desc):'')+'</td><td>'+(r?escapeHtml(r.piece):'')+'</td><td>'+(r?escapeHtml(r.weight):'')+'</td><td>'+(r?escapeHtml(r.qtyMU):'')+'</td><td>'+(r?escapeHtml(r.totalAmount):'')+'</td><td>'+(r&&r.image?'<img src="'+r.image+'" style="width:70px;height:70px;object-fit:cover;border-radius:3px">':'')+'</td></tr>';
   }
   const sums={piece:0,weight:0,qty:0};
   currentWasteLog.rows.forEach(r=>{
