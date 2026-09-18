@@ -7990,6 +7990,8 @@ function openWasteAddChoice(){
 }
 function closeWasteAddChoice(){
   document.getElementById('wasteAddChoiceOverlay').style.display='none';
+  currentWasteLog=null;
+  renderWasteTable();
 }
 function saveWasteAddChoiceProgress(){
   if(!currentWasteLog)return;
