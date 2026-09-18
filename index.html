@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js"></script>
@@ -8042,22 +8043,73 @@ function openWasteBarcodeScan(){
 function openWasteManageItems(){
   showWasteToast('ฟังก์ชันนี้จะเพิ่มให้ทีหลังครับ');
 }
-function exportWasteExcel(){
+function wasteExcelDateStr(log){
+  const toSlash=iso=>{ const p=(iso||'').split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso; };
+  return log.startDate===log.endDate?toSlash(log.startDate):(toSlash(log.startDate)+' - '+toSlash(log.endDate));
+}
+async function exportWasteExcel(){
   if(!currentWasteLog||!currentWasteLog.rows.length){ alert('ยังไม่มีข้อมูลให้ส่งออก'); return; }
-  const rows=currentWasteLog.rows.map(r=>({
-    'No.':r.no,
-    'Item':r.itemNo,
-    'Description':r.desc,
-    'Piece':r.piece,
-    'Weight':r.weight,
-    'Quantity (MU)':r.qtyMU,
-    'Total Amount':r.totalAmount
-  }));
-  const ws=XLSX.utils.json_to_sheet(rows);
-  ws['!cols']=[{wch:6},{wch:14},{wch:35},{wch:10},{wch:10},{wch:14},{wch:14}];
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Waste Log');
-  XLSX.writeFile(wb,'waste_log_'+currentWasteLog.startDate+'_'+currentWasteLog.endDate+'.xlsx');
+  const thinBorder={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
+  const wb=new ExcelJS.Workbook();
+  const sheet=wb.addWorksheet('Waste Log');
+  sheet.columns=[{width:14},{width:6},{width:14},{width:35},{width:10},{width:10},{width:14},{width:16}];
+  sheet.getCell('A1').value='วันที่ '+wasteExcelDateStr(currentWasteLog);
+
+  const headerRowIdx=2;
+  ['No.','Item','Description','Piece','Weight','Quantity (MU)','Total Amount (บาท)'].forEach((h,i)=>{
+    const cell=sheet.getCell(headerRowIdx,i+2);
+    cell.value=h;
+    cell.font={bold:true};
+    cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE9EDE0'}};
+    cell.border=thinBorder;
+    cell.alignment={horizontal:'center',vertical:'middle'};
+  });
+
+  const minRows=5;
+  const rowCount=Math.max(currentWasteLog.rows.length,minRows);
+  for(let i=0;i<rowCount;i++){
+    const r=currentWasteLog.rows[i];
+    const rowIdx=headerRowIdx+1+i;
+    const values=[i+1,r?r.itemNo:'',r?r.desc:'',r?r.piece:'',r?r.weight:'',r?r.qtyMU:'',r?r.totalAmount:''];
+    values.forEach((v,j)=>{
+      const cell=sheet.getCell(rowIdx,j+2);
+      cell.value=v;
+      cell.border=thinBorder;
+      if(j>=4) cell.alignment={horizontal:'right'};
+    });
+  }
+
+  const sums={piece:0,weight:0,qty:0,total:0};
+  currentWasteLog.rows.forEach(r=>{
+    sums.piece+=parseFloat(r.piece)||0;
+    sums.weight+=parseFloat(r.weight)||0;
+    sums.qty+=parseFloat(r.qtyMU)||0;
+    sums.total+=parseFloat(r.totalAmount)||0;
+  });
+  const sumRowIdx=headerRowIdx+1+rowCount;
+  sheet.getCell(sumRowIdx,1).value='รวมทั้งหมด';
+  sheet.getCell(sumRowIdx,2).value=rowCount;
+  sheet.mergeCells(sumRowIdx,3,sumRowIdx,4);
+  sheet.getCell(sumRowIdx,5).value=sums.piece;
+  sheet.getCell(sumRowIdx,6).value=sums.weight;
+  sheet.getCell(sumRowIdx,7).value=sums.qty;
+  sheet.getCell(sumRowIdx,8).value=sums.total;
+  for(let c=1;c<=8;c++){
+    const cell=sheet.getCell(sumRowIdx,c);
+    cell.font={bold:true};
+    cell.border=thinBorder;
+  }
+
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/octet-stream'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='waste_log_'+currentWasteLog.startDate+'_'+currentWasteLog.endDate+'.xlsx';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
 }
 function showWasteToast(msg){
   showPalletToast(msg);
