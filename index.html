@@ -607,11 +607,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .waste-print-table th i{display:block;font-size:18px;margin-bottom:3px}
   .waste-print-icon-badge{display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;background:#fff;border:1.5px solid #1B5FA8;color:#123a63;font-size:8px;font-weight:800;margin:0 auto 3px}
   .waste-print-table td{border:1px solid #1B5FA8;padding:12px 8px;text-align:center;font-size:12.5px;height:14px}
-  .waste-print-table td:nth-child(4){text-align:left}
-  .waste-print-total-row td{background:#eaf2fb;color:#123a63;font-weight:800;font-size:13px}
+  .waste-print-table tbody tr:not(.waste-print-total-row) td:nth-child(4){text-align:left}
+  .waste-print-total-row td{background:#eaf2fb;color:#123a63;font-weight:800;font-size:13px;text-align:center}
   .waste-print-total-row td:last-child{background:#123a63;color:#fff}
-  .waste-print-total-label{text-align:right!important;padding-right:12px!important}
-  .waste-print-total-pill{display:inline-block;background:#123a63;color:#fff;padding:8px 22px;border-radius:8px;font-weight:800}
+  .waste-print-total-label{text-align:right!important;padding-right:12px!important;font-weight:800}
   .waste-print-footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;font-size:13px;gap:24px}
   .waste-print-note{flex:1;display:flex;align-items:center;gap:6px}
   .waste-print-dots{flex:1;border-bottom:1px dotted #123a63;margin-left:8px;height:14px}
@@ -8210,7 +8209,7 @@ function exportWastePdf(){
     +'<th><i class="ti ti-calculator" aria-hidden="true"></i>Total Amount (บาท)</th>'
     +'</tr></thead><tbody>'+rowsHtml
     +'<tr class="waste-print-total-row">'
-      +'<td colspan="4" class="waste-print-total-label"><span class="waste-print-total-pill">รวมทั้งหมด</span></td>'
+      +'<td colspan="4" class="waste-print-total-label">รวมทั้งหมด</td>'
       +'<td>'+numFmt(sums.piece)+'</td>'
       +'<td>'+numFmt(sums.weight)+'</td>'
       +'<td>'+numFmt(sums.qty)+'</td>'
