@@ -7870,7 +7870,7 @@ function applyWasteScanCode(code){
     if(altKey!==null)item=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
   }
   const row=emptyWasteRow(currentWasteLog.rows.length+1);
-  if(item){ row.itemNo=item.itemNo; row.desc=item.desc; }
+  if(item){ row.itemNo=item.itemNo; row.desc=item.desc; showWasteToast('เพิ่ม '+item.desc+' แล้ว'); }
   else { row.itemNo=code; showWasteToast('ไม่พบสินค้าในระบบ กรอกรายละเอียดเองได้'); }
   currentWasteLog.rows.push(row);
   renderWasteTable();
