@@ -1133,8 +1133,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="wasteRecordView" style="display:none">
       <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
       <div class="waste-datetime-row">
-        <div class="waste-datetime-display"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text"></span></div>
         <button type="button" class="waste-btn waste-btn-outline" id="wasteManageItemsBtn" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> จัดการสินค้า</button>
+        <div class="waste-datetime-display"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text" id="wasteTopDateTimeText"></span></div>
       </div>
       <div class="waste-scan-row" id="wasteScanRow">
         <div class="waste-scan-input-wrap">
@@ -1159,7 +1159,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> ส่งออกเป็น PDF</button>
           <button type="button" class="waste-btn waste-btn-green" onclick="exportWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
         </div>
-        <div class="waste-datetime-display" style="margin-bottom:8px"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text"></span></div>
         <div class="waste-section-title">แสดงรายการ</div>
         <div id="wasteTableWrap"></div>
         <div class="waste-total-row">
@@ -7716,13 +7715,23 @@ function newWasteLog(startDate,endDate){
   return {startDate:startDate,endDate:endDate,rows:[]};
 }
 let wasteDateTimeTimer=null;
+let wasteTopBadgeShowsResult=false;
 function updateWasteCurrentDateTimeDisplay(){
   const els=document.querySelectorAll('.waste-current-datetime-text');
   if(!els.length)return;
   const d=new Date();
   const timeStr=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
   const text='วันที่ '+formatDateDMY(todayDateStr())+' เวลา '+timeStr;
-  els.forEach(el=>{ el.textContent=text; });
+  els.forEach(el=>{
+    if(el.id==='wasteTopDateTimeText'&&wasteTopBadgeShowsResult)return;
+    el.textContent=text;
+  });
+}
+function setWasteTopBadgeToRange(startDate,endDate){
+  wasteTopBadgeShowsResult=true;
+  const el=document.getElementById('wasteTopDateTimeText');
+  if(!el)return;
+  el.textContent='วันที่ '+formatDateDMY(startDate)+(startDate!==endDate?' - '+formatDateDMY(endDate):'');
 }
 async function openWasteLog(){
   if(!isEmployee())return;
@@ -7751,6 +7760,8 @@ function showWasteRecordView(){
   document.getElementById('wasteRecordDayRow').style.display='none';
   document.getElementById('wasteRecordResultBlock').style.display='none';
   document.getElementById('wasteManageItemsBtn').style.display='none';
+  wasteTopBadgeShowsResult=false;
+  updateWasteCurrentDateTimeDisplay();
   if(!currentWasteLog) selectWasteRange(todayDateStr(),todayDateStr());
   else renderWasteTable();
 }
@@ -7773,7 +7784,7 @@ function openWasteHistoryRange(startDate,endDate){
   document.getElementById('wasteRecordDayRow').style.display='flex';
   document.getElementById('wasteRecordResultBlock').style.display='block';
   document.getElementById('wasteManageItemsBtn').style.display='inline-flex';
-  updateWasteCurrentDateTimeDisplay();
+  setWasteTopBadgeToRange(startDate,endDate);
 }
 function formatDateDMY(dateStr){
   const parts=(dateStr||'').split('-');
@@ -7827,6 +7838,7 @@ function addWasteDay(){
   const startDate=document.getElementById('wasteStartDateInput').value||todayDateStr();
   const endDate=document.getElementById('wasteEndDateInput').value||startDate;
   selectWasteRange(startDate,endDate);
+  setWasteTopBadgeToRange(startDate,endDate);
 }
 function removeWasteRow(idx){
   if(!currentWasteLog)return;
