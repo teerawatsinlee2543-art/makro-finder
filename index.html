@@ -272,7 +272,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-day-field{display:flex;flex-direction:column;gap:4px}
 .waste-day-field label{font-size:11px;font-weight:700;color:#5a86ad}
 .waste-datetime-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.waste-datetime-display{display:flex;align-items:center;gap:8px;background:#f4f9fe;border:1px solid #bfdbf7;color:#123a63;border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.waste-datetime-display{display:inline-flex;align-items:center;gap:8px;background:#f4f9fe;border:1px solid #bfdbf7;color:#123a63;border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums}
 .waste-datetime-display i{color:#1B5FA8;font-size:17px}
 .waste-table-toolbar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .waste-section-title{font-size:14px;font-weight:800;color:#123a63;margin-bottom:8px}
@@ -1127,7 +1127,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="wasteRecordView" style="display:none">
       <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
       <div class="waste-datetime-row">
-        <div class="waste-datetime-display"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span id="wasteCurrentDateTimeText"></span></div>
+        <div class="waste-datetime-display"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text"></span></div>
         <button type="button" class="waste-btn waste-btn-outline" id="wasteManageItemsBtn" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> จัดการสินค้า</button>
       </div>
       <div class="waste-scan-row" id="wasteScanRow">
@@ -1153,6 +1153,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> ส่งออกเป็น PDF</button>
           <button type="button" class="waste-btn waste-btn-green" onclick="importWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
         </div>
+        <div class="waste-datetime-display" style="margin-bottom:8px"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text"></span></div>
         <div class="waste-section-title">แสดงรายการ</div>
         <div id="wasteTableWrap"></div>
         <div class="waste-total-row">
@@ -1183,6 +1184,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div><div class="waste-menu-card-title">สแกน Barcode</div><div class="waste-menu-card-sub">ใช้กล้องสแกนบาร์โค้ด</div></div>
       <i class="ti ti-chevron-right waste-menu-card-arrow" aria-hidden="true"></i>
     </div>
+    <div class="waste-datetime-display" style="margin-bottom:8px"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text"></span></div>
     <div class="waste-section-title">แสดงรายการ</div>
     <div id="wasteAddChoiceTableWrap"></div>
     <div class="waste-total-row">
@@ -7709,11 +7711,12 @@ function newWasteLog(startDate,endDate){
 }
 let wasteDateTimeTimer=null;
 function updateWasteCurrentDateTimeDisplay(){
-  const el=document.getElementById('wasteCurrentDateTimeText');
-  if(!el)return;
+  const els=document.querySelectorAll('.waste-current-datetime-text');
+  if(!els.length)return;
   const d=new Date();
   const timeStr=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-  el.textContent=formatDateDMY(todayDateStr())+' '+timeStr;
+  const text='วันที่ '+formatDateDMY(todayDateStr())+' เวลา '+timeStr;
+  els.forEach(el=>{ el.textContent=text; });
 }
 async function openWasteLog(){
   if(!isEmployee())return;
@@ -7764,6 +7767,7 @@ function openWasteHistoryRange(startDate,endDate){
   document.getElementById('wasteRecordDayRow').style.display='flex';
   document.getElementById('wasteRecordResultBlock').style.display='block';
   document.getElementById('wasteManageItemsBtn').style.display='inline-flex';
+  updateWasteCurrentDateTimeDisplay();
 }
 function formatDateDMY(dateStr){
   const parts=(dateStr||'').split('-');
@@ -7952,6 +7956,7 @@ function handleWasteScanInput(code){
 }
 function openWasteAddChoice(){
   document.getElementById('wasteAddChoiceOverlay').style.display='flex';
+  updateWasteCurrentDateTimeDisplay();
   renderWasteTable();
 }
 function closeWasteAddChoice(){
