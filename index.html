@@ -7797,9 +7797,16 @@ function renderWasteHistoryList(query){
     return;
   }
   box.innerHTML=logs.map(log=>{
+    let matchHtml='';
+    if(q){
+      const matchedRows=(log.rows||[]).filter(r=>(r.itemNo||'').toLowerCase().includes(q)||(r.desc||'').toLowerCase().includes(q));
+      if(matchedRows.length){
+        matchHtml='<div class="waste-history-item-meta">'+matchedRows.map(r=>escapeHtml(r.desc||r.itemNo)).join(', ')+'</div>';
+      }
+    }
     return '<div class="waste-history-item" onclick="openWasteHistoryRange('+jsStr(log.startDate)+','+jsStr(log.endDate)+')">'
       +'<i class="ti ti-calendar-event" style="font-size:20px;color:#1B5FA8" aria-hidden="true"></i>'
-      +'<div class="waste-history-item-date">วันที่ '+escapeHtml(formatWasteRangeDMY(log))+'</div>'
+      +'<div><div class="waste-history-item-date">วันที่ '+escapeHtml(formatWasteRangeDMY(log))+'</div>'+matchHtml+'</div>'
       +'</div>';
   }).join('');
 }
