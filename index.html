@@ -8094,7 +8094,7 @@ function removeWasteRow(idx){
 function computeWasteRowTotal(row){
   const piece=parseFloat(row.piece)||0;
   const weight=parseFloat(row.weight)||0;
-  if(weight>0) return (piece*(weight/1000)).toFixed(2);
+  if(weight>0) return (piece*weight).toFixed(2);
   const qty=parseFloat(row.qtyMU)||0;
   return (piece*qty).toFixed(2);
 }
@@ -8453,7 +8453,7 @@ function wasteWizardUpdateTotalDisplay(){
   const piece=parseFloat(document.getElementById('wasteWizardPiece').value)||0;
   const weight=parseFloat(document.getElementById('wasteWizardWeight').value)||0;
   const qty=parseFloat(document.getElementById('wasteWizardQty').value)||0;
-  const total=weight>0?piece*(weight/1000):piece*qty;
+  const total=weight>0?piece*weight:piece*qty;
   document.getElementById('wasteWizardTotalDisplay').textContent='Total '+total.toFixed(2)+' THB';
 }
 function wasteWizardPieceInput(){
