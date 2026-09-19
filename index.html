@@ -244,7 +244,9 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .pallet-open-btn.compact{width:auto;display:inline-flex;padding:9px 18px}
 .waste-overlay{position:fixed;inset:0;background:rgba(20,30,45,.55);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
 .waste-panel{width:100%;max-width:900px;max-height:92vh;max-height:92dvh;overflow-y:auto;background:#ffffff;color:#173350;border-radius:16px;padding:20px 22px;box-sizing:border-box;font-family:inherit;border:1px solid #d7e7f8}
-.waste-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5;background:#fdeaea;margin:-20px -22px 14px;padding:20px 22px 14px;border-radius:16px 16px 0 0;border-bottom:1px solid #f7cdd0}
+.waste-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:-1px;z-index:5;background:#fdeaea;margin:-21px -23px 14px;padding:21px 23px 14px;border-radius:16px 16px 0 0;border-bottom:1px solid #f7cdd0}
+.waste-mode-indicator{display:none;position:sticky;bottom:-1px;z-index:5;margin:14px -23px -21px;padding:10px 23px;background:#fdeaea;border-top:3px solid #e05252;border-radius:0 0 16px 16px;font-size:13px;font-weight:800;color:#a83232;text-align:center}
+.waste-mode-indicator.show{display:block}
 .waste-title{font-size:22px;font-weight:800;color:#123a63}
 .waste-desc{font-size:12.5px;color:#5a86ad;margin-top:4px}
 .waste-header-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
@@ -1211,6 +1213,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <button type="button" class="waste-btn waste-btn-red" style="margin-left:auto" onclick="confirmDeleteWasteLog()"><i class="ti ti-trash" aria-hidden="true"></i> ลบข้อมูล</button>
         </div>
       </div>
+      <div class="waste-mode-indicator" id="wasteModeIndicator"></div>
     </div>
   </div>
 </div>
@@ -7854,9 +7857,16 @@ function showWasteRecordView(){
   wasteTopBadgeShowsResult=false;
   wasteTableReadOnly=false;
   updateWasteCurrentDateTimeDisplay();
+  setWasteModeIndicator('บันทึกข้อมูล');
   const today=todayDateStr();
   if(!currentWasteLog||currentWasteLog.startDate!==today||currentWasteLog.endDate!==today) selectWasteRange(today,today);
   else renderWasteTable();
+}
+function setWasteModeIndicator(label){
+  const el=document.getElementById('wasteModeIndicator');
+  if(!el)return;
+  el.innerHTML='<i class="ti ti-circle-filled" aria-hidden="true" style="font-size:8px;vertical-align:middle"></i> กำลังอยู่ในโหมด: '+escapeHtml(label);
+  el.classList.add('show');
 }
 function showWasteHistoryView(){
   setWasteView('history');
@@ -7880,6 +7890,7 @@ function openWasteHistoryRange(startDate,endDate){
   document.getElementById('wasteManageItemsBtn').style.display='inline-flex';
   setWasteTopBadgeToRange(startDate,endDate);
   renderWasteRecordedAt();
+  setWasteModeIndicator('ค้นหาข้อมูลย้อนหลัง');
 }
 function renderWasteRecordedAt(){
   const el=document.getElementById('wasteRecordedAt');
