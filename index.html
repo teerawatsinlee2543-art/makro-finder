@@ -1313,6 +1313,40 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <button type="button" class="waste-btn waste-btn-green waste-btn-block" onclick="confirmWasteNewItem()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึก</button>
   </div>
 </div>
+<div class="waste-overlay" id="wasteWizardOverlay" style="display:none;z-index:2465">
+  <div class="waste-panel" style="max-width:380px">
+    <div class="waste-header">
+      <div class="waste-title" style="font-size:16px" id="wasteWizardTitle">ขั้นที่ 1/3: ราคา และน้ำหนัก</div>
+      <div class="waste-header-right">
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteWizard()" aria-label="ปิด"></i>
+      </div>
+    </div>
+    <div id="wasteWizardStep1">
+      <div class="waste-scan-input-wrap" style="margin-bottom:10px">
+        <i class="ti ti-coin" aria-hidden="true"></i>
+        <input type="number" id="wasteWizardPiece" placeholder="ราคา">
+      </div>
+      <div class="waste-scan-input-wrap" style="margin-bottom:14px">
+        <i class="ti ti-weight" aria-hidden="true"></i>
+        <input type="number" id="wasteWizardWeight" placeholder="น้ำหนัก">
+      </div>
+    </div>
+    <div id="wasteWizardStep2" style="display:none">
+      <div class="waste-scan-input-wrap" style="margin-bottom:14px">
+        <i class="ti ti-package" aria-hidden="true"></i>
+        <input type="number" id="wasteWizardQty" placeholder="จำนวน (MU)">
+      </div>
+    </div>
+    <div id="wasteWizardStep3" style="display:none">
+      <div class="waste-new-item-photo" id="wasteWizardPhoto" onclick="document.getElementById('wasteWizardPhotoInput').click()">
+        <i class="ti ti-camera-plus" aria-hidden="true"></i>
+        <span>ถ่ายรูปของเสีย (ไม่บังคับ)</span>
+      </div>
+      <input type="file" id="wasteWizardPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleWasteWizardPhotoSelect(event)">
+    </div>
+    <button type="button" class="waste-btn waste-btn-green waste-btn-block" id="wasteWizardNextBtn" onclick="wasteWizardNext()">ถัดไป <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+  </div>
+</div>
 <div class="waste-overlay" id="wasteFieldEditOverlay" style="display:none;z-index:2460">
   <div class="waste-panel" style="max-width:340px">
     <div class="waste-header">
@@ -8364,6 +8398,89 @@ async function confirmWasteNewItem(){
   applyWasteScanCode(itemNo);
   showWasteToast('เพิ่มรายการใหม่ "'+desc+'" และบันทึกไว้ในระบบแล้ว');
 }
+let wasteWizardRowIdx=null;
+let wasteWizardStep=1;
+let wasteWizardPhotoDataUrl=null;
+function openWasteItemWizard(idx){
+  if(!currentWasteLog||!currentWasteLog.rows[idx])return;
+  wasteWizardRowIdx=idx;
+  wasteWizardStep=1;
+  wasteWizardPhotoDataUrl=null;
+  const row=currentWasteLog.rows[idx];
+  document.getElementById('wasteWizardPiece').value=row.piece||'';
+  document.getElementById('wasteWizardWeight').value=row.weight||'';
+  document.getElementById('wasteWizardQty').value=row.qtyMU||'1';
+  document.getElementById('wasteWizardPhoto').innerHTML='<i class="ti ti-camera-plus" aria-hidden="true"></i><span>ถ่ายรูปของเสีย (ไม่บังคับ)</span>';
+  renderWasteWizardStep();
+  document.getElementById('wasteWizardOverlay').style.display='flex';
+}
+function renderWasteWizardStep(){
+  document.getElementById('wasteWizardStep1').style.display=wasteWizardStep===1?'block':'none';
+  document.getElementById('wasteWizardStep2').style.display=wasteWizardStep===2?'block':'none';
+  document.getElementById('wasteWizardStep3').style.display=wasteWizardStep===3?'block':'none';
+  const titles={1:'ขั้นที่ 1/3: ราคา และน้ำหนัก',2:'ขั้นที่ 2/3: จำนวน (MU)',3:'ขั้นที่ 3/3: ถ่ายรูปของเสีย'};
+  document.getElementById('wasteWizardTitle').textContent=titles[wasteWizardStep];
+  const btn=document.getElementById('wasteWizardNextBtn');
+  btn.innerHTML=wasteWizardStep<3?'ถัดไป <i class="ti ti-arrow-right" aria-hidden="true"></i>':'<i class="ti ti-check" aria-hidden="true"></i> เสร็จสิ้น';
+}
+function wasteWizardNext(){
+  if(wasteWizardStep===1){
+    const piece=document.getElementById('wasteWizardPiece').value.trim();
+    const weight=document.getElementById('wasteWizardWeight').value.trim();
+    if(!piece){ alert('กรุณากรอกราคา'); return; }
+    if(!weight){ alert('กรุณากรอกน้ำหนัก'); return; }
+    wasteWizardStep=2;
+    renderWasteWizardStep();
+    return;
+  }
+  if(wasteWizardStep===2){
+    const qty=document.getElementById('wasteWizardQty').value.trim();
+    if(!qty){ alert('กรุณากรอกจำนวน'); return; }
+    wasteWizardStep=3;
+    renderWasteWizardStep();
+    return;
+  }
+  finishWasteWizard();
+}
+function handleWasteWizardPhotoSelect(evt){
+  const file=evt.target.files&&evt.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    const img=new Image();
+    img.onload=function(){
+      const maxW=300;
+      const scale=Math.min(1,maxW/img.width);
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(img.width*scale);
+      canvas.height=Math.round(img.height*scale);
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      wasteWizardPhotoDataUrl=canvas.toDataURL('image/jpeg',0.6);
+      document.getElementById('wasteWizardPhoto').innerHTML='<img src="'+wasteWizardPhotoDataUrl+'">';
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+  evt.target.value='';
+}
+function finishWasteWizard(){
+  if(wasteWizardRowIdx==null||!currentWasteLog||!currentWasteLog.rows[wasteWizardRowIdx]){ closeWasteWizard(); return; }
+  const row=currentWasteLog.rows[wasteWizardRowIdx];
+  row.piece=document.getElementById('wasteWizardPiece').value.trim();
+  row.weight=document.getElementById('wasteWizardWeight').value.trim();
+  row.qtyMU=document.getElementById('wasteWizardQty').value.trim();
+  if(wasteWizardPhotoDataUrl) row.image=wasteWizardPhotoDataUrl;
+  const piece=parseFloat(row.piece)||0;
+  const qty=parseFloat(row.qtyMU)||0;
+  row.totalAmount=(piece*qty).toFixed(2);
+  closeWasteWizard();
+  renderWasteTable();
+}
+function closeWasteWizard(){
+  document.getElementById('wasteWizardOverlay').style.display='none';
+  wasteWizardRowIdx=null;
+}
 function chooseWasteAddScan(){
   closeWasteAddChoice();
   openWasteBarcodeScan();
@@ -8395,6 +8512,7 @@ function applyWasteScanCode(code){
   }
   currentWasteLog.rows.push(row);
   renderWasteTable();
+  openWasteItemWizard(currentWasteLog.rows.length-1);
 }
 function openWasteBarcodeScan(){
   openPalletScan('wastelog');
