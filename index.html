@@ -7756,7 +7756,7 @@ function todayDateStr(){
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 function emptyWasteRow(no){
-  return {no:no,itemNo:'',desc:'',image:null,piece:'',weight:'',qtyMU:'',totalAmount:''};
+  return {no:no,itemNo:'',desc:'',image:null,piece:'',weight:'0',qtyMU:'1',totalAmount:''};
 }
 function newWasteLog(startDate,endDate){
   return {startDate:startDate,endDate:endDate,rows:[]};
