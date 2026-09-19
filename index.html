@@ -6938,6 +6938,32 @@ function loadWasteItemPrices(){
     .then(data=>{ WASTE_ITEM_PRICES=data||{}; WASTE_ITEM_PRICES_READY=true; loadCustomWastePrices(); })
     .catch(()=>{ WASTE_ITEM_PRICES={}; WASTE_ITEM_PRICES_READY=true; loadCustomWastePrices(); });
 }
+// ==== เลข PLU สำหรับ Weight Loss and Waste O2O เท่านั้น ====
+// waste_plu_map.json คือ {plu: [itemNo, desc]} มาจากไฟล์ PLUไอเทมหลัก ใช้เป็นอีกช่องทางสแกน/ค้นหา
+// นอกเหนือจาก barcode/เลขไอเท็มเดิม โหลดแบบ lazy พร้อมกับราคา
+let WASTE_PLU_MAP={};
+let WASTE_PLU_MAP_READY=false;
+let wastePluMapLoadStarted=false;
+function loadWastePluMap(){
+  if(wastePluMapLoadStarted)return;
+  wastePluMapLoadStarted=true;
+  fetch('waste_plu_map.json',{cache:'no-store'})
+    .then(r=>r.ok?r.json():{})
+    .then(data=>{ WASTE_PLU_MAP=data||{}; WASTE_PLU_MAP_READY=true; })
+    .catch(()=>{ WASTE_PLU_MAP={}; WASTE_PLU_MAP_READY=true; });
+}
+// แปลงเลข PLU เป็นเลขไอเท็มจริง (ตรวจชื่อสินค้าให้ตรงกันก่อนเพื่อความปลอดภัย) ถ้าไม่ใช่ PLU หรือไม่พบ คืนค่าโค้ดเดิม
+function resolveWastePluCode(code){
+  const entry=WASTE_PLU_MAP[code];
+  if(!entry)return code;
+  const mappedItemNo=entry[0];
+  const mappedDesc=entry[1];
+  const product=PRODUCTS_BY_KEY.find(x=>x.itemNo===mappedItemNo);
+  if(!product)return code;
+  const normalizeDesc=s=>(s||'').replace(/\s+/g,'').trim();
+  if(normalizeDesc(product.desc)!==normalizeDesc(mappedDesc))return code;
+  return mappedItemNo;
+}
 // ==== ไอเท็ม+ราคาที่พนักงานเพิ่มเองใน Weight Loss O2O (ไม่มีในไฟล์ waste_item_prices.json) ====
 // เก็บถาวรใน Firestore (คอลเลกชันเดียวกับข้อมูลของเสีย) แยกจากไฟล์ราคาหลักที่เป็นไฟล์นิ่ง
 let CUSTOM_WASTE_PRICES_CACHE=[];
@@ -7960,6 +7986,7 @@ async function openWasteLog(){
   clearInterval(wasteDateTimeTimer);
   wasteDateTimeTimer=setInterval(updateWasteCurrentDateTimeDisplay,30000);
   loadWasteItemPrices();
+  loadWastePluMap();
   await loadAllWasteLogs();
   showWasteMenu();
 }
@@ -8357,6 +8384,13 @@ function handleWasteAddChoiceManualInput(code){
     if(altKey!==null)item=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
   }
   if(!item){
+    const pluItemNo=resolveWastePluCode(code);
+    if(pluItemNo!==code){
+      item=PRODUCTS_BY_KEY.find(x=>x.itemNo===pluItemNo);
+      if(item)code=pluItemNo;
+    }
+  }
+  if(!item){
     showWasteToast('ไม่พบสินค้านี้ในระบบ กรุณากดปุ่ม "เพิ่มรายการใหม่" เพื่อเพิ่มรายการก่อน');
     return;
   }
@@ -8579,6 +8613,13 @@ function applyWasteScanCode(code){
   if(!item){
     const altKey=ALT_BARCODES[code]!==undefined?code:(ALT_BARCODES[codeNorm]!==undefined?codeNorm:null);
     if(altKey!==null)item=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
+  }
+  if(!item){
+    const pluItemNo=resolveWastePluCode(code);
+    if(pluItemNo!==code){
+      item=PRODUCTS_BY_KEY.find(x=>x.itemNo===pluItemNo);
+      if(item)code=pluItemNo;
+    }
   }
   const resolvedItemNo=item?item.itemNo:code;
   if(WASTE_EXCLUDED_ITEMS.has(resolvedItemNo)){
