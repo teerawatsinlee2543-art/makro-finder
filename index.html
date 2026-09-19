@@ -6952,9 +6952,21 @@ function loadWastePluMap(){
     .then(data=>{ WASTE_PLU_MAP=data||{}; WASTE_PLU_MAP_READY=true; })
     .catch(()=>{ WASTE_PLU_MAP={}; WASTE_PLU_MAP_READY=true; });
 }
-// แปลงเลข PLU เป็นเลขไอเท็มจริง (ตรวจชื่อสินค้าให้ตรงกันก่อนเพื่อความปลอดภัย) ถ้าไม่ใช่ PLU หรือไม่พบ คืนค่าโค้ดเดิม
+// บาร์โค้ดสินค้าชั่งน้ำหนัก (เครื่องชั่งพิมพ์) ขึ้นต้นด้วย 21 แล้วตามด้วยเลข PLU 6 หลัก เช่น 21 001317 ...
+// ถอดรหัสเอาเลข PLU (ตำแหน่งที่ 3-8) ออกมา ถ้าไม่ตรงรูปแบบคืนค่า null
+function extractPluFromVariableWeightBarcode(code){
+  const digits=String(code||'').replace(/\D/g,'');
+  if(digits.length<8||!digits.startsWith('21'))return null;
+  const pluNum=parseInt(digits.slice(2,8),10);
+  return (pluNum&&!isNaN(pluNum))?String(pluNum):null;
+}
+// แปลงเลข PLU หรือบาร์โค้ดสินค้าชั่งน้ำหนักเป็นเลขไอเท็มจริง (ตรวจชื่อสินค้าให้ตรงกันก่อนเพื่อความปลอดภัย) ถ้าไม่ตรงหรือไม่พบ คืนค่าโค้ดเดิม
 function resolveWastePluCode(code){
-  const entry=WASTE_PLU_MAP[code];
+  let entry=WASTE_PLU_MAP[code];
+  if(!entry){
+    const extractedPlu=extractPluFromVariableWeightBarcode(code);
+    if(extractedPlu&&WASTE_PLU_MAP[extractedPlu])entry=WASTE_PLU_MAP[extractedPlu];
+  }
   if(!entry)return code;
   const mappedItemNo=entry[0];
   const mappedDesc=entry[1];
