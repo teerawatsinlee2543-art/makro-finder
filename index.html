@@ -279,7 +279,14 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-table-toolbar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .waste-section-title{font-size:14px;font-weight:800;color:#123a63;margin-bottom:8px}
 .waste-table-toolbar .waste-btn{flex:1;min-width:180px}
-.waste-table-wrap{overflow-x:auto;border:1px solid #bfdbf7;border-radius:12px}
+.waste-table-wrap{overflow-x:auto;border:1px solid #bfdbf7;border-radius:12px;-webkit-overflow-scrolling:touch;scrollbar-width:auto}
+.waste-table-wrap::-webkit-scrollbar{height:10px}
+.waste-table-wrap::-webkit-scrollbar-track{background:#eaf2fb}
+.waste-table-wrap::-webkit-scrollbar-thumb{background:#1B5FA8;border-radius:6px}
+.waste-scroll-hint{display:none;align-items:center;justify-content:center;gap:6px;font-size:11.5px;color:#1B5FA8;font-weight:700;margin-bottom:6px}
+@media (max-width:640px){
+  .waste-scroll-hint{display:flex}
+}
 .waste-table{width:100%;border-collapse:collapse;font-size:12.5px}
 .waste-table thead th{background:#1B5FA8;color:#fff;font-weight:700;text-align:center;padding:10px 8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
 .waste-row-no{width:26px;height:26px;border-radius:50%;background:#1B5FA8;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;margin:0 auto}
@@ -1191,6 +1198,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <button type="button" class="waste-btn waste-btn-green" onclick="exportWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
         </div>
         <div class="waste-section-title">แสดงรายการ</div>
+        <div class="waste-scroll-hint"><i class="ti ti-arrow-left" aria-hidden="true"></i> เลื่อนดูข้อมูลเพิ่มเติม <i class="ti ti-arrow-right" aria-hidden="true"></i></div>
         <div id="wasteTableWrap"></div>
         <div class="waste-total-row">
           <i class="ti ti-coin" aria-hidden="true"></i>
@@ -1223,6 +1231,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
     <div class="waste-datetime-display" style="margin-bottom:8px"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text"></span></div>
     <div class="waste-section-title">แสดงรายการ</div>
+    <div class="waste-scroll-hint"><i class="ti ti-arrow-left" aria-hidden="true"></i> เลื่อนดูข้อมูลเพิ่มเติม <i class="ti ti-arrow-right" aria-hidden="true"></i></div>
     <div id="wasteAddChoiceTableWrap"></div>
     <div class="waste-total-row">
       <i class="ti ti-coin" aria-hidden="true"></i>
