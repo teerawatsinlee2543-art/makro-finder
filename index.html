@@ -284,6 +284,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-day-field{display:flex;flex-direction:column;gap:4px}
 .waste-day-field label{font-size:11px;font-weight:700;color:#5a86ad}
 #wasteWizardOverlay label,#wasteNewItemOverlay label{font-size:12px;font-weight:700;color:#5a86ad}
+.waste-wizard-note{font-size:11.5px;color:#d9364a;font-weight:600;margin-bottom:14px}
 .waste-datetime-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .waste-datetime-display{display:inline-flex;align-items:center;gap:8px;background:#f4f9fe;border:1px solid #bfdbf7;color:#123a63;border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums}
 .waste-datetime-display i{color:#1B5FA8;font-size:17px}
@@ -1332,17 +1333,19 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <input type="number" id="wasteWizardPiece" placeholder="ราคา">
       </div>
       <label style="display:block;margin-bottom:4px">น้ำหนัก (Weight)</label>
-      <div class="waste-scan-input-wrap" style="margin-bottom:14px">
+      <div class="waste-scan-input-wrap" style="margin-bottom:6px">
         <i class="ti ti-weight" aria-hidden="true"></i>
         <input type="number" id="wasteWizardWeight" placeholder="น้ำหนัก">
       </div>
+      <div class="waste-wizard-note">หมายเหตุ: ถ้าสินค้าเป็น กก. ละ ให้ใส่น้ำหนักจริงได้เลย</div>
     </div>
     <div id="wasteWizardStep2" style="display:none">
       <label style="display:block;margin-bottom:4px">จำนวน (Quantity MU)</label>
-      <div class="waste-scan-input-wrap" style="margin-bottom:14px">
+      <div class="waste-scan-input-wrap" style="margin-bottom:6px">
         <i class="ti ti-package" aria-hidden="true"></i>
         <input type="number" id="wasteWizardQty" placeholder="จำนวน (MU)">
       </div>
+      <div class="waste-wizard-note">หมายเหตุ: ถ้าสินค้าเป็นชิ้น (MU) ให้ใส่ 1 ชิ้นได้เลย</div>
     </div>
     <div id="wasteWizardStep3" style="display:none">
       <div class="waste-new-item-photo" id="wasteWizardPhoto" onclick="document.getElementById('wasteWizardPhotoInput').click()">
