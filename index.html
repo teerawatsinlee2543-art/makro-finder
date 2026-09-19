@@ -1344,7 +1344,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
       <input type="file" id="wasteWizardPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleWasteWizardPhotoSelect(event)">
     </div>
-    <button type="button" class="waste-btn waste-btn-green waste-btn-block" id="wasteWizardNextBtn" onclick="wasteWizardNext()">ถัดไป <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    <div style="display:flex;gap:10px">
+      <button type="button" class="waste-btn waste-btn-outline" id="wasteWizardBackBtn" style="display:none;flex:0 0 auto" onclick="wasteWizardBack()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
+      <button type="button" class="waste-btn waste-btn-green" style="flex:1" id="wasteWizardNextBtn" onclick="wasteWizardNext()">ถัดไป <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    </div>
   </div>
 </div>
 <div class="waste-overlay" id="wasteFieldEditOverlay" style="display:none;z-index:2460">
@@ -8422,6 +8425,12 @@ function renderWasteWizardStep(){
   document.getElementById('wasteWizardTitle').textContent=titles[wasteWizardStep];
   const btn=document.getElementById('wasteWizardNextBtn');
   btn.innerHTML=wasteWizardStep<3?'ถัดไป <i class="ti ti-arrow-right" aria-hidden="true"></i>':'<i class="ti ti-check" aria-hidden="true"></i> เสร็จสิ้น';
+  document.getElementById('wasteWizardBackBtn').style.display=wasteWizardStep>1?'inline-flex':'none';
+}
+function wasteWizardBack(){
+  if(wasteWizardStep<=1)return;
+  wasteWizardStep--;
+  renderWasteWizardStep();
 }
 function wasteWizardNext(){
   if(wasteWizardStep===1){
