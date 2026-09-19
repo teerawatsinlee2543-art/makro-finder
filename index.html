@@ -1338,8 +1338,6 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <input type="number" id="wasteWizardWeight" placeholder="น้ำหนัก">
       </div>
       <div class="waste-wizard-note">หมายเหตุ: ถ้าสินค้าเป็น กก. ละ ให้ใส่น้ำหนักจริงได้เลย</div>
-    </div>
-    <div id="wasteWizardStep2" style="display:none">
       <label style="display:block;margin-bottom:4px">จำนวน (Quantity MU)</label>
       <div class="waste-scan-input-wrap" style="margin-bottom:6px">
         <i class="ti ti-package" aria-hidden="true"></i>
@@ -1347,7 +1345,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
       <div class="waste-wizard-note">หมายเหตุ: ถ้าสินค้าเป็นชิ้น (MU) ให้ใส่ 1 ชิ้นได้เลย</div>
     </div>
-    <div id="wasteWizardStep3" style="display:none">
+    <div id="wasteWizardStep2" style="display:none">
       <div class="waste-new-item-photo" id="wasteWizardPhoto" onclick="document.getElementById('wasteWizardPhotoInput').click()">
         <i class="ti ti-camera-plus" aria-hidden="true"></i>
         <span>ถ่ายรูปของเสีย (ไม่บังคับ)</span>
@@ -8430,11 +8428,10 @@ function openWasteItemWizard(idx){
 function renderWasteWizardStep(){
   document.getElementById('wasteWizardStep1').style.display=wasteWizardStep===1?'block':'none';
   document.getElementById('wasteWizardStep2').style.display=wasteWizardStep===2?'block':'none';
-  document.getElementById('wasteWizardStep3').style.display=wasteWizardStep===3?'block':'none';
-  const titles={1:'ขั้นที่ 1/3: ราคา และน้ำหนัก',2:'ขั้นที่ 2/3: จำนวน (MU)',3:'ขั้นที่ 3/3: ถ่ายรูปของเสีย'};
+  const titles={1:'ขั้นที่ 1/2: ราคา น้ำหนัก และจำนวน',2:'ขั้นที่ 2/2: ถ่ายรูปของเสีย'};
   document.getElementById('wasteWizardTitle').textContent=titles[wasteWizardStep];
   const btn=document.getElementById('wasteWizardNextBtn');
-  btn.innerHTML=wasteWizardStep<3?'ถัดไป <i class="ti ti-arrow-right" aria-hidden="true"></i>':'<i class="ti ti-check" aria-hidden="true"></i> เสร็จสิ้น';
+  btn.innerHTML=wasteWizardStep<2?'ถัดไป <i class="ti ti-arrow-right" aria-hidden="true"></i>':'<i class="ti ti-check" aria-hidden="true"></i> เสร็จสิ้น';
   document.getElementById('wasteWizardBackBtn').style.display=wasteWizardStep>1?'inline-flex':'none';
 }
 function wasteWizardBack(){
@@ -8446,16 +8443,11 @@ function wasteWizardNext(){
   if(wasteWizardStep===1){
     const piece=document.getElementById('wasteWizardPiece').value.trim();
     const weight=document.getElementById('wasteWizardWeight').value.trim();
+    const qty=document.getElementById('wasteWizardQty').value.trim();
     if(!piece){ alert('กรุณากรอกราคา'); return; }
     if(!weight){ alert('กรุณากรอกน้ำหนัก'); return; }
-    wasteWizardStep=2;
-    renderWasteWizardStep();
-    return;
-  }
-  if(wasteWizardStep===2){
-    const qty=document.getElementById('wasteWizardQty').value.trim();
     if(!qty){ alert('กรุณากรอกจำนวน'); return; }
-    wasteWizardStep=3;
+    wasteWizardStep=2;
     renderWasteWizardStep();
     return;
   }
