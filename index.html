@@ -247,7 +247,8 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
 #wasteLogOverlay .waste-panel{padding:0}
 .waste-panel-body{padding:20px 22px}
-#wasteLogOverlay .waste-header{position:sticky;top:0;z-index:5;background:#fdeaea;padding:20px 22px 14px;margin-bottom:0;border-radius:16px 16px 0 0;border-bottom:1px solid #f7cdd0}
+#wasteLogOverlay .waste-header,#wasteAddChoiceOverlay .waste-header{position:sticky;top:0;z-index:5;background:#fdeaea;padding:20px 22px 14px;margin-bottom:0;border-radius:16px 16px 0 0;border-bottom:1px solid #f7cdd0}
+#wasteAddChoiceOverlay .waste-panel{padding:0}
 .waste-mode-indicator{display:none;position:sticky;bottom:0;z-index:5;padding:10px 22px;background:#fdeaea;border-top:3px solid #e05252;border-radius:0 0 16px 16px;font-size:13px;font-weight:800;color:#a83232;text-align:center}
 .waste-mode-indicator.show{display:block}
 .waste-title{font-size:22px;font-weight:800;color:#123a63}
@@ -1232,6 +1233,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         <i class="ti ti-x waste-close-btn" onclick="closeWasteAddChoice()" aria-label="ปิด"></i>
       </div>
     </div>
+    <div class="waste-panel-body">
     <div class="waste-menu-card" onclick="chooseWasteAddManual()">
       <i class="ti ti-keyboard" aria-hidden="true"></i>
       <div><div class="waste-menu-card-title">ป้อนเลขไอเท็ม</div><div class="waste-menu-card-sub">พิมพ์รหัสสินค้าเอง</div></div>
@@ -1252,6 +1254,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <span class="waste-total-value" id="wasteAddChoiceTotalValue">0.00</span>
       <button type="button" class="waste-btn waste-btn-red" style="margin-left:auto" onclick="closeWasteAddChoice()"><i class="ti ti-x" aria-hidden="true"></i> ยกเลิก</button>
       <button type="button" class="waste-btn waste-btn-green" onclick="saveWasteAddChoiceProgress()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึก</button>
+    </div>
     </div>
   </div>
 </div>
