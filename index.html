@@ -7930,12 +7930,10 @@ function wasteStepperHtml(idx,field,value,placeholder){
     return '<div class="waste-stepper waste-stepper-readonly">'+text+'</div>';
   }
   const valueHtml='<span class="waste-stepper-value" onclick="startWasteValueEdit('+idx+',\''+field+'\',\''+placeholder+'\')">'+text+'</span>';
-  const camBtn=field==='piece'?'<button type="button" class="waste-stepper-btn" onclick="openWastePriceCapture('+idx+')" title="ถ่ายรูปราคา"><i class="ti ti-camera" aria-hidden="true"></i></button>':'';
   return '<div class="waste-stepper">'
     +'<button type="button" class="waste-stepper-btn" onclick="stepWasteRowField('+idx+',\''+field+'\',-1)"><i class="ti ti-minus" aria-hidden="true"></i></button>'
     +valueHtml
     +'<button type="button" class="waste-stepper-btn" onclick="stepWasteRowField('+idx+',\''+field+'\',1)"><i class="ti ti-plus" aria-hidden="true"></i></button>'
-    +camBtn
     +'</div>';
 }
 let wasteFieldEditIdx=null;
