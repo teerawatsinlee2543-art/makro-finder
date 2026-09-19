@@ -7811,7 +7811,8 @@ function showWasteRecordView(){
   wasteTopBadgeShowsResult=false;
   wasteTableReadOnly=false;
   updateWasteCurrentDateTimeDisplay();
-  if(!currentWasteLog) selectWasteRange(todayDateStr(),todayDateStr());
+  const today=todayDateStr();
+  if(!currentWasteLog||currentWasteLog.startDate!==today||currentWasteLog.endDate!==today) selectWasteRange(today,today);
   else renderWasteTable();
 }
 function showWasteHistoryView(){
@@ -7896,18 +7897,11 @@ function removeWasteRow(idx){
   currentWasteLog.rows.splice(idx,1);
   currentWasteLog.rows.forEach((r,i)=>{ r.no=i+1; });
   renderWasteTable();
-  persistCurrentWasteLog();
 }
 function updateWasteRowField(idx,field,value){
   if(!currentWasteLog||!currentWasteLog.rows[idx])return;
   currentWasteLog.rows[idx][field]=value;
   if(field==='totalAmount') updateWasteTotalDisplay();
-  persistCurrentWasteLogSoon();
-}
-let wastePersistTimer=null;
-function persistCurrentWasteLogSoon(){
-  clearTimeout(wastePersistTimer);
-  wastePersistTimer=setTimeout(persistCurrentWasteLog,600);
 }
 function persistCurrentWasteLog(){
   if(!currentWasteLog)return;
@@ -8087,7 +8081,6 @@ function handleWasteRowPhotoSelect(evt){
       if(currentWasteLog&&currentWasteLog.rows[wasteRowPhotoTargetIdx]){
         currentWasteLog.rows[wasteRowPhotoTargetIdx].image=dataUrl;
         renderWasteTable();
-        persistCurrentWasteLog();
       }
     };
     img.src=reader.result;
@@ -8175,7 +8168,6 @@ function applyWasteScanCode(code){
   else { row.itemNo=code; showWasteToast('ไม่พบสินค้าในระบบ กรอกรายละเอียดเองได้'); }
   currentWasteLog.rows.push(row);
   renderWasteTable();
-  persistCurrentWasteLog();
 }
 function openWasteBarcodeScan(){
   openPalletScan('wastelog');
