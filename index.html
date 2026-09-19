@@ -269,6 +269,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-manual-confirm-btn{font-size:20px;color:#ffffff;cursor:pointer;flex-shrink:0;background:#2E9E5B;border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
 .waste-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13.5px;font-weight:700;border-radius:10px;padding:10px 16px;cursor:pointer;white-space:nowrap;font-family:inherit}
 .waste-btn-outline{background:#fff;border:1.5px solid #1B5FA8;color:#1B5FA8}
+.waste-btn-static{opacity:.55;cursor:default}
 .waste-btn-outline:hover{background:#eaf2fb}
 .waste-btn-solid{background:#1B5FA8;border:1.5px solid #1B5FA8;color:#ffffff}
 .waste-btn-solid:hover{background:#2670c2}
@@ -1205,7 +1206,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="wasteRecordView" style="display:none">
       <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> <span data-i18n="loginBackBtn">กลับ</span></button>
       <div class="waste-datetime-row">
-        <button type="button" class="waste-btn waste-btn-outline" id="wasteManageItemsBtn" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> <span data-i18n="wasteManageItemsBtn">จัดการสินค้า</span></button>
+        <button type="button" class="waste-btn waste-btn-outline waste-btn-static" id="wasteManageItemsBtn" disabled><i class="ti ti-package" aria-hidden="true"></i> <span data-i18n="wasteManageItemsBtn">จัดการสินค้า</span></button>
         <div class="waste-datetime-display"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text" id="wasteTopDateTimeText"></span></div>
       </div>
       <div class="waste-scan-row" id="wasteScanRow">
@@ -1788,6 +1789,7 @@ const I18N={
     wasteAddedItemToast:'เพิ่ม {desc} แล้ว',
     wasteItemNotFoundFillManually:'ไม่พบสินค้าในระบบ กรอกรายละเอียดเองได้',
     wasteScanNotFoundToast:'ไม่พบข้อมูล',
+    wasteScanOverlayTitle:'สแกนบาร์โค้ดสินค้าของเสีย',
     wasteManageItemsComingSoon:'ฟังก์ชันนี้จะเพิ่มให้ทีหลังครับ',
     wasteNothingToExport:'ยังไม่มีข้อมูลให้ส่งออก',
     wasteLineBrowserExportWarning:'ดาวน์โหลดไฟล์ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง',
@@ -2158,6 +2160,7 @@ const I18N={
     wasteAddedItemToast:'Added {desc}',
     wasteItemNotFoundFillManually:'Item not found in the system. You can fill in the details yourself.',
     wasteScanNotFoundToast:'Not found',
+    wasteScanOverlayTitle:'Scan waste item barcode',
     wasteManageItemsComingSoon:'This feature will be added later.',
     wasteNothingToExport:'There is no data to export yet',
     wasteLineBrowserExportWarning:'Files can\'t be downloaded inside the LINE app. Please tap "..." in the top-right corner and choose "Open in external browser" (Chrome/Safari), then export again.',
@@ -2528,6 +2531,7 @@ const I18N={
     wasteAddedItemToast:'已添加 {desc}',
     wasteItemNotFoundFillManually:'系统中未找到该商品，可自行填写详细信息',
     wasteScanNotFoundToast:'未找到数据',
+    wasteScanOverlayTitle:'扫描损耗商品条码',
     wasteManageItemsComingSoon:'此功能将在稍后推出',
     wasteNothingToExport:'暂无数据可导出',
     wasteLineBrowserExportWarning:'无法在 LINE 应用内下载文件，请点击右上角的 "..." 并选择"在外部浏览器中打开"（Chrome/Safari），然后再重新导出',
@@ -2898,6 +2902,7 @@ const I18N={
     wasteAddedItemToast:'{desc} ကို ထည့်ပြီးပါပြီ',
     wasteItemNotFoundFillManually:'စနစ်ထဲတွင် ပစ္စည်းကို မတွေ့ပါ။ အသေးစိတ်ကို ကိုယ်တိုင်ဖြည့်နိုင်ပါသည်',
     wasteScanNotFoundToast:'ဒေတာမတွေ့ပါ',
+    wasteScanOverlayTitle:'အလွှင့်ပစ္စည်း ဘားကုဒ် စကန်ဖတ်ရန်',
     wasteManageItemsComingSoon:'ဤလုပ်ဆောင်ချက်ကို နောက်ပိုင်းတွင် ထည့်သွင်းပေးပါမည်',
     wasteNothingToExport:'ထုတ်ယူရန် ဒေတာ မရှိသေးပါ',
     wasteLineBrowserExportWarning:'LINE အက်ပ်တွင်း ဖိုင်ကို ဒေါင်းလုဒ်လုပ်၍ မရပါ။ ညာဘက်အပေါ်ထောင့်ရှိ "..." ကို နှိပ်ပြီး "ပြင်ပဘရောက်ဇာဖြင့် ဖွင့်ရန်" (Chrome/Safari) ကို ရွေးချယ်ပြီးမှ ထပ်မံထုတ်ယူပါ',
@@ -3268,6 +3273,7 @@ const I18N={
     wasteAddedItemToast:'{desc} 추가됨',
     wasteItemNotFoundFillManually:'시스템에서 상품을 찾을 수 없습니다. 직접 상세 정보를 입력할 수 있습니다',
     wasteScanNotFoundToast:'데이터를 찾을 수 없습니다',
+    wasteScanOverlayTitle:'폐기 상품 바코드 스캔',
     wasteManageItemsComingSoon:'이 기능은 나중에 추가될 예정입니다',
     wasteNothingToExport:'아직 내보낼 데이터가 없습니다',
     wasteLineBrowserExportWarning:'LINE 앱 내에서는 파일을 다운로드할 수 없습니다. 오른쪽 상단의 "..."을 누르고 "외부 브라우저에서 열기" (Chrome/Safari)를 선택한 후 다시 내보내 주세요',
@@ -3638,6 +3644,7 @@ const I18N={
     wasteAddedItemToast:'{desc}を追加しました',
     wasteItemNotFoundFillManually:'システムに商品が見つかりません。詳細を自分で入力できます',
     wasteScanNotFoundToast:'データが見つかりません',
+    wasteScanOverlayTitle:'廃棄商品のバーコードをスキャン',
     wasteManageItemsComingSoon:'この機能は後日追加予定です',
     wasteNothingToExport:'まだ書き出すデータがありません',
     wasteLineBrowserExportWarning:'LINEアプリ内ではファイルをダウンロードできません。右上の「…」をタップし「外部ブラウザで開く」(Chrome/Safari) を選択してから、もう一度書き出してください',
@@ -6859,7 +6866,7 @@ function openPalletScan(mode){
   hint.style.display='block';
   palletScanConfirmCode=null;palletScanConfirmCount=0;
   palletScanLocked=false;
-  document.getElementById('palletScanTitle').textContent=mode==='manage'?t('scanTitleManage'):(mode==='find'?t('scanTitleFind'):(mode==='palletloc'?t('scanTitleBay'):(mode==='newitembarcode'?t('scanTitleNewItemBarcode'):(mode==='movepallettarget'?t('scanTitleMoveTarget'):(mode==='wastelog'?'สแกนบาร์โค้ดสินค้าของเสีย':t('scanTitleDelete'))))));
+  document.getElementById('palletScanTitle').textContent=mode==='manage'?t('scanTitleManage'):(mode==='find'?t('scanTitleFind'):(mode==='palletloc'?t('scanTitleBay'):(mode==='newitembarcode'?t('scanTitleNewItemBarcode'):(mode==='movepallettarget'?t('scanTitleMoveTarget'):(mode==='wastelog'?t('wasteScanOverlayTitle'):t('scanTitleDelete'))))));
   overlay.style.display='flex';
   if(isLineAndroidBrowser()){
     err.innerHTML=lineCameraErrorHtml();
