@@ -8088,16 +8088,21 @@ function removeWasteRow(idx){
   currentWasteLog.rows.forEach((r,i)=>{ r.no=i+1; });
   renderWasteTable();
 }
+function computeWasteRowTotal(row){
+  const piece=parseFloat(row.piece)||0;
+  const weight=parseFloat(row.weight)||0;
+  if(weight>0) return (piece*(weight/1000)).toFixed(2);
+  const qty=parseFloat(row.qtyMU)||0;
+  return (piece*qty).toFixed(2);
+}
 function updateWasteRowField(idx,field,value){
   if(!currentWasteLog||!currentWasteLog.rows[idx])return;
   const row=currentWasteLog.rows[idx];
   row[field]=value;
-  if(field==='piece'||field==='qtyMU'){
-    const piece=parseFloat(row.piece)||0;
-    const qty=parseFloat(row.qtyMU)||0;
-    row.totalAmount=(piece*qty).toFixed(2);
+  if(field==='piece'||field==='qtyMU'||field==='weight'){
+    row.totalAmount=computeWasteRowTotal(row);
   }
-  if(field==='totalAmount'||field==='piece'||field==='qtyMU') updateWasteTotalDisplay();
+  if(field==='totalAmount'||field==='piece'||field==='qtyMU'||field==='weight') updateWasteTotalDisplay();
 }
 function persistCurrentWasteLog(){
   if(!currentWasteLog)return;
@@ -8504,9 +8509,7 @@ function finishWasteWizard(){
   row.weight=document.getElementById('wasteWizardWeight').value.trim();
   row.qtyMU=document.getElementById('wasteWizardQty').value.trim();
   if(wasteWizardPhotoDataUrl) row.image=wasteWizardPhotoDataUrl;
-  const piece=parseFloat(row.piece)||0;
-  const qty=parseFloat(row.qtyMU)||0;
-  row.totalAmount=(piece*qty).toFixed(2);
+  row.totalAmount=computeWasteRowTotal(row);
   closeWasteWizard();
   renderWasteTable();
 }
