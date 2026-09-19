@@ -8326,6 +8326,16 @@ function closeWasteManualEntry(){
 function handleWasteAddChoiceManualInput(code){
   code=(code||'').trim();
   if(!code)return;
+  const codeNorm=normBarcode(code);
+  let item=PRODUCTS_BY_KEY.find(x=>x.barcode===code||x.itemNo===code||(x.barcode&&normBarcode(x.barcode)===codeNorm));
+  if(!item){
+    const altKey=ALT_BARCODES[code]!==undefined?code:(ALT_BARCODES[codeNorm]!==undefined?codeNorm:null);
+    if(altKey!==null)item=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
+  }
+  if(!item){
+    showWasteToast('ไม่พบสินค้านี้ในระบบ กรุณากดปุ่ม "เพิ่มรายการใหม่" เพื่อเพิ่มรายการก่อน');
+    return;
+  }
   document.getElementById('wasteAddChoiceManualInput').value='';
   closeWasteManualEntry();
   applyWasteScanCode(code);
