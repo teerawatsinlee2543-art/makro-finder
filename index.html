@@ -6811,6 +6811,21 @@ function loadAltBarcodes(){
 }
 loadAltBarcodes();
 
+// ==== ราคาสินค้าสำหรับ Weight Loss and Waste O2O เท่านั้น ====
+// waste_item_prices.json คือ {itemNo: ราคา} มาจากรายงาน Item List (Selling Price) โหลดแบบ lazy
+// เฉพาะตอนเปิดฟีเจอร์ Weight Loss O2O เท่านั้น เพราะไฟล์ใหญ่ (~1.2MB) และไม่เกี่ยวกับฟีเจอร์อื่น
+let WASTE_ITEM_PRICES={};
+let WASTE_ITEM_PRICES_READY=false;
+let wasteItemPricesLoadStarted=false;
+function loadWasteItemPrices(){
+  if(wasteItemPricesLoadStarted)return;
+  wasteItemPricesLoadStarted=true;
+  fetch('waste_item_prices.json',{cache:'no-store'})
+    .then(r=>r.ok?r.json():{})
+    .then(data=>{ WASTE_ITEM_PRICES=data||{}; WASTE_ITEM_PRICES_READY=true; })
+    .catch(()=>{ WASTE_ITEM_PRICES={}; WASTE_ITEM_PRICES_READY=true; });
+}
+
 function applyEmployeeOnlyVisibility(){
   if(!PRODUCTS_READY)return;
   const shouldShow=isEmployee();
@@ -7787,6 +7802,7 @@ async function openWasteLog(){
   updateWasteCurrentDateTimeDisplay();
   clearInterval(wasteDateTimeTimer);
   wasteDateTimeTimer=setInterval(updateWasteCurrentDateTimeDisplay,30000);
+  loadWasteItemPrices();
   await loadAllWasteLogs();
   showWasteMenu();
 }
@@ -8166,6 +8182,12 @@ function applyWasteScanCode(code){
   const row=emptyWasteRow(currentWasteLog.rows.length+1);
   if(item){ row.itemNo=item.itemNo; row.desc=item.desc; showWasteToast('เพิ่ม '+item.desc+' แล้ว'); }
   else { row.itemNo=code; showWasteToast('ไม่พบสินค้าในระบบ กรอกรายละเอียดเองได้'); }
+  const priceEntry=WASTE_ITEM_PRICES[row.itemNo];
+  if(priceEntry){
+    const normalizeDesc=s=>(s||'').replace(/\s+/g,'').trim();
+    const nameMatches=!row.desc||normalizeDesc(row.desc)===normalizeDesc(priceEntry[1]);
+    if(priceEntry[0]!=null&&nameMatches) row.piece=Number(priceEntry[0]).toFixed(2);
+  }
   currentWasteLog.rows.push(row);
   renderWasteTable();
 }
