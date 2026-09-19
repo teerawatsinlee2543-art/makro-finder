@@ -1383,7 +1383,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     </div>
     <div class="waste-scan-input-wrap" style="margin-bottom:14px">
       <i class="ti ti-keyboard" aria-hidden="true"></i>
-      <input type="number" id="wasteFieldEditInput" data-i18n-placeholder="wasteEnterQtyPlaceholder" placeholder="ใส่จำนวน" onkeydown="if(event.key==='Enter')confirmWasteFieldEdit()">
+      <input type="number" id="wasteFieldEditInput" placeholder="" onkeydown="if(event.key==='Enter')confirmWasteFieldEdit()">
     </div>
     <button type="button" class="waste-btn waste-btn-green waste-btn-block" onclick="confirmWasteFieldEdit()"><i class="ti ti-check" aria-hidden="true"></i> <span data-i18n="wasteOkBtn">ตกลง</span></button>
   </div>
@@ -8756,6 +8756,7 @@ function startWasteValueEdit(idx,field,label){
   document.getElementById('wasteFieldEditTitle').textContent=label;
   const row=currentWasteLog&&currentWasteLog.rows[idx];
   const input=document.getElementById('wasteFieldEditInput');
+  input.placeholder=label;
   input.value=row?(row[field]||''):'';
   document.getElementById('wasteFieldEditOverlay').style.display='flex';
   setTimeout(()=>{ input.focus(); input.select(); },0);
@@ -9143,6 +9144,7 @@ function startWasteWizardTotalEdit(){
   const qty=parseFloat(document.getElementById('wasteWizardQty').value)||0;
   const currentTotal=wasteWizardManualTotal!=null?wasteWizardManualTotal:(weight>0?piece*weight:piece*qty);
   const input=document.getElementById('wasteFieldEditInput');
+  input.placeholder=t('wasteColTotalAmount');
   input.value=currentTotal.toFixed(2);
   document.getElementById('wasteFieldEditOverlay').style.display='flex';
   setTimeout(()=>{ input.focus(); input.select(); },0);
