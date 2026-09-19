@@ -7916,8 +7916,14 @@ function removeWasteRow(idx){
 }
 function updateWasteRowField(idx,field,value){
   if(!currentWasteLog||!currentWasteLog.rows[idx])return;
-  currentWasteLog.rows[idx][field]=value;
-  if(field==='totalAmount') updateWasteTotalDisplay();
+  const row=currentWasteLog.rows[idx];
+  row[field]=value;
+  if(field==='piece'||field==='qtyMU'){
+    const piece=parseFloat(row.piece)||0;
+    const qty=parseFloat(row.qtyMU)||0;
+    row.totalAmount=(piece*qty).toFixed(2);
+  }
+  if(field==='totalAmount'||field==='piece'||field==='qtyMU') updateWasteTotalDisplay();
 }
 function persistCurrentWasteLog(){
   if(!currentWasteLog)return;
@@ -8186,7 +8192,10 @@ function applyWasteScanCode(code){
   if(priceEntry){
     const normalizeDesc=s=>(s||'').replace(/\s+/g,'').trim();
     const nameMatches=!row.desc||normalizeDesc(row.desc)===normalizeDesc(priceEntry[1]);
-    if(priceEntry[0]!=null&&nameMatches) row.piece=Number(priceEntry[0]).toFixed(2);
+    if(priceEntry[0]!=null&&nameMatches){
+      row.piece=Number(priceEntry[0]).toFixed(2);
+      row.totalAmount=(Number(priceEntry[0])*(parseFloat(row.qtyMU)||0)).toFixed(2);
+    }
   }
   currentWasteLog.rows.push(row);
   renderWasteTable();
