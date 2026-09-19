@@ -334,6 +334,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-row-edit-btn-active{color:#2E9E5B}
 .waste-row-edit-btn-active span{background:#2E9E5B;color:#fff;padding:2px 6px;border-radius:6px;white-space:nowrap}
 .waste-row-locked-text{color:#173350;padding:2px 4px}
+.waste-row-desc-translated{font-size:10.5px;color:#5a86ad;padding:0 4px;font-style:italic}
 .waste-empty-state{border:1.5px dashed #bfdbf7;border-radius:12px;padding:22px;text-align:center;color:#5a86ad;font-size:13px;margin-top:6px;background:#f4f9fe}
 .waste-total-row{display:flex;align-items:center;gap:10px;margin-top:14px;padding:10px 14px;border-radius:10px;background:#eaf2fb;font-size:13px;flex-wrap:wrap}
 .waste-total-row i.ti-coin{color:#1B5FA8;font-size:18px}
@@ -1154,10 +1155,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div class="waste-header">
       <div>
         <div class="waste-title">Weight Loss and Waste O2O</div>
-        <div class="waste-desc">บันทึกข้อมูลรายวัน สแกนบาร์โค้ดเพื่อกรอกอัตโนมัติ แล้วส่งออกเป็น Excel</div>
+        <div class="waste-desc" data-i18n="wasteAppDesc">บันทึกข้อมูลรายวัน สแกนบาร์โค้ดเพื่อกรอกอัตโนมัติ แล้วส่งออกเป็น Excel</div>
       </div>
       <div class="waste-header-right">
-        <i class="ti ti-x waste-close-btn" onclick="closeWasteLog()" aria-label="ปิด"></i>
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteLog()" data-i18n-title="closeBtnAria" aria-label="ปิด"></i>
       </div>
     </div>
     <div class="waste-panel-body">
@@ -1165,78 +1166,78 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div class="waste-menu-card" onclick="showWasteRecordView()">
         <i class="ti ti-clipboard-list" aria-hidden="true"></i>
         <div>
-          <div class="waste-menu-card-title">บันทึกข้อมูล</div>
-          <div class="waste-menu-card-sub">สแกน/กรอกข้อมูลของเสียประจำวัน</div>
+          <div class="waste-menu-card-title" data-i18n="wasteMenuRecordTitle">บันทึกข้อมูล</div>
+          <div class="waste-menu-card-sub" data-i18n="wasteMenuRecordSub">สแกน/กรอกข้อมูลของเสียประจำวัน</div>
         </div>
         <i class="ti ti-chevron-right waste-menu-card-arrow" aria-hidden="true"></i>
       </div>
       <div class="waste-menu-card" onclick="showWasteHistoryView()">
         <i class="ti ti-history" aria-hidden="true"></i>
         <div>
-          <div class="waste-menu-card-title">ค้นหาข้อมูลย้อนหลัง</div>
-          <div class="waste-menu-card-sub">ดู/ค้นหาข้อมูลที่เคยบันทึกไว้แต่ละวัน</div>
+          <div class="waste-menu-card-title" data-i18n="wasteMenuHistoryTitle">ค้นหาข้อมูลย้อนหลัง</div>
+          <div class="waste-menu-card-sub" data-i18n="wasteMenuHistorySub">ดู/ค้นหาข้อมูลที่เคยบันทึกไว้แต่ละวัน</div>
         </div>
         <i class="ti ti-chevron-right waste-menu-card-arrow" aria-hidden="true"></i>
       </div>
     </div>
     <div id="wasteHistoryView" style="display:none">
-      <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
+      <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> <span data-i18n="loginBackBtn">กลับ</span></button>
       <div class="waste-scan-input-wrap" style="margin-bottom:14px">
         <i class="ti ti-search" aria-hidden="true"></i>
-        <input type="text" id="wasteHistorySearch" placeholder="ค้นหาด้วยรหัสสินค้า/รายละเอียด หรือวันที่ (DD MM YYYY)" oninput="renderWasteHistoryList(this.value)">
+        <input type="text" id="wasteHistorySearch" data-i18n-placeholder="wasteHistorySearchPlaceholder" placeholder="ค้นหาด้วยรหัสสินค้า/รายละเอียด หรือวันที่ (DD MM YYYY)" oninput="renderWasteHistoryList(this.value)">
       </div>
       <div class="waste-day-row">
         <div class="waste-day-field">
-          <label for="wasteHistoryStartDateInput">เริ่ม</label>
+          <label for="wasteHistoryStartDateInput" data-i18n="wasteStartLabel">เริ่ม</label>
           <input type="date" id="wasteHistoryStartDateInput" lang="en-GB">
         </div>
         <div class="waste-day-field">
-          <label for="wasteHistoryEndDateInput">สิ้นสุด</label>
+          <label for="wasteHistoryEndDateInput" data-i18n="wasteEndLabel">สิ้นสุด</label>
           <input type="date" id="wasteHistoryEndDateInput" lang="en-GB">
         </div>
-        <button type="button" class="waste-btn waste-btn-solid" onclick="searchWasteHistoryByRange()"><i class="ti ti-search" aria-hidden="true"></i> ค้นหา</button>
+        <button type="button" class="waste-btn waste-btn-solid" onclick="searchWasteHistoryByRange()"><i class="ti ti-search" aria-hidden="true"></i> <span data-i18n="wasteSearchBtn">ค้นหา</span></button>
       </div>
-      <div class="waste-section-title">ประวัติย้อนหลัง</div>
+      <div class="waste-section-title" data-i18n="wasteHistoryTitle">ประวัติย้อนหลัง</div>
       <div id="wasteHistoryList"></div>
     </div>
     <div id="wasteRecordView" style="display:none">
-      <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
+      <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="showWasteMenu()"><i class="ti ti-arrow-left" aria-hidden="true"></i> <span data-i18n="loginBackBtn">กลับ</span></button>
       <div class="waste-datetime-row">
-        <button type="button" class="waste-btn waste-btn-outline" id="wasteManageItemsBtn" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> จัดการสินค้า</button>
+        <button type="button" class="waste-btn waste-btn-outline" id="wasteManageItemsBtn" onclick="openWasteManageItems()"><i class="ti ti-package" aria-hidden="true"></i> <span data-i18n="wasteManageItemsBtn">จัดการสินค้า</span></button>
         <div class="waste-datetime-display"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text" id="wasteTopDateTimeText"></span></div>
       </div>
       <div class="waste-scan-row" id="wasteScanRow">
         <div class="waste-scan-input-wrap">
           <i class="ti ti-focus-2" aria-hidden="true"></i>
-          <input type="text" id="wasteScanInput" placeholder="เพิ่มข้อมูล (สแกนด้วยเครื่องสแกน USB หรือพิมพ์บาร์โค้ดแล้วกด Enter)" onkeydown="if(event.key==='Enter')handleWasteScanInput(this.value)">
+          <input type="text" id="wasteScanInput" data-i18n-placeholder="wasteScanInputPlaceholder" placeholder="เพิ่มข้อมูล (สแกนด้วยเครื่องสแกน USB หรือพิมพ์บาร์โค้ดแล้วกด Enter)" onkeydown="if(event.key==='Enter')handleWasteScanInput(this.value)">
         </div>
-        <button type="button" class="waste-btn waste-btn-solid" style="flex-shrink:0" onclick="openWasteAddChoice()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่ม</button>
+        <button type="button" class="waste-btn waste-btn-solid" style="flex-shrink:0" onclick="openWasteAddChoice()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="wasteAddBtn">เพิ่ม</span></button>
       </div>
       <div class="waste-day-row" id="wasteRecordDayRow">
         <div class="waste-day-field">
-          <label for="wasteStartDateInput">เริ่ม</label>
+          <label for="wasteStartDateInput" data-i18n="wasteStartLabel">เริ่ม</label>
           <input type="date" id="wasteStartDateInput" lang="en-GB" onchange="addWasteDay()">
         </div>
         <div class="waste-day-field">
-          <label for="wasteEndDateInput">สิ้นสุด</label>
+          <label for="wasteEndDateInput" data-i18n="wasteEndLabel">สิ้นสุด</label>
           <input type="date" id="wasteEndDateInput" lang="en-GB" onchange="addWasteDay()">
         </div>
-        <button type="button" class="waste-btn waste-btn-solid" onclick="addWasteDay()"><i class="ti ti-search" aria-hidden="true"></i> ค้นหา</button>
+        <button type="button" class="waste-btn waste-btn-solid" onclick="addWasteDay()"><i class="ti ti-search" aria-hidden="true"></i> <span data-i18n="wasteSearchBtn">ค้นหา</span></button>
       </div>
       <div id="wasteRecordResultBlock">
         <div class="waste-table-toolbar">
-          <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> ส่งออกเป็น PDF</button>
-          <button type="button" class="waste-btn waste-btn-green" onclick="exportWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
+          <button type="button" class="waste-btn waste-btn-red" onclick="exportWastePdf()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> <span data-i18n="wasteExportPdfBtn">ส่งออกเป็น PDF</span></button>
+          <button type="button" class="waste-btn waste-btn-green" onclick="exportWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> <span data-i18n="wasteExportExcelBtn">ส่งออกเป็น Excel</span></button>
         </div>
-        <div class="waste-section-title">แสดงรายการ</div>
+        <div class="waste-section-title" data-i18n="wasteShowListTitle">แสดงรายการ</div>
         <div class="waste-recorded-at" id="wasteRecordedAt"></div>
-        <div class="waste-scroll-hint"><i class="ti ti-arrow-left" aria-hidden="true"></i> เลื่อนดูข้อมูลเพิ่มเติม <i class="ti ti-arrow-right" aria-hidden="true"></i></div>
+        <div class="waste-scroll-hint"><i class="ti ti-arrow-left" aria-hidden="true"></i> <span data-i18n="wasteScrollHint">เลื่อนดูข้อมูลเพิ่มเติม</span> <i class="ti ti-arrow-right" aria-hidden="true"></i></div>
         <div id="wasteTableWrap"></div>
         <div class="waste-total-row">
           <i class="ti ti-coin" aria-hidden="true"></i>
-          <span class="waste-total-label"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
+          <span class="waste-total-label"><i class="ti ti-calculator" aria-hidden="true"></i> <span data-i18n="wasteColTotalAmount">Total Amount</span></span>
           <span class="waste-total-value" id="wasteTotalValue">0.00</span>
-          <button type="button" class="waste-btn waste-btn-red" style="margin-left:auto" onclick="confirmDeleteWasteLog()"><i class="ti ti-trash" aria-hidden="true"></i> ลบข้อมูล</button>
+          <button type="button" class="waste-btn waste-btn-red" style="margin-left:auto" onclick="confirmDeleteWasteLog()"><i class="ti ti-trash" aria-hidden="true"></i> <span data-i18n="wasteDeleteDataBtn">ลบข้อมูล</span></button>
         </div>
       </div>
     </div>
@@ -1249,33 +1250,33 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div class="waste-overlay" id="wasteAddChoiceOverlay" style="display:none;z-index:2400">
   <div class="waste-panel" style="max-width:900px">
     <div class="waste-header">
-      <div class="waste-title" style="font-size:17px">เพิ่มข้อมูล</div>
+      <div class="waste-title" style="font-size:17px" data-i18n="wasteAddDataTitle">เพิ่มข้อมูล</div>
       <div class="waste-header-right">
-        <i class="ti ti-x waste-close-btn" onclick="closeWasteAddChoice()" aria-label="ปิด"></i>
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteAddChoice()" data-i18n-title="closeBtnAria" aria-label="ปิด"></i>
       </div>
     </div>
     <div class="waste-panel-body">
-    <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="closeWasteAddChoice()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
+    <button type="button" class="waste-btn waste-btn-outline" style="margin-bottom:14px" onclick="closeWasteAddChoice()"><i class="ti ti-arrow-left" aria-hidden="true"></i> <span data-i18n="loginBackBtn">กลับ</span></button>
     <div class="waste-menu-card" onclick="chooseWasteAddManual()">
       <i class="ti ti-keyboard" aria-hidden="true"></i>
-      <div><div class="waste-menu-card-title">ป้อนเลขไอเท็ม</div><div class="waste-menu-card-sub">พิมพ์รหัสสินค้าเอง</div></div>
+      <div><div class="waste-menu-card-title" data-i18n="wasteEnterItemNoTitle">ป้อนเลขไอเท็ม</div><div class="waste-menu-card-sub" data-i18n="wasteEnterItemNoSub">พิมพ์รหัสสินค้าเอง</div></div>
       <i class="ti ti-chevron-right waste-menu-card-arrow" aria-hidden="true"></i>
     </div>
     <div class="waste-menu-card" onclick="chooseWasteAddScan()">
       <i class="ti ti-camera" aria-hidden="true"></i>
-      <div><div class="waste-menu-card-title">สแกน Barcode</div><div class="waste-menu-card-sub">ใช้กล้องสแกนบาร์โค้ด</div></div>
+      <div><div class="waste-menu-card-title" data-i18n="wasteScanBarcodeTitle">สแกน Barcode</div><div class="waste-menu-card-sub" data-i18n="wasteScanBarcodeSub">ใช้กล้องสแกนบาร์โค้ด</div></div>
       <i class="ti ti-chevron-right waste-menu-card-arrow" aria-hidden="true"></i>
     </div>
     <div class="waste-datetime-display" style="margin-bottom:8px"><i class="ti ti-calendar-time" aria-hidden="true"></i> <span class="waste-current-datetime-text"></span></div>
-    <div class="waste-section-title">แสดงรายการ</div>
-    <div class="waste-scroll-hint"><i class="ti ti-arrow-left" aria-hidden="true"></i> เลื่อนดูข้อมูลเพิ่มเติม <i class="ti ti-arrow-right" aria-hidden="true"></i></div>
+    <div class="waste-section-title" data-i18n="wasteShowListTitle">แสดงรายการ</div>
+    <div class="waste-scroll-hint"><i class="ti ti-arrow-left" aria-hidden="true"></i> <span data-i18n="wasteScrollHint">เลื่อนดูข้อมูลเพิ่มเติม</span> <i class="ti ti-arrow-right" aria-hidden="true"></i></div>
     <div id="wasteAddChoiceTableWrap"></div>
     <div class="waste-total-row">
       <i class="ti ti-coin" aria-hidden="true"></i>
-      <span class="waste-total-label waste-total-label-inline"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
+      <span class="waste-total-label waste-total-label-inline"><i class="ti ti-calculator" aria-hidden="true"></i> <span data-i18n="wasteColTotalAmount">Total Amount</span></span>
       <span class="waste-total-value" id="wasteAddChoiceTotalValue">0.00</span>
-      <button type="button" class="waste-btn waste-btn-red" style="margin-left:auto" onclick="closeWasteAddChoice()"><i class="ti ti-x" aria-hidden="true"></i> ยกเลิก</button>
-      <button type="button" class="waste-btn waste-btn-green" onclick="saveWasteAddChoiceProgress()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึก</button>
+      <button type="button" class="waste-btn waste-btn-red" style="margin-left:auto" onclick="closeWasteAddChoice()"><i class="ti ti-x" aria-hidden="true"></i> <span data-i18n="cancelBtn">ยกเลิก</span></button>
+      <button type="button" class="waste-btn waste-btn-green" onclick="saveWasteAddChoiceProgress()"><i class="ti ti-device-floppy" aria-hidden="true"></i> <span data-i18n="saveBtn">บันทึก</span></button>
     </div>
     </div>
   </div>
@@ -1283,14 +1284,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div class="waste-overlay" id="wasteManualEntryOverlay" style="display:none;z-index:2450">
   <div class="waste-panel" style="max-width:420px">
     <div class="waste-header">
-      <div class="waste-title" style="font-size:17px">ป้อนเลขไอเท็ม</div>
+      <div class="waste-title" style="font-size:17px" data-i18n="wasteEnterItemNoTitle">ป้อนเลขไอเท็ม</div>
       <div class="waste-header-right">
-        <i class="ti ti-x waste-close-btn" onclick="closeWasteManualEntry()" aria-label="ปิด"></i>
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteManualEntry()" data-i18n-title="closeBtnAria" aria-label="ปิด"></i>
       </div>
     </div>
     <div class="waste-scan-input-wrap" style="margin-bottom:0">
       <i class="ti ti-keyboard" aria-hidden="true"></i>
-      <input type="text" id="wasteAddChoiceManualInput" placeholder="พิมพ์รหัสสินค้าหรือค้นหาด้วยชื่อ แล้วกด Enter" oninput="renderWasteManualSearchResults(this.value)" onkeydown="if(event.key==='Enter')handleWasteAddChoiceManualInput(this.value)">
+      <input type="text" id="wasteAddChoiceManualInput" data-i18n-placeholder="wasteManualInputPlaceholder" placeholder="พิมพ์รหัสสินค้าหรือค้นหาด้วยชื่อ แล้วกด Enter" oninput="renderWasteManualSearchResults(this.value)" onkeydown="if(event.key==='Enter')handleWasteAddChoiceManualInput(this.value)">
       <i class="ti ti-circle-check waste-manual-confirm-btn" aria-hidden="true" onclick="handleWasteAddChoiceManualInput(document.getElementById('wasteAddChoiceManualInput').value)"></i>
     </div>
     <div id="wasteManualSearchResults"></div>
@@ -1299,89 +1300,89 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div class="waste-overlay" id="wasteNewItemOverlay" style="display:none;z-index:2455">
   <div class="waste-panel" style="max-width:420px">
     <div class="waste-header">
-      <div class="waste-title" style="font-size:17px">เพิ่มรายการใหม่</div>
+      <div class="waste-title" style="font-size:17px" data-i18n="wasteAddNewItemTitle">เพิ่มรายการใหม่</div>
       <div class="waste-header-right">
-        <i class="ti ti-x waste-close-btn" onclick="closeWasteNewItemForm()" aria-label="ปิด"></i>
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteNewItemForm()" data-i18n-title="closeBtnAria" aria-label="ปิด"></i>
       </div>
     </div>
-    <label style="display:block;margin-bottom:4px">เลขไอเท็ม (Item No.)</label>
+    <label style="display:block;margin-bottom:4px" data-i18n="wasteItemNoFieldLabelFull">เลขไอเท็ม (Item No.)</label>
     <div class="waste-scan-input-wrap" style="margin-bottom:10px">
       <i class="ti ti-barcode" aria-hidden="true"></i>
-      <input type="text" id="wasteNewItemNo" placeholder="เลขไอเท็ม">
+      <input type="text" id="wasteNewItemNo" data-i18n-placeholder="wasteItemNoPlaceholder" placeholder="เลขไอเท็ม">
     </div>
-    <label style="display:block;margin-bottom:4px">ชื่อสินค้า (Name)</label>
+    <label style="display:block;margin-bottom:4px" data-i18n="wasteNameFieldLabelFull">ชื่อสินค้า (Name)</label>
     <div class="waste-scan-input-wrap" style="margin-bottom:10px">
       <i class="ti ti-tag" aria-hidden="true"></i>
-      <input type="text" id="wasteNewItemDesc" placeholder="ชื่อสินค้า">
+      <input type="text" id="wasteNewItemDesc" data-i18n-placeholder="productNameLabel" placeholder="ชื่อสินค้า">
     </div>
-    <label style="display:block;margin-bottom:4px">ราคา (Price)</label>
+    <label style="display:block;margin-bottom:4px" data-i18n="wastePriceFieldLabelFull">ราคา (Price)</label>
     <div class="waste-scan-input-wrap" style="margin-bottom:10px">
       <i class="ti ti-coin" aria-hidden="true"></i>
-      <input type="number" id="wasteNewItemPrice" placeholder="ราคา">
+      <input type="number" id="wasteNewItemPrice" data-i18n-placeholder="wastePriceWord" placeholder="ราคา">
     </div>
     <div class="waste-new-item-photo" id="wasteNewItemPhoto" onclick="document.getElementById('wasteNewItemPhotoInput').click()">
       <i class="ti ti-camera-plus" aria-hidden="true"></i>
-      <span>ถ่ายรูปสินค้า (ไม่บังคับ)</span>
+      <span data-i18n="wastePhotoOptionalLabel">ถ่ายรูปสินค้า (ไม่บังคับ)</span>
     </div>
     <input type="file" id="wasteNewItemPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleWasteNewItemPhotoSelect(event)">
-    <button type="button" class="waste-btn waste-btn-green waste-btn-block" onclick="confirmWasteNewItem()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึก</button>
+    <button type="button" class="waste-btn waste-btn-green waste-btn-block" onclick="confirmWasteNewItem()"><i class="ti ti-device-floppy" aria-hidden="true"></i> <span data-i18n="saveBtn">บันทึก</span></button>
   </div>
 </div>
 <div class="waste-overlay" id="wasteWizardOverlay" style="display:none;z-index:2465">
   <div class="waste-panel" style="max-width:380px">
     <div class="waste-header">
-      <div class="waste-title" style="font-size:16px" id="wasteWizardTitle">ขั้นที่ 1/3: ราคา และน้ำหนัก</div>
+      <div class="waste-title" style="font-size:16px" id="wasteWizardTitle" data-i18n="wasteWizardStep1Title">ขั้นที่ 1/2: ราคา น้ำหนัก และจำนวน</div>
       <div class="waste-header-right">
-        <i class="ti ti-x waste-close-btn" onclick="closeWasteWizard()" aria-label="ปิด"></i>
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteWizard()" data-i18n-title="closeBtnAria" aria-label="ปิด"></i>
       </div>
     </div>
     <div id="wasteWizardStep1">
       <div id="wasteWizardItemName" style="font-size:15px;font-weight:700;color:#173350;margin-bottom:10px"></div>
-      <label style="display:block;margin-bottom:4px">ราคา (Price)</label>
+      <label style="display:block;margin-bottom:4px" data-i18n="wastePriceFieldLabelFull">ราคา (Price)</label>
       <div class="waste-scan-input-wrap" style="margin-bottom:10px">
         <i class="ti ti-coin" aria-hidden="true"></i>
-        <input type="number" id="wasteWizardPiece" placeholder="ราคา" oninput="wasteWizardPieceInput()">
+        <input type="number" id="wasteWizardPiece" data-i18n-placeholder="wastePriceWord" placeholder="ราคา" oninput="wasteWizardPieceInput()">
       </div>
-      <label style="display:block;margin-bottom:4px">น้ำหนัก (Weight)</label>
+      <label style="display:block;margin-bottom:4px" data-i18n="wasteWeightFieldLabelFull">น้ำหนัก (Weight)</label>
       <div class="waste-scan-input-wrap" style="margin-bottom:6px">
         <i class="ti ti-weight" aria-hidden="true"></i>
-        <input type="number" id="wasteWizardWeight" placeholder="น้ำหนัก" oninput="wasteWizardWeightInput(this.value)">
+        <input type="number" id="wasteWizardWeight" data-i18n-placeholder="wasteWeightWord" placeholder="น้ำหนัก" oninput="wasteWizardWeightInput(this.value)">
       </div>
-      <div class="waste-wizard-note">หมายเหตุ: ถ้าสินค้าเป็น กก. ละ ให้ใส่น้ำหนักจริง</div>
-      <label style="display:block;margin-bottom:4px">จำนวน (Quantity MU)</label>
+      <div class="waste-wizard-note" data-i18n="wasteWeightNote">หมายเหตุ: ถ้าสินค้าเป็น กก. ละ ให้ใส่น้ำหนักจริง</div>
+      <label style="display:block;margin-bottom:4px" data-i18n="wasteQtyFieldLabelFull">จำนวน (Quantity MU)</label>
       <div class="waste-scan-input-wrap" style="margin-bottom:6px">
         <i class="ti ti-package" aria-hidden="true"></i>
-        <input type="number" id="wasteWizardQty" placeholder="จำนวน (MU)" oninput="wasteWizardQtyInput(this.value)">
+        <input type="number" id="wasteWizardQty" data-i18n-placeholder="wasteQtyMuPlaceholder" placeholder="จำนวน (MU)" oninput="wasteWizardQtyInput(this.value)">
       </div>
-      <div class="waste-wizard-note">หมายเหตุ: ถ้าสินค้าเป็นชิ้น (MU) ให้ใส่จำนวนตามจริง</div>
+      <div class="waste-wizard-note" data-i18n="wasteQtyNote">หมายเหตุ: ถ้าสินค้าเป็นชิ้น (MU) ให้ใส่จำนวนตามจริง</div>
     </div>
     <div id="wasteWizardStep2" style="display:none">
       <div class="waste-new-item-photo" id="wasteWizardPhoto" onclick="document.getElementById('wasteWizardPhotoInput').click()">
         <i class="ti ti-camera-plus" aria-hidden="true"></i>
-        <span>ถ่ายรูปของเสีย (ไม่บังคับ)</span>
+        <span data-i18n="wasteWastePhotoOptionalLabel">ถ่ายรูปของเสีย (ไม่บังคับ)</span>
       </div>
       <input type="file" id="wasteWizardPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleWasteWizardPhotoSelect(event)">
     </div>
     <div class="waste-wizard-total" id="wasteWizardTotalDisplay">Total 0.00 THB</div>
     <div style="display:flex;gap:10px">
-      <button type="button" class="waste-btn waste-btn-outline" id="wasteWizardBackBtn" style="display:none;flex:0 0 auto" onclick="wasteWizardBack()"><i class="ti ti-arrow-left" aria-hidden="true"></i> กลับ</button>
-      <button type="button" class="waste-btn waste-btn-green" style="flex:1" id="wasteWizardNextBtn" onclick="wasteWizardNext()">ถัดไป <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      <button type="button" class="waste-btn waste-btn-outline" id="wasteWizardBackBtn" style="display:none;flex:0 0 auto" onclick="wasteWizardBack()"><i class="ti ti-arrow-left" aria-hidden="true"></i> <span data-i18n="loginBackBtn">กลับ</span></button>
+      <button type="button" class="waste-btn waste-btn-green" style="flex:1" id="wasteWizardNextBtn" onclick="wasteWizardNext()"><span data-i18n="wasteNextBtn">ถัดไป</span> <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
     </div>
   </div>
 </div>
 <div class="waste-overlay" id="wasteFieldEditOverlay" style="display:none;z-index:2460">
   <div class="waste-panel" style="max-width:340px">
     <div class="waste-header">
-      <div class="waste-title" style="font-size:17px" id="wasteFieldEditTitle">จำนวน</div>
+      <div class="waste-title" style="font-size:17px" id="wasteFieldEditTitle" data-i18n="wasteQtyWord">จำนวน</div>
       <div class="waste-header-right">
-        <i class="ti ti-x waste-close-btn" onclick="closeWasteFieldEdit()" aria-label="ปิด"></i>
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteFieldEdit()" data-i18n-title="closeBtnAria" aria-label="ปิด"></i>
       </div>
     </div>
     <div class="waste-scan-input-wrap" style="margin-bottom:14px">
       <i class="ti ti-keyboard" aria-hidden="true"></i>
-      <input type="number" id="wasteFieldEditInput" placeholder="ใส่จำนวน" onkeydown="if(event.key==='Enter')confirmWasteFieldEdit()">
+      <input type="number" id="wasteFieldEditInput" data-i18n-placeholder="wasteEnterQtyPlaceholder" placeholder="ใส่จำนวน" onkeydown="if(event.key==='Enter')confirmWasteFieldEdit()">
     </div>
-    <button type="button" class="waste-btn waste-btn-green waste-btn-block" onclick="confirmWasteFieldEdit()"><i class="ti ti-check" aria-hidden="true"></i> ตกลง</button>
+    <button type="button" class="waste-btn waste-btn-green waste-btn-block" onclick="confirmWasteFieldEdit()"><i class="ti ti-check" aria-hidden="true"></i> <span data-i18n="wasteOkBtn">ตกลง</span></button>
   </div>
 </div>
 
@@ -1710,7 +1711,96 @@ const I18N={
     fbDateColLabel:'วันที่',
     fbTimeColLabel:'เวลา',
     fbTextColLabel:'ข้อเสนอแนะ / ความคิดเห็น',
-    fbSheetName:'ข้อเสนอแนะ'
+    fbSheetName:'ข้อเสนอแนะ',
+    wasteAppDesc:'บันทึกข้อมูลรายวัน สแกนบาร์โค้ดเพื่อกรอกอัตโนมัติ แล้วส่งออกเป็น Excel',
+    wasteMenuRecordTitle:'บันทึกข้อมูล',
+    wasteMenuRecordSub:'สแกน/กรอกข้อมูลของเสียประจำวัน',
+    wasteMenuHistoryTitle:'ค้นหาข้อมูลย้อนหลัง',
+    wasteMenuHistorySub:'ดู/ค้นหาข้อมูลที่เคยบันทึกไว้แต่ละวัน',
+    wasteHistorySearchPlaceholder:'ค้นหาด้วยรหัสสินค้า/รายละเอียด หรือวันที่ (DD MM YYYY)',
+    wasteStartLabel:'เริ่ม',
+    wasteEndLabel:'สิ้นสุด',
+    wasteSearchBtn:'ค้นหา',
+    wasteHistoryTitle:'ประวัติย้อนหลัง',
+    wasteManageItemsBtn:'จัดการสินค้า',
+    wasteScanInputPlaceholder:'เพิ่มข้อมูล (สแกนด้วยเครื่องสแกน USB หรือพิมพ์บาร์โค้ดแล้วกด Enter)',
+    wasteAddBtn:'เพิ่ม',
+    wasteExportPdfBtn:'ส่งออกเป็น PDF',
+    wasteExportExcelBtn:'ส่งออกเป็น Excel',
+    wasteShowListTitle:'แสดงรายการ',
+    wasteScrollHint:'เลื่อนดูข้อมูลเพิ่มเติม',
+    wasteDeleteDataBtn:'ลบข้อมูล',
+    wasteEmptyStateText:'ยังไม่มีข้อมูล — เลือกวันที่ด้านบนหรือสแกนบาร์โค้ดเพื่อเริ่มบันทึก',
+    wasteAddDataTitle:'เพิ่มข้อมูล',
+    wasteEnterItemNoTitle:'ป้อนเลขไอเท็ม',
+    wasteEnterItemNoSub:'พิมพ์รหัสสินค้าเอง',
+    wasteScanBarcodeTitle:'สแกน Barcode',
+    wasteScanBarcodeSub:'ใช้กล้องสแกนบาร์โค้ด',
+    wasteManualInputPlaceholder:'พิมพ์รหัสสินค้าหรือค้นหาด้วยชื่อ แล้วกด Enter',
+    wasteAddNewItemTitle:'เพิ่มรายการใหม่',
+    wasteItemNoFieldLabelFull:'เลขไอเท็ม (Item No.)',
+    wasteItemNoPlaceholder:'เลขไอเท็ม',
+    wasteNameFieldLabelFull:'ชื่อสินค้า (Name)',
+    wastePriceFieldLabelFull:'ราคา (Price)',
+    wastePriceWord:'ราคา',
+    wastePhotoOptionalLabel:'ถ่ายรูปสินค้า (ไม่บังคับ)',
+    wasteWeightFieldLabelFull:'น้ำหนัก (Weight)',
+    wasteWeightWord:'น้ำหนัก',
+    wasteWeightNote:'หมายเหตุ: ถ้าสินค้าเป็น กก. ละ ให้ใส่น้ำหนักจริง',
+    wasteQtyFieldLabelFull:'จำนวน (Quantity MU)',
+    wasteQtyMuPlaceholder:'จำนวน (MU)',
+    wasteQtyNote:'หมายเหตุ: ถ้าสินค้าเป็นชิ้น (MU) ให้ใส่จำนวนตามจริง',
+    wasteWastePhotoOptionalLabel:'ถ่ายรูปของเสีย (ไม่บังคับ)',
+    wasteNextBtn:'ถัดไป',
+    wasteQtyWord:'จำนวน',
+    wasteEnterQtyPlaceholder:'ใส่จำนวน',
+    wasteOkBtn:'ตกลง',
+    wasteTotalValueWord:'มูลค่า',
+    wasteItemCodePlaceholder:'รหัสสินค้า',
+    wasteItemDescPlaceholder:'รายละเอียดสินค้า',
+    wasteUpdateDataBtn:'อัพเดทข้อมูล',
+    wasteColNo:'No.',
+    wasteColItem:'Item',
+    wasteColPhoto:'Photo',
+    wasteColDescription:'Description',
+    wasteColPrice:'Price',
+    wasteColWeight:'Weight',
+    wasteColQtyMU:'Quantity (MU)',
+    wasteColTotalAmount:'Total Amount',
+    wasteColTotalAmountBaht:'Total Amount (Baht)',
+    wasteSavedToast:'บันทึกข้อมูลแล้ว',
+    wasteItemNotFoundToast:'ไม่พบสินค้านี้ในระบบ กรุณากดปุ่ม "เพิ่มรายการใหม่" เพื่อเพิ่มรายการก่อน',
+    wasteUseCodeFillManually:'ใช้รหัส "{code}" กรอกรายละเอียดเอง',
+    wasteNoMatchFor:'ไม่พบสินค้าที่ตรงกับ "{query}"',
+    wasteItemNoRequired:'กรุณากรอกเลขไอเท็ม',
+    wasteNameRequired:'กรุณากรอกชื่อสินค้า',
+    wastePriceInvalid:'กรุณากรอกราคาให้ถูกต้อง',
+    wasteExcludedItemToast:'ไอเท็มนี้ไม่รองรับใน Weight Loss O2O (ไม่มีราคาขายปลีก)',
+    wasteNewItemSavedToast:'เพิ่มรายการใหม่ "{desc}" และบันทึกไว้ในระบบแล้ว',
+    wasteWizardStep1Title:'ขั้นที่ 1/2: ราคา น้ำหนัก และจำนวน',
+    wasteWizardStep2Title:'ขั้นที่ 2/2: ถ่ายรูปของเสีย',
+    wasteFinishBtn:'เสร็จสิ้น',
+    wastePriceRequired:'กรุณากรอกราคา',
+    wasteWeightRequired:'กรุณากรอกน้ำหนัก',
+    wasteQtyRequired:'กรุณากรอกจำนวน',
+    wasteAddedItemToast:'เพิ่ม {desc} แล้ว',
+    wasteItemNotFoundFillManually:'ไม่พบสินค้าในระบบ กรอกรายละเอียดเองได้',
+    wasteManageItemsComingSoon:'ฟังก์ชันนี้จะเพิ่มให้ทีหลังครับ',
+    wasteNothingToExport:'ยังไม่มีข้อมูลให้ส่งออก',
+    wasteLineBrowserExportWarning:'ดาวน์โหลดไฟล์ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง',
+    wasteLineBrowserPdfWarning:'พิมพ์/บันทึก PDF ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง',
+    wasteDateTimeLine:'วันที่ {date} เวลา {time}',
+    wasteModeIndicatorPrefix:'กำลังอยู่ในโหมด: {label}',
+    wasteRecordedAtPrefix:'บันทึกข้อมูลเมื่อ',
+    wasteNoHistoryFound:'ไม่พบข้อมูลย้อนหลัง',
+    wasteNoHistoryMatchQuery:'ที่ตรงกับ "{query}"',
+    wasteDeleteConfirmPrompt:'กรอกรหัสพนักงานเพื่อยืนยันการลบข้อมูล',
+    wasteWrongPinAlert:'รหัสไม่ถูกต้อง',
+    wasteDeleteConfirmMsg:'ยืนยันลบข้อมูลวันที่ {date} ใช่หรือไม่? ไม่สามารถกู้คืนได้',
+    wasteDeletedToast:'ลบข้อมูลแล้ว',
+    wasteGrandTotalLabel:'รวมทั้งหมด',
+    wastePdfNoteLabel:'หมายเหตุ',
+    wastePdfInspectorLabel:'ผู้ตรวจสอบ'
   },
   en:{
     roleIntro:'Please choose how you want to use the app',
@@ -1990,7 +2080,96 @@ const I18N={
     fbDateColLabel:'Date',
     fbTimeColLabel:'Time',
     fbTextColLabel:'Feedback / Comments',
-    fbSheetName:'Feedback'
+    fbSheetName:'Feedback',
+    wasteAppDesc:'Record daily waste data. Scan a barcode to auto-fill, then export to Excel.',
+    wasteMenuRecordTitle:'Record data',
+    wasteMenuRecordSub:'Scan/enter daily waste data',
+    wasteMenuHistoryTitle:'Search past records',
+    wasteMenuHistorySub:'View/search records saved on each day',
+    wasteHistorySearchPlaceholder:'Search by item code/description or date (DD MM YYYY)',
+    wasteStartLabel:'Start',
+    wasteEndLabel:'End',
+    wasteSearchBtn:'Search',
+    wasteHistoryTitle:'Past records',
+    wasteManageItemsBtn:'Manage items',
+    wasteScanInputPlaceholder:'Add data (scan with a USB scanner or type a barcode, then press Enter)',
+    wasteAddBtn:'Add',
+    wasteExportPdfBtn:'Export as PDF',
+    wasteExportExcelBtn:'Export as Excel',
+    wasteShowListTitle:'Item list',
+    wasteScrollHint:'Scroll to see more',
+    wasteDeleteDataBtn:'Delete data',
+    wasteEmptyStateText:'No data yet — pick a date above or scan a barcode to start recording',
+    wasteAddDataTitle:'Add data',
+    wasteEnterItemNoTitle:'Enter item number',
+    wasteEnterItemNoSub:'Type the item code yourself',
+    wasteScanBarcodeTitle:'Scan barcode',
+    wasteScanBarcodeSub:'Use the camera to scan a barcode',
+    wasteManualInputPlaceholder:'Type the item code or search by name, then press Enter',
+    wasteAddNewItemTitle:'Add new item',
+    wasteItemNoFieldLabelFull:'Item number (Item No.)',
+    wasteItemNoPlaceholder:'Item number',
+    wasteNameFieldLabelFull:'Product name (Name)',
+    wastePriceFieldLabelFull:'Price',
+    wastePriceWord:'Price',
+    wastePhotoOptionalLabel:'Take a product photo (optional)',
+    wasteWeightFieldLabelFull:'Weight',
+    wasteWeightWord:'Weight',
+    wasteWeightNote:'Note: for items priced per kg, enter the actual weight',
+    wasteQtyFieldLabelFull:'Quantity (Quantity MU)',
+    wasteQtyMuPlaceholder:'Quantity (MU)',
+    wasteQtyNote:'Note: for items sold by piece (MU), enter the actual quantity',
+    wasteWastePhotoOptionalLabel:'Take a photo of the waste (optional)',
+    wasteNextBtn:'Next',
+    wasteQtyWord:'Quantity',
+    wasteEnterQtyPlaceholder:'Enter quantity',
+    wasteOkBtn:'OK',
+    wasteTotalValueWord:'Amount',
+    wasteItemCodePlaceholder:'Item code',
+    wasteItemDescPlaceholder:'Item description',
+    wasteUpdateDataBtn:'Update data',
+    wasteColNo:'No.',
+    wasteColItem:'Item',
+    wasteColPhoto:'Photo',
+    wasteColDescription:'Description',
+    wasteColPrice:'Price',
+    wasteColWeight:'Weight',
+    wasteColQtyMU:'Quantity (MU)',
+    wasteColTotalAmount:'Total Amount',
+    wasteColTotalAmountBaht:'Total Amount (Baht)',
+    wasteSavedToast:'Data saved',
+    wasteItemNotFoundToast:'This item was not found in the system. Please tap "Add new item" to add it first.',
+    wasteUseCodeFillManually:'Use code "{code}" and fill in the details yourself',
+    wasteNoMatchFor:'No items match "{query}"',
+    wasteItemNoRequired:'Please enter the item number',
+    wasteNameRequired:'Please enter the product name',
+    wastePriceInvalid:'Please enter a valid price',
+    wasteExcludedItemToast:'This item is not supported in Weight Loss O2O (no retail price)',
+    wasteNewItemSavedToast:'Added new item "{desc}" and saved it to the system',
+    wasteWizardStep1Title:'Step 1/2: Price, weight, and quantity',
+    wasteWizardStep2Title:'Step 2/2: Photo of the waste',
+    wasteFinishBtn:'Done',
+    wastePriceRequired:'Please enter the price',
+    wasteWeightRequired:'Please enter the weight',
+    wasteQtyRequired:'Please enter the quantity',
+    wasteAddedItemToast:'Added {desc}',
+    wasteItemNotFoundFillManually:'Item not found in the system. You can fill in the details yourself.',
+    wasteManageItemsComingSoon:'This feature will be added later.',
+    wasteNothingToExport:'There is no data to export yet',
+    wasteLineBrowserExportWarning:'Files can\'t be downloaded inside the LINE app. Please tap "..." in the top-right corner and choose "Open in external browser" (Chrome/Safari), then export again.',
+    wasteLineBrowserPdfWarning:'PDF can\'t be printed/saved inside the LINE app. Please tap "..." in the top-right corner and choose "Open in external browser" (Chrome/Safari), then export again.',
+    wasteDateTimeLine:'Date {date} Time {time}',
+    wasteModeIndicatorPrefix:'Current mode: {label}',
+    wasteRecordedAtPrefix:'Recorded on',
+    wasteNoHistoryFound:'No past records found',
+    wasteNoHistoryMatchQuery:'matching "{query}"',
+    wasteDeleteConfirmPrompt:'Enter your employee code to confirm deleting the data',
+    wasteWrongPinAlert:'Incorrect code',
+    wasteDeleteConfirmMsg:'Delete the data for {date}? This cannot be undone.',
+    wasteDeletedToast:'Data deleted',
+    wasteGrandTotalLabel:'Grand Total',
+    wastePdfNoteLabel:'Note',
+    wastePdfInspectorLabel:'Inspected by'
   },
   cn:{
     roleIntro:'请选择使用模式',
@@ -2270,7 +2449,96 @@ const I18N={
     fbDateColLabel:'日期',
     fbTimeColLabel:'时间',
     fbTextColLabel:'反馈 / 意见',
-    fbSheetName:'反馈'
+    fbSheetName:'反馈',
+    wasteAppDesc:'记录每日损耗数据。扫描条码自动填写，然后导出为 Excel。',
+    wasteMenuRecordTitle:'记录数据',
+    wasteMenuRecordSub:'扫描/填写每日损耗数据',
+    wasteMenuHistoryTitle:'查询历史记录',
+    wasteMenuHistorySub:'查看/搜索每日已保存的记录',
+    wasteHistorySearchPlaceholder:'按商品编号/描述或日期搜索 (DD MM YYYY)',
+    wasteStartLabel:'开始',
+    wasteEndLabel:'结束',
+    wasteSearchBtn:'搜索',
+    wasteHistoryTitle:'历史记录',
+    wasteManageItemsBtn:'管理商品',
+    wasteScanInputPlaceholder:'添加数据（使用 USB 扫描枪扫描或输入条码后按 Enter）',
+    wasteAddBtn:'添加',
+    wasteExportPdfBtn:'导出为 PDF',
+    wasteExportExcelBtn:'导出为 Excel',
+    wasteShowListTitle:'显示列表',
+    wasteScrollHint:'滑动查看更多',
+    wasteDeleteDataBtn:'删除数据',
+    wasteEmptyStateText:'暂无数据 — 请选择上方日期或扫描条码开始记录',
+    wasteAddDataTitle:'添加数据',
+    wasteEnterItemNoTitle:'输入商品编号',
+    wasteEnterItemNoSub:'自行输入商品编号',
+    wasteScanBarcodeTitle:'扫描条码',
+    wasteScanBarcodeSub:'使用相机扫描条码',
+    wasteManualInputPlaceholder:'输入商品编号或按名称搜索，然后按 Enter',
+    wasteAddNewItemTitle:'添加新项目',
+    wasteItemNoFieldLabelFull:'商品编号 (Item No.)',
+    wasteItemNoPlaceholder:'商品编号',
+    wasteNameFieldLabelFull:'商品名称 (Name)',
+    wastePriceFieldLabelFull:'价格 (Price)',
+    wastePriceWord:'价格',
+    wastePhotoOptionalLabel:'拍摄商品照片（非必填）',
+    wasteWeightFieldLabelFull:'重量 (Weight)',
+    wasteWeightWord:'重量',
+    wasteWeightNote:'备注：如商品按公斤计价，请填写实际重量',
+    wasteQtyFieldLabelFull:'数量 (Quantity MU)',
+    wasteQtyMuPlaceholder:'数量 (MU)',
+    wasteQtyNote:'备注：如商品按件计价 (MU)，请填写实际数量',
+    wasteWastePhotoOptionalLabel:'拍摄损耗商品照片（非必填）',
+    wasteNextBtn:'下一步',
+    wasteQtyWord:'数量',
+    wasteEnterQtyPlaceholder:'输入数量',
+    wasteOkBtn:'确定',
+    wasteTotalValueWord:'金额',
+    wasteItemCodePlaceholder:'商品编号',
+    wasteItemDescPlaceholder:'商品描述',
+    wasteUpdateDataBtn:'更新数据',
+    wasteColNo:'No.',
+    wasteColItem:'Item',
+    wasteColPhoto:'Photo',
+    wasteColDescription:'Description',
+    wasteColPrice:'Price',
+    wasteColWeight:'Weight',
+    wasteColQtyMU:'Quantity (MU)',
+    wasteColTotalAmount:'Total Amount',
+    wasteColTotalAmountBaht:'Total Amount (Baht)',
+    wasteSavedToast:'数据已保存',
+    wasteItemNotFoundToast:'系统中未找到该商品，请点击"添加新项目"按钮先添加该商品',
+    wasteUseCodeFillManually:'使用编号 "{code}" 自行填写详细信息',
+    wasteNoMatchFor:'未找到与 "{query}" 匹配的商品',
+    wasteItemNoRequired:'请输入商品编号',
+    wasteNameRequired:'请输入商品名称',
+    wastePriceInvalid:'请输入正确的价格',
+    wasteExcludedItemToast:'此商品在 Weight Loss O2O 中不受支持（无零售价格）',
+    wasteNewItemSavedToast:'已添加新项目 "{desc}" 并保存到系统中',
+    wasteWizardStep1Title:'第 1/2 步：价格、重量和数量',
+    wasteWizardStep2Title:'第 2/2 步：拍摄损耗照片',
+    wasteFinishBtn:'完成',
+    wastePriceRequired:'请输入价格',
+    wasteWeightRequired:'请输入重量',
+    wasteQtyRequired:'请输入数量',
+    wasteAddedItemToast:'已添加 {desc}',
+    wasteItemNotFoundFillManually:'系统中未找到该商品，可自行填写详细信息',
+    wasteManageItemsComingSoon:'此功能将在稍后推出',
+    wasteNothingToExport:'暂无数据可导出',
+    wasteLineBrowserExportWarning:'无法在 LINE 应用内下载文件，请点击右上角的 "..." 并选择"在外部浏览器中打开"（Chrome/Safari），然后再重新导出',
+    wasteLineBrowserPdfWarning:'无法在 LINE 应用内打印/保存 PDF，请点击右上角的 "..." 并选择"在外部浏览器中打开"（Chrome/Safari），然后再重新导出',
+    wasteDateTimeLine:'日期 {date} 时间 {time}',
+    wasteModeIndicatorPrefix:'当前模式：{label}',
+    wasteRecordedAtPrefix:'记录时间',
+    wasteNoHistoryFound:'未找到历史记录',
+    wasteNoHistoryMatchQuery:'与 "{query}" 匹配',
+    wasteDeleteConfirmPrompt:'请输入员工编号以确认删除数据',
+    wasteWrongPinAlert:'编号不正确',
+    wasteDeleteConfirmMsg:'确定要删除 {date} 的数据吗？此操作无法撤销',
+    wasteDeletedToast:'数据已删除',
+    wasteGrandTotalLabel:'总计',
+    wastePdfNoteLabel:'备注',
+    wastePdfInspectorLabel:'审核人'
   },
   mm:{
     roleIntro:'အသုံးပြုမည့်မုဒ်ကို ရွေးချယ်ပါ',
@@ -2550,7 +2818,96 @@ const I18N={
     fbDateColLabel:'ရက်စွဲ',
     fbTimeColLabel:'အချိန်',
     fbTextColLabel:'အကြံပြုချက် / မှတ်ချက်',
-    fbSheetName:'အကြံပြုချက်'
+    fbSheetName:'အကြံပြုချက်',
+    wasteAppDesc:'နေ့စဉ် ပစ္စည်းအလွှင့်ဒေတာကို မှတ်တမ်းတင်ပါ။ ဘားကုဒ်ကို စကန်ဖတ်ပြီး အလိုအလျောက်ဖြည့်ကာ Excel အဖြစ် ထုတ်ယူနိုင်ပါသည်။',
+    wasteMenuRecordTitle:'ဒေတာမှတ်တမ်းတင်ရန်',
+    wasteMenuRecordSub:'နေ့စဉ် ပစ္စည်းအလွှင့်ဒေတာကို စကန်ဖတ်/ဖြည့်ရန်',
+    wasteMenuHistoryTitle:'ယခင်မှတ်တမ်းများ ရှာဖွေရန်',
+    wasteMenuHistorySub:'နေ့စဉ် သိမ်းဆည်းထားသော မှတ်တမ်းများကို ကြည့်ရှု/ရှာဖွေရန်',
+    wasteHistorySearchPlaceholder:'ပစ္စည်းကုဒ်/အသေးစိတ် သို့မဟုတ် ရက်စွဲဖြင့် ရှာဖွေပါ (DD MM YYYY)',
+    wasteStartLabel:'စတင်',
+    wasteEndLabel:'ပြီးဆုံး',
+    wasteSearchBtn:'ရှာဖွေရန်',
+    wasteHistoryTitle:'ယခင်မှတ်တမ်း',
+    wasteManageItemsBtn:'ပစ္စည်းစီမံရန်',
+    wasteScanInputPlaceholder:'ဒေတာထည့်ရန် (USB စကင်နာဖြင့် စကန်ဖတ်ပါ သို့မဟုတ် ဘားကုဒ်ရိုက်ထည့်ပြီး Enter နှိပ်ပါ)',
+    wasteAddBtn:'ထည့်ရန်',
+    wasteExportPdfBtn:'PDF အဖြစ် ထုတ်ယူရန်',
+    wasteExportExcelBtn:'Excel အဖြစ် ထုတ်ယူရန်',
+    wasteShowListTitle:'စာရင်းပြရန်',
+    wasteScrollHint:'ပိုမိုကြည့်ရှုရန် ဆွဲကြည့်ပါ',
+    wasteDeleteDataBtn:'ဒေတာဖျက်ရန်',
+    wasteEmptyStateText:'ဒေတာမရှိသေးပါ — အထက်ရှိ ရက်စွဲကို ရွေးပါ သို့မဟုတ် မှတ်တမ်းစတင်ရန် ဘားကုဒ်ကို စကန်ဖတ်ပါ',
+    wasteAddDataTitle:'ဒေတာထည့်ရန်',
+    wasteEnterItemNoTitle:'ပစ္စည်းနံပါတ် ရိုက်ထည့်ရန်',
+    wasteEnterItemNoSub:'ပစ္စည်းကုဒ်ကို ကိုယ်တိုင်ရိုက်ထည့်ရန်',
+    wasteScanBarcodeTitle:'ဘားကုဒ် စကန်ဖတ်ရန်',
+    wasteScanBarcodeSub:'ကင်မရာဖြင့် ဘားကုဒ်ဖတ်ရန်',
+    wasteManualInputPlaceholder:'ပစ္စည်းကုဒ် ရိုက်ထည့် သို့မဟုတ် အမည်ဖြင့် ရှာဖွေပြီး Enter နှိပ်ပါ',
+    wasteAddNewItemTitle:'ပစ္စည်းအသစ် ထည့်ရန်',
+    wasteItemNoFieldLabelFull:'ပစ္စည်းနံပါတ် (Item No.)',
+    wasteItemNoPlaceholder:'ပစ္စည်းနံပါတ်',
+    wasteNameFieldLabelFull:'ပစ္စည်းအမည် (Name)',
+    wastePriceFieldLabelFull:'စျေးနှုန်း (Price)',
+    wastePriceWord:'စျေးနှုန်း',
+    wastePhotoOptionalLabel:'ပစ္စည်းဓာတ်ပုံရိုက်ရန် (မဖြစ်မနေမလို)',
+    wasteWeightFieldLabelFull:'အလေးချိန် (Weight)',
+    wasteWeightWord:'အလေးချိန်',
+    wasteWeightNote:'မှတ်ချက်: ပစ္စည်းသည် ကီလိုဂရမ်နှုန်းဖြစ်ပါက အလေးချိန်အမှန်ကို ရိုက်ထည့်ပါ',
+    wasteQtyFieldLabelFull:'အရေအတွက် (Quantity MU)',
+    wasteQtyMuPlaceholder:'အရေအတွက် (MU)',
+    wasteQtyNote:'မှတ်ချက်: ပစ္စည်းသည် အခု (MU) နှုန်းဖြစ်ပါက အရေအတွက်အမှန်ကို ရိုက်ထည့်ပါ',
+    wasteWastePhotoOptionalLabel:'အလွှင့်ပစ္စည်း ဓာတ်ပုံရိုက်ရန် (မဖြစ်မနေမလို)',
+    wasteNextBtn:'ရှေ့သို့',
+    wasteQtyWord:'အရေအတွက်',
+    wasteEnterQtyPlaceholder:'အရေအတွက် ရိုက်ထည့်ရန်',
+    wasteOkBtn:'အိုကေ',
+    wasteTotalValueWord:'တန်ဖိုး',
+    wasteItemCodePlaceholder:'ပစ္စည်းကုဒ်',
+    wasteItemDescPlaceholder:'ပစ္စည်းအသေးစိတ်',
+    wasteUpdateDataBtn:'ဒေတာအသစ်ပြင်ရန်',
+    wasteColNo:'No.',
+    wasteColItem:'Item',
+    wasteColPhoto:'Photo',
+    wasteColDescription:'Description',
+    wasteColPrice:'Price',
+    wasteColWeight:'Weight',
+    wasteColQtyMU:'Quantity (MU)',
+    wasteColTotalAmount:'Total Amount',
+    wasteColTotalAmountBaht:'Total Amount (Baht)',
+    wasteSavedToast:'ဒေတာကို သိမ်းဆည်းပြီးပါပြီ',
+    wasteItemNotFoundToast:'ဤပစ္စည်းကို စနစ်ထဲတွင် မတွေ့ပါ။ ကျေးဇူးပြု၍ "ပစ္စည်းအသစ် ထည့်ရန်" ခလုတ်ကို နှိပ်၍ အရင်ထည့်ပါ',
+    wasteUseCodeFillManually:'ကုဒ် "{code}" ကို အသုံးပြု၍ အသေးစိတ်ကို ကိုယ်တိုင်ဖြည့်ပါ',
+    wasteNoMatchFor:'"{query}" နှင့် ကိုက်ညီသော ပစ္စည်းကို မတွေ့ပါ',
+    wasteItemNoRequired:'ကျေးဇူးပြု၍ ပစ္စည်းနံပါတ် ရိုက်ထည့်ပါ',
+    wasteNameRequired:'ကျေးဇူးပြု၍ ပစ္စည်းအမည် ရိုက်ထည့်ပါ',
+    wastePriceInvalid:'ကျေးဇူးပြု၍ မှန်ကန်သော စျေးနှုန်း ရိုက်ထည့်ပါ',
+    wasteExcludedItemToast:'ဤပစ္စည်းကို Weight Loss O2O တွင် မထောက်ပံ့ပါ (လက်ကားစျေးနှုန်း မရှိပါ)',
+    wasteNewItemSavedToast:'ပစ္စည်းအသစ် "{desc}" ကို ထည့်ပြီး စနစ်ထဲတွင် သိမ်းဆည်းပြီးပါပြီ',
+    wasteWizardStep1Title:'အဆင့် ၁/၂: စျေးနှုန်း၊ အလေးချိန်နှင့် အရေအတွက်',
+    wasteWizardStep2Title:'အဆင့် ၂/၂: အလွှင့်ပစ္စည်း ဓာတ်ပုံ',
+    wasteFinishBtn:'ပြီးပါပြီ',
+    wastePriceRequired:'ကျေးဇူးပြု၍ စျေးနှုန်း ရိုက်ထည့်ပါ',
+    wasteWeightRequired:'ကျေးဇူးပြု၍ အလေးချိန် ရိုက်ထည့်ပါ',
+    wasteQtyRequired:'ကျေးဇူးပြု၍ အရေအတွက် ရိုက်ထည့်ပါ',
+    wasteAddedItemToast:'{desc} ကို ထည့်ပြီးပါပြီ',
+    wasteItemNotFoundFillManually:'စနစ်ထဲတွင် ပစ္စည်းကို မတွေ့ပါ။ အသေးစိတ်ကို ကိုယ်တိုင်ဖြည့်နိုင်ပါသည်',
+    wasteManageItemsComingSoon:'ဤလုပ်ဆောင်ချက်ကို နောက်ပိုင်းတွင် ထည့်သွင်းပေးပါမည်',
+    wasteNothingToExport:'ထုတ်ယူရန် ဒေတာ မရှိသေးပါ',
+    wasteLineBrowserExportWarning:'LINE အက်ပ်တွင်း ဖိုင်ကို ဒေါင်းလုဒ်လုပ်၍ မရပါ။ ညာဘက်အပေါ်ထောင့်ရှိ "..." ကို နှိပ်ပြီး "ပြင်ပဘရောက်ဇာဖြင့် ဖွင့်ရန်" (Chrome/Safari) ကို ရွေးချယ်ပြီးမှ ထပ်မံထုတ်ယူပါ',
+    wasteLineBrowserPdfWarning:'LINE အက်ပ်တွင်း PDF ကို ပရင့်ထုတ်/သိမ်းဆည်း၍ မရပါ။ ညာဘက်အပေါ်ထောင့်ရှိ "..." ကို နှိပ်ပြီး "ပြင်ပဘရောက်ဇာဖြင့် ဖွင့်ရန်" (Chrome/Safari) ကို ရွေးချယ်ပြီးမှ ထပ်မံထုတ်ယူပါ',
+    wasteDateTimeLine:'ရက်စွဲ {date} အချိန် {time}',
+    wasteModeIndicatorPrefix:'လက်ရှိမုဒ်: {label}',
+    wasteRecordedAtPrefix:'မှတ်တမ်းတင်ချိန်',
+    wasteNoHistoryFound:'ယခင်မှတ်တမ်း မတွေ့ပါ',
+    wasteNoHistoryMatchQuery:'"{query}" နှင့် ကိုက်ညီသော',
+    wasteDeleteConfirmPrompt:'ဒေတာဖျက်ခြင်းကို အတည်ပြုရန် ဝန်ထမ်းကုဒ် ရိုက်ထည့်ပါ',
+    wasteWrongPinAlert:'ကုဒ်မှားနေပါသည်',
+    wasteDeleteConfirmMsg:'{date} ရက်စွဲရှိ ဒေတာကို ဖျက်မည်လား? ဤလုပ်ဆောင်ချက်ကို ပြန်ပြင်၍ မရပါ',
+    wasteDeletedToast:'ဒေတာကို ဖျက်ပြီးပါပြီ',
+    wasteGrandTotalLabel:'စုစုပေါင်း',
+    wastePdfNoteLabel:'မှတ်ချက်',
+    wastePdfInspectorLabel:'စစ်ဆေးသူ'
   },
   kr:{
     roleIntro:'사용 모드를 선택해 주세요',
@@ -2830,7 +3187,96 @@ const I18N={
     fbDateColLabel:'날짜',
     fbTimeColLabel:'시간',
     fbTextColLabel:'피드백 / 의견',
-    fbSheetName:'피드백'
+    fbSheetName:'피드백',
+    wasteAppDesc:'일일 폐기 데이터를 기록하세요. 바코드를 스캔해 자동으로 입력한 후 Excel로 내보내세요.',
+    wasteMenuRecordTitle:'데이터 기록',
+    wasteMenuRecordSub:'일일 폐기 데이터 스캔/입력',
+    wasteMenuHistoryTitle:'이전 기록 검색',
+    wasteMenuHistorySub:'날짜별로 저장된 기록 보기/검색',
+    wasteHistorySearchPlaceholder:'상품 코드/설명 또는 날짜로 검색 (DD MM YYYY)',
+    wasteStartLabel:'시작',
+    wasteEndLabel:'종료',
+    wasteSearchBtn:'검색',
+    wasteHistoryTitle:'이전 기록',
+    wasteManageItemsBtn:'상품 관리',
+    wasteScanInputPlaceholder:'데이터 추가 (USB 스캐너로 스캔하거나 바코드를 입력한 후 Enter)',
+    wasteAddBtn:'추가',
+    wasteExportPdfBtn:'PDF로 내보내기',
+    wasteExportExcelBtn:'Excel로 내보내기',
+    wasteShowListTitle:'목록 표시',
+    wasteScrollHint:'더 보려면 스크롤하세요',
+    wasteDeleteDataBtn:'데이터 삭제',
+    wasteEmptyStateText:'아직 데이터가 없습니다 — 위에서 날짜를 선택하거나 바코드를 스캔해 기록을 시작하세요',
+    wasteAddDataTitle:'데이터 추가',
+    wasteEnterItemNoTitle:'상품 번호 입력',
+    wasteEnterItemNoSub:'상품 코드를 직접 입력',
+    wasteScanBarcodeTitle:'바코드 스캔',
+    wasteScanBarcodeSub:'카메라로 바코드 스캔',
+    wasteManualInputPlaceholder:'상품 코드를 입력하거나 이름으로 검색 후 Enter',
+    wasteAddNewItemTitle:'새 항목 추가',
+    wasteItemNoFieldLabelFull:'상품 번호 (Item No.)',
+    wasteItemNoPlaceholder:'상품 번호',
+    wasteNameFieldLabelFull:'상품명 (Name)',
+    wastePriceFieldLabelFull:'가격 (Price)',
+    wastePriceWord:'가격',
+    wastePhotoOptionalLabel:'상품 사진 촬영 (선택 사항)',
+    wasteWeightFieldLabelFull:'중량 (Weight)',
+    wasteWeightWord:'중량',
+    wasteWeightNote:'참고: 킬로그램 단위로 판매하는 상품은 실제 중량을 입력하세요',
+    wasteQtyFieldLabelFull:'수량 (Quantity MU)',
+    wasteQtyMuPlaceholder:'수량 (MU)',
+    wasteQtyNote:'참고: 개당(MU) 단위로 판매하는 상품은 실제 수량을 입력하세요',
+    wasteWastePhotoOptionalLabel:'폐기 상품 사진 촬영 (선택 사항)',
+    wasteNextBtn:'다음',
+    wasteQtyWord:'수량',
+    wasteEnterQtyPlaceholder:'수량 입력',
+    wasteOkBtn:'확인',
+    wasteTotalValueWord:'금액',
+    wasteItemCodePlaceholder:'상품 코드',
+    wasteItemDescPlaceholder:'상품 설명',
+    wasteUpdateDataBtn:'데이터 업데이트',
+    wasteColNo:'No.',
+    wasteColItem:'Item',
+    wasteColPhoto:'Photo',
+    wasteColDescription:'Description',
+    wasteColPrice:'Price',
+    wasteColWeight:'Weight',
+    wasteColQtyMU:'Quantity (MU)',
+    wasteColTotalAmount:'Total Amount',
+    wasteColTotalAmountBaht:'Total Amount (Baht)',
+    wasteSavedToast:'데이터가 저장되었습니다',
+    wasteItemNotFoundToast:'이 상품을 시스템에서 찾을 수 없습니다. "새 항목 추가" 버튼을 눌러 먼저 추가해 주세요',
+    wasteUseCodeFillManually:'코드 "{code}"를 사용하여 직접 상세 정보를 입력하세요',
+    wasteNoMatchFor:'"{query}"와 일치하는 상품이 없습니다',
+    wasteItemNoRequired:'상품 번호를 입력해 주세요',
+    wasteNameRequired:'상품명을 입력해 주세요',
+    wastePriceInvalid:'올바른 가격을 입력해 주세요',
+    wasteExcludedItemToast:'이 상품은 Weight Loss O2O에서 지원되지 않습니다 (소매 가격 없음)',
+    wasteNewItemSavedToast:'새 항목 "{desc}"을(를) 추가하고 시스템에 저장했습니다',
+    wasteWizardStep1Title:'1/2단계: 가격, 중량, 수량',
+    wasteWizardStep2Title:'2/2단계: 폐기 상품 사진',
+    wasteFinishBtn:'완료',
+    wastePriceRequired:'가격을 입력해 주세요',
+    wasteWeightRequired:'중량을 입력해 주세요',
+    wasteQtyRequired:'수량을 입력해 주세요',
+    wasteAddedItemToast:'{desc} 추가됨',
+    wasteItemNotFoundFillManually:'시스템에서 상품을 찾을 수 없습니다. 직접 상세 정보를 입력할 수 있습니다',
+    wasteManageItemsComingSoon:'이 기능은 나중에 추가될 예정입니다',
+    wasteNothingToExport:'아직 내보낼 데이터가 없습니다',
+    wasteLineBrowserExportWarning:'LINE 앱 내에서는 파일을 다운로드할 수 없습니다. 오른쪽 상단의 "..."을 누르고 "외부 브라우저에서 열기" (Chrome/Safari)를 선택한 후 다시 내보내 주세요',
+    wasteLineBrowserPdfWarning:'LINE 앱 내에서는 PDF를 인쇄/저장할 수 없습니다. 오른쪽 상단의 "..."을 누르고 "외부 브라우저에서 열기" (Chrome/Safari)를 선택한 후 다시 내보내 주세요',
+    wasteDateTimeLine:'날짜 {date} 시간 {time}',
+    wasteModeIndicatorPrefix:'현재 모드: {label}',
+    wasteRecordedAtPrefix:'기록 시각',
+    wasteNoHistoryFound:'이전 기록을 찾을 수 없습니다',
+    wasteNoHistoryMatchQuery:'"{query}"와 일치',
+    wasteDeleteConfirmPrompt:'데이터 삭제를 확인하려면 직원 코드를 입력하세요',
+    wasteWrongPinAlert:'코드가 올바르지 않습니다',
+    wasteDeleteConfirmMsg:'{date}의 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다',
+    wasteDeletedToast:'데이터가 삭제되었습니다',
+    wasteGrandTotalLabel:'총합계',
+    wastePdfNoteLabel:'비고',
+    wastePdfInspectorLabel:'검수자'
   },
   jp:{
     roleIntro:'利用モードを選択してください',
@@ -3110,7 +3556,96 @@ const I18N={
     fbDateColLabel:'日付',
     fbTimeColLabel:'時間',
     fbTextColLabel:'フィードバック・コメント',
-    fbSheetName:'フィードバック'
+    fbSheetName:'フィードバック',
+    wasteAppDesc:'日々の廃棄データを記録します。バーコードをスキャンすると自動入力され、Excelへ書き出せます。',
+    wasteMenuRecordTitle:'データを記録',
+    wasteMenuRecordSub:'日々の廃棄データをスキャン・入力',
+    wasteMenuHistoryTitle:'過去の記録を検索',
+    wasteMenuHistorySub:'日ごとに保存された記録を確認・検索',
+    wasteHistorySearchPlaceholder:'商品コード・説明または日付で検索 (DD MM YYYY)',
+    wasteStartLabel:'開始',
+    wasteEndLabel:'終了',
+    wasteSearchBtn:'検索',
+    wasteHistoryTitle:'過去の記録',
+    wasteManageItemsBtn:'商品管理',
+    wasteScanInputPlaceholder:'データを追加（USBスキャナーでスキャン、またはバーコードを入力してEnter）',
+    wasteAddBtn:'追加',
+    wasteExportPdfBtn:'PDFとして書き出す',
+    wasteExportExcelBtn:'Excelとして書き出す',
+    wasteShowListTitle:'リスト表示',
+    wasteScrollHint:'スクロールしてさらに表示',
+    wasteDeleteDataBtn:'データを削除',
+    wasteEmptyStateText:'まだデータがありません — 上の日付を選択するか、バーコードをスキャンして記録を開始してください',
+    wasteAddDataTitle:'データを追加',
+    wasteEnterItemNoTitle:'商品番号を入力',
+    wasteEnterItemNoSub:'商品コードを自分で入力',
+    wasteScanBarcodeTitle:'バーコードをスキャン',
+    wasteScanBarcodeSub:'カメラでバーコードをスキャン',
+    wasteManualInputPlaceholder:'商品コードを入力するか名前で検索してEnter',
+    wasteAddNewItemTitle:'新しい項目を追加',
+    wasteItemNoFieldLabelFull:'商品番号 (Item No.)',
+    wasteItemNoPlaceholder:'商品番号',
+    wasteNameFieldLabelFull:'商品名 (Name)',
+    wastePriceFieldLabelFull:'価格 (Price)',
+    wastePriceWord:'価格',
+    wastePhotoOptionalLabel:'商品写真を撮影（任意）',
+    wasteWeightFieldLabelFull:'重量 (Weight)',
+    wasteWeightWord:'重量',
+    wasteWeightNote:'注：キログラム単位の商品は実際の重量を入力してください',
+    wasteQtyFieldLabelFull:'数量 (Quantity MU)',
+    wasteQtyMuPlaceholder:'数量 (MU)',
+    wasteQtyNote:'注：個数(MU)単位の商品は実際の数量を入力してください',
+    wasteWastePhotoOptionalLabel:'廃棄商品の写真を撮影（任意）',
+    wasteNextBtn:'次へ',
+    wasteQtyWord:'数量',
+    wasteEnterQtyPlaceholder:'数量を入力',
+    wasteOkBtn:'OK',
+    wasteTotalValueWord:'金額',
+    wasteItemCodePlaceholder:'商品コード',
+    wasteItemDescPlaceholder:'商品の説明',
+    wasteUpdateDataBtn:'データを更新',
+    wasteColNo:'No.',
+    wasteColItem:'Item',
+    wasteColPhoto:'Photo',
+    wasteColDescription:'Description',
+    wasteColPrice:'Price',
+    wasteColWeight:'Weight',
+    wasteColQtyMU:'Quantity (MU)',
+    wasteColTotalAmount:'Total Amount',
+    wasteColTotalAmountBaht:'Total Amount (Baht)',
+    wasteSavedToast:'データを保存しました',
+    wasteItemNotFoundToast:'この商品はシステムに見つかりません。「新しい項目を追加」ボタンを押して先に追加してください',
+    wasteUseCodeFillManually:'コード「{code}」を使って詳細を自分で入力してください',
+    wasteNoMatchFor:'「{query}」に一致する商品が見つかりません',
+    wasteItemNoRequired:'商品番号を入力してください',
+    wasteNameRequired:'商品名を入力してください',
+    wastePriceInvalid:'正しい価格を入力してください',
+    wasteExcludedItemToast:'この商品はWeight Loss O2Oでは対応していません（小売価格なし）',
+    wasteNewItemSavedToast:'新しい項目「{desc}」を追加し、システムに保存しました',
+    wasteWizardStep1Title:'ステップ1/2：価格・重量・数量',
+    wasteWizardStep2Title:'ステップ2/2：廃棄商品の写真',
+    wasteFinishBtn:'完了',
+    wastePriceRequired:'価格を入力してください',
+    wasteWeightRequired:'重量を入力してください',
+    wasteQtyRequired:'数量を入力してください',
+    wasteAddedItemToast:'{desc}を追加しました',
+    wasteItemNotFoundFillManually:'システムに商品が見つかりません。詳細を自分で入力できます',
+    wasteManageItemsComingSoon:'この機能は後日追加予定です',
+    wasteNothingToExport:'まだ書き出すデータがありません',
+    wasteLineBrowserExportWarning:'LINEアプリ内ではファイルをダウンロードできません。右上の「…」をタップし「外部ブラウザで開く」(Chrome/Safari) を選択してから、もう一度書き出してください',
+    wasteLineBrowserPdfWarning:'LINEアプリ内ではPDFを印刷・保存できません。右上の「…」をタップし「外部ブラウザで開く」(Chrome/Safari) を選択してから、もう一度書き出してください',
+    wasteDateTimeLine:'日付 {date} 時刻 {time}',
+    wasteModeIndicatorPrefix:'現在のモード：{label}',
+    wasteRecordedAtPrefix:'記録日時',
+    wasteNoHistoryFound:'過去の記録が見つかりません',
+    wasteNoHistoryMatchQuery:'「{query}」に一致',
+    wasteDeleteConfirmPrompt:'データ削除を確認するため従業員コードを入力してください',
+    wasteWrongPinAlert:'コードが正しくありません',
+    wasteDeleteConfirmMsg:'{date}のデータを削除しますか？この操作は元に戻せません',
+    wasteDeletedToast:'データを削除しました',
+    wasteGrandTotalLabel:'合計',
+    wastePdfNoteLabel:'備考',
+    wastePdfInspectorLabel:'検品者'
   }
 };
 let currentLang=(function(){ try{ return localStorage.getItem('mf_lang')||'th'; }catch(e){ return 'th'; } })();
@@ -3152,6 +3687,10 @@ function refreshCurrentViewForLangChange(){
     if(typeof renderPromoGallery==='function') renderPromoGallery();
     if(typeof refreshInlineMap==='function') refreshInlineMap();
     if(typeof rerenderMapEditorSVG==='function') rerenderMapEditorSVG();
+    if(typeof renderWasteTable==='function') renderWasteTable();
+    if(typeof renderWasteRecordedAt==='function') renderWasteRecordedAt();
+    if(typeof updateWasteCurrentDateTimeDisplay==='function') updateWasteCurrentDateTimeDisplay();
+    if(typeof wasteTopBadgeShowsResult!=='undefined'&&wasteTopBadgeShowsResult&&currentWasteLog) setWasteTopBadgeToRange(currentWasteLog.startDate,currentWasteLog.endDate);
   }catch(e){}
 }
 let pendingCategoryKeyForLang=null;
@@ -7959,12 +8498,12 @@ async function deleteWasteLog(log){
 }
 async function confirmDeleteWasteLog(){
   if(!currentWasteLog)return;
-  const pin=prompt('กรอกรหัสพนักงานเพื่อยืนยันการลบข้อมูล');
+  const pin=prompt(t('wasteDeleteConfirmPrompt'));
   if(pin===null)return;
-  if(!STAFF_PINS.includes(pin.trim())){ alert('รหัสไม่ถูกต้อง'); return; }
-  if(!confirm('ยืนยันลบข้อมูลวันที่ '+formatWasteRangeDMY(currentWasteLog)+' ใช่หรือไม่? ไม่สามารถกู้คืนได้'))return;
+  if(!STAFF_PINS.includes(pin.trim())){ alert(t('wasteWrongPinAlert')); return; }
+  if(!confirm(t('wasteDeleteConfirmMsg',{date:formatWasteRangeDMY(currentWasteLog)})))return;
   await deleteWasteLog(currentWasteLog);
-  showWasteToast('ลบข้อมูลแล้ว');
+  showWasteToast(t('wasteDeletedToast'));
   showWasteHistoryView();
 }
 function todayDateStr(){
@@ -7985,7 +8524,7 @@ function updateWasteCurrentDateTimeDisplay(){
   if(!els.length)return;
   const d=new Date();
   const timeStr=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-  const text='วันที่ '+formatDateDMY(todayDateStr())+' เวลา '+timeStr;
+  const text=t('wasteDateTimeLine',{date:formatDateDMY(todayDateStr()),time:timeStr});
   els.forEach(el=>{
     if(el.id==='wasteTopDateTimeText'&&wasteTopBadgeShowsResult)return;
     el.textContent=text;
@@ -7995,7 +8534,7 @@ function setWasteTopBadgeToRange(startDate,endDate){
   wasteTopBadgeShowsResult=true;
   const el=document.getElementById('wasteTopDateTimeText');
   if(!el)return;
-  el.textContent='วันที่ '+formatDateDMY(startDate)+(startDate!==endDate?' - '+formatDateDMY(endDate):'');
+  el.textContent=t('printDateLabel')+' '+formatDateDMY(startDate)+(startDate!==endDate?' - '+formatDateDMY(endDate):'');
 }
 async function openWasteLog(){
   if(!isEmployee())return;
@@ -8031,7 +8570,7 @@ function showWasteRecordView(){
   wasteTopBadgeShowsResult=false;
   wasteTableReadOnly=false;
   updateWasteCurrentDateTimeDisplay();
-  setWasteModeIndicator('บันทึกข้อมูล');
+  setWasteModeIndicator(t('wasteMenuRecordTitle'));
   const today=todayDateStr();
   if(!currentWasteLog||currentWasteLog.startDate!==today||currentWasteLog.endDate!==today) selectWasteRange(today,today);
   else renderWasteTable();
@@ -8039,7 +8578,7 @@ function showWasteRecordView(){
 function setWasteModeIndicator(label){
   const el=document.getElementById('wasteModeIndicator');
   if(!el)return;
-  el.innerHTML='<i class="ti ti-circle-filled" aria-hidden="true" style="font-size:8px;vertical-align:middle"></i> กำลังอยู่ในโหมด: '+escapeHtml(label);
+  el.innerHTML='<i class="ti ti-circle-filled" aria-hidden="true" style="font-size:8px;vertical-align:middle"></i> '+escapeHtml(t('wasteModeIndicatorPrefix',{label:label}));
   el.classList.add('show');
 }
 function showWasteHistoryView(){
@@ -8064,7 +8603,7 @@ function openWasteHistoryRange(startDate,endDate){
   document.getElementById('wasteManageItemsBtn').style.display='inline-flex';
   setWasteTopBadgeToRange(startDate,endDate);
   renderWasteRecordedAt();
-  setWasteModeIndicator('ค้นหาข้อมูลย้อนหลัง');
+  setWasteModeIndicator(t('wasteMenuHistoryTitle'));
 }
 function renderWasteRecordedAt(){
   const el=document.getElementById('wasteRecordedAt');
@@ -8073,7 +8612,7 @@ function renderWasteRecordedAt(){
     const d=new Date(currentWasteLog.updatedAt);
     const dateStr=String(d.getDate()).padStart(2,'0')+' '+String(d.getMonth()+1).padStart(2,'0')+' '+d.getFullYear();
     const timeStr=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    el.innerHTML='<i class="ti ti-clock" aria-hidden="true"></i> บันทึกข้อมูลเมื่อ '+dateStr+' เวลา '+timeStr;
+    el.innerHTML='<i class="ti ti-clock" aria-hidden="true"></i> '+escapeHtml(t('wasteRecordedAtPrefix'))+' '+dateStr+' '+t('printTimeLabel')+' '+timeStr;
     el.classList.add('show');
   } else {
     el.textContent='';
@@ -8103,7 +8642,7 @@ function renderWasteHistoryList(query){
     });
   }
   if(!logs.length){
-    box.innerHTML='<div class="waste-empty-state">ไม่พบข้อมูลย้อนหลัง'+(q?'ที่ตรงกับ "'+escapeHtml(query)+'"':'')+'</div>';
+    box.innerHTML='<div class="waste-empty-state">'+escapeHtml(t('wasteNoHistoryFound'))+(q?' '+escapeHtml(t('wasteNoHistoryMatchQuery',{query:query})):'')+'</div>';
     return;
   }
   box.innerHTML=logs.map(log=>{
@@ -8116,7 +8655,7 @@ function renderWasteHistoryList(query){
     }
     return '<div class="waste-history-item" onclick="openWasteHistoryRange('+jsStr(log.startDate)+','+jsStr(log.endDate)+')">'
       +'<i class="ti ti-calendar-event" style="font-size:20px;color:#1B5FA8" aria-hidden="true"></i>'
-      +'<div><div class="waste-history-item-date">วันที่ '+escapeHtml(formatWasteRangeDMY(log))+'</div>'+matchHtml+'</div>'
+      +'<div><div class="waste-history-item-date">'+escapeHtml(t('printDateLabel'))+' '+escapeHtml(formatWasteRangeDMY(log))+'</div>'+matchHtml+'</div>'
       +'</div>';
   }).join('');
 }
@@ -8273,12 +8812,28 @@ function toggleWasteRowEdit(idx){
   wasteEditingRowIdx=wasteEditingRowIdx===idx?null:idx;
   renderWasteTable();
 }
+function wasteDescTranslateLineHtml(idx){
+  if(currentLang==='th')return '';
+  return '<div class="waste-row-desc-translated" data-waste-desc-idx="'+idx+'">'+escapeHtml(t('translatedNameLabel'))+' : …</div>';
+}
+function translateWasteRowDescs(){
+  if(currentLang==='th'||!currentWasteLog||!currentWasteLog.rows.length)return;
+  currentWasteLog.rows.forEach((r,i)=>{
+    if(!r.desc)return;
+    translateItemName(r.itemNo,r.desc,currentLang).then(translated=>{
+      document.querySelectorAll('[data-waste-desc-idx="'+i+'"]').forEach(el=>{
+        if(translated) el.textContent=t('translatedNameLabel')+' : '+translated;
+        else el.remove();
+      });
+    });
+  });
+}
 function renderWasteTable(){
   const wraps=['wasteTableWrap','wasteAddChoiceTableWrap'].map(id=>document.getElementById(id)).filter(Boolean);
   if(!wraps.length)return;
   let html;
   if(!currentWasteLog||!currentWasteLog.rows.length){
-    html='<div class="waste-empty-state">ยังไม่มีข้อมูล — เลือกวันที่ด้านบนหรือสแกนบาร์โค้ดเพื่อเริ่มบันทึก</div>';
+    html='<div class="waste-empty-state">'+escapeHtml(t('wasteEmptyStateText'))+'</div>';
   } else {
     const rowsHtml=currentWasteLog.rows.map((r,i)=>{
       const photoHtml=r.image?'<img src="'+r.image+'">':'<i class="ti ti-camera-plus" aria-hidden="true"></i>';
@@ -8287,39 +8842,39 @@ function renderWasteTable(){
           +'<td><div class="waste-row-no">'+r.no+'</div></td>'
           +'<td>'+escapeHtml(r.itemNo)+'</td>'
           +'<td><div class="waste-row-photo">'+photoHtml+'</div></td>'
-          +'<td>'+escapeHtml(r.desc)+'</td>'
-          +'<td>'+wasteStepperHtml(i,'piece',r.piece,'ราคา')+'</td>'
-          +'<td>'+wasteStepperHtml(i,'weight',r.weight,'น้ำหนัก')+'</td>'
-          +'<td>'+wasteStepperHtml(i,'qtyMU',r.qtyMU,'จำนวน')+'</td>'
-          +'<td>'+wasteStepperHtml(i,'totalAmount',r.totalAmount,'มูลค่า')+'</td>'
+          +'<td>'+escapeHtml(r.desc)+wasteDescTranslateLineHtml(i)+'</td>'
+          +'<td>'+wasteStepperHtml(i,'piece',r.piece,t('wastePriceWord'))+'</td>'
+          +'<td>'+wasteStepperHtml(i,'weight',r.weight,t('wasteWeightWord'))+'</td>'
+          +'<td>'+wasteStepperHtml(i,'qtyMU',r.qtyMU,t('wasteQtyWord'))+'</td>'
+          +'<td>'+wasteStepperHtml(i,'totalAmount',r.totalAmount,t('wasteTotalValueWord'))+'</td>'
           +'</tr>';
       }
       const editing=i===wasteEditingRowIdx;
       const itemNoCell=editing
-        ?'<input type="text" class="waste-item-input" placeholder="รหัสสินค้า" value="'+escapeHtml(r.itemNo)+'" oninput="updateWasteRowField('+i+',\'itemNo\',this.value)">'
+        ?'<input type="text" class="waste-item-input" placeholder="'+escapeHtml(t('wasteItemCodePlaceholder'))+'" value="'+escapeHtml(r.itemNo)+'" oninput="updateWasteRowField('+i+',\'itemNo\',this.value)">'
         :'<div class="waste-row-locked-text">'+escapeHtml(r.itemNo)+'</div>';
       const descCell=editing
-        ?'<input type="text" placeholder="รายละเอียดสินค้า" value="'+escapeHtml(r.desc)+'" oninput="updateWasteRowField('+i+',\'desc\',this.value)">'
-        :'<div class="waste-row-locked-text">'+escapeHtml(r.desc)+'</div>';
+        ?'<input type="text" placeholder="'+escapeHtml(t('wasteItemDescPlaceholder'))+'" value="'+escapeHtml(r.desc)+'" oninput="updateWasteRowField('+i+',\'desc\',this.value)">'
+        :'<div class="waste-row-locked-text">'+escapeHtml(r.desc)+wasteDescTranslateLineHtml(i)+'</div>';
       const photoCell=editing
         ?'<div class="waste-row-photo" onclick="openWasteRowPhotoPicker('+i+')">'+photoHtml+'</div>'
         :'<div class="waste-row-photo">'+photoHtml+'</div>';
       return '<tr>'
-        +'<td><div class="waste-row-edit-btn'+(editing?' waste-row-edit-btn-active':'')+'" onclick="toggleWasteRowEdit('+i+')"><i class="ti '+(editing?'ti-check':'ti-pencil')+'" aria-hidden="true"></i><span>'+(editing?'อัพเดทข้อมูล':'แก้ไข')+'</span></div></td>'
+        +'<td><div class="waste-row-edit-btn'+(editing?' waste-row-edit-btn-active':'')+'" onclick="toggleWasteRowEdit('+i+')"><i class="ti '+(editing?'ti-check':'ti-pencil')+'" aria-hidden="true"></i><span>'+escapeHtml(editing?t('wasteUpdateDataBtn'):t('empEditBtn'))+'</span></div></td>'
         +'<td><div class="waste-row-no">'+r.no+'</div></td>'
         +'<td>'+itemNoCell+'</td>'
         +'<td>'+photoCell+'</td>'
         +'<td>'+descCell+'</td>'
-        +'<td>'+wasteStepperHtml(i,'piece',r.piece,'ราคา',!editing)+'</td>'
-        +'<td>'+wasteStepperHtml(i,'weight',r.weight,'น้ำหนัก',!editing)+'</td>'
-        +'<td>'+wasteStepperHtml(i,'qtyMU',r.qtyMU,'จำนวน',!editing)+'</td>'
-        +'<td>'+wasteStepperHtml(i,'totalAmount',r.totalAmount,'มูลค่า',!editing)+'</td>'
+        +'<td>'+wasteStepperHtml(i,'piece',r.piece,t('wastePriceWord'),!editing)+'</td>'
+        +'<td>'+wasteStepperHtml(i,'weight',r.weight,t('wasteWeightWord'),!editing)+'</td>'
+        +'<td>'+wasteStepperHtml(i,'qtyMU',r.qtyMU,t('wasteQtyWord'),!editing)+'</td>'
+        +'<td>'+wasteStepperHtml(i,'totalAmount',r.totalAmount,t('wasteTotalValueWord'),!editing)+'</td>'
         +'<td><i class="ti ti-trash waste-row-del" onclick="removeWasteRow('+i+')"></i></td>'
         +'</tr>';
     }).join('');
     html='<div class="waste-table-wrap"><table class="waste-table"><thead><tr>'
-      +(wasteTableReadOnly?'':'<th><i class="ti ti-pencil" aria-hidden="true"></i> แก้ไข</th>')
-      +'<th>No.</th><th>Item</th><th>รูป Item</th><th>Description</th><th>Price</th><th>Weight</th><th>Quantity (MU)</th><th>Total Amount</th>'+(wasteTableReadOnly?'':'<th></th>')
+      +(wasteTableReadOnly?'':'<th><i class="ti ti-pencil" aria-hidden="true"></i> '+escapeHtml(t('empEditBtn'))+'</th>')
+      +'<th>'+escapeHtml(t('wasteColNo'))+'</th><th>'+escapeHtml(t('wasteColItem'))+'</th><th>'+escapeHtml(t('wasteColPhoto'))+'</th><th>'+escapeHtml(t('wasteColDescription'))+'</th><th>'+escapeHtml(t('wasteColPrice'))+'</th><th>'+escapeHtml(t('wasteColWeight'))+'</th><th>'+escapeHtml(t('wasteColQtyMU'))+'</th><th>'+escapeHtml(t('wasteColTotalAmount'))+'</th>'+(wasteTableReadOnly?'':'<th></th>')
       +'</tr></thead><tbody>'+rowsHtml+'</tbody></table></div>';
   }
   wraps.forEach(wrap=>{
@@ -8330,6 +8885,7 @@ function renderWasteTable(){
     if(nextScroll) nextScroll.scrollLeft=scrollLeft;
   });
   updateWasteTotalDisplay();
+  translateWasteRowDescs();
 }
 let wasteRowPhotoTargetIdx=null;
 function openWasteRowPhotoPicker(idx){
@@ -8380,7 +8936,7 @@ function closeWasteAddChoice(){
 function saveWasteAddChoiceProgress(){
   if(!currentWasteLog)return;
   persistCurrentWasteLog();
-  showWasteToast('บันทึกข้อมูลแล้ว');
+  showWasteToast(t('wasteSavedToast'));
   closeWasteAddChoice();
 }
 function chooseWasteAddManual(){
@@ -8409,7 +8965,7 @@ function handleWasteAddChoiceManualInput(code){
     }
   }
   if(!item){
-    showWasteToast('ไม่พบสินค้านี้ในระบบ กรุณากดปุ่ม "เพิ่มรายการใหม่" เพื่อเพิ่มรายการก่อน');
+    showWasteToast(t('wasteItemNotFoundToast'));
     return;
   }
   document.getElementById('wasteAddChoiceManualInput').value='';
@@ -8436,12 +8992,12 @@ function renderWasteManualSearchResults(query){
   const hasExactMatch=!!pluMatchItemNo||matches.some(item=>(item.itemNo||'').toLowerCase()===q);
   const addNewHtml=hasExactMatch?'':'<div class="waste-search-result-item waste-search-add-new" onclick="openWasteNewItemForm('+jsStr(query)+')">'
       +'<div class="waste-search-result-text">'
-        +'<div class="waste-search-result-itemno">เพิ่มรายการใหม่</div>'
-        +'<div class="waste-search-result-desc">ใช้รหัส "'+escapeHtml(query)+'" กรอกรายละเอียดเอง</div>'
+        +'<div class="waste-search-result-itemno">'+escapeHtml(t('wasteAddNewItemTitle'))+'</div>'
+        +'<div class="waste-search-result-desc">'+escapeHtml(t('wasteUseCodeFillManually',{code:query}))+'</div>'
       +'</div>'
       +'<i class="ti ti-plus" aria-hidden="true"></i>'
     +'</div>';
-  if(!matches.length){ box.innerHTML='<div class="waste-search-empty">ไม่พบสินค้าที่ตรงกับ "'+escapeHtml(query)+'"</div><div class="waste-search-results">'+addNewHtml+'</div>'; return; }
+  if(!matches.length){ box.innerHTML='<div class="waste-search-empty">'+escapeHtml(t('wasteNoMatchFor',{query:query}))+'</div><div class="waste-search-results">'+addNewHtml+'</div>'; return; }
   box.innerHTML='<div class="waste-search-results">'+matches.map((item,i)=>
     '<div class="waste-search-result-item" onclick="selectWasteManualSearchResult('+jsStr(item.itemNo)+')">'
       +'<div class="waste-search-result-text">'
@@ -8466,7 +9022,7 @@ function openWasteNewItemForm(code){
   document.getElementById('wasteNewItemDesc').value='';
   document.getElementById('wasteNewItemPrice').value='';
   wasteNewItemPhotoDataUrl=null;
-  document.getElementById('wasteNewItemPhoto').innerHTML='<i class="ti ti-camera-plus" aria-hidden="true"></i><span>ถ่ายรูปสินค้า (ไม่บังคับ)</span>';
+  document.getElementById('wasteNewItemPhoto').innerHTML='<i class="ti ti-camera-plus" aria-hidden="true"></i><span>'+escapeHtml(t('wastePhotoOptionalLabel'))+'</span>';
   document.getElementById('wasteNewItemOverlay').style.display='flex';
 }
 function closeWasteNewItemForm(){
@@ -8498,12 +9054,12 @@ async function confirmWasteNewItem(){
   const itemNo=document.getElementById('wasteNewItemNo').value.trim();
   const desc=document.getElementById('wasteNewItemDesc').value.trim();
   const priceStr=document.getElementById('wasteNewItemPrice').value.trim();
-  if(!itemNo){ alert('กรุณากรอกเลขไอเท็ม'); return; }
-  if(!desc){ alert('กรุณากรอกชื่อสินค้า'); return; }
+  if(!itemNo){ alert(t('wasteItemNoRequired')); return; }
+  if(!desc){ alert(t('wasteNameRequired')); return; }
   const price=parseFloat(priceStr);
-  if(!priceStr||isNaN(price)||price<0){ alert('กรุณากรอกราคาให้ถูกต้อง'); return; }
+  if(!priceStr||isNaN(price)||price<0){ alert(t('wastePriceInvalid')); return; }
   if(WASTE_EXCLUDED_ITEMS.has(itemNo)){
-    showWasteToast('ไอเท็มนี้ไม่รองรับใน Weight Loss O2O (ไม่มีราคาขายปลีก)');
+    showWasteToast(t('wasteExcludedItemToast'));
     return;
   }
   if(!PRODUCTS_INDEX[itemNo]){
@@ -8514,7 +9070,7 @@ async function confirmWasteNewItem(){
   document.getElementById('wasteAddChoiceManualInput').value='';
   closeWasteManualEntry();
   applyWasteScanCode(itemNo);
-  showWasteToast('เพิ่มรายการใหม่ "'+desc+'" และบันทึกไว้ในระบบแล้ว');
+  showWasteToast(t('wasteNewItemSavedToast',{desc:desc}));
 }
 let wasteWizardRowIdx=null;
 let wasteWizardStep=1;
@@ -8531,7 +9087,7 @@ function openWasteItemWizard(idx){
   document.getElementById('wasteWizardWeight').disabled=false;
   document.getElementById('wasteWizardQty').value=row.qtyMU||'1';
   document.getElementById('wasteWizardQty').disabled=false;
-  document.getElementById('wasteWizardPhoto').innerHTML='<i class="ti ti-camera-plus" aria-hidden="true"></i><span>ถ่ายรูปของเสีย (ไม่บังคับ)</span>';
+  document.getElementById('wasteWizardPhoto').innerHTML='<i class="ti ti-camera-plus" aria-hidden="true"></i><span>'+escapeHtml(t('wasteWastePhotoOptionalLabel'))+'</span>';
   renderWasteWizardStep();
   wasteWizardUpdateTotalDisplay();
   document.getElementById('wasteWizardOverlay').style.display='flex';
@@ -8569,10 +9125,10 @@ function wasteWizardQtyInput(val){
 function renderWasteWizardStep(){
   document.getElementById('wasteWizardStep1').style.display=wasteWizardStep===1?'block':'none';
   document.getElementById('wasteWizardStep2').style.display=wasteWizardStep===2?'block':'none';
-  const titles={1:'ขั้นที่ 1/2: ราคา น้ำหนัก และจำนวน',2:'ขั้นที่ 2/2: ถ่ายรูปของเสีย'};
+  const titles={1:t('wasteWizardStep1Title'),2:t('wasteWizardStep2Title')};
   document.getElementById('wasteWizardTitle').textContent=titles[wasteWizardStep];
   const btn=document.getElementById('wasteWizardNextBtn');
-  btn.innerHTML=wasteWizardStep<2?'ถัดไป <i class="ti ti-arrow-right" aria-hidden="true"></i>':'<i class="ti ti-check" aria-hidden="true"></i> เสร็จสิ้น';
+  btn.innerHTML=wasteWizardStep<2?(escapeHtml(t('wasteNextBtn'))+' <i class="ti ti-arrow-right" aria-hidden="true"></i>'):('<i class="ti ti-check" aria-hidden="true"></i> '+escapeHtml(t('wasteFinishBtn')));
   document.getElementById('wasteWizardBackBtn').style.display=wasteWizardStep>1?'inline-flex':'none';
 }
 function wasteWizardBack(){
@@ -8585,9 +9141,9 @@ function wasteWizardNext(){
     const piece=document.getElementById('wasteWizardPiece').value.trim();
     const weight=document.getElementById('wasteWizardWeight').value.trim();
     const qty=document.getElementById('wasteWizardQty').value.trim();
-    if(!piece){ alert('กรุณากรอกราคา'); return; }
-    if(!weight){ alert('กรุณากรอกน้ำหนัก'); return; }
-    if(!qty){ alert('กรุณากรอกจำนวน'); return; }
+    if(!piece){ alert(t('wastePriceRequired')); return; }
+    if(!weight){ alert(t('wasteWeightRequired')); return; }
+    if(!qty){ alert(t('wasteQtyRequired')); return; }
     wasteWizardStep=2;
     renderWasteWizardStep();
     return;
@@ -8652,12 +9208,12 @@ function applyWasteScanCode(code){
   }
   const resolvedItemNo=item?item.itemNo:code;
   if(WASTE_EXCLUDED_ITEMS.has(resolvedItemNo)){
-    showWasteToast('ไอเท็มนี้ไม่รองรับใน Weight Loss O2O (ไม่มีราคาขายปลีก)');
+    showWasteToast(t('wasteExcludedItemToast'));
     return;
   }
   const row=emptyWasteRow(currentWasteLog.rows.length+1);
-  if(item){ row.itemNo=item.itemNo; row.desc=item.desc; if(item.customImage)row.image=item.customImage; showWasteToast('เพิ่ม '+item.desc+' แล้ว'); }
-  else { row.itemNo=code; showWasteToast('ไม่พบสินค้าในระบบ กรอกรายละเอียดเองได้'); }
+  if(item){ row.itemNo=item.itemNo; row.desc=item.desc; if(item.customImage)row.image=item.customImage; showWasteToast(t('wasteAddedItemToast',{desc:item.desc})); }
+  else { row.itemNo=code; showWasteToast(t('wasteItemNotFoundFillManually')); }
   const priceEntry=WASTE_ITEM_PRICES[row.itemNo];
   if(priceEntry){
     const normalizeDesc=s=>(s||'').replace(/\s+/g,'').trim();
@@ -8675,15 +9231,15 @@ function openWasteBarcodeScan(){
   openPalletScan('wastelog');
 }
 function openWasteManageItems(){
-  showWasteToast('ฟังก์ชันนี้จะเพิ่มให้ทีหลังครับ');
+  showWasteToast(t('wasteManageItemsComingSoon'));
 }
 function wasteExcelDateStr(log){
   const toSlash=iso=>{ const p=(iso||'').split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso; };
   return log.startDate===log.endDate?toSlash(log.startDate):(toSlash(log.startDate)+' - '+toSlash(log.endDate));
 }
 async function exportWasteExcel(){
-  if(!currentWasteLog||!currentWasteLog.rows.length){ alert('ยังไม่มีข้อมูลให้ส่งออก'); return; }
-  if(isLineBrowser()){ alert('ดาวน์โหลดไฟล์ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง'); return; }
+  if(!currentWasteLog||!currentWasteLog.rows.length){ alert(t('wasteNothingToExport')); return; }
+  if(isLineBrowser()){ alert(t('wasteLineBrowserExportWarning')); return; }
   const thinBorder={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
   const headerFill={type:'pattern',pattern:'solid',fgColor:{argb:'FFBDD7EE'}};
   const wb=new ExcelJS.Workbook();
@@ -8694,11 +9250,11 @@ async function exportWasteExcel(){
   const nowTimeStr=String(recordedAt.getHours()).padStart(2,'0')+':'+String(recordedAt.getMinutes()).padStart(2,'0');
   sheet.mergeCells(1,1,1,7);
   const dateCell=sheet.getCell(1,1);
-  dateCell.value='วันที่ '+wasteExcelDateStr(currentWasteLog)+' เวลา '+nowTimeStr+' น.';
+  dateCell.value=t('wasteDateTimeLine',{date:wasteExcelDateStr(currentWasteLog),time:nowTimeStr});
   dateCell.font={bold:true};
 
   const headerRowIdx=2;
-  ['No.','Item','Description','Price','Weight','Quantity (MU)','Total Amount (บาท)'].forEach((h,i)=>{
+  [t('wasteColNo'),t('wasteColItem'),t('wasteColDescription'),t('wasteColPrice'),t('wasteColWeight'),t('wasteColQtyMU'),t('wasteColTotalAmountBaht')].forEach((h,i)=>{
     const cell=sheet.getCell(headerRowIdx,i+1);
     cell.value=h;
     cell.font={bold:true};
@@ -8730,7 +9286,7 @@ async function exportWasteExcel(){
   });
   const sumRowIdx=headerRowIdx+1+rowCount;
   sheet.mergeCells(sumRowIdx,1,sumRowIdx,3);
-  sheet.getCell(sumRowIdx,1).value='รวมทั้งหมด';
+  sheet.getCell(sumRowIdx,1).value=t('wasteGrandTotalLabel');
   sheet.getCell(sumRowIdx,1).alignment={horizontal:'center'};
   sheet.getCell(sumRowIdx,4).value=sums.piece;
   sheet.getCell(sumRowIdx,5).value=sums.weight;
@@ -8764,8 +9320,8 @@ function wasteLogTotalAmount(){
 // ส่งออกเป็น PDF จริงๆ ผ่านหน้าต่างพิมพ์ของเบราว์เซอร์ (เลือก "บันทึกเป็น PDF" ในกล่องพิมพ์ได้) เหมือน printPalletList()
 // ไม่ต้องโหลดไลบรารีสร้าง PDF เพิ่ม ใช้กลไก @media print + #palletPrintArea ที่มีอยู่แล้วในระบบ
 function exportWastePdf(){
-  if(!currentWasteLog||!currentWasteLog.rows.length){ alert('ยังไม่มีข้อมูลให้ส่งออก'); return; }
-  if(isLineBrowser()){ alert('พิมพ์/บันทึก PDF ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง'); return; }
+  if(!currentWasteLog||!currentWasteLog.rows.length){ alert(t('wasteNothingToExport')); return; }
+  if(isLineBrowser()){ alert(t('wasteLineBrowserPdfWarning')); return; }
   const area=document.getElementById('palletPrintArea');
   const rowCount=currentWasteLog.rows.length;
   let rowsHtml='';
@@ -8789,18 +9345,18 @@ function exportWastePdf(){
     +'<div class="waste-print-meta-row"><div class="waste-print-meta-label">Record Date :</div><div>'+escapeHtml(wasteExcelDateStr(currentWasteLog))+' '+nowTimeStr+'</div></div>'
     +'</div>';
   html+='<table class="waste-print-table"><thead><tr>'
-    +'<th>No.</th>'
-    +'<th>Item</th>'
-    +'<th>Description</th>'
-    +'<th>Price</th>'
-    +'<th>Weight</th>'
-    +'<th>Quantity (MU)</th>'
-    +'<th>Total Amount(บาท)</th>'
-    +'<th>รูป item</th>'
+    +'<th>'+escapeHtml(t('wasteColNo'))+'</th>'
+    +'<th>'+escapeHtml(t('wasteColItem'))+'</th>'
+    +'<th>'+escapeHtml(t('wasteColDescription'))+'</th>'
+    +'<th>'+escapeHtml(t('wasteColPrice'))+'</th>'
+    +'<th>'+escapeHtml(t('wasteColWeight'))+'</th>'
+    +'<th>'+escapeHtml(t('wasteColQtyMU'))+'</th>'
+    +'<th>'+escapeHtml(t('wasteColTotalAmountBaht'))+'</th>'
+    +'<th>'+escapeHtml(t('wasteColPhoto'))+'</th>'
     +'</tr></thead><tbody>'+rowsHtml
     +'<tr class="waste-print-total-row">'
       +'<td>'+rowCount+'</td>'
-      +'<td colspan="2" class="waste-print-total-label">รวมทั้งหมด</td>'
+      +'<td colspan="2" class="waste-print-total-label">'+escapeHtml(t('wasteGrandTotalLabel'))+'</td>'
       +'<td>'+numFmt(sums.piece)+'</td>'
       +'<td>'+numFmt(sums.weight)+'</td>'
       +'<td>'+numFmt(sums.qty)+'</td>'
@@ -8809,8 +9365,8 @@ function exportWastePdf(){
     +'</tr>'
     +'</tbody></table>';
   html+='<div class="waste-print-footer">'
-    +'<div class="waste-print-note"><i class="ti ti-note" aria-hidden="true"></i> หมายเหตุ : <span class="waste-print-dots"></span></div>'
-    +'<div class="waste-print-signoff"><span>ผู้ตรวจสอบ : <span class="waste-print-dots-short"></span></span><span>วันที่ : <span class="waste-print-dots-short"></span></span></div>'
+    +'<div class="waste-print-note"><i class="ti ti-note" aria-hidden="true"></i> '+escapeHtml(t('wastePdfNoteLabel'))+' : <span class="waste-print-dots"></span></div>'
+    +'<div class="waste-print-signoff"><span>'+escapeHtml(t('wastePdfInspectorLabel'))+' : <span class="waste-print-dots-short"></span></span><span>'+escapeHtml(t('printDateLabel'))+' : <span class="waste-print-dots-short"></span></span></div>'
     +'</div>';
   html+='</div>';
   area.innerHTML=html;
