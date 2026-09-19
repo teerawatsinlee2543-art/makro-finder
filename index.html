@@ -340,6 +340,10 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-history-item-total{margin-left:auto;font-weight:800;color:#1B5FA8;font-variant-numeric:tabular-nums;flex-shrink:0}
 .waste-search-results{margin-top:10px;max-height:260px;overflow-y:auto}
 .waste-search-result-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e3eefb;border-radius:10px;cursor:pointer;margin-bottom:6px}
+.waste-search-add-new{background:#fff8de;border-color:#f0e2a8;color:#8a6d1d}
+.waste-search-add-new:hover{background:#fdf0c0}
+.waste-search-add-new .waste-search-result-itemno{color:#8a6d1d}
+.waste-search-add-new i{font-size:20px;color:#c9a227;flex-shrink:0}
 .waste-search-result-item:hover{background:#f4f9fe;border-color:#bfdbf7}
 .waste-search-result-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .waste-search-result-itemno{font-weight:800;color:#123a63;font-size:12.5px}
@@ -8221,7 +8225,15 @@ function renderWasteManualSearchResults(query){
   const q=(query||'').trim().toLowerCase();
   if(!q){ box.innerHTML=''; return; }
   const matches=PRODUCTS_BY_KEY.filter(item=>(item.desc||'').toLowerCase().includes(q)||(item.itemNo||'').toLowerCase().includes(q)).slice(0,8);
-  if(!matches.length){ box.innerHTML='<div class="waste-search-empty">ไม่พบสินค้าที่ตรงกับ "'+escapeHtml(query)+'"</div>'; return; }
+  const hasExactMatch=matches.some(item=>(item.itemNo||'').toLowerCase()===q);
+  const addNewHtml=hasExactMatch?'':'<div class="waste-search-result-item waste-search-add-new" onclick="handleWasteAddChoiceManualInput('+jsStr(query)+')">'
+      +'<div class="waste-search-result-text">'
+        +'<div class="waste-search-result-itemno">เพิ่มรายการใหม่</div>'
+        +'<div class="waste-search-result-desc">ใช้รหัส "'+escapeHtml(query)+'" กรอกรายละเอียดเอง</div>'
+      +'</div>'
+      +'<i class="ti ti-plus" aria-hidden="true"></i>'
+    +'</div>';
+  if(!matches.length){ box.innerHTML='<div class="waste-search-empty">ไม่พบสินค้าที่ตรงกับ "'+escapeHtml(query)+'"</div><div class="waste-search-results">'+addNewHtml+'</div>'; return; }
   box.innerHTML='<div class="waste-search-results">'+matches.map((item,i)=>
     '<div class="waste-search-result-item" onclick="selectWasteManualSearchResult('+jsStr(item.itemNo)+')">'
       +'<div class="waste-search-result-text">'
@@ -8230,7 +8242,7 @@ function renderWasteManualSearchResults(query){
       +'</div>'
       +'<div class="waste-search-result-thumb" id="wasteSearchResultImg'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'
     +'</div>'
-  ).join('')+'</div>';
+  ).join('')+addNewHtml+'</div>';
   matches.forEach((item,i)=>{
     applyItemImage(document.getElementById('wasteSearchResultImg'+i),item);
   });
