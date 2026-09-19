@@ -8240,7 +8240,7 @@ function renderWasteTable(){
         +'</tr>';
     }).join('');
     html='<div class="waste-table-wrap"><table class="waste-table"><thead><tr>'
-      +'<th>No.</th><th>Item</th><th>รูป Item</th><th>Description</th><th>Piece</th><th>Weight</th><th>Quantity (MU)</th><th>Total Amount</th>'+(wasteTableReadOnly?'':'<th></th>')
+      +'<th>No.</th><th>Item</th><th>รูป Item</th><th>Description</th><th>Price</th><th>Weight</th><th>Quantity (MU)</th><th>Total Amount</th>'+(wasteTableReadOnly?'':'<th></th>')
       +'</tr></thead><tbody>'+rowsHtml+'</tbody></table></div>';
   }
   wraps.forEach(wrap=>{
@@ -8552,7 +8552,7 @@ async function exportWasteExcel(){
   dateCell.font={bold:true};
 
   const headerRowIdx=2;
-  ['No.','Item','Description','Piece','Weight','Quantity (MU)','Total Amount (บาท)'].forEach((h,i)=>{
+  ['No.','Item','Description','Price','Weight','Quantity (MU)','Total Amount (บาท)'].forEach((h,i)=>{
     const cell=sheet.getCell(headerRowIdx,i+1);
     cell.value=h;
     cell.font={bold:true};
@@ -8646,7 +8646,7 @@ function exportWastePdf(){
     +'<th>No.</th>'
     +'<th>Item</th>'
     +'<th>Description</th>'
-    +'<th>Piece</th>'
+    +'<th>Price</th>'
     +'<th>Weight</th>'
     +'<th>Quantity (MU)</th>'
     +'<th>Total Amount(บาท)</th>'
