@@ -1787,6 +1787,7 @@ const I18N={
     wasteQtyRequired:'กรุณากรอกจำนวน',
     wasteAddedItemToast:'เพิ่ม {desc} แล้ว',
     wasteItemNotFoundFillManually:'ไม่พบสินค้าในระบบ กรอกรายละเอียดเองได้',
+    wasteScanNotFoundToast:'ไม่พบข้อมูล',
     wasteManageItemsComingSoon:'ฟังก์ชันนี้จะเพิ่มให้ทีหลังครับ',
     wasteNothingToExport:'ยังไม่มีข้อมูลให้ส่งออก',
     wasteLineBrowserExportWarning:'ดาวน์โหลดไฟล์ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง',
@@ -2156,6 +2157,7 @@ const I18N={
     wasteQtyRequired:'Please enter the quantity',
     wasteAddedItemToast:'Added {desc}',
     wasteItemNotFoundFillManually:'Item not found in the system. You can fill in the details yourself.',
+    wasteScanNotFoundToast:'Not found',
     wasteManageItemsComingSoon:'This feature will be added later.',
     wasteNothingToExport:'There is no data to export yet',
     wasteLineBrowserExportWarning:'Files can\'t be downloaded inside the LINE app. Please tap "..." in the top-right corner and choose "Open in external browser" (Chrome/Safari), then export again.',
@@ -2525,6 +2527,7 @@ const I18N={
     wasteQtyRequired:'请输入数量',
     wasteAddedItemToast:'已添加 {desc}',
     wasteItemNotFoundFillManually:'系统中未找到该商品，可自行填写详细信息',
+    wasteScanNotFoundToast:'未找到数据',
     wasteManageItemsComingSoon:'此功能将在稍后推出',
     wasteNothingToExport:'暂无数据可导出',
     wasteLineBrowserExportWarning:'无法在 LINE 应用内下载文件，请点击右上角的 "..." 并选择"在外部浏览器中打开"（Chrome/Safari），然后再重新导出',
@@ -2894,6 +2897,7 @@ const I18N={
     wasteQtyRequired:'ကျေးဇူးပြု၍ အရေအတွက် ရိုက်ထည့်ပါ',
     wasteAddedItemToast:'{desc} ကို ထည့်ပြီးပါပြီ',
     wasteItemNotFoundFillManually:'စနစ်ထဲတွင် ပစ္စည်းကို မတွေ့ပါ။ အသေးစိတ်ကို ကိုယ်တိုင်ဖြည့်နိုင်ပါသည်',
+    wasteScanNotFoundToast:'ဒေတာမတွေ့ပါ',
     wasteManageItemsComingSoon:'ဤလုပ်ဆောင်ချက်ကို နောက်ပိုင်းတွင် ထည့်သွင်းပေးပါမည်',
     wasteNothingToExport:'ထုတ်ယူရန် ဒေတာ မရှိသေးပါ',
     wasteLineBrowserExportWarning:'LINE အက်ပ်တွင်း ဖိုင်ကို ဒေါင်းလုဒ်လုပ်၍ မရပါ။ ညာဘက်အပေါ်ထောင့်ရှိ "..." ကို နှိပ်ပြီး "ပြင်ပဘရောက်ဇာဖြင့် ဖွင့်ရန်" (Chrome/Safari) ကို ရွေးချယ်ပြီးမှ ထပ်မံထုတ်ယူပါ',
@@ -3263,6 +3267,7 @@ const I18N={
     wasteQtyRequired:'수량을 입력해 주세요',
     wasteAddedItemToast:'{desc} 추가됨',
     wasteItemNotFoundFillManually:'시스템에서 상품을 찾을 수 없습니다. 직접 상세 정보를 입력할 수 있습니다',
+    wasteScanNotFoundToast:'데이터를 찾을 수 없습니다',
     wasteManageItemsComingSoon:'이 기능은 나중에 추가될 예정입니다',
     wasteNothingToExport:'아직 내보낼 데이터가 없습니다',
     wasteLineBrowserExportWarning:'LINE 앱 내에서는 파일을 다운로드할 수 없습니다. 오른쪽 상단의 "..."을 누르고 "외부 브라우저에서 열기" (Chrome/Safari)를 선택한 후 다시 내보내 주세요',
@@ -3632,6 +3637,7 @@ const I18N={
     wasteQtyRequired:'数量を入力してください',
     wasteAddedItemToast:'{desc}を追加しました',
     wasteItemNotFoundFillManually:'システムに商品が見つかりません。詳細を自分で入力できます',
+    wasteScanNotFoundToast:'データが見つかりません',
     wasteManageItemsComingSoon:'この機能は後日追加予定です',
     wasteNothingToExport:'まだ書き出すデータがありません',
     wasteLineBrowserExportWarning:'LINEアプリ内ではファイルをダウンロードできません。右上の「…」をタップし「外部ブラウザで開く」(Chrome/Safari) を選択してから、もう一度書き出してください',
@@ -9243,9 +9249,12 @@ function applyWasteScanCode(code){
     showWasteToast(t('wasteExcludedItemToast'));
     return;
   }
+  if(!item){
+    showWasteToast(t('wasteScanNotFoundToast'));
+    return;
+  }
   const row=emptyWasteRow(currentWasteLog.rows.length+1);
-  if(item){ row.itemNo=item.itemNo; row.desc=item.desc; if(item.customImage)row.image=item.customImage; showWasteToast(t('wasteAddedItemToast',{desc:item.desc})); }
-  else { row.itemNo=code; showWasteToast(t('wasteItemNotFoundFillManually')); }
+  row.itemNo=item.itemNo; row.desc=item.desc; if(item.customImage)row.image=item.customImage; showWasteToast(t('wasteAddedItemToast',{desc:item.desc}));
   const priceEntry=WASTE_ITEM_PRICES[row.itemNo];
   if(priceEntry){
     const normalizeDesc=s=>(s||'').replace(/\s+/g,'').trim();
