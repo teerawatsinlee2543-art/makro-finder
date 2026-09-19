@@ -6330,7 +6330,8 @@ function openPalletScan(mode){
     if(!r){ palletScanConfirmCode=null;palletScanConfirmCount=0; return; }
     const code=r.getText().trim();
     if(code===palletScanConfirmCode){ palletScanConfirmCount++; } else { palletScanConfirmCode=code; palletScanConfirmCount=1; }
-    if(palletScanConfirmCount>=2){
+    const requiredScanConfirms=palletScanMode==='wastelog'?1:2;
+    if(palletScanConfirmCount>=requiredScanConfirms){
       handlePalletScanCode(code);
     }
   }).then(controls=>{
