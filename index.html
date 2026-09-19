@@ -360,6 +360,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-search-result-item:hover{background:#f4f9fe;border-color:#bfdbf7}
 .waste-search-result-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .waste-search-result-itemno{font-weight:800;color:#123a63;font-size:12.5px}
+.waste-search-plu-badge{background:#eaf2fb;color:#1B5FA8;font-weight:700;font-size:10.5px;padding:1px 6px;border-radius:5px;margin-left:4px}
 .waste-search-result-desc{font-size:12px;color:#5a86ad}
 .waste-search-result-thumb{width:40px;height:40px;border-radius:8px;background:#eaf2fb;border:1px solid #cfe2f7;display:flex;align-items:center;justify-content:center;color:#1B5FA8;font-size:18px;flex-shrink:0;overflow:hidden}
 .waste-search-result-thumb img{width:100%;height:100%;object-fit:cover}
@@ -8413,10 +8414,21 @@ function handleWasteAddChoiceManualInput(code){
 function renderWasteManualSearchResults(query){
   const box=document.getElementById('wasteManualSearchResults');
   if(!box)return;
-  const q=(query||'').trim().toLowerCase();
+  const rawQuery=(query||'').trim();
+  const q=rawQuery.toLowerCase();
   if(!q){ box.innerHTML=''; return; }
-  const matches=PRODUCTS_BY_KEY.filter(item=>(item.desc||'').toLowerCase().includes(q)||(item.itemNo||'').toLowerCase().includes(q)).slice(0,8);
-  const hasExactMatch=matches.some(item=>(item.itemNo||'').toLowerCase()===q);
+  let matches=PRODUCTS_BY_KEY.filter(item=>(item.desc||'').toLowerCase().includes(q)||(item.itemNo||'').toLowerCase().includes(q)).slice(0,8);
+  let pluMatchItemNo=null;
+  const pluResolvedItemNo=resolveWastePluCode(rawQuery);
+  if(pluResolvedItemNo!==rawQuery){
+    const pluItem=PRODUCTS_BY_KEY.find(x=>x.itemNo===pluResolvedItemNo);
+    if(pluItem){
+      pluMatchItemNo=pluItem.itemNo;
+      if(!matches.some(m=>m.itemNo===pluItem.itemNo)) matches=[pluItem,...matches];
+      matches=matches.slice(0,8);
+    }
+  }
+  const hasExactMatch=!!pluMatchItemNo||matches.some(item=>(item.itemNo||'').toLowerCase()===q);
   const addNewHtml=hasExactMatch?'':'<div class="waste-search-result-item waste-search-add-new" onclick="openWasteNewItemForm('+jsStr(query)+')">'
       +'<div class="waste-search-result-text">'
         +'<div class="waste-search-result-itemno">เพิ่มรายการใหม่</div>'
@@ -8428,7 +8440,7 @@ function renderWasteManualSearchResults(query){
   box.innerHTML='<div class="waste-search-results">'+matches.map((item,i)=>
     '<div class="waste-search-result-item" onclick="selectWasteManualSearchResult('+jsStr(item.itemNo)+')">'
       +'<div class="waste-search-result-text">'
-        +'<div class="waste-search-result-itemno">'+escapeHtml(item.itemNo)+'</div>'
+        +'<div class="waste-search-result-itemno">'+escapeHtml(item.itemNo)+(item.itemNo===pluMatchItemNo?' <span class="waste-search-plu-badge">PLU '+escapeHtml(rawQuery)+'</span>':'')+'</div>'
         +'<div class="waste-search-result-desc">'+escapeHtml(item.desc)+'</div>'
       +'</div>'
       +'<div class="waste-search-result-thumb" id="wasteSearchResultImg'+i+'"><i class="ti ti-package" aria-hidden="true"></i></div>'
