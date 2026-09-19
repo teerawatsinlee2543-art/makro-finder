@@ -279,6 +279,8 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-datetime-display i{color:#1B5FA8;font-size:17px}
 .waste-table-toolbar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .waste-section-title{font-size:14px;font-weight:800;color:#123a63;margin-bottom:8px}
+.waste-recorded-at{font-size:12.5px;color:#5a86ad;margin-top:-4px;margin-bottom:10px;display:none}
+.waste-recorded-at.show{display:block}
 .waste-table-toolbar .waste-btn{flex:1;min-width:180px}
 .waste-table-wrap{overflow-x:auto;border:1px solid #bfdbf7;border-radius:12px;-webkit-overflow-scrolling:touch;scrollbar-width:auto}
 .waste-table-wrap::-webkit-scrollbar{height:10px}
@@ -1199,12 +1201,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <button type="button" class="waste-btn waste-btn-green" onclick="exportWasteExcel()"><i class="ti ti-file-upload" aria-hidden="true"></i> ส่งออกเป็น Excel</button>
         </div>
         <div class="waste-section-title">แสดงรายการ</div>
+        <div class="waste-recorded-at" id="wasteRecordedAt"></div>
         <div class="waste-scroll-hint"><i class="ti ti-arrow-left" aria-hidden="true"></i> เลื่อนดูข้อมูลเพิ่มเติม <i class="ti ti-arrow-right" aria-hidden="true"></i></div>
         <div id="wasteTableWrap"></div>
         <div class="waste-total-row">
           <i class="ti ti-coin" aria-hidden="true"></i>
           <span class="waste-total-label"><i class="ti ti-calculator" aria-hidden="true"></i> Total Amount</span>
           <span class="waste-total-value" id="wasteTotalValue">0.00</span>
+          <button type="button" class="waste-btn waste-btn-red" style="margin-left:auto" onclick="confirmDeleteWasteLog()"><i class="ti ti-trash" aria-hidden="true"></i> ลบข้อมูล</button>
         </div>
       </div>
     </div>
@@ -7766,6 +7770,25 @@ async function saveWasteLog(log){
     catch(e){ console.error('บันทึกข้อมูลของเสียไป Firestore ไม่สำเร็จ',e); }
   }
 }
+async function deleteWasteLog(log){
+  const local=loadWasteLogsLocal().filter(l=>!(l.startDate===log.startDate&&l.endDate===log.endDate));
+  saveWasteLogsLocal(local);
+  WASTE_LOGS_CACHE=WASTE_LOGS_CACHE.filter(l=>!(l.startDate===log.startDate&&l.endDate===log.endDate));
+  if(wasteLogCollectionRef){
+    try{ await wasteLogCollectionRef.doc(wasteLogDocId(log.startDate,log.endDate)).delete(); }
+    catch(e){ console.error('ลบข้อมูลของเสียจาก Firestore ไม่สำเร็จ',e); }
+  }
+}
+async function confirmDeleteWasteLog(){
+  if(!currentWasteLog)return;
+  const pin=prompt('กรอกรหัสพนักงานเพื่อยืนยันการลบข้อมูล');
+  if(pin===null)return;
+  if(!STAFF_PINS.includes(pin.trim())){ alert('รหัสไม่ถูกต้อง'); return; }
+  if(!confirm('ยืนยันลบข้อมูลวันที่ '+formatWasteRangeDMY(currentWasteLog)+' ใช่หรือไม่? ไม่สามารถกู้คืนได้'))return;
+  await deleteWasteLog(currentWasteLog);
+  showWasteToast('ลบข้อมูลแล้ว');
+  showWasteHistoryView();
+}
 function todayDateStr(){
   const d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -7852,6 +7875,21 @@ function openWasteHistoryRange(startDate,endDate){
   document.getElementById('wasteRecordResultBlock').style.display='block';
   document.getElementById('wasteManageItemsBtn').style.display='inline-flex';
   setWasteTopBadgeToRange(startDate,endDate);
+  renderWasteRecordedAt();
+}
+function renderWasteRecordedAt(){
+  const el=document.getElementById('wasteRecordedAt');
+  if(!el)return;
+  if(currentWasteLog&&currentWasteLog.updatedAt){
+    const d=new Date(currentWasteLog.updatedAt);
+    const dateStr=String(d.getDate()).padStart(2,'0')+' '+String(d.getMonth()+1).padStart(2,'0')+' '+d.getFullYear();
+    const timeStr=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    el.innerHTML='<i class="ti ti-clock" aria-hidden="true"></i> บันทึกข้อมูลเมื่อ '+dateStr+' เวลา '+timeStr;
+    el.classList.add('show');
+  } else {
+    el.textContent='';
+    el.classList.remove('show');
+  }
 }
 function formatDateDMY(dateStr){
   const parts=(dateStr||'').split('-');
