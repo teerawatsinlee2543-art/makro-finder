@@ -1282,6 +1282,29 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div id="wasteManualSearchResults"></div>
   </div>
 </div>
+<div class="waste-overlay" id="wasteNewItemOverlay" style="display:none;z-index:2455">
+  <div class="waste-panel" style="max-width:420px">
+    <div class="waste-header">
+      <div class="waste-title" style="font-size:17px">เพิ่มรายการใหม่</div>
+      <div class="waste-header-right">
+        <i class="ti ti-x waste-close-btn" onclick="closeWasteNewItemForm()" aria-label="ปิด"></i>
+      </div>
+    </div>
+    <div class="waste-scan-input-wrap" style="margin-bottom:10px">
+      <i class="ti ti-barcode" aria-hidden="true"></i>
+      <input type="text" id="wasteNewItemNo" placeholder="เลขไอเท็ม">
+    </div>
+    <div class="waste-scan-input-wrap" style="margin-bottom:10px">
+      <i class="ti ti-tag" aria-hidden="true"></i>
+      <input type="text" id="wasteNewItemDesc" placeholder="ชื่อสินค้า">
+    </div>
+    <div class="waste-scan-input-wrap" style="margin-bottom:14px">
+      <i class="ti ti-coin" aria-hidden="true"></i>
+      <input type="number" id="wasteNewItemPrice" placeholder="ราคา">
+    </div>
+    <button type="button" class="waste-btn waste-btn-green waste-btn-block" onclick="confirmWasteNewItem()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึก</button>
+  </div>
+</div>
 <div class="waste-overlay" id="wasteFieldEditOverlay" style="display:none;z-index:2460">
   <div class="waste-panel" style="max-width:340px">
     <div class="waste-header">
@@ -6849,8 +6872,33 @@ function loadWasteItemPrices(){
   wasteItemPricesLoadStarted=true;
   fetch('waste_item_prices.json',{cache:'no-store'})
     .then(r=>r.ok?r.json():{})
-    .then(data=>{ WASTE_ITEM_PRICES=data||{}; WASTE_ITEM_PRICES_READY=true; })
-    .catch(()=>{ WASTE_ITEM_PRICES={}; WASTE_ITEM_PRICES_READY=true; });
+    .then(data=>{ WASTE_ITEM_PRICES=data||{}; WASTE_ITEM_PRICES_READY=true; loadCustomWastePrices(); })
+    .catch(()=>{ WASTE_ITEM_PRICES={}; WASTE_ITEM_PRICES_READY=true; loadCustomWastePrices(); });
+}
+// ==== ไอเท็ม+ราคาที่พนักงานเพิ่มเองใน Weight Loss O2O (ไม่มีในไฟล์ waste_item_prices.json) ====
+// เก็บถาวรใน Firestore (คอลเลกชันเดียวกับข้อมูลของเสีย) แยกจากไฟล์ราคาหลักที่เป็นไฟล์นิ่ง
+let CUSTOM_WASTE_PRICES_CACHE=[];
+function newCustomWastePriceId(){ return 'CUSTPRICE-'+Date.now()+'-'+Math.random().toString(36).slice(2,8); }
+async function loadCustomWastePrices(){
+  if(!wasteLogCollectionRef){ return; }
+  try{
+    const snap=await wasteLogCollectionRef.get();
+    const list=[];
+    snap.forEach(doc=>{ const d=doc.data(); if(d&&d.type==='customWastePrice') list.push(d); });
+    CUSTOM_WASTE_PRICES_CACHE=list;
+    list.forEach(ci=>{ WASTE_ITEM_PRICES[ci.itemNo]=[ci.price,ci.desc]; });
+  }catch(e){ console.error('โหลดราคาไอเท็มที่เพิ่มเองไม่สำเร็จ',e); }
+}
+async function saveCustomWastePrice(itemNo,desc,price){
+  const sess=getSession();
+  const addedBy=sess?(sess.name+' · '+sess.dept):t('unknownNameFallback');
+  const data={id:newCustomWastePriceId(),type:'customWastePrice',itemNo,desc,price,addedBy,ts:Date.now()};
+  CUSTOM_WASTE_PRICES_CACHE.push(data);
+  WASTE_ITEM_PRICES[itemNo]=[price,desc];
+  if(wasteLogCollectionRef){
+    try{ await wasteLogCollectionRef.doc(data.id).set(data); }
+    catch(e){ console.error('บันทึกราคาไอเท็มใหม่ไป Firestore ไม่สำเร็จ',e); }
+  }
 }
 
 function applyEmployeeOnlyVisibility(){
@@ -8226,7 +8274,7 @@ function renderWasteManualSearchResults(query){
   if(!q){ box.innerHTML=''; return; }
   const matches=PRODUCTS_BY_KEY.filter(item=>(item.desc||'').toLowerCase().includes(q)||(item.itemNo||'').toLowerCase().includes(q)).slice(0,8);
   const hasExactMatch=matches.some(item=>(item.itemNo||'').toLowerCase()===q);
-  const addNewHtml=hasExactMatch?'':'<div class="waste-search-result-item waste-search-add-new" onclick="handleWasteAddChoiceManualInput('+jsStr(query)+')">'
+  const addNewHtml=hasExactMatch?'':'<div class="waste-search-result-item waste-search-add-new" onclick="openWasteNewItemForm('+jsStr(query)+')">'
       +'<div class="waste-search-result-text">'
         +'<div class="waste-search-result-itemno">เพิ่มรายการใหม่</div>'
         +'<div class="waste-search-result-desc">ใช้รหัส "'+escapeHtml(query)+'" กรอกรายละเอียดเอง</div>'
@@ -8251,6 +8299,37 @@ function selectWasteManualSearchResult(itemNo){
   document.getElementById('wasteAddChoiceManualInput').value='';
   closeWasteManualEntry();
   applyWasteScanCode(itemNo);
+}
+function openWasteNewItemForm(code){
+  document.getElementById('wasteNewItemNo').value=(code||'').trim();
+  document.getElementById('wasteNewItemDesc').value='';
+  document.getElementById('wasteNewItemPrice').value='';
+  document.getElementById('wasteNewItemOverlay').style.display='flex';
+}
+function closeWasteNewItemForm(){
+  document.getElementById('wasteNewItemOverlay').style.display='none';
+}
+async function confirmWasteNewItem(){
+  const itemNo=document.getElementById('wasteNewItemNo').value.trim();
+  const desc=document.getElementById('wasteNewItemDesc').value.trim();
+  const priceStr=document.getElementById('wasteNewItemPrice').value.trim();
+  if(!itemNo){ alert('กรุณากรอกเลขไอเท็ม'); return; }
+  if(!desc){ alert('กรุณากรอกชื่อสินค้า'); return; }
+  const price=parseFloat(priceStr);
+  if(!priceStr||isNaN(price)||price<0){ alert('กรุณากรอกราคาให้ถูกต้อง'); return; }
+  if(WASTE_EXCLUDED_ITEMS.has(itemNo)){
+    showWasteToast('ไอเท็มนี้ไม่รองรับใน Weight Loss O2O (ไม่มีราคาขายปลีก)');
+    return;
+  }
+  if(!PRODUCTS_INDEX[itemNo]){
+    await saveCustomItem(desc,itemNo,'',null);
+  }
+  await saveCustomWastePrice(itemNo,desc,price);
+  closeWasteNewItemForm();
+  document.getElementById('wasteAddChoiceManualInput').value='';
+  closeWasteManualEntry();
+  applyWasteScanCode(itemNo);
+  showWasteToast('เพิ่มรายการใหม่ "'+desc+'" และบันทึกไว้ในระบบแล้ว');
 }
 function chooseWasteAddScan(){
   closeWasteAddChoice();
