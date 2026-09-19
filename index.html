@@ -6302,6 +6302,7 @@ let palletScanControls=null,palletScanMode=null;
 let lastPalletScanCode=null,lastPalletScanAt=0;
 const SCAN_DEBOUNCE_MS=1500;
 let palletScanConfirmCode=null,palletScanConfirmCount=0;
+let palletScanLocked=false;
 function openPalletScan(mode){
   palletScanMode=mode;
   const overlay=document.getElementById('palletScanOverlay');
@@ -6310,6 +6311,7 @@ function openPalletScan(mode){
   err.style.display='none';
   hint.style.display='block';
   palletScanConfirmCode=null;palletScanConfirmCount=0;
+  palletScanLocked=false;
   document.getElementById('palletScanTitle').textContent=mode==='manage'?t('scanTitleManage'):(mode==='find'?t('scanTitleFind'):(mode==='palletloc'?t('scanTitleBay'):(mode==='newitembarcode'?t('scanTitleNewItemBarcode'):(mode==='movepallettarget'?t('scanTitleMoveTarget'):(mode==='wastelog'?'สแกนบาร์โค้ดสินค้าของเสีย':t('scanTitleDelete'))))));
   overlay.style.display='flex';
   if(isLineAndroidBrowser()){
@@ -6326,17 +6328,19 @@ function openPalletScan(mode){
   }
   const video=document.getElementById('palletScanVideo');
   getZXingReader().decodeFromConstraints({video:SCAN_VIDEO_CONSTRAINTS},video,(result)=>{
+    if(palletScanLocked)return;
     const r=result||tryRotatedDecode(video);
     if(!r){ palletScanConfirmCode=null;palletScanConfirmCount=0; return; }
     const code=r.getText().trim();
     if(code===palletScanConfirmCode){ palletScanConfirmCount++; } else { palletScanConfirmCode=code; palletScanConfirmCount=1; }
     const requiredScanConfirms=palletScanMode==='wastelog'?1:2;
     if(palletScanConfirmCount>=requiredScanConfirms){
+      palletScanLocked=true;
       handlePalletScanCode(code);
     }
   }).then(controls=>{
     palletScanControls=controls;
-    if(overlay.style.display==='none'){ controls.stop(); palletScanControls=null; }
+    if(overlay.style.display==='none'||palletScanLocked){ controls.stop(); palletScanControls=null; }
   }).catch(()=>{
     if(isLineAndroidBrowser()){
       err.innerHTML=lineCameraErrorHtml();
