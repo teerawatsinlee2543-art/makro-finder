@@ -253,8 +253,9 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-close-btn:hover{color:#123a63}
 .waste-scan-row{display:flex;gap:10px;margin-bottom:12px}
 .waste-scan-input-wrap{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:#f4f9fe;border:1px solid #bfdbf7;border-radius:10px;padding:10px 14px;color:#1B5FA8}
-.waste-scan-input-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:#173350;font-size:14px;font-family:inherit}
+.waste-scan-input-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:#173350;font-size:16px;font-family:inherit}
 .waste-scan-input-wrap input::placeholder{color:#9db3c9}
+.waste-manual-confirm-btn{font-size:22px;color:#1B5FA8;cursor:pointer;flex-shrink:0}
 .waste-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13.5px;font-weight:700;border-radius:10px;padding:10px 16px;cursor:pointer;white-space:nowrap;font-family:inherit}
 .waste-btn-outline{background:#fff;border:1.5px solid #1B5FA8;color:#1B5FA8}
 .waste-btn-outline:hover{background:#eaf2fb}
@@ -338,7 +339,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 @media (max-width:640px){
   .waste-table{font-size:11.5px}
   .waste-scan-row{flex-direction:column}
-  .waste-total-row .waste-btn{flex:1;min-width:0;margin-left:0!important}
+  .waste-total-row .waste-btn{flex:1;min-width:120px;margin-left:0!important}
   .waste-datetime-row{flex-direction:column;align-items:stretch}
   .waste-day-row .waste-btn{width:100%}
 }
@@ -1253,6 +1254,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div class="waste-scan-input-wrap" style="margin-bottom:0">
       <i class="ti ti-keyboard" aria-hidden="true"></i>
       <input type="text" id="wasteAddChoiceManualInput" placeholder="พิมพ์รหัสสินค้าหรือค้นหาด้วยชื่อ แล้วกด Enter" oninput="renderWasteManualSearchResults(this.value)" onkeydown="if(event.key==='Enter')handleWasteAddChoiceManualInput(this.value)">
+      <i class="ti ti-circle-check waste-manual-confirm-btn" aria-hidden="true" onclick="handleWasteAddChoiceManualInput(document.getElementById('wasteAddChoiceManualInput').value)"></i>
     </div>
     <div id="wasteManualSearchResults"></div>
   </div>
