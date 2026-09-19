@@ -36,7 +36,7 @@
 html,body{background:var(--color-background-secondary);height:100%;font-family:'Sarabun','Segoe UI',sans-serif;overflow-x:hidden}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 body{margin:0;padding:0;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;caret-color:transparent}
-#wasteAddChoiceManualInput,#wasteFieldEditInput,#wasteHistorySearch{caret-color:#1B5FA8}
+input,textarea,[contenteditable]{caret-color:#1B5FA8}
 input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default}
 /* เปิดให้เลือก/คัดลอกข้อความได้เฉพาะจุดที่มีข้อมูลจริงที่ผู้ใช้อาจอยากคัดลอก (ชื่อสินค้า/Item No/บาร์โค้ด/ตำแหน่งจัดเก็บ/รายละเอียด) แม้ปิด user-select ทั้งแอปไว้เพื่อกันเคอร์เซอร์กระพริบตอนแตะค้างตัวหนังสือทั่วไป */
 #foundCard,#resultsList,#navInfoBody,.pallet-body,.pallet-item-info{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default}
@@ -319,6 +319,9 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-stepper-placeholder{color:#a9bed3}
 .waste-stepper-readonly{padding:2px 4px;color:#173350;cursor:default}
 .waste-row-photo{width:36px;height:36px;border-radius:8px;background:#eaf2fb;border:1px solid #cfe2f7;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#1B5FA8;overflow:hidden;flex-shrink:0;margin:0 auto}
+.waste-new-item-photo{width:100%;height:90px;border-radius:10px;background:#f4f9fe;border:1.5px dashed #bfdbf7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:#1B5FA8;overflow:hidden;margin-bottom:14px;font-size:12.5px;box-sizing:border-box}
+.waste-new-item-photo i{font-size:24px}
+.waste-new-item-photo img{width:100%;height:100%;object-fit:cover}
 .waste-row-photo img{width:100%;height:100%;object-fit:cover}
 .waste-row-del{color:#d9534f;cursor:pointer;font-size:16px;flex-shrink:0}
 .waste-empty-state{border:1.5px dashed #bfdbf7;border-radius:12px;padding:22px;text-align:center;color:#5a86ad;font-size:13px;margin-top:6px;background:#f4f9fe}
@@ -1298,10 +1301,15 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <i class="ti ti-tag" aria-hidden="true"></i>
       <input type="text" id="wasteNewItemDesc" placeholder="ชื่อสินค้า">
     </div>
-    <div class="waste-scan-input-wrap" style="margin-bottom:14px">
+    <div class="waste-scan-input-wrap" style="margin-bottom:10px">
       <i class="ti ti-coin" aria-hidden="true"></i>
       <input type="number" id="wasteNewItemPrice" placeholder="ราคา">
     </div>
+    <div class="waste-new-item-photo" id="wasteNewItemPhoto" onclick="document.getElementById('wasteNewItemPhotoInput').click()">
+      <i class="ti ti-camera-plus" aria-hidden="true"></i>
+      <span>ถ่ายรูปสินค้า (ไม่บังคับ)</span>
+    </div>
+    <input type="file" id="wasteNewItemPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleWasteNewItemPhotoSelect(event)">
     <button type="button" class="waste-btn waste-btn-green waste-btn-block" onclick="confirmWasteNewItem()"><i class="ti ti-device-floppy" aria-hidden="true"></i> บันทึก</button>
   </div>
 </div>
@@ -8300,14 +8308,39 @@ function selectWasteManualSearchResult(itemNo){
   closeWasteManualEntry();
   applyWasteScanCode(itemNo);
 }
+let wasteNewItemPhotoDataUrl=null;
 function openWasteNewItemForm(code){
   document.getElementById('wasteNewItemNo').value=(code||'').trim();
   document.getElementById('wasteNewItemDesc').value='';
   document.getElementById('wasteNewItemPrice').value='';
+  wasteNewItemPhotoDataUrl=null;
+  document.getElementById('wasteNewItemPhoto').innerHTML='<i class="ti ti-camera-plus" aria-hidden="true"></i><span>ถ่ายรูปสินค้า (ไม่บังคับ)</span>';
   document.getElementById('wasteNewItemOverlay').style.display='flex';
 }
 function closeWasteNewItemForm(){
   document.getElementById('wasteNewItemOverlay').style.display='none';
+}
+function handleWasteNewItemPhotoSelect(evt){
+  const file=evt.target.files&&evt.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    const img=new Image();
+    img.onload=function(){
+      const maxW=300;
+      const scale=Math.min(1,maxW/img.width);
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(img.width*scale);
+      canvas.height=Math.round(img.height*scale);
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      wasteNewItemPhotoDataUrl=canvas.toDataURL('image/jpeg',0.6);
+      document.getElementById('wasteNewItemPhoto').innerHTML='<img src="'+wasteNewItemPhotoDataUrl+'">';
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+  evt.target.value='';
 }
 async function confirmWasteNewItem(){
   const itemNo=document.getElementById('wasteNewItemNo').value.trim();
@@ -8322,7 +8355,7 @@ async function confirmWasteNewItem(){
     return;
   }
   if(!PRODUCTS_INDEX[itemNo]){
-    await saveCustomItem(desc,itemNo,'',null);
+    await saveCustomItem(desc,itemNo,'',wasteNewItemPhotoDataUrl);
   }
   await saveCustomWastePrice(itemNo,desc,price);
   closeWasteNewItemForm();
@@ -8349,7 +8382,7 @@ function applyWasteScanCode(code){
     return;
   }
   const row=emptyWasteRow(currentWasteLog.rows.length+1);
-  if(item){ row.itemNo=item.itemNo; row.desc=item.desc; showWasteToast('เพิ่ม '+item.desc+' แล้ว'); }
+  if(item){ row.itemNo=item.itemNo; row.desc=item.desc; if(item.customImage)row.image=item.customImage; showWasteToast('เพิ่ม '+item.desc+' แล้ว'); }
   else { row.itemNo=code; showWasteToast('ไม่พบสินค้าในระบบ กรอกรายละเอียดเองได้'); }
   const priceEntry=WASTE_ITEM_PRICES[row.itemNo];
   if(priceEntry){
