@@ -264,6 +264,8 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-scan-input-wrap{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:#f4f9fe;border:1px solid #bfdbf7;border-radius:10px;padding:10px 14px;color:#1B5FA8}
 .waste-scan-input-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:#173350;font-size:16px;font-family:inherit}
 .waste-scan-input-wrap input::placeholder{color:#9db3c9}
+.waste-scan-input-wrap input:disabled{color:#9db3c9}
+.waste-scan-input-wrap:has(input:disabled){background:#eceff2;border-color:#d7dde3}
 .waste-manual-confirm-btn{font-size:20px;color:#ffffff;cursor:pointer;flex-shrink:0;background:#2E9E5B;border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
 .waste-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13.5px;font-weight:700;border-radius:10px;padding:10px 16px;cursor:pointer;white-space:nowrap;font-family:inherit}
 .waste-btn-outline{background:#fff;border:1.5px solid #1B5FA8;color:#1B5FA8}
@@ -8420,19 +8422,29 @@ function openWasteItemWizard(idx){
   const row=currentWasteLog.rows[idx];
   document.getElementById('wasteWizardPiece').value=row.piece||'';
   document.getElementById('wasteWizardWeight').value=row.weight||'';
+  document.getElementById('wasteWizardWeight').disabled=false;
   document.getElementById('wasteWizardQty').value=row.qtyMU||'1';
+  document.getElementById('wasteWizardQty').disabled=false;
   document.getElementById('wasteWizardPhoto').innerHTML='<i class="ti ti-camera-plus" aria-hidden="true"></i><span>ถ่ายรูปของเสีย (ไม่บังคับ)</span>';
   renderWasteWizardStep();
   document.getElementById('wasteWizardOverlay').style.display='flex';
 }
 function wasteWizardWeightInput(val){
+  const qtyEl=document.getElementById('wasteWizardQty');
   if(val!==''&&parseFloat(val)!==0){
-    document.getElementById('wasteWizardQty').value='0';
+    qtyEl.value='0';
+    qtyEl.disabled=true;
+  } else {
+    qtyEl.disabled=false;
   }
 }
 function wasteWizardQtyInput(val){
+  const weightEl=document.getElementById('wasteWizardWeight');
   if(val!==''&&parseFloat(val)!==0){
-    document.getElementById('wasteWizardWeight').value='0';
+    weightEl.value='0';
+    weightEl.disabled=true;
+  } else {
+    weightEl.disabled=false;
   }
 }
 function renderWasteWizardStep(){
