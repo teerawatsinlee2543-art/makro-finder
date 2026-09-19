@@ -8055,7 +8055,13 @@ function renderWasteTable(){
       +'<th>No.</th><th>Item</th><th>รูป Item</th><th>Description</th><th>Piece</th><th>Weight</th><th>Quantity (MU)</th><th>Total Amount</th>'+(wasteTableReadOnly?'':'<th></th>')
       +'</tr></thead><tbody>'+rowsHtml+'</tbody></table></div>';
   }
-  wraps.forEach(wrap=>{ wrap.innerHTML=html; });
+  wraps.forEach(wrap=>{
+    const prevScroll=wrap.querySelector('.waste-table-wrap');
+    const scrollLeft=prevScroll?prevScroll.scrollLeft:0;
+    wrap.innerHTML=html;
+    const nextScroll=wrap.querySelector('.waste-table-wrap');
+    if(nextScroll) nextScroll.scrollLeft=scrollLeft;
+  });
   updateWasteTotalDisplay();
 }
 let wasteRowPhotoTargetIdx=null;
