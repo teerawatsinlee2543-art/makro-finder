@@ -1335,13 +1335,13 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <label style="display:block;margin-bottom:4px">น้ำหนัก (Weight)</label>
       <div class="waste-scan-input-wrap" style="margin-bottom:6px">
         <i class="ti ti-weight" aria-hidden="true"></i>
-        <input type="number" id="wasteWizardWeight" placeholder="น้ำหนัก">
+        <input type="number" id="wasteWizardWeight" placeholder="น้ำหนัก" oninput="wasteWizardWeightInput(this.value)">
       </div>
       <div class="waste-wizard-note">หมายเหตุ: ถ้าสินค้าเป็น กก. ละ ให้ใส่น้ำหนักจริง</div>
       <label style="display:block;margin-bottom:4px">จำนวน (Quantity MU)</label>
       <div class="waste-scan-input-wrap" style="margin-bottom:6px">
         <i class="ti ti-package" aria-hidden="true"></i>
-        <input type="number" id="wasteWizardQty" placeholder="จำนวน (MU)">
+        <input type="number" id="wasteWizardQty" placeholder="จำนวน (MU)" oninput="wasteWizardQtyInput(this.value)">
       </div>
       <div class="waste-wizard-note">หมายเหตุ: ถ้าสินค้าเป็นชิ้น (MU) ให้ใส่จำนวนตามจริง</div>
     </div>
@@ -8424,6 +8424,16 @@ function openWasteItemWizard(idx){
   document.getElementById('wasteWizardPhoto').innerHTML='<i class="ti ti-camera-plus" aria-hidden="true"></i><span>ถ่ายรูปของเสีย (ไม่บังคับ)</span>';
   renderWasteWizardStep();
   document.getElementById('wasteWizardOverlay').style.display='flex';
+}
+function wasteWizardWeightInput(val){
+  if(val!==''&&parseFloat(val)!==0){
+    document.getElementById('wasteWizardQty').value='0';
+  }
+}
+function wasteWizardQtyInput(val){
+  if(val!==''&&parseFloat(val)!==0){
+    document.getElementById('wasteWizardWeight').value='0';
+  }
 }
 function renderWasteWizardStep(){
   document.getElementById('wasteWizardStep1').style.display=wasteWizardStep===1?'block':'none';
