@@ -329,6 +329,8 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .waste-new-item-photo img{width:100%;height:100%;object-fit:cover}
 .waste-row-photo img{width:100%;height:100%;object-fit:cover}
 .waste-row-del{color:#d9534f;cursor:pointer;font-size:16px;flex-shrink:0}
+.waste-row-edit-btn{color:#1B5FA8;cursor:pointer;font-size:16px}
+.waste-row-locked-text{color:#173350;padding:2px 4px}
 .waste-empty-state{border:1.5px dashed #bfdbf7;border-radius:12px;padding:22px;text-align:center;color:#5a86ad;font-size:13px;margin-top:6px;background:#f4f9fe}
 .waste-total-row{display:flex;align-items:center;gap:10px;margin-top:14px;padding:10px 14px;border-radius:10px;background:#eaf2fb;font-size:13px;flex-wrap:wrap}
 .waste-total-row i.ti-coin{color:#1B5FA8;font-size:18px}
@@ -8076,6 +8078,7 @@ function selectWasteRange(startDate,endDate){
   document.getElementById('wasteEndDateInput').value=endDate;
   const existing=WASTE_LOGS_CACHE.find(l=>l.startDate===startDate&&l.endDate===endDate);
   currentWasteLog=existing?JSON.parse(JSON.stringify(existing)):newWasteLog(startDate,endDate);
+  wasteEditingRowIdx=null;
   renderWasteTable();
 }
 function addWasteDay(){
@@ -8089,6 +8092,7 @@ function removeWasteRow(idx){
   if(!confirm(t('confirmRemoveFromPallet')))return;
   currentWasteLog.rows.splice(idx,1);
   currentWasteLog.rows.forEach((r,i)=>{ r.no=i+1; });
+  wasteEditingRowIdx=null;
   renderWasteTable();
 }
 function computeWasteRowTotal(row){
@@ -8122,9 +8126,9 @@ function updateWasteTotalDisplay(){
     if(el) el.textContent=text;
   });
 }
-function wasteStepperHtml(idx,field,value,placeholder){
+function wasteStepperHtml(idx,field,value,placeholder,locked){
   const text=(value===undefined||value===null||value==='')?('<span class="waste-stepper-placeholder">'+placeholder+'</span>'):escapeHtml(value);
-  if(wasteTableReadOnly){
+  if(wasteTableReadOnly||locked){
     return '<div class="waste-stepper waste-stepper-readonly">'+text+'</div>';
   }
   const valueHtml='<span class="waste-stepper-value" onclick="startWasteValueEdit('+idx+',\''+field+'\',\''+placeholder+'\')">'+text+'</span>';
@@ -8216,6 +8220,11 @@ async function handleWastePriceCaptureSelect(evt){
     startWasteValueEdit(idx,'piece','ราคา');
   }
 }
+let wasteEditingRowIdx=null;
+function toggleWasteRowEdit(idx){
+  wasteEditingRowIdx=wasteEditingRowIdx===idx?null:idx;
+  renderWasteTable();
+}
 function renderWasteTable(){
   const wraps=['wasteTableWrap','wasteAddChoiceTableWrap'].map(id=>document.getElementById(id)).filter(Boolean);
   if(!wraps.length)return;
@@ -8237,19 +8246,31 @@ function renderWasteTable(){
           +'<td>'+wasteStepperHtml(i,'totalAmount',r.totalAmount,'มูลค่า')+'</td>'
           +'</tr>';
       }
+      const editing=i===wasteEditingRowIdx;
+      const itemNoCell=editing
+        ?'<input type="text" class="waste-item-input" placeholder="รหัสสินค้า" value="'+escapeHtml(r.itemNo)+'" oninput="updateWasteRowField('+i+',\'itemNo\',this.value)">'
+        :'<div class="waste-row-locked-text">'+escapeHtml(r.itemNo)+'</div>';
+      const descCell=editing
+        ?'<input type="text" placeholder="รายละเอียดสินค้า" value="'+escapeHtml(r.desc)+'" oninput="updateWasteRowField('+i+',\'desc\',this.value)">'
+        :'<div class="waste-row-locked-text">'+escapeHtml(r.desc)+'</div>';
+      const photoCell=editing
+        ?'<div class="waste-row-photo" onclick="openWasteRowPhotoPicker('+i+')">'+photoHtml+'</div>'
+        :'<div class="waste-row-photo">'+photoHtml+'</div>';
       return '<tr>'
+        +'<td><i class="ti '+(editing?'ti-check':'ti-pencil')+' waste-row-edit-btn" onclick="toggleWasteRowEdit('+i+')"></i></td>'
         +'<td><div class="waste-row-no">'+r.no+'</div></td>'
-        +'<td><input type="text" class="waste-item-input" placeholder="รหัสสินค้า" value="'+escapeHtml(r.itemNo)+'" oninput="updateWasteRowField('+i+',\'itemNo\',this.value)"></td>'
-        +'<td><div class="waste-row-photo" onclick="openWasteRowPhotoPicker('+i+')">'+photoHtml+'</div></td>'
-        +'<td><input type="text" placeholder="รายละเอียดสินค้า" value="'+escapeHtml(r.desc)+'" oninput="updateWasteRowField('+i+',\'desc\',this.value)"></td>'
-        +'<td>'+wasteStepperHtml(i,'piece',r.piece,'ราคา')+'</td>'
-        +'<td>'+wasteStepperHtml(i,'weight',r.weight,'น้ำหนัก')+'</td>'
-        +'<td>'+wasteStepperHtml(i,'qtyMU',r.qtyMU,'จำนวน')+'</td>'
-        +'<td>'+wasteStepperHtml(i,'totalAmount',r.totalAmount,'มูลค่า')+'</td>'
+        +'<td>'+itemNoCell+'</td>'
+        +'<td>'+photoCell+'</td>'
+        +'<td>'+descCell+'</td>'
+        +'<td>'+wasteStepperHtml(i,'piece',r.piece,'ราคา',!editing)+'</td>'
+        +'<td>'+wasteStepperHtml(i,'weight',r.weight,'น้ำหนัก',!editing)+'</td>'
+        +'<td>'+wasteStepperHtml(i,'qtyMU',r.qtyMU,'จำนวน',!editing)+'</td>'
+        +'<td>'+wasteStepperHtml(i,'totalAmount',r.totalAmount,'มูลค่า',!editing)+'</td>'
         +'<td><i class="ti ti-trash waste-row-del" onclick="removeWasteRow('+i+')"></i></td>'
         +'</tr>';
     }).join('');
     html='<div class="waste-table-wrap"><table class="waste-table"><thead><tr>'
+      +(wasteTableReadOnly?'':'<th><i class="ti ti-pencil" aria-hidden="true"></i> แก้ไข</th>')
       +'<th>No.</th><th>Item</th><th>รูป Item</th><th>Description</th><th>Price</th><th>Weight</th><th>Quantity (MU)</th><th>Total Amount</th>'+(wasteTableReadOnly?'':'<th></th>')
       +'</tr></thead><tbody>'+rowsHtml+'</tbody></table></div>';
   }
