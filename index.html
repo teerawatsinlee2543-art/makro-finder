@@ -617,6 +617,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .loc-label-cut-line{width:100mm;border-top:1px dashed #999;flex:0 0 auto}
 .quick-tools{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:12px;z-index:900}
 .quick-tool-btn{width:60px;height:60px;border-radius:50%;border:none;background:#fff;color:var(--brand-red);box-shadow:0 2px 6px rgba(0,0,0,.18),0 8px 20px rgba(0,0,0,.16);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer}
+.quick-tool-item{display:flex;flex-direction:column;align-items:center;gap:4px}
+.quick-tool-label{font-size:10.5px;font-weight:800;color:var(--brand-red);background:#fff;padding:2px 8px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.18);white-space:nowrap}
 .quick-tool-btn:active{transform:scale(.94)}
 .quick-tool-btn.logout{background:var(--brand-red);color:#fff}
 @media print{.quick-tools{display:none}}
@@ -954,9 +956,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   </div>
 
   <div class="quick-tools" id="quickTools">
-    <button type="button" class="quick-tool-btn" id="itemLookupBtn" style="display:none;padding:0;overflow:hidden" onclick="window.open('https://ssmobile.siammakro.co.th/login.html','_blank')" aria-label="Item Lookup" title="Item Lookup">
-      <img src="item-lookup-icon.png" alt="Item Lookup" style="width:100%;height:100%;object-fit:cover">
-    </button>
+    <div class="quick-tool-item" id="itemLookupWrap" style="display:none">
+      <button type="button" class="quick-tool-btn" id="itemLookupBtn" style="padding:0;overflow:hidden" onclick="window.open('https://ssmobile.siammakro.co.th/login.html','_blank')" aria-label="Item Lookup" title="Item Lookup">
+        <img src="item-lookup-icon.png" alt="Item Lookup" style="width:100%;height:100%;object-fit:cover">
+      </button>
+      <span class="quick-tool-label">Item Lookup</span>
+    </div>
     <button type="button" class="quick-tool-btn" onclick="goToHomeView()" data-i18n-title="goHomeAria" aria-label="ไปหน้าแรก" title="ไปหน้าแรก"><i class="ti ti-home" aria-hidden="true"></i></button>
     <button type="button" class="quick-tool-btn logout" onclick="confirmLogout()" data-i18n-title="logoutAria" aria-label="ออกจากระบบ" title="ออกจากระบบ"><i class="ti ti-logout" aria-hidden="true"></i></button>
   </div>
@@ -5528,8 +5533,8 @@ function updateMapEditBarVisibility(){
   if(bar) bar.style.display=(currentRole==='employee') ? 'block' : 'none';
 }
 function updateItemLookupBtnVisibility(){
-  const btn=document.getElementById('itemLookupBtn');
-  if(btn) btn.style.display=(currentRole==='employee') ? 'flex' : 'none';
+  const wrap=document.getElementById('itemLookupWrap');
+  if(wrap) wrap.style.display=(currentRole==='employee') ? 'flex' : 'none';
 }
 
 // ==== จัดการพาเลท (GR) ====
