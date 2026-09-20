@@ -9106,12 +9106,14 @@ let wasteWizardRowIdx=null;
 let wasteWizardStep=1;
 let wasteWizardPhotoDataUrl=null;
 let wasteWizardManualTotal=null;
+let wasteWizardCommitted=false;
 function openWasteItemWizard(idx){
   if(!currentWasteLog||!currentWasteLog.rows[idx])return;
   wasteWizardRowIdx=idx;
   wasteWizardStep=1;
   wasteWizardPhotoDataUrl=null;
   wasteWizardManualTotal=null;
+  wasteWizardCommitted=false;
   const row=currentWasteLog.rows[idx];
   document.getElementById('wasteWizardItemName').textContent=row.desc||row.itemNo||'';
   document.getElementById('wasteWizardPiece').value=row.piece||'';
@@ -9233,10 +9235,17 @@ function finishWasteWizard(){
   row.qtyMU=document.getElementById('wasteWizardQty').value.trim();
   if(wasteWizardPhotoDataUrl) row.image=wasteWizardPhotoDataUrl;
   row.totalAmount=wasteWizardManualTotal!=null?wasteWizardManualTotal.toFixed(2):computeWasteRowTotal(row);
+  wasteWizardCommitted=true;
   closeWasteWizard();
   renderWasteTable();
 }
 function closeWasteWizard(){
+  if(!wasteWizardCommitted&&wasteWizardRowIdx!=null&&currentWasteLog&&currentWasteLog.rows[wasteWizardRowIdx]){
+    currentWasteLog.rows.splice(wasteWizardRowIdx,1);
+    currentWasteLog.rows.forEach((r,i)=>{ r.no=i+1; });
+    wasteEditingRowIdx=null;
+    renderWasteTable();
+  }
   document.getElementById('wasteWizardOverlay').style.display='none';
   wasteWizardRowIdx=null;
 }
