@@ -8647,7 +8647,7 @@ function formatWasteRangeDMY(log){
 function renderWasteHistoryList(query){
   const box=document.getElementById('wasteHistoryList');
   const q=(query||'').trim().toLowerCase();
-  let logs=WASTE_LOGS_CACHE.slice().sort((a,b)=>a.startDate<b.startDate?-1:1);
+  let logs=WASTE_LOGS_CACHE.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
   if(q){
     logs=logs.filter(log=>{
       if((log.startDate||'').toLowerCase().includes(q))return true;
