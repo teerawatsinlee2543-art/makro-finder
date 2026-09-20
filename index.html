@@ -957,7 +957,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
   <div class="quick-tools" id="quickTools">
     <div class="quick-tool-item" id="itemLookupWrap" style="display:none">
-      <button type="button" class="quick-tool-btn" id="itemLookupBtn" style="padding:0;overflow:hidden" onclick="window.open('https://ssmobile.siammakro.co.th/login.html','_blank')" aria-label="Item Lookup" title="Item Lookup">
+      <button type="button" class="quick-tool-btn" id="itemLookupBtn" style="padding:0;overflow:hidden" onclick="openItemLookup()" aria-label="Item Lookup" title="Item Lookup">
         <img src="item-lookup-icon.png" alt="Item Lookup" style="width:100%;height:100%;object-fit:cover">
       </button>
       <span class="quick-tool-label">Item Lookup</span>
@@ -1802,6 +1802,7 @@ const I18N={
     wasteNothingToExport:'ยังไม่มีข้อมูลให้ส่งออก',
     wasteLineBrowserExportWarning:'ดาวน์โหลดไฟล์ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง',
     wasteLineBrowserPdfWarning:'พิมพ์/บันทึก PDF ผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดส่งออกอีกครั้ง',
+    itemLookupLineWarning:'ใช้กล้องสแกนผ่านแอป LINE ไม่ได้ครับ กรุณากดปุ่ม "..." มุมขวาบน แล้วเลือก "เปิดด้วยเบราว์เซอร์ภายนอก" (Chrome/Safari) ก่อนกดปุ่ม Item Lookup อีกครั้ง',
     wasteDateTimeLine:'วันที่ {date} เวลา {time}',
     wasteModeIndicatorPrefix:'กำลังอยู่ในโหมด: {label}',
     wasteRecordedAtPrefix:'บันทึกข้อมูลเมื่อ',
@@ -2173,6 +2174,7 @@ const I18N={
     wasteNothingToExport:'There is no data to export yet',
     wasteLineBrowserExportWarning:'Files can\'t be downloaded inside the LINE app. Please tap "..." in the top-right corner and choose "Open in external browser" (Chrome/Safari), then export again.',
     wasteLineBrowserPdfWarning:'PDF can\'t be printed/saved inside the LINE app. Please tap "..." in the top-right corner and choose "Open in external browser" (Chrome/Safari), then export again.',
+    itemLookupLineWarning:'The camera scanner doesn\'t work inside the LINE app. Please tap "..." in the top-right corner and choose "Open in external browser" (Chrome/Safari), then tap Item Lookup again.',
     wasteDateTimeLine:'Date {date} Time {time}',
     wasteModeIndicatorPrefix:'Current mode: {label}',
     wasteRecordedAtPrefix:'Recorded on',
@@ -2544,6 +2546,7 @@ const I18N={
     wasteNothingToExport:'暂无数据可导出',
     wasteLineBrowserExportWarning:'无法在 LINE 应用内下载文件，请点击右上角的 "..." 并选择"在外部浏览器中打开"（Chrome/Safari），然后再重新导出',
     wasteLineBrowserPdfWarning:'无法在 LINE 应用内打印/保存 PDF，请点击右上角的 "..." 并选择"在外部浏览器中打开"（Chrome/Safari），然后再重新导出',
+    itemLookupLineWarning:'无法在 LINE 应用内使用相机扫描，请点击右上角的 "..." 并选择"在外部浏览器中打开"（Chrome/Safari），然后再次点击 Item Lookup',
     wasteDateTimeLine:'日期 {date} 时间 {time}',
     wasteModeIndicatorPrefix:'当前模式：{label}',
     wasteRecordedAtPrefix:'记录时间',
@@ -2915,6 +2918,7 @@ const I18N={
     wasteNothingToExport:'ထုတ်ယူရန် ဒေတာ မရှိသေးပါ',
     wasteLineBrowserExportWarning:'LINE အက်ပ်တွင်း ဖိုင်ကို ဒေါင်းလုဒ်လုပ်၍ မရပါ။ ညာဘက်အပေါ်ထောင့်ရှိ "..." ကို နှိပ်ပြီး "ပြင်ပဘရောက်ဇာဖြင့် ဖွင့်ရန်" (Chrome/Safari) ကို ရွေးချယ်ပြီးမှ ထပ်မံထုတ်ယူပါ',
     wasteLineBrowserPdfWarning:'LINE အက်ပ်တွင်း PDF ကို ပရင့်ထုတ်/သိမ်းဆည်း၍ မရပါ။ ညာဘက်အပေါ်ထောင့်ရှိ "..." ကို နှိပ်ပြီး "ပြင်ပဘရောက်ဇာဖြင့် ဖွင့်ရန်" (Chrome/Safari) ကို ရွေးချယ်ပြီးမှ ထပ်မံထုတ်ယူပါ',
+    itemLookupLineWarning:'LINE အက်ပ်တွင်း ကင်မရာကို အသုံးပြု၍ မရပါ။ ညာဘက်အပေါ်ထောင့်ရှိ "..." ကို နှိပ်ပြီး "ပြင်ပဘရောက်ဇာဖြင့် ဖွင့်ရန်" (Chrome/Safari) ကို ရွေးချယ်ပြီးမှ Item Lookup ကို ထပ်မံနှိပ်ပါ',
     wasteDateTimeLine:'ရက်စွဲ {date} အချိန် {time}',
     wasteModeIndicatorPrefix:'လက်ရှိမုဒ်: {label}',
     wasteRecordedAtPrefix:'မှတ်တမ်းတင်ချိန်',
@@ -3286,6 +3290,7 @@ const I18N={
     wasteNothingToExport:'아직 내보낼 데이터가 없습니다',
     wasteLineBrowserExportWarning:'LINE 앱 내에서는 파일을 다운로드할 수 없습니다. 오른쪽 상단의 "..."을 누르고 "외부 브라우저에서 열기" (Chrome/Safari)를 선택한 후 다시 내보내 주세요',
     wasteLineBrowserPdfWarning:'LINE 앱 내에서는 PDF를 인쇄/저장할 수 없습니다. 오른쪽 상단의 "..."을 누르고 "외부 브라우저에서 열기" (Chrome/Safari)를 선택한 후 다시 내보내 주세요',
+    itemLookupLineWarning:'LINE 앱 내에서는 카메라 스캔을 사용할 수 없습니다. 오른쪽 상단의 "..."을 누르고 "외부 브라우저에서 열기" (Chrome/Safari)를 선택한 후 Item Lookup을 다시 눌러주세요',
     wasteDateTimeLine:'날짜 {date} 시간 {time}',
     wasteModeIndicatorPrefix:'현재 모드: {label}',
     wasteRecordedAtPrefix:'기록 시각',
@@ -3657,6 +3662,7 @@ const I18N={
     wasteNothingToExport:'まだ書き出すデータがありません',
     wasteLineBrowserExportWarning:'LINEアプリ内ではファイルをダウンロードできません。右上の「…」をタップし「外部ブラウザで開く」(Chrome/Safari) を選択してから、もう一度書き出してください',
     wasteLineBrowserPdfWarning:'LINEアプリ内ではPDFを印刷・保存できません。右上の「…」をタップし「外部ブラウザで開く」(Chrome/Safari) を選択してから、もう一度書き出してください',
+    itemLookupLineWarning:'LINEアプリ内ではカメラスキャンを使用できません。右上の「…」をタップし「外部ブラウザで開く」(Chrome/Safari) を選択してから、もう一度Item Lookupをタップしてください',
     wasteDateTimeLine:'日付 {date} 時刻 {time}',
     wasteModeIndicatorPrefix:'現在のモード：{label}',
     wasteRecordedAtPrefix:'記録日時',
@@ -6853,6 +6859,14 @@ function fallbackCopyLineLink(url,done){
     document.body.removeChild(ta);
     done();
   }catch(e){}
+}
+function openItemLookup(){
+  const targetUrl='https://ssmobile.siammakro.co.th/login.html';
+  if(isLineBrowser()){
+    alert(t('itemLookupLineWarning'));
+    return;
+  }
+  window.open(targetUrl,'_blank');
 }
 function lineCameraErrorHtml(){
   return '<div class="line-camera-notice">'+
