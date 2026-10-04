@@ -71,6 +71,9 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .steps li{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .steps .when{font-variant-numeric:tabular-nums;min-width:200px}
 .acted{opacity:.55}
+.hchip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:none}
+.h-ok{background:var(--seg-ok);color:#fff}.h-md1{background:var(--seg-md1);color:var(--seg-ink)}.h-md2{background:var(--seg-md2);color:var(--seg-ink)}.h-pull{background:var(--seg-pull);color:var(--seg-pull-ink)}
+td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:600}td.c-md2{color:var(--md2);font-weight:600}td.c-pull{color:var(--seg-pull);font-weight:700}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
 .redbox.todo{min-width:190px}
 .actbtns{display:flex;flex-direction:column;gap:4px;align-items:stretch}
@@ -181,7 +184,7 @@ dialog::backdrop{background:#0008}
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">สินค้า & กฎ Shelf life</h2>
       <span class="row w"><button class="btn" onclick="addManual()">เพิ่มสินค้าที่ยังไม่มีจากคู่มือ</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
     <p class="muted small">กฎตาม “คู่มือ อายุและการจัดการสินค้าผักและผลไม้” (ผ่านการตรวจสอบจากทีมจัดซื้อและ QA) · นับวันที่ 1 = วันรับสินค้า · ขายราคาเต็มครบ Shelf life → ลด 15% (Step 1) → ลด 30% (Step 2) → Code 52 · สินค้า Shelf life 1 วันข้าม Step 1 · อายุสินค้ากำหนดตามการจัดเรียงในตู้แช่ 0–4°C (ผักสลัด 6–8°C) หรือให้พิจารณาตามสภาพสินค้า</p>
-    <table class="resp"><thead><tr><th>สินค้า</th><th>Shelf life</th><th>ขายราคาเต็ม</th><th>ลด 15%</th><th>ลด 30%</th><th>Code 52</th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
+    <table class="resp"><thead><tr><th>สินค้า</th><th>Shelf life</th><th><span class="hchip h-ok">ขายราคาเต็ม</span></th><th><span class="hchip h-md1">ลด 15%</span></th><th><span class="hchip h-md2">ลด 30%</span></th><th><span class="hchip h-pull">Code 52</span></th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
   </div>
 </section>
 
@@ -783,9 +786,9 @@ function renderProd(){
     const rng=x=>x?`${x.label.replace('ลดราคา ','').replace(/ \(Step \d\)/,'')} · วันที่ ${x.from}${x.to!=null&&x.to>x.from?'–'+x.to:''}`:'<span class="muted">—</span>';
     const man=manualRule(p.shelf,p.origin),off=man&&['md1Day','md2Day','pullDay'].some(x=>man[x]!==p[x]);
     return`<tr><td data-l="สินค้า"><div><b>${esc(p.desc)}</b><div class="muted small">${p.sku?esc(p.sku)+' · ':''}${ORIGINS[p.origin]||'อื่นๆ'}${p.temp?' · '+esc(p.temp):''}${off?' · <span class="err-text">ต่างจากคู่มือ</span>':''}</div>${strip(p)}</div></td>
-    <td data-l="Shelf life" class="num">${p.shelf} วัน</td><td data-l="ขายราคาเต็ม" class="num"><b>วันที่ 1${f("ok").to>1?"–"+f("ok").to:""}</b></td>
-    <td data-l="ลด 15%" class="num">${rng(f('md1'))}</td><td data-l="ลด 30%" class="num">${rng(f('md2'))}</td>
-    <td data-l="Code 52" class="num">วันที่ ${p.pullDay}${amPm(p)?' (บ่าย)':''}</td>
+    <td data-l="Shelf life" class="num">${p.shelf} วัน</td><td data-l="ขายราคาเต็ม" class="num c-ok"><b>วันที่ 1${f("ok").to>1?"–"+f("ok").to:""}</b></td>
+    <td data-l="ลด 15%" class="num c-md1">${rng(f('md1'))}</td><td data-l="ลด 30%" class="num c-md2">${rng(f('md2'))}</td>
+    <td data-l="Code 52" class="num c-pull">วันที่ ${p.pullDay}${amPm(p)?' (บ่าย)':''}</td>
     <td data-l="Buyer UID">${esc(p.buyerUid||'-')}</td><td data-l="Commercial">${esc(p.comUid||'-')}</td>
     <td><div class="row w" style="gap:4px;flex-wrap:nowrap"><button class="btn sm" onclick="editProduct('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delProduct('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
