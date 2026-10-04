@@ -126,9 +126,11 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 @media (max-width:720px){.lot-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:420px){.lot-grid{grid-template-columns:1fr}}
 .preview-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.save-row{display:flex;justify-content:flex-end}
+.save-row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.cancel-btn{min-width:140px;padding:12px 22px;font-size:16px;font-weight:700;color:var(--md2);border-color:var(--line)}
+.cancel-btn:hover{border-color:var(--md2);background:var(--redbox)}
 .save-btn{min-width:220px;padding:12px 22px;font-size:16px}
-@media (max-width:520px){.save-btn{width:100%}}
+@media (max-width:520px){.save-btn,.cancel-btn{flex:1 1 0;min-width:0}}
 .scan-dlg{width:min(520px,calc(100vw - 24px));padding:14px}
 .scan-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .scan-view{position:relative;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:4/3;max-width:100%}
@@ -284,7 +286,7 @@ dialog::backdrop{background:#0008}
     <div class="add-step">
       <div class="step-title"><span class="step-no" id="stepNo3">3</span>ตรวจกำหนดการ แล้วบันทึก</div>
       <div id="aPreview" class="preview-box"></div>
-      <div class="save-row"><button class="btn pri w save-btn" id="aSave">บันทึกล็อต</button></div>
+      <div class="save-row"><button type="button" class="btn cancel-btn" id="aCancel">ยกเลิก</button><button class="btn pri w save-btn" id="aSave">บันทึกล็อต</button></div>
     </div>
   </div>
 </section>
@@ -1100,6 +1102,12 @@ async function useScanned(code){
   else{renderMfResults();toast(h.length?'เลือกสินค้าจากรายการ':'ไม่พบบาร์โค้ด '+code+' ใน Makro Finder')}
 }
 $('#scanBtn').onclick=openScan;
+function resetAddForm(){
+  ['#mfQ','#aJ','#aDate','#aLoc','#aRemarkOther'].forEach(s=>{const el=$(s);if(el)el.value=''});
+  $('#aQty').value=1;$('#aRemark').value='';$('#aRemarkOtherWrap').hidden=true;
+  mfPick=null;$('#mfPicked').hidden=true;$('#mfResults').innerHTML='';addPreview();
+}
+$('#aCancel').onclick=()=>{resetAddForm();toast('ล้างข้อมูลในฟอร์มแล้ว');window.scrollTo({top:0,behavior:'smooth'})};
 $('#dlgScan').addEventListener('close',()=>{scanOn=false;try{zxr&&zxr.reset()}catch(e){}});
 if(!onMakroSite()){$('#stepNo2').textContent='1';$('#stepNo3').textContent='2'}
 $('#jD').value=iso(today());
