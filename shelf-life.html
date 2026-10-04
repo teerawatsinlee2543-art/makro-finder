@@ -110,6 +110,9 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .cphone a{color:var(--accent);font-weight:600;text-decoration:none}
 .cbackup{font-size:12.5px;color:var(--muted)}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
+.redbox.remark{background:var(--redbox-ink);color:#fff;border-color:var(--redbox-ink)}
+.remark-field{grid-column:span 2}
+@media (max-width:520px){.remark-field{grid-column:auto}}
 .redbox.todo{min-width:190px}
 .td-now{font-size:14px;font-weight:800;line-height:1.35}
 .td-next{margin-top:6px;padding-top:6px;border-top:1px dashed var(--redbox-line);font-weight:600;line-height:1.35}
@@ -214,6 +217,7 @@ dialog::backdrop{background:#0008}
       <label>จำนวน<input id="aQty" type="number" min="0" value="1"></label>
       <label>ที่ตั้ง / ชั้นวาง<input id="aLoc" placeholder="เช่น Chiller A3"></label>
       <label>หมายเหตุ<input id="aNote"></label>
+      <label class="remark-field">Remark (แจ้ง Buyer / Commercial)<select id="aRemark"><option value="">— ไม่มี —</option><option>สินค้ามี Stock เยอะ ต้องการระบาย</option><option>รบกวนทำลดราคา 60% เนื่องจากสินค้ามีคุณภาพไม่ไหว</option></select></label>
     </div>
     <div id="aPreview" class="card" style="margin:14px 0 0;background:var(--bg)"></div>
     <div class="row" style="margin-top:12px"><button class="btn pri w" id="aSave">บันทึกล็อต</button></div>
@@ -681,7 +685,7 @@ function renderDash(){
     const by=done&&b.ackBy?(mode==='sheet'?` โดย ${esc(b.ackBy)}`:` โดย <span data-uid="${esc(b.ackBy)}">${b.ackBy===myId?'คุณ':'…'}</span>`):'';
     return`<tr class="${done?'acted':''}">
     <td data-l="สถานะ"><div>${chip(e.st,e.label)}${done?`<div class="small" style="margin-top:4px">✓ ทำแล้ว${by}</div>`:''}</div></td>
-    <td data-l="สินค้า"><div>${ii?.img?`<img class="pthumb" src="${esc(ii.img)}" alt="" loading="lazy">`:""}<b>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(ii.locs))}</b></div>`:""}${b.note?`<div class="redbox" style="margin-top:6px"><b>หมายเหตุ:</b> ${esc(b.note)}</div>`:''}</div></td>
+    <td data-l="สินค้า"><div>${ii?.img?`<img class="pthumb" src="${esc(ii.img)}" alt="" loading="lazy">`:""}<b>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(ii.locs))}</b></div>`:""}${b.note?`<div class="redbox" style="margin-top:6px"><b>หมายเหตุ:</b> ${esc(b.note)}</div>`:''}${b.remark?`<div class="redbox remark" style="margin-top:6px"><b>Remark:</b> ${esc(b.remark)}</div>`:''}</div></td>
     <td data-l="Julian รับ" class="num"><div><b>${jul(e.prod).ddd}</b><div class="small">${fmt(e.prod)}</div></div></td>
     <td data-l="วางขาย"><div><span class="num">วันที่ ${e.day} / ${p.pullDay}</span>${strip(p,e.day)}</div></td>
     <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
@@ -710,7 +714,7 @@ function copyMsg(id){
 สินค้า: ${ii?ii.no+' '+ii.desc+' (กฎ '+p.desc+')':(p.sku?p.sku+' ':'')+p.desc} (Shelf life ${p.shelf} วัน)${ii&&ii.locs.length?'\nตำแหน่งในร้าน: '+locText(ii.locs):''}
 Julian ${jul(e.prod).ddd} | วันรับ ${fmt(e.prod)} | Code 52 ${fmt(e.c52)}
 วางขายวันที่ ${e.day}/${p.pullDay}
-จำนวน ${b.qty} | ที่ตั้ง ${b.loc||'-'}
+จำนวน ${b.qty} | ที่ตั้ง ${b.loc||'-'}${b.remark?"\nRemark: "+b.remark:""}
 ต้องทำ: ${e.action}
 Buyer UID: ${c(e.buyer)}
 Commercial: ${c(e.com)}`;
@@ -829,9 +833,9 @@ $('#aSku').onchange=addPreview;$('#aJ').oninput=addPreview;
 $('#aDate').oninput=()=>{const v=$('#aDate').value;$('#aJ').value=v?jul(fromIso(v)).ddd:'';addPreview()};
 $('#aSave').onclick=async()=>{
   const prod=addPreview();if(!prod)return toast('กรุณาใส่ Julian code หรือวันรับสินค้าที่ถูกต้อง');
-  const o={sku:$('#aSku').value,prod:iso(prod),qty:+$('#aQty').value||0,loc:$('#aLoc').value.trim(),note:$('#aNote').value.trim(),addedBy:myId||null,addedAt:new Date().toISOString()};
+  const o={sku:$('#aSku').value,prod:iso(prod),qty:+$('#aQty').value||0,loc:$('#aLoc').value.trim(),note:$('#aNote').value.trim(),remark:$('#aRemark').value,addedBy:myId||null,addedAt:new Date().toISOString()};
   if(mfPick)Object.assign(o,{itemNo:mfPick.itemNo,itemDesc:mfPick.desc,barcode:mfPick.barcode||'',img:MF.images[mfPick.itemNo]||'',locs:mfPick.locs.slice(0,3)});
-  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aNote').value='';mfPick=null;$('#mfPicked').hidden=true;addPreview()}
+  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aNote').value='';$('#aRemark').value='';mfPick=null;$('#mfPicked').hidden=true;addPreview()}
 };
 
 /* ---------- products ---------- */
@@ -945,8 +949,8 @@ function parseCSV(t){t=t.replace(/^﻿/,'');const rows=[];let r=[],c='',q=false;
   if(c||r.length){r.push(c);rows.push(r)}
   const h=rows.shift()?.map(x=>x.trim().toLowerCase())||[];return rows.filter(r=>r.some(x=>x.trim())).map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]??'').trim()])))}
 function exportBatchesCSV(){
-  const rows=[['status','sku','description','origin','julian_receive','receive_date','day_on_shelf','shelf_life','code52_day','code52_date','days_to_code52','action','qty','location','buyer_uid','buyer_name','commercial_uid','commercial_name','done','note']];
-  st.batches.forEach(b=>{const e=evalBatch(b),p=e.p||{};rows.push([e.label,p.sku||'',p.desc||b.sku,ORIGINS[p.origin]||'',e.prod?jul(e.prod).ddd:'',b.prod,e.day,p.shelf,p.pullDay,e.c52?iso(e.c52):'',e.left,e.action,b.qty,b.loc,p.buyerUid,e.buyer?.name,p.comUid,e.com?.name,b.ack===e.st?'Y':'',b.note])});
+  const rows=[['status','sku','description','origin','julian_receive','receive_date','day_on_shelf','shelf_life','code52_day','code52_date','days_to_code52','action','qty','location','buyer_uid','buyer_name','commercial_uid','commercial_name','done','note','remark']];
+  st.batches.forEach(b=>{const e=evalBatch(b),p=e.p||{};rows.push([e.label,p.sku||'',p.desc||b.sku,ORIGINS[p.origin]||'',e.prod?jul(e.prod).ddd:'',b.prod,e.day,p.shelf,p.pullDay,e.c52?iso(e.c52):'',e.left,e.action,b.qty,b.loc,p.buyerUid,e.buyer?.name,p.comUid,e.com?.name,b.ack===e.st?'Y':'',b.note,b.remark||''])});
   dl(`shelf-life_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8')}
 function downloadTemplate(){dl('products_template.csv',toCSV([['sku','description','origin','temp','shelf_life','step1_day','step1_pct','step2_day','step2_pct','code52_day','buyer_uid','commercial_uid'],['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']]),'text/csv;charset=utf-8')}
 const ORIG_IN=v=>{v=String(v||'').trim().toLowerCase();return/import|นำเข้า/.test(v)?'import':/local|ท้องถิ่น|ไทย/.test(v)?'local':'other'};
