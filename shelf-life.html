@@ -74,6 +74,28 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .hchip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:none}
 .h-ok{background:var(--seg-ok);color:#fff}.h-md1{background:var(--seg-md1);color:var(--seg-ink)}.h-md2{background:var(--seg-md2);color:var(--seg-ink)}.h-pull{background:var(--seg-pull);color:var(--seg-pull-ink)}
 td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:600}td.c-md2{color:var(--md2);font-weight:600}td.c-pull{color:var(--seg-pull);font-weight:700}
+.plan{border-collapse:separate;border-spacing:0 6px;width:auto;margin:-6px 0}
+.plan td{border:0;padding:0 16px 0 0;vertical-align:middle;white-space:nowrap}
+.plan td.pw{white-space:normal;color:var(--muted)}
+.plan tr.cur td:first-child .chip{box-shadow:0 0 0 3px var(--today)}
+.plan tr.cur b{color:var(--ink)}
+.nowtag{display:inline-block;background:var(--today);color:#fff;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700}
+.plan-foot{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pv-head{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.pv-name{font-size:18px;margin-right:4px}
+.pill{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:2px 10px;font-size:12.5px;color:var(--muted);font-weight:600}
+.pill b{color:var(--ink)}
+.pill-green{color:var(--ok);border-color:var(--ok);background:var(--okbg)}
+.pill-red{color:var(--redbox-ink);border-color:var(--redbox-line);background:var(--redbox)}
+.pill-red b{color:inherit}
+.ccards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:14px}
+.ccard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:2px;min-width:0}
+.clabel{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.clabel b{color:var(--accent);font-size:13px}
+.cname{font-weight:700}
+.cphone{font-variant-numeric:tabular-nums}
+.cphone a{color:var(--accent);font-weight:600;text-decoration:none}
+.cbackup{font-size:12.5px;color:var(--muted)}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
 .redbox.todo{min-width:190px}
 .actbtns{display:flex;flex-direction:column;gap:4px;align-items:stretch}
@@ -594,12 +616,18 @@ function ctOptions(sel,role){const l=st.contacts.filter(c=>!role||c.role===role)
   return'<option value="">— ไม่ระบุ —</option>'+gs.map(g=>`<optgroup label="${esc(g)}">`+l.filter(c=>grpOf(c)===g).sort((a,b)=>String(a.uid).localeCompare(String(b.uid))).map(c=>`<option value="${esc(c.uid)}"${c.uid===sel?' selected':''}>${esc(c.uid)} · ${esc(c.name)}</option>`).join('')+'</optgroup>').join('')}
 function planHTML(p,prod){
   const t=today();
-  return`<ul class="steps">${stages(p,prod).map(s=>{
+  const rows=stages(p,prod).map(s=>{
     const cur=prod&&diffD(t,s.d1)>=0&&(s.d2==null||diffD(s.d2,t)>=0);
-    const when=prod?`${fmtS(s.d1)}${s.d2&&s.d2>s.d1?` – ${fmtS(s.d2)}`:''}`:'';
-    const days=s.to!=null&&s.to>s.from?`วันที่ ${s.from}–${s.to} (${s.to-s.from+1} วัน)`:`วันที่ ${s.from}`;
-    return`<li${cur?' style="font-weight:700"':''}>${chip(s.k,s.label)}<span class="when">${when}</span><span class="muted small">${days}</span>${cur?' ◀ วันนี้':''}</li>`}).join('')}</ul>
-    ${prod?`<p class="small" style="margin:8px 0 0">วันที่ 1 (รับ/วางขาย) <b>${fmt(prod)}</b> (Julian ${jul(prod).ddd}) · Code 52 <b>${fmt(addD(prod,p.pullDay-1))}</b> (Julian ${jul(addD(prod,p.pullDay-1)).ddd})</p>`:''}`;
+    const n=s.to!=null?s.to-s.from+1:0;
+    const days=s.to!=null&&s.to>s.from?`วันที่ ${s.from}–${s.to}`:`วันที่ ${s.from}`;
+    const when=prod?`${fmtS(s.d1)}${s.d2&&s.d2>s.d1?` – ${fmtS(s.d2)}`:s.to==null?' เป็นต้นไป':''}`:'';
+    return`<tr${cur?' class="cur"':''}><td>${chip(s.k,s.label)}</td><td class="num"><b>${days}</b>${n>1?` <span class="muted small">(${n} วัน)</span>`:''}</td>${prod?`<td class="num pw">${when}</td>`:''}<td>${cur?'<span class="nowtag">วันนี้</span>':''}</td></tr>`}).join('');
+  return`<table class="plan">${rows}</table>${prod?`<div class="plan-foot"><span class="pill">วันที่ 1 (รับ/วางขาย) <b>${fmt(prod)}</b> · Julian ${jul(prod).ddd}</span><span class="pill pill-red">Code 52 <b>${fmt(addD(prod,p.pullDay-1))}</b> · Julian ${jul(addD(prod,p.pullDay-1)).ddd}</span></div>`:''}`;
+}
+function contactCard(label,c,uid){
+  const head=`<div class="clabel">${label}${c||uid?` · <b>${esc(c?c.uid:uid)}</b>`:''}</div>`;
+  if(!c)return`<div class="ccard">${head}<div class="muted small">${uid?'ไม่มีรายชื่อในข้อมูลนี้':'— ยังไม่กำหนด —'}</div></div>`;
+  return`<div class="ccard">${head}<div class="cname">${esc(c.name)}</div>${c.phone?`<div class="cphone">โทร <a href="tel:${esc(c.phone.replace(/[^\d+]/g,''))}">${esc(c.phone)}</a></div>`:''}${c.email?`<div class="small">${esc(c.email)}</div>`:''}${c.backup?`<div class="cbackup">สำรอง: ${esc(c.backup)}</div>`:''}</div>`;
 }
 const byId=(col,id)=>st[col].find(x=>x._id===id);
 
@@ -766,8 +794,9 @@ function addPreview(){
   else if($('#aDate').value)prod=fromIso($('#aDate').value);
   if(!p){$('#aPreview').innerHTML='<p class="muted">ยังไม่มีสินค้า — เพิ่มที่แท็บ “สินค้า & กฎลดราคา”</p>';return null}
   if(prod&&prod>today())msg+='<p class="err-text">วันรับสินค้าอยู่ในอนาคต — ตรวจสอบ Julian code</p>';
-  $('#aPreview').innerHTML=msg+`<b>${esc(p.desc)}</b> <span class="muted small">Shelf life ${p.shelf} วัน · ขายราคาเต็มวันที่ 1–${firstMd(p)-1}${p.temp?' · จัดเรียงตู้แช่ '+esc(p.temp):''}</span>${prod?'':'<p class="muted small">ใส่ Julian code หรือวันที่รับสินค้าเพื่อดูกำหนดการ</p>'}<div style="margin-top:8px">${planHTML(p,prod)}</div>
-  <p class="small" style="margin:8px 0 0">ติดต่อ — Buyer: ${who(st.contacts.find(c=>c.uid===p.buyerUid),p.buyerUid)} · Commercial: ${who(st.contacts.find(c=>c.uid===p.comUid),p.comUid)}</p>`;
+  const fd=firstMd(p)-1;
+  $('#aPreview').innerHTML=msg+`<div class="pv-head"><b class="pv-name">${esc(p.desc)}</b><span class="pill">Shelf life ${p.shelf} วัน</span><span class="pill pill-green">ขายราคาเต็ม ${fd>1?`วันที่ 1–${fd}`:'วันที่ 1'}</span>${p.temp?`<span class="pill">ตู้แช่ ${esc(p.temp)}</span>`:''}</div>${prod?'':'<p class="muted small" style="margin:6px 0 0">ใส่ Julian code หรือวันที่รับสินค้า เพื่อดูวันที่จริงของแต่ละขั้น</p>'}<div style="margin-top:10px">${planHTML(p,prod)}</div>
+  <div class="ccards">${contactCard('Buyer',st.contacts.find(c=>c.uid===p.buyerUid),p.buyerUid)}${contactCard('Commercial',st.contacts.find(c=>c.uid===p.comUid),p.comUid)}</div>`;
   return prod&&!(j?.error)?prod:null;
 }
 $('#aSku').onchange=addPreview;$('#aJ').oninput=addPreview;
