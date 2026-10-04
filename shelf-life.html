@@ -8,11 +8,11 @@
 <style>
 :root{--bg:#f5f6f8;--card:#fff;--ink:#1d2433;--muted:#667085;--line:#e2e5ea;--accent:#0b5cad;--accent-ink:#fff;
 --ok:#1f7a45;--okbg:#e4f3ea;--soon:#8a5a00;--soonbg:#fff2d6;--md1:#6b5800;--md1bg:#fff3a6;--md2:#9a4300;--md2bg:#ffdcb8;--pull:#fff;--pullbg:#c62828;--err:#5b3fa8;--errbg:#ece6fb;
---seg-ok:#6ab04c;--seg-md1:#f5e03b;--seg-md2:#eba135;--seg-pull:#c62828;--seg-ink:#1d2433;--seg-pull-ink:#fff}
+--seg-ok:#6ab04c;--seg-md1:#f5e03b;--seg-md2:#eba135;--seg-pull:#c62828;--seg-ink:#1d2433;--seg-pull-ink:#fff;--today:#7c3aed;--todaybg:#7c3aed2e}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11141a;--card:#1a1f28;--ink:#e6e9ef;--muted:#98a2b3;--line:#2c333f;--accent:#6aa8ff;--accent-ink:#0b1220;
---ok:#6fd49a;--okbg:#16301f;--soon:#f5c060;--soonbg:#372a10;--md1:#f5e06a;--md1bg:#37320f;--md2:#ffb066;--md2bg:#3d2614;--pull:#fff;--pullbg:#c62828;--err:#bba6ff;--errbg:#2a2240;--seg-ok:#5a9e43;--seg-md1:#e3cf2c;--seg-md2:#de9430;--seg-pull:#c0392b;color-scheme:dark}}
+--ok:#6fd49a;--okbg:#16301f;--soon:#f5c060;--soonbg:#372a10;--md1:#f5e06a;--md1bg:#37320f;--md2:#ffb066;--md2bg:#3d2614;--pull:#fff;--pullbg:#c62828;--err:#bba6ff;--errbg:#2a2240;--today:#b18cff;--todaybg:#b18cff33;--seg-ok:#5a9e43;--seg-md1:#e3cf2c;--seg-md2:#de9430;--seg-pull:#c0392b;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#11141a;--card:#1a1f28;--ink:#e6e9ef;--muted:#98a2b3;--line:#2c333f;--accent:#6aa8ff;--accent-ink:#0b1220;
---ok:#6fd49a;--okbg:#16301f;--soon:#f5c060;--soonbg:#372a10;--md1:#f5e06a;--md1bg:#37320f;--md2:#ffb066;--md2bg:#3d2614;--pull:#fff;--pullbg:#c62828;--err:#bba6ff;--errbg:#2a2240;--seg-ok:#5a9e43;--seg-md1:#e3cf2c;--seg-md2:#de9430;--seg-pull:#c0392b;color-scheme:dark}
+--ok:#6fd49a;--okbg:#16301f;--soon:#f5c060;--soonbg:#372a10;--md1:#f5e06a;--md1bg:#37320f;--md2:#ffb066;--md2bg:#3d2614;--pull:#fff;--pullbg:#c62828;--err:#bba6ff;--errbg:#2a2240;--today:#b18cff;--todaybg:#b18cff33;--seg-ok:#5a9e43;--seg-md1:#e3cf2c;--seg-md2:#de9430;--seg-pull:#c0392b;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sarabun,system-ui,sans-serif}
 header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
@@ -62,9 +62,11 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .strip .ok{background:var(--seg-ok)}.strip .md1{background:var(--seg-md1)}.strip .md2{background:var(--seg-md2)}.strip .pull{background:var(--seg-pull);color:var(--seg-pull-ink)}
 .strip .split{background:linear-gradient(180deg,var(--seg-md2) 50%,var(--seg-pull) 50%);color:var(--seg-pull-ink)}
 .strip .past{opacity:.4}
-.strip .now{outline:2px solid var(--ink);outline-offset:1px;opacity:1}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
-.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;background:var(--c)}
+.strip .now{outline:3px solid var(--today);outline-offset:1px;opacity:1;box-shadow:0 0 0 6px var(--todaybg)}
+.legend{display:flex;gap:10px 20px;flex-wrap:wrap;align-items:center;font-size:15px;color:var(--ink);font-weight:600}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend span::before{content:"";display:inline-block;width:28px;height:18px;border-radius:5px;background:var(--c)}
+.legend .today-key::before{background:transparent;outline:3px solid var(--today);outline-offset:-3px;box-shadow:0 0 0 4px var(--todaybg)}
 .steps{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .steps li{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .steps .when{font-variant-numeric:tabular-nums;min-width:200px}
@@ -135,7 +137,7 @@ dialog::backdrop{background:#0008}
       <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="fHide"> ซ่อนรายการที่ทำแล้ว</label>
     </div>
     <div class="legend" style="margin-bottom:8px">
-      <span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลดราคา 15%</span><span style="--c:var(--seg-md2)">ลดราคา 30%</span><span style="--c:var(--seg-pull)">Code 52</span><span style="--c:transparent;outline:0">กรอบ = วันนี้</span>
+      <span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลดราคา 15%</span><span style="--c:var(--seg-md2)">ลดราคา 30%</span><span style="--c:var(--seg-pull)">Code 52</span><span class="today-key">กรอบสีม่วง = วันนี้</span>
     </div>
     <table class="resp"><thead><tr><th>สถานะ</th><th>สินค้า</th><th>Julian รับ</th><th>วางขาย</th><th>Code 52</th><th>ต้องทำ</th><th>ติดต่อ</th><th>จำนวน</th><th class="no-print"></th></tr></thead>
     <tbody id="dashBody"></tbody></table>
