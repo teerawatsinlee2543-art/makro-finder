@@ -98,6 +98,10 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .cbackup{font-size:12.5px;color:var(--muted)}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
 .redbox.todo{min-width:190px}
+.td-now{font-size:14px;font-weight:800;line-height:1.35}
+.td-next{margin-top:6px;padding-top:6px;border-top:1px dashed var(--redbox-line);font-weight:600;line-height:1.35}
+.td-lbl{display:inline-block;font-size:11px;font-weight:700;background:var(--redbox-ink);color:var(--redbox);border-radius:4px;padding:0 6px;margin-right:6px;vertical-align:1px}
+.td-when{font-weight:500;opacity:.85;margin-top:2px}
 .actbtns{display:flex;flex-direction:column;gap:4px;align-items:stretch}
 .actbtns .btn{white-space:nowrap}
 @media (max-width:820px){.redbox.todo{min-width:0}.actbtns{flex-direction:row;flex-wrap:wrap}}
@@ -411,25 +415,33 @@ function strip(p,day){
   if(day>p.pullDay)h+=`<span class="pull now" title="เลย Code 52 มา ${day-p.pullDay} วัน">+${day-p.pullDay}</span>`;
   return`<div class="strip">${h}</div>`;
 }
+/* each status gives `todo` (what to do today) and optionally `next` = {what, d} (the next step and its day);
+   `action` keeps the one-line text for copy/CSV */
 function evalBatch(b){
   const p=st.products.find(x=>pkey(x)===b.sku);const t=today();
-  if(!p)return{st:'err',label:'ไม่พบสินค้า',action:`ไม่มี “${b.sku}” ในรายการสินค้า`,rank:-1};
+  if(!p)return{st:'err',label:'ไม่พบสินค้า',todo:`ไม่มี “${b.sku}” ในรายการสินค้า`,action:`ไม่มี “${b.sku}” ในรายการสินค้า`,rank:-1};
   const prod=fromIso(b.prod),day=diffD(t,prod)+1,c52=addD(prod,p.pullDay-1),left=p.pullDay-day;
   const buyer=st.contacts.find(c=>c.uid===p.buyerUid),com=st.contacts.find(c=>c.uid===p.comUid);
-  const base={p,prod,day,c52,left,buyer,com},on=d=>`${fmtS(addD(prod,d-1))} (อีก ${d-day} วัน)`;
-  if(day<1)return{...base,st:'err',label:'วันรับในอนาคต',action:'ตรวจสอบ Julian code อีกครั้ง',rank:-1};
+  const base={p,prod,day,c52,left,buyer,com};
+  const mk=(o,todo,next)=>{const nx=next&&next.d!=null?{...next,date:addD(prod,next.d-1),inDays:next.d-day}:next||null;
+    return{...base,...o,todo,next:nx,action:todo+(nx?` · ถัดไป: ${nx.what}${nx.date?` ${fmtS(nx.date)} (อีก ${nx.inDays} วัน)`:''}`:'')}};
+  if(day<1)return mk({st:'err',label:'วันรับในอนาคต',rank:-1},'ตรวจสอบ Julian code อีกครั้ง');
   const ap=amPm(p),pm=new Date().getHours()>=12;
-  if(day>p.pullDay||(day===p.pullDay&&(!ap||pm)))return{...base,st:'pull',label:'Code 52',rank:0,
-    action:`นำออกจากชั้นวาง ทำ Code 52${day>p.pullDay?` (เลยกำหนดมา ${day-p.pullDay} วัน)`:''} — แจ้ง Buyer และ Commercial`};
-  if(ap&&day===p.pullDay)return{...base,st:'md2',label:`ลด ${p.md2Pct}%`,rank:1,action:`ช่วงเช้าขายลดราคา ${p.md2Pct}% · บ่ายวันนี้ทำ Code 52`};
-  if(p.md2Day&&day>=p.md2Day)return{...base,st:'md2',label:`ลด ${p.md2Pct}%`,rank:1,
-    action:`ขายลดราคา ${p.md2Pct}% (Step ${p.md1Day?2:1}) · Code 52 ${ap?'บ่าย':''}${on(p.pullDay)}`};
-  if(p.md1Day&&day>=p.md1Day)return{...base,st:'md1',label:`ลด ${p.md1Pct}%`,rank:2,
-    action:`ขายลดราคา ${p.md1Pct}% (Step 1) · ${p.md2Day?`ลด ${p.md2Pct}% ${on(p.md2Day)}`:`Code 52 ${on(p.pullDay)}`}`};
+  if(day>p.pullDay||(day===p.pullDay&&(!ap||pm)))return mk({st:'pull',label:'Code 52',rank:0},
+    `นำออกจากชั้นวาง ทำ Code 52${day>p.pullDay?` (เลยกำหนดมา ${day-p.pullDay} วัน)`:''}`,{what:'แจ้ง Buyer และ Commercial'});
+  if(ap&&day===p.pullDay)return mk({st:'md2',label:`ลด ${p.md2Pct}%`,rank:1},`ช่วงเช้า ขายลดราคา ${p.md2Pct}%`,{what:'บ่ายวันนี้ทำ Code 52'});
+  if(p.md2Day&&day>=p.md2Day)return mk({st:'md2',label:`ลด ${p.md2Pct}%`,rank:1},
+    `ขายลดราคา ${p.md2Pct}% (Step ${p.md1Day?2:1})`,{what:ap?'Code 52 (ช่วงบ่าย)':'Code 52',d:p.pullDay});
+  if(p.md1Day&&day>=p.md1Day)return mk({st:'md1',label:`ลด ${p.md1Pct}%`,rank:2},
+    `ขายลดราคา ${p.md1Pct}% (Step 1)`,p.md2Day?{what:`ลดราคา ${p.md2Pct}%`,d:p.md2Day}:{what:'Code 52',d:p.pullDay});
   const f=firstMd(p),pct=p.md1Day?p.md1Pct:p.md2Pct;
-  if(f!==p.pullDay&&f-day===1)return{...base,st:'soon',label:'พรุ่งนี้ลดราคา',rank:3,
-    action:`วันนี้ขายราคาปกติวันสุดท้าย · พรุ่งนี้ลดราคา ${pct}% — เตรียมป้าย`};
-  return{...base,st:'ok',label:'ขายปกติ',rank:4,action:`ขายราคาปกติ · เริ่มลดราคา ${pct}% ${on(f)}`};
+  if(f!==p.pullDay&&f-day===1)return mk({st:'soon',label:'พรุ่งนี้ลดราคา',rank:3},
+    'ขายราคาปกติ (วันสุดท้าย)',{what:`ลดราคา ${pct}% — เตรียมป้าย`,d:f});
+  return mk({st:'ok',label:'ขายปกติ',rank:4},'ขายราคาปกติ',{what:`เริ่มลดราคา ${pct}%`,d:f});
+}
+function todoHTML(e){
+  const nx=e.next;
+  return`<div class="redbox todo"><div class="td-now">${esc(e.todo||e.action)}</div>${nx?`<div class="td-next"><span class="td-lbl">ถัดไป</span>${esc(nx.what)}${nx.date?`<div class="td-when">${esc(fmtS(nx.date))} · ${nx.inDays===1?'พรุ่งนี้':nx.inDays===0?'วันนี้':`อีก ${nx.inDays} วัน`}</div>`:''}</div>`:''}</div>`;
 }
 const ST=[['pull','Code 52'],['md2','ลดราคา 30%'],['md1','ลดราคา 15%'],['soon','พรุ่งนี้ลดราคา'],['ok','ขายปกติ'],['err','ต้องตรวจสอบ']];
 
@@ -659,7 +671,7 @@ function renderDash(){
     <td data-l="Julian รับ" class="num"><div><b>${jul(e.prod).ddd}</b><div class="small">${fmt(e.prod)}</div></div></td>
     <td data-l="วางขาย"><div><span class="num">วันที่ ${e.day} / ${p.pullDay}</span>${strip(p,e.day)}</div></td>
     <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
-    <td data-l="ต้องทำ"><div class="redbox todo">${esc(e.action)}</div></td>
+    <td data-l="ต้องทำ">${todoHTML(e)}</td>
     <td data-l="ติดต่อ"><div class="small contact">${e.st==='ok'?'<span class="muted">ยังไม่ต้องติดต่อ</span><br>':''}Buyer: ${who(e.buyer,p.buyerUid)}<br>Commercial: ${who(e.com,p.comUid)}</div></td>
     <td data-l="จำนวน" class="num"><div>${esc(b.qty)}<div class="muted small">${esc(b.loc)}</div></div></td>
     <td class="no-print"><div class="actbtns">
