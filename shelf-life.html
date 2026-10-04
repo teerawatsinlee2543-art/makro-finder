@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shelf-Life Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2433;--muted:#667085;--line:#e2e5ea;--accent:#0b5cad;--accent-ink:#fff;
+--ok:#1f7a45;--okbg:#e4f3ea;--soon:#8a5a00;--soonbg:#fff2d6;--md1:#6b5800;--md1bg:#fff3a6;--md2:#9a4300;--md2bg:#ffdcb8;--pull:#fff;--pullbg:#c62828;--err:#5b3fa8;--errbg:#ece6fb;
+--seg-ok:#6ab04c;--seg-md1:#f5e03b;--seg-md2:#eba135;--seg-pull:#c62828;--seg-ink:#1d2433;--seg-pull-ink:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11141a;--card:#1a1f28;--ink:#e6e9ef;--muted:#98a2b3;--line:#2c333f;--accent:#6aa8ff;--accent-ink:#0b1220;
+--ok:#6fd49a;--okbg:#16301f;--soon:#f5c060;--soonbg:#372a10;--md1:#f5e06a;--md1bg:#37320f;--md2:#ffb066;--md2bg:#3d2614;--pull:#fff;--pullbg:#c62828;--err:#bba6ff;--errbg:#2a2240;--seg-ok:#5a9e43;--seg-md1:#e3cf2c;--seg-md2:#de9430;--seg-pull:#c0392b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11141a;--card:#1a1f28;--ink:#e6e9ef;--muted:#98a2b3;--line:#2c333f;--accent:#6aa8ff;--accent-ink:#0b1220;
+--ok:#6fd49a;--okbg:#16301f;--soon:#f5c060;--soonbg:#372a10;--md1:#f5e06a;--md1bg:#37320f;--md2:#ffb066;--md2bg:#3d2614;--pull:#fff;--pullbg:#c62828;--err:#bba6ff;--errbg:#2a2240;--seg-ok:#5a9e43;--seg-md1:#e3cf2c;--seg-md2:#de9430;--seg-pull:#c0392b;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sarabun,system-ui,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
+h1{font-size:20px;margin:0}
+.today{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.jbig{font-size:22px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+nav{display:flex;gap:4px;overflow-x:auto;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+nav button{border:0;background:none;color:var(--muted);padding:8px 12px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
+nav button.on{background:var(--accent);color:var(--accent-ink)}
+main{max-width:1280px;margin:0 auto;padding:16px}
+section[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+h2{font-size:17px;margin:0 0 12px}
+.muted{color:var(--muted)}.small{font-size:13px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;font:inherit;color:inherit;text-align:left}
+body.ro .w{display:none!important}
+body.busy{cursor:progress}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tile b{display:block;font-size:26px;font-variant-numeric:tabular-nums}
+.tile.sel{outline:2px solid var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:600}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.sm{padding:4px 9px;font-size:13px}
+.btn.danger{color:var(--md2)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:13px;white-space:nowrap}
+.s-ok{color:var(--ok);background:var(--okbg)}.s-soon{color:var(--soon);background:var(--soonbg)}
+.s-md1{color:var(--md1);background:var(--md1bg)}.s-md2{color:var(--md2);background:var(--md2bg)}
+.s-pull{color:var(--pull);background:var(--pullbg)}.s-err{color:var(--err);background:var(--errbg)}
+.strip{display:flex;gap:2px;margin-top:6px;overflow-x:auto;padding:3px 2px;max-width:100%}
+.strip span{flex:1 0 0;min-width:22px;max-width:40px;height:26px;display:grid;place-items:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;border-radius:3px;color:var(--seg-ink)}
+.strip .ok{background:var(--seg-ok)}.strip .md1{background:var(--seg-md1)}.strip .md2{background:var(--seg-md2)}.strip .pull{background:var(--seg-pull);color:var(--seg-pull-ink)}
+.strip .split{background:linear-gradient(180deg,var(--seg-md2) 50%,var(--seg-pull) 50%);color:var(--seg-pull-ink)}
+.strip .past{opacity:.4}
+.strip .now{outline:2px solid var(--ink);outline-offset:1px;opacity:1}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;background:var(--c)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.steps li{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.steps .when{font-variant-numeric:tabular-nums;min-width:200px}
+.acted{opacity:.55}
+tr.grp td{background:var(--bg);font-weight:700;color:var(--accent);padding-top:14px}
+.contact b{display:block}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:20px;width:min(640px,calc(100vw - 32px))}
+dialog::backdrop{background:#0008}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;opacity:0;transition:.2s;pointer-events:none;z-index:9}
+.toast.show{opacity:1}
+.err-text{color:var(--md2);font-weight:600}
+.howto{margin:0;padding-left:20px}
+@media (max-width:820px){
+  table.resp thead{display:none}
+  table.resp tr{display:block;border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:10px}
+  table.resp td{display:flex;gap:10px;border:0;padding:4px 2px}
+  table.resp td::before{content:attr(data-l);min-width:92px;color:var(--muted);font-size:12px;font-weight:600}
+  table.resp td>*{flex:1}
+}
+@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="row" style="align-items:center;gap:10px"><h1>Shelf-Life Monitor</h1><span class="chip s-err" id="mode">กำลังเชื่อมต่อ…</span></div>
+  <div class="today">
+    <span class="muted" id="todayTxt"></span>
+    <span class="muted">Julian</span><span class="jbig" id="todayJ"></span>
+  </div>
+</header>
+<nav id="tabs">
+  <button data-tab="dash" class="on">ภาพรวมวันนี้</button>
+  <button data-tab="add">+ รับ/เพิ่มล็อต</button>
+  <button data-tab="prod">สินค้า & กฎลดราคา</button>
+  <button data-tab="ct">Buyer / Commercial</button>
+  <button data-tab="jul">แปลง Julian</button>
+  <button data-tab="data">นำเข้า/ส่งออก</button>
+</nav>
+<main>
+
+<!-- DASHBOARD -->
+<section id="t-dash">
+  <div class="card" id="localWarn" hidden style="border-color:var(--soon);background:var(--soonbg)"><h2 style="color:var(--soon)">ไม่ได้แสดงข้อมูลทีม</h2><p style="margin:0" id="localWhy"></p><p class="small" id="localTeamHint" style="margin:6px 0 0">ข้อมูลทีมอยู่ที่ <b>claude.ai/artifact/XwwnvaT9BChA7UbX8yj1Td</b> — เปิดลิงก์นี้ขณะล็อกอิน claude.ai ด้วยบัญชีองค์กร</p></div>
+  <div class="card" id="onboard" hidden><h2>ยังไม่มีข้อมูลของทีม</h2><p class="muted" style="margin-top:0">โหลดรายการสินค้าและกฎ Shelf life จากคู่มือ Makro (ผักผลไม้นำเข้าและท้องถิ่น 69 รายการ) แล้วเพิ่ม Buyer / Commercial ทุกคนที่เปิดลิงก์นี้จะเห็นข้อมูลชุดเดียวกัน</p><div class="row w"><button class="btn pri" id="obSample">โหลดสินค้าตามคู่มือ Makro</button><button class="btn" id="obMigrate" hidden></button></div></div>
+  <div class="tiles" id="tiles"></div>
+  <div class="card">
+    <div class="row no-print" style="margin-bottom:12px">
+      <label style="flex:1;min-width:180px">ค้นหา (สินค้า / SKU / Buyer UID / ที่ตั้ง)<input id="q" placeholder="เช่น บลูเบอรี่"></label>
+      <label>สถานะ<select id="fSt"><option value="">ทั้งหมด</option></select></label>
+      <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="fHide"> ซ่อนรายการที่ทำแล้ว</label>
+    </div>
+    <div class="legend" style="margin-bottom:8px">
+      <span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลดราคา 15%</span><span style="--c:var(--seg-md2)">ลดราคา 30%</span><span style="--c:var(--seg-pull)">Code 52</span><span style="--c:transparent;outline:0">กรอบ = วันนี้</span>
+    </div>
+    <table class="resp"><thead><tr><th>สถานะ</th><th>สินค้า</th><th>Julian รับ</th><th>วางขาย</th><th>Code 52</th><th>ต้องทำ</th><th>ติดต่อ</th><th>จำนวน</th><th class="no-print"></th></tr></thead>
+    <tbody id="dashBody"></tbody></table>
+    <p class="muted" id="dashLoading">กำลังโหลดข้อมูลทีม…</p>
+    <p class="muted" id="dashEmpty" hidden>ยังไม่มีล็อตที่ตรงเงื่อนไข — ไปที่แท็บ “+ รับ/เพิ่มล็อต”</p>
+  </div>
+</section>
+
+<!-- ADD BATCH -->
+<section id="t-add" hidden>
+  <div class="card">
+    <h2>รับสินค้า / เพิ่มล็อต</h2>
+    <p class="muted small" style="margin-top:0">นับวันตามคู่มือ: วันที่รับสินค้าและจัดเรียงหน้าร้าน = <b>วันที่ 1</b></p>
+    <div class="grid2">
+      <label>สินค้า<select id="aSku"></select></label>
+      <label>Julian วันรับสินค้า (เช่น 277)<input id="aJ" inputmode="numeric" placeholder="DDD / YDDD / YYDDD"></label>
+      <label>หรือเลือกวันรับสินค้า<input type="date" id="aDate"></label>
+      <label>จำนวน<input id="aQty" type="number" min="0" value="1"></label>
+      <label>ที่ตั้ง / ชั้นวาง<input id="aLoc" placeholder="เช่น Chiller A3"></label>
+      <label>หมายเหตุ<input id="aNote"></label>
+    </div>
+    <div id="aPreview" class="card" style="margin:14px 0 0;background:var(--bg)"></div>
+    <div class="row" style="margin-top:12px"><button class="btn pri w" id="aSave">บันทึกล็อต</button></div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="t-prod" hidden>
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">สินค้า & กฎ Shelf life</h2>
+      <span class="row w"><button class="btn" onclick="addManual()">เพิ่มสินค้าที่ยังไม่มีจากคู่มือ</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
+    <p class="muted small">กฎตาม “คู่มือ อายุและการจัดการสินค้าผักและผลไม้” (ผ่านการตรวจสอบจากทีมจัดซื้อและ QA) · นับวันที่ 1 = วันรับสินค้า · ขายราคาเต็มครบ Shelf life → ลด 15% (Step 1) → ลด 30% (Step 2) → Code 52 · สินค้า Shelf life 1 วันข้าม Step 1 · อายุสินค้ากำหนดตามการจัดเรียงในตู้แช่ 0–4°C (ผักสลัด 6–8°C) หรือให้พิจารณาตามสภาพสินค้า</p>
+    <table class="resp"><thead><tr><th>สินค้า</th><th>Shelf life</th><th>ขายราคาเต็ม</th><th>ลด 15%</th><th>ลด 30%</th><th>Code 52</th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
+  </div>
+</section>
+
+<!-- CONTACTS -->
+<section id="t-ct" hidden>
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><button class="btn pri w" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></div>
+    <div class="row" style="margin-bottom:10px"><label style="flex:1;min-width:180px">ค้นหา (UID / ชื่อ / หมวดสินค้า / เบอร์)<input id="ctQ" placeholder="เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small" id="ctCount" style="padding-bottom:8px"></span></div>
+    <table class="resp"><thead><tr><th>UID</th><th>ชื่อ</th><th>บทบาท</th><th>แผนก / หมวด</th><th>โทร</th><th>อีเมล / LINE</th><th>ผู้ติดต่อสำรอง</th><th>ใช้กับสินค้า</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
+  </div>
+</section>
+
+<!-- JULIAN -->
+<section id="t-jul" hidden>
+  <div class="grid2">
+    <div class="card"><h2>วันที่ → Julian</h2>
+      <label>วันที่<input type="date" id="jD"></label>
+      <p id="jDout" style="font-size:18px"></p></div>
+    <div class="card"><h2>Julian → วันที่</h2>
+      <label>Julian code<input id="jC" inputmode="numeric" placeholder="277 / 6277 / 26277 / 2026277"></label>
+      <p id="jCout" style="font-size:18px"></p></div>
+    <div class="card"><h2>กำหนดการจาก Julian วันรับ</h2>
+      <label>สินค้า<select id="jSku"></select></label>
+      <label style="margin-top:8px">Julian วันรับสินค้า<input id="jC2" inputmode="numeric"></label>
+      <div id="jPlan" style="margin-top:10px"></div></div>
+  </div>
+  <div class="card small muted"><b>Julian Calendar:</b> เลขวันของปี 001–365 (ปี 2026 ไม่มี 29 ก.พ.) เช่น 1 ม.ค. = 001, 1 ต.ค. = 274, 31 ธ.ค. = 365 · <b>รูปแบบที่รองรับ:</b> DDD (ถ้าเป็นวันในอนาคตจะถือเป็นปีก่อน) · YDDD (6277 = ปี 2026 วันที่ 277) · YYDDD (26277) · YYYYDDD (2026277)</div>
+</section>
+
+<!-- DATA -->
+<section id="t-data" hidden>
+  <div class="card"><h2>ส่งออก</h2>
+    <div class="row"><button class="btn" onclick="exportBatchesCSV()">ล็อต + สถานะวันนี้ (CSV/Excel)</button>
+    <button class="btn" onclick="exportJSON()">สำรองข้อมูลทั้งหมด (JSON)</button>
+    <button class="btn" onclick="downloadTemplate()">แม่แบบ CSV สินค้า</button></div></div>
+  <div class="card w"><h2>นำเข้า</h2>
+    <div class="grid2">
+      <label>สินค้า (CSV ตามแม่แบบ — SKU หรือชื่อซ้ำจะถูกอัปเดต · เว้นวันว่าง = ใช้กฎตามคู่มือ)<input type="file" accept=".csv,text/csv" id="impProd"></label>
+      <label>ผู้ติดต่อ (CSV: uid,name,role,dept,phone,email)<input type="file" accept=".csv,text/csv" id="impCt"></label>
+      <label>กู้คืนข้อมูลสำรอง (JSON)<input type="file" accept=".json" id="impJson"></label>
+    </div></div>
+  <div class="card" id="whoBox" hidden><h2>ชื่อของคุณ</h2><label style="max-width:360px">ใช้บันทึกว่าใครกด “ทำแล้ว” (เก็บในเครื่องนี้)<input id="whoName" placeholder="เช่น ธีรวัฒน์ (Fresh)"></label></div>
+  <div class="card w"><h2>ล้างข้อมูล</h2>
+    <p class="muted small" id="storeNote"></p>
+    <div class="row"><button class="btn" onclick="purgeOld()">ลบล็อตที่เลย Code 52 เกิน 7 วัน</button>
+    <button class="btn danger" onclick="resetSample()">ล้างทั้งหมดแล้วโหลดคู่มือใหม่</button></div></div>
+</section>
+</main>
+
+<dialog id="dlgProd"><form method="dialog" id="fProd">
+  <h2 id="dpTitle">สินค้า</h2>
+  <div class="grid2">
+    <label>Description<input name="desc" required></label>
+    <label>SKU / Item code (ถ้ามี)<input name="sku"></label>
+    <label>ประเภท<select name="origin"><option value="import">ผักผลไม้นำเข้า</option><option value="local">ผักผลไม้ท้องถิ่น</option><option value="other">อื่นๆ</option></select></label>
+    <label>หมวด<input name="cat"></label>
+    <label>อุณหภูมิจัดเรียง<input name="temp" placeholder="เช่น 0–4°C"></label>
+    <label>Shelf life (วัน)<input name="shelf" type="number" min="1" required></label>
+    <label>ลดราคา Step 1 เริ่มวันที่ (0 = ไม่มี)<input name="md1Day" type="number" min="0"></label>
+    <label>Step 1 ลด (%)<input name="md1Pct" type="number" min="0" max="100"></label>
+    <label>ลดราคา Step 2 เริ่มวันที่ (0 = ไม่มี)<input name="md2Day" type="number" min="0"></label>
+    <label>Step 2 ลด (%)<input name="md2Pct" type="number" min="0" max="100"></label>
+    <label>Code 52 วันที่<input name="pullDay" type="number" min="2"></label>
+    <label>Buyer UID<select name="buyerUid"></select></label>
+    <label>Commercial<select name="comUid"></select></label>
+  </div>
+  <p class="small muted" id="dpMan" style="margin-bottom:0"></p>
+  <div id="dpPrev" style="margin-top:12px"></div>
+  <p class="err-text" id="dpErr"></p>
+  <div class="row" style="justify-content:space-between;margin-top:6px">
+    <button type="button" class="btn" id="dpAuto">ใช้กฎตามคู่มือ Makro</button>
+    <span class="row"><button type="button" class="btn" onclick="dlgProd.close()">ยกเลิก</button><button class="btn pri" value="ok">บันทึก</button></span>
+  </div>
+</form></dialog>
+
+<dialog id="dlgCt"><form method="dialog" id="fCt">
+  <h2>ผู้ติดต่อ</h2>
+  <div class="grid2">
+    <label>UID<input name="uid" required></label>
+    <label>ชื่อ<input name="name" required></label>
+    <label>บทบาท<select name="role"><option>Buyer</option><option>Commercial</option><option>อื่นๆ</option></select></label>
+    <label>กลุ่ม / หน่วยงาน<input name="group" list="grpList" placeholder="เช่น Dry Grocery Food"><datalist id="grpList"><option>Fresh Food · Fruit & Vegetable (FF3)</option><option>Dry Grocery Food</option><option>Dry Grocery Non Food</option></datalist></label>
+    <label>แผนก / หมวด<input name="dept"></label>
+    <label>โทร<input name="phone"></label>
+    <label>อีเมล / LINE<input name="email"></label>
+    <label style="grid-column:1/-1">ผู้ติดต่อสำรอง (Jr. Merchandise / Assistant Buyer)<input name="backup"></label>
+  </div>
+  <div class="row" style="justify-content:flex-end;margin-top:14px"><button type="button" class="btn" onclick="dlgCt.close()">ยกเลิก</button><button class="btn pri" value="ok">บันทึก</button></div>
+</form></dialog>
+
+<dialog id="dlgAsk"><form method="dialog">
+  <p id="askMsg" style="white-space:pre-line;margin-top:0"></p>
+  <div class="row" style="justify-content:flex-end"><button class="btn" value="no" id="askNo">ยกเลิก</button><button class="btn pri" value="yes">ตกลง</button></div>
+</form></dialog>
+
+<dialog id="dlgOut"><form method="dialog">
+  <h2 id="outTitle">ส่งออก</h2>
+  <p class="muted small" style="margin-top:0">คัดลอกแล้ววางลง Excel / Notepad หรือกดดาวน์โหลด (ถ้าเบราว์เซอร์อนุญาต)</p>
+  <textarea id="outText" rows="12" style="width:100%;font-family:ui-monospace,Consolas,monospace;font-size:12px" readonly></textarea>
+  <div class="row" style="justify-content:flex-end;margin-top:10px"><button type="button" class="btn" id="outDl">ดาวน์โหลดไฟล์</button><button type="button" class="btn pri" id="outCopy">คัดลอก</button><button class="btn">ปิด</button></div>
+</form></dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- date + julian helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())};
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const fromIso=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addD=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const diffD=(a,b)=>Math.round((a-b)/864e5);
+const fmt=d=>d.toLocaleDateString('th-TH-u-ca-gregory',{day:'numeric',month:'short',year:'numeric'});
+const fmtS=d=>d.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'short',day:'numeric',month:'short'});
+const isLeap=y=>(y%4===0&&y%100!==0)||y%400===0;
+const doy=d=>diffD(d,new Date(d.getFullYear(),0,0));
+const jul=d=>{const ddd=String(doy(d)).padStart(3,'0');return{ddd,y1:`${d.getFullYear()%10}${ddd}`,y2:`${String(d.getFullYear()).slice(2)}${ddd}`,y4:`${d.getFullYear()}${ddd}`}};
+function parseJulian(raw,ref=today()){
+  const c=String(raw??'').replace(/\D/g,'');if(!c)return null;
+  let year,ddd;const Y=ref.getFullYear();
+  if(c.length<=3){ddd=+c;year=Y}
+  else if(c.length===4){ddd=+c.slice(1);year=Y-((Y%10-+c[0]+10)%10)}
+  else if(c.length===5){ddd=+c.slice(2);year=2000+ +c.slice(0,2)}
+  else if(c.length===7){ddd=+c.slice(4);year=+c.slice(0,4)}
+  else return{error:'รูปแบบไม่ถูกต้อง (ใช้ 3, 4, 5 หรือ 7 หลัก)'};
+  if(c.length<=3&&ddd>=1&&addD(new Date(year,0,1),ddd-1)>ref)year--;
+  const max=isLeap(year)?366:365;
+  if(ddd<1||ddd>max)return{error:`วัน Julian ต้องอยู่ระหว่าง 001–${max} (ปี ${year})`};
+  return{date:addD(new Date(year,0,1),ddd-1),year,ddd};
+}
+
+/* ---------- rules: Makro "คู่มือ อายุและการจัดการสินค้าผักและผลไม้" ----------
+   Day numbers are วันที่วางขาย: day 1 = the Julian receive/display date.
+   [last full-price day, Step 1 (15%) start, Step 2 (30%) start, Code 52 day]; 0 = no such step.
+   Step 2 day == Code 52 day means "30% in the morning, Code 52 in the afternoon". */
+const MANUAL={
+  import:{label:'ผักผลไม้นำเข้า',rules:{1:[1,0,2,3],2:[2,3,4,5],3:[3,4,5,6],5:[5,6,7,8],7:[7,8,10,11],10:[10,11,13,14],15:[15,16,18,19]},
+    items:{1:['บล็อคโคลี่','กะหล่ำดอก'],2:['แบล็คเบอร์รี่','ราสเบอร์รี่','พีช','เชอร์รี่'],3:['สตรอเบอร์รี่นำเข้า','องุ่น (ทุกสี)'],
+      5:['แก้วมังกร (นำเข้า)','องุ่นไชมัสคัส','ทับทิมอินเดีย','เสาวรส (นำเข้า)','สละอินโด','พลับ','สาลี่หิมะ'],
+      7:['อโวคาโด','ส้มนำเข้า','กีวี่','บลูเบอรี่','ทับทิมจีน','แนคทารีน','พลัม','มันหวานญี่ปุ่น','สาลี่ทอง','สาลี่หอม','แพร'],
+      10:['แอปเปิ้ลโอริน','แอปเปิ้ลเซไกอิจิ','แอปเปิ้ลมุทสึ','แอปเปิ้ลคินเซย','แอปเปิ้ลซันฟูจิ'],15:['แอปเปิ้ลแดง','แอปเปิ้ลเขียว','แอปเปิ้ลอื่นๆ']}},
+  local:{label:'ผักผลไม้ท้องถิ่น',rules:{1:[1,0,2,2],2:[2,0,3,4],3:[2,3,4,5],5:[5,6,7,8],7:[7,8,10,11],14:[14,15,16,17]},
+    items:{1:['เห็ดฟาง','เงาะ','ลิ้นจี่'],2:['สตรอเบอร์รี่ไทย','มังคุด (กก.ละ)','ลองกอง / ลางสาด','ลำไย','มะไฟ','เห็ดนางฟ้า','นางรมหลวง','เห็ดหูหนู','เห็ดเปาฮื้อ'],
+      3:['ชมพู่','น้อยหน่า','มะม่วงสุก','ฝรั่ง','สละไทย','มะม่วงดิบ','มันฝรั่ง','ผักสลัด'],
+      5:['เมล่อน','แคนตาลูป','แก้วมังกร (ไทย)','สับปะรด','แตงโม','กล้วยหอม','มัน','ส้มไทย','เสาวรส (ไทย)','มังคุด (แพ็คละ)','เห็ดเข็มทอง'],
+      7:['อโวคาโดไทย','ขนุน','ส้มโอ'],14:['เห็ดแครง']}}};
+const ORIGINS={import:'นำเข้า',local:'ท้องถิ่น',other:'อื่นๆ'};
+function manualRule(shelf,origin){const r=MANUAL[origin]?.rules[+shelf];return r?{md1Day:r[1],md1Pct:15,md2Day:r[2],md2Pct:30,pullDay:r[3]}:null}
+function autoRule(shelf,origin){
+  shelf=Math.max(1,+shelf||1);
+  return manualRule(shelf,origin)||(()=>{const md2Day=shelf+Math.max(2,Math.ceil(shelf*.3));return{md1Day:shelf+1,md1Pct:15,md2Day,md2Pct:30,pullDay:md2Day+1}})();
+}
+function manualTemp(desc,origin){if(origin==='import')return'0–4°C';if(/^เห็ด|^นางรม/.test(desc))return'0–4°C';if(desc==='ผักสลัด')return'6–8°C';return''}
+/* Buyer UID per manual item, from FF Directory AUG2026 (FF3). Names/phones live only in the team data, never in this file. */
+const BUYER_ITEMS={FV2:['บล็อคโคลี่','กะหล่ำดอก'],FF2A:['แบล็คเบอร์รี่','ราสเบอร์รี่','เชอร์รี่','สตรอเบอร์รี่นำเข้า','พลับ'],
+  FF2C:['พีช','อโวคาโด','ส้มนำเข้า','กีวี่','แนคทารีน','พลัม'],FF2B:['องุ่น (ทุกสี)','องุ่นไชมัสคัส','ทับทิมอินเดีย','บลูเบอรี่','ทับทิมจีน'],
+  FF2:['แก้วมังกร (นำเข้า)','สาลี่หิมะ','สาลี่ทอง','สาลี่หอม','แพร','แอปเปิ้ลโอริน','แอปเปิ้ลเซไกอิจิ','แอปเปิ้ลมุทสึ','แอปเปิ้ลคินเซย','แอปเปิ้ลซันฟูจิ','แอปเปิ้ลแดง','แอปเปิ้ลเขียว','แอปเปิ้ลอื่นๆ'],
+  FV2A:['มันหวานญี่ปุ่น'],FV1B:['เห็ดฟาง','เห็ดนางฟ้า','นางรมหลวง','เห็ดหูหนู','เห็ดเปาฮื้อ','เห็ดแครง'],FV1D:['ผักสลัด'],
+  FF1A:['เงาะ','ลิ้นจี่','มังคุด (กก.ละ)','ลองกอง / ลางสาด','ลำไย','มะม่วงสุก','สละไทย','มะม่วงดิบ','แก้วมังกร (ไทย)','ส้มไทย','มังคุด (แพ็คละ)','ส้มโอ'],
+  FF1:['เมล่อน','แคนตาลูป','สับปะรด','แตงโม','ขนุน']};
+const BUYER_OF={};Object.entries(BUYER_ITEMS).forEach(([u,l])=>l.forEach(d=>BUYER_OF[d]=u));
+const comOf=(origin,buyer)=>origin==='import'?'9746':/^FV1/.test(buyer)?'8890':origin==='local'?'8718':'';
+function manualProducts(){const out=[];
+  for(const origin of ['import','local'])for(const [shelf,names] of Object.entries(MANUAL[origin].items))
+    names.forEach(desc=>out.push({sku:'',desc,cat:MANUAL[origin].label,origin,temp:manualTemp(desc,origin),shelf:+shelf,...autoRule(shelf,origin),buyerUid:BUYER_OF[desc]||'',comUid:comOf(origin,BUYER_OF[desc]||''),rv:2}));
+  return out}
+const pkey=p=>p.sku||p.desc;
+const firstMd=p=>p.md1Day||p.md2Day||p.pullDay;
+const amPm=p=>p.md2Day&&p.md2Day===p.pullDay;
+/* older saves counted age from day 0 and had no origin */
+function normProduct(p){if(p.rv===2)return p;return{...p,origin:p.origin||'other',temp:p.temp||'',md1Day:p.md1Day?p.md1Day+1:0,md2Day:p.md2Day?p.md2Day+1:0,pullDay:(p.pullDay||p.shelf)+1,rv:2}}
+function ruleError(p){
+  if(!(p.shelf>=1))return'Shelf life ต้องมากกว่า 0';
+  if(!(p.pullDay>=2))return'วัน Code 52 ต้องเป็นวันที่ 2 ขึ้นไป';
+  if(firstMd(p)<2)return'ต้องขายราคาเต็มอย่างน้อยวันที่ 1';
+  if(p.md1Day&&p.md1Day>=(p.md2Day||p.pullDay))return'Step 1 ต้องเริ่มก่อน Step 2 และก่อน Code 52';
+  if(p.md2Day&&p.md2Day>p.pullDay)return'Step 2 ต้องเริ่มไม่เกินวัน Code 52';
+  return'';
+}
+function stages(p,d0){
+  const s=[],ap=amPm(p);
+  s.push({k:'ok',label:'ขายราคาปกติ',from:1,to:firstMd(p)-1});
+  if(p.md1Day)s.push({k:'md1',label:`ลดราคา ${p.md1Pct}% (Step 1)`,from:p.md1Day,to:(p.md2Day||p.pullDay)-1});
+  if(p.md2Day)s.push({k:'md2',label:`ลดราคา ${p.md2Pct}% (Step ${p.md1Day?2:1})${ap?' ช่วงเช้า':''}`,from:p.md2Day,to:ap?p.md2Day:p.pullDay-1});
+  s.push({k:'pull',label:ap?'Code 52 ช่วงบ่าย':'Code 52',from:p.pullDay,to:null});
+  if(d0)s.forEach(x=>{x.d1=addD(d0,x.from-1);x.d2=x.to==null?null:addD(d0,x.to-1)});
+  return s;
+}
+function barStyle(p){
+  const T=p.pullDay,pc=n=>(Math.min(T,Math.max(0,n))/T*100).toFixed(1)+'%',ap=amPm(p);
+  const a=firstMd(p)-1,b=(p.md2Day||p.pullDay)-1,c=ap?p.pullDay-.5:p.pullDay-1;
+  return`background:linear-gradient(90deg,var(--seg-ok) 0 ${pc(a)},var(--seg-md1) ${pc(a)} ${pc(b)},var(--seg-md2) ${pc(b)} ${pc(c)},var(--seg-pull) ${pc(c)} 100%)`;
+}
+function stageOf(p,d){return d<firstMd(p)?'ok':p.md1Day&&d<(p.md2Day||p.pullDay)?'md1':p.md2Day&&d<p.pullDay?'md2':'pull'}
+const STAGE_TXT={ok:'ขาย',md1:'ลดราคา 15%',md2:'ลดราคา 30%',pull:'Code 52'};
+function strip(p,day){
+  if(!(p.pullDay>=1))return'';let h='';const ap=amPm(p);
+  for(let d=1;d<=p.pullDay;d++){const split=ap&&d===p.pullDay,k=split?'split':stageOf(p,d);
+    const tip=split?`วันที่ ${d}: เช้าลด ${p.md2Pct}% · บ่าย Code 52`:`วันที่ ${d}: ${k==='md1'?`ลดราคา ${p.md1Pct}%`:k==='md2'?`ลดราคา ${p.md2Pct}%`:STAGE_TXT[k]}`;
+    h+=`<span class="${k}${day===d?' now':''}${day>d?' past':''}" title="${tip}">${d}</span>`}
+  if(day>p.pullDay)h+=`<span class="pull now" title="เลย Code 52 มา ${day-p.pullDay} วัน">+${day-p.pullDay}</span>`;
+  return`<div class="strip">${h}</div>`;
+}
+function evalBatch(b){
+  const p=st.products.find(x=>pkey(x)===b.sku);const t=today();
+  if(!p)return{st:'err',label:'ไม่พบสินค้า',action:`ไม่มี “${b.sku}” ในรายการสินค้า`,rank:-1};
+  const prod=fromIso(b.prod),day=diffD(t,prod)+1,c52=addD(prod,p.pullDay-1),left=p.pullDay-day;
+  const buyer=st.contacts.find(c=>c.uid===p.buyerUid),com=st.contacts.find(c=>c.uid===p.comUid);
+  const base={p,prod,day,c52,left,buyer,com},on=d=>`${fmtS(addD(prod,d-1))} (อีก ${d-day} วัน)`;
+  if(day<1)return{...base,st:'err',label:'วันรับในอนาคต',action:'ตรวจสอบ Julian code อีกครั้ง',rank:-1};
+  const ap=amPm(p),pm=new Date().getHours()>=12;
+  if(day>p.pullDay||(day===p.pullDay&&(!ap||pm)))return{...base,st:'pull',label:'Code 52',rank:0,
+    action:`นำออกจากชั้นวาง ทำ Code 52${day>p.pullDay?` (เลยกำหนดมา ${day-p.pullDay} วัน)`:''} — แจ้ง Buyer และ Commercial`};
+  if(ap&&day===p.pullDay)return{...base,st:'md2',label:`ลด ${p.md2Pct}%`,rank:1,action:`ช่วงเช้าขายลดราคา ${p.md2Pct}% · บ่ายวันนี้ทำ Code 52`};
+  if(p.md2Day&&day>=p.md2Day)return{...base,st:'md2',label:`ลด ${p.md2Pct}%`,rank:1,
+    action:`ขายลดราคา ${p.md2Pct}% (Step ${p.md1Day?2:1}) · Code 52 ${ap?'บ่าย':''}${on(p.pullDay)}`};
+  if(p.md1Day&&day>=p.md1Day)return{...base,st:'md1',label:`ลด ${p.md1Pct}%`,rank:2,
+    action:`ขายลดราคา ${p.md1Pct}% (Step 1) · ${p.md2Day?`ลด ${p.md2Pct}% ${on(p.md2Day)}`:`Code 52 ${on(p.pullDay)}`}`};
+  const f=firstMd(p),pct=p.md1Day?p.md1Pct:p.md2Pct;
+  if(f!==p.pullDay&&f-day===1)return{...base,st:'soon',label:'พรุ่งนี้ลดราคา',rank:3,
+    action:`วันนี้ขายราคาปกติวันสุดท้าย · พรุ่งนี้ลดราคา ${pct}% — เตรียมป้าย`};
+  return{...base,st:'ok',label:'ขายปกติ',rank:4,action:`ขายราคาปกติ · เริ่มลดราคา ${pct}% ${on(f)}`};
+}
+const ST=[['pull','Code 52'],['md2','ลดราคา 30%'],['md1','ลดราคา 15%'],['soon','พรุ่งนี้ลดราคา'],['ok','ขายปกติ'],['err','ต้องตรวจสอบ']];
+
+/* ---------- storage: claude.ai artifact db · Google Sheet (public site) · this browser ----------
+   SHEET_API = the Google Apps Script Web App URL (…/exec). Leave '' to keep data in this browser only. */
+const SHEET_API='';
+const KEY='shelfLifeMonitor.v2',COLS=['products','contacts','batches'];
+let noTeam='';let st={products:[],contacts:[],batches:[]},mode='init',db=null,usr=null,myId=null,canWrite=true;
+const loaded={};
+const rid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+function seed(demo){
+  const t=today(),d=n=>iso(addD(t,-n)),B=(sku,n,qty,loc)=>({sku,prod:d(n),qty,loc,note:'ล็อตตัวอย่าง'});
+  return{contacts:[],products:manualProducts(),
+    batches:demo?[B('บลูเบอรี่',2,24,'Chiller A1'),B('บลูเบอรี่',8,10,'Chiller A1'),B('สตรอเบอร์รี่นำเข้า',4,12,'Chiller A2'),
+      B('ผักสลัด',3,30,'Chiller B1 (6–8°C)'),B('แอปเปิ้ลแดง',17,40,'Chiller A3'),B('เห็ดฟาง',2,15,'Chiller B2')]:[]};
+}
+function withIds(s){const o={};COLS.forEach(c=>o[c]=(s[c]||[]).map(x=>({...x,_id:x._id||rid()})));return o}
+function loadLocal(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.products){s.products=s.products.map(normProduct).map(p=>p.buyerUid||p.comUid||!BUYER_OF[p.desc]?p:{...p,buyerUid:BUYER_OF[p.desc],comUid:comOf(p.origin,BUYER_OF[p.desc])});return withIds(s)}}catch(e){}return null}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){toast('บันทึกในเบราว์เซอร์ไม่ได้ — โปรดสำรองเป็น JSON')}}
+const body=o=>{const{_id,id,...r}=o;return JSON.parse(JSON.stringify(r))};
+function dbErr(e){const c=e?.code;
+  if(c==='invalid_argument'||c==='not_granted'){canWrite=false;applyRole();return'คุณยังไม่มีสิทธิ์แก้ไขข้อมูลทีม — ขอให้เจ้าของแชร์สิทธิ์ระดับ Contributor ขึ้นไป'}
+  if(c==='quota_exceeded')return'พื้นที่ข้อมูลเต็ม — ลบล็อตเก่าออกก่อน (แท็บ นำเข้า/ส่งออก)';
+  if(c==='resource_exhausted')return'บันทึกถี่เกินไป — รอสักครู่แล้วลองใหม่';
+  if(mode==='sheet')return'บันทึกลง Google Sheet ไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่ (ข้อมูลจะโหลดใหม่จาก Sheet)';
+  return'บันทึกไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'}
+async function retry(fn){try{return await fn()}catch(e){if(e?.code==='unavailable'){await new Promise(r=>setTimeout(r,400+Math.random()*600));return fn()}throw e}}
+/* Google Sheet: text/plain POST avoids the CORS preflight Apps Script cannot answer */
+let queue=null;
+async function sheetCall(req){
+  let r;try{r=await fetch(SHEET_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(req)})}catch(e){throw{code:'unavailable'}}
+  const j=await r.json().catch(()=>({ok:false}));if(!j.ok)throw{code:j.error||'unavailable'};return j;
+}
+function sheetWrite(w){if(queue)queue.push(w);else return retry(()=>sheetCall(w))}
+async function pull(){
+  if(mode!=='sheet'||busy)return;
+  try{const r=await fetch(SHEET_API+(SHEET_API.includes('?')?'&':'?')+'t='+Date.now());const j=await r.json();if(!j.ok)throw 0;
+    COLS.forEach(c=>{st[c]=(j[c]||[]).map(x=>c==='products'?normProduct(x):x);loaded[c]=true});lastPull=Date.now();renderAll();applyRole()}
+  catch(e){if(!COLS.every(c=>loaded[c])){COLS.forEach(c=>loaded[c]=true);renderAll()}toast('โหลดข้อมูลจาก Google Sheet ไม่สำเร็จ — จะลองใหม่อัตโนมัติ')}
+}
+let lastPull=0;
+async function putItem(col,o){
+  if(mode==='db'){const ref=o._id?db.collection(col).doc(o._id):db.collection(col).doc();await retry(()=>ref.set(body(o)));return}
+  const id=o._id||rid(),i=st[col].findIndex(x=>x._id===id),rec={...o,_id:id};
+  if(i>-1)st[col][i]=rec;else st[col].push(rec);
+  if(mode==='sheet')return sheetWrite({op:'set',col,id,data:body(rec)});
+  saveLocal();
+}
+async function patchItem(col,o,patch){
+  if(mode==='db'){await retry(()=>db.collection(col).doc(o._id).update(patch));return}
+  Object.assign(o,patch);
+  if(mode==='sheet')return sheetWrite({op:'update',col,id:o._id,data:JSON.parse(JSON.stringify(patch))});
+  saveLocal()}
+async function rmItem(col,o){
+  if(mode==='db'){await retry(()=>db.collection(col).doc(o._id).delete());return}
+  st[col]=st[col].filter(x=>x._id!==o._id);
+  if(mode==='sheet')return sheetWrite({op:'delete',col,id:o._id});
+  saveLocal()}
+let busy=false;
+async function act(fn,okMsg){
+  if(!canWrite){toast('คุณดูข้อมูลได้อย่างเดียว');return false}
+  if(busy){toast('กำลังบันทึกรายการก่อนหน้า…');return false}
+  busy=true;document.body.classList.add('busy');
+  try{
+    if(mode==='sheet'){queue=[];await fn();const ws=queue;queue=null;renderAll();if(ws.length)await retry(()=>sheetCall({op:'bulk',writes:ws}))}
+    else{await fn();if(mode==='local')renderAll()}
+    if(okMsg)toast(okMsg);return true}
+  catch(e){queue=null;notice(dbErr(e));if(mode==='sheet'){busy=false;pull()}return false}
+  finally{busy=false;document.body.classList.remove('busy')}
+}
+async function replaceAll(s){
+  if(mode==='sheet'){const data={};COLS.forEach(c=>data[c]=(s[c]||[]).map(x=>({...body(x),_id:x._id||rid()})));
+    COLS.forEach(c=>st[c]=data[c].map(x=>c==='products'?normProduct(x):x));
+    queue=null;await retry(()=>sheetCall({op:'replace',data}));return}
+  for(const c of COLS)for(const x of [...st[c]])await rmItem(c,x);
+  for(const c of COLS)for(const x of s[c]||[])await putItem(c,{...x,_id:undefined});
+}
+function applyRole(){
+  document.body.classList.toggle('ro',!canWrite);
+  const m=$('#mode'),team=mode==='db'||mode==='sheet';
+  m.textContent=mode==='db'?(canWrite?'ข้อมูลทีม · อัปเดตสด':'ข้อมูลทีม · ดูอย่างเดียว'):mode==='sheet'?'ข้อมูลทีม · Google Sheet':mode==='local'?'ไม่ใช่ข้อมูลทีม · เก็บในเครื่องนี้':'กำลังเชื่อมต่อ…';
+  $('#localWarn').hidden=mode!=='local';$('#localWhy').textContent=noTeam==='signin'?'หน้านี้เชื่อมกับข้อมูลทีมไม่ได้ (มักเกิดจากยังไม่ได้ล็อกอิน claude.ai หรือไม่มีสิทธิ์เข้าถึง) จึงแสดงข้อมูลที่เก็บในเบราว์เซอร์นี้แทน ซึ่งไม่มีรายชื่อ Buyer / Commercial และล็อตของทีม':noTeam==='nosheet'?'ยังไม่ได้เชื่อม Google Sheet ข้อมูลจะเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีรายชื่อ Buyer / Commercial และล็อตของทีม':'นี่คือไฟล์ที่เปิดจากเครื่อง ข้อมูลจะเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีรายชื่อ Buyer / Commercial และล็อตของทีม';
+  $('#localTeamHint').hidden=noTeam==='nosheet';
+  m.className='chip '+(team?'s-ok':mode==='local'?'s-soon':'s-err');
+  $('#storeNote').textContent=mode==='db'?'ข้อมูลชุดนี้ใช้ร่วมกันทั้งทีม — ทุกคนที่เปิดลิงก์เห็นข้อมูลเดียวกันทันที การลบมีผลกับทุกคน'
+    :mode==='sheet'?'ข้อมูลเก็บใน Google Sheet ใช้ร่วมกันทั้งทีม — หน้าจะดึงข้อมูลใหม่ทุก 30 วินาที การลบมีผลกับทุกคน':'ข้อมูลเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น — สำรองเป็น JSON เป็นประจำ';
+  $('#whoBox').hidden=mode!=='sheet';
+}
+async function connect(){
+  const c=window.claude;
+  if(c?.use){try{[db,usr]=await Promise.all([c.use('db'),c.use('user')])}catch(e){db=null}}
+  if(!db&&!c?.use&&SHEET_API){
+    mode='sheet';try{myId=localStorage.getItem('shelfLifeMonitor.name')||null}catch(e){}
+    $('#whoName').value=myId||'';applyRole();renderAll();await pull();
+    setInterval(()=>{if(!document.hidden&&Date.now()-lastPull>25000)pull()},5000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastPull>10000)pull()});
+    return}
+  if(!db){mode='local';noTeam=c?.use?'signin':location.protocol==='file:'?'file':'nosheet';st=loadLocal()||withIds(seed(true));saveLocal();applyRole();renderAll();return}
+  mode='db';
+  try{myId=await usr?.id()}catch(e){}
+  try{const w=await usr?.can('data.write');canWrite=w!==false}catch(e){}
+  applyRole();renderAll();
+  COLS.forEach(col=>db.collection(col).onSnapshot(s=>{
+    st[col]=s.docs.map(d=>({...d.data(),_id:d.id})).map(x=>col==="products"?normProduct(x):x);loaded[col]=true;renderAll()
+  },()=>toast('การเชื่อมต่อข้อมูลทีมหยุด — โหลดหน้าใหม่')));
+}
+
+/* ---------- ui helpers ---------- */
+function ask(msg,okOnly){return new Promise(res=>{const d=$('#dlgAsk');$('#askMsg').textContent=msg;$('#askNo').hidden=!!okOnly;d.returnValue='';d.onclose=()=>res(d.returnValue==='yes');d.showModal()})}
+const notice=m=>ask(m,true);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400)}
+const chip=(k,l)=>`<span class="chip s-${k}">${esc(l)}</span>`;
+const who=(c,uid)=>!c&&uid?`<b>${esc(uid)}</b> <span class="muted">(ไม่มีรายชื่อในข้อมูลนี้)</span>`:c?`<b>${esc(c.uid)}</b> ${esc(c.name)}${c.phone?` · ${esc(c.phone)}`:""}${c.email?` · ${esc(c.email)}`:""}${c.backup?`<br><span class="muted">สำรอง: ${esc(c.backup)}</span>`:""}`:'<span class="muted">— ยังไม่กำหนด —</span>';
+const OO={import:0,local:1,other:2};
+const bySku=()=>[...st.products].sort((a,b)=>(OO[a.origin]??3)-(OO[b.origin]??3)||a.shelf-b.shelf||String(a.desc).localeCompare(String(b.desc),'th'));
+function prodOptions(sel){return bySku().map(p=>`<option value="${esc(pkey(p))}"${pkey(p)===sel?' selected':''}>${p.sku?esc(p.sku)+' · ':''}${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} · ${p.shelf} วัน)</option>`).join('')}
+function ctOptions(sel,role){const l=st.contacts.filter(c=>!role||c.role===role),gs=[...new Set(l.map(grpOf))].sort();
+  return'<option value="">— ไม่ระบุ —</option>'+gs.map(g=>`<optgroup label="${esc(g)}">`+l.filter(c=>grpOf(c)===g).sort((a,b)=>String(a.uid).localeCompare(String(b.uid))).map(c=>`<option value="${esc(c.uid)}"${c.uid===sel?' selected':''}>${esc(c.uid)} · ${esc(c.name)}</option>`).join('')+'</optgroup>').join('')}
+function planHTML(p,prod){
+  const t=today();
+  return`<ul class="steps">${stages(p,prod).map(s=>{
+    const cur=prod&&diffD(t,s.d1)>=0&&(s.d2==null||diffD(s.d2,t)>=0);
+    const when=prod?`${fmtS(s.d1)}${s.d2&&s.d2>s.d1?` – ${fmtS(s.d2)}`:''}`:'';
+    const days=s.to!=null&&s.to>s.from?`วันที่ ${s.from}–${s.to} (${s.to-s.from+1} วัน)`:`วันที่ ${s.from}`;
+    return`<li${cur?' style="font-weight:700"':''}>${chip(s.k,s.label)}<span class="when">${when}</span><span class="muted small">${days}</span>${cur?' ◀ วันนี้':''}</li>`}).join('')}</ul>
+    ${prod?`<p class="small" style="margin:8px 0 0">วันที่ 1 (รับ/วางขาย) <b>${fmt(prod)}</b> (Julian ${jul(prod).ddd}) · Code 52 <b>${fmt(addD(prod,p.pullDay-1))}</b> (Julian ${jul(addD(prod,p.pullDay-1)).ddd})</p>`:''}`;
+}
+const byId=(col,id)=>st[col].find(x=>x._id===id);
+
+/* ---------- dashboard ---------- */
+let tileFilter='';
+function renderDash(){
+  const allEmpty=COLS.every(c=>!st[c].length);
+  $('#onboard').hidden=!((mode==='db'||mode==='sheet')&&COLS.every(c=>loaded[c])&&allEmpty);
+  const lc=mode==='db'||mode==='sheet'?loadLocal():null,ln=lc?lc.batches.length+lc.contacts.length:0;
+  $('#obMigrate').hidden=!ln;$('#obMigrate').textContent=`ย้ายข้อมูลจากเบราว์เซอร์นี้ (${lc?lc.products.length:0} สินค้า, ${lc?lc.batches.length:0} ล็อต)`;
+  const rows=st.batches.map(b=>({b,e:evalBatch(b)}));
+  const cnt={};rows.forEach(r=>{if(r.b.ack!==r.e.st)cnt[r.e.st]=(cnt[r.e.st]||0)+1});
+  $('#tiles').innerHTML=ST.filter(([k])=>k!=='err'||cnt.err).map(([k,l])=>`<button type="button" class="tile${tileFilter===k?' sel':''}" data-k="${k}"><span class="chip s-${k}">${l}</span><b>${cnt[k]||0}</b><span class="muted small">ล็อตที่ยังไม่ดำเนินการ</span></button>`).join('');
+  const q=$('#q').value.trim().toLowerCase(),fs=$('#fSt').value||tileFilter,hide=$('#fHide').checked;
+  const list=rows.filter(({b,e})=>{
+    if(fs&&e.st!==fs)return false;if(hide&&b.ack===e.st)return false;
+    if(q){const h=[b.sku,e.p?.desc,e.p?.sku,e.p?.cat,e.p?.buyerUid,e.p?.comUid,e.buyer?.name,b.loc,b.note].join(' ').toLowerCase();if(!h.includes(q))return false}
+    return true}).sort((a,b)=>(a.b.ack===a.e.st)-(b.b.ack===b.e.st)||a.e.rank-b.e.rank||(a.e.left??0)-(b.e.left??0));
+  $('#dashEmpty').hidden=list.length>0||mode==='init';
+  $('#dashLoading').hidden=mode!=='init'&&(mode!=='db'||COLS.every(c=>loaded[c]));
+  $('#dashBody').innerHTML=list.map(({b,e})=>{
+    const done=b.ack===e.st,p=e.p,k=esc(b._id);
+    if(!p)return`<tr><td data-l="สถานะ">${chip('err',e.label)}</td><td data-l="สินค้า" colspan="7">${esc(e.action)}</td><td class="no-print"><button class="btn sm danger w" onclick="delBatch('${k}')">ลบ</button></td></tr>`;
+    const pos=Math.min(100,Math.max(0,(e.day-.5)/p.pullDay*100));
+    const by=done&&b.ackBy?(mode==='sheet'?` โดย ${esc(b.ackBy)}`:` โดย <span data-uid="${esc(b.ackBy)}">${b.ackBy===myId?'คุณ':'…'}</span>`):'';
+    return`<tr class="${done?'acted':''}">
+    <td data-l="สถานะ"><div>${chip(e.st,e.label)}${done?`<div class="small" style="margin-top:4px">✓ ทำแล้ว${by}</div>`:''}</div></td>
+    <td data-l="สินค้า"><div><b>${esc(p.desc)}</b><div class="muted small">${p.sku?esc(p.sku)+' · ':''}${esc(p.cat||'')} · Shelf life ${p.shelf} วัน${p.temp?' · '+esc(p.temp):''}</div>${b.note?`<div class="small">หมายเหตุ: ${esc(b.note)}</div>`:''}</div></td>
+    <td data-l="Julian รับ" class="num"><div><b>${jul(e.prod).ddd}</b><div class="small">${fmt(e.prod)}</div></div></td>
+    <td data-l="วางขาย"><div><span class="num">วันที่ ${e.day} / ${p.pullDay}</span>${strip(p,e.day)}</div></td>
+    <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
+    <td data-l="ต้องทำ"><div class="small">${esc(e.action)}</div></td>
+    <td data-l="ติดต่อ"><div class="small contact">${e.st==='ok'?'<span class="muted">ยังไม่ต้องติดต่อ</span><br>':''}Buyer: ${who(e.buyer,p.buyerUid)}<br>Commercial: ${who(e.com,p.comUid)}</div></td>
+    <td data-l="จำนวน" class="num"><div>${esc(b.qty)}<div class="muted small">${esc(b.loc)}</div></div></td>
+    <td class="no-print"><div class="row" style="gap:4px;flex-wrap:nowrap">
+      <button class="btn sm" title="คัดลอกข้อความแจ้ง Buyer/Commercial" onclick="copyMsg('${k}')">คัดลอก</button>
+      ${e.st!=='ok'?`<button class="btn sm w" onclick="ack('${k}')">${done?'ยกเลิก ✓':'ทำแล้ว'}</button>`:''}
+      <button class="btn sm danger w" onclick="delBatch('${k}')">ลบ</button></div></td></tr>`}).join('');
+  fillNames();
+}
+async function fillNames(){
+  if(!usr?.profiles)return;
+  const els=[...document.querySelectorAll('[data-uid]')].filter(el=>el.dataset.uid!==myId);if(!els.length)return;
+  try{const ps=await usr.profiles([...new Set(els.map(el=>el.dataset.uid))]);
+    els.forEach(el=>{el.textContent=ps[el.dataset.uid]?.name||'สมาชิกทีม'})}catch(e){els.forEach(el=>el.textContent='สมาชิกทีม')}
+}
+function ack(id){const b=byId('batches',id);if(!b)return;const e=evalBatch(b),undo=b.ack===e.st;
+  act(()=>patchItem('batches',b,undo?{ack:null,ackBy:null,ackAt:null}:{ack:e.st,ackBy:myId,ackAt:new Date().toISOString()}),undo?'ยกเลิกแล้ว':'บันทึกว่าทำแล้ว')}
+async function delBatch(id){const b=byId('batches',id);if(!b||!await ask(mode==='db'?'ลบล็อตนี้? (ลบให้ทุกคนในทีม)':'ลบล็อตนี้?'))return;act(()=>rmItem('batches',b),'ลบล็อตแล้ว')}
+function copyMsg(id){
+  const b=byId('batches',id);if(!b)return;const e=evalBatch(b),p=e.p;if(!p)return;
+  const c=x=>x?`${x.uid} ${x.name}${x.phone?' โทร '+x.phone:''}${x.email?' '+x.email:''}${x.backup?' (สำรอง: '+x.backup+')':''}`:'-';
+  const txt=`[Shelf-Life] ${e.label}
+สินค้า: ${p.sku?p.sku+' ':''}${p.desc} (Shelf life ${p.shelf} วัน)
+Julian ${jul(e.prod).ddd} | วันรับ ${fmt(e.prod)} | Code 52 ${fmt(e.c52)}
+วางขายวันที่ ${e.day}/${p.pullDay}
+จำนวน ${b.qty} | ที่ตั้ง ${b.loc||'-'}
+ต้องทำ: ${e.action}
+Buyer UID: ${c(e.buyer)}
+Commercial: ${c(e.com)}`;
+  copyText(txt,'คัดลอกข้อความแล้ว — วางใน LINE/อีเมลได้เลย');
+}
+
+/* ---------- add batch ---------- */
+const findProd=k=>st.products.find(x=>pkey(x)===k);
+function addPreview(){
+  const p=findProd($('#aSku').value),j=parseJulian($('#aJ').value);
+  let prod=null,msg='';
+  if(j?.error)msg=`<p class="err-text">${j.error}</p>`;
+  else if(j){prod=j.date;$('#aDate').value=iso(prod)}
+  else if($('#aDate').value)prod=fromIso($('#aDate').value);
+  if(!p){$('#aPreview').innerHTML='<p class="muted">ยังไม่มีสินค้า — เพิ่มที่แท็บ “สินค้า & กฎลดราคา”</p>';return null}
+  if(prod&&prod>today())msg+='<p class="err-text">วันรับสินค้าอยู่ในอนาคต — ตรวจสอบ Julian code</p>';
+  $('#aPreview').innerHTML=msg+`<b>${esc(p.desc)}</b> <span class="muted small">Shelf life ${p.shelf} วัน · ขายราคาเต็มวันที่ 1–${firstMd(p)-1}${p.temp?' · จัดเรียงตู้แช่ '+esc(p.temp):''}</span>${prod?'':'<p class="muted small">ใส่ Julian code หรือวันที่รับสินค้าเพื่อดูกำหนดการ</p>'}<div style="margin-top:8px">${planHTML(p,prod)}</div>
+  <p class="small" style="margin:8px 0 0">ติดต่อ — Buyer: ${who(st.contacts.find(c=>c.uid===p.buyerUid),p.buyerUid)} · Commercial: ${who(st.contacts.find(c=>c.uid===p.comUid),p.comUid)}</p>`;
+  return prod&&!(j?.error)?prod:null;
+}
+$('#aSku').onchange=addPreview;$('#aJ').oninput=addPreview;
+$('#aDate').oninput=()=>{const v=$('#aDate').value;$('#aJ').value=v?jul(fromIso(v)).ddd:'';addPreview()};
+$('#aSave').onclick=async()=>{
+  const prod=addPreview();if(!prod)return toast('กรุณาใส่ Julian code หรือวันรับสินค้าที่ถูกต้อง');
+  const o={sku:$('#aSku').value,prod:iso(prod),qty:+$('#aQty').value||0,loc:$('#aLoc').value.trim(),note:$('#aNote').value.trim(),addedBy:myId||null,addedAt:new Date().toISOString()};
+  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aNote').value='';addPreview()}
+};
+
+/* ---------- products ---------- */
+function renderProd(){
+  $('#prodBody').innerHTML=bySku().map(p=>{
+    const s=stages(p),f=k=>s.find(x=>x.k===k),k=esc(p._id);
+    const rng=x=>x?`${x.label.replace('ลดราคา ','').replace(/ \(Step \d\)/,'')} · วันที่ ${x.from}${x.to!=null&&x.to>x.from?'–'+x.to:''}`:'<span class="muted">—</span>';
+    const man=manualRule(p.shelf,p.origin),off=man&&['md1Day','md2Day','pullDay'].some(x=>man[x]!==p[x]);
+    return`<tr><td data-l="สินค้า"><div><b>${esc(p.desc)}</b><div class="muted small">${p.sku?esc(p.sku)+' · ':''}${ORIGINS[p.origin]||'อื่นๆ'}${p.temp?' · '+esc(p.temp):''}${off?' · <span class="err-text">ต่างจากคู่มือ</span>':''}</div>${strip(p)}</div></td>
+    <td data-l="Shelf life" class="num">${p.shelf} วัน</td><td data-l="ขายราคาเต็ม" class="num"><b>วันที่ 1${f("ok").to>1?"–"+f("ok").to:""}</b></td>
+    <td data-l="ลด 15%" class="num">${rng(f('md1'))}</td><td data-l="ลด 30%" class="num">${rng(f('md2'))}</td>
+    <td data-l="Code 52" class="num">วันที่ ${p.pullDay}${amPm(p)?' (บ่าย)':''}</td>
+    <td data-l="Buyer UID">${esc(p.buyerUid||'-')}</td><td data-l="Commercial">${esc(p.comUid||'-')}</td>
+    <td><div class="row w" style="gap:4px;flex-wrap:nowrap"><button class="btn sm" onclick="editProduct('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delProduct('${k}')">ลบ</button></div></td></tr>`}).join('');
+}
+const dlgProd=$('#dlgProd'),fP=$('#fProd');let editId=null;
+const NUMF=['shelf','md1Day','md1Pct','md2Day','md2Pct','pullDay'],TXTF=['sku','desc','cat','origin','temp','buyerUid','comUid'];
+function readProdForm(){const o={rv:2};TXTF.forEach(k=>o[k]=fP[k].value.trim());NUMF.forEach(k=>o[k]=+fP[k].value||0);return o}
+function prodPrev(){const o=readProdForm(),e=ruleError(o),man=manualRule(o.shelf,o.origin);$('#dpErr').textContent=e;
+  $('#dpMan').textContent=man?`คู่มือ Makro (${ORIGINS[o.origin]}, ${o.shelf} วัน): ลด 15% วันที่ ${man.md1Day||'—'} · ลด 30% วันที่ ${man.md2Day} · Code 52 วันที่ ${man.pullDay}`:`ไม่มีกฎสำหรับ ${ORIGINS[o.origin]||'อื่นๆ'} ${o.shelf} วันในคู่มือ — ปุ่มด้านล่างจะคำนวณแบบประมาณ`;
+  $('#dpPrev').innerHTML=e?'':`${strip(o)}<div style="margin-top:10px">${planHTML(o,null)}</div>`}
+function editProduct(id){
+  const cur=id?byId('products',id):null;editId=cur?id:null;
+  const p=cur||{sku:'',desc:'',cat:'',origin:'import',temp:'0–4°C',shelf:7,...autoRule(7,'import'),buyerUid:'',comUid:''};
+  $('#dpTitle').textContent=cur?'แก้ไขสินค้า':'เพิ่มสินค้า';
+  fP.buyerUid.innerHTML=ctOptions(p.buyerUid,'Buyer');fP.comUid.innerHTML=ctOptions(p.comUid,'Commercial');
+  [...TXTF.filter(k=>k!=='buyerUid'&&k!=='comUid'),...NUMF].forEach(k=>fP[k].value=p[k]??'');prodPrev();dlgProd.showModal();
+}
+fP.oninput=prodPrev;
+$('#dpAuto').onclick=()=>{const r=autoRule(+fP.shelf.value,fP.origin.value);Object.entries(r).forEach(([k,v])=>fP[k].value=v);prodPrev()};
+fP.onsubmit=ev=>{
+  const o=readProdForm(),e=ruleError(o);
+  if(e){ev.preventDefault();$('#dpErr').textContent=e;return}
+  const dup=findProd(pkey(o));
+  if(dup&&dup._id!==editId){ev.preventDefault();$('#dpErr').textContent='มีสินค้า SKU/ชื่อนี้อยู่แล้ว';return}
+  const old=editId?byId('products',editId):null;
+  act(async()=>{
+    await putItem('products',{...o,_id:editId||undefined});
+    if(old&&pkey(old)!==pkey(o))for(const b of st.batches.filter(b=>b.sku===pkey(old)))await patchItem('batches',b,{sku:pkey(o)});
+  },'บันทึกสินค้าแล้ว');
+};
+async function delProduct(id){const p=byId('products',id);if(!p)return;const bs=st.batches.filter(b=>b.sku===pkey(p));
+  if(!await ask(`ลบ ${p.desc}?${bs.length?` (มี ${bs.length} ล็อตที่ใช้สินค้านี้ — จะถูกลบด้วย)`:''}`))return;
+  act(async()=>{for(const b of bs)await rmItem('batches',b);await rmItem('products',p)},'ลบสินค้าแล้ว')}
+function addManual(){const have=new Set(st.products.map(p=>p.desc)),add=manualProducts().filter(p=>!have.has(p.desc));
+  if(!add.length)return toast('มีสินค้าครบตามคู่มือแล้ว');
+  act(async()=>{for(const p of add)await putItem('products',p)},`เพิ่มสินค้าจากคู่มือ ${add.length} รายการ`)}
+
+/* ---------- contacts ---------- */
+const grpOf=c=>c.group||'อื่นๆ';
+function renderCt(){
+  const q=$('#ctQ').value.trim().toLowerCase(),g=$('#ctG').value;
+  const groups=[...new Set(st.contacts.map(grpOf))].sort();
+  $('#ctG').innerHTML='<option value="">ทุกกลุ่ม</option>'+groups.map(x=>`<option${x===g?' selected':''}>${esc(x)}</option>`).join('');
+  const list=st.contacts.filter(c=>(!g||grpOf(c)===g)&&(!q||[c.uid,c.name,c.dept,c.backup,c.phone].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>grpOf(a).localeCompare(grpOf(b))||(a.role===b.role?0:a.role==='Commercial'?-1:1)||String(a.uid).localeCompare(String(b.uid)));
+  $('#ctCount').textContent=`${list.length} จาก ${st.contacts.length} รายการ`;
+  let last=null;
+  $('#ctBody').innerHTML=list.map(c=>{const used=st.products.filter(p=>p.buyerUid===c.uid||p.comUid===c.uid).map(p=>p.desc),k=esc(c._id);
+    let head='';if(grpOf(c)!==last){last=grpOf(c);head=`<tr class="grp"><td colspan="9">${esc(last)}</td></tr>`}
+    return head+`<tr><td data-l="UID"><b>${esc(c.uid)}</b></td><td data-l="ชื่อ">${esc(c.name)}</td><td data-l="บทบาท">${esc(c.role)}</td><td data-l="แผนก">${esc(c.dept)}</td><td data-l="โทร" class="num">${esc(c.phone||'-')}</td><td data-l="อีเมล/LINE">${esc(c.email||'-')}</td><td data-l="สำรอง" class="small">${esc(c.backup||'-')}</td>
+    <td data-l="สินค้า" class="small">${used.length?esc(used.join(', ')):'<span class="muted">-</span>'}</td>
+    <td><div class="row w" style="gap:4px;flex-wrap:nowrap"><button class="btn sm" onclick="editContact('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delContact('${k}')">ลบ</button></div></td></tr>`}).join('');
+}
+$('#ctQ').oninput=renderCt;$('#ctG').onchange=renderCt;
+const dlgCt=$('#dlgCt'),fC=$('#fCt');let ctId=null;
+const CTF=['uid','name','role','group','dept','phone','email','backup'];
+function editContact(id){const cur=id?byId('contacts',id):null;ctId=cur?id:null;const c=cur||{uid:'',name:'',role:'Buyer',group:$('#ctG').value,dept:'',phone:'',email:''};CTF.forEach(k=>fC[k].value=c[k]??'');dlgCt.showModal()}
+fC.onsubmit=ev=>{
+  const o={};CTF.forEach(k=>o[k]=fC[k].value.trim());
+  const dup=st.contacts.find(x=>x.uid===o.uid);if(dup&&dup._id!==ctId){ev.preventDefault();notice('UID นี้มีอยู่แล้ว');return}
+  const old=ctId?byId('contacts',ctId):null;
+  act(async()=>{
+    await putItem('contacts',{...o,_id:ctId||undefined});
+    if(old&&old.uid!==o.uid)for(const p of st.products.filter(p=>p.buyerUid===old.uid||p.comUid===old.uid))
+      await patchItem('products',p,{...(p.buyerUid===old.uid?{buyerUid:o.uid}:{}),...(p.comUid===old.uid?{comUid:o.uid}:{})});
+  },'บันทึกผู้ติดต่อแล้ว');
+};
+async function delContact(id){const c=byId('contacts',id);if(!c||!await ask(`ลบ ${c.name}?`))return;
+  act(async()=>{for(const p of st.products.filter(p=>p.buyerUid===c.uid||p.comUid===c.uid))
+    await patchItem('products',p,{...(p.buyerUid===c.uid?{buyerUid:''}:{}),...(p.comUid===c.uid?{comUid:''}:{})});
+    await rmItem('contacts',c)},'ลบผู้ติดต่อแล้ว')}
+
+/* ---------- julian tab ---------- */
+function julTab(){
+  const v=$('#jD').value;if(v){const d=fromIso(v),j=jul(d);$('#jDout').innerHTML=`<b>${j.ddd}</b> <span class="muted small">· YDDD ${j.y1} · YYDDD ${j.y2} · ${j.y4}</span>`}
+  const r=parseJulian($('#jC').value);$('#jCout').innerHTML=!r?'':r.error?`<span class="err-text">${r.error}</span>`:`<b>${fmt(r.date)}</b> <span class="muted small">ถ้าเป็นวันรับสินค้า วันนี้คือวางขายวันที่ ${diffD(today(),r.date)+1}</span>`;
+  const p=findProd($("#jSku").value),r2=parseJulian($('#jC2').value);
+  $('#jPlan').innerHTML=!p?'':r2?.error?`<span class="err-text">${r2.error}</span>`:planHTML(p,r2?.date||null);
+}
+['#jD','#jC','#jC2','#jSku'].forEach(s=>$(s).addEventListener('input',julTab));
+
+/* ---------- import / export ---------- */
+function copyText(txt,okMsg){
+  const fb=()=>{const t=document.createElement('textarea');t.value=txt;document.body.append(t);t.select();try{document.execCommand('copy');toast(okMsg)}catch(e){toast('คัดลอกไม่ได้ — เลือกข้อความแล้วกด Ctrl+C')}t.remove()};
+  try{navigator.clipboard.writeText(txt).then(()=>toast(okMsg),fb)}catch(e){fb()}
+}
+function dl(name,text,type){
+  $('#outTitle').textContent=name;$('#outText').value=text.replace(/^﻿/,'');
+  $('#outCopy').onclick=()=>copyText($('#outText').value,'คัดลอกแล้ว');
+  $('#outDl').hidden=mode==='db';
+  $('#outDl').onclick=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.append(a);a.click();a.remove()}catch(e){toast('ดาวน์โหลดไม่ได้ — ใช้ปุ่มคัดลอกแทน')}};
+  $('#dlgOut').showModal();
+}
+const csvCell=v=>{v=String(v??'');return/[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
+const toCSV=rows=>'﻿'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');
+function parseCSV(t){t=t.replace(/^﻿/,'');const rows=[];let r=[],c='',q=false;
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}
+    else if(ch==='"')q=true;else if(ch===','){r.push(c);c=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);rows.push(r);r=[];c=''}else c+=ch}
+  if(c||r.length){r.push(c);rows.push(r)}
+  const h=rows.shift()?.map(x=>x.trim().toLowerCase())||[];return rows.filter(r=>r.some(x=>x.trim())).map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]??'').trim()])))}
+function exportBatchesCSV(){
+  const rows=[['status','sku','description','origin','julian_receive','receive_date','day_on_shelf','shelf_life','code52_day','code52_date','days_to_code52','action','qty','location','buyer_uid','buyer_name','commercial_uid','commercial_name','done','note']];
+  st.batches.forEach(b=>{const e=evalBatch(b),p=e.p||{};rows.push([e.label,p.sku||'',p.desc||b.sku,ORIGINS[p.origin]||'',e.prod?jul(e.prod).ddd:'',b.prod,e.day,p.shelf,p.pullDay,e.c52?iso(e.c52):'',e.left,e.action,b.qty,b.loc,p.buyerUid,e.buyer?.name,p.comUid,e.com?.name,b.ack===e.st?'Y':'',b.note])});
+  dl(`shelf-life_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8')}
+function downloadTemplate(){dl('products_template.csv',toCSV([['sku','description','origin','temp','shelf_life','step1_day','step1_pct','step2_day','step2_pct','code52_day','buyer_uid','commercial_uid'],['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']]),'text/csv;charset=utf-8')}
+const ORIG_IN=v=>{v=String(v||'').trim().toLowerCase();return/import|นำเข้า/.test(v)?'import':/local|ท้องถิ่น|ไทย/.test(v)?'local':'other'};
+const plain=()=>{const o={};COLS.forEach(c=>o[c]=st[c].map(body));return o};
+function exportJSON(){dl(`shelf-life-backup_${iso(today())}.json`,JSON.stringify(plain(),null,1),'application/json')}
+const readFile=(inp,fn)=>inp.onchange=()=>{const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{fn(r.result)}catch(e){notice('นำเข้าไม่สำเร็จ: '+e.message)}inp.value=''};r.readAsText(f,'utf-8')};
+readFile($('#impProd'),t=>{const ok=[],bad=[];parseCSV(t).forEach(r=>{
+  const shelf=+r.shelf_life,desc=r.description||r.desc||'';if(!(r.sku||desc)||!(shelf>=1)){bad.push(r.sku||desc||'(ว่าง)');return}
+  const origin=ORIG_IN(r.origin),has=r.code52_day!==''&&r.code52_day!=null;
+  const o={sku:r.sku||'',desc:desc||r.sku,cat:origin==='other'?(r.category||''):MANUAL[origin].label,origin,temp:r.temp||'',shelf,
+    ...(has?{md1Day:+r.step1_day||0,md1Pct:+r.step1_pct||15,md2Day:+r.step2_day||0,md2Pct:+r.step2_pct||30,pullDay:+r.code52_day}:autoRule(shelf,origin)),
+    buyerUid:r.buyer_uid||'',comUid:r.commercial_uid||'',rv:2};
+  if(ruleError(o)){bad.push(pkey(o));return}ok.push(o)});
+  act(async()=>{for(const o of ok){const ex=findProd(pkey(o));await putItem('products',{...o,_id:ex?._id})}})
+    .then(y=>y&&notice(`นำเข้าสินค้า ${ok.length} รายการ${bad.length?`\nข้าม (ข้อมูลไม่ถูกต้อง): ${bad.join(', ')}`:''}`))});
+readFile($('#impCt'),t=>{const ok=parseCSV(t).filter(r=>r.uid).map(r=>({uid:r.uid,name:r.name||r.uid,role:r.role||'Buyer',dept:r.dept||'',phone:r.phone||'',email:r.email||'',backup:r.backup||'',group:r.group||''}));
+  act(async()=>{for(const o of ok){const ex=st.contacts.find(x=>x.uid===o.uid);await putItem('contacts',{...o,_id:ex?._id})}})
+    .then(y=>y&&notice(`นำเข้าผู้ติดต่อ ${ok.length} รายการ`))});
+readFile($('#impJson'),t=>{const o=JSON.parse(t);if(!o.products||!o.batches)throw Error('ไฟล์ไม่ใช่ข้อมูลสำรองของโปรแกรมนี้');
+  ask(mode==='db'?'แทนที่ข้อมูลของทั้งทีมด้วยไฟล์สำรองนี้?':'แทนที่ข้อมูลปัจจุบันทั้งหมด?').then(y=>{if(y)act(()=>replaceAll(o),'กู้คืนข้อมูลแล้ว')})});
+function purgeOld(){const old=st.batches.filter(b=>evalBatch(b).left<-7);
+  if(!old.length)return toast('ไม่มีล็อตที่เลย Code 52 เกิน 7 วัน');
+  act(async()=>{for(const b of old)await rmItem('batches',b)},`ลบ ${old.length} ล็อต`)}
+async function resetSample(){if(!await ask(mode==='db'?'ลบข้อมูลของทั้งทีม (สินค้า ผู้ติดต่อ ล็อต) แล้วโหลดสินค้าตามคู่มือใหม่?':'ลบข้อมูลทั้งหมดแล้วโหลดสินค้าตามคู่มือใหม่?'))return;act(()=>replaceAll(seed(mode!=='db')),'โหลดข้อมูลตามคู่มือแล้ว')}
+$('#obSample').onclick=()=>act(()=>replaceAll(seed(false)),'โหลดสินค้าตามคู่มือ Makro แล้ว');
+$('#obMigrate').onclick=()=>{const lc=loadLocal();if(lc)act(()=>replaceAll(lc),'ย้ายข้อมูลขึ้นข้อมูลทีมแล้ว')};
+
+/* ---------- boot ---------- */
+function renderAll(){
+  const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  $('#todayJ').textContent=`${jul(t).ddd}  (${jul(t).y1})`;
+  const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML=prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
+  renderDash();renderProd();renderCt();addPreview();julTab();
+}
+$('#fSt').innerHTML+=ST.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
+$('#q').oninput=renderDash;$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
+$('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash()};
+$('#jD').value=iso(today());
+$('#whoName').oninput=e=>{myId=e.target.value.trim()||null;try{localStorage.setItem('shelfLifeMonitor.name',myId||'')}catch(x){}};
+applyRole();renderAll();connect();
+setInterval(()=>{if($('#todayJ').textContent.slice(0,3)!==jul(today()).ddd)renderAll()},60000);
+</script>
+</body>
+</html>
