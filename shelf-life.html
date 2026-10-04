@@ -374,6 +374,37 @@ const ST=[['pull','Code 52'],['md2','ลดราคา 30%'],['md1','ลดร�
 /* ---------- storage: claude.ai artifact db · Google Sheet (public site) · this browser ----------
    SHEET_API = the Google Apps Script Web App URL (…/exec). Leave '' to keep data in this browser only. */
 const SHEET_API='';
+/* Supabase (Postgres via REST): one table `items` (col, id, data jsonb). Fill both to use it instead of the Sheet. */
+const SUPABASE_URL='',SUPABASE_KEY='';
+const REMOTE=SUPABASE_URL&&SUPABASE_KEY?'supabase':SHEET_API?'sheet':'';
+const REMOTE_NAME=REMOTE==='supabase'?'Supabase':'Google Sheet';
+const SB=p=>SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/'+p;
+async function sbFetch(path,opt={}){
+  let r;try{r=await fetch(SB(path),{...opt,headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,...(opt.headers||{})}})}catch(e){throw{code:'unavailable'}}
+  if(!r.ok){const t=await r.text().catch(()=>'');throw{code:r.status>=500||r.status===429?'unavailable':'remote_rejected',message:t}}
+  return r}
+async function supaPull(){
+  const out={ok:true};COLS.forEach(c=>out[c]=[]);
+  for(let off=0;;off+=1000){
+    const rows=await (await sbFetch(`items?select=col,id,data&order=col,id&limit=1000&offset=${off}`)).json();
+    rows.forEach(x=>{if(out[x.col])out[x.col].push({...x.data,_id:x.id})});if(rows.length<1000)break}
+  return out}
+async function sbUpsert(rows){for(let i=0;i<rows.length;i+=500)await sbFetch('items',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows.slice(i,i+500))})}
+const sbq=s=>'"'+String(s).replace(/"/g,'')+'"';
+async function sbDelete(col,ids){for(let i=0;i<ids.length;i+=100)await sbFetch(`items?col=eq.${col}&id=in.(${encodeURIComponent(ids.slice(i,i+100).map(sbq).join(','))})`,{method:'DELETE',headers:{Prefer:'return=minimal'}})}
+async function supaCall(req){
+  const now=new Date().toISOString();
+  if(req.op==='replace'){
+    await sbFetch('items?col=in.(products,contacts,batches)',{method:'DELETE',headers:{Prefer:'return=minimal'}});
+    const rows=[];COLS.forEach(c=>(req.data[c]||[]).forEach(o=>{const{_id,...d}=o;rows.push({col:c,id:String(_id),data:d,updated_at:now})}));
+    await sbUpsert(rows);return{ok:true}}
+  const ws=req.op==='bulk'?req.writes:[req],kind=w=>w.op==='delete'?'delete':'set';
+  for(let i=0;i<ws.length;){
+    let j=i;while(j<ws.length&&kind(ws[j])===kind(ws[i]))j++;const grp=ws.slice(i,j);
+    if(kind(ws[i])==='set'){const m=new Map();grp.forEach(w=>m.set(w.col+'\u0000'+w.id,{col:w.col,id:String(w.id),data:w.data,updated_at:now}));await sbUpsert([...m.values()])}
+    else for(const c of COLS){const ids=grp.filter(w=>w.col===c).map(w=>w.id);if(ids.length)await sbDelete(c,ids)}
+    i=j}
+  return{ok:true}}
 const KEY='shelfLifeMonitor.v2',COLS=['products','contacts','batches'];
 let noTeam='';let st={products:[],contacts:[],batches:[]},mode='init',db=null,usr=null,myId=null,canWrite=true;
 const loaded={};
@@ -392,21 +423,21 @@ function dbErr(e){const c=e?.code;
   if(c==='invalid_argument'||c==='not_granted'){canWrite=false;applyRole();return'คุณยังไม่มีสิทธิ์แก้ไขข้อมูลทีม — ขอให้เจ้าของแชร์สิทธิ์ระดับ Contributor ขึ้นไป'}
   if(c==='quota_exceeded')return'พื้นที่ข้อมูลเต็ม — ลบล็อตเก่าออกก่อน (แท็บ นำเข้า/ส่งออก)';
   if(c==='resource_exhausted')return'บันทึกถี่เกินไป — รอสักครู่แล้วลองใหม่';
-  if(mode==='sheet')return'บันทึกลง Google Sheet ไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่ (ข้อมูลจะโหลดใหม่จาก Sheet)';
+  if(mode==='sheet')return'บันทึกลง '+REMOTE_NAME+' ไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่ (ข้อมูลจะโหลดใหม่อัตโนมัติ)';
   return'บันทึกไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'}
 async function retry(fn){try{return await fn()}catch(e){if(e?.code==='unavailable'){await new Promise(r=>setTimeout(r,400+Math.random()*600));return fn()}throw e}}
 /* Google Sheet: text/plain POST avoids the CORS preflight Apps Script cannot answer */
 let queue=null;
-async function sheetCall(req){
+async function sheetCall(req){if(REMOTE==='supabase')return supaCall(req);
   let r;try{r=await fetch(SHEET_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(req)})}catch(e){throw{code:'unavailable'}}
   const j=await r.json().catch(()=>({ok:false}));if(!j.ok)throw{code:j.error||'unavailable'};return j;
 }
 function sheetWrite(w){if(queue)queue.push(w);else return retry(()=>sheetCall(w))}
 async function pull(){
   if(mode!=='sheet'||busy)return;
-  try{const r=await fetch(SHEET_API+(SHEET_API.includes('?')?'&':'?')+'t='+Date.now());const j=await r.json();if(!j.ok)throw 0;
+  try{const j=REMOTE==='supabase'?await supaPull():await (await fetch(SHEET_API+(SHEET_API.includes('?')?'&':'?')+'t='+Date.now())).json();if(!j.ok)throw 0;
     COLS.forEach(c=>{st[c]=(j[c]||[]).map(x=>c==='products'?normProduct(x):x);loaded[c]=true});lastPull=Date.now();renderAll();applyRole()}
-  catch(e){if(!COLS.every(c=>loaded[c])){COLS.forEach(c=>loaded[c]=true);renderAll()}toast('โหลดข้อมูลจาก Google Sheet ไม่สำเร็จ — จะลองใหม่อัตโนมัติ')}
+  catch(e){if(!COLS.every(c=>loaded[c])){COLS.forEach(c=>loaded[c]=true);renderAll()}toast('โหลดข้อมูลจาก '+REMOTE_NAME+' ไม่สำเร็จ — จะลองใหม่อัตโนมัติ')}
 }
 let lastPull=0;
 async function putItem(col,o){
@@ -419,7 +450,7 @@ async function putItem(col,o){
 async function patchItem(col,o,patch){
   if(mode==='db'){await retry(()=>db.collection(col).doc(o._id).update(patch));return}
   Object.assign(o,patch);
-  if(mode==='sheet')return sheetWrite({op:'update',col,id:o._id,data:JSON.parse(JSON.stringify(patch))});
+  if(mode==='sheet')return sheetWrite({op:'set',col,id:o._id,data:body(o)});
   saveLocal()}
 async function rmItem(col,o){
   if(mode==='db'){await retry(()=>db.collection(col).doc(o._id).delete());return}
@@ -448,21 +479,21 @@ async function replaceAll(s){
 function applyRole(){
   document.body.classList.toggle('ro',!canWrite);
   const m=$('#mode'),team=mode==='db'||mode==='sheet';
-  m.textContent=mode==='db'?(canWrite?'ข้อมูลทีม · อัปเดตสด':'ข้อมูลทีม · ดูอย่างเดียว'):mode==='sheet'?'ข้อมูลทีม · Google Sheet':mode==='local'?'ไม่ใช่ข้อมูลทีม · เก็บในเครื่องนี้':'กำลังเชื่อมต่อ…';
-  $('#localWarn').hidden=mode!=='local';$('#localWhy').textContent=noTeam==='signin'?'หน้านี้เชื่อมกับข้อมูลทีมไม่ได้ (มักเกิดจากยังไม่ได้ล็อกอิน claude.ai หรือไม่มีสิทธิ์เข้าถึง) จึงแสดงข้อมูลที่เก็บในเบราว์เซอร์นี้แทน ซึ่งไม่มีรายชื่อ Buyer / Commercial และล็อตของทีม':noTeam==='nosheet'?'ยังไม่ได้เชื่อม Google Sheet ข้อมูลจะเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีรายชื่อ Buyer / Commercial และล็อตของทีม':'นี่คือไฟล์ที่เปิดจากเครื่อง ข้อมูลจะเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีรายชื่อ Buyer / Commercial และล็อตของทีม';
+  m.textContent=mode==='db'?(canWrite?'ข้อมูลทีม · อัปเดตสด':'ข้อมูลทีม · ดูอย่างเดียว'):mode==='sheet'?'ข้อมูลทีม · '+REMOTE_NAME:mode==='local'?'ไม่ใช่ข้อมูลทีม · เก็บในเครื่องนี้':'กำลังเชื่อมต่อ…';
+  $('#localWarn').hidden=mode!=='local';$('#localWhy').textContent=noTeam==='signin'?'หน้านี้เชื่อมกับข้อมูลทีมไม่ได้ (มักเกิดจากยังไม่ได้ล็อกอิน claude.ai หรือไม่มีสิทธิ์เข้าถึง) จึงแสดงข้อมูลที่เก็บในเบราว์เซอร์นี้แทน ซึ่งไม่มีรายชื่อ Buyer / Commercial และล็อตของทีม':noTeam==='nosheet'?'ยังไม่ได้เชื่อมฐานข้อมูลทีม ข้อมูลจะเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีรายชื่อ Buyer / Commercial และล็อตของทีม':'นี่คือไฟล์ที่เปิดจากเครื่อง ข้อมูลจะเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีรายชื่อ Buyer / Commercial และล็อตของทีม';
   $('#localTeamHint').hidden=noTeam==='nosheet';
   m.className='chip '+(team?'s-ok':mode==='local'?'s-soon':'s-err');
   $('#storeNote').textContent=mode==='db'?'ข้อมูลชุดนี้ใช้ร่วมกันทั้งทีม — ทุกคนที่เปิดลิงก์เห็นข้อมูลเดียวกันทันที การลบมีผลกับทุกคน'
-    :mode==='sheet'?'ข้อมูลเก็บใน Google Sheet ใช้ร่วมกันทั้งทีม — หน้าจะดึงข้อมูลใหม่ทุก 30 วินาที การลบมีผลกับทุกคน':'ข้อมูลเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น — สำรองเป็น JSON เป็นประจำ';
+    :mode==='sheet'?'ข้อมูลเก็บใน '+REMOTE_NAME+' ใช้ร่วมกันทั้งทีม — หน้าจะดึงข้อมูลใหม่ทุก '+(REMOTE==='supabase'?10:30)+' วินาที การลบมีผลกับทุกคน':'ข้อมูลเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น — สำรองเป็น JSON เป็นประจำ';
   $('#whoBox').hidden=mode!=='sheet';
 }
 async function connect(){
   const c=window.claude;
   if(c?.use){try{[db,usr]=await Promise.all([c.use('db'),c.use('user')])}catch(e){db=null}}
-  if(!db&&!c?.use&&SHEET_API){
+  if(!db&&!c?.use&&REMOTE){
     mode='sheet';try{myId=localStorage.getItem('shelfLifeMonitor.name')||null}catch(e){}
     $('#whoName').value=myId||'';applyRole();renderAll();await pull();
-    setInterval(()=>{if(!document.hidden&&Date.now()-lastPull>25000)pull()},5000);
+    setInterval(()=>{if(!document.hidden&&Date.now()-lastPull>(REMOTE==='supabase'?9000:25000))pull()},3000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastPull>10000)pull()});
     return}
   if(!db){mode='local';noTeam=c?.use?'signin':location.protocol==='file:'?'file':'nosheet';st=loadLocal()||withIds(seed(true));saveLocal();applyRole();renderAll();return}
