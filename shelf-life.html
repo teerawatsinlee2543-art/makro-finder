@@ -24,6 +24,12 @@ h1{font-size:20px;margin:0}
 .jside{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
 .jsub{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;background:#ffffff26;padding:1px 8px;border-radius:99px}
 .jdate{font-size:13px;opacity:.9;white-space:nowrap}
+.jmini{margin-left:auto;flex:none;display:flex;align-items:center;gap:8px;padding:4px 6px 4px 12px;border-radius:12px;background:linear-gradient(135deg,#0b5cad,#1474d4);color:#fff;opacity:0;transform:translateY(-4px);transition:opacity .2s,transform .2s;pointer-events:none}
+.jmini.show{opacity:1;transform:none}
+.jm-l{font-size:11px;font-weight:700;letter-spacing:.08em;opacity:.85}
+.jmini b{font-size:22px;line-height:1;color:#e30613;background:#fff;border-radius:8px;padding:3px 9px 4px;font-variant-numeric:tabular-nums}
+.jm-y{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;background:#ffffff26;border-radius:99px;padding:1px 8px}
+@media (prefers-reduced-motion:reduce){.jmini{transition:none}}
 @media (max-width:520px){.jbadge{width:100%;justify-content:center}.jnum{font-size:34px}}
 nav{display:flex;gap:4px;overflow-x:auto;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--line)}
 nav button{border:0;background:none;color:var(--muted);padding:8px 12px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
@@ -158,6 +164,7 @@ dialog::backdrop{background:#0008}
   <button data-tab="ct">Buyer / Commercial</button>
   <button data-tab="jul">แปลง Julian</button>
   <button data-tab="data">นำเข้า/ส่งออก</button>
+  <div class="jmini" id="jmini" aria-hidden="true"><span class="jm-l">JULIAN</span><b id="jmNum"></b><span class="jm-y" id="jmY"></span></div>
 </nav>
 <main>
 
@@ -963,7 +970,7 @@ $('#obMigrate').onclick=()=>{const lc=loadLocal();if(lc)act(()=>replaceAll(lc),'
 /* ---------- boot ---------- */
 function renderAll(){
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;
+  $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent=jul(t).y2;
   const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML=prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
   renderDash();renderProd();renderCt();addPreview();julTab();
 }
@@ -979,6 +986,8 @@ $('#mfQ').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const h=mfSearch(
 $('#mfResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)pickMf(b.dataset.no)};
 /* keep sticky table headers just under the pinned tab bar */
 try{const ro=new ResizeObserver(()=>{const s=document.documentElement.style;s.setProperty('--navh',$('#tabs').offsetHeight+'px');s.setProperty('--legh',$('#dashLegend').offsetHeight+'px')});ro.observe($('#tabs'));ro.observe($('#dashLegend'))}catch(e){}
+/* compact Julian in the pinned tab bar once the big badge scrolls away */
+try{new IntersectionObserver(([en])=>$('#jmini').classList.toggle('show',!en.isIntersecting),{threshold:0}).observe(document.querySelector('.jbadge'))}catch(e){$('#jmini').classList.add('show')}
 $('#jD').value=iso(today());
 $('#whoName').oninput=e=>{myId=e.target.value.trim()||null;try{localStorage.setItem('shelfLifeMonitor.name',myId||'')}catch(x){}};
 applyRole();renderAll();connect();
