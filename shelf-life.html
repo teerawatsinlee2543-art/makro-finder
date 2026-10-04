@@ -63,6 +63,15 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .steps li{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .steps .when{font-variant-numeric:tabular-nums;min-width:200px}
 .acted{opacity:.55}
+.mf-results{display:grid;gap:4px;margin-top:6px}
+.mf-hit{display:flex;gap:10px;align-items:center;text-align:left;font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer}
+.mf-hit:hover{border-color:var(--accent)}
+.mf-hit>span:last-child{display:flex;flex-direction:column;min-width:0}
+.mf-hit img,.mf-noimg{width:40px;height:40px;object-fit:contain;border-radius:6px;background:#fff;flex:none}
+.mf-picked{display:flex;gap:12px;align-items:flex-start;margin-top:8px;padding:10px;border:1px solid var(--accent);border-radius:10px;background:var(--bg)}
+.mf-picked img{width:64px;height:64px;object-fit:contain;border-radius:8px;background:#fff;flex:none}
+.mf-picked>div{flex:1;min-width:0}
+.pthumb{width:44px;height:44px;object-fit:contain;border-radius:6px;background:#fff;float:left;margin:0 8px 4px 0}
 tr.grp td{background:var(--bg);font-weight:700;color:var(--accent);padding-top:14px}
 .contact b{display:block}
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:20px;width:min(640px,calc(100vw - 32px))}
@@ -83,7 +92,7 @@ dialog::backdrop{background:#0008}
 </head>
 <body>
 <header>
-  <div class="row" style="align-items:center;gap:10px"><h1>Shelf-Life Monitor</h1><span class="chip s-err" id="mode">กำลังเชื่อมต่อ…</span></div>
+  <div class="row" style="align-items:center;gap:10px"><a href="./" id="backMf" class="btn sm" hidden>← Makro Finder</a><h1>Shelf-Life Monitor</h1><span class="chip s-err" id="mode">กำลังเชื่อมต่อ…</span></div>
   <div class="today">
     <span class="muted" id="todayTxt"></span>
     <span class="muted">Julian</span><span class="jbig" id="todayJ"></span>
@@ -125,8 +134,14 @@ dialog::backdrop{background:#0008}
   <div class="card">
     <h2>รับสินค้า / เพิ่มล็อต</h2>
     <p class="muted small" style="margin-top:0">นับวันตามคู่มือ: วันที่รับสินค้าและจัดเรียงหน้าร้าน = <b>วันที่ 1</b></p>
+    <div id="mfBox" hidden style="margin-bottom:14px">
+      <label>ค้นหาสินค้าจาก Makro Finder (สแกน/พิมพ์ รหัสสินค้า บาร์โค้ด หรือชื่อ)<input id="mfQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
+      <p class="muted small" id="mfStatus" style="margin:4px 0 0"></p>
+      <div id="mfResults" class="mf-results"></div>
+      <div id="mfPicked" class="mf-picked" hidden></div>
+    </div>
     <div class="grid2">
-      <label>สินค้า<select id="aSku"></select></label>
+      <label>กฎ Shelf life (ประเภทสินค้าตามคู่มือ)<select id="aSku"></select></label>
       <label>Julian วันรับสินค้า (เช่น 277)<input id="aJ" inputmode="numeric" placeholder="DDD / YDDD / YYDDD"></label>
       <label>หรือเลือกวันรับสินค้า<input type="date" id="aDate"></label>
       <label>จำนวน<input id="aQty" type="number" min="0" value="1"></label>
@@ -376,8 +391,40 @@ const ST=[['pull','Code 52'],['md2','ลดราคา 30%'],['md1','ลดร�
 const SHEET_API='';
 /* Supabase (Postgres via REST): one table `items` (col, id, data jsonb). Fill both to use it instead of the Sheet. */
 const SUPABASE_URL='',SUPABASE_KEY='';
-const REMOTE=SUPABASE_URL&&SUPABASE_KEY?'supabase':SHEET_API?'sheet':'';
-const REMOTE_NAME=REMOTE==='supabase'?'Supabase':'Google Sheet';
+/* Firebase: Makro Finder's own Firestore project. Shelf-life data lives in three documents
+   makroFinder/shelfLife_<products|contacts|batches> = {items:{id:data}}, so Makro Finder's
+   whole-collection reads only gain three small documents. */
+const FIREBASE_CONFIG={apiKey:"AIzaSyCOGD2xdLUODa705sQBu_slLJmQng_tLCA",authDomain:"makro-finder.firebaseapp.com",projectId:"makro-finder",storageBucket:"makro-finder.firebasestorage.app",messagingSenderId:"39825032351",appId:"1:39825032351:web:cdfcf244f920959ffaceaa"};
+let fdb=null;
+const loadScript=src=>new Promise((ok,no)=>{if([...document.scripts].some(s=>s.src===src))return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.append(s)});
+async function fbInit(){
+  await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+  await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js');
+  if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+  fdb=firebase.firestore();
+}
+const fbRef=c=>fdb.collection('makroFinder').doc('shelfLife_'+c);
+const fbItems=(c,snap)=>Object.entries(snap.exists?(snap.data().items||{}):{}).map(([id,d])=>({...d,_id:id}));
+async function fbPull(){const out={ok:true};for(const c of COLS)out[c]=fbItems(c,await fbRef(c).get());return out}
+function fbSubscribe(){
+  COLS.forEach(c=>fbRef(c).onSnapshot(s=>{
+    if(!s.exists&&!s.metadata.fromCache)fbRef(c).set({items:{},updatedAt:Date.now()},{merge:true}).catch(()=>{});
+    st[c]=fbItems(c,s).map(x=>c==='products'?normProduct(x):x);loaded[c]=true;lastPull=Date.now();renderAll();applyRole();
+  },()=>toast('การเชื่อมต่อฐานข้อมูลหยุด — โหลดหน้าใหม่')));
+}
+async function fbCall(req){
+  const FS=firebase.firestore,b=fdb.batch(),now=Date.now();
+  if(req.op==='replace'){
+    COLS.forEach(c=>{const items={};(req.data[c]||[]).forEach(o=>{const{_id,...d}=o;items[String(_id)]=d});b.set(fbRef(c),{items,updatedAt:now})});
+  }else{
+    const by={};(req.op==='bulk'?req.writes:[req]).forEach(w=>{(by[w.col]=by[w.col]||new Map()).set(String(w.id),w.op==='delete'?FS.FieldValue.delete():w.data)});
+    for(const c in by){const args=['updatedAt',now];by[c].forEach((v,id)=>args.push(new FS.FieldPath('items',id),v));b.update(fbRef(c),...args)}
+  }
+  try{await b.commit()}catch(e){throw{code:e.code==='permission-denied'||e.code==='not-found'?'remote_rejected':e.code==='resource-exhausted'?'resource_exhausted':'unavailable',message:e.message}}
+  return{ok:true};
+}
+const REMOTE=FIREBASE_CONFIG?'firebase':SUPABASE_URL&&SUPABASE_KEY?'supabase':SHEET_API?'sheet':'';
+const REMOTE_NAME=REMOTE==='firebase'?'Makro Finder':REMOTE==='supabase'?'Supabase':'Google Sheet';
 const SB=p=>SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/'+p;
 async function sbFetch(path,opt={}){
   let r;try{r=await fetch(SB(path),{...opt,headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,...(opt.headers||{})}})}catch(e){throw{code:'unavailable'}}
@@ -422,20 +469,21 @@ const body=o=>{const{_id,id,...r}=o;return JSON.parse(JSON.stringify(r))};
 function dbErr(e){const c=e?.code;
   if(c==='invalid_argument'||c==='not_granted'){canWrite=false;applyRole();return'คุณยังไม่มีสิทธิ์แก้ไขข้อมูลทีม — ขอให้เจ้าของแชร์สิทธิ์ระดับ Contributor ขึ้นไป'}
   if(c==='quota_exceeded')return'พื้นที่ข้อมูลเต็ม — ลบล็อตเก่าออกก่อน (แท็บ นำเข้า/ส่งออก)';
+  if(c==='remote_rejected')return'ฐานข้อมูลไม่อนุญาตให้บันทึก — ต้องเปิดสิทธิ์เขียนข้อมูลในฐานข้อมูล (Firestore Rules / RLS)';
   if(c==='resource_exhausted')return'บันทึกถี่เกินไป — รอสักครู่แล้วลองใหม่';
   if(mode==='sheet')return'บันทึกลง '+REMOTE_NAME+' ไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่ (ข้อมูลจะโหลดใหม่อัตโนมัติ)';
   return'บันทึกไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'}
 async function retry(fn){try{return await fn()}catch(e){if(e?.code==='unavailable'){await new Promise(r=>setTimeout(r,400+Math.random()*600));return fn()}throw e}}
 /* Google Sheet: text/plain POST avoids the CORS preflight Apps Script cannot answer */
 let queue=null;
-async function sheetCall(req){if(REMOTE==='supabase')return supaCall(req);
+async function sheetCall(req){if(REMOTE==='firebase')return fbCall(req);if(REMOTE==='supabase')return supaCall(req);
   let r;try{r=await fetch(SHEET_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(req)})}catch(e){throw{code:'unavailable'}}
   const j=await r.json().catch(()=>({ok:false}));if(!j.ok)throw{code:j.error||'unavailable'};return j;
 }
 function sheetWrite(w){if(queue)queue.push(w);else return retry(()=>sheetCall(w))}
 async function pull(){
   if(mode!=='sheet'||busy)return;
-  try{const j=REMOTE==='supabase'?await supaPull():await (await fetch(SHEET_API+(SHEET_API.includes('?')?'&':'?')+'t='+Date.now())).json();if(!j.ok)throw 0;
+  try{const j=REMOTE==='firebase'?await fbPull():REMOTE==='supabase'?await supaPull():await (await fetch(SHEET_API+(SHEET_API.includes('?')?'&':'?')+'t='+Date.now())).json();if(!j.ok)throw 0;
     COLS.forEach(c=>{st[c]=(j[c]||[]).map(x=>c==='products'?normProduct(x):x);loaded[c]=true});lastPull=Date.now();renderAll();applyRole()}
   catch(e){if(!COLS.every(c=>loaded[c])){COLS.forEach(c=>loaded[c]=true);renderAll()}toast('โหลดข้อมูลจาก '+REMOTE_NAME+' ไม่สำเร็จ — จะลองใหม่อัตโนมัติ')}
 }
@@ -492,7 +540,9 @@ async function connect(){
   if(c?.use){try{[db,usr]=await Promise.all([c.use('db'),c.use('user')])}catch(e){db=null}}
   if(!db&&!c?.use&&REMOTE){
     mode='sheet';try{myId=localStorage.getItem('shelfLifeMonitor.name')||null}catch(e){}
-    $('#whoName').value=myId||'';applyRole();renderAll();await pull();
+    $('#whoName').value=myId||'';applyRole();renderAll();
+    if(REMOTE==='firebase'){try{await fbInit();fbSubscribe()}catch(e){toast('เชื่อมต่อฐานข้อมูล Makro Finder ไม่ได้ — ตรวจสอบอินเทอร์เน็ตแล้วโหลดหน้าใหม่')}return}
+    await pull();
     setInterval(()=>{if(!document.hidden&&Date.now()-lastPull>(REMOTE==='supabase'?9000:25000))pull()},3000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastPull>10000)pull()});
     return}
@@ -541,18 +591,18 @@ function renderDash(){
   const q=$('#q').value.trim().toLowerCase(),fs=$('#fSt').value||tileFilter,hide=$('#fHide').checked;
   const list=rows.filter(({b,e})=>{
     if(fs&&e.st!==fs)return false;if(hide&&b.ack===e.st)return false;
-    if(q){const h=[b.sku,e.p?.desc,e.p?.sku,e.p?.cat,e.p?.buyerUid,e.p?.comUid,e.buyer?.name,b.loc,b.note].join(' ').toLowerCase();if(!h.includes(q))return false}
+    if(q){const h=[b.itemNo,b.itemDesc,b.barcode,b.sku,e.p?.desc,e.p?.sku,e.p?.cat,e.p?.buyerUid,e.p?.comUid,e.buyer?.name,b.loc,b.note].join(' ').toLowerCase();if(!h.includes(q))return false}
     return true}).sort((a,b)=>(a.b.ack===a.e.st)-(b.b.ack===b.e.st)||a.e.rank-b.e.rank||(a.e.left??0)-(b.e.left??0));
   $('#dashEmpty').hidden=list.length>0||mode==='init';
   $('#dashLoading').hidden=mode!=='init'&&(mode!=='db'||COLS.every(c=>loaded[c]));
   $('#dashBody').innerHTML=list.map(({b,e})=>{
-    const done=b.ack===e.st,p=e.p,k=esc(b._id);
+    const done=b.ack===e.st,p=e.p,k=esc(b._id),ii=itemInfo(b);
     if(!p)return`<tr><td data-l="สถานะ">${chip('err',e.label)}</td><td data-l="สินค้า" colspan="7">${esc(e.action)}</td><td class="no-print"><button class="btn sm danger w" onclick="delBatch('${k}')">ลบ</button></td></tr>`;
     const pos=Math.min(100,Math.max(0,(e.day-.5)/p.pullDay*100));
     const by=done&&b.ackBy?(mode==='sheet'?` โดย ${esc(b.ackBy)}`:` โดย <span data-uid="${esc(b.ackBy)}">${b.ackBy===myId?'คุณ':'…'}</span>`):'';
     return`<tr class="${done?'acted':''}">
     <td data-l="สถานะ"><div>${chip(e.st,e.label)}${done?`<div class="small" style="margin-top:4px">✓ ทำแล้ว${by}</div>`:''}</div></td>
-    <td data-l="สินค้า"><div><b>${esc(p.desc)}</b><div class="muted small">${p.sku?esc(p.sku)+' · ':''}${esc(p.cat||'')} · Shelf life ${p.shelf} วัน${p.temp?' · '+esc(p.temp):''}</div>${b.note?`<div class="small">หมายเหตุ: ${esc(b.note)}</div>`:''}</div></td>
+    <td data-l="สินค้า"><div>${ii?.img?`<img class="pthumb" src="${esc(ii.img)}" alt="" loading="lazy">`:""}<b>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(ii.locs))}</b></div>`:""}${b.note?`<div class="small">หมายเหตุ: ${esc(b.note)}</div>`:''}</div></td>
     <td data-l="Julian รับ" class="num"><div><b>${jul(e.prod).ddd}</b><div class="small">${fmt(e.prod)}</div></div></td>
     <td data-l="วางขาย"><div><span class="num">วันที่ ${e.day} / ${p.pullDay}</span>${strip(p,e.day)}</div></td>
     <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
@@ -575,10 +625,10 @@ function ack(id){const b=byId('batches',id);if(!b)return;const e=evalBatch(b),un
   act(()=>patchItem('batches',b,undo?{ack:null,ackBy:null,ackAt:null}:{ack:e.st,ackBy:myId,ackAt:new Date().toISOString()}),undo?'ยกเลิกแล้ว':'บันทึกว่าทำแล้ว')}
 async function delBatch(id){const b=byId('batches',id);if(!b||!await ask(mode==='db'?'ลบล็อตนี้? (ลบให้ทุกคนในทีม)':'ลบล็อตนี้?'))return;act(()=>rmItem('batches',b),'ลบล็อตแล้ว')}
 function copyMsg(id){
-  const b=byId('batches',id);if(!b)return;const e=evalBatch(b),p=e.p;if(!p)return;
+  const b=byId("batches",id);if(!b)return;const e=evalBatch(b),p=e.p,ii=itemInfo(b);if(!p)return;
   const c=x=>x?`${x.uid} ${x.name}${x.phone?' โทร '+x.phone:''}${x.email?' '+x.email:''}${x.backup?' (สำรอง: '+x.backup+')':''}`:'-';
   const txt=`[Shelf-Life] ${e.label}
-สินค้า: ${p.sku?p.sku+' ':''}${p.desc} (Shelf life ${p.shelf} วัน)
+สินค้า: ${ii?ii.no+' '+ii.desc+' (กฎ '+p.desc+')':(p.sku?p.sku+' ':'')+p.desc} (Shelf life ${p.shelf} วัน)${ii&&ii.locs.length?'\nตำแหน่งในร้าน: '+locText(ii.locs):''}
 Julian ${jul(e.prod).ddd} | วันรับ ${fmt(e.prod)} | Code 52 ${fmt(e.c52)}
 วางขายวันที่ ${e.day}/${p.pullDay}
 จำนวน ${b.qty} | ที่ตั้ง ${b.loc||'-'}
@@ -588,6 +638,99 @@ Commercial: ${c(e.com)}`;
   copyText(txt,'คัดลอกข้อความแล้ว — วางใน LINE/อีเมลได้เลย');
 }
 
+/* ---------- Makro Finder item data (only when this page sits next to Makro Finder's index.html) ---------- */
+const MF={state:'idle',items:new Map(),bar:new Map(),images:{},list:[]};
+const onMakroSite=()=>!window.claude&&location.protocol!=='file:';
+const normTh=s=>String(s||'').toLowerCase().replace(/.์/g,'').replace(/[่-๋็\s.\-()]/g,'');
+async function loadMakroData(){
+  if(MF.state!=='idle'||!onMakroSite())return;
+  MF.state='loading';renderMfStatus();
+  try{
+    const idx=await (await fetch('index.html',{cache:'no-cache'})).text();
+    const file=(idx.match(/fetch\('(ItemLocation[^']+\.xlsx)'/)||[])[1];if(!file)throw Error('no item file');
+    await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+    const [buf,imgs,alt,ov]=await Promise.all([
+      fetch(file).then(r=>{if(!r.ok)throw Error('item file '+r.status);return r.arrayBuffer()}),
+      fetch('item_images.json').then(r=>r.ok?r.json():{}).catch(()=>({})),
+      fetch('alt_barcodes.json').then(r=>r.ok?r.json():{}).catch(()=>({})),
+      fdb?fdb.collection('makroFinder').doc('locationOverrides').get().then(d=>d.exists?(d.data().data||{}):{}).catch(()=>({})):Promise.resolve({})]);
+    const wb=XLSX.read(buf,{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+    /* same rule as Makro Finder: per item use its 2026 rows when it has any, else the older ones */
+    const byItem=new Map();
+    rows.forEach(r=>{const no=String(r['Item No']||'').trim(),desc=String(r['Item Desc']||'').trim();if(!no||!desc||typeof r['Date']!=='number')return;
+      const y=new Date(Math.floor(r['Date']-25569)*864e5).getUTCFullYear();let b=byItem.get(no);if(!b)byItem.set(no,b={n:[],o:[]});(y===2026?b.n:b.o).push(r)});
+    byItem.forEach((b,no)=>{(b.n.length?b.n:b.o).forEach(r=>{
+      let it=MF.items.get(no);if(!it)MF.items.set(no,it={itemNo:no,desc:String(r['Item Desc']).trim(),barcode:String(r['Barcode']||'').trim(),locs:[]});
+      const loc=String(r['Loc']||'').trim(),location=String(r['Location']||'').trim();
+      if((loc||location)&&!it.locs.some(l=>l.loc===loc&&l.location===location))it.locs.push({loc,location})})});
+    MF.items.forEach(it=>{const o=ov[it.itemNo];if(o){it.locs=it.locs.filter(l=>!(o.removes||[]).some(x=>x.loc===l.loc&&x.location===l.location)).concat((o.adds||[]).map(a=>({loc:a.loc,location:a.location})))}
+      if(it.barcode)MF.bar.set(it.barcode,it.itemNo);it.n=normTh(it.desc)});
+    Object.entries(alt||{}).forEach(([bc,no])=>{if(!MF.bar.has(bc))MF.bar.set(bc,String(no))});
+    MF.images=imgs||{};MF.list=[...MF.items.values()];MF.state='ready';
+    loadMakroExtra();
+  }catch(e){MF.state='error';console.warn('Makro Finder data',e)}
+  renderMfStatus();renderDash();
+}
+/* Item Master items that have no shelf location yet (many fresh items live only here) — large file, loaded after the main list */
+async function loadMakroExtra(){
+  try{const extra=await (await fetch('employee_only_items.json')).json();let n=0;
+    Object.entries(extra||{}).forEach(([no,v])=>{no=String(no);if(MF.items.has(no)||!v||!v.desc)return;
+      const it={itemNo:no,desc:String(v.desc).trim(),barcode:String(v.barcode||'').trim(),locs:[],noLoc:true};it.n=normTh(it.desc);
+      MF.items.set(no,it);if(it.barcode&&!MF.bar.has(it.barcode))MF.bar.set(it.barcode,no);n++});
+    MF.list=[...MF.items.values()];MF.extra=n;renderMfStatus();if($('#mfQ').value.trim())renderMfResults();
+  }catch(e){}
+}
+function renderMfStatus(){const el=$('#mfStatus');if(!el)return;
+  el.textContent=MF.state==='loading'?'กำลังโหลดข้อมูลสินค้าจาก Makro Finder…':MF.state==='ready'?`ค้นได้ ${MF.list.length.toLocaleString()} สินค้า (รหัส บาร์โค้ด หรือชื่อ)${MF.extra?'':' · กำลังโหลดสินค้าที่ยังไม่มีตำแหน่งเพิ่ม…'}`:MF.state==='error'?'โหลดข้อมูลสินค้าจาก Makro Finder ไม่สำเร็จ — เลือกกฎจากรายการด้านล่างแทนได้':''}
+/* rule matching: fresh items start with the produce name (แอปเปิ้ลฟูจิ…, แก้วมังกรเวียดนาม…) — prefix match avoids
+   drinks/snacks that merely mention a fruit flavour. "…อื่นๆ" rules are fallbacks for their prefix. */
+let ruleCache=null,ruleCacheOf=null;
+function ruleCores(){
+  if(ruleCacheOf===st.products)return ruleCache;
+  ruleCacheOf=st.products;
+  return ruleCache=st.products.map(p=>{const raw=String(p.desc).replace(/\(.*?\)/g,'').trim(),other=/อื่นๆ$/.test(raw);
+    return{p,other,c:normTh(raw.replace(/อื่นๆ$/,'').replace(/(นำเข้า|ไทย)$/,''))}}).filter(x=>x.c.length>=2);
+}
+const IMPORT_HINT=/นำเข้า|จีน|ญี่ปุ่น|เกาหลี|ออส|นิวซีแลนด์|อเมริกา|ชิลี|เปรู|แอฟริกา|อิตาลี|สเปน|ฝรั่งเศส|อินโด|อียิปต์|ตุรกี|เวียดนาม|(^|[^a-z])(aus|nz|usa|us|chn|jpn|kor|egy|chile|peru|import)([^a-z]|$)/i;
+function guessRule(it,noLearn){
+  if(!noLearn){const learned=st.batches.find(b=>b.itemNo===it.itemNo&&findProd(b.sku));if(learned)return findProd(learned.sku)}
+  const m=ruleCores().filter(x=>it.n.startsWith(x.c));if(!m.length)return null;
+  const rank=x=>(x.other?0:1000)+x.c.length,top=Math.max(...m.map(rank)),best=m.filter(x=>rank(x)===top).map(x=>x.p);
+  if(best.length<2)return best[0];
+  const want=IMPORT_HINT.test(it.desc)?'import':'local';return best.find(p=>p.origin===want)||best[0];
+}
+function mfSearch(q){
+  q=String(q||'').trim();if(!q||MF.state!=='ready')return[];
+  const digits=/^\d+$/.test(q),toks=q.split(/\s+/).map(normTh).filter(Boolean),n=toks[0]||'',hits=new Map(),add=(it,s)=>{if(it&&(!hits.has(it.itemNo)||hits.get(it.itemNo).s>s))hits.set(it.itemNo,{it,s})};
+  if(digits){add(MF.items.get(q),-100);add(MF.items.get(MF.bar.get(q)),-100)}
+  for(const it of MF.list){
+    if(hits.size>=400)break;
+    const byNo=digits&&(it.itemNo.startsWith(q)||(q.length>=6&&it.barcode.includes(q))),byName=toks.join('').length>=2&&toks.every(t=>it.n.includes(t));
+    if(!byNo&&!byName)continue;
+    add(it,(byNo?-20:0)+(guessRule(it,true)?-10:0)+(it.n.startsWith(n)?-5:0)+(it.locs.length?-1:0));
+  }
+  return [...hits.values()].sort((a,b)=>a.s-b.s).slice(0,8).map(x=>x.it);
+}
+const locText=locs=>(locs||[]).slice(0,3).map(l=>[l.loc&&'Loc '+l.loc,l.location&&'Location '+l.location].filter(Boolean).join(' / ')).join(' · ');
+let mfPick=null;
+function renderMfResults(){
+  const list=mfSearch($('#mfQ').value);
+  $('#mfResults').innerHTML=list.map(it=>{const img=MF.images[it.itemNo];
+    return`<button type="button" class="mf-hit" data-no="${esc(it.itemNo)}">${img?`<img src="${esc(img)}" alt="" loading="lazy">`:'<span class="mf-noimg"></span>'}<span><b>${esc(it.desc)}</b><span class="muted small">${esc(it.itemNo)}${it.barcode?' · '+esc(it.barcode):''}${it.locs.length?' · '+esc(locText(it.locs)):''}</span></span></button>`}).join('')
+    +($('#mfQ').value.trim()&&MF.state==='ready'&&!list.length?'<p class="muted small" style="margin:6px 0">ไม่พบสินค้าใน Makro Finder</p>':'');
+}
+function pickMf(no){
+  const it=MF.items.get(no);if(!it)return;mfPick=it;$('#mfResults').innerHTML='';$('#mfQ').value='';
+  const p=guessRule(it);if(p)$('#aSku').value=pkey(p);
+  $('#mfPicked').hidden=false;
+  $('#mfPicked').innerHTML=`${MF.images[it.itemNo]?`<img src="${esc(MF.images[it.itemNo])}" alt="">`:''}<div><b>${esc(it.desc)}</b><div class="muted small">${esc(it.itemNo)}${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div>${it.locs.length?`<div class="small">ตำแหน่งในร้าน: <b>${esc(locText(it.locs))}</b></div>`:''}<div class="small ${p?'muted':'err-text'}">${p?`ใช้กฎ Shelf life: ${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} ${p.shelf} วัน) — เปลี่ยนได้ที่ช่อง “กฎ Shelf life” ด้านล่าง`:'ไม่พบกฎที่ตรงกับสินค้านี้ — เลือกกฎ Shelf life ด้านล่างเอง'}</div></div><button type="button" class="btn sm" id="mfClear">ไม่ใช้</button>`;
+  $('#mfClear').onclick=()=>{mfPick=null;$('#mfPicked').hidden=true};
+  if(!$('#aLoc').value&&it.locs.length)$('#aLoc').value=locText(it.locs.slice(0,1));
+  addPreview();
+}
+function itemInfo(b){/* live Makro Finder data when loaded, else what was saved with the lot */
+  const it=b.itemNo&&MF.items.get(b.itemNo);
+  return b.itemNo?{no:b.itemNo,desc:it?.desc||b.itemDesc||'',img:MF.images[b.itemNo]||b.img||'',locs:it?it.locs:(b.locs||[])}:null}
 /* ---------- add batch ---------- */
 const findProd=k=>st.products.find(x=>pkey(x)===k);
 function addPreview(){
@@ -607,7 +750,8 @@ $('#aDate').oninput=()=>{const v=$('#aDate').value;$('#aJ').value=v?jul(fromIso(
 $('#aSave').onclick=async()=>{
   const prod=addPreview();if(!prod)return toast('กรุณาใส่ Julian code หรือวันรับสินค้าที่ถูกต้อง');
   const o={sku:$('#aSku').value,prod:iso(prod),qty:+$('#aQty').value||0,loc:$('#aLoc').value.trim(),note:$('#aNote').value.trim(),addedBy:myId||null,addedAt:new Date().toISOString()};
-  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aNote').value='';addPreview()}
+  if(mfPick)Object.assign(o,{itemNo:mfPick.itemNo,itemDesc:mfPick.desc,barcode:mfPick.barcode||'',img:MF.images[mfPick.itemNo]||'',locs:mfPick.locs.slice(0,3)});
+  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aNote').value='';mfPick=null;$('#mfPicked').hidden=true;addPreview()}
 };
 
 /* ---------- products ---------- */
@@ -760,7 +904,11 @@ function renderAll(){
 $('#fSt').innerHTML+=ST.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
 $('#q').oninput=renderDash;$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
-$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash()};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add')loadMakroData()};
+if(onMakroSite()){$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
+let mfT;$('#mfQ').oninput=()=>{clearTimeout(mfT);mfT=setTimeout(renderMfResults,150)};
+$('#mfQ').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const h=mfSearch($('#mfQ').value);if(h.length===1||(h[0]&&/^\d+$/.test($('#mfQ').value.trim())))pickMf(h[0].itemNo)}};
+$('#mfResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)pickMf(b.dataset.no)};
 $('#jD').value=iso(today());
 $('#whoName').oninput=e=>{myId=e.target.value.trim()||null;try{localStorage.setItem('shelfLifeMonitor.name',myId||'')}catch(x){}};
 applyRole();renderAll();connect();
