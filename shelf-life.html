@@ -191,7 +191,7 @@ dialog::backdrop{background:#0008}
     </div>
     <div class="grid2">
       <label>กฎ Shelf life (ประเภทสินค้าตามคู่มือ)<select id="aSku"></select></label>
-      <label>Julian วันรับสินค้า (เช่น 277)<input id="aJ" inputmode="numeric" placeholder="DDD / YDDD / YYDDD"></label>
+      <label>Julian วันรับสินค้า (DDD หรือ YYDDD)<input id="aJ" inputmode="numeric" maxlength="5" placeholder="277 หรือ 26277"></label>
       <label>หรือเลือกวันรับสินค้า<input type="date" id="aDate"></label>
       <label>จำนวน<input id="aQty" type="number" min="0" value="1"></label>
       <label>ที่ตั้ง / ชั้นวาง<input id="aLoc" placeholder="เช่น Chiller A3"></label>
@@ -228,14 +228,14 @@ dialog::backdrop{background:#0008}
       <label>วันที่<input type="date" id="jD"></label>
       <p id="jDout" style="font-size:18px"></p></div>
     <div class="card"><h2>Julian → วันที่</h2>
-      <label>Julian code<input id="jC" inputmode="numeric" placeholder="277 / 6277 / 26277 / 2026277"></label>
+      <label>Julian code<input id="jC" inputmode="numeric" maxlength="5" placeholder="277 หรือ 26277"></label>
       <p id="jCout" style="font-size:18px"></p></div>
     <div class="card"><h2>กำหนดการจาก Julian วันรับ</h2>
       <label>สินค้า<select id="jSku"></select></label>
       <label style="margin-top:8px">Julian วันรับสินค้า<input id="jC2" inputmode="numeric"></label>
       <div id="jPlan" style="margin-top:10px"></div></div>
   </div>
-  <div class="card small muted"><b>Julian Calendar:</b> เลขวันของปี 001–365 (ปี 2026 ไม่มี 29 ก.พ.) เช่น 1 ม.ค. = 001, 1 ต.ค. = 274, 31 ธ.ค. = 365 · <b>รูปแบบที่รองรับ:</b> DDD (ถ้าเป็นวันในอนาคตจะถือเป็นปีก่อน) · YDDD (6277 = ปี 2026 วันที่ 277) · YYDDD (26277) · YYYYDDD (2026277)</div>
+  <div class="card small muted"><b>Julian Calendar:</b> เลขวันของปี 001–365 (ปี 2026 ไม่มี 29 ก.พ.) เช่น 1 ม.ค. = 001, 1 ต.ค. = 274, 31 ธ.ค. = 365 · <b>รูปแบบที่รองรับ:</b> DDD เช่น 277 (ถ้าเป็นวันในอนาคตจะถือเป็นปีก่อน) · YYDDD เช่น 26277 = ปี 2026 วันที่ 277</div>
 </section>
 
 <!-- DATA -->
@@ -331,10 +331,8 @@ function parseJulian(raw,ref=today()){
   const c=String(raw??'').replace(/\D/g,'');if(!c)return null;
   let year,ddd;const Y=ref.getFullYear();
   if(c.length<=3){ddd=+c;year=Y}
-  else if(c.length===4){ddd=+c.slice(1);year=Y-((Y%10-+c[0]+10)%10)}
   else if(c.length===5){ddd=+c.slice(2);year=2000+ +c.slice(0,2)}
-  else if(c.length===7){ddd=+c.slice(4);year=+c.slice(0,4)}
-  else return{error:'รูปแบบไม่ถูกต้อง (ใช้ 3, 4, 5 หรือ 7 หลัก)'};
+  else return{error:'ใช้ได้เฉพาะ DDD (เช่น 277) หรือ YYDDD (เช่น 26277)'};
   if(c.length<=3&&ddd>=1&&addD(new Date(year,0,1),ddd-1)>ref)year--;
   const max=isLeap(year)?366:365;
   if(ddd<1||ddd>max)return{error:`วัน Julian ต้องอยู่ระหว่าง 001–${max} (ปี ${year})`};
@@ -893,7 +891,7 @@ async function delContact(id){const c=byId('contacts',id);if(!c||!await ask(`ล
 
 /* ---------- julian tab ---------- */
 function julTab(){
-  const v=$('#jD').value;if(v){const d=fromIso(v),j=jul(d);$('#jDout').innerHTML=`<b>${j.ddd}</b> <span class="muted small">· YDDD ${j.y1} · YYDDD ${j.y2} · ${j.y4}</span>`}
+  const v=$('#jD').value;if(v){const d=fromIso(v),j=jul(d);$('#jDout').innerHTML=`<b>${j.ddd}</b> <span class="muted small">DDD</span> · <b>${j.y2}</b> <span class="muted small">YYDDD</span>`}
   const r=parseJulian($('#jC').value);$('#jCout').innerHTML=!r?'':r.error?`<span class="err-text">${r.error}</span>`:`<b>${fmt(r.date)}</b> <span class="muted small">ถ้าเป็นวันรับสินค้า วันนี้คือวางขายวันที่ ${diffD(today(),r.date)+1}</span>`;
   const p=findProd($("#jSku").value),r2=parseJulian($('#jC2').value);
   $('#jPlan').innerHTML=!p?'':r2?.error?`<span class="err-text">${r2.error}</span>`:planHTML(p,r2?.date||null);
