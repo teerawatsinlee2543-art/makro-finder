@@ -906,6 +906,8 @@ $('#q').oninput=renderDash;$('#fSt').onchange=()=>{tileFilter='';renderDash()};$
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
 $('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add')loadMakroData()};
 if(onMakroSite()){$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
+/* came from Makro Finder in this tab → go back in history so its page/search state is kept */
+$('#backMf').onclick=e=>{try{const r=new URL(document.referrer);if(r.origin===location.origin&&r.pathname.replace(/index\.html$/,'')===new URL('./',location.href).pathname&&history.length>1){e.preventDefault();history.back()}}catch(x){}};
 let mfT;$('#mfQ').oninput=()=>{clearTimeout(mfT);mfT=setTimeout(renderMfResults,150)};
 $('#mfQ').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const h=mfSearch($('#mfQ').value);if(h.length===1||(h[0]&&/^\d+$/.test($('#mfQ').value.trim())))pickMf(h[0].itemNo)}};
 $('#mfResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)pickMf(b.dataset.no)};
