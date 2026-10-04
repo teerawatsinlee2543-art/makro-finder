@@ -217,7 +217,31 @@ dialog::backdrop{background:#0008}
       <label>จำนวน<input id="aQty" type="number" min="0" value="1"></label>
       <label>ที่ตั้ง / ชั้นวาง<input id="aLoc" placeholder="เช่น Chiller A3"></label>
       <label>หมายเหตุ<input id="aNote"></label>
-      <label class="remark-field">Remark (แจ้ง Buyer / Commercial)<select id="aRemark"><option value="">— ไม่มี —</option><option>สินค้ามี Stock เยอะ ต้องการระบาย</option><option>รบกวนทำลดราคา 60% เนื่องจากสินค้ามีคุณภาพไม่ไหว</option></select></label>
+      <label class="remark-field">Remark (แจ้ง Buyer / Commercial)<select id="aRemark">
+        <option value="">— ไม่มี —</option>
+        <optgroup label="ขอลดราคา / ระบายสต็อก">
+          <option>สินค้ามี Stock เยอะ ต้องการระบาย</option>
+          <option>รบกวนทำลดราคา 60% เนื่องจากสินค้ามีคุณภาพไม่ไหว</option>
+          <option>ขออนุมัติลดราคามากกว่าคู่มือ BPM (เช่น 30% / 50%)</option>
+          <option>ขอทำโปรโมชัน / จัดเป็นแพ็คขายรวม / จัดชิม</option>
+        </optgroup>
+        <optgroup label="คุณภาพสินค้า">
+          <option>สินค้าช้ำ / เน่าบางส่วน ต้องคัดแยก</option>
+          <option>สินค้าสุกเร็วกว่ากำหนด / สินค้าเหี่ยว / แห้ง / เปลี่ยนสี</option>
+        </optgroup>
+        <optgroup label="การรับสินค้า">
+          <option>รับสินค้ามา Shelf life สั้นกว่าปกติ</option>
+        </optgroup>
+        <optgroup label="การจัดเก็บ / หน้าร้าน">
+          <option>ตู้แช่อุณหภูมิไม่ได้ / ตู้เสีย</option>
+          <option>ไม่มีพื้นที่วางขาย ต้องย้ายตำแหน่ง / โอนออก Transfer to Store ใกล้เคียง</option>
+          <option>ขายช้ากว่ายอดสั่ง ขอลดยอดสั่งรอบหน้า</option>
+        </optgroup>
+        <optgroup label="อื่นๆ">
+          <option value="__other">อื่นๆ โปรดระบุ…</option>
+        </optgroup>
+      </select></label>
+      <label class="remark-field" id="aRemarkOtherWrap" hidden>ระบุ Remark (อื่นๆ)<input id="aRemarkOther" maxlength="200" placeholder="พิมพ์รายละเอียด แล้วกด “บันทึกล็อต”"></label>
     </div>
     <div id="aPreview" class="card" style="margin:14px 0 0;background:var(--bg)"></div>
     <div class="row" style="margin-top:12px"><button class="btn pri w" id="aSave">บันทึกล็อต</button></div>
@@ -831,11 +855,14 @@ function addPreview(){
 }
 $('#aSku').onchange=addPreview;$('#aJ').oninput=addPreview;
 $('#aDate').oninput=()=>{const v=$('#aDate').value;$('#aJ').value=v?jul(fromIso(v)).ddd:'';addPreview()};
+const remarkValue=()=>$('#aRemark').value==='__other'?$('#aRemarkOther').value.trim():$('#aRemark').value;
+$('#aRemark').onchange=()=>{const o=$('#aRemark').value==='__other';$('#aRemarkOtherWrap').hidden=!o;if(o)$('#aRemarkOther').focus()};
 $('#aSave').onclick=async()=>{
   const prod=addPreview();if(!prod)return toast('กรุณาใส่ Julian code หรือวันรับสินค้าที่ถูกต้อง');
-  const o={sku:$('#aSku').value,prod:iso(prod),qty:+$('#aQty').value||0,loc:$('#aLoc').value.trim(),note:$('#aNote').value.trim(),remark:$('#aRemark').value,addedBy:myId||null,addedAt:new Date().toISOString()};
+  if($('#aRemark').value==='__other'&&!remarkValue()){toast('กรุณาระบุ Remark ในช่อง “อื่นๆ”');$('#aRemarkOther').focus();return}
+  const o={sku:$('#aSku').value,prod:iso(prod),qty:+$('#aQty').value||0,loc:$('#aLoc').value.trim(),note:$('#aNote').value.trim(),remark:remarkValue(),addedBy:myId||null,addedAt:new Date().toISOString()};
   if(mfPick)Object.assign(o,{itemNo:mfPick.itemNo,itemDesc:mfPick.desc,barcode:mfPick.barcode||'',img:MF.images[mfPick.itemNo]||'',locs:mfPick.locs.slice(0,3)});
-  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aNote').value='';$('#aRemark').value='';mfPick=null;$('#mfPicked').hidden=true;addPreview()}
+  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aNote').value='';$('#aRemark').value='';$('#aRemarkOther').value='';$('#aRemarkOtherWrap').hidden=true;mfPick=null;$('#mfPicked').hidden=true;addPreview()}
 };
 
 /* ---------- products ---------- */
