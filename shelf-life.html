@@ -115,7 +115,7 @@ dialog::backdrop{background:#0008}
 </header>
 <nav id="tabs">
   <button data-tab="dash" class="on">ภาพรวมวันนี้</button>
-  <button data-tab="add">+ รับ/เพิ่มล็อต</button>
+  <button data-tab="add">+ Monitor item</button>
   <button data-tab="prod">สินค้า & กฎลดราคา</button>
   <button data-tab="ct">Buyer / Commercial</button>
   <button data-tab="jul">แปลง Julian</button>
@@ -140,14 +140,14 @@ dialog::backdrop{background:#0008}
     <table class="resp"><thead><tr><th>สถานะ</th><th>สินค้า</th><th>Julian รับ</th><th>วางขาย</th><th>Code 52</th><th>ต้องทำ</th><th>ติดต่อ</th><th>จำนวน</th><th class="no-print"></th></tr></thead>
     <tbody id="dashBody"></tbody></table>
     <p class="muted" id="dashLoading">กำลังโหลดข้อมูลทีม…</p>
-    <p class="muted" id="dashEmpty" hidden>ยังไม่มีล็อตที่ตรงเงื่อนไข — ไปที่แท็บ “+ รับ/เพิ่มล็อต”</p>
+    <p class="muted" id="dashEmpty" hidden>ยังไม่มีล็อตที่ตรงเงื่อนไข — ไปที่แท็บ “+ Monitor item”</p>
   </div>
 </section>
 
 <!-- ADD BATCH -->
 <section id="t-add" hidden>
   <div class="card">
-    <h2>รับสินค้า / เพิ่มล็อต</h2>
+    <h2>Monitor item <span class="muted small" style="font-weight:400">· รับสินค้า / เพิ่มล็อต</span></h2>
     <p class="muted small" style="margin-top:0">นับวันตามคู่มือ: วันที่รับสินค้าและจัดเรียงหน้าร้าน = <b>วันที่ 1</b></p>
     <div id="mfBox" hidden style="margin-bottom:14px">
       <label>ค้นหาสินค้าจาก Makro Finder (สแกน/พิมพ์ รหัสสินค้า บาร์โค้ด หรือชื่อ)<input id="mfQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
