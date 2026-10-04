@@ -897,7 +897,7 @@ $('#obMigrate').onclick=()=>{const lc=loadLocal();if(lc)act(()=>replaceAll(lc),'
 /* ---------- boot ---------- */
 function renderAll(){
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  $('#todayJ').textContent=`${jul(t).ddd}  (${jul(t).y1})`;
+  $("#todayJ").textContent=`${jul(t).ddd}  (${jul(t).y2})`;
   const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML=prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
   renderDash();renderProd();renderCt();addPreview();julTab();
 }
