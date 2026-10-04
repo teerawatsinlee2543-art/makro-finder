@@ -109,6 +109,33 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .cphone{font-variant-numeric:tabular-nums}
 .cphone a{color:var(--accent);font-weight:600;text-decoration:none}
 .cbackup{font-size:12.5px;color:var(--muted)}
+.add-card{display:grid;gap:16px}
+.add-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.add-head h2{margin:0}
+.add-step{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:10px;background:var(--card)}
+.add-step[hidden]{display:none}
+.step-title{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}
+.step-no{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-size:14px;font-weight:800;flex:none}
+.search-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.search-row .grow{flex:1 1 320px;min-width:0}
+.scan-btn{display:inline-flex;align-items:center;gap:6px;height:42px;background:#e30613;border-color:#e30613;color:#fff;font-weight:700;white-space:nowrap}
+.scan-btn:hover{background:#c00510}
+.lot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.lot-grid .span2{grid-column:span 2}
+.lot-grid .span3{grid-column:1/-1}
+@media (max-width:720px){.lot-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:420px){.lot-grid{grid-template-columns:1fr}}
+.preview-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.save-row{display:flex;justify-content:flex-end}
+.save-btn{min-width:220px;padding:12px 22px;font-size:16px}
+@media (max-width:520px){.save-btn{width:100%}}
+.scan-dlg{width:min(520px,calc(100vw - 24px));padding:14px}
+.scan-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.scan-view{position:relative;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:4/3;max-width:100%}
+.scan-view video{width:100%;height:100%;object-fit:cover;display:block}
+.scan-frame{position:absolute;inset:22% 10%;border:3px solid #e30613;border-radius:10px;box-shadow:0 0 0 999px #00000059}
+[hidden]{display:none!important}
+#mfStatus:empty,#mfResults:empty{display:none}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
 .redbox.remark{background:var(--redbox-ink);color:#fff;border-color:var(--redbox-ink)}
 .remark-field{grid-column:span 2}
@@ -201,23 +228,32 @@ dialog::backdrop{background:#0008}
 
 <!-- ADD BATCH -->
 <section id="t-add" hidden>
-  <div class="card">
-    <h2>Monitor item <span class="muted small" style="font-weight:400">· รับสินค้า / เพิ่มล็อต</span></h2>
-    <p class="muted small" style="margin-top:0">นับวันตามคู่มือ: วันที่รับสินค้าและจัดเรียงหน้าร้าน = <b>วันที่ 1</b></p>
-    <div id="mfBox" hidden style="margin-bottom:14px">
-      <label>ค้นหาสินค้าจาก Makro Finder (สแกน/พิมพ์ รหัสสินค้า บาร์โค้ด หรือชื่อ)<input id="mfQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
-      <p class="muted small" id="mfStatus" style="margin:4px 0 0"></p>
+  <div class="card add-card">
+    <div class="add-head">
+      <h2>Monitor item <span class="muted small" style="font-weight:400">· รับสินค้า / เพิ่มล็อต</span></h2>
+      <span class="pill">นับวันตามคู่มือ: วันรับสินค้า = <b>วันที่ 1</b></span>
+    </div>
+
+    <div class="add-step" id="mfBox" hidden>
+      <div class="step-title"><span class="step-no">1</span>เลือกสินค้า</div>
+      <div class="search-row">
+        <label class="grow">ค้นหาสินค้าจาก Makro Finder (รหัสสินค้า บาร์โค้ด หรือชื่อ)<input id="mfQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
+        <button type="button" class="btn scan-btn" id="scanBtn" title="สแกนบาร์โค้ดด้วยกล้อง"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M7 8v8M10 8v8M13 8v8M16 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>สแกน Barcode</button>
+      </div>
+      <p class="muted small" id="mfStatus" style="margin:0"></p>
       <div id="mfResults" class="mf-results"></div>
       <div id="mfPicked" class="mf-picked" hidden></div>
     </div>
-    <div class="grid2">
-      <label>กฎ Shelf life (ประเภทสินค้าตามคู่มือ)<select id="aSku"></select></label>
-      <label>Julian วันรับสินค้า (DDD หรือ YYDDD)<input id="aJ" inputmode="numeric" maxlength="5" placeholder="277 หรือ 26277"></label>
-      <label>หรือเลือกวันรับสินค้า<input type="date" id="aDate"></label>
-      <label>จำนวน<input id="aQty" type="number" min="0" value="1"></label>
-      <label>ที่ตั้ง / ชั้นวาง<input id="aLoc" placeholder="เช่น Chiller A3"></label>
-      <label>หมายเหตุ<input id="aNote"></label>
-      <label class="remark-field">Remark (แจ้ง Buyer / Commercial)<select id="aRemark">
+
+    <div class="add-step">
+      <div class="step-title"><span class="step-no" id="stepNo2">2</span>ข้อมูลล็อต</div>
+      <div class="lot-grid">
+        <label class="span3">กฎ Shelf life (ประเภทสินค้าตามคู่มือ)<select id="aSku"></select></label>
+        <label>Julian วันรับสินค้า (DDD หรือ YYDDD)<input id="aJ" inputmode="numeric" maxlength="5" placeholder="277 หรือ 26277"></label>
+        <label>หรือเลือกวันรับสินค้า<input type="date" id="aDate"></label>
+        <label>จำนวน<input id="aQty" type="number" min="0" value="1"></label>
+        <label class="span3">ที่ตั้ง / ชั้นวาง<input id="aLoc" placeholder="เช่น Chiller A3"></label>
+        <label class="span3">Remark (แจ้ง Buyer / Commercial)<select id="aRemark">
         <option value="">— ไม่มี —</option>
         <optgroup label="ขอลดราคา / ระบายสต็อก">
           <option>สินค้ามี Stock เยอะ ต้องการระบาย</option>
@@ -241,12 +277,23 @@ dialog::backdrop{background:#0008}
           <option value="__other">อื่นๆ โปรดระบุ…</option>
         </optgroup>
       </select></label>
-      <label class="remark-field" id="aRemarkOtherWrap" hidden>ระบุ Remark (อื่นๆ)<input id="aRemarkOther" maxlength="200" placeholder="พิมพ์รายละเอียด แล้วกด “บันทึกล็อต”"></label>
+        <label class="span3" id="aRemarkOtherWrap" hidden>ระบุ Remark (อื่นๆ)<input id="aRemarkOther" maxlength="200" placeholder="พิมพ์รายละเอียด แล้วกด “บันทึกล็อต”"></label>
+      </div>
     </div>
-    <div id="aPreview" class="card" style="margin:14px 0 0;background:var(--bg)"></div>
-    <div class="row" style="margin-top:12px"><button class="btn pri w" id="aSave">บันทึกล็อต</button></div>
+
+    <div class="add-step">
+      <div class="step-title"><span class="step-no" id="stepNo3">3</span>ตรวจกำหนดการ แล้วบันทึก</div>
+      <div id="aPreview" class="preview-box"></div>
+      <div class="save-row"><button class="btn pri w save-btn" id="aSave">บันทึกล็อต</button></div>
+    </div>
   </div>
 </section>
+
+<dialog id="dlgScan" class="scan-dlg"><form method="dialog">
+  <div class="scan-head"><b>สแกน Barcode สินค้า</b><button class="btn sm" value="close">ปิด</button></div>
+  <div class="scan-view"><video id="scanVideo" playsinline muted></video><div class="scan-frame"></div></div>
+  <p class="muted small" id="scanMsg" style="margin:8px 0 0">เล็งกล้องไปที่บาร์โค้ดให้อยู่ในกรอบ</p>
+</form></dialog>
 
 <!-- PRODUCTS -->
 <section id="t-prod" hidden>
@@ -860,9 +907,9 @@ $('#aRemark').onchange=()=>{const o=$('#aRemark').value==='__other';$('#aRemarkO
 $('#aSave').onclick=async()=>{
   const prod=addPreview();if(!prod)return toast('กรุณาใส่ Julian code หรือวันรับสินค้าที่ถูกต้อง');
   if($('#aRemark').value==='__other'&&!remarkValue()){toast('กรุณาระบุ Remark ในช่อง “อื่นๆ”');$('#aRemarkOther').focus();return}
-  const o={sku:$('#aSku').value,prod:iso(prod),qty:+$('#aQty').value||0,loc:$('#aLoc').value.trim(),note:$('#aNote').value.trim(),remark:remarkValue(),addedBy:myId||null,addedAt:new Date().toISOString()};
+  const o={sku:$('#aSku').value,prod:iso(prod),qty:+$('#aQty').value||0,loc:$('#aLoc').value.trim(),remark:remarkValue(),addedBy:myId||null,addedAt:new Date().toISOString()};
   if(mfPick)Object.assign(o,{itemNo:mfPick.itemNo,itemDesc:mfPick.desc,barcode:mfPick.barcode||'',img:MF.images[mfPick.itemNo]||'',locs:mfPick.locs.slice(0,3)});
-  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aNote').value='';$('#aRemark').value='';$('#aRemarkOther').value='';$('#aRemarkOtherWrap').hidden=true;mfPick=null;$('#mfPicked').hidden=true;addPreview()}
+  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aRemark').value='';$('#aRemarkOther').value='';$('#aRemarkOtherWrap').hidden=true;mfPick=null;$('#mfPicked').hidden=true;addPreview()}
 };
 
 /* ---------- products ---------- */
@@ -1026,6 +1073,35 @@ $('#mfResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)pickMf(b.da
 try{const ro=new ResizeObserver(()=>{const s=document.documentElement.style;s.setProperty('--navh',$('#tabs').offsetHeight+'px');s.setProperty('--legh',$('#dashLegend').offsetHeight+'px')});ro.observe($('#tabs'));ro.observe($('#dashLegend'))}catch(e){}
 /* compact Julian in the pinned tab bar once the big badge scrolls away */
 try{new IntersectionObserver(([en])=>$('#jmini').classList.toggle('show',!en.isIntersecting),{threshold:0}).observe(document.querySelector('.jbadge'))}catch(e){$('#jmini').classList.add('show')}
+/* camera barcode scan — same ZXing build and settings as Makro Finder's own scanner */
+let zxr=null,scanOn=false,scanLast=null,scanHits=0;
+async function openScan(){
+  const d=$('#dlgScan');$('#scanMsg').textContent='กำลังเปิดกล้อง…';d.showModal();
+  if(!navigator.mediaDevices?.getUserMedia){$('#scanMsg').textContent='เบราว์เซอร์นี้ใช้กล้องไม่ได้ — พิมพ์บาร์โค้ดในช่องค้นหาแทน';return}
+  try{
+    await loadScript('https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js');
+    if(!zxr){const h=new Map();h.set(ZXing.DecodeHintType.TRY_HARDER,true);
+      h.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E,ZXing.BarcodeFormat.CODE_128,ZXing.BarcodeFormat.CODE_39,ZXing.BarcodeFormat.QR_CODE]);
+      zxr=new ZXing.BrowserMultiFormatReader(h,80)}
+    scanOn=true;scanLast=null;scanHits=0;$('#scanMsg').textContent='เล็งกล้องไปที่บาร์โค้ดให้อยู่ในกรอบ';
+    await zxr.decodeFromConstraints({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}},$('#scanVideo'),r=>{
+      if(!scanOn||!r)return;const code=r.getText().trim();
+      /* accept a code only after reading it twice in a row, like Makro Finder */
+      if(code===scanLast)scanHits++;else{scanLast=code;scanHits=1}
+      if(scanHits>=2){closeScan();useScanned(code)}});
+  }catch(e){$('#scanMsg').textContent='เปิดกล้องไม่ได้ — อนุญาตให้ใช้กล้องในเบราว์เซอร์ หรือพิมพ์บาร์โค้ดในช่องค้นหาแทน'}
+}
+function closeScan(){scanOn=false;try{zxr&&zxr.reset()}catch(e){}const d=$('#dlgScan');if(d.open)d.close()}
+async function useScanned(code){
+  $('#mfQ').value=code;
+  if(MF.state!=='ready'){toast('กำลังโหลดข้อมูลสินค้า…');await loadMakroData();for(let i=0;i<120&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250))}
+  const h=mfSearch(code);
+  if(h.length&&(h[0].barcode===code||MF.bar.get(code)===h[0].itemNo||h[0].itemNo===code)){pickMf(h[0].itemNo);toast('พบสินค้า: '+h[0].desc)}
+  else{renderMfResults();toast(h.length?'เลือกสินค้าจากรายการ':'ไม่พบบาร์โค้ด '+code+' ใน Makro Finder')}
+}
+$('#scanBtn').onclick=openScan;
+$('#dlgScan').addEventListener('close',()=>{scanOn=false;try{zxr&&zxr.reset()}catch(e){}});
+if(!onMakroSite()){$('#stepNo2').textContent='1';$('#stepNo3').textContent='2'}
 $('#jD').value=iso(today());
 $('#whoName').oninput=e=>{myId=e.target.value.trim()||null;try{localStorage.setItem('shelfLifeMonitor.name',myId||'')}catch(x){}};
 applyRole();renderAll();connect();
