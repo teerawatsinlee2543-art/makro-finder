@@ -2126,7 +2126,7 @@ td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-w
 .rm{margin-top:2px;background:#fdecec;border:1px solid #f5c2c0;border-radius:4px;padding:1px 4px;color:#9f1d1d}
 .nm{display:flex;gap:6px;align-items:flex-start}.nt{min-width:0;flex:1}
 .th{flex:none;width:38px;height:38px;object-fit:contain;border:1px solid #eadada;border-radius:5px;background:#fff}.th.ph{background:#f4eeee}
-.dv{display:inline-block;border-radius:99px;padding:0 8px;font-weight:800;font-size:9px;background:#e4edfb;color:#0f4c9c}</style></head><body>
+.dv{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px;white-space:nowrap;background:#e4edfb;color:#0f4c9c}</style></head><body>
 <h1>Item NBS · สินค้าที่ไม่มียอดขาย</h1>
 <p class="sub">พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · แสดง ${all.length.toLocaleString()} จาก ${total.toLocaleString()} รายการ${all.length<total?' (ตามตัวกรองที่เลือกอยู่)':''} · เกณฑ์ NBS: FF ≥5 / DF ≥7 / NF ≥10 วัน · Aging ตามตาราง Aging Stock</p>
 <div class="sum">${Object.entries(NBS_DIV).map(([k,l])=>`<span>${k} · ${l} ${(cnt[k]||0).toLocaleString()}</span>`).join('')}</div>
