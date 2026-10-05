@@ -163,7 +163,7 @@ nav#tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;box-shadow:
 table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-inset-top,0px));z-index:5;background:var(--card);box-shadow:inset 0 -1px 0 var(--line)}
 #dashLegend{position:sticky;top:calc(var(--navh,52px) + env(safe-area-inset-top,0px));z-index:6;background:var(--card);padding:10px 0 8px;margin:-2px 0 0}
 #t-dash table.resp thead th{top:calc(var(--navh,52px) + var(--legh,44px) + env(safe-area-inset-top,0px))}
-.app-logo{width:46px;height:46px;object-fit:cover;flex:none;border-radius:50%;border:3px solid #e30613;box-sizing:border-box;background:#fff}
+.app-logo{width:46px;height:46px;object-fit:contain;flex:none}
 .back-mf{display:inline-flex;align-items:center;gap:4px;padding:7px 14px 7px 10px;border-radius:999px;background:#e30613;color:#fff;font-weight:700;font-size:14px;text-decoration:none;box-shadow:0 2px 6px #e3061340;transition:background .15s,transform .15s}
 .back-mf:hover{background:#c00510;transform:translateX(-2px)}
 .back-mf:focus-visible{outline:3px solid #e3061366;outline-offset:2px}
@@ -199,7 +199,7 @@ dialog::backdrop{background:#0008}
 </head>
 <body>
 <header>
-  <div class="row" style="align-items:center;gap:10px"><a href="./" id="backMf" class="back-mf" hidden><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Makro Finder</a><img src="shrink-icon.webp" alt="" class="app-logo" id="appLogo" hidden><h1>Shelf-Life Monitor</h1><span class="chip s-err" id="mode">กำลังเชื่อมต่อ…</span></div>
+  <div class="row" style="align-items:center;gap:10px"><a href="./" id="backMf" class="back-mf" hidden><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Makro Finder</a><img src="shrink-icon.png" alt="" class="app-logo" id="appLogo" hidden><h1>Shelf-Life Monitor</h1><span class="chip s-err" id="mode">กำลังเชื่อมต่อ…</span></div>
   <div class="jbadge" title="Julian วันนี้ (ลำดับวันของปี)">
     <div class="jlabel">JULIAN<br>วันนี้</div>
     <div class="jnum" id="todayJ"></div>
