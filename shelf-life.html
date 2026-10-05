@@ -1358,7 +1358,9 @@ async function pdfItems(file,say){
   const doc=await pdfjs.getDocument({data:await file.arrayBuffer()}).promise,items=[],pages=Math.min(doc.numPages,80);let off=0;
   for(let p=1;p<=pages;p++){
     const pg=await doc.getPage(p),tc=await pg.getTextContent(),vp=pg.getViewport({scale:1});
-    tc.items.forEach(it=>{it.str=(it.str||'').replace(/\u0000/g,'');if(it.str&&it.str.trim())items.push({str:it.str.trim(),x:it.transform[4],y:off+(vp.height-it.transform[5]),w:it.width,h:Math.abs(it.transform[3])||it.height||10})});
+    tc.items.forEach(it=>{it.str=(it.str||'').replace(/\u0000/g,'');if(!it.str.trim())return;
+      const t=pdfjs.Util.transform(vp.transform,it.transform); /* viewport coordinates, so rotated pages come out upright */
+      items.push({str:it.str.trim(),x:t[4],y:off+t[5],w:it.width*vp.scale,h:Math.hypot(t[2],t[3])||10,page:p})});
     off+=vp.height+20}
   if(items.length>=5)return items;
   /* no text layer (a scanned PDF): draw each page and read it like a picture */
@@ -1413,6 +1415,90 @@ function itemsToRows(items,detect,squash){
   body.forEach(l=>{let bi=0,bd=1e9;recs.forEach((r,i)=>{const d=Math.abs(l.y-r.y);if(d<bd){bd=d;bi=i}});recs[bi].lines.push(l)});
   recs.forEach(r=>{r.lines.sort((p,q)=>p.y-q.y);out.push(cols.map((_,j)=>r.lines.map(l=>l.row[j]).filter(Boolean).join(' ')))});
   return out}
+/* ---------- Makro buyer org chart (PDF / picture) -> contacts, when the file has no UID / name table ---------- */
+function orgCells(items){
+  const hs=items.map(i=>i.h).sort((a,b)=>a-b),mh=hs[hs.length>>1]||4,lines=[];
+  items.slice().sort((a,b)=>a.y-b.y||a.x-b.x).forEach(it=>{const L=lines[lines.length-1];
+    if(L&&Math.abs(it.y-L.y)<=mh*.55){L.items.push(it);L.y=(L.y*(L.items.length-1)+it.y)/L.items.length}else lines.push({y:it.y,items:[it]})});
+  const cells=[];
+  lines.forEach(L=>{L.items.sort((a,b)=>a.x-b.x);let cur=null;
+    L.items.forEach(it=>{
+      if(cur&&it.x-cur.x1<=mh*.9){cur.text+=(it.x-cur.x1>mh*.15?' ':'')+it.str;cur.x1=Math.max(cur.x1,it.x+it.w)}
+      else{cur={text:it.str,x0:it.x,x1:it.x+it.w,y:L.y};cells.push(cur)}})});
+  cells.forEach(c=>c.cx=(c.x0+c.x1)/2);
+  return{cells,mh}}
+const orgPhone=t=>{const m=String(t).match(/(?:^|[^\d])(0\d[\d\- ]{7,13}\d)\s*$/);if(!m)return'';const d=m[1].replace(/\D/g,'');
+  return d.length===10?`${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`:d.length===9?`${d.slice(0,2)}-${d.slice(2,5)}-${d.slice(5)}`:''};
+const orgTitle=s=>String(s||'').toLowerCase().replace(/\s*&\s*/g,' & ').replace(/\band\b/g,'&').replace(/(^|[\s(\/])([a-zก-๙])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(rtd|uht|msg|tv|led|usb|uv)\b/gi,m=>m.toUpperCase()).replace(/\s+/g,' ').trim();
+function parseOrgChart(items,fileName){
+  const recs=[],byUid=new Map();
+  const add=(r)=>{const k=r.uid.toUpperCase();if(!byUid.has(k)){byUid.set(k,r);recs.push(r)}};
+  let group='';const gm=String(fileName||'').match(/(Dry Grocery Non Food|Dry Grocery Food|Fresh Food|Non ?Food)/i);if(gm)group=gm[1];
+  const buyers=[],srs=[],codeLists=[];let hdr=null;
+  const pages=[...new Set(items.map(i=>i.page||1))].sort((a,b)=>a-b);
+  pages.forEach(pg=>{
+    const {cells}=orgCells(items.filter(i=>(i.page||1)===pg));
+    const H=cells.filter(c=>/^(Area|Senior Director|Associate Director|Senior Manager|Buyer UID|Merchandise|Art Grp|Description|Assistant|Junior Buyer)/i.test(c.text)&&c.y<cells.reduce((m,x)=>Math.min(m,x.y),1e9)+200);
+    const hb=H.find(c=>/^Buyer UID/i.test(c.text));
+    if(hb){const hy=hb.y,row=cells.filter(c=>Math.abs(c.y-hy)<=3);
+      const col=re=>row.find(c=>re.test(c.text));
+      hdr={y:hy,uid:col(/^Buyer UID/i)?.cx,merch:col(/^Merchandise/i)?.cx,art:col(/^Art Grp/i)?.cx,desc:col(/^Description/i)?.cx,asst:col(/^Assistant/i)?.cx,jr:col(/^Junior Buyer/i)?.cx,
+        sm:row.filter(c=>/^Senior Manager/i.test(c.text)).map(c=>c.cx)[0],ad:row.filter(c=>/^Associate Director/i.test(c.text)).map(c=>c.cx)[0],area:row.filter(c=>/^Area/i.test(c.text)).map(c=>c.cx).pop()}}
+    if(!hdr||!hdr.merch)return;
+    const cols=Object.entries({uid:hdr.uid,merch:hdr.merch,art:hdr.art,desc:hdr.desc,asst:hdr.asst,jr:hdr.jr,sm:hdr.sm,ad:hdr.ad,area:hdr.area}).filter(([,v])=>v!=null);
+    const bandOf=c=>cols.reduce((b,[k,v])=>Math.abs(c.cx-v)<b[1]?[k,Math.abs(c.cx-v)]:b,['',1e9])[0];
+    /* group name from the left margin */
+    if(!group){const left=cells.filter(c=>c.x0<70&&c.y>=hdr.y).map(c=>c.text).join(' ');const g=left.match(/(Dry Grocery Non Food|Dry Grocery Food|Fresh Food|Non ?Food)/i);if(g)group=g[1]}
+    const body=cells.filter(c=>c.y>hdr.y+8);
+    const person=c=>{const m=c.text.match(/^(.*?)\s*#\s*(\d{3,5}|x{3,5})\s*$/i);if(m&&m[1].trim().length>1)return{name:m[1].trim(),id:/\d/.test(m[2])?m[2]:'',y:c.y,cx:c.cx};
+      if(/^[\p{L}][\p{L} .'’-]{2,40}$/u.test(c.text)&&!/^(vacant|area|commodity|description|assistant|name|no\.?)$/i.test(c.text)&&body.some(p=>orgPhone(p.text)&&p.y>c.y&&p.y-c.y<=9&&Math.abs(p.cx-c.cx)<=22))return{name:c.text,id:'',y:c.y,cx:c.cx};return null};
+    const phoneFor=p=>{let best=null;body.forEach(c=>{const ph=orgPhone(c.text);if(ph&&c.y>p.y-1&&c.y-p.y<=9&&Math.abs(c.cx-p.cx)<=22&&(!best||c.y<best.y))best={y:c.y,ph}});return best?best.ph:''};
+    const P={merch:[],asst:[],jr:[],sm:[],ad:[]};
+    body.forEach(c=>{const b=bandOf(c);if(P[b]){const p=person(c);if(p){p.phone=phoneFor(p);p.page=pg;P[b].push(p)}}});
+    /* buyer codes + the summary lists of codes under each section */
+    const codeCells=body.filter(c=>bandOf(c)==='uid');
+    const codes=codeCells.filter(c=>/^[A-Z]{1,4}\d{0,2}[A-Z]?$/.test(c.text)).map(c=>({code:c.text,y:c.y,page:pg}));
+    codeCells.filter(c=>/,/.test(c.text)&&/^[A-Z0-9, ]+$/.test(c.text)).forEach(c=>codeLists.push({y:c.y,page:pg,codes:c.text.split(/\s*,\s*/)}));
+    /* area labels (several lines -> one label) */
+    const areaCells=body.filter(c=>bandOf(c)==='area'&&c.x0>=hdr.area-30).sort((a,b)=>a.y-b.y),labels=[];
+    areaCells.forEach(c=>{const L=labels[labels.length-1];if(L&&c.y-L.yEnd<=8){L.text+=' '+c.text;L.yEnd=c.y}else labels.push({y:c.y,yEnd:c.y,text:c.text})});
+    labels.forEach(L=>{L.pg=/\(\s*product group\s*\)/i.test(L.text);L.text=orgTitle(L.text.replace(/\(\s*product group\s*\)/i,''))});
+    /* art groups: number + (wrapped) description */
+    const nums=body.filter(c=>Math.abs(c.cx-hdr.art)<=16&&/^\d{1,3}$/.test(c.text)),
+      descs=body.filter(c=>c.x0>=hdr.art+8&&c.x1<=(hdr.asst||1e9)-8&&!/^\d{1,3}$/.test(c.text));
+    const arts=nums.map(n=>({no:n.text,y:n.y,desc:descs.filter(d=>Math.abs(d.y-n.y)<=6).sort((a,b)=>a.y-b.y).map(d=>d.text).join(' ')}));
+    /* match each buyer code with the Merchandise Mgr. name printed at or just above it */
+    const used=new Set();
+    codes.forEach(cd=>{let best=null;P.merch.forEach(p=>{if(used.has(p)||p.y>cd.y+2||cd.y-p.y>32)return;if(!best||p.y>best.y)best=p});
+      if(best){used.add(best);cd.p=best}});
+    codes.forEach(cd=>buyers.push({...cd,page:pg,arts:[],lab:null,asst:[],jr:[],merchGrp:null}));
+    const pb=buyers.filter(b=>b.page===pg&&b.p);
+    const near=(y,b)=>Math.min(Math.abs(y-b.y),Math.abs(y-b.p.y));
+    arts.forEach(a=>{let best=null,bd=1e9;pb.forEach(b=>{const d=near(a.y,b);if(d<bd){bd=d;best=b}});if(best&&bd<=34)best.arts.push(a)});
+    ['asst','jr'].forEach(k=>P[k].forEach(p=>{let best=null,bd=1e9;pb.forEach(b=>{const d=near(p.y,b);if(d<bd){bd=d;best=b}});if(best&&bd<=14&&!/^vacant$/i.test(p.name))best[k].push(p)}));
+    pb.forEach(b=>{let L=null;labels.forEach(l=>{if(l.y<=b.p.y+3)L=l});b.lab=L});
+    /* Merchandise group heads: a Merchandise Mgr. name that no code claimed, just above a summary list of codes */
+    P.merch.filter(p=>!used.has(p)).forEach(p=>{const cl=codeLists.filter(c=>c.page===pg&&c.y>p.y&&c.y-p.y<=40).sort((a,b)=>a.y-b.y)[0];if(cl)cl.head=p});
+    /* senior managers / product group heads, with the associate director printed on the same line */
+    P.sm.forEach(p=>{let L=null;labels.forEach(l=>{if(Math.abs(l.y-p.y)<=4)L=l});const ad=P.ad.find(a=>Math.abs(a.y-p.y)<=4);srs.push({p,L,ad,page:pg})});
+  });
+  if(!buyers.length)return{recs:[],info:{}};
+  const clean=s=>String(s).replace(/\.{2,}/g,'.'),fmtP=p=>`${clean(p.name)}${p.id?' #'+p.id:''}${p.phone?' '+p.phone:''}`,nm=p=>p.id?`${clean(p.name)} (#${p.id})`:clean(p.name);
+  buyers.filter(b=>b.p).forEach(b=>{
+    const bk=[];
+    if(b.asst.length)bk.push('Asst. '+b.asst.map(fmtP).join(', '));
+    if(b.jr.length)bk.push('Jr. '+b.jr.map(fmtP).join(', '));
+    const cl=codeLists.find(c=>c.page===b.page&&c.head&&c.codes.includes(b.code));
+    if(cl)bk.push('Merch กลุ่ม '+fmtP(cl.head));
+    const arts=b.arts.sort((x,y)=>x.y-y.y).map(a=>`${a.no} ${orgTitle(a.desc)}`.trim()).join(', ');
+    add({_org:true,uid:b.code,name:nm(b.p),role:'Buyer',group,dept:[b.lab?b.lab.text:'',arts].filter(Boolean).join(' · '),phone:b.p.phone,email:'',backup:bk.join(' · ')})});
+  srs.forEach(({p,L,ad})=>{
+    const initials=group.split(/\s+/).map(w=>w[0]).join('').toUpperCase(),uid=p.id||`${initials}-${p.name.split(/\s+/)[0].replace(/\W/g,'')}`;
+    const codes=buyers.filter(b=>b.p&&b.lab===L).map(b=>b.code).join(', ');
+    add({_org:true,uid,name:nm(p),role:'Commercial',group,dept:[L&&L.pg?'Product Group':'Senior Manager',L?L.text+(codes?` (${codes})`:''):''].filter(Boolean).join(' · '),phone:p.phone,email:'',
+      backup:ad?`Assoc. Dir. ${ad.name}${ad.id?' #'+ad.id:''}${ad.phone?' · '+ad.phone:''}`:''})});
+  return{recs,info:{org:true}}}
+
 async function readAnyFile(file,detect,say){
   say=say||(()=>{});
   await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
@@ -1571,7 +1657,12 @@ function planContacts(recs,defRole){
   recs.forEach(r=>{
     const key=r.uid.toUpperCase(),ex=byUid.get(key);seen.add(key);
     if(!ex){add.push({uid:r.uid,name:r.name||r.uid,role:r.role||defRole,group:r.group||'',dept:r.dept||'',phone:r.phone||'',email:r.email||'',backup:r.backup||''});return}
-    const patch={},ch=[];CT_FIELDS.forEach(f=>{if(r[f]&&r[f]!==(ex[f]??'')){patch[f]=r[f];ch.push([f,ex[f]||'',r[f]])}});
+    const patch={},ch=[];CT_FIELDS.forEach(f=>{
+      if(!r[f]||r[f]===(ex[f]??''))return;
+      /* from an org chart only the name and phone are reliable enough to overwrite; the rest only fills blanks, and a longer saved name ("… — Jr. Buyer") is kept */
+      if(r._org&&f!=='name'&&f!=='phone'&&ex[f])return;
+      if(r._org&&f==='name'&&String(ex[f]||'').startsWith(r[f]))return;
+      patch[f]=r[f];ch.push([f,ex[f]||'',r[f]])});
     if(ch.length)upd.push({ex,patch,ch});else same++;
   });
   const missing=st.contacts.filter(c=>!seen.has(String(c.uid).toUpperCase())&&roles.has(c.role)&&(!groups.size||groups.has(c.group)));
@@ -1580,9 +1671,16 @@ function planContacts(recs,defRole){
 async function readContactFile(file){
   $('#ctErr').textContent='';$('#ctBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
   try{
-    const wb=await readAnyFile(file,r=>{const m=ctMapHeader(r);return m.uid!=null&&m.name!=null},sayTo('#ctBox'));
-    const parsed=parseContacts(wb);
-    if(!parsed.recs.length)throw Error('ไม่พบรายชื่อในไฟล์ — ต้องมีคอลัมน์ UID และ ชื่อ');
+    const say=sayTo('#ctBox'),detect=r=>{const m=ctMapHeader(r);return m.uid!=null&&m.name!=null};let parsed;
+    if(isPdfFile(file)||isImgFile(file)){
+      await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+      const items=isPdfFile(file)?await pdfItems(file,say):await ocrItems(file,say),wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(itemsToRows(items,detect,!isPdfFile(file)||items.ocr)),'ไฟล์');
+      parsed=parseContacts(wb);
+      /* no UID / name table: try the Makro team org chart (Buyer UID, Merchandise Mgr., Assistant ...) */
+      if(!parsed.recs.length){const o=parseOrgChart(items,file.name);if(o.recs.length)parsed={recs:o.recs,info:{cols:{uid:1,name:1,role:1,group:1,dept:1,phone:1,backup:1},rows:o.recs.length,skipped:0,org:true}}}
+    }else parsed=parseContacts(await readAnyFile(file,detect,say));
+    if(!parsed.recs.length)throw Error('ไม่พบรายชื่อในไฟล์ — ต้องมีตารางที่มี UID และ ชื่อ หรือเป็นแผนผังทีม Buyer / Commercial ของ Makro');
     ctImp={file:file.name,...parsed};showContactPreview();
   }catch(e){ctImp=null;$('#ctBox').innerHTML='';$('#ctErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
 }
@@ -1594,6 +1692,7 @@ function showContactPreview(){
   $('#ctBox').innerHTML=`<div class="imp-file"><b>${esc(ctImp.file)}</b> <span class="muted small">· ${recs.length.toLocaleString()} รายชื่อ${info.skipped?` · ข้าม ${info.skipped} แถวที่ไม่มี UID`:''}</span> <button type="button" class="btn sm" id="ctChange">เลือกไฟล์อื่น</button></div>
   <div class="imp-tiles"><div class="t-new"><b>${plan.add.length.toLocaleString()}</b><span>รายชื่อใหม่</span></div><div><b>${plan.upd.length.toLocaleString()}</b><span>อัปเดตข้อมูล</span></div><div><b>${plan.same.toLocaleString()}</b><span>ไม่เปลี่ยนแปลง</span></div><div class="${plan.missing.length?'t-close':''}"><b>${plan.missing.length.toLocaleString()}</b><span>ไม่อยู่ในไฟล์</span></div></div>
   <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>CT_LBL[k]||k).join(' · ')}</p>
+  ${info.org?'<p class="small" style="margin:6px 0 0">อ่านจากแผนผังทีม (Org Chart) ของ Makro — UID = รหัส Buyer UID, ชื่อ = Merchandise Mgr. · กรุณาตรวจรายชื่อและเบอร์โทรในตัวอย่างก่อนกดนำเข้า</p>':''}
   ${rows.length?`<div class="imp-sample"><table><thead><tr><th>UID</th><th>ชื่อ</th><th>สิ่งที่จะเปลี่ยน</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>${plan.upd.length+plan.add.length>8?`<p class="muted small" style="margin:4px 0 0">แสดง 8 รายการแรก จากทั้งหมด ${(plan.upd.length+plan.add.length).toLocaleString()} รายการที่มีการเปลี่ยนแปลง</p>`:''}`:'<p class="small muted" style="margin:8px 0 0">ข้อมูลในไฟล์ตรงกับที่มีอยู่แล้วทั้งหมด ไม่มีอะไรต้องอัปเดต</p>'}`;
   $('#ctChange').onclick=()=>{$('#ctDrop').hidden=false;$('#ctBox').innerHTML='';$('#ctGo').disabled=true;ctImp=null;$('#ctFile').value='';$('#ctFile').click()};
 }
