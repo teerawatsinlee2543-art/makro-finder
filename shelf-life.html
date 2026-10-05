@@ -1695,22 +1695,31 @@ function renderFMenu(){
     ||'<p class="muted small" style="margin:8px">ยังไม่มีข้อมูล</p>';
   const a=el.querySelector('[data-all]');if(a)a.indeterminate=n>0&&n<opts.length;
 }
+/* keep the menu inside the window: below the button when there is room, otherwise above it; it scrolls inside when the window is short */
+function placeFMenu(){
+  if(!fMenu)return;const {el,btn}=fMenu,r=btn.getBoundingClientRect(),room=innerHeight-r.bottom-12,roomUp=r.top-12;
+  el.style.maxHeight='';
+  const below=room>=Math.min(el.scrollHeight,260)||room>=roomUp;
+  el.style.maxHeight=Math.max(120,Math.min(420,below?room:roomUp))+'px';
+  el.style.top=below?(r.bottom+4)+'px':Math.max(8,r.top-4-el.offsetHeight)+'px';
+  el.style.left=Math.max(8,Math.min(r.left,innerWidth-el.offsetWidth-8))+'px';
+}
 function openFMenu(btn){
   const f=btn.dataset.f;if(fMenu&&fMenu.f===f){closeFMenu();return}closeFMenu();
   const el=document.createElement('div');el.className='fmenu';document.body.append(el);fMenu={f,el,btn};renderFMenu();
-  const r=btn.getBoundingClientRect();el.style.top=(r.bottom+4)+'px';el.style.left=Math.max(8,Math.min(r.left,innerWidth-el.offsetWidth-8))+'px';
+  placeFMenu();
   el.onchange=e=>{
     const opts=colOpts(f).map(x=>x[0]);let vals;
     if(e.target.matches('[data-all]'))vals=e.target.checked?opts:[];
     else vals=[...el.querySelectorAll('input[value]:checked')].map(i=>i.value);
-    nbsColF[f]=vals.length===opts.length?null:new Set(vals);
+    nbsColF[f]=!vals.length||vals.length===opts.length?null:new Set(vals); /* nothing ticked = no filter, so the table never ends up empty by mistake */
     if(f==='div')nbsFilterDiv='';
     nbsLimit=200;renderFMenu();renderNbs();
   };
 }
 document.addEventListener('click',e=>{if(fMenu&&!fMenu.el.contains(e.target)&&!fMenu.btn.contains(e.target))closeFMenu()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFMenu()});
-window.addEventListener('scroll',closeFMenu);window.addEventListener('resize',closeFMenu);
+window.addEventListener('scroll',e=>{if(!(fMenu&&fMenu.el.contains(e.target)))placeFMenu()},true);window.addEventListener('resize',placeFMenu);
 const nbsDays=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null;
 /* Makro "Aging Stock" table: 9 aging types x 5 statuses (Alert / Attention / Critical / Obsolete / Full Provision), thresholds in days.
    Makro NBS work-instruction: stock-check items with no sales for FF&Bakery >=5 days, Dry Food >=7 days, Non Food/Professional >=10 days. */
