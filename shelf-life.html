@@ -212,6 +212,14 @@ table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-in
 .mf-picked{display:flex;gap:12px;align-items:flex-start;margin-top:8px;padding:10px;border:1px solid var(--accent);border-radius:10px;background:var(--bg)}
 .mf-picked img{width:64px;height:64px;object-fit:contain;border-radius:8px;background:#fff;flex:none}
 .mf-picked>div{flex:1;min-width:0}
+.ncell{display:flex;gap:10px;align-items:flex-start}
+.nthumb{flex:none;width:48px;height:48px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--line)}
+.nph{display:block;background:var(--bg)}
+.nbody{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.nname{font-size:15px;line-height:1.3}
+.nmeta{display:flex;flex-direction:column;gap:1px;font-size:12.5px;color:var(--muted);line-height:1.35}
+.nmeta b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.ndept{font-size:11.5px;font-weight:700;letter-spacing:.02em;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 7px;line-height:1.5}
 .pthumb{width:44px;height:44px;object-fit:contain;border-radius:6px;background:#fff;float:left;margin:0 8px 4px 0}
 tr.grp td{background:var(--bg);font-weight:700;color:var(--accent);padding-top:14px}
 .contact b{display:block}
@@ -1354,7 +1362,7 @@ function renderNbs(){
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
   $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,b=st.contacts.find(x=>x.uid===r.buyerUid),img=r.img||(MF.images&&MF.images[r.itemNo])||'';
     return`<tr class="${r.status==='done'?'acted':''}">
-    <td data-l="ชื่อสินค้า"><div>${img?`<img class="pthumb" src="${esc(img)}" alt="" loading="lazy">`:''}<b>${esc(r.desc||'—')}</b><div class="muted small">${esc(r.itemNo||'')}${r.barcode?' · '+esc(r.barcode):''}${r.dept?' · '+esc(r.dept):''}</div></div></td>
+    <td data-l="ชื่อสินค้า"><div class="ncell">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="nbody"><b class="nname">${esc(r.desc||'—')}</b><div class="nmeta">${r.itemNo?`<span>รหัส <b>${esc(r.itemNo)}</b></span>`:''}${r.barcode?`<span title="บาร์โค้ด" style="white-space:nowrap"><svg viewBox="0 0 24 24" width="13" height="13" style="vertical-align:-2px;margin-right:3px" aria-hidden="true"><path d="M5 5v14M9 5v14M13 5v14M17 5v14M20 5v14" stroke="currentColor" stroke-width="2" fill="none"/></svg>${esc(r.barcode)}</span>`:''}</div>${r.dept?`<span class="ndept">${esc(r.dept)}</span>`:''}</div></div></td>
     <td data-l="กลุ่ม (Division)"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></td>
     <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td>
     <td data-l="Location" class="small">${esc(r.loc||'-')}</td>
