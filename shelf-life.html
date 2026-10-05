@@ -359,7 +359,7 @@ dialog::backdrop{background:#0008}
       <label>ระดับเตือน<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="30">30+ วัน</option><option value="60">60+ วัน</option><option value="90">90+ วัน</option></select></label>
       <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
     </div>
-    <table class="resp"><thead><tr><th>สินค้า</th><th>กลุ่ม</th><th>ที่ตั้ง</th><th>ไม่มียอดขาย</th><th>Stock</th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
+    <table class="resp"><thead><tr><th>ชื่อสินค้า</th><th>กลุ่ม (Division)</th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th>Aging Status</th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
     <div id="nbsMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="nbsMoreTxt"></span><button class="btn" id="nbsMore">แสดงเพิ่ม 200 รายการ</button></div>
     <p class="muted" id="nbsEmpty" hidden>ยังไม่มีรายการ — กด “+ เพิ่ม Item NBS” เพื่อบันทึกสินค้าที่ไม่มียอดขาย</p>
   </div>
@@ -475,7 +475,8 @@ dialog::backdrop{background:#0008}
   <div class="lot-grid" style="margin-top:12px">
     <label>กลุ่มสินค้า<select id="nDiv"><option value="FF">FF · Fresh Food</option><option value="DF">DF · Dry Food</option><option value="NF">NF · Non Food</option></select></label>
     <label>รหัสสินค้า (Item No)<input id="nNo" inputmode="numeric" placeholder="เช่น 210907"></label>
-    <label>วันที่ขายครั้งล่าสุด (ถ้าทราบ)<input type="date" id="nLast"></label>
+    <label>Last Recv. Date (ถ้าทราบ)<input type="date" id="nRecv"></label>
+    <label>Last Sold Date (ถ้าทราบ)<input type="date" id="nLast"></label>
     <label class="span3">ชื่อสินค้า<input id="nDesc" placeholder="ชื่อสินค้า"></label>
     <label>ที่ตั้ง / ชั้นวาง<input id="nLoc" placeholder="เช่น Loc 510 / Location 510-011"></label>
     <label>Stock คงเหลือ (ชิ้น)<input type="number" min="0" id="nStock" placeholder="0"></label>
@@ -1215,7 +1216,12 @@ const nbsLevel=d=>d==null?null:d>=90?['วิกฤต 90+ วัน','s-pull']:
 let nbsLimit=200;
 function nbsDaysText(r){
   const n=nbsDays(r);if(n==null)return'<span class="muted">ไม่ระบุ / ไม่เคยขาย</span>';
-  const lv=nbsLevel(n);return`<b class="${n>=30?'err-text':''}">${n} วัน</b><div class="muted small">ขายล่าสุด ${fmt(fromIso(r.lastSale))}</div>${lv&&r.status!=='done'?`<span class="chip ${lv[1]}" style="margin-top:3px">${lv[0]}</span>`:''}`;
+  const lv=nbsLevel(n);return`<b class="${n>=30?'err-text':''}">${n} วัน</b>`;
+}
+function nbsAgingText(r){
+  const lv=nbsLevel(nbsDays(r)),t=String(r.aging||'').trim();
+  if(!t&&!lv)return'<span class="muted">-</span>';
+  return`<span class="chip ${lv&&r.status!=='done'?lv[1]:'s-ok'}">${esc(t||lv[0])}</span>`;
 }
 function renderNbs(){
   if(!$('#nbsBody'))return;
@@ -1233,11 +1239,14 @@ function renderNbs(){
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
   $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,b=st.contacts.find(x=>x.uid===r.buyerUid),img=r.img||(MF.images&&MF.images[r.itemNo])||'';
     return`<tr class="${r.status==='done'?'acted':''}">
-    <td data-l="สินค้า"><div>${img?`<img class="pthumb" src="${esc(img)}" alt="" loading="lazy">`:''}<b>${esc(r.desc||'—')}</b><div class="muted small">${esc(r.itemNo||'')}${r.barcode?' · '+esc(r.barcode):''}</div></div></td>
-    <td data-l="กลุ่ม"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></td>
-    <td data-l="ที่ตั้ง" class="small">${esc(r.loc||'-')}</td>
-    <td data-l="ไม่มียอดขาย" class="num">${nbsDaysText(r)}</td>
+    <td data-l="ชื่อสินค้า"><div>${img?`<img class="pthumb" src="${esc(img)}" alt="" loading="lazy">`:''}<b>${esc(r.desc||'—')}</b><div class="muted small">${esc(r.itemNo||'')}${r.barcode?' · '+esc(r.barcode):''}</div></div></td>
+    <td data-l="กลุ่ม (Division)"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></td>
     <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td>
+    <td data-l="Location" class="small">${esc(r.loc||'-')}</td>
+    <td data-l="Last Recv. Date" class="small num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td>
+    <td data-l="Last Sold Date" class="small num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
+    <td data-l="ไม่มียอดขาย (NBS)" class="num">${nbsDaysText(r)}</td>
+    <td data-l="Aging Status">${nbsAgingText(r)}</td>
     <td data-l="สถานะ"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</td>
     <td data-l="Buyer / Remark" class="small">${r.buyerUid?`<b>${esc(r.buyerUid)}</b>${b?' '+esc(b.name):''}`:'<span class="muted">-</span>'}${r.remark?`<div class="redbox" style="margin-top:4px">${esc(r.remark)}</div>`:''}</td>
     <td data-l="บันทึกเมื่อ" class="small num">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.</div>${r.source==='import'?'<div class="muted">นำเข้าจากไฟล์</div>':''}`:'-'}</td>
@@ -1254,7 +1263,7 @@ function nbsOpen(r){
   $('#nbsFind').hidden=r||!onMakroSite();if(!r&&onMakroSite())loadMakroData();
   $('#nStat').innerHTML=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
   const v=r||{division:nbsFilterDiv||'FF',itemNo:'',desc:'',lastSale:'',loc:'',stock:'',buyerUid:'',status:'check',remark:''};
-  $('#nDiv').value=v.division;$('#nNo').value=v.itemNo||'';$('#nDesc').value=v.desc||'';$('#nLast').value=v.lastSale||'';$('#nLoc').value=v.loc||'';
+  $('#nDiv').value=v.division;$('#nNo').value=v.itemNo||'';$('#nDesc').value=v.desc||'';$('#nLast').value=v.lastSaleDerived?'':v.lastSale||'';$('#nRecv').value=v.lastRecv||'';$('#nLoc').value=v.loc||'';
   $('#nStock').value=v.stock??'';$('#nStat').value=v.status;$('#nRemark').value=v.remark||'';nbsBuyerOptions(v.buyerUid);
   $('#nQ').value='';$('#nResults').innerHTML='';renderNbsPicked();renderNbsStatus();$('#dlgNbs').showModal();
 }
@@ -1274,7 +1283,7 @@ async function nbsSave(){
   const no=$('#nNo').value.trim(),desc=$('#nDesc').value.trim();
   if(!no&&!desc){$('#nErr').textContent='กรอกรหัสสินค้าหรือชื่อสินค้าอย่างน้อย 1 อย่าง';return}
   const prev=nbsEditId?byId('nbs',nbsEditId):null,now=new Date().toISOString();
-  const o={...(prev?body(prev):{}),division:$('#nDiv').value,itemNo:no,desc,loc:$('#nLoc').value.trim(),lastSale:$('#nLast').value,
+  const o={...(prev?body(prev):{}),division:$('#nDiv').value,itemNo:no,desc,loc:$('#nLoc').value.trim(),lastSale:$('#nLast').value||(prev&&prev.lastSaleDerived?prev.lastSale:''),lastSaleDerived:!$('#nLast').value&&!!(prev&&prev.lastSaleDerived),lastRecv:$('#nRecv').value,
     stock:$('#nStock').value===''?'':+$('#nStock').value,buyerUid:$('#nBuyer').value,status:$('#nStat').value,remark:$('#nRemark').value.trim(),
     barcode:nbsDraft.barcode||'',img:nbsDraft.img||'',locs:nbsDraft.locs||[],updatedAt:now,updatedBy:myId||null};
   if(!prev){o.createdAt=now;o.createdBy=myId||null}
@@ -1283,8 +1292,8 @@ async function nbsSave(){
   await act(()=>putItem('nbs',o),prev?'บันทึกการแก้ไขแล้ว':'เพิ่มรายการแล้ว');
 }
 function nbsCSV(){
-  const rows=[['group','item_no','description','barcode','location','last_sale','days_no_sale','stock','status','buyer_uid','remark','created_at']];
-  (st.nbs||[]).forEach(r=>rows.push([r.division,r.itemNo,r.desc,r.barcode||'',r.loc||'',r.lastSale||'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',r.stock??'',nStat(r.status)[1],r.buyerUid||'',r.remark||'',r.createdAt||'']));
+  const rows=[['division','item_no','description','barcode','stock','location','last_recv_date','last_sold_date','nbs_days','aging_status','status','buyer_uid','remark','created_at']];
+  (st.nbs||[]).forEach(r=>rows.push([r.division,r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',r.aging||(nbsLevel(nbsDays(r))||[''])[0],nStat(r.status)[1],r.buyerUid||'',r.remark||'',r.createdAt||'']));
   dl(`item-nbs_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8');
 }
 $('#nbsAdd').onclick=()=>nbsOpen(null);$('#nbsExport').onclick=nbsCSV;
@@ -1299,8 +1308,10 @@ $('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFil
 const normH=s=>String(s??'').toLowerCase().replace(/[\s._\-\/()\[\]:]/g,'');
 /* header → field, first match wins; order matters (days before stock, so "จำนวนวัน…" is not read as stock) */
 const NBS_COLS=[
-  ['days',/(daysnosale|nosaledays|daywithoutsale|daysnosales|noofdays|วันที่ไม่มียอดขาย|จำนวนวัน|ไม่มียอดขาย|วันไม่มียอดขาย|agingdays|aging)/],
+  ['aging',/(agingstatus|agestatus|agingcategory|agingbucket|agingband|สถานะอายุ|^aging$)/],
+  ['lastRecv',/(lastrecv|lastreceiv|lastrcv|lastgr|วันที่รับล่าสุด|รับล่าสุด|วันที่รับสินค้าล่าสุด|วันรับล่าสุด)/],
   ['lastSale',/(lastsale|lastsold|วันที่ขายล่าสุด|ขายล่าสุด|วันที่ขายครั้งล่าสุด)/],
+  ['days',/^(nbs|nbsdays|nbsday)$|(daysnosale|nosaledays|daywithoutsale|daysnosales|noofdays|วันที่ไม่มียอดขาย|จำนวนวัน|ไม่มียอดขาย|วันไม่มียอดขาย|agingdays|ไม่มีการขาย)/],
   ['barcode',/(barcode|บาร์โค้ด|^ean$|^upc$)/],
   ['itemNo',/^(itemno|itemnumber|itemcode|itemid|item|sku|article|articleno|รหัสสินค้า|รหัสไอเท็ม|รหัส|ไอเท็ม|ไอเทม|itemnum|artno)$/],
   ['desc',/(itemdesc|description|productname|itemname|ชื่อสินค้า|ชื่อไอเท็ม|รายการสินค้า|รายละเอียดสินค้า|^desc$|^name$|^ชื่อ$|^รายการ$)/],
@@ -1356,10 +1367,14 @@ function parseWorkbook(wb,fileName,defDiv){
         if(!div&&fileDiv){div=fileDiv;src='ชื่อไฟล์'}
         if(!div){div=defDiv;src='ค่าเริ่มต้น'}
       }
-      let last=m.lastSale!=null?toIsoDate(r[m.lastSale]):'';
-      if(!last&&m.days!=null){const d=numOr(r[m.days]);if(d!==''&&d>=0)last=iso(addD(today(),-Math.round(d)))}
+      let last=m.lastSale!=null?toIsoDate(r[m.lastSale]):'',derived=false;
+      const recv=m.lastRecv!=null?toIsoDate(r[m.lastRecv]):'';
+      const aging=m.aging!=null?String(r[m.aging]??'').trim():'';
+      let dv=m.days!=null?numOr(r[m.days]):'';
+      if(dv===''&&/^\d+$/.test(aging))dv=+aging;
+      if(!last&&dv!==''&&dv>=0){last=iso(addD(today(),-Math.round(dv)));derived=true}
       let buyer='';if(m.buyer!=null){const b=String(r[m.buyer]??'').trim().toUpperCase();const c=st.contacts.find(x=>String(x.uid).toUpperCase()===b&&x.role==='Buyer');if(c)buyer=c.uid}
-      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
+      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
     info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict")info.cols[k]=true});
@@ -1394,7 +1409,7 @@ async function readImportFile(file){
     impState={file:file.name,wb,...parsed};showImportPreview();
   }catch(e){impState=null;$('#impBox').innerHTML='';$('#impErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
 }
-const COL_LBL={itemNo:'รหัสสินค้า',desc:'ชื่อสินค้า',barcode:'บาร์โค้ด',division:'กลุ่ม',lastSale:'ขายล่าสุด',days:'จำนวนวันที่ไม่มียอดขาย',stock:'Stock',loc:'ที่ตั้ง',buyer:'Buyer'};
+const COL_LBL={itemNo:'รหัสสินค้า',desc:'ชื่อสินค้า',barcode:'บาร์โค้ด',division:'กลุ่ม',lastSale:'Last Sold Date',lastRecv:'Last Recv. Date',aging:'Aging Status',days:'NBS (วันที่ไม่มียอดขาย)',stock:'Stock',loc:'ที่ตั้ง',buyer:'Buyer'};
 function showImportPreview(){
   const {recs,info}=impState,plan=planImport(recs,$('#impAuto').checked),cnt={FF:0,DF:0,NF:0};recs.forEach(r=>cnt[r.division]++);
   const days=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null,hasDays=recs.some(r=>r.lastSale);
@@ -1407,7 +1422,7 @@ function showImportPreview(){
   ${Object.keys(info.divVals).length?`<div class="imp-div"><b>กลุ่มจากคอลัมน์ Division (ใช้ตามค่าในไฟล์ 100%):</b><div class="imp-divchips">${Object.entries(info.divVals).sort((a,b)=>b[1].n-a[1].n).map(([k,e])=>`<span class="chip ${e.div?'div-'+e.div.toLowerCase():'s-pull'}">${esc(k)} → ${e.div||'ไม่รู้จัก'} · ${e.n.toLocaleString()}</span>`).join('')}</div>${info.badDiv?`<p class="err-text small" style="margin:6px 0 0">ข้าม ${info.badDiv.toLocaleString()} แถวที่ค่า Division ไม่ใช่ FRESH FOOD / DRY FOOD / NON FOOD (ไม่นำเข้า เพราะไม่เดากลุ่มให้)</p>`:''}</div>`:''}
   ${Object.keys(info.divVals).length?'':`<p class="small muted" style="margin:2px 0 0">แยกกลุ่มจาก: ${Object.entries(info.byDivSource).map(([k,v])=>`${esc(k)} (${v.toLocaleString()})`).join(' · ')}${info.byDivSource['ค่าเริ่มต้น']?' — ถ้าไม่ถูก เลือก “กลุ่มเริ่มต้น” ด้านล่างแล้วเลือกไฟล์ใหม่':''}</p>`}
   ${hasDays?`<p class="small" style="margin:2px 0 0"><b>ระดับเตือนที่ระบบจะเฝ้าระวัง:</b> <span class="chip s-md1">30+ วัน ${al[0]}</span> <span class="chip s-md2">60+ วัน ${al[1]}</span> <span class="chip s-pull">90+ วัน ${al[2]}</span></p>`:'<p class="small muted" style="margin:2px 0 0">ไฟล์นี้ไม่มีวันที่ขายล่าสุด — ระบบจะบันทึกรายการเป็น “รอตรวจสอบ” โดยไม่นับวัน</p>'}
-  <div class="imp-sample"><table><thead><tr><th>กลุ่ม</th><th>รหัส</th><th>ชื่อสินค้า</th><th>ขายล่าสุด</th><th>Stock</th><th>ที่ตั้ง</th></tr></thead><tbody>${recs.slice(0,6).map(r=>`<tr><td>${r.division}</td><td>${esc(r.itemNo)}</td><td>${esc(r.desc||'—')}</td><td>${r.lastSale?fmt(fromIso(r.lastSale)):'-'}</td><td>${r.stock===''?'-':esc(r.stock)}</td><td>${esc(r.loc||'-')}</td></tr>`).join('')}</tbody></table></div>`;
+  <div class="imp-sample"><table><thead><tr><th>กลุ่ม</th><th>รหัส</th><th>ชื่อสินค้า</th><th>Stock</th><th>Location</th><th>Last Recv.</th><th>Last Sold</th><th>NBS</th><th>Aging</th></tr></thead><tbody>${recs.slice(0,6).map(r=>`<tr><td>${r.division}</td><td>${esc(r.itemNo)}</td><td>${esc(r.desc||'—')}</td><td>${r.stock===''?'-':esc(r.stock)}</td><td>${esc(r.loc||'-')}</td><td>${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td>${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td><td>${days(r)==null?'-':days(r)}</td><td>${esc(r.aging||'-')}</td></tr>`).join('')}</tbody></table></div>`;
   $('#impChange').onclick=()=>{$('#impDrop').hidden=false;$('#impBox').innerHTML='';$('#impGo').disabled=true;impState=null;$('#impFile').value='';$('#impFile').click()};
 }
 async function runImport(){
@@ -1425,12 +1440,12 @@ async function runImport(){
         const keep=body(alt);
         await rmItem('nbs',alt);
         await putItem('nbs',{...keep,_id:nbsId(r),division:r.division,desc:r.desc||it?.desc||alt.desc||'',barcode:r.barcode||it?.barcode||alt.barcode||'',loc:r.loc||alt.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),
-          lastSale:r.lastSale||alt.lastSale||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
+          lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
         continue}
       const desc=r.desc||it?.desc||old?.desc||'',barcode=r.barcode||it?.barcode||old?.barcode||'',loc=r.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):'')||old?.loc||'';
-      if(old){await putItem('nbs',{...body(old),_id:old._id,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
+      if(old){await putItem('nbs',{...body(old),_id:old._id,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!old.lastSaleDerived,lastRecv:r.lastRecv||old.lastRecv||'',aging:r.aging||old.aging||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
         lastSeenAt:nowIso,updatedAt:nowIso,...(old.status==='done'&&old.autoClosed?{status:'check',autoClosed:false,autoNote:'กลับมาอยู่ในไฟล์ไม่มียอดขายอีกครั้ง'}:{})})}
-      else await putItem('nbs',{_id:nbsId(r),division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
+      else await putItem('nbs',{_id:nbsId(r),division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,lastSaleDerived:r.lastSaleDerived,lastRecv:r.lastRecv||'',aging:r.aging||'',stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
         source:'import',importedAt:nowIso,lastSeenAt:nowIso,createdAt:nowIso,createdBy:myId||null,updatedAt:nowIso});
     }
     for(const old of plan.close)await putItem('nbs',{...body(old),_id:old._id,status:'done',autoClosed:true,autoNote:'ปิดอัตโนมัติ — ไม่อยู่ในไฟล์ไม่มียอดขายล่าสุด ('+fmt(today())+')',updatedAt:nowIso});
