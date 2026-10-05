@@ -326,7 +326,8 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 /* fit every screen: wide tables turn into cards below 1100px (the two widest, Item NBS and Buyer / Commercial, below 1180px); cards sit in a grid on tablets and stack on phones */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 img,svg,video,canvas{max-width:100%}
-main,.card,.row>*{min-width:0}
+main,.card,.row>*,.lot-grid>*,.grid2>*{min-width:0}
+select,input,textarea{max-width:100%}
 @media (max-width:1100px),(max-width:1180px){
   table.nbs-tbl,table.ct-tbl{table-layout:auto}
 }
