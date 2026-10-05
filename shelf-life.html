@@ -429,7 +429,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 <section id="t-prod" hidden>
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">สินค้า & กฎ Shelf life</h2>
-      <span class="row w"><button class="btn" onclick="addManual()">เพิ่มสินค้าที่ยังไม่มีจากคู่มือ</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
+      <span class="row w"><button class="btn imp-btn" id="prImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
     <p class="muted small">กฎตาม “คู่มือ อายุและการจัดการสินค้าผักและผลไม้” (ผ่านการตรวจสอบจากทีมจัดซื้อและ QA) · นับวันที่ 1 = วันรับสินค้า · ขายราคาเต็มครบ Shelf life → ลด 15% (Step 1) → ลด 30% (Step 2) → Code 52 · สินค้า Shelf life 1 วันข้าม Step 1 · อายุสินค้ากำหนดตามการจัดเรียงในตู้แช่ 0–4°C (ผักสลัด 6–8°C) หรือให้พิจารณาตามสภาพสินค้า</p>
     <div class="row" style="margin:0 0 10px;align-items:center"><label style="flex:1;min-width:220px;max-width:520px">ค้นหาสินค้า (ชื่อ / รหัส / หมวด / Buyer UID / Commercial)<input id="pQ" type="search" placeholder="เช่น บลูเบอร์รี่ มะม่วง หรือ FF3" autocomplete="off"></label><span class="muted small" id="pQn" style="padding-bottom:9px"></span></div>
     <table class="resp"><thead><tr><th>สินค้า</th><th>Shelf life</th><th><span class="hchip h-ok">ขายราคาเต็ม</span></th><th><span class="hchip h-md1">ลด 15%</span></th><th><span class="hchip h-md2">ลด 30%</span></th><th><span class="hchip h-pull">Code 52</span></th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
@@ -557,6 +557,20 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
   <p class="muted small" style="margin:0 0 10px">เลือกไฟล์ที่ต้องการลบ — รายการสินค้าที่มาจากไฟล์นั้นจะถูกลบออกจากระบบ (ลบให้ทุกคนในทีม) ส่วนรายการที่เพิ่มเองด้วยมือจะไม่ถูกลบ</p>
   <div id="delImpList"></div>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="delImpClose">ปิด</button></div>
+</div></dialog>
+<dialog id="dlgImpPr" class="nbs-dlg imp-dlg"><div>
+  <h2>นำเข้าข้อมูลสินค้า &amp; กฎ Shelf life</h2>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV ของรายการสินค้ามาวาง ระบบจับคู่ด้วยรหัส (SKU) หรือชื่อสินค้า — รายการที่มีอยู่แล้วจะอัปเดตให้เป็นล่าสุด รายการใหม่จะเพิ่มให้ ช่องที่เว้นว่างในไฟล์จะไม่ทับข้อมูลเดิม ถ้าเปลี่ยน Shelf life แต่ไม่ได้ใส่วันลดราคา ระบบคำนวณกฎให้ใหม่ตามคู่มือ</p>
+  <div id="prDrop" class="imp-drop" tabindex="0">
+    <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span>
+    <button type="button" class="btn pri" id="prPick">เลือกไฟล์จากเครื่อง</button>
+    <input type="file" id="prFile" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+    <span class="muted small">คอลัมน์ที่อ่านได้: ชื่อสินค้า · SKU · ประเภท (นำเข้า/ท้องถิ่น) · อุณหภูมิ · Shelf life · วันลด 15% / 30% · วัน Code 52 · Buyer UID · Commercial UID</span>
+  </div>
+  <div id="prBox"></div>
+  <p class="err-text" id="prErr" style="margin:8px 0 0"></p>
+  <div class="row" style="justify-content:space-between;margin-top:12px;align-items:center"><button type="button" class="btn sm" id="prManual" title="เพิ่มสินค้าตามคู่มือ Makro ที่ยังไม่มีในรายการ">เพิ่มสินค้าที่ยังไม่มีจากคู่มือ</button><span class="row"><button type="button" class="btn cancel-btn" id="prCancel">ปิด</button><button type="button" class="btn pri save-btn" id="prGo" disabled>นำเข้าสินค้า</button></span></div>
 </div></dialog>
 <dialog id="dlgImpCt" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้ารายชื่อ Buyer / Commercial</h2>
@@ -1235,6 +1249,115 @@ async function delContact(id){const c=byId('contacts',id);if(!c||!await ask(`ล
   act(async()=>{for(const p of st.products.filter(p=>p.buyerUid===c.uid||p.comUid===c.uid))
     await patchItem('products',p,{...(p.buyerUid===c.uid?{buyerUid:''}:{}),...(p.comUid===c.uid?{comUid:''}:{})});
     await rmItem('contacts',c)},'ลบผู้ติดต่อแล้ว')}
+
+/* ---------- import products (Shelf life rules) from Excel / CSV ---------- */
+const PR_COLS=[
+  ['step1pct',/(step1pct|md1pct|step1percent)/],['step2pct',/(step2pct|md2pct|step2percent)/],
+  ['step1day',/(step1day|md1day|^step1$|วันลด15|ลด15วัน)/],['step2day',/(step2day|md2day|^step2$|วันลด30|ลด30วัน)/],
+  ['code52',/(code52|pullday|ถอดสินค้า)/],
+  ['buyer',/(buyeruid|^buyer$|ผู้ซื้อ)/],['com',/(commercialuid|comuid|^commercial$|คอมเมอร์เชียล)/],
+  ['sku',/^(sku|itemno|itemnumber|itemcode|article|รหัส|รหัสสินค้า)$/],
+  ['temp',/^(temp|temperature|อุณหภูมิ|storage|การเก็บรักษา)$/],
+  ['origin',/^(origin|source|ประเภท|แหล่งที่มา|นำเข้าท้องถิ่น)$/],
+  ['shelf',/^(shelflife|shelf|shelflifedays|อายุ|อายุสินค้า|อายุการเก็บ|อายุการเก็บรักษา)$/],
+  ['cat',/^(cat|category|หมวด|หมวดสินค้า)$/],
+  ['desc',/^(description|desc|name|itemname|productname|ชื่อสินค้า|ชื่อ|สินค้า|รายการสินค้า|รายการ)$/]];
+const PR_FIELDS=['desc','sku','origin','temp','shelf','md1Day','md1Pct','md2Day','md2Pct','pullDay','buyerUid','comUid'];
+const PR_LBL={desc:'ชื่อสินค้า',sku:'SKU',origin:'ประเภท',temp:'อุณหภูมิ',shelf:'Shelf life',md1Day:'ลด 15% วันที่',md1Pct:'ลด Step 1 %',md2Day:'ลด 30% วันที่',md2Pct:'ลด Step 2 %',pullDay:'Code 52 วันที่',buyerUid:'Buyer UID',comUid:'Commercial UID'};
+function prMapHeader(row){const m={},used=new Set();
+  (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of PR_COLS){if(m[f]==null&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
+const prNum=v=>{const s=String(v??'').trim();if(!s)return'';const n=parseFloat(s.replace(/,/g,''));return isNaN(n)?'':n};
+const prShow=(f,v)=>f==='origin'?(ORIGINS[v]||v):v;
+let prImp=null;
+function parseProducts(wb){
+  const recs=[],info={cols:{},skipped:0};
+  for(const sn of wb.SheetNames){
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
+    let hi=-1,m=null;
+    for(let i=0;i<Math.min(rows.length,25);i++){const mm=prMapHeader(rows[i]);if(mm.desc!=null||mm.sku!=null){if(Object.keys(mm).length>=2){hi=i;m=mm;break}}}
+    if(hi<0)continue;
+    Object.keys(m).forEach(k=>info.cols[k]=true);
+    for(let i=hi+1;i<rows.length;i++){
+      const r=rows[i],g=f=>m[f]!=null?String(r[m[f]]??'').replace(/\s+/g,' ').trim():'';
+      const o={desc:g('desc'),sku:g('sku'),temp:g('temp'),cat:g('cat'),buyerUid:g('buyer'),comUid:g('com'),shelf:m.shelf!=null?prNum(r[m.shelf]):'',
+        md1Day:m.step1day!=null?prNum(r[m.step1day]):'',md1Pct:m.step1pct!=null?prNum(r[m.step1pct]):'',md2Day:m.step2day!=null?prNum(r[m.step2day]):'',md2Pct:m.step2pct!=null?prNum(r[m.step2pct]):'',
+        pullDay:m.code52!=null?prNum(r[m.code52]):'',origin:g('origin')?ORIG_IN(g('origin')):''};
+      if(!o.desc&&!o.sku){if(r.some(x=>String(x).trim()))info.skipped++;continue}
+      recs.push(o);
+    }
+  }
+  return{recs,info};
+}
+function planProducts(recs){
+  const bySku=new Map(),byDesc=new Map();
+  st.products.forEach(p=>{if(p.sku)bySku.set(String(p.sku).toLowerCase(),p);byDesc.set(String(p.desc).toLowerCase(),p)});
+  const add=[],upd=[],bad=[],seen=new Set();let same=0,unk=0;
+  const ctUids=new Set(st.contacts.map(c=>String(c.uid).toUpperCase()));
+  recs.forEach(r=>{
+    const label=r.desc||r.sku,ex=(r.sku&&bySku.get(r.sku.toLowerCase()))||byDesc.get(String(r.desc).toLowerCase());
+    if(ex&&seen.has(ex._id)){return}if(ex)seen.add(ex._id);
+    [r.buyerUid,r.comUid].forEach(u=>{if(u&&!ctUids.has(u.toUpperCase()))unk++});
+    const base=ex?{...ex}:{sku:'',desc:r.desc||r.sku,cat:'',origin:'other',temp:'',shelf:0,md1Day:0,md1Pct:15,md2Day:0,md2Pct:30,pullDay:0,buyerUid:'',comUid:'',rv:2};
+    const nx={...base};
+    ['desc','sku','temp','buyerUid','comUid'].forEach(f=>{if(r[f])nx[f]=r[f]});
+    if(r.origin)nx.origin=r.origin;if(r.shelf!=='')nx.shelf=r.shelf;
+    const hasRule=r.pullDay!=='';
+    if(hasRule){nx.pullDay=r.pullDay;nx.md1Day=r.md1Day!==''?r.md1Day:0;nx.md2Day=r.md2Day!==''?r.md2Day:0;nx.md1Pct=r.md1Pct!==''?r.md1Pct:(ex?.md1Pct||15);nx.md2Pct=r.md2Pct!==''?r.md2Pct:(ex?.md2Pct||30)}
+    else if(!ex||nx.shelf!==ex.shelf||nx.origin!==ex.origin)Object.assign(nx,autoRule(nx.shelf,nx.origin));
+    if(nx.origin!=='other'&&MANUAL[nx.origin])nx.cat=MANUAL[nx.origin].label;else if(r.cat)nx.cat=r.cat;
+    nx.rv=2;
+    const err=ruleError(nx);if(err){bad.push([label,err]);return}
+    if(!ex){add.push(nx);return}
+    const ch=PR_FIELDS.filter(f=>String(nx[f]??'')!==String(ex[f]??'')).map(f=>[f,ex[f]??'',nx[f]]);
+    if(ch.length)upd.push({ex,next:nx,ch});else same++;
+  });
+  return{add,upd,bad,same,unk};
+}
+async function readProductFile(file){
+  $('#prErr').textContent='';$('#prBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
+  try{
+    await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+    let wb;
+    if(/\.csv$/i.test(file.name)){const txt=await file.text();wb=XLSX.read(txt.replace(/^﻿/,''),{type:'string',raw:true})}
+    else wb=XLSX.read(await file.arrayBuffer(),{type:'array',raw:true});
+    const parsed=parseProducts(wb);
+    if(!parsed.recs.length)throw Error('ไม่พบรายการสินค้าในไฟล์ — ต้องมีคอลัมน์ชื่อสินค้า (หรือ SKU) และอย่างน้อย 1 คอลัมน์ข้อมูลอื่น');
+    prImp={file:file.name,...parsed};showProductPreview();
+  }catch(e){prImp=null;$('#prBox').innerHTML='';$('#prErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
+}
+function showProductPreview(){
+  const {recs,info}=prImp,plan=planProducts(recs);prImp.plan=plan;
+  $('#prGo').disabled=!(plan.add.length||plan.upd.length);$('#prDrop').hidden=true;
+  const rows=[...plan.upd.slice(0,8).map(u=>`<tr><td><b>${esc(u.ex.desc)}</b>${u.ex.sku?`<div class="muted small">${esc(u.ex.sku)}</div>`:''}</td><td>${u.ch.map(([f,a,b])=>`<div><span class="muted">${PR_LBL[f]}:</span> ${a!==''?`<s>${esc(prShow(f,a))}</s> → `:''}<b>${esc(prShow(f,b))}</b></div>`).join('')}</td></tr>`),
+    ...plan.add.slice(0,Math.max(0,8-plan.upd.length)).map(a=>`<tr><td><b>${esc(a.desc)}</b>${a.sku?`<div class="muted small">${esc(a.sku)}</div>`:''}</td><td><span class="chip s-ok">ใหม่</span> ${esc(ORIGINS[a.origin]||'')} · Shelf life ${a.shelf} วัน · Code 52 วันที่ ${a.pullDay}</td></tr>`)];
+  $('#prBox').innerHTML=`<div class="imp-file"><b>${esc(prImp.file)}</b> <span class="muted small">· ${recs.length.toLocaleString()} รายการ${info.skipped?` · ข้าม ${info.skipped} แถวที่ไม่มีชื่อ/SKU`:''}</span> <button type="button" class="btn sm" id="prChange">เลือกไฟล์อื่น</button></div>
+  <div class="imp-tiles"><div class="t-new"><b>${plan.add.length.toLocaleString()}</b><span>สินค้าใหม่</span></div><div><b>${plan.upd.length.toLocaleString()}</b><span>อัปเดตข้อมูล</span></div><div><b>${plan.same.toLocaleString()}</b><span>ไม่เปลี่ยนแปลง</span></div><div class="${plan.bad.length?'t-close':''}"><b>${plan.bad.length.toLocaleString()}</b><span>ข้าม (ข้อมูลไม่ถูกต้อง)</span></div></div>
+  <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>({step1day:'ลด 15% วันที่',step1pct:'ลด Step 1 %',step2day:'ลด 30% วันที่',step2pct:'ลด Step 2 %',code52:'Code 52 วันที่',buyer:'Buyer UID',com:'Commercial UID',cat:'หมวด'}[k]||PR_LBL[k]||k)).join(' · ')}</p>
+  ${plan.unk?`<p class="small err-text" style="margin:6px 0 0">มี Buyer/Commercial UID ${plan.unk} ค่าที่ยังไม่มีในแท็บ Buyer / Commercial (ยังนำเข้าได้ แต่จะไม่เห็นชื่อ)</p>`:''}
+  ${plan.bad.length?`<p class="small err-text" style="margin:6px 0 0">ข้าม: ${plan.bad.slice(0,5).map(b=>esc(b[0])+' ('+esc(b[1])+')').join(' · ')}${plan.bad.length>5?' …':''}</p>`:''}
+  ${rows.length?`<div class="imp-sample"><table><thead><tr><th>สินค้า</th><th>สิ่งที่จะเปลี่ยน</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>${plan.upd.length+plan.add.length>8?`<p class="muted small" style="margin:4px 0 0">แสดง 8 รายการแรก จากทั้งหมด ${(plan.upd.length+plan.add.length).toLocaleString()} รายการที่มีการเปลี่ยนแปลง</p>`:''}`:'<p class="small muted" style="margin:8px 0 0">ข้อมูลในไฟล์ตรงกับที่มีอยู่แล้วทั้งหมด ไม่มีอะไรต้องอัปเดต</p>'}`;
+  $('#prChange').onclick=()=>{$('#prDrop').hidden=false;$('#prBox').innerHTML='';$('#prGo').disabled=true;prImp=null;$('#prFile').value='';$('#prFile').click()};
+}
+async function runProductImport(){
+  if(!prImp)return;
+  const plan=planProducts(prImp.recs);
+  $('#prGo').disabled=true;$('#prGo').textContent='กำลังนำเข้า…';
+  const ok=await act(async()=>{
+    for(const a of plan.add)await putItem('products',a);
+    for(const u of plan.upd){const {_id,...d}=u.next;await putItem('products',{...d,_id:u.ex._id})}
+  },null);
+  $('#prGo').textContent='นำเข้าสินค้า';
+  if(ok){$('#dlgImpPr').close();renderProd();renderDash();toast(`นำเข้าแล้ว: ใหม่ ${plan.add.length} · อัปเดต ${plan.upd.length}`)}else showProductPreview();
+}
+function openImportPr(){prImp=null;$('#prBox').innerHTML='';$('#prDrop').hidden=false;$('#prGo').disabled=true;$('#prGo').textContent='นำเข้าสินค้า';$('#prErr').textContent='';$('#prFile').value='';$('#dlgImpPr').showModal()}
+$('#prImport').onclick=openImportPr;$('#prCancel').onclick=()=>$('#dlgImpPr').close();$('#prGo').onclick=runProductImport;
+$('#prManual').onclick=()=>{$('#dlgImpPr').close();addManual()};
+$('#prPick').onclick=()=>$('#prFile').click();$('#prFile').onchange=e=>{const f=e.target.files[0];if(f)readProductFile(f)};
+(()=>{const d=$('#prDrop');
+  ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));
+  ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+  $('#dlgImpPr').addEventListener('dragover',e=>e.preventDefault());
+  $('#dlgImpPr').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readProductFile(f)})})();
 
 /* ---------- import Buyer / Commercial contacts from Excel / CSV ---------- */
 const CT_COLS=[
