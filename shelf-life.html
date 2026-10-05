@@ -536,6 +536,7 @@ select,input,textarea{max-width:100%}
       <label>นับอายุ Aging จาก<select id="nbsBasis"><option value="sold">วันที่ไม่มียอดขาย (Last Sold)</option><option value="recv">วันที่รับสินค้าล่าสุด (Last Recv.)</option></select></label>
       <div class="f-act">
         <label class="f-chk"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
+        <button type="button" class="btn w" id="nbsArtImport" title="นำเข้าตาราง Item → Art Grp แล้วกำหนด Buyer ให้ตามเลข Art Grp" onclick="openImportArt()">นำเข้า Item → Art Grp</button>
         <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
       </div>
     </div>
@@ -602,6 +603,7 @@ select,input,textarea{max-width:100%}
       <button type="button" class="dtile dtile-in" onclick="openImportPr()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3c4 0 7 3 7 7 0 5-4 9-7 11-3-2-7-6-7-11 0-4 3-7 7-7zM12 3c0 3 0 6 0 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>สินค้า &amp; กฎ Shelf life</b><span class="muted small">เพิ่ม/อัปเดตสินค้า อายุ และวันลดราคา</span></button>
       <button type="button" class="dtile dtile-in" onclick="openImportCt()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2 .7 3.2 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>Buyer / Commercial</b><span class="muted small">รายชื่อ เบอร์โทร อีเมล ผู้ติดต่อสำรอง</span></button>
       <button type="button" class="dtile dtile-in" onclick="openImport()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>Item NBS</b><span class="muted small">รายงานสินค้าไม่มียอดขาย แยก FF / DF / NF</span></button>
+      <button type="button" class="dtile dtile-in" onclick="openImportArt()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h6M4 12h6M4 17h6M14 7h6M14 12h6M14 17h6M10 7l4 5-4 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>Item → Art Grp</b><span class="muted small">ตารางจับคู่เลข Item กับ Art Grp — ใส่ให้ Item NBS แล้วกำหนด Buyer อัตโนมัติ</span></button>
       <label class="dtile dtile-warn" for="impJson"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>กู้คืนข้อมูลสำรอง</b><span class="muted small">ไฟล์ JSON จากปุ่มสำรอง — แทนที่ข้อมูลปัจจุบันทั้งหมด</span><input type="file" accept=".json" id="impJson" hidden></label>
     </div>
   </div>
@@ -715,6 +717,25 @@ select,input,textarea{max-width:100%}
   <p class="err-text" id="prErr" style="margin:8px 0 0"></p>
   <div class="row" style="justify-content:space-between;margin-top:12px;align-items:center"><button type="button" class="btn sm" id="prManual" title="เพิ่มสินค้าตามคู่มือ Makro ที่ยังไม่มีในรายการ">เพิ่มสินค้าที่ยังไม่มีจากคู่มือ</button><span class="row"><button type="button" class="btn cancel-btn" id="prCancel">ปิด</button><button type="button" class="btn pri save-btn" id="prGo" disabled>นำเข้าสินค้า</button></span></div>
 </div></dialog>
+<dialog id="dlgArt" class="nbs-dlg imp-dlg"><div>
+  <h2>นำเข้าตาราง Item → Art Grp</h2>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls), CSV, PDF หรือรูปภาพของตารางที่มีเลข <b>Item</b> คู่กับ <b>Art Grp</b> มาวาง ระบบใส่ Art Grp ให้ Item NBS ที่เลข Item ตรงกัน แล้วกำหนด Buyer ให้ตามเลข Art Grp ที่ Buyer ดูแล (ใน Buyer / Commercial) · ถ้าไฟล์ไม่มีหัวคอลัมน์ ให้เรียงคอลัมน์แรก = Item คอลัมน์ที่สอง = Art Grp</p>
+  <div id="amDrop" class="imp-drop" tabindex="0">
+    <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span>
+    <button type="button" class="btn pri" id="amPick">เลือกไฟล์จากเครื่อง</button>
+    <input type="file" id="amFile" accept=".xlsx,.xls,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp,image/*,application/pdf" hidden>
+    <span class="muted small">คอลัมน์ที่อ่านได้: Item No · Art Grp (No.) · ชื่อ Art Grp (ไม่บังคับ)</span>
+  </div>
+  <div id="amBox"></div>
+  <p class="err-text" id="amErr" style="margin:8px 0 0"></p>
+  <div id="amOpts" class="imp-opts" hidden>
+    <label class="chk"><input type="checkbox" id="amBuyer" checked> กำหนด Buyer ให้รายการที่ยังไม่มี Buyer ตามเลข Art Grp (ไม่ทับ Buyer ที่ตั้งไว้แล้ว)</label>
+    <label class="chk"><input type="checkbox" id="amOver" checked> ใช้ Art Grp ในไฟล์ทับค่าเดิมที่ต่างกัน (ถ้าไม่ติ๊ก จะเติมเฉพาะรายการที่ยังไม่มี Art Grp)</label>
+  </div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="amCancel">ปิด</button><button type="button" class="btn pri save-btn" id="amGo" disabled>นำเข้า Art Grp</button></div>
+</div></dialog>
+
 <dialog id="dlgImpCt" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้ารายชื่อ Buyer / Commercial</h2>
   <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls), CSV, PDF หรือรูปภาพ (ถ่ายรูปรายงาน/ตาราง) ของรายชื่อผู้ติดต่อมาวาง ระบบจับคู่ด้วย UID — UID ที่มีอยู่แล้วจะอัปเดตข้อมูลให้เป็นล่าสุด UID ใหม่จะเพิ่มให้ ช่องที่เว้นว่างในไฟล์จะไม่ทับข้อมูลเดิม</p>
@@ -1964,6 +1985,88 @@ $('#ctDel').onchange=()=>{if(ctImp)showContactPreview()};$('#ctDefRole').onchang
   $('#dlgImpCt').addEventListener('dragover',e=>e.preventDefault());
   $('#dlgImpCt').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readContactFile(f)})})();
 
+/* ---------- import an Item -> Art Grp table: puts the Art Grp number on Item NBS rows, then a Buyer when exactly one Buyer holds that Art Grp ---------- */
+const AM_COLS=[
+  ['item',/^(itemno|item|itemnumber|itemcode|article|articleno|articlenumber|sku|รหัส|รหัสสินค้า|เลขสินค้า|เลขitem|เลขที่สินค้า)$/],
+  ['artName',/(artgrpdesc|artgroupdesc|artdesc|artname|articlegroupdesc|ชื่อart|รายละเอียดart)/],
+  ['art',/(artgrpno|artgrp|artgroup|articlegroup|artno|artnumber|artกลุ่ม|กลุ่มสินค้าart|^art$|เลขart)/]];
+function amMapHeader(row){const m={},used=new Set();
+  (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of AM_COLS){if(m[f]==null&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
+/* numbers compare without leading zeros / ".0" from Excel: 042081 = 42081, 22.0 = 22 */
+const amNum=v=>{const s=String(v??'').trim().replace(/\.0+$/,'');return/^\d+$/.test(s)?s.replace(/^0+(?=\d)/,''):s.toLowerCase()};
+let artImp=null;
+function parseArtMap(wb){
+  const map=new Map(),names=new Map(),info={cols:{},rows:0,skipped:0,conflicts:0,headerless:false};
+  const take=(item,art,name)=>{info.rows++;const k=amNum(item),a=amNum(art);if(!k||!a){info.skipped++;return}
+    if(map.has(k)&&map.get(k)!==a){info.conflicts++;return} /* same Item with two different Art Grp: the first one wins */
+    map.set(k,a);if(name&&String(name).trim()&&!names.has(a))names.set(a,String(name).trim())};
+  for(const sn of wb.SheetNames){
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
+    let hi=-1,m=null;
+    for(let i=0;i<Math.min(rows.length,25);i++){const mm=amMapHeader(rows[i]);if(mm.item!=null&&mm.art!=null){hi=i;m=mm;break}}
+    if(hi>=0){Object.keys(m).forEach(k=>info.cols[k]=true);
+      for(let i=hi+1;i<rows.length;i++){const r=rows[i];if(r.every(c=>String(c).trim()===''))continue;take(r[m.item],r[m.art],m.artName!=null?r[m.artName]:'')}
+      continue}
+    /* no header row: first column = Item (3-9 digits), second = Art Grp (1-4 digits) */
+    const body=rows.filter(r=>r.some(c=>String(c).trim()!==''));
+    const ok=body.filter(r=>/^\d{3,9}(\.0+)?$/.test(String(r[0]).trim())&&/^\d{1,4}(\.0+)?$/.test(String(r[1]).trim()));
+    if(body.length&&ok.length/body.length>=.7&&ok.length>=3){info.headerless=true;info.cols.item=info.cols.art=true;ok.forEach(r=>take(r[0],r[1],''))}
+  }
+  return{map,names,info}}
+const artOpts=()=>({buyer:$('#amBuyer').checked,over:$('#amOver').checked});
+function planArt(imp,o){
+  const rows=[],un=new Map(),keys=new Set();let matched=0;
+  (st.nbs||[]).forEach(r=>{
+    const k=amNum(r.itemNo),file=imp.map.get(k);if(file==null)return;
+    keys.add(k);matched++;
+    const cur=String(r.artGrp||'').trim(),art=cur&&!o.over?cur:file,chArt=art!==cur;
+    let buyer='';
+    if(o.buyer&&!r.buyerUid){buyer=buyerFor({...r,artGrp:art})||'';
+      if(!buyer){const e=un.get(art)||{art,n:0,c:[]};e.n++;un.set(art,e)}}
+    if(chArt||buyer)rows.push({r,art,chArt,buyer});
+  });
+  un.forEach(e=>{e.c=buyersByArt(e.art).map(c=>c.uid)});
+  return{rows,matched,fileOnly:imp.map.size-keys.size,unres:[...un.values()].sort((a,b)=>b.n-a.n),nArt:rows.filter(x=>x.chArt).length,nBuyer:rows.filter(x=>x.buyer).length,nbsNoFile:(st.nbs||[]).length-matched};
+}
+async function readArtFile(file){
+  $('#amErr').textContent='';$('#amBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
+  try{
+    const wb=await readAnyFile(file,r=>{const m=amMapHeader(r);return m.item!=null&&m.art!=null},sayTo('#amBox')),parsed=parseArtMap(wb);
+    if(!parsed.map.size)throw Error('ไม่พบคู่ Item / Art Grp ในไฟล์ — ต้องมีคอลัมน์ Item No และ Art Grp (หรือเรียงคอลัมน์แรก = Item คอลัมน์ที่สอง = Art Grp)');
+    artImp={file:file.name,...parsed};showArtPreview();
+  }catch(e){artImp=null;$('#amBox').innerHTML='';$('#amErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
+}
+function showArtPreview(){
+  const {file,info,map,names}=artImp,o=artOpts(),plan=planArt(artImp,o);artImp.plan=plan;
+  $('#amOpts').hidden=false;$('#amDrop').hidden=true;$('#amGo').disabled=!plan.rows.length;
+  const unTot=plan.unres.reduce((s,e)=>s+e.n,0);
+  const un=plan.unres.slice(0,10).map(e=>`<tr><td><b>${esc(e.art)}</b>${names.get(e.art)?`<div class="muted small">${esc(names.get(e.art))}</div>`:''}</td><td class="num">${e.n.toLocaleString()}</td><td>${e.c.length>1?'มี Buyer มากกว่า 1 คน: '+esc(e.c.join(', ')):'ไม่มี Buyer ที่ดูแลเลข Art นี้ใน Buyer / Commercial'}</td></tr>`).join('');
+  $('#amBox').innerHTML=`<div class="imp-file"><b>${esc(file)}</b> <span class="muted small">· ${map.size.toLocaleString()} Item${info.headerless?' · ไม่มีหัวคอลัมน์ (คอลัมน์ 1 = Item, 2 = Art Grp)':''}${info.skipped?` · ข้าม ${info.skipped.toLocaleString()} แถวที่ไม่ครบ`:''}${info.conflicts?` · ${info.conflicts.toLocaleString()} แถวที่ Item ซ้ำแต่ Art Grp ไม่ตรงกัน (ใช้ค่าแรก)`:''}</span> <button type="button" class="btn sm" id="amChange">เลือกไฟล์อื่น</button></div>
+  <div class="imp-tiles"><div class="t-new"><b>${plan.nArt.toLocaleString()}</b><span>ใส่ / แก้ Art Grp</span></div><div class="t-new"><b>${plan.nBuyer.toLocaleString()}</b><span>กำหนด Buyer ให้</span></div><div><b>${plan.matched.toLocaleString()}</b><span>Item NBS ที่ตรงกับไฟล์</span></div><div><b>${plan.nbsNoFile.toLocaleString()}</b><span>Item NBS ที่ไม่มีในไฟล์</span></div></div>
+  ${o.buyer&&unTot?`<p class="small" style="margin:8px 0 0"><b>ยังหา Buyer ไม่ได้ ${unTot.toLocaleString()} รายการ</b> — เลข Art Grp ที่ไม่มี Buyer ดูแล หรือมีหลายคน (เติมเลข Art ในช่อง “สินค้าที่ดูแล” ของ Buyer แล้วนำเข้าไฟล์นี้ซ้ำได้):</p><div class="imp-sample"><table><thead><tr><th>Art Grp</th><th>Item NBS</th><th>สาเหตุ</th></tr></thead><tbody>${un}</tbody></table></div>${plan.unres.length>10?`<p class="muted small" style="margin:4px 0 0">แสดง 10 อันดับแรกจาก ${plan.unres.length.toLocaleString()} เลข Art Grp</p>`:''}`:''}
+  ${!plan.matched?'<p class="err-text small" style="margin:8px 0 0">ไม่มี Item ในไฟล์ที่ตรงกับ Item NBS เลย — ตรวจว่าคอลัมน์ Item เป็นเลขสินค้าตัวเดียวกับในรายงาน NBS</p>':''}`;
+  $('#amChange').onclick=()=>{$('#amDrop').hidden=false;$('#amBox').innerHTML='';$('#amGo').disabled=true;artImp=null;$('#amFile').value='';$('#amFile').click()};
+}
+async function runArtImport(){
+  if(!artImp)return;
+  const plan=planArt(artImp,artOpts());if(!plan.rows.length)return;
+  if(!await ask(`ใส่ / แก้ Art Grp ให้ ${plan.nArt.toLocaleString()} รายการ และกำหนด Buyer ให้ ${plan.nBuyer.toLocaleString()} รายการ?  (ทุกคนในทีมเห็นการเปลี่ยนนี้)`))return;
+  const now=new Date().toISOString();
+  $('#amGo').disabled=true;$('#amGo').textContent='กำลังบันทึก…';
+  const ok=await act(async()=>{for(const x of plan.rows)await patchItem('nbs',x.r,{...(x.chArt?{artGrp:x.art}:{}),...(x.buyer?{buyerUid:x.buyer}:{}),updatedAt:now})},null);
+  $('#amGo').textContent='นำเข้า Art Grp';
+  if(ok){$('#dlgArt').close();renderNbs();toast(`นำเข้า Art Grp แล้ว: ใส่ / แก้ ${plan.nArt.toLocaleString()} · กำหนด Buyer ${plan.nBuyer.toLocaleString()}`)}else showArtPreview();
+}
+function openImportArt(){artImp=null;$('#amBox').innerHTML='';$('#amDrop').hidden=false;$('#amGo').disabled=true;$('#amGo').textContent='นำเข้า Art Grp';$('#amOpts').hidden=true;$('#amErr').textContent='';$('#amFile').value='';$('#dlgArt').showModal()}
+$('#amCancel').onclick=()=>$('#dlgArt').close();$('#amGo').onclick=runArtImport;
+$('#amPick').onclick=()=>$('#amFile').click();$('#amFile').onchange=e=>{const f=e.target.files[0];if(f)readArtFile(f)};
+$('#amBuyer').onchange=$('#amOver').onchange=()=>{if(artImp)showArtPreview()};
+(()=>{const d=$('#amDrop');
+  ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));
+  ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+  $('#dlgArt').addEventListener('dragover',e=>e.preventDefault());
+  $('#dlgArt').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readArtFile(f)})})();
+
 /* ---------- julian tab ---------- */
 function julTab(){
   const v=$('#jD').value;if(v){const d=fromIso(v),j=jul(d);$('#jDout').innerHTML=`<b>${j.ddd}</b> <span class="muted small">DDD</span> · <b>${j.y2}</b> <span class="muted small">YYDDD</span>`}
@@ -2286,11 +2389,13 @@ async function applyBuyerRules(){
   await act(async()=>{for(const [r,u] of hit)await patchItem('nbs',r,{buyerUid:u,updatedAt:now})},`กำหนด Buyer ให้ ${hit.length.toLocaleString()} รายการแล้ว`);
   renderNbs();
 }
-function buyerByArt(no){
-  no=String(no||'').trim();if(!/^\d{1,4}$/.test(no))return'';
-  const re=new RegExp('(^|[\\s,·])'+no+'(?=\\s+\\p{L})','u'),hit=st.contacts.filter(c=>c.role==='Buyer'&&re.test(String(c.dept||'')));
-  return hit.length===1?hit[0].uid:'';
+/* every Buyer who holds this Art Grp: the number written in the Buyer's department text ("· 22 COOKING OIL") or saved as a plain-number rule in "สินค้าที่ดูแล" */
+function buyersByArt(no){
+  no=String(no||'').trim();if(!/^\d{1,4}$/.test(no))return[];
+  const re=new RegExp('(^|[\\s,·])'+no+'(?=\\s+\\p{L})','u');
+  return st.contacts.filter(c=>c.role==='Buyer'&&(re.test(String(c.dept||''))||ctKeys(c).some(k=>/^\d+$/.test(k)&&k.replace(/^0+(?=\d)/,'')===no)));
 }
+function buyerByArt(no){const h=buyersByArt(no);return h.length===1?h[0].uid:''}
 function nbsBuyerOptions(sel){
   const div=$('#nDiv').value,l=st.contacts.filter(c=>c.role==='Buyer'&&divGroupOk(div,c.group)).sort((a,b)=>String(a.uid).localeCompare(String(b.uid)));
   $('#nBuyer').innerHTML='<option value="">— ไม่ระบุ —</option>'+l.map(c=>`<option value="${esc(c.uid)}"${c.uid===sel?' selected':''}>${esc(c.uid)} · ${esc(c.name)}</option>`).join('')
