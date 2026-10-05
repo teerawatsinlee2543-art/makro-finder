@@ -38,6 +38,11 @@
 html,body{background:var(--color-background-secondary);height:100%;font-family:'Sarabun','Segoe UI',sans-serif;overflow-x:hidden}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 body{margin:0;padding:0;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;caret-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation;overscroll-behavior-x:none}
+/* มือถือ: iOS ซูมหน้าเข้าเองเมื่อแตะช่องที่ตัวอักษรเล็กกว่า 16px — บังคับทุกช่องกรอกเป็น 16px บนจอสัมผัส (กันซูมเอง/เด้ง) */
+@media (pointer:coarse){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),select,textarea{font-size:16px!important}
+}
 input,textarea,[contenteditable]{caret-color:#1B5FA8}
 input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default}
 /* เปิดให้เลือก/คัดลอกข้อความได้เฉพาะจุดที่มีข้อมูลจริงที่ผู้ใช้อาจอยากคัดลอก (ชื่อสินค้า/Item No/บาร์โค้ด/ตำแหน่งจัดเก็บ/รายละเอียด) แม้ปิด user-select ทั้งแอปไว้เพื่อกันเคอร์เซอร์กระพริบตอนแตะค้างตัวหนังสือทั่วไป */

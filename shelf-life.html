@@ -348,7 +348,11 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
   table.nbs-tbl .actbtns .btn{padding:4px 6px}
 }
 /* fit every screen: wide tables turn into cards below 1100px (the two widest, Item NBS and Buyer / Commercial, below 1180px); cards sit in a grid on tablets and stack on phones */
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation;overscroll-behavior-x:none}
+/* phones: iOS zooms the page in by itself when a field under 16px gets focus — keep every field at 16px on touch screens (and no double-tap zoom, no sideways bounce) */
+@media (pointer:coarse){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),select,textarea{font-size:16px!important}
+}
 img,svg,video,canvas{max-width:100%}
 main,.card,.row>*,.lot-grid>*,.grid2>*{min-width:0}
 select,input,textarea{max-width:100%}
