@@ -560,6 +560,8 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
     <label>โทร<input name="phone"></label>
     <label>อีเมล / LINE<input name="email"></label>
     <label style="grid-column:1/-1">ผู้ติดต่อสำรอง (Jr. Merchandise / Assistant Buyer)<input name="backup"></label>
+    <label style="grid-column:1/-1">สินค้าที่ดูแล — ใช้จับ Buyer ให้รายการ Item NBS อัตโนมัติตอนนำเข้า<textarea name="artKeys" rows="2" placeholder="คั่นด้วยเครื่องหมายจุลภาค เช่น 22, 240, dept:HOUSE HOLD, kw:ผงซักฟอก"></textarea></label>
+    <p class="muted small" style="grid-column:1/-1;margin:-6px 0 0">ตัวเลข = รหัส Art Grp · dept:ชื่อ = Department ตรงกันทั้งชื่อ · kw:คำ = คำที่อยู่ในชื่อสินค้า (พิมพ์คำเปล่าๆ ก็นับเป็น kw) — จับให้เฉพาะเมื่อมี Buyer เพียงคนเดียวที่ตรง</p>
   </div>
   <div class="row" style="justify-content:flex-end;margin-top:14px"><button type="button" class="btn" onclick="dlgCt.close()">ยกเลิก</button><button class="btn pri" value="ok">บันทึก</button></div>
 </form></dialog>
@@ -595,9 +597,10 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
   <h2>กำหนด Buyer ให้หลายรายการ</h2>
   <p class="muted small" id="bbInfo" style="margin:0 0 10px"></p>
   <label>Buyer<select id="bbBuyer"></select></label>
+  <label id="bbRuleBox" style="margin-top:10px" hidden>จำเป็นกฎให้ Buyer คนนี้ — นำเข้าไฟล์ครั้งต่อไปจะจับ Buyer ให้อัตโนมัติ<select id="bbRule"></select></label>
   <label class="chk" style="margin-top:10px"><input type="checkbox" id="bbEmpty" checked> เฉพาะรายการที่ยังไม่มี Buyer</label>
   <p class="muted small" style="margin:10px 0 0">ใช้ตัวกรองด้านบน (กลุ่ม, Department ผ่านช่องค้นหา, Aging, สถานะ) เลือกรายการให้ตรงก่อน แล้วค่อยกำหนด Buyer ให้ทั้งหมดในครั้งเดียว</p>
-  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="bbCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="bbGo">กำหนด Buyer</button></div>
+  <div class="row" style="justify-content:space-between;align-items:center;margin-top:12px"><button type="button" class="btn sm" id="bbApply" title="ใช้กฎ “สินค้าที่ดูแล” ที่บันทึกไว้ที่ Buyer แต่ละคน">ใช้กฎที่จำไว้กับรายการที่ยังไม่มี Buyer</button><span class="row"><button type="button" class="btn cancel-btn" id="bbCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="bbGo">กำหนด Buyer</button></span></div>
 </div></dialog>
 <dialog id="dlgDelImp" class="nbs-dlg imp-dlg"><div>
   <h2 id="delImpTitle">ลบไฟล์ที่นำเข้า</h2>
@@ -1323,7 +1326,7 @@ function renderCt(){
 }
 $('#ctQ').oninput=renderCt;$('#ctG').onchange=renderCt;
 const dlgCt=$('#dlgCt'),fC=$('#fCt');let ctId=null;
-const CTF=['uid','name','role','group','dept','phone','email','backup'];
+const CTF=['uid','name','role','group','dept','phone','email','backup','artKeys'];
 function editContact(id){const cur=id?byId('contacts',id):null;ctId=cur?id:null;const c=cur||{uid:'',name:'',role:'Buyer',group:$('#ctG').value,dept:'',phone:'',email:''};CTF.forEach(k=>fC[k].value=c[k]??'');dlgCt.showModal()}
 fC.onsubmit=ev=>{
   const o={};CTF.forEach(k=>o[k]=fC[k].value.trim());
@@ -1873,7 +1876,7 @@ function nbsAgingText(r){
 function nbsFiltered(){
   const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value;
   return rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):(agingInfo(r).level??-1)>=+fa.slice(1)))
-    &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode].join(' ').toLowerCase().includes(q)))
+    &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q)))
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
 const PDF_CHIP={ok:['#e4f3ea','#1f7a45'],md1:['#fff3a6','#6b5800'],md2:['#ffdcb8','#9a4300'],pull:['#c62828','#fff'],obs:['#7f1d1d','#fff'],full:['#111','#fff']};
@@ -1996,6 +1999,12 @@ function bulkBuyerOpen(){
   $('#bbBuyer').innerHTML='<option value="">— เลือก Buyer —</option>'+bs.map(c=>`<option value="${esc(c.uid)}">${esc(c.uid)} · ${esc(c.name)} · ${esc(c.group||'')}</option>`).join('')+'<option value="__clear">ล้าง Buyer (ไม่ระบุ)</option>';
   const noBuyer=rows.filter(r=>!r.buyerUid).length;
   $('#bbInfo').innerHTML=`ตารางตอนนี้แสดง <b>${rows.length.toLocaleString()}</b> รายการ (ยังไม่มี Buyer ${noBuyer.toLocaleString()} รายการ)`;
+  /* offer to remember what the current filter stands for */
+  const one=f=>{const s=new Set(rows.map(r=>String(r[f]||'').trim()));return s.size===1?[...s][0]:''},q=$('#nbsQ').value.trim(),opts=['<option value="">ไม่จำเป็นกฎ</option>'];
+  if(one('artGrp'))opts.push(`<option value="${esc(one('artGrp'))}">Art Grp ${esc(one('artGrp'))}</option>`);
+  if(one('dept'))opts.push(`<option value="dept:${esc(one('dept'))}">Department “${esc(one('dept'))}” → Buyer นี้</option>`);
+  if(q)opts.push(`<option value="kw:${esc(q)}">ชื่อสินค้ามีคำว่า “${esc(q)}” → Buyer นี้</option>`);
+  $('#bbRule').innerHTML=opts.join('');$('#bbRuleBox').hidden=opts.length<2;
   $('#dlgBulkBuyer').showModal();
 }
 async function bulkBuyerGo(){
@@ -2005,12 +2014,33 @@ async function bulkBuyerGo(){
   const who=uid?`${uid} ${st.contacts.find(c=>c.uid===uid)?.name||''}`:'ไม่ระบุ';
   if(!await ask(`กำหนด Buyer “${who}” ให้ ${rows.length.toLocaleString()} รายการ?  (ทุกคนในทีมเห็นการเปลี่ยนนี้)`))return;
   $('#dlgBulkBuyer').close();
-  const now=new Date().toISOString();
-  await act(async()=>{for(const r of rows)await patchItem('nbs',r,{buyerUid:uid,updatedAt:now,updatedBy:myId||null})},`กำหนด Buyer ให้ ${rows.length.toLocaleString()} รายการแล้ว`);
+  const now=new Date().toISOString(),rule=$('#bbRule').value,bc=uid?st.contacts.find(c=>c.uid===uid):null;
+  await act(async()=>{for(const r of rows)await patchItem('nbs',r,{buyerUid:uid,updatedAt:now,updatedBy:myId||null});
+    if(rule&&bc&&!ctKeys(bc).some(k=>k.toLowerCase()===rule.toLowerCase()))await patchItem('contacts',bc,{artKeys:[...ctKeys(bc),rule].join(', ')})},`กำหนด Buyer ให้ ${rows.length.toLocaleString()} รายการแล้ว${rule&&bc?' · จำกฎไว้ที่ '+uid:''}`);
   renderNbs();
 }
-$('#nbsBulkBuyer').onclick=bulkBuyerOpen;$('#bbCancel').onclick=()=>$('#dlgBulkBuyer').close();$('#bbGo').onclick=bulkBuyerGo;
+$('#nbsBulkBuyer').onclick=bulkBuyerOpen;$('#bbApply').onclick=()=>{$('#dlgBulkBuyer').close();applyBuyerRules()};$('#bbCancel').onclick=()=>$('#dlgBulkBuyer').close();$('#bbGo').onclick=bulkBuyerGo;
 /* Art Group number -> Buyer, using the art-group numbers written in the Buyer contacts' department text (e.g. "Commodity · 22 Cooking Oil") */
+/* who looks after an item? rules written on each Buyer ("สินค้าที่ดูแล"): Art Grp number, dept:<Department>, kw:<word in the item name>.
+   the most specific rule type with exactly one Buyer wins (Art Grp, then name word, then Department); ambiguous = leave blank */
+const ctKeys=c=>String(c.artKeys||'').split(/[,;\n]+/).map(s=>s.trim()).filter(Boolean);
+function buyerFor(rec){
+  const art=String(rec.artGrp||'').trim().toLowerCase(),dept=String(rec.dept||'').trim().toLowerCase(),name=String(rec.desc||'').toLowerCase(),hits={art:new Set(),kw:new Set(),dept:new Set()};
+  st.contacts.filter(c=>c.role==='Buyer'&&divGroupOk(rec.division,c.group)).forEach(c=>ctKeys(c).forEach(k=>{
+    const m=k.match(/^(dept|d|kw|art):\s*(.+)$/i),t=m?(m[1].toLowerCase()==='d'?'dept':m[1].toLowerCase()):(/^\d+$/.test(k)?'art':'kw'),v=(m?m[2]:k).trim().toLowerCase();
+    if(!v)return;
+    if(t==='art'&&art&&v===art)hits.art.add(c.uid);else if(t==='kw'&&name.includes(v))hits.kw.add(c.uid);else if(t==='dept'&&dept&&v===dept)hits.dept.add(c.uid)}));
+  for(const t of ['art','kw','dept'])if(hits[t].size===1)return[...hits[t]][0];
+  return art?buyerByArt(art):'';
+}
+async function applyBuyerRules(){
+  const hit=(st.nbs||[]).filter(r=>!r.buyerUid).map(r=>[r,buyerFor(r)]).filter(x=>x[1]);
+  if(!hit.length){toast('ยังไม่มีรายการที่กฎ “สินค้าที่ดูแล” จับ Buyer ให้ได้');return}
+  if(!await ask(`ใช้กฎที่จำไว้กำหนด Buyer ให้ ${hit.length.toLocaleString()} รายการที่ยังไม่มี Buyer?  (ทุกคนในทีมเห็นการเปลี่ยนนี้)`))return;
+  const now=new Date().toISOString();
+  await act(async()=>{for(const [r,u] of hit)await patchItem('nbs',r,{buyerUid:u,updatedAt:now})},`กำหนด Buyer ให้ ${hit.length.toLocaleString()} รายการแล้ว`);
+  renderNbs();
+}
 function buyerByArt(no){
   no=String(no||'').trim();if(!/^\d{1,4}$/.test(no))return'';
   const re=new RegExp('(^|[\\s,·])'+no+'(?=\\s+\\p{L})','u'),hit=st.contacts.filter(c=>c.role==='Buyer'&&re.test(String(c.dept||'')));
@@ -2145,7 +2175,7 @@ function parseWorkbook(wb,fileName,defDiv){
       if(dv===''&&/^\d+$/.test(aging))dv=+aging;
       if(!last&&dv!==''&&dv>=0){last=iso(addD(today(),-Math.round(dv)));derived=true}
       let buyer='';if(m.buyer!=null){const b=String(r[m.buyer]??'').trim().toUpperCase();const c=st.contacts.find(x=>String(x.uid).toUpperCase()===b&&x.role==='Buyer');if(c)buyer=c.uid}
-      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer||buyerByArt(artGrp)});
+      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer||buyerFor({division:div,artGrp,dept,desc})});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
     info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict")info.cols[k]=true});
