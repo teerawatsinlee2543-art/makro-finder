@@ -64,7 +64,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .chip{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:13px;white-space:nowrap}
 .s-ok{color:var(--ok);background:var(--okbg)}.s-soon{color:var(--soon);background:var(--soonbg)}
 .s-md1{color:var(--md1);background:var(--md1bg)}.s-md2{color:var(--md2);background:var(--md2bg)}
-.s-pull{color:var(--pull);background:var(--pullbg)}.s-err{color:var(--err);background:var(--errbg)}
+.s-pull{color:var(--pull);background:var(--pullbg)}.s-err{color:var(--err);background:var(--errbg)}.s-done{color:var(--card);background:var(--ink)}
 .strip{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;padding:3px 2px;max-width:min(100%,320px)}
 .strip span{flex:none;min-width:28px;width:auto;padding:0 4px;box-sizing:border-box;height:26px;display:grid;place-items:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;border-radius:3px;color:var(--seg-ink)}
 .strip .ok{background:var(--seg-ok)}.strip .md1{background:var(--seg-md1)}.strip .md2{background:var(--seg-md2)}.strip .pull{background:var(--seg-pull);color:var(--seg-pull-ink)}
@@ -888,11 +888,12 @@ function renderDash(){
   const lc=mode==='db'||mode==='sheet'?loadLocal():null,ln=lc?lc.batches.length+lc.contacts.length:0;
   $('#obMigrate').hidden=!ln;$('#obMigrate').textContent=`ย้ายข้อมูลจากเบราว์เซอร์นี้ (${lc?lc.products.length:0} สินค้า, ${lc?lc.batches.length:0} ล็อต)`;
   const rows=st.batches.map(b=>({b,e:evalBatch(b)}));
-  const cnt={};rows.forEach(r=>{if(r.b.ack!==r.e.st)cnt[r.e.st]=(cnt[r.e.st]||0)+1});
-  $('#tiles').innerHTML=ST.filter(([k])=>k!=='err'||cnt.err).map(([k,l])=>`<button type="button" class="tile${tileFilter===k?' sel':''}" data-k="${k}"><span class="chip s-${k}">${l}</span><b>${cnt[k]||0}</b><span class="muted small">ล็อตที่ยังไม่ดำเนินการ</span></button>`).join('');
+  const cnt={};rows.forEach(r=>{if(r.b.ack!==r.e.st)cnt[r.e.st]=(cnt[r.e.st]||0)+1;else if(r.e.p)cnt.done=(cnt.done||0)+1});
+  $('#tiles').innerHTML=ST.filter(([k])=>k!=='err'||cnt.err).map(([k,l])=>`<button type="button" class="tile${tileFilter===k?' sel':''}" data-k="${k}"><span class="chip s-${k}">${l}</span><b>${cnt[k]||0}</b><span class="muted small">ล็อตที่ยังไม่ดำเนินการ</span></button>`).join('')
+    +`<button type="button" class="tile${tileFilter==='done'?' sel':''}" data-k="done"><span class="chip s-done">✓ ปิดงานเรียบร้อย</span><b>${cnt.done||0}</b><span class="muted small">ล็อตที่ดำเนินการแล้ว</span></button>`;
   const q=$('#q').value.trim().toLowerCase(),fs=$('#fSt').value||tileFilter,hide=$('#fHide').checked;
   const list=rows.filter(({b,e})=>{
-    if(fs&&e.st!==fs)return false;if(hide&&b.ack===e.st)return false;
+    if(fs==='done'){if(b.ack!==e.st)return false}else{if(fs&&e.st!==fs)return false;if(hide&&b.ack===e.st)return false}
     if(q){const h=[b.itemNo,b.itemDesc,b.barcode,b.sku,e.p?.desc,e.p?.sku,e.p?.cat,e.p?.buyerUid,e.p?.comUid,e.buyer?.name,b.loc,b.note].join(' ').toLowerCase();if(!h.includes(q))return false}
     return true}).sort((a,b)=>(a.b.ack===a.e.st)-(b.b.ack===b.e.st)||a.e.rank-b.e.rank||(a.e.left??0)-(b.e.left??0));
   $('#dashEmpty').hidden=list.length>0||mode==='init';
