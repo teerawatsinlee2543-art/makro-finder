@@ -321,6 +321,9 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 @media (max-width:1500px){.fbtn svg+svg{display:none}}
 .agnext{display:flex;flex-direction:column;gap:1px;margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.4}
 .agnext b{font-variant-numeric:tabular-nums}
+/* a table cell holding a chip + notes goes in one block, so the card layout (td>* {flex:1}) can't stretch the chip into a tall oval or clip its text */
+.cbox{min-width:0}
+.cbox>.chip,.cbox>.chip+*{max-width:100%}
 .chip.mini{padding:0 8px;font-size:11.5px}
 .s-obs{color:#fff;background:#7f1d1d}.s-full{color:#fff;background:#111;box-shadow:inset 0 0 0 1px #888}
 .pdf-btn{background:var(--redbox);color:var(--redbox-ink);border-color:var(--redbox-line);font-weight:800}
@@ -2200,14 +2203,14 @@ function renderNbs(){
   $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,b=st.contacts.find(x=>x.uid===r.buyerUid),img=r.img||(MF.images&&MF.images[r.itemNo])||'';
     return`<tr class="${r.status==='done'?'acted':''}">
     <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div>${r.artGrp?`<div><dt>Art Grp :</dt><dd>${esc(r.artGrp)}</dd></div>`:''}</dl></div></td>
-    <td data-l="กลุ่ม (Division)"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></td>
+    <td data-l="กลุ่ม (Division)"><div class="cbox"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></div></td>
     <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td>
     <td data-l="Location" class="small">${esc(r.loc||'-')}</td>
     <td data-l="Last Recv. Date" class="small num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td>
     <td data-l="Last Sold Date" class="small num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
     <td data-l="ไม่มียอดขาย (NBS)" class="num">${nbsDaysText(r)}</td>
-    <td data-l="Aging Status">${nbsAgingText(r)}</td>
-    <td data-l="สถานะ"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</td>
+    <td data-l="Aging Status"><div class="cbox">${nbsAgingText(r)}</div></td>
+    <td data-l="สถานะ"><div class="cbox"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</div></td>
     <td data-l="Buyer" class="small">${r.buyerUid?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(r.buyerUid)}"><b>${esc(String(r.buyerUid).slice(0,14))}${String(r.buyerUid).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}</td>
     <td data-l="Remark" class="small">${r.remark?`<div class="redbox">${esc(r.remark)}</div>`:'<span class="muted">-</span>'}</td>
     <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}<div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
