@@ -178,9 +178,8 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .meta{color:#7fb6ff}}
 :root[data-theme="dark"] .meta{color:#7fb6ff}
 @media (max-width:1100px){table.resp tr.has-meta{border-bottom:0;border-radius:10px 10px 0 0;margin-bottom:0}table.resp tr.meta-row{border-top:1px dashed var(--line);border-radius:0 0 10px 10px;margin-top:0}table.resp tr.meta-row td::before{display:none}}
-.chip.div-ff{color:var(--ok);background:var(--okbg)}
-.chip.div-df{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--card))}
-.chip.div-nf{color:var(--today);background:color-mix(in srgb,var(--today) 14%,var(--card))}
+/* FF / DF / NF share one colour */
+.chip.div-ff,.chip.div-df,.chip.div-nf{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--card))}
 .nbs-dlg{width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto}
 .imp-btn{display:inline-flex;align-items:center;gap:6px;border-color:#0b5cad;color:#0b5cad;font-weight:700}
 .imp-btn:hover{background:color-mix(in srgb,#0b5cad 10%,var(--card))}
@@ -2109,8 +2108,9 @@ function nbsPDFHtml(){
   const body=all.map(r=>{
     const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),b=st.contacts.find(x=>x.uid===r.buyerUid);
     const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${esc(a.next[0])}</div>`:''):esc(r.aging||'-');
-    return`<tr><td><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div></td>
-<td class="ctr"><b>${esc(r.division)}</b></td><td class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td><td>${esc(r.loc||'-')}</td>
+    const img=r.img||(MF.images&&MF.images[r.itemNo])||'';
+    return`<tr><td><div class="nm">${img?`<img class="th" src="${esc(img)}" alt="">`:'<span class="th ph"></span>'}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div></div></div></td>
+<td class="ctr"><span class="dv">${esc(r.division)}</span></td><td class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td><td>${esc(r.loc||'-')}</td>
 <td class="num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td class="num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
 <td class="num">${n==null?'-':`<b class="${over?'ov':''}">${n.toLocaleString()} วัน</b><div class="m">${over?'เกินเกณฑ์':'ไม่ถึงเกณฑ์'} ≥${lim}</div>`}</td><td>${ag}</td>
 <td>${esc(s[1])}</td><td>${r.buyerUid?`<b>${esc(r.buyerUid)}</b>${b?' '+esc(b.name):''}`:'-'}${r.remark?`<div class="rm">${esc(r.remark)}</div>`:''}</td></tr>`}).join('');
@@ -2123,7 +2123,10 @@ h1{font-size:18px;margin:0 0 2px;color:#9f1d1d}.sub{color:#667085;font-size:10px
 table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#fdecec;color:#7a1d1d;text-align:left;padding:5px 5px;border-bottom:2px solid #e8a3a0;font-size:9.5px}
 td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-wrap:anywhere}thead{display:table-header-group}tr{page-break-inside:avoid}tbody tr:nth-child(even) td{background:#fdf8f8}
 .m{color:#667085;font-size:8.5px}.num{white-space:nowrap}.ctr{text-align:center}.ov{color:#b42318}.c{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px}
-.rm{margin-top:2px;background:#fdecec;border:1px solid #f5c2c0;border-radius:4px;padding:1px 4px;color:#9f1d1d}</style></head><body>
+.rm{margin-top:2px;background:#fdecec;border:1px solid #f5c2c0;border-radius:4px;padding:1px 4px;color:#9f1d1d}
+.nm{display:flex;gap:6px;align-items:flex-start}.nt{min-width:0;flex:1}
+.th{flex:none;width:38px;height:38px;object-fit:contain;border:1px solid #eadada;border-radius:5px;background:#fff}.th.ph{background:#f4eeee}
+.dv{display:inline-block;border-radius:99px;padding:0 8px;font-weight:800;font-size:9px;background:#e4edfb;color:#0f4c9c}</style></head><body>
 <h1>Item NBS · สินค้าที่ไม่มียอดขาย</h1>
 <p class="sub">พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · แสดง ${all.length.toLocaleString()} จาก ${total.toLocaleString()} รายการ${all.length<total?' (ตามตัวกรองที่เลือกอยู่)':''} · เกณฑ์ NBS: FF ≥5 / DF ≥7 / NF ≥10 วัน · Aging ตามตาราง Aging Stock</p>
 <div class="sum">${Object.entries(NBS_DIV).map(([k,l])=>`<span>${k} · ${l} ${(cnt[k]||0).toLocaleString()}</span>`).join('')}</div>
@@ -2134,7 +2137,10 @@ td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-w
 function printDoc(html){
   const f=document.createElement('iframe');f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';document.body.append(f);
   f.onload=()=>{const w=f.contentWindow,go=()=>{try{w.focus();w.print()}catch(e){toast('เปิดหน้าต่างพิมพ์ไม่ได้ — ลองกด Ctrl+P')}};
-    (w.document.fonts&&w.document.fonts.ready?Promise.race([w.document.fonts.ready,new Promise(r=>setTimeout(r,2500))]):Promise.resolve()).then(go)};
+    /* wait for the fonts and for any product photos to finish loading (max 15 s) so the PDF doesn't print empty picture boxes */
+    const fontsOk=w.document.fonts&&w.document.fonts.ready?Promise.race([w.document.fonts.ready,new Promise(r=>setTimeout(r,2500))]):Promise.resolve();
+    const imgsOk=Promise.race([Promise.all([...w.document.images].map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r}))),new Promise(r=>setTimeout(r,15000))]);
+    Promise.all([fontsOk,imgsOk]).then(go)};
   f.srcdoc=html;setTimeout(()=>f.remove(),180000);
   toast('เลือก “บันทึกเป็น PDF” (Save as PDF) ที่ปลายทางในหน้าต่างพิมพ์');
 }
