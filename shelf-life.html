@@ -1350,7 +1350,7 @@ async function getTesseract(say){
 async function ocrCanvas(canvas,say){
   const w=await getTesseract(say),{data}=await w.recognize(canvas,{},{blocks:true});
   const words=data.words||(data.blocks||[]).flatMap(b=>(b.paragraphs||[]).flatMap(p=>(p.lines||[]).flatMap(l=>l.words||[])));
-  return words.filter(x=>x.text&&x.text.trim()&&x.confidence>25).map(x=>({str:x.text.trim(),x:x.bbox.x0,y:x.bbox.y0,w:x.bbox.x1-x.bbox.x0,h:x.bbox.y1-x.bbox.y0}))}
+  return words.filter(x=>x.text&&x.text.trim()&&x.confidence>25&&!/^[^\p{L}\p{N}]{1,3}$/u.test(x.text.trim())).map(x=>({str:x.text.trim(),x:x.bbox.x0,y:x.bbox.y0,w:x.bbox.x1-x.bbox.x0,h:x.bbox.y1-x.bbox.y0}))}
 async function ocrItems(file,say){
   const bmp=await createImageBitmap(file,{imageOrientation:'from-image'}),big=Math.max(bmp.width,bmp.height),s=big<1400?2:Math.min(1,2600/big),c=document.createElement('canvas');
   c.width=Math.round(bmp.width*s);c.height=Math.round(bmp.height*s);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(bmp,0,0,c.width,c.height);
