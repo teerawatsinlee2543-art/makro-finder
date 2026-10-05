@@ -1568,8 +1568,8 @@ function parseCSV(t){t=t.replace(/^﻿/,'');const rows=[];let r=[],c='',q=false;
 function exportBatchesCSV(){
   const rows=[['status','sku','description','origin','julian_receive','receive_date','day_on_shelf','shelf_life','code52_day','code52_date','days_to_code52','action','qty','location','buyer_uid','buyer_name','commercial_uid','commercial_name','done','note','remark']];
   st.batches.forEach(b=>{const e=evalBatch(b),p=e.p||{};rows.push([e.label,p.sku||'',p.desc||b.sku,ORIGINS[p.origin]||'',e.prod?jul(e.prod).ddd:'',b.prod,e.day,p.shelf,p.pullDay,e.c52?iso(e.c52):'',e.left,e.action,b.qty,b.loc,p.buyerUid,e.buyer?.name,p.comUid,e.com?.name,b.ack===e.st?'Y':'',b.note,b.remark||''])});
-  dl(`shelf-life_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8')}
-function downloadTemplate(){dl('products_template.csv',toCSV([['sku','description','origin','temp','shelf_life','step1_day','step1_pct','step2_day','step2_pct','code52_day','buyer_uid','commercial_uid'],['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']]),'text/csv;charset=utf-8')}
+  dl(`shelf-life_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8',batchesPDF)}
+function downloadTemplate(){dl('products_template.csv',toCSV([['sku','description','origin','temp','shelf_life','step1_day','step1_pct','step2_day','step2_pct','code52_day','buyer_uid','commercial_uid'],['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']]),'text/csv;charset=utf-8',templatePDF)}
 const ORIG_IN=v=>{v=String(v||'').trim().toLowerCase();return/import|นำเข้า/.test(v)?'import':/local|ท้องถิ่น|ไทย/.test(v)?'local':'other'};
 const plain=()=>{const o={};COLS.forEach(c=>o[c]=st[c].map(body));return o};
 function exportJSON(){dl(`shelf-life-backup_${iso(today())}.json`,JSON.stringify(plain(),null,1),'application/json')}
@@ -1696,14 +1696,63 @@ td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-w
 <table><colgroup><col style="width:25%"><col style="width:5%"><col style="width:5%"><col style="width:10%"><col style="width:8%"><col style="width:8%"><col style="width:8.5%"><col style="width:13%"><col style="width:7%"><col style="width:10.5%"></colgroup>
 <thead><tr><th>ชื่อสินค้า</th><th class="ctr">กลุ่ม</th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th>Aging Status</th><th>สถานะ</th><th>Buyer / Remark</th></tr></thead><tbody>${body}</tbody></table></body></html>`;
 }
-function nbsPDF(){
-  if(!nbsFiltered().length){toast('ไม่มีรายการให้ส่งออก');return}
+/* print a page of HTML through a hidden iframe: the browser's print dialog offers "Save as PDF" */
+function printDoc(html){
   const f=document.createElement('iframe');f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';document.body.append(f);
   f.onload=()=>{const w=f.contentWindow,go=()=>{try{w.focus();w.print()}catch(e){toast('เปิดหน้าต่างพิมพ์ไม่ได้ — ลองกด Ctrl+P')}};
     (w.document.fonts&&w.document.fonts.ready?Promise.race([w.document.fonts.ready,new Promise(r=>setTimeout(r,2500))]):Promise.resolve()).then(go)};
-  f.srcdoc=nbsPDFHtml();setTimeout(()=>f.remove(),180000);
+  f.srcdoc=html;setTimeout(()=>f.remove(),180000);
   toast('เลือก “บันทึกเป็น PDF” (Save as PDF) ที่ปลายทางในหน้าต่างพิมพ์');
 }
+function nbsPDF(){
+  if(!nbsFiltered().length){toast('ไม่มีรายการให้ส่งออก');return}
+  printDoc(nbsPDFHtml());
+}
+/* one A4 page layout for the other PDFs (same look as the Item NBS one) */
+const PDF_CHIP2={...PDF_CHIP,soon:['#fff2d6','#8a5a00'],err:['#ece6fb','#5b3fa8']};
+function pdfPage({title,sub,sum,cols,rows,foot,landscape=true}){
+  return`<!doctype html><html lang="th"><head><meta charset="utf-8"><title>${esc(title)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>@page{size:A4 ${landscape?'landscape':'portrait'};margin:9mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;font:9.5px/1.35 Sarabun,"Segoe UI",Tahoma,sans-serif;color:#1d2433}
+h1{font-size:18px;margin:0 0 2px;color:#9f1d1d}.sub{color:#667085;font-size:10px;margin:0 0 6px}
+.sum{display:flex;gap:6px;margin:0 0 8px;flex-wrap:wrap}.sum span{border:1px solid #f5c2c0;background:#fdecec;color:#7a1d1d;border-radius:99px;padding:1px 9px;font-weight:700}
+table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#fdecec;color:#7a1d1d;text-align:left;padding:5px 5px;border-bottom:2px solid #e8a3a0;font-size:9.5px}
+td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-wrap:anywhere}thead{display:table-header-group}tr{page-break-inside:avoid}tbody tr:nth-child(even) td{background:#fdf8f8}
+.m{color:#667085;font-size:8.5px}.num{white-space:nowrap}.ctr{text-align:center}.ov{color:#b42318}.c{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px}
+.blank td{height:22px}.note{margin:10px 0 0;color:#475467;font-size:9.5px;line-height:1.6}.note b{color:#7a1d1d}</style></head><body>
+<h1>${esc(title)}</h1><p class="sub">${sub}</p>${sum?`<div class="sum">${sum}</div>`:''}
+<table><colgroup>${cols.map(c=>`<col style="width:${c[1]}%">`).join('')}</colgroup><thead><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>${foot||''}</body></html>`;
+}
+function batchesPDFHtml(){
+  const now=new Date(),list=st.batches.map(b=>({b,e:evalBatch(b)})).sort((a,b)=>(a.b.ack===a.e.st)-(b.b.ack===b.e.st)||a.e.rank-b.e.rank||(a.e.left??0)-(b.e.left??0));
+  const cnt={},chip=(t,k)=>{const c=PDF_CHIP2[k]||PDF_CHIP2.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
+  list.forEach(({b,e})=>{if(b.ack!==e.st)cnt[e.label]=(cnt[e.label]||0)+1});
+  const rows=list.map(({b,e})=>{const p=e.p,done=b.ack===e.st,ii=itemInfo(b);
+    if(!p)return`<tr><td>${chip(e.label,'err')}</td><td colspan="9">${esc(e.action)}</td></tr>`;
+    return`<tr><td>${chip(e.label,e.st)}${done?'<div class="m">✓ ทำแล้ว</div>':''}</td>
+<td><b>${esc(ii?.desc||p.desc)}</b><div class="m">${ii?esc(ii.no)+' · ':p.sku?esc(p.sku)+' · ':''}${esc(p.cat||'')} · Shelf life ${p.shelf} วัน</div></td>
+<td class="num"><b>${jul(e.prod).ddd}</b><div class="m">${fmt(e.prod)}</div></td>
+<td class="num">วันที่ ${e.day} / ${p.pullDay}</td>
+<td class="num">${fmt(e.c52)}<div class="m ${e.left<=1?'ov':''}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></td>
+<td>${esc(e.action||'')}</td>
+<td><div class="m">Buyer</div>${esc(p.buyerUid||'-')}${e.buyer?' '+esc(e.buyer.name):''}<div class="m">Commercial</div>${esc(p.comUid||'-')}${e.com?' '+esc(e.com.name):''}</td>
+<td class="num">${esc(b.qty??'')}</td><td>${esc(b.loc||'-')}</td><td>${esc(b.remark||'')}</td></tr>`}).join('');
+  return pdfPage({title:'Shelf-Life Monitor · ล็อตและสถานะวันนี้',
+    sub:`Julian วันนี้ ${jul(today()).ddd} (YYDDD ${jul(today()).y2}) · พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · ทั้งหมด ${list.length.toLocaleString()} ล็อต`,
+    sum:Object.entries(cnt).map(([k,v])=>`<span>${esc(k)} ${v.toLocaleString()}</span>`).join(''),
+    cols:[['สถานะ',8],['สินค้า',20],['Julian รับ',8],['วางขาย',8],['Code 52',10],['ต้องทำ',17],['ติดต่อ',13],['จำนวน',5],['ที่ตั้ง',6],['Remark',5]],rows});
+}
+function batchesPDF(){if(!st.batches.length){toast('ยังไม่มีล็อตให้ส่งออก');return}printDoc(batchesPDFHtml())}
+const TPL_COLS=[['sku','รหัสสินค้า (ถ้ามี)'],['description','ชื่อสินค้า'],['origin','ประเภท: import / local / other'],['temp','อุณหภูมิจัดเรียง'],['shelf_life','Shelf life (วัน)'],['step1_day','ลด Step 1 เริ่มวันที่'],['step1_pct','Step 1 ลด %'],['step2_day','ลด Step 2 เริ่มวันที่'],['step2_pct','Step 2 ลด %'],['code52_day','Code 52 วันที่'],['buyer_uid','Buyer UID'],['commercial_uid','Commercial UID']];
+function templatePDFHtml(){
+  const ex=[['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']];
+  const rows=ex.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')+Array.from({length:14},()=>`<tr class="blank">${TPL_COLS.map(()=>'<td></td>').join('')}</tr>`).join('');
+  return pdfPage({title:'แบบฟอร์มนำเข้าสินค้า & กฎ Shelf life',sub:'กรอกด้วยมือหรือพิมพ์ใน Excel แล้วนำเข้าที่แท็บ “สินค้า & กฎลดราคา” → นำเข้าข้อมูล · สองแถวแรกคือตัวอย่าง',
+    cols:TPL_COLS.map(([k,t],i)=>[`${esc(t)}<div class="m">${k}</div>`,[8,17,10,8,7,7,6,7,6,7,8,9][i]]),rows,
+    foot:`<p class="note"><b>วิธีกรอก:</b> ถ้าเว้นวันลดราคาและ Code 52 ว่าง ระบบคำนวณให้ตามคู่มือ Makro จาก Shelf life และประเภท · วันที่ 1 = วันรับสินค้า · ถ้า SKU หรือชื่อสินค้าซ้ำกับที่มีอยู่ ระบบอัปเดตรายการเดิม · ช่องที่เว้นว่างจะไม่ทับข้อมูลเดิม</p>`});
+}
+function templatePDF(){printDoc(templatePDFHtml())}
 function renderNbs(){
   if(!$('#nbsBody'))return;
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',!!nbsColF[b.dataset.f]));
