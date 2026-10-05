@@ -328,6 +328,27 @@ table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 /* a table cell holding a chip + notes goes in one block, so the card layout (td>* {flex:1}) can't stretch the chip into a tall oval or clip its text */
 .cbox{min-width:0}
 .cbox>.chip,.cbox>.chip+*{max-width:100%}
+/* OOS+ tab: count badge on the tab, dashboard banner, refill cards coloured by how long the item has been out (orange after 2 h, red after 6 h) */
+.tabcnt{display:inline-block;min-width:18px;margin-left:6px;padding:0 6px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:800;line-height:18px;text-align:center}
+.tabcnt.late{background:#c62828;color:#fff}
+nav button.on .tabcnt{background:var(--accent-ink);color:var(--accent)}
+nav button.on .tabcnt.late{background:#c62828;color:#fff}
+.oos-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;border-color:var(--soon);background:var(--soonbg);color:var(--soon);font-weight:700}
+.oos-banner.late{border-color:#c62828;background:var(--redbox);color:var(--redbox-ink)}
+.oos-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
+.oosc{display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px;border:1px solid var(--line);border-left:6px solid var(--seg-ok);border-radius:12px;background:var(--card)}
+.oosc.lv-warn{border-left-color:var(--seg-md2);background:var(--soonbg)}
+.oosc.lv-late{border-left-color:#c62828;background:var(--redbox)}
+.oosc.lv-done{border-left-color:var(--line);opacity:.78}
+.oosc-h{display:flex;gap:10px;align-items:flex-start}
+.oosc-t{min-width:0;flex:1;overflow-wrap:anywhere}
+.oosc-m{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.oosc-note{padding:6px 8px;border:1px dashed var(--line);border-radius:8px;background:var(--bg);font-size:13px;overflow-wrap:anywhere}
+.oosc-photo{width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.oosc-a{display:flex;flex-wrap:wrap;gap:8px}
+.oosc-a .btn{flex:1 1 auto}
+.oos-photo{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.oos-ph img{max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--line)}
 .chip.mini{padding:0 8px;font-size:11.5px}
 .s-obs{color:#fff;background:#7f1d1d}.s-full{color:#fff;background:#111;box-shadow:inset 0 0 0 1px #888}
 .pdf-btn{background:var(--redbox);color:var(--redbox-ink);border-color:var(--redbox-line);font-weight:800}
@@ -422,6 +443,7 @@ select,input,textarea{max-width:100%}
   <button data-tab="dash" class="on">ภาพรวมวันนี้</button>
   <button data-tab="add">+ Monitor item</button>
   <button data-tab="nbs">Item NBS</button>
+  <button data-tab="oos">OOS+<span class="tabcnt" id="oosBadge" hidden></span></button>
   <button data-tab="prod">สินค้า & กฎลดราคา</button>
   <button data-tab="ct">Buyer / Commercial</button>
   <button data-tab="jul">แปลง Julian</button>
@@ -434,6 +456,7 @@ select,input,textarea{max-width:100%}
 <section id="t-dash">
   <div class="card" id="localWarn" hidden style="border-color:var(--soon);background:var(--soonbg)"><h2 style="color:var(--soon)">ไม่ได้แสดงข้อมูลทีม</h2><p style="margin:0" id="localWhy"></p><p class="small" id="localTeamHint" style="margin:6px 0 0">ข้อมูลทีมอยู่ที่ <b>claude.ai/artifact/XwwnvaT9BChA7UbX8yj1Td</b> — เปิดลิงก์นี้ขณะล็อกอิน claude.ai ด้วยบัญชีองค์กร</p></div>
   <div class="card" id="onboard" hidden><h2>ยังไม่มีข้อมูลของทีม</h2><p class="muted" style="margin-top:0">โหลดรายการสินค้าและกฎ Shelf life จากคู่มือ Makro (ผักผลไม้นำเข้าและท้องถิ่น 69 รายการ) แล้วเพิ่ม Buyer / Commercial ทุกคนที่เปิดลิงก์นี้จะเห็นข้อมูลชุดเดียวกัน</p><div class="row w"><button class="btn pri" id="obSample">โหลดสินค้าตามคู่มือ Makro</button><button class="btn" id="obMigrate" hidden></button></div></div>
+  <div class="card oos-banner" id="oosBanner" hidden><span id="oosBannerTxt"></span><button type="button" class="btn sm" id="oosBannerGo">ดูรายการ OOS+</button></div>
   <div class="tiles" id="tiles"></div>
   <div class="card">
     <div class="fbar no-print">
@@ -543,6 +566,30 @@ select,input,textarea{max-width:100%}
     <table class="resp nbs-tbl"><colgroup><col style="width:13%"><col style="width:9%"><col style="width:4%"><col style="width:6.5%"><col style="width:6.5%"><col style="width:6.5%"><col style="width:7.5%"><col style="width:10.5%"><col style="width:7.5%"><col style="width:13%"><col style="width:9.5%"><col style="width:6.5%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th><div class="th-in"><span>Division</span><button type="button" class="fbtn" data-f="div" title="Filter Division" aria-label="Filter Division"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th><div class="th-in"><span>Aging<br>Status</span><button type="button" class="fbtn" data-f="aging" title="Filter Aging Status" aria-label="Filter Aging Status"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>สถานะ</th><th>Buyer</th><th>Remark</th><th>บันทึกเมื่อ / จัดการ</th></tr></thead><tbody id="nbsBody"></tbody></table>
     <div id="nbsMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="nbsMoreTxt"></span><button class="btn" id="nbsMore">แสดงเพิ่ม 200 รายการ</button></div>
     <p class="muted" id="nbsEmpty" hidden>ยังไม่มีรายการ — กด “+ เพิ่ม Item NBS” เพื่อบันทึกสินค้าที่ไม่มียอดขาย</p>
+  </div>
+</section>
+
+<!-- OOS+ -->
+<section id="t-oos" hidden>
+  <div class="card">
+    <div class="add-head">
+      <h2>OOS+ <span class="muted small" style="font-weight:400">· สินค้าหมดชั้น / หมดสต็อก — เตือนให้เติม</span></h2>
+      <span class="row w"><button type="button" class="btn" id="oosAdd">+ เพิ่มรายการ</button><button type="button" class="btn imp-btn" id="oosImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span>
+    </div>
+    <div class="tiles" id="oosTiles" style="margin:12px 0"></div>
+    <div class="fbar f4">
+      <label class="f-q">ค้นหา<input id="oosQ" placeholder="รหัส / ชื่อสินค้า / ตำแหน่ง / ผู้รับผิดชอบ / หมายเหตุ"></label>
+      <label>สถานะ<select id="oosFSt"><option value="">ทั้งหมด</option><option value="need">ต้องเติม</option><option value="doing">กำลังเติม</option><option value="done">เติมแล้ว</option></select></label>
+      <label>ผู้รับผิดชอบ<select id="oosFWho"><option value="">ทั้งหมด</option></select></label>
+      <label>เรียงตาม<select id="oosSort"><option value="age">ค้างนานสุดก่อน</option><option value="loc">ตำแหน่งชั้น</option><option value="name">ชื่อสินค้า</option></select></label>
+      <div class="f-act">
+        <label class="f-chk"><input type="checkbox" id="oosHide" checked> ซ่อนที่เติมแล้ว</label>
+        <button type="button" class="btn danger w" id="oosClearDone" title="ลบรายการที่เติมแล้วออกจากรายการ (ทุกคนในทีมเห็นการลบ)">ลบรายการที่เติมแล้ว</button>
+      </div>
+    </div>
+    <div id="oosList" class="oos-list"></div>
+    <div id="oosMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="oosMoreTxt"></span><button class="btn" id="oosMore">แสดงเพิ่ม</button></div>
+    <p class="muted" id="oosEmpty" hidden>ยังไม่มีรายการ OOS — กด “นำเข้ารายงาน” หรือ “+ เพิ่มรายการ” เมื่อเจอสินค้าหมดชั้นหรือหมดสต็อก</p>
   </div>
 </section>
 
@@ -717,6 +764,47 @@ select,input,textarea{max-width:100%}
   <p class="err-text" id="prErr" style="margin:8px 0 0"></p>
   <div class="row" style="justify-content:space-between;margin-top:12px;align-items:center"><button type="button" class="btn sm" id="prManual" title="เพิ่มสินค้าตามคู่มือ Makro ที่ยังไม่มีในรายการ">เพิ่มสินค้าที่ยังไม่มีจากคู่มือ</button><span class="row"><button type="button" class="btn cancel-btn" id="prCancel">ปิด</button><button type="button" class="btn pri save-btn" id="prGo" disabled>นำเข้าสินค้า</button></span></div>
 </div></dialog>
+<dialog id="dlgOos" class="nbs-dlg"><form method="dialog" id="fOos">
+  <h2 id="oosTitle">เพิ่มรายการ OOS</h2>
+  <div class="grid2">
+    <label>เลข Item<input name="itemNo" inputmode="numeric" autocomplete="off" placeholder="เช่น 814216"></label>
+    <label>ตำแหน่งชั้น<input name="loc" placeholder="เช่น Loc 007 / Location 007-135"></label>
+    <label style="grid-column:1/-1">ชื่อสินค้า<input name="desc" required></label>
+    <label>สถานะ<select name="status"><option value="need">ต้องเติม</option><option value="doing">กำลังเติม</option><option value="done">เติมแล้ว</option></select></label>
+    <label>ผู้รับผิดชอบเติม<input name="assignee" list="oosWhoList" placeholder="ชื่อน้อง / ผู้เติม" autocomplete="off"><datalist id="oosWhoList"></datalist></label>
+    <label>สต็อกในระบบ (ถ้ามี)<input name="stock" inputmode="numeric" placeholder="เช่น 12"></label>
+    <label>เวลาที่ตรวจพบ<input name="foundAt" type="datetime-local"></label>
+    <label style="grid-column:1/-1">หมายเหตุ<textarea name="note" rows="2" placeholder="เช่น ของอยู่ชั้นลอย / รอสินค้าเข้า / ต้องสั่งเพิ่ม"></textarea></label>
+  </div>
+  <div class="oos-photo">
+    <div id="oImgPrev" class="oos-ph"></div>
+    <div class="row" style="gap:8px">
+      <button type="button" class="btn" id="oCamBtn">ถ่ายรูปชั้นวาง</button><button type="button" class="btn" id="oFileBtn">แนบรูป</button><button type="button" class="btn danger" id="oPhotoDel" hidden>ลบรูป</button>
+      <input type="file" id="oCam" accept="image/*" capture="environment" hidden><input type="file" id="oFile" accept="image/*" hidden>
+    </div>
+    <span class="muted small" id="oPhotoMsg">ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน</span>
+  </div>
+  <p class="err-text" id="oErr" style="margin:8px 0 0"></p>
+  <div class="row" style="justify-content:flex-end;margin-top:14px"><button type="button" class="btn" onclick="$('#dlgOos').close()">ยกเลิก</button><button class="btn pri" value="ok">บันทึก</button></div>
+</form></dialog>
+
+<dialog id="dlgOosImp" class="nbs-dlg imp-dlg"><div>
+  <h2>นำเข้ารายงาน OOS</h2>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV ของรายงานสินค้าหมดชั้น / หมดสต็อกมาวาง ระบบอ่านคอลัมน์ <b>Item No</b> (บังคับ) และ ชื่อสินค้า · ตำแหน่ง · สต็อก · วันที่/เวลา · ผู้รับผิดชอบ · หมายเหตุ (ถ้ามี) — รายการที่ยังเปิดอยู่จะไม่ซ้ำ รายการที่เคยเติมแล้วแต่กลับมาอยู่ในรายงานจะเปิดใหม่ ตำแหน่งชั้นและชื่อที่ขาดจะเติมจาก Makro Finder ให้</p>
+  <div id="oiDrop" class="imp-drop" tabindex="0">
+    <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span>
+    <button type="button" class="btn pri" id="oiPick">เลือกไฟล์จากเครื่อง</button>
+    <input type="file" id="oiFile" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+  </div>
+  <div id="oiBox"></div>
+  <p class="err-text" id="oiErr" style="margin:8px 0 0"></p>
+  <div id="oiOpts" class="imp-opts" hidden>
+    <label class="chk"><input type="checkbox" id="oiClose"> ปิดอัตโนมัติ (เติมแล้ว) รายการที่นำเข้าจากไฟล์ก่อนหน้าแต่ไม่อยู่ในรายงานนี้ — ใช้เมื่อรายงานแสดง OOS ทั้งหมดของวันนั้น</label>
+  </div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="oiCancel">ปิด</button><button type="button" class="btn pri save-btn" id="oiGo" disabled>นำเข้า OOS</button></div>
+</div></dialog>
+
 <dialog id="dlgArt" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้าตาราง Item → Art Grp</h2>
   <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls), CSV, PDF หรือรูปภาพของตารางที่มีเลข <b>Item</b> คู่กับ <b>Art Grp</b> มาวาง ระบบใส่ Art Grp ให้ Item NBS ที่เลข Item ตรงกัน แล้วกำหนด Buyer ให้ตามเลข Art Grp ที่ Buyer ดูแล (ใน Buyer / Commercial) · ถ้าไฟล์ไม่มีหัวคอลัมน์ ให้เรียงคอลัมน์แรก = Item คอลัมน์ที่สอง = Art Grp</p>
@@ -963,7 +1051,8 @@ async function fbInit(){
 /* Item NBS lists can be thousands of rows (Excel imports) and one Firestore document holds ≤1 MB,
    so the `nbs` collection is spread over NBS_SHARDS documents (shelfLife_nbs_0 … _7) by a hash of the item id. */
 /* `imgs` (photos taken / attached on a product, resized to ~30 KB) is sharded the same way */
-const SHARDED={nbs:8,imgs:8};
+/* `oos` (OOS+ list: out-of-shelf / out-of-stock items to refill) is spread over 4 documents the same way */
+const SHARDED={nbs:8,imgs:8,oos:4};
 const shardOf=(id,n)=>{let h=0;for(const ch of String(id))h=(h*31+ch.charCodeAt(0))>>>0;return h%n};
 const docKey=(c,id)=>SHARDED[c]?c+'_'+shardOf(id,SHARDED[c]):c;
 const fbDoc=key=>fdb.collection('makroFinder').doc('shelfLife_'+key);
@@ -1023,8 +1112,8 @@ async function supaCall(req){
     else for(const c of COLS){const ids=grp.filter(w=>w.col===c).map(w=>w.id);if(ids.length)await sbDelete(c,ids)}
     i=j}
   return{ok:true}}
-const KEY='shelfLifeMonitor.v2',COLS=['products','contacts','batches','nbs','imgs'];
-let noTeam='';let st={products:[],contacts:[],batches:[],nbs:[],imgs:[]},mode='init',db=null,usr=null,myId=null,canWrite=true;
+const KEY='shelfLifeMonitor.v2',COLS=['products','contacts','batches','nbs','imgs','oos'];
+let noTeam='';let st={products:[],contacts:[],batches:[],nbs:[],imgs:[],oos:[]},mode='init',db=null,usr=null,myId=null,canWrite=true;
 const loaded={};
 const rid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
 function seed(demo){
@@ -1118,7 +1207,7 @@ async function connect(){
     setInterval(()=>{if(!document.hidden&&Date.now()-lastPull>(REMOTE==='supabase'?9000:25000))pull()},3000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastPull>10000)pull()});
     return}
-  if(!db){mode='local';noTeam=c?.use?'signin':location.protocol==='file:'?'file':'nosheet';st=loadLocal()||withIds(seed(true));saveLocal();applyRole();renderAll();return}
+  if(!db){mode='local';noTeam=c?.use?'signin':location.protocol==='file:'?'file':'nosheet';st=loadLocal()||withIds(seed(true));st.oos=st.oos||[];saveLocal();applyRole();renderAll();return}
   mode='db';
   try{myId=await usr?.id()}catch(e){}
   try{const w=await usr?.can('data.write');canWrite=w!==false}catch(e){}
@@ -2067,6 +2156,213 @@ $('#amBuyer').onchange=$('#amOver').onchange=()=>{if(artImp)showArtPreview()};
   $('#dlgArt').addEventListener('dragover',e=>e.preventDefault());
   $('#dlgArt').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readArtFile(f)})})();
 
+/* ---------- OOS+ : out-of-shelf / out-of-stock items the team has to refill ----------
+   record = {itemNo, desc, loc, stock, status:'need'|'doing'|'done', assignee, note, foundAt, doneAt, img:'img:<id>' (shelf photo in `imgs`), source:'import'|'manual'} */
+const OOS_ST={need:['ต้องเติม','md1'],doing:['กำลังเติม','soon'],done:['เติมแล้ว','ok']};
+const OOS_WARN_H=2,OOS_LATE_H=6; /* hours since found: orange from 2 h, red from 6 h */
+const oosAll=()=>st.oos||[];
+const oosMs=r=>{const t=r.foundAt?new Date(r.foundAt).getTime():NaN;return isNaN(t)?Date.now():t};
+const oosDoneMs=r=>{const t=r.doneAt?new Date(r.doneAt).getTime():NaN;return isNaN(t)?oosMs(r):t};
+const oosHours=r=>(Date.now()-oosMs(r))/36e5;
+const oosLevel=r=>r.status==='done'?'done':oosHours(r)>=OOS_LATE_H?'late':oosHours(r)>=OOS_WARN_H?'warn':'ok';
+const oosDur=h=>{h=Math.max(0,h);if(h<1)return`${Math.max(1,Math.round(h*60))} นาที`;if(h<24){const m=Math.round((h%1)*60);return`${Math.floor(h)} ชม.${m&&m<60?' '+m+' น.':''}`}const hh=Math.floor(h%24);return`${Math.floor(h/24)} วัน${hh?' '+hh+' ชม.':''}`};
+const oosFmt=ms=>{const d=new Date(ms);return`${fmt(d)} ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')} น.`};
+const oosLocalInput=iso=>{const d=new Date(iso),p=n=>String(n).padStart(2,'0');return isNaN(d)?'':`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`};
+const oosMe=()=>{try{return localStorage.getItem('shelfLifeMonitor.oosName')||localStorage.getItem('shelfLifeMonitor.name')||''}catch(e){return''}};
+let oosTile='',oosLimit=60;
+function oosVisible(){
+  const q=$('#oosQ').value.trim().toLowerCase(),fs=$('#oosFSt').value,fw=$('#oosFWho').value,hide=$('#oosHide').checked,t0=new Date();t0.setHours(0,0,0,0);
+  const rows=oosAll().filter(r=>{
+    if(oosTile==='need'&&r.status!=='need')return false;
+    if(oosTile==='doing'&&r.status!=='doing')return false;
+    if(oosTile==='late'&&oosLevel(r)!=='late')return false;
+    if(oosTile==='done'&&!(r.status==='done'&&oosDoneMs(r)>=t0.getTime()))return false;
+    if(!oosTile&&!fs&&hide&&r.status==='done')return false;
+    if(fs&&r.status!==fs)return false;
+    if(fw&&(r.assignee||'')!==fw)return false;
+    return!q||[r.itemNo,r.desc,r.loc,r.assignee,r.note].join(' ').toLowerCase().includes(q)});
+  const s=$('#oosSort').value;
+  return rows.sort((a,b)=>(a.status==='done')-(b.status==='done')||(a.status==='done'?oosDoneMs(b)-oosDoneMs(a):
+    (s==='loc'?String(a.loc||'~').localeCompare(String(b.loc||'~'),'th',{numeric:true}):s==='name'?String(a.desc||'').localeCompare(String(b.desc||''),'th'):0)||oosMs(a)-oosMs(b)))}
+function oosCard(r){
+  const lv=oosLevel(r),k=esc(r._id),s=OOS_ST[r.status]||OOS_ST.need,th=(MF.images&&MF.images[r.itemNo])||'',ph=String(r.img||'').startsWith('img:')?imgData(String(r.img).slice(4)):'';
+  const age=r.status==='done'?`<span class="muted small">ใช้เวลา ${oosDur(((r.doneAt?new Date(r.doneAt).getTime():Date.now())-oosMs(r))/36e5)}${r.doneAt?' · เติมเมื่อ '+oosFmt(oosDoneMs(r)):''}</span>`
+    :`<span class="chip s-${lv==='late'?'pull':lv==='warn'?'md2':'ok'}">ค้าง ${oosDur(oosHours(r))}</span>`;
+  const acts=r.status==='need'?`<button type="button" class="btn pri sm" onclick="oosStart('${k}')">เริ่มเติม</button><button type="button" class="btn sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button>`
+    :r.status==='doing'?`<button type="button" class="btn pri sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button><button type="button" class="btn sm" onclick="oosBack('${k}')">กลับเป็นต้องเติม</button>`
+    :`<button type="button" class="btn sm" onclick="oosBack('${k}')">เปิดใหม่ (ต้องเติม)</button>`;
+  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div><div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div></div>
+    <div class="oosc-m"><span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
+    <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
+    <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
+function renderOos(){
+  const all=oosAll(),active=all.filter(r=>r.status!=='done'),late=active.filter(r=>oosLevel(r)==='late'),need=all.filter(r=>r.status==='need'),doing=all.filter(r=>r.status==='doing');
+  const t0=new Date();t0.setHours(0,0,0,0);const doneToday=all.filter(r=>r.status==='done'&&oosDoneMs(r)>=t0.getTime());
+  /* always: tab badge + dashboard banner */
+  const bd=$('#oosBadge');bd.hidden=!active.length;bd.textContent=active.length.toLocaleString();bd.classList.toggle('late',late.length>0);
+  const bn=$('#oosBanner');bn.hidden=!active.length;bn.classList.toggle('late',late.length>0);
+  $('#oosBannerTxt').textContent=`OOS+ มีสินค้าต้องเติม ${need.length.toLocaleString()} รายการ${doing.length?` · กำลังเติม ${doing.length.toLocaleString()}`:''}${late.length?` · ค้างเกิน ${OOS_LATE_H} ชม. ${late.length.toLocaleString()} รายการ`:''}`;
+  if($('#t-oos').hidden)return;
+  $('#oosTiles').innerHTML=[['need','ต้องเติม','md1',need.length],['doing','กำลังเติม','soon',doing.length],['late','ค้างเกิน '+OOS_LATE_H+' ชม.','pull',late.length],['done','เติมแล้ววันนี้','ok',doneToday.length]]
+    .map(([k,l,c,n])=>`<button type="button" class="tile${oosTile===k?' sel':''}" data-t="${k}"><span class="chip s-${c}">${l}</span><b>${n.toLocaleString()}</b><span class="muted small">รายการ</span></button>`).join('');
+  const sel=$('#oosFWho'),cur=sel.value,names=[...new Set(all.map(r=>r.assignee).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  sel.innerHTML='<option value="">ทั้งหมด</option>'+names.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('');
+  const rows=oosVisible(),shown=rows.slice(0,oosLimit);
+  $('#oosList').innerHTML=shown.map(oosCard).join('');
+  $('#oosEmpty').hidden=rows.length>0;$('#oosEmpty').textContent=all.length?'ไม่มีรายการที่ตรงกับตัวกรอง':'ยังไม่มีรายการ OOS — กด “นำเข้ารายงาน” หรือ “+ เพิ่มรายการ” เมื่อเจอสินค้าหมดชั้นหรือหมดสต็อก';
+  $('#oosMoreWrap').hidden=rows.length<=oosLimit;$('#oosMoreTxt').textContent=`แสดง ${shown.length.toLocaleString()} จาก ${rows.length.toLocaleString()} รายการ`;
+}
+async function oosPatch(r,patch,msg){await act(async()=>patchItem('oos',r,{...patch,updatedAt:new Date().toISOString()}),msg);renderOos()}
+function oosStart(id){const r=byId('oos',id);if(!r)return;const who=r.assignee||oosMe();if(!who){oosEdit(id,true);return}oosPatch(r,{status:'doing',assignee:who},'เริ่มเติมแล้ว')}
+function oosDone(id){const r=byId('oos',id);if(r)oosPatch(r,{status:'done',doneAt:new Date().toISOString(),doneBy:r.assignee||oosMe()||''},'บันทึกว่าเติมแล้ว')}
+function oosBack(id){const r=byId('oos',id);if(r)oosPatch(r,{status:'need',doneAt:'',doneBy:'',...(r.status==='done'?{foundAt:new Date().toISOString()}:{})},'เปลี่ยนเป็นต้องเติมแล้ว')}
+const oosPhotoId=r=>String(r&&r.img||'').startsWith('img:')?String(r.img).slice(4):null;
+async function oosDel(id){const r=byId('oos',id);if(!r)return;if(!await ask(`ลบรายการ OOS “${r.desc||r.itemNo}”?  (ลบให้ทุกคนในทีม)`))return;
+  const ph=oosPhotoId(r)?byId('imgs',oosPhotoId(r)):null;act(async()=>{await rmItem('oos',r);if(ph)await rmItem('imgs',ph)},'ลบรายการแล้ว')}
+const fOos=$('#fOos');let oosEditId=null,oosPhoto={id:null,data:null,old:null};
+function oosPhotoPrev(){const d=oosPhoto.id?imgData(oosPhoto.id):'';$('#oImgPrev').innerHTML=d?`<img src="${esc(d)}" alt="">`:'';$('#oPhotoDel').hidden=!oosPhoto.id}
+function oosEdit(id,focusWho){
+  const r=id?byId('oos',id):null;oosEditId=r?r._id:null;
+  $('#oosTitle').textContent=r?'แก้ไขรายการ OOS':'เพิ่มรายการ OOS';$('#oErr').textContent='';
+  const v=r||{itemNo:'',desc:'',loc:'',status:'need',assignee:oosMe(),stock:'',foundAt:new Date().toISOString(),note:''};
+  fOos.itemNo.value=v.itemNo||'';fOos.desc.value=v.desc||'';fOos.loc.value=v.loc||'';fOos.status.value=v.status;fOos.assignee.value=v.assignee||'';
+  fOos.stock.value=v.stock??'';fOos.foundAt.value=oosLocalInput(v.foundAt);fOos.note.value=v.note||'';
+  const pid=oosPhotoId(r);oosPhoto={id:pid,data:null,old:pid};oosPhotoPrev();
+  $('#oPhotoMsg').textContent='ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน';
+  $('#oosWhoList').innerHTML=[...new Set(oosAll().map(x=>x.assignee).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th')).map(n=>`<option value="${esc(n)}">`).join('');
+  if(onMakroSite())loadMakroData();$('#dlgOos').showModal();if(focusWho)fOos.assignee.focus()}
+/* typing an Item No fills the name and shelf location from Makro Finder when they are still empty */
+fOos.itemNo.onchange=()=>{const it=MF.state==='ready'?MF.items.get(fOos.itemNo.value.trim()):null;if(!it)return;if(!fOos.desc.value)fOos.desc.value=it.desc;if(!fOos.loc.value)fOos.loc.value=locText(it.locs.slice(0,2))};
+async function oosTakePhoto(file){
+  if(!file)return;
+  try{const data=await resizePhoto(file);if(data.length>350000)throw Error('รูปใหญ่เกินไป ลองรูปอื่น');
+    const id=oosPhoto.id||rid();tmpImgs[id]=data;oosPhoto={...oosPhoto,id,data};
+    $('#oPhotoMsg').textContent=`ได้รูปแล้ว (${Math.round(data.length*.75/1024)} KB) — กด “บันทึก” เพื่อใช้รูปนี้`;oosPhotoPrev();
+  }catch(e){$('#oPhotoMsg').textContent='ใช้รูปนี้ไม่ได้: '+e.message}
+}
+$('#oCamBtn').onclick=()=>$('#oCam').click();$('#oFileBtn').onclick=()=>$('#oFile').click();
+$('#oCam').onchange=$('#oFile').onchange=e=>{oosTakePhoto(e.target.files[0]);e.target.value=''};
+$('#oPhotoDel').onclick=()=>{if(oosPhoto.id)delete tmpImgs[oosPhoto.id];oosPhoto={...oosPhoto,id:null,data:null};oosPhotoPrev();$('#oPhotoMsg').textContent='ลบรูปแล้ว — กด “บันทึก” เพื่อยืนยัน'};
+fOos.onsubmit=ev=>{
+  const f=fOos,no=f.itemNo.value.trim(),desc=f.desc.value.trim(),status=f.status.value;
+  if(!desc){ev.preventDefault();$('#oErr').textContent='กรอกชื่อสินค้า';return}
+  if(no&&status!=='done'&&oosAll().some(x=>x._id!==oosEditId&&x.status!=='done'&&amNum(x.itemNo)===amNum(no))){ev.preventDefault();$('#oErr').textContent='Item นี้มีรายการ OOS ที่ยังไม่เติมอยู่แล้ว';return}
+  const old=oosEditId?byId('oos',oosEditId):null,now=new Date().toISOString(),ph={...oosPhoto},keep=!!ph.id,who=f.assignee.value.trim();
+  try{if(who)localStorage.setItem('shelfLifeMonitor.oosName',who)}catch(e){}
+  const rec={...(old?body(old):{}),itemNo:no,desc,loc:f.loc.value.trim(),stock:f.stock.value.trim(),status,assignee:who,note:f.note.value.trim(),
+    foundAt:f.foundAt.value?new Date(f.foundAt.value).toISOString():(old?.foundAt||now),img:keep?'img:'+ph.id:'',
+    doneAt:status==='done'?(old?.doneAt||now):'',doneBy:status==='done'?(old?.doneBy||who):'',updatedAt:now,...(old?{}:{source:'manual',createdAt:now,createdBy:myId||null})};
+  act(async()=>{
+    if(keep&&ph.data)await putItem('imgs',{_id:ph.id,data:ph.data});
+    if(ph.old&&!(keep&&ph.id===ph.old)){const x=byId('imgs',ph.old);if(x)await rmItem('imgs',x)} /* the old photo is no longer used */
+    await putItem('oos',{...rec,_id:oosEditId||undefined});
+  },'บันทึกรายการ OOS แล้ว');
+};
+$('#oosClearDone').onclick=async()=>{
+  const l=oosAll().filter(r=>r.status==='done');if(!l.length){toast('ไม่มีรายการที่เติมแล้ว');return}
+  if(!await ask(`ลบรายการที่เติมแล้ว ${l.length.toLocaleString()} รายการ?  (ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)`))return;
+  act(async()=>{for(const r of l){const ph=oosPhotoId(r)?byId('imgs',oosPhotoId(r)):null;await rmItem('oos',r);if(ph)await rmItem('imgs',ph)}},`ลบแล้ว ${l.length.toLocaleString()} รายการ`)};
+$('#oosAdd').onclick=()=>oosEdit();
+$('#oosTiles').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;oosTile=oosTile===b.dataset.t?'':b.dataset.t;oosLimit=60;renderOos()};
+$('#oosMore').onclick=()=>{oosLimit+=60;renderOos()};
+let oosQT;$('#oosQ').oninput=()=>{clearTimeout(oosQT);oosQT=setTimeout(()=>{oosLimit=60;renderOos()},150)};
+['#oosFSt','#oosFWho','#oosSort','#oosHide'].forEach(s=>$(s).onchange=()=>{oosLimit=60;renderOos()});
+$('#oosBannerGo').onclick=()=>document.querySelector('#tabs button[data-tab="oos"]').click();
+setInterval(()=>{if(!document.hidden)renderOos()},60000); /* the "ค้าง … ชม." counters and colours move on without a click */
+/* ---- import an OOS report (Excel / CSV): Item No required, everything else optional ---- */
+const OOS_COLS=[
+  ['item',/^(itemno|item|itemnumber|itemcode|article|articleno|sku|รหัส|รหัสสินค้า|เลขสินค้า|เลขitem)$/],
+  ['barcode',/(barcode|บาร์โค้ด|^ean$|^gtin$)/],
+  ['desc',/^(itemdesc|itemdescription|description|desc|name|itemname|productname|ชื่อสินค้า|ชื่อ|สินค้า|รายการสินค้า|รายการ)$/],
+  ['loc',/(location|^loc$|ตำแหน่ง|ชั้น|bay)/],
+  ['stock',/(stock|onhand|qty|quantity|คงเหลือ|สต็อก|จำนวน)/],
+  ['found',/(datetime|date|time|วันที่|เวลา|ตรวจพบ)/],
+  ['who',/(assign|owner|ผู้รับผิดชอบ|ผู้เติม|พนักงาน)/],
+  ['note',/(remark|note|หมายเหตุ)/]];
+function oosMapHeader(row){const m={},used=new Set();
+  (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of OOS_COLS){if(m[f]==null&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
+/* Excel serial / dd/mm/yyyy [hh:mm] (Buddhist years too) / ISO → ISO string; a date with no time that is today counts as "now" */
+function oosParseDate(v){
+  if(v===''||v==null)return'';
+  let d;
+  if(typeof v==='number'&&v>20000&&v<80000){const ms=Math.round((v-25569)*864e5);d=new Date(ms+new Date(ms).getTimezoneOffset()*6e4)}
+  else{const s=String(v).trim(),m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})(?:[ T,]+(\d{1,2})[:.](\d{2}))?/);
+    if(m){let y=+m[3];if(y<100)y+=2000;if(y>2400)y-=543;d=new Date(y,+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0))}else d=new Date(s)}
+  if(isNaN(d))return'';
+  const n=new Date();if(d.getHours()===0&&d.getMinutes()===0&&d.toDateString()===n.toDateString())return n.toISOString();
+  return d.toISOString()}
+let oosImp=null;
+function parseOosFile(wb){
+  const rows=[],info={cols:{},skipped:0,headerless:false},seen=new Map();
+  const take=(g)=>{const no=String(g.item??'').trim().replace(/\.0+$/,'');if(!no){info.skipped++;return}
+    const x={itemNo:no,barcode:String(g.barcode??'').trim(),desc:String(g.desc??'').trim(),loc:String(g.loc??'').trim(),stock:String(g.stock??'').trim(),foundAt:oosParseDate(g.found),who:String(g.who??'').trim(),note:String(g.note??'').trim()};
+    const k=amNum(no);if(seen.has(k))rows[seen.get(k)]=x;else{seen.set(k,rows.length);rows.push(x)}}; /* the same Item twice: the last row wins */
+  for(const sn of wb.SheetNames){
+    const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
+    let hi=-1,m=null;
+    for(let i=0;i<Math.min(raw.length,25);i++){const mm=oosMapHeader(raw[i]);if(mm.item!=null){hi=i;m=mm;break}}
+    if(hi>=0){Object.keys(m).forEach(k=>info.cols[k]=true);
+      for(let i=hi+1;i<raw.length;i++){const r=raw[i];if(r.every(c=>String(c).trim()===''))continue;const g={};Object.entries(m).forEach(([f,c])=>g[f]=r[c]);take(g)}
+      continue}
+    /* no header row: first column = Item (3-9 digits), second = name */
+    const body=raw.filter(r=>r.some(c=>String(c).trim()!=='')),ok=body.filter(r=>/^\d{3,9}(\.0+)?$/.test(String(r[0]).trim()));
+    if(body.length&&ok.length/body.length>=.7&&ok.length>=3){info.headerless=true;info.cols.item=true;if(ok.some(r=>String(r[1]||'').trim()))info.cols.desc=true;ok.forEach(r=>take({item:r[0],desc:r[1]}))}
+  }
+  return{rows,info}}
+function planOos(imp,o){
+  const pick=new Map();
+  oosAll().forEach(r=>{const k=amNum(r.itemNo);if(!k)return;const c=pick.get(k);if(!c||(c.status==='done'&&r.status!=='done')||(c.status===r.status&&oosMs(r)>oosMs(c)))pick.set(k,r)});
+  const add=[],upd=[],reopen=[],seen=new Set();
+  imp.rows.forEach(x=>{const k=amNum(x.itemNo);seen.add(k);const ex=pick.get(k);if(!ex)add.push(x);else if(ex.status==='done')reopen.push({ex,x});else upd.push({ex,x})});
+  const close=o.close?oosAll().filter(r=>r.status!=='done'&&r.source==='import'&&!seen.has(amNum(r.itemNo))):[];
+  return{add,upd,reopen,close}}
+async function readOosFile(file){
+  $('#oiErr').textContent='';$('#oiBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
+  try{
+    const wb=await readAnyFile(file,r=>oosMapHeader(r).item!=null,sayTo('#oiBox')),parsed=parseOosFile(wb);
+    if(!parsed.rows.length)throw Error('ไม่พบรายการในไฟล์ — ต้องมีคอลัมน์ Item No (หรือเรียงคอลัมน์แรก = Item No)');
+    oosImp={file:file.name,...parsed};showOosPreview();
+  }catch(e){oosImp=null;$('#oiBox').innerHTML='';$('#oiErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
+}
+const OOS_COL_LBL={item:'Item No',barcode:'บาร์โค้ด',desc:'ชื่อสินค้า',loc:'ตำแหน่ง',stock:'สต็อก',found:'วันที่/เวลา',who:'ผู้รับผิดชอบ',note:'หมายเหตุ'};
+function showOosPreview(){
+  const {file,info,rows}=oosImp,plan=planOos(oosImp,{close:$('#oiClose').checked});oosImp.plan=plan;
+  $('#oiOpts').hidden=false;$('#oiDrop').hidden=true;$('#oiGo').disabled=!(plan.add.length||plan.upd.length||plan.reopen.length||plan.close.length);
+  const sample=[...plan.add.slice(0,6).map(x=>[x,'ใหม่']),...plan.reopen.slice(0,3).map(y=>[y.x,'เปิดซ้ำ'])].slice(0,8).map(([x,t])=>`<tr><td><b>${esc(x.itemNo)}</b></td><td>${esc(x.desc||(MF.state==='ready'&&MF.items.get(x.itemNo)?.desc)||'—')}</td><td>${esc(x.loc||'')}</td><td><span class="chip s-md1">${t}</span></td></tr>`).join('');
+  $('#oiBox').innerHTML=`<div class="imp-file"><b>${esc(file)}</b> <span class="muted small">· ${rows.length.toLocaleString()} รายการ${info.headerless?' · ไม่มีหัวคอลัมน์ (คอลัมน์ 1 = Item No, 2 = ชื่อ)':''}${info.skipped?` · ข้าม ${info.skipped.toLocaleString()} แถวที่ไม่มี Item No`:''}</span> <button type="button" class="btn sm" id="oiChange">เลือกไฟล์อื่น</button></div>
+  <div class="imp-tiles"><div class="t-new"><b>${plan.add.length.toLocaleString()}</b><span>รายการใหม่</span></div><div><b>${plan.reopen.length.toLocaleString()}</b><span>เปิดซ้ำ (เคยเติมแล้ว)</span></div><div><b>${plan.upd.length.toLocaleString()}</b><span>อยู่ในรายการเดิมแล้ว</span></div><div><b>${plan.close.length.toLocaleString()}</b><span>ปิดอัตโนมัติ</span></div></div>
+  <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>OOS_COL_LBL[k]||k).join(' · ')}</p>
+  ${sample?`<div class="imp-sample"><table><thead><tr><th>Item No</th><th>ชื่อสินค้า</th><th>ตำแหน่ง</th><th></th></tr></thead><tbody>${sample}</tbody></table></div>`:''}`;
+  $('#oiChange').onclick=()=>{$('#oiDrop').hidden=false;$('#oiBox').innerHTML='';$('#oiGo').disabled=true;oosImp=null;$('#oiFile').value='';$('#oiFile').click()};
+}
+async function runOosImport(){
+  if(!oosImp)return;
+  const plan=planOos(oosImp,{close:$('#oiClose').checked}),now=new Date().toISOString(),file=oosImp.file;
+  $('#oiGo').disabled=true;$('#oiGo').textContent='กำลังนำเข้า…';
+  if(onMakroSite()&&MF.state==='idle')loadMakroData();
+  for(let i=0;i<60&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250));
+  const ready=MF.state==='ready',fill=x=>{const it=ready?MF.items.get(x.itemNo):null;return{desc:x.desc||it?.desc||'',loc:x.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),barcode:x.barcode||it?.barcode||''}};
+  const ok=await act(async()=>{
+    for(const x of plan.add){const f=fill(x);await putItem('oos',{itemNo:x.itemNo,desc:f.desc,loc:f.loc,barcode:f.barcode,stock:x.stock,status:'need',assignee:x.who,note:x.note,foundAt:x.foundAt||now,source:'import',importFile:file,importRun:now,createdAt:now,createdBy:myId||null,updatedAt:now})}
+    for(const {ex,x} of plan.reopen){const f=fill(x);await patchItem('oos',ex,{status:'need',doneAt:'',doneBy:'',autoClosed:false,foundAt:x.foundAt||now,desc:ex.desc||f.desc,loc:x.loc||ex.loc||f.loc,stock:x.stock||ex.stock||'',...(x.who?{assignee:x.who}:{}),importFile:file,importRun:now,updatedAt:now})}
+    for(const {ex,x} of plan.upd){const f=fill(x),p={};
+      if(!ex.desc&&f.desc)p.desc=f.desc;if(!ex.loc&&(x.loc||f.loc))p.loc=x.loc||f.loc;if(x.stock&&x.stock!==String(ex.stock??''))p.stock=x.stock;if(!ex.note&&x.note)p.note=x.note;
+      if(Object.keys(p).length)await patchItem('oos',ex,{...p,updatedAt:now})}
+    for(const r of plan.close)await patchItem('oos',r,{status:'done',doneAt:now,doneBy:'ปิดอัตโนมัติ',autoClosed:true,updatedAt:now});
+  },null);
+  $('#oiGo').disabled=false;$('#oiGo').textContent='นำเข้า OOS';
+  if(ok){$('#dlgOosImp').close();renderOos();toast(`นำเข้า OOS แล้ว: ใหม่ ${plan.add.length} · เปิดซ้ำ ${plan.reopen.length}${plan.close.length?` · ปิดอัตโนมัติ ${plan.close.length}`:''}`)}else showOosPreview();
+}
+function openOosImport(){oosImp=null;$('#oiBox').innerHTML='';$('#oiDrop').hidden=false;$('#oiGo').disabled=true;$('#oiGo').textContent='นำเข้า OOS';$('#oiOpts').hidden=true;$('#oiErr').textContent='';$('#oiFile').value='';$('#oiClose').checked=false;if(onMakroSite())loadMakroData();$('#dlgOosImp').showModal()}
+$('#oosImport').onclick=openOosImport;$('#oiCancel').onclick=()=>$('#dlgOosImp').close();$('#oiGo').onclick=runOosImport;
+$('#oiPick').onclick=()=>$('#oiFile').click();$('#oiFile').onchange=e=>{const f=e.target.files[0];if(f)readOosFile(f)};
+$('#oiClose').onchange=()=>{if(oosImp)showOosPreview()};
+(()=>{const d=$('#oiDrop');
+  ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));
+  ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+  $('#dlgOosImp').addEventListener('dragover',e=>e.preventDefault());
+  $('#dlgOosImp').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readOosFile(f)})})();
+
 /* ---------- julian tab ---------- */
 function julTab(){
   const v=$('#jD').value;if(v){const d=fromIso(v),j=jul(d);$('#jDout').innerHTML=`<b>${j.ddd}</b> <span class="muted small">DDD</span> · <b>${j.y2}</b> <span class="muted small">YYDDD</span>`}
@@ -2666,12 +2962,12 @@ function renderAll(){
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent=jul(t).y2;
   const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML=prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
-  renderDash();renderProd();renderCt();renderNbs();addPreview();julTab();
+  renderDash();renderProd();renderCt();renderNbs();renderOos();addPreview();julTab();
 }
 $('#fSt').innerHTML+=ST.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
 $('#q').oninput=renderDash;$('#pQ').oninput=renderProd;$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
-$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs')loadMakroData();if(b.dataset.tab==='nbs')renderNbs()};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs'||b.dataset.tab==='oos')loadMakroData();if(b.dataset.tab==='nbs')renderNbs();if(b.dataset.tab==='oos')renderOos()};
 if(onMakroSite()){$('#appLogo').hidden=false;$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
 /* came from Makro Finder in this tab → go back in history so its page/search state is kept */
 $('#backMf').onclick=e=>{try{const r=new URL(document.referrer);if(r.origin===location.origin&&r.pathname.replace(/index\.html$/,'')===new URL('./',location.href).pathname&&history.length>1){e.preventDefault();history.back()}}catch(x){}};
