@@ -380,6 +380,7 @@ dialog::backdrop{background:#0008}
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">สินค้า & กฎ Shelf life</h2>
       <span class="row w"><button class="btn" onclick="addManual()">เพิ่มสินค้าที่ยังไม่มีจากคู่มือ</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
     <p class="muted small">กฎตาม “คู่มือ อายุและการจัดการสินค้าผักและผลไม้” (ผ่านการตรวจสอบจากทีมจัดซื้อและ QA) · นับวันที่ 1 = วันรับสินค้า · ขายราคาเต็มครบ Shelf life → ลด 15% (Step 1) → ลด 30% (Step 2) → Code 52 · สินค้า Shelf life 1 วันข้าม Step 1 · อายุสินค้ากำหนดตามการจัดเรียงในตู้แช่ 0–4°C (ผักสลัด 6–8°C) หรือให้พิจารณาตามสภาพสินค้า</p>
+    <div class="row" style="margin:0 0 10px;align-items:center"><label style="flex:1;min-width:220px;max-width:520px">ค้นหาสินค้า (ชื่อ / รหัส / หมวด / Buyer UID / Commercial)<input id="pQ" type="search" placeholder="เช่น บลูเบอร์รี่ มะม่วง หรือ FF3" autocomplete="off"></label><span class="muted small" id="pQn" style="padding-bottom:9px"></span></div>
     <table class="resp"><thead><tr><th>สินค้า</th><th>Shelf life</th><th><span class="hchip h-ok">ขายราคาเต็ม</span></th><th><span class="hchip h-md1">ลด 15%</span></th><th><span class="hchip h-md2">ลด 30%</span></th><th><span class="hchip h-pull">Code 52</span></th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
   </div>
 </section>
@@ -1074,7 +1075,10 @@ $('#aSave').onclick=async()=>{
 
 /* ---------- products ---------- */
 function renderProd(){
-  $('#prodBody').innerHTML=bySku().map(p=>{
+  const pq=($('#pQ')?.value||'').trim().toLowerCase(),all=bySku(),shown=pq?all.filter(p=>[p.desc,p.sku,p.cat,p.buyerUid,p.comUid,ORIGINS[p.origin],p.temp].join(' ').toLowerCase().includes(pq)):all;
+  if($('#pQn'))$('#pQn').textContent=pq?`พบ ${shown.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`:`${all.length.toLocaleString()} รายการ`;
+  if(pq&&!shown.length){$('#prodBody').innerHTML='<tr><td colspan="9" class="muted">ไม่พบสินค้าที่ตรงกับคำค้นหา</td></tr>';return}
+  $('#prodBody').innerHTML=shown.map(p=>{
     const s=stages(p),f=k=>s.find(x=>x.k===k),k=esc(p._id);
     const rng=x=>x?`${x.label.replace('ลดราคา ','').replace(/ \(Step \d\)/,'')} · วันที่ ${x.from}${x.to!=null&&x.to>x.from?'–'+x.to:''}`:'<span class="muted">—</span>';
     const man=manualRule(p.shelf,p.origin),off=man&&['md1Day','md2Day','pullDay'].some(x=>man[x]!==p[x]);
@@ -1483,7 +1487,7 @@ function renderAll(){
   renderDash();renderProd();renderCt();renderNbs();addPreview();julTab();
 }
 $('#fSt').innerHTML+=ST.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
-$('#q').oninput=renderDash;$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
+$('#q').oninput=renderDash;$('#pQ').oninput=renderProd;$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
 $('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs')loadMakroData();if(b.dataset.tab==='nbs')renderNbs()};
 if(onMakroSite()){$('#appLogo').hidden=false;$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
