@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Shelf-Life Monitor</title>
-<link rel="icon" href="shrink-icon.webp" type="image/webp">
+<link rel="icon" href="makro-finder-tab-icon.png" type="image/png">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f5f6f8;--card:#fff;--ink:#1d2433;--muted:#667085;--line:#e2e5ea;--accent:#0b5cad;--accent-ink:#fff;
@@ -65,7 +65,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .s-md1{color:var(--md1);background:var(--md1bg)}.s-md2{color:var(--md2);background:var(--md2bg)}
 .s-pull{color:var(--pull);background:var(--pullbg)}.s-err{color:var(--err);background:var(--errbg)}
 .strip{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;padding:3px 2px;max-width:min(100%,320px)}
-.strip span{flex:none;width:28px;height:26px;display:grid;place-items:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;border-radius:3px;color:var(--seg-ink)}
+.strip span{flex:none;min-width:28px;width:auto;padding:0 4px;box-sizing:border-box;height:26px;display:grid;place-items:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;border-radius:3px;color:var(--seg-ink)}
 .strip .ok{background:var(--seg-ok)}.strip .md1{background:var(--seg-md1)}.strip .md2{background:var(--seg-md2)}.strip .pull{background:var(--seg-pull);color:var(--seg-pull-ink)}
 .strip .split{background:linear-gradient(180deg,var(--seg-md2) 50%,var(--seg-pull) 50%);color:var(--seg-pull-ink)}
 .strip .past{opacity:.4}
@@ -139,6 +139,14 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .scan-frame{position:absolute;inset:22% 10%;border:3px solid #e30613;border-radius:10px;box-shadow:0 0 0 999px #00000059}
 [hidden]{display:none!important}
 #mfStatus:empty,#mfResults:empty{display:none}
+tr.has-meta td{border-bottom:0}
+tr.meta-row td{padding-top:0;padding-bottom:12px}
+.meta{color:#0b5cad;font-size:13px;display:grid;gap:2px;line-height:1.5}
+.meta b{font-weight:800}
+.meta .hl{font-weight:800;background:#0b5cad14;border-radius:4px;padding:0 4px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .meta{color:#7fb6ff}}
+:root[data-theme="dark"] .meta{color:#7fb6ff}
+@media (max-width:820px){table.resp tr.has-meta{border-bottom:0;border-radius:10px 10px 0 0;margin-bottom:0}table.resp tr.meta-row{border-top:1px dashed var(--line);border-radius:0 0 10px 10px;margin-top:0}table.resp tr.meta-row td::before{display:none}}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
 .redbox.remark{background:var(--redbox-ink);color:#fff;border-color:var(--redbox-ink)}
 .remark-field{grid-column:span 2}
@@ -758,7 +766,7 @@ function renderDash(){
     if(!p)return`<tr><td data-l="สถานะ">${chip('err',e.label)}</td><td data-l="สินค้า" colspan="7">${esc(e.action)}</td><td class="no-print"><button class="btn sm danger w" onclick="delBatch('${k}')">ลบ</button></td></tr>`;
     const pos=Math.min(100,Math.max(0,(e.day-.5)/p.pullDay*100));
     const by=done&&b.ackBy?(mode==='sheet'?` โดย ${esc(b.ackBy)}`:` โดย <span data-uid="${esc(b.ackBy)}">${b.ackBy===myId?'คุณ':'…'}</span>`):'';
-    return`<tr class="${done?'acted':''}">
+    return`<tr class="has-meta${done?" acted":""}">
     <td data-l="สถานะ"><div>${chip(e.st,e.label)}${done?`<div class="small" style="margin-top:4px">✓ ทำแล้ว${by}</div>`:''}</div></td>
     <td data-l="สินค้า"><div>${ii?.img?`<img class="pthumb" src="${esc(ii.img)}" alt="" loading="lazy">`:""}<b>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(ii.locs))}</b></div>`:""}${b.note?`<div class="redbox" style="margin-top:6px"><b>หมายเหตุ:</b> ${esc(b.note)}</div>`:''}${b.remark?`<div class="redbox remark" style="margin-top:6px"><b>Remark:</b> ${esc(b.remark)}</div>`:''}</div></td>
     <td data-l="Julian รับ" class="num"><div><b>${jul(e.prod).ddd}</b><div class="small">${fmt(e.prod)}</div></div></td>
@@ -770,8 +778,19 @@ function renderDash(){
     <td class="no-print"><div class="actbtns">
       <button class="btn sm" title="คัดลอกข้อความแจ้ง Buyer/Commercial" onclick="copyMsg('${k}')">คัดลอก</button>
       ${e.st!=='ok'?`<button class="btn sm w" onclick="ack('${k}')">${done?'ยกเลิก ✓':'ทำแล้ว'}</button>`:''}
-      <button class="btn sm danger w" onclick="delBatch('${k}')">ลบ</button></div></td></tr>`}).join('');
+      <button class="btn sm danger w" onclick="delBatch('${k}')">ลบ</button></div></td></tr>${metaRow(b,done)}`}).join('');
   fillNames();
+}
+/* lot footer: when it was created, plus the store's working rounds (today's rule highlighted) */
+const TH_DOW=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
+function metaRow(b,done){
+  const c=b.addedAt?new Date(b.addedAt):null,hm=d=>String(d.getHours()).padStart(2,'0')+'.'+String(d.getMinutes()).padStart(2,'0');
+  const created=c&&!isNaN(c)?`${TH_DOW[c.getDay()]} ${fmt(c)} เวลา ${hm(c)} น.`:'— (ล็อตเก่า ไม่มีบันทึกเวลา)';
+  const we=[0,6].includes(new Date().getDay());
+  return`<tr class="meta-row${done?' acted':''}"><td colspan="9"><div class="meta">
+    <div><b>Create (วันที่ทำ):</b> ${created}${b.addedBy&&mode==='sheet'?` · โดย ${esc(b.addedBy)}`:''}</div>
+    <div><b>เวลา:</b> <span class="${we?'':'hl'}">จ–ศ = 2 รอบ ทำก่อน 10.00 น. และ 14.00 น.</span> / <span class="${we?'hl':''}">ส–อา = 1 รอบ ทำก่อน 14.00 น.</span></div>
+  </div></td></tr>`;
 }
 async function fillNames(){
   if(!usr?.profiles)return;
