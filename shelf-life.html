@@ -148,6 +148,10 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .meta{color:#7fb6ff}}
 :root[data-theme="dark"] .meta{color:#7fb6ff}
 @media (max-width:820px){table.resp tr.has-meta{border-bottom:0;border-radius:10px 10px 0 0;margin-bottom:0}table.resp tr.meta-row{border-top:1px dashed var(--line);border-radius:0 0 10px 10px;margin-top:0}table.resp tr.meta-row td::before{display:none}}
+.chip.div-ff{color:var(--ok);background:var(--okbg)}
+.chip.div-df{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--card))}
+.chip.div-nf{color:var(--today);background:color-mix(in srgb,var(--today) 14%,var(--card))}
+.nbs-dlg{width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
 .redbox.remark{background:var(--redbox-ink);color:#fff;border-color:var(--redbox-ink)}
 .remark-field{grid-column:span 2}
@@ -210,6 +214,7 @@ dialog::backdrop{background:#0008}
 <nav id="tabs">
   <button data-tab="dash" class="on">ภาพรวมวันนี้</button>
   <button data-tab="add">+ Monitor item</button>
+  <button data-tab="nbs">Item NBS</button>
   <button data-tab="prod">สินค้า & กฎลดราคา</button>
   <button data-tab="ct">Buyer / Commercial</button>
   <button data-tab="jul">แปลง Julian</button>
@@ -308,6 +313,24 @@ dialog::backdrop{background:#0008}
   <p class="muted small" id="scanMsg" style="margin:8px 0 0">เล็งกล้องไปที่บาร์โค้ดให้อยู่ในกรอบ</p>
 </form></dialog>
 
+<!-- ITEM NBS -->
+<section id="t-nbs" hidden>
+  <div class="card">
+    <div class="add-head">
+      <h2>Item NBS <span class="muted small" style="font-weight:400">· สินค้าที่ไม่มียอดขายเลย (FF / DF / NF)</span></h2>
+      <span class="row w"><button class="btn" id="nbsExport">ส่งออก CSV</button><button class="btn pri" id="nbsAdd">+ เพิ่ม Item NBS</button></span>
+    </div>
+    <div class="tiles" id="nbsTiles" style="margin:12px 0"></div>
+    <div class="row" style="margin-bottom:10px">
+      <label style="flex:1;min-width:200px">ค้นหา (รหัส / ชื่อ / Buyer UID / ที่ตั้ง / Remark)<input id="nbsQ" placeholder="เช่น 210907 หรือ ชื่อสินค้า"></label>
+      <label>สถานะ<select id="nbsFSt"><option value="">ทั้งหมด</option></select></label>
+      <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
+    </div>
+    <table class="resp"><thead><tr><th>สินค้า</th><th>กลุ่ม</th><th>ที่ตั้ง</th><th>ไม่มียอดขาย</th><th>Stock</th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
+    <p class="muted" id="nbsEmpty" hidden>ยังไม่มีรายการ — กด “+ เพิ่ม Item NBS” เพื่อบันทึกสินค้าที่ไม่มียอดขาย</p>
+  </div>
+</section>
+
 <!-- PRODUCTS -->
 <section id="t-prod" hidden>
   <div class="card">
@@ -404,6 +427,29 @@ dialog::backdrop{background:#0008}
   </div>
   <div class="row" style="justify-content:flex-end;margin-top:14px"><button type="button" class="btn" onclick="dlgCt.close()">ยกเลิก</button><button class="btn pri" value="ok">บันทึก</button></div>
 </form></dialog>
+
+<dialog id="dlgNbs" class="nbs-dlg"><div>
+  <h2 id="nbsTitle">เพิ่ม Item NBS</h2>
+  <div id="nbsFind" hidden>
+    <label>ค้นหาสินค้าจาก Makro Finder (รหัส บาร์โค้ด หรือชื่อ)<input id="nQ" placeholder="เช่น 210907 หรือ ชื่อสินค้า" autocomplete="off"></label>
+    <p class="muted small" id="nStatus" style="margin:4px 0 0"></p>
+    <div id="nResults" class="mf-results"></div>
+  </div>
+  <div id="nPicked" class="mf-picked" hidden></div>
+  <div class="lot-grid" style="margin-top:12px">
+    <label>กลุ่มสินค้า<select id="nDiv"><option value="FF">FF · Fresh Food</option><option value="DF">DF · Dry Food</option><option value="NF">NF · Non Food</option></select></label>
+    <label>รหัสสินค้า (Item No)<input id="nNo" inputmode="numeric" placeholder="เช่น 210907"></label>
+    <label>วันที่ขายครั้งล่าสุด (ถ้าทราบ)<input type="date" id="nLast"></label>
+    <label class="span3">ชื่อสินค้า<input id="nDesc" placeholder="ชื่อสินค้า"></label>
+    <label>ที่ตั้ง / ชั้นวาง<input id="nLoc" placeholder="เช่น Loc 510 / Location 510-011"></label>
+    <label>Stock คงเหลือ (ชิ้น)<input type="number" min="0" id="nStock" placeholder="0"></label>
+    <label>Buyer UID<select id="nBuyer"></select></label>
+    <label class="span3">สถานะ / การดำเนินการ<select id="nStat"></select></label>
+    <label class="span3">Remark<textarea id="nRemark" rows="2" maxlength="300" placeholder="รายละเอียดเพิ่มเติม เช่น เหตุผลที่ไม่ขายได้ สิ่งที่ขอให้ Buyer ดำเนินการ"></textarea></label>
+  </div>
+  <p class="err-text" id="nErr" style="margin:8px 0 0"></p>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="nCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="nSave">บันทึก</button></div>
+</div></dialog>
 
 <dialog id="dlgAsk"><form method="dialog">
   <p id="askMsg" style="white-space:pre-line;margin-top:0"></p>
@@ -613,8 +659,8 @@ async function supaCall(req){
     else for(const c of COLS){const ids=grp.filter(w=>w.col===c).map(w=>w.id);if(ids.length)await sbDelete(c,ids)}
     i=j}
   return{ok:true}}
-const KEY='shelfLifeMonitor.v2',COLS=['products','contacts','batches'];
-let noTeam='';let st={products:[],contacts:[],batches:[]},mode='init',db=null,usr=null,myId=null,canWrite=true;
+const KEY='shelfLifeMonitor.v2',COLS=['products','contacts','batches','nbs'];
+let noTeam='';let st={products:[],contacts:[],batches:[],nbs:[]},mode='init',db=null,usr=null,myId=null,canWrite=true;
 const loaded={};
 const rid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
 function seed(demo){
@@ -718,7 +764,7 @@ async function connect(){
 }
 
 /* ---------- ui helpers ---------- */
-function ask(msg,okOnly){return new Promise(res=>{const d=$('#dlgAsk');$('#askMsg').textContent=msg;$('#askNo').hidden=!!okOnly;d.returnValue='';d.onclose=()=>res(d.returnValue==='yes');d.showModal()})}
+function ask(msg,okOnly){return new Promise(res=>{const d=$('#dlgAsk');let done=false;const fin=v=>{if(!done){done=true;res(v)}};$('#askMsg').textContent=msg;$('#askNo').hidden=!!okOnly;d.returnValue='';d.onclose=()=>fin(d.returnValue==='yes');d.querySelectorAll('button').forEach(b=>{b.onclick=()=>fin(b.value==='yes')});d.showModal()})}
 const notice=m=>ask(m,true);
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400)}
 const chip=(k,l)=>`<span class="chip s-${k}">${esc(l)}</span>`;
@@ -1076,17 +1122,102 @@ async function resetSample(){if(!await ask(mode==='db'?'ลบข้อมูล
 $('#obSample').onclick=()=>act(()=>replaceAll(seed(false)),'โหลดสินค้าตามคู่มือ Makro แล้ว');
 $('#obMigrate').onclick=()=>{const lc=loadLocal();if(lc)act(()=>replaceAll(lc),'ย้ายข้อมูลขึ้นข้อมูลทีมแล้ว')};
 
+/* ---------- Item NBS: items with no sales at all (FF / DF / NF) ---------- */
+const NBS_DIV={FF:'Fresh Food',DF:'Dry Food',NF:'Non Food'};
+const NBS_STAT=[['check','รอตรวจสอบ','s-err'],['wait','แจ้ง Buyer แล้ว รอตอบกลับ','s-soon'],['promo','ขอลดราคา / ระบายสต็อก','s-md1'],
+  ['move','ย้ายตำแหน่ง / จัดวางใหม่','s-md2'],['transfer','โอนออก Store ใกล้เคียง','s-md2'],['cancel','ขอยกเลิก Item / ตัดออกจากสินค้าที่ขาย','s-pull'],
+  ['writeoff','ทำลาย / Write-off','s-pull'],['done','แก้ไขแล้ว (ปิดงาน)','s-ok']];
+const nStat=k=>NBS_STAT.find(x=>x[0]===k)||NBS_STAT[0];
+const divGroupOk=(div,g)=>div==='FF'?String(g).startsWith('Fresh Food'):div==='DF'?g==='Dry Grocery Food':div==='NF'?g==='Dry Grocery Non Food':true;
+let nbsFilterDiv='',nbsEditId=null,nbsDraft={};
+function nbsDaysText(r){
+  if(!r.lastSale)return'<span class="muted">ไม่ระบุ / ไม่เคยขาย</span>';
+  const n=diffD(today(),fromIso(r.lastSale));return`<b class="${n>=30?'err-text':''}">${n} วัน</b><div class="muted small">ขายล่าสุด ${fmt(fromIso(r.lastSale))}</div>`;
+}
+function renderNbs(){
+  if(!$('#nbsBody'))return;
+  const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0};rows.forEach(r=>{if(r.status!=='done')cnt[r.division]=(cnt[r.division]||0)+1});
+  $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k} · ${l}</span><b>${cnt[k]||0}</b><span class="muted small">รายการที่ยังไม่ปิดงาน</span></button>`).join('');
+  const q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked;
+  const list=rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!fs||r.status===fs)&&!(hide&&r.status==='done')
+    &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>(a.status==='done')-(b.status==='done')||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  $('#nbsEmpty').hidden=list.length>0||mode==='init';
+  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,b=st.contacts.find(x=>x.uid===r.buyerUid);
+    return`<tr class="${r.status==='done'?'acted':''}">
+    <td data-l="สินค้า"><div>${r.img?`<img class="pthumb" src="${esc(r.img)}" alt="" loading="lazy">`:''}<b>${esc(r.desc||'—')}</b><div class="muted small">${esc(r.itemNo||'')}${r.barcode?' · '+esc(r.barcode):''}</div></div></td>
+    <td data-l="กลุ่ม"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></td>
+    <td data-l="ที่ตั้ง" class="small">${esc(r.loc||'-')}</td>
+    <td data-l="ไม่มียอดขาย" class="num">${nbsDaysText(r)}</td>
+    <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td>
+    <td data-l="สถานะ"><span class="chip ${s[2]}">${esc(s[1])}</span></td>
+    <td data-l="Buyer / Remark" class="small">${r.buyerUid?`<b>${esc(r.buyerUid)}</b>${b?' '+esc(b.name):''}`:'<span class="muted">-</span>'}${r.remark?`<div class="redbox" style="margin-top:4px">${esc(r.remark)}</div>`:''}</td>
+    <td data-l="บันทึกเมื่อ" class="small num">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.</div>`:'-'}</td>
+    <td><div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
+}
+function nbsBuyerOptions(sel){
+  const div=$('#nDiv').value,l=st.contacts.filter(c=>c.role==='Buyer'&&divGroupOk(div,c.group)).sort((a,b)=>String(a.uid).localeCompare(String(b.uid)));
+  $('#nBuyer').innerHTML='<option value="">— ไม่ระบุ —</option>'+l.map(c=>`<option value="${esc(c.uid)}"${c.uid===sel?' selected':''}>${esc(c.uid)} · ${esc(c.name)}</option>`).join('')
+    +(sel&&!l.some(c=>c.uid===sel)?`<option value="${esc(sel)}" selected>${esc(sel)}</option>`:'');
+}
+function nbsOpen(r){
+  nbsEditId=r?r._id:null;nbsDraft=r?{barcode:r.barcode||'',img:r.img||'',locs:r.locs||[]}:{};
+  $('#nbsTitle').textContent=r?'แก้ไข Item NBS':'เพิ่ม Item NBS';$('#nErr').textContent='';
+  $('#nbsFind').hidden=r||!onMakroSite();if(!r&&onMakroSite())loadMakroData();
+  $('#nStat').innerHTML=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
+  const v=r||{division:nbsFilterDiv||'FF',itemNo:'',desc:'',lastSale:'',loc:'',stock:'',buyerUid:'',status:'check',remark:''};
+  $('#nDiv').value=v.division;$('#nNo').value=v.itemNo||'';$('#nDesc').value=v.desc||'';$('#nLast').value=v.lastSale||'';$('#nLoc').value=v.loc||'';
+  $('#nStock').value=v.stock??'';$('#nStat').value=v.status;$('#nRemark').value=v.remark||'';nbsBuyerOptions(v.buyerUid);
+  $('#nQ').value='';$('#nResults').innerHTML='';renderNbsPicked();renderNbsStatus();$('#dlgNbs').showModal();
+}
+function renderNbsPicked(){const d=nbsDraft,el=$('#nPicked');el.hidden=!(d.img||d.barcode);
+  el.innerHTML=el.hidden?'':`${d.img?`<img src="${esc(d.img)}" alt="">`:''}<div><b>${esc($('#nDesc').value)}</b><div class="muted small">${esc($('#nNo').value)}${d.barcode?' · บาร์โค้ด '+esc(d.barcode):''}</div></div>`}
+function renderNbsStatus(){const el=$('#nStatus');if(!el)return;el.textContent=MF.state==='loading'?'กำลังโหลดข้อมูลสินค้าจาก Makro Finder…':MF.state==='ready'?`ค้นได้ ${MF.list.length.toLocaleString()} สินค้า`:MF.state==='error'?'โหลดข้อมูลสินค้าไม่สำเร็จ — กรอกรหัสและชื่อเองได้':''}
+function nbsSearch(){
+  const l=mfSearch($('#nQ').value);
+  $('#nResults').innerHTML=l.map(it=>`<button type="button" class="mf-hit" data-no="${esc(it.itemNo)}">${MF.images[it.itemNo]?`<img src="${esc(MF.images[it.itemNo])}" alt="" loading="lazy">`:'<span class="mf-noimg"></span>'}<span><b>${esc(it.desc)}</b><span class="muted small">${esc(it.itemNo)}${it.barcode?' · '+esc(it.barcode):''}${it.locs.length?' · '+esc(locText(it.locs)):''}</span></span></button>`).join('');
+}
+function nbsPick(no){const it=MF.items.get(no);if(!it)return;
+  $('#nNo').value=it.itemNo;$('#nDesc').value=it.desc;if(it.locs.length)$('#nLoc').value=locText(it.locs.slice(0,2));
+  nbsDraft={barcode:it.barcode||'',img:MF.images[it.itemNo]||'',locs:it.locs.slice(0,3)};$('#nResults').innerHTML='';$('#nQ').value='';renderNbsPicked()}
+function nbsEdit(id){const r=byId('nbs',id);if(r)nbsOpen(r)}
+async function nbsDel(id){const r=byId('nbs',id);if(!r||!await ask(`ลบ “${r.desc||r.itemNo}” ออกจาก Item NBS?${mode==='sheet'||mode==='db'?' (ลบให้ทุกคนในทีม)':''}`))return;act(()=>rmItem('nbs',r),'ลบรายการแล้ว')}
+async function nbsSave(){
+  const no=$('#nNo').value.trim(),desc=$('#nDesc').value.trim();
+  if(!no&&!desc){$('#nErr').textContent='กรอกรหัสสินค้าหรือชื่อสินค้าอย่างน้อย 1 อย่าง';return}
+  const prev=nbsEditId?byId('nbs',nbsEditId):null,now=new Date().toISOString();
+  const o={...(prev?body(prev):{}),division:$('#nDiv').value,itemNo:no,desc,loc:$('#nLoc').value.trim(),lastSale:$('#nLast').value,
+    stock:$('#nStock').value===''?'':+$('#nStock').value,buyerUid:$('#nBuyer').value,status:$('#nStat').value,remark:$('#nRemark').value.trim(),
+    barcode:nbsDraft.barcode||'',img:nbsDraft.img||'',locs:nbsDraft.locs||[],updatedAt:now,updatedBy:myId||null};
+  if(!prev){o.createdAt=now;o.createdBy=myId||null}
+  if(nbsEditId)o._id=nbsEditId;
+  $('#dlgNbs').close();
+  await act(()=>putItem('nbs',o),prev?'บันทึกการแก้ไขแล้ว':'เพิ่มรายการแล้ว');
+}
+function nbsCSV(){
+  const rows=[['group','item_no','description','barcode','location','last_sale','days_no_sale','stock','status','buyer_uid','remark','created_at']];
+  (st.nbs||[]).forEach(r=>rows.push([r.division,r.itemNo,r.desc,r.barcode||'',r.loc||'',r.lastSale||'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',r.stock??'',nStat(r.status)[1],r.buyerUid||'',r.remark||'',r.createdAt||'']));
+  dl(`item-nbs_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8');
+}
+$('#nbsAdd').onclick=()=>nbsOpen(null);$('#nbsExport').onclick=nbsCSV;
+$('#nCancel').onclick=()=>$('#dlgNbs').close();$('#nSave').onclick=nbsSave;
+$('#nDiv').onchange=()=>nbsBuyerOptions($('#nBuyer').value);
+let nbsT;$('#nQ').oninput=()=>{clearTimeout(nbsT);nbsT=setTimeout(nbsSearch,150)};
+$('#nResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)nbsPick(b.dataset.no)};
+$('#nbsQ').oninput=renderNbs;$('#nbsFSt').onchange=renderNbs;$('#nbsHide').onchange=renderNbs;
+$('#nbsFSt').innerHTML+=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
+$('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;renderNbs()};
 /* ---------- boot ---------- */
 function renderAll(){
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent=jul(t).y2;
   const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML=prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
-  renderDash();renderProd();renderCt();addPreview();julTab();
+  renderDash();renderProd();renderCt();renderNbs();addPreview();julTab();
 }
 $('#fSt').innerHTML+=ST.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
 $('#q').oninput=renderDash;$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
-$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add')loadMakroData()};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs')loadMakroData();if(b.dataset.tab==='nbs')renderNbs()};
 if(onMakroSite()){$('#appLogo').hidden=false;$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
 /* came from Makro Finder in this tab → go back in history so its page/search state is kept */
 $('#backMf').onclick=e=>{try{const r=new URL(document.referrer);if(r.origin===location.origin&&r.pathname.replace(/index\.html$/,'')===new URL('./',location.href).pathname&&history.length>1){e.preventDefault();history.back()}}catch(x){}};
