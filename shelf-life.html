@@ -214,7 +214,7 @@ table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-in
 .mf-picked>div{flex:1;min-width:0}
 .ncell{display:flex;flex-direction:column;gap:8px}
 .nhead{display:flex;gap:10px;align-items:flex-start}
-.nthumb{flex:none;width:76px;height:76px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--line)}
+.nthumb{flex:none;width:68px;height:68px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--line)}
 .nph{display:block;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a0a8b5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='2'/%3E%3Ccircle cx='9' cy='10' r='1.6'/%3E%3Cpath d='M21 16l-5-5-8 8'/%3E%3C/svg%3E") no-repeat center/30px}
 .nbody{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
 .nname{flex:1;min-width:0;font-size:15px;line-height:1.3}
@@ -272,7 +272,9 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
   table.nbs-tbl th{white-space:normal;text-transform:none;letter-spacing:0;font-size:13px;line-height:1.25;vertical-align:bottom;padding:9px 6px}
   table.nbs-tbl td{padding:10px 6px;overflow-wrap:anywhere}
   table.nbs-tbl td.num{white-space:normal}
-  table.nbs-tbl .chip{white-space:normal;padding:2px 9px;font-size:12.5px;line-height:1.35}
+  table.nbs-tbl .chip{white-space:normal;padding:2px 8px;font-size:12.5px;line-height:1.35}
+  table.nbs-tbl td.nsave{font-size:12.5px;white-space:nowrap}
+  table.nbs-tbl .agnext .nw{white-space:nowrap}
   table.nbs-tbl .actbtns .btn{padding:4px 6px}
 }
 @media (max-width:820px){
@@ -415,7 +417,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
       <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
       <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
     </div>
-    <table class="resp nbs-tbl"><colgroup><col style="width:20%"><col style="width:8%"><col style="width:4.5%"><col style="width:8%"><col style="width:7.5%"><col style="width:7.5%"><col style="width:8%"><col style="width:10.5%"><col style="width:7.5%"><col style="width:6%"><col style="width:7%"><col style="width:4.5%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th><div class="th-in"><span>กลุ่ม<br>(Division)</span><button type="button" class="fbtn" data-f="div" title="Filter กลุ่ม" aria-label="Filter กลุ่ม"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th><div class="th-in"><span>Aging<br>Status</span><button type="button" class="fbtn" data-f="aging" title="Filter Aging Status" aria-label="Filter Aging Status"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
+    <table class="resp nbs-tbl"><colgroup><col style="width:18%"><col style="width:7.5%"><col style="width:4.5%"><col style="width:7.5%"><col style="width:7.5%"><col style="width:7.5%"><col style="width:8.5%"><col style="width:12%"><col style="width:8.5%"><col style="width:6%"><col style="width:7.5%"><col style="width:5%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th><div class="th-in"><span>กลุ่ม<br>(Division)</span><button type="button" class="fbtn" data-f="div" title="Filter กลุ่ม" aria-label="Filter กลุ่ม"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th><div class="th-in"><span>Aging<br>Status</span><button type="button" class="fbtn" data-f="aging" title="Filter Aging Status" aria-label="Filter Aging Status"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
     <div id="nbsMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="nbsMoreTxt"></span><button class="btn" id="nbsMore">แสดงเพิ่ม 200 รายการ</button></div>
     <p class="muted" id="nbsEmpty" hidden>ยังไม่มีรายการ — กด “+ เพิ่ม Item NBS” เพื่อบันทึกสินค้าที่ไม่มียอดขาย</p>
   </div>
@@ -1351,8 +1353,8 @@ function nbsAgingText(r){
   const a=agingInfo(r),t=String(r.aging||'').trim();
   if(a.level==null)return t?`<span class="chip s-err">${esc(t)}</span><div class="muted small">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>`:'<span class="muted">-</span>';
   const [lb,k]=AGING_LV[a.level],pv=AGING_PROV[a.level];
-  return`<span class="chip s-${k}">${lb}</span>${pv?`<div class="small" style="margin-top:2px"><b>Provision ${pv}%</b></div>`:''}<div class="muted small">${esc(a.name)} · อายุ ${a.age.toLocaleString()} วัน</div>`
-    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span>อีก <b>${a.left.toLocaleString()} วัน</b></span><span>→ <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted">ประมาณ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>');
+  return`<span class="chip s-${k}">${lb}</span>${pv?`<div class="small" style="margin-top:2px"><b>Provision ${pv}%</b></div>`:''}<div class="muted small">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`
+    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> → <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">≈ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>');
 }
 function renderNbs(){
   if(!$('#nbsBody'))return;
@@ -1381,7 +1383,7 @@ function renderNbs(){
     <td data-l="Aging Status">${nbsAgingText(r)}</td>
     <td data-l="สถานะ"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</td>
     <td data-l="Buyer / Remark" class="small">${r.buyerUid?`<b>${esc(r.buyerUid)}</b>${b?' '+esc(b.name):''}`:'<span class="muted">-</span>'}${r.remark?`<div class="redbox" style="margin-top:4px">${esc(r.remark)}</div>`:''}</td>
-    <td data-l="บันทึกเมื่อ" class="small num">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.</div>${r.source==='import'?'<div class="muted">นำเข้าจากไฟล์</div>':''}`:'-'}</td>
+    <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.</div>${r.source==='import'?'<div class="muted">จากไฟล์</div>':''}`:'-'}</td>
     <td><div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
 function nbsBuyerOptions(sel){
