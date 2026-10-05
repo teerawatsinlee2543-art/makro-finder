@@ -498,7 +498,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
     </div>
   </div>
   <div class="card dcard w">
-    <div class="dhead"><span class="dico dico-in"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h2>นำเข้าข้อมูล</h2><p class="muted small">ลากไฟล์ Excel / CSV มาวาง ระบบจับคู่รายการเดิมให้และอัปเดตเป็นข้อมูลล่าสุด · ก่อนบันทึกจะมีตัวอย่างให้ตรวจก่อนทุกครั้ง</p></div></div>
+    <div class="dhead"><span class="dico dico-in"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h2>นำเข้าข้อมูล</h2><p class="muted small">ลากไฟล์ Excel / CSV / PDF หรือรูปภาพ (ถ่ายรูปรายงาน) มาวาง ระบบอ่านตารางและจับคู่รายการเดิมให้ · ก่อนบันทึกจะมีตัวอย่างให้ตรวจก่อนทุกครั้ง</p></div></div>
     <div class="dgrid">
       <button type="button" class="dtile dtile-in" onclick="openImportPr()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3c4 0 7 3 7 7 0 5-4 9-7 11-3-2-7-6-7-11 0-4 3-7 7-7zM12 3c0 3 0 6 0 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>สินค้า &amp; กฎ Shelf life</b><span class="muted small">เพิ่ม/อัปเดตสินค้า อายุ และวันลดราคา</span></button>
       <button type="button" class="dtile dtile-in" onclick="openImportCt()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2 .7 3.2 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>Buyer / Commercial</b><span class="muted small">รายชื่อ เบอร์โทร อีเมล ผู้ติดต่อสำรอง</span></button>
@@ -597,12 +597,12 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 </div></dialog>
 <dialog id="dlgImpPr" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้าข้อมูลสินค้า &amp; กฎ Shelf life</h2>
-  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV ของรายการสินค้ามาวาง ระบบจับคู่ด้วยรหัส (SKU) หรือชื่อสินค้า — รายการที่มีอยู่แล้วจะอัปเดตให้เป็นล่าสุด รายการใหม่จะเพิ่มให้ ช่องที่เว้นว่างในไฟล์จะไม่ทับข้อมูลเดิม ถ้าเปลี่ยน Shelf life แต่ไม่ได้ใส่วันลดราคา ระบบคำนวณกฎให้ใหม่ตามคู่มือ</p>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls), CSV, PDF หรือรูปภาพ (ถ่ายรูปรายงาน/ตาราง) ของรายการสินค้ามาวาง ระบบจับคู่ด้วยรหัส (SKU) หรือชื่อสินค้า — รายการที่มีอยู่แล้วจะอัปเดตให้เป็นล่าสุด รายการใหม่จะเพิ่มให้ ช่องที่เว้นว่างในไฟล์จะไม่ทับข้อมูลเดิม ถ้าเปลี่ยน Shelf life แต่ไม่ได้ใส่วันลดราคา ระบบคำนวณกฎให้ใหม่ตามคู่มือ</p>
   <div id="prDrop" class="imp-drop" tabindex="0">
     <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span>
     <button type="button" class="btn pri" id="prPick">เลือกไฟล์จากเครื่อง</button>
-    <input type="file" id="prFile" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+    <input type="file" id="prFile" accept=".xlsx,.xls,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp,image/*,application/pdf" hidden>
     <span class="muted small">คอลัมน์ที่อ่านได้: ชื่อสินค้า · SKU · ประเภท (นำเข้า/ท้องถิ่น) · อุณหภูมิ · Shelf life · วันลด 15% / 30% · วัน Code 52 · Buyer UID · Commercial UID</span>
   </div>
   <div id="prBox"></div>
@@ -611,12 +611,12 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 </div></dialog>
 <dialog id="dlgImpCt" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้ารายชื่อ Buyer / Commercial</h2>
-  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV ของรายชื่อผู้ติดต่อมาวาง ระบบจับคู่ด้วย UID — UID ที่มีอยู่แล้วจะอัปเดตข้อมูลให้เป็นล่าสุด UID ใหม่จะเพิ่มให้ ช่องที่เว้นว่างในไฟล์จะไม่ทับข้อมูลเดิม</p>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls), CSV, PDF หรือรูปภาพ (ถ่ายรูปรายงาน/ตาราง) ของรายชื่อผู้ติดต่อมาวาง ระบบจับคู่ด้วย UID — UID ที่มีอยู่แล้วจะอัปเดตข้อมูลให้เป็นล่าสุด UID ใหม่จะเพิ่มให้ ช่องที่เว้นว่างในไฟล์จะไม่ทับข้อมูลเดิม</p>
   <div id="ctDrop" class="imp-drop" tabindex="0">
     <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span>
     <button type="button" class="btn pri" id="ctPick">เลือกไฟล์จากเครื่อง</button>
-    <input type="file" id="ctFile" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+    <input type="file" id="ctFile" accept=".xlsx,.xls,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp,image/*,application/pdf" hidden>
     <span class="muted small">คอลัมน์ที่อ่านได้: UID · ชื่อ · บทบาท · กลุ่ม · แผนก/หมวด · โทร · อีเมล/LINE · ผู้ติดต่อสำรอง</span>
   </div>
   <div id="ctBox"></div>
@@ -629,13 +629,13 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 </div></dialog>
 <dialog id="dlgImp" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้าข้อมูล Item NBS</h2>
-  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV ของรายงานสินค้าที่ไม่มียอดขายมาวาง ระบบอ่านคอลัมน์ให้เอง แยกกลุ่ม FF / DF / NF คำนวณจำนวนวันที่ไม่มียอดขาย และเริ่มเฝ้าระวังให้อัตโนมัติ</p>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls), CSV, PDF หรือรูปภาพ (ถ่ายรูปรายงาน/ตาราง) ของรายงานสินค้าที่ไม่มียอดขายมาวาง ระบบอ่านคอลัมน์ให้เอง แยกกลุ่ม FF / DF / NF คำนวณจำนวนวันที่ไม่มียอดขาย และเริ่มเฝ้าระวังให้อัตโนมัติ</p>
   <div id="impDrop" class="imp-drop" tabindex="0">
     <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <b>ลากไฟล์มาวางที่นี่</b>
     <span class="muted small">หรือ</span>
     <button type="button" class="btn pri" id="impPick">เลือกไฟล์จากเครื่อง</button>
-    <input type="file" id="impFile" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+    <input type="file" id="impFile" accept=".xlsx,.xls,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp,image/*,application/pdf" hidden>
   </div>
   <div id="impBox"></div>
   <p class="err-text" id="impErr" style="margin:8px 0 0"></p>
@@ -1330,6 +1330,102 @@ async function delContact(id){const c=byId('contacts',id);if(!c||!await ask(`ล
     await patchItem('products',p,{...(p.buyerUid===c.uid?{buyerUid:''}:{}),...(p.comUid===c.uid?{comUid:''}:{})});
     await rmItem('contacts',c)},'ลบผู้ติดต่อแล้ว')}
 
+/* ---------- read a file into a SheetJS workbook: Excel / CSV directly, PDF through its text layer, pictures (and scanned PDFs) through OCR ---------- */
+const isPdfFile=f=>/\.pdf$/i.test(f.name)||f.type==='application/pdf';
+const isImgFile=f=>/\.(png|jpe?g|webp|bmp|gif)$/i.test(f.name)||/^image\//.test(f.type);
+const ANY_ACCEPT='.xlsx,.xls,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp,image/*,application/pdf';
+let _pdfjs=null,_tess=null;
+async function getPdfjs(){
+  if(_pdfjs)return _pdfjs;
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  const wsrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  await loadScript(wsrc); /* a cross-origin Worker is not allowed, so pdf.js runs its worker code on the page itself (fine for report-sized PDFs) */
+  pdfjsLib.GlobalWorkerOptions.workerSrc=wsrc;
+  return _pdfjs=pdfjsLib}
+async function getTesseract(say){
+  if(_tess)return _tess;
+  say('กำลังโหลดตัวอ่านตัวหนังสือจากรูป (ครั้งแรกใช้เวลาสักครู่)…');
+  await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+  return _tess=await Tesseract.createWorker(['tha','eng'],1,{logger:m=>{if(m.status==='recognizing text')say(`กำลังอ่านตัวหนังสือจากรูป… ${Math.round(m.progress*100)}%`)}})}
+async function ocrCanvas(canvas,say){
+  const w=await getTesseract(say),{data}=await w.recognize(canvas,{},{blocks:true});
+  const words=data.words||(data.blocks||[]).flatMap(b=>(b.paragraphs||[]).flatMap(p=>(p.lines||[]).flatMap(l=>l.words||[])));
+  return words.filter(x=>x.text&&x.text.trim()&&x.confidence>25).map(x=>({str:x.text.trim(),x:x.bbox.x0,y:x.bbox.y0,w:x.bbox.x1-x.bbox.x0,h:x.bbox.y1-x.bbox.y0}))}
+async function ocrItems(file,say){
+  const bmp=await createImageBitmap(file,{imageOrientation:'from-image'}),big=Math.max(bmp.width,bmp.height),s=big<1400?2:Math.min(1,2600/big),c=document.createElement('canvas');
+  c.width=Math.round(bmp.width*s);c.height=Math.round(bmp.height*s);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(bmp,0,0,c.width,c.height);
+  return ocrCanvas(c,say)}
+async function pdfItems(file,say){
+  const pdfjs=await getPdfjs();say('กำลังอ่านไฟล์ PDF…');
+  const doc=await pdfjs.getDocument({data:await file.arrayBuffer()}).promise,items=[],pages=Math.min(doc.numPages,80);let off=0;
+  for(let p=1;p<=pages;p++){
+    const pg=await doc.getPage(p),tc=await pg.getTextContent(),vp=pg.getViewport({scale:1});
+    tc.items.forEach(it=>{it.str=(it.str||'').replace(/\u0000/g,'');if(it.str&&it.str.trim())items.push({str:it.str.trim(),x:it.transform[4],y:off+(vp.height-it.transform[5]),w:it.width,h:Math.abs(it.transform[3])||it.height||10})});
+    off+=vp.height+20}
+  if(items.length>=5)return items;
+  /* no text layer (a scanned PDF): draw each page and read it like a picture */
+  const out=[];let o2=0;
+  for(let p=1;p<=Math.min(doc.numPages,10);p++){
+    say(`PDF เป็นภาพสแกน — กำลังอ่านหน้า ${p}/${Math.min(doc.numPages,10)} (ใช้เวลาสักครู่)…`);
+    const pg=await doc.getPage(p),vp=pg.getViewport({scale:2}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+    await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+    (await ocrCanvas(c,say)).forEach(i=>out.push({...i,y:i.y+o2}));o2+=c.height+40}
+  out.ocr=true;return out}
+/* text items with positions -> table rows: group by line, join words into cells, then drop the cells under the header's columns */
+function itemsToRows(items,detect,squash){
+  if(!items.length)return[];
+  const hs=items.map(i=>i.h).sort((a,b)=>a-b),mh=hs[hs.length>>1]||10,lines=[];
+  items.slice().sort((a,b)=>a.y-b.y||a.x-b.x).forEach(it=>{const L=lines[lines.length-1];
+    if(L&&Math.abs(it.y-L.y)<=mh*.55){L.items.push(it);L.y=(L.y*(L.items.length-1)+it.y)/L.items.length}else lines.push({y:it.y,items:[it]})});
+  const rows=lines.map(L=>{L.items.sort((a,b)=>a.x-b.x);const cells=[];
+    L.items.forEach(it=>{const c=cells[cells.length-1];
+      if(c&&it.x-c.x1<=mh*.9){c.text+=(it.x-c.x1>mh*.15?' ':'')+it.str;c.x1=Math.max(c.x1,it.x+it.w)}else cells.push({text:it.str,x0:it.x,x1:it.x+it.w})});
+    if(squash)cells.forEach(c=>{c.text=c.text.replace(/([฀-๿])\s+(?=[฀-๿])/g,'$1')}); /* OCR puts spaces inside Thai words */
+    return{y:L.y,cells}}),tx=r=>r.cells.map(c=>c.text);
+  let hi=-1;for(let i=0;i<Math.min(rows.length,60);i++){if(detect(tx(rows[i]))){hi=i;break}}
+  if(hi<0)return rows.map(tx);
+  /* header titles can wrap over several lines (and single-line titles sit between them): gather the neighbouring text-only lines into the header block */
+  const noDigit=r=>r.cells.every(c=>!/\d/.test(c.text)),gap=mh*1.9;
+  let a=hi,b=hi;
+  while(a>0&&rows[a].y-rows[a-1].y<=gap&&noDigit(rows[a-1]))a--;
+  while(b+1<rows.length&&rows[b+1].y-rows[b].y<=gap&&noDigit(rows[b+1])&&!detect(tx(rows[b+1])))b++;
+  const cols=rows[hi].cells.map(c=>({x0:c.x0,x1:c.x1,parts:[[hi,c.text]]}));
+  for(let i=a;i<=b;i++){if(i===hi)continue;
+    const spans=rows[i].cells.map(c=>cols.filter(k=>Math.min(c.x1,k.x1)-Math.max(c.x0,k.x0)>0).length);
+    if(spans.some(n=>n>1))continue; /* a title spanning several columns */
+    rows[i].cells.forEach(c=>{let best=-1,bo=0;cols.forEach((k,j)=>{const ov=Math.min(c.x1,k.x1)-Math.max(c.x0,k.x0);if(ov>bo){bo=ov;best=j}});
+      if(best>=0){cols[best].parts.push([i,c.text]);cols[best].x0=Math.min(cols[best].x0,c.x0);cols[best].x1=Math.max(cols[best].x1,c.x1)}
+      else cols.push({x0:c.x0,x1:c.x1,parts:[[i,c.text]]})})}
+  cols.sort((p,q)=>p.x0-q.x0);cols.forEach(k=>{k.text=k.parts.sort((p,q)=>p[0]-q[0]).map(p=>p[1]).join(' ')});
+  const nx=b+1,out=[cols.map(c=>c.text)],body=[];
+  for(let i=nx;i<rows.length;i++){
+    if(detect(tx(rows[i])))continue; /* the header repeated on the next page */
+    const row=Array(cols.length).fill('');
+    rows[i].cells.forEach(c=>{let best=-1,bo=0;
+      cols.forEach((k,j)=>{const ov=Math.min(c.x1,k.x1)-Math.max(c.x0,k.x0);if(ov>bo){bo=ov;best=j}});
+      if(best<0){let d=1e9;cols.forEach((k,j)=>{const dd=Math.abs((c.x0+c.x1)/2-(k.x0+k.x1)/2);if(dd<d){d=dd;best=j}})}
+      row[best]=row[best]?row[best]+' '+c.text:c.text});
+    body.push({y:rows[i].y,row})}
+  /* cells that wrap onto several lines: one record per line that holds a code (item no / UID); the other lines join the nearest one */
+  const code=/^(\d{4,}|[A-Za-z]{1,4}\d+[A-Za-z]?)$/;let key=0,bn=-1;
+  cols.forEach((k,j)=>{const n=body.filter(l=>code.test(l.row[j].trim())).length;if(n>bn){bn=n;key=j}});
+  const anchors=bn>=2?body.filter(l=>code.test(l.row[key].trim())):[];
+  if(anchors.length<2){body.forEach(l=>out.push(l.row));return out}
+  const recs=anchors.map(a=>({y:a.y,lines:[]}));
+  body.forEach(l=>{let bi=0,bd=1e9;recs.forEach((r,i)=>{const d=Math.abs(l.y-r.y);if(d<bd){bd=d;bi=i}});recs[bi].lines.push(l)});
+  recs.forEach(r=>{r.lines.sort((p,q)=>p.y-q.y);out.push(cols.map((_,j)=>r.lines.map(l=>l.row[j]).filter(Boolean).join(' ')))});
+  return out}
+async function readAnyFile(file,detect,say){
+  say=say||(()=>{});
+  await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+  if(isPdfFile(file)||isImgFile(file)){
+    const isPdf=isPdfFile(file),its=isPdf?await pdfItems(file,say):await ocrItems(file,say),rows=itemsToRows(its,detect,!isPdf||its.ocr);
+    if(!rows.length)throw Error('อ่านตัวหนังสือจากไฟล์ไม่ได้ — ลองไฟล์ที่ชัดกว่านี้ หรือใช้ Excel');
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'ไฟล์');return wb}
+  if(/\.csv$/i.test(file.name)){const txt=await file.text();return XLSX.read(txt.replace(/^﻿/,''),{type:'string',raw:true})}
+  return XLSX.read(await file.arrayBuffer(),{type:'array',raw:true})}
+const sayTo=sel=>m=>{const el=$(sel);if(el)el.innerHTML=`<p class="muted">${esc(m)}</p>`};
+
 /* ---------- import products (Shelf life rules) from Excel / CSV ---------- */
 const PR_COLS=[
   ['step1pct',/(step1pct|md1pct|step1percent)/],['step2pct',/(step2pct|md2pct|step2percent)/],
@@ -1396,10 +1492,7 @@ function planProducts(recs){
 async function readProductFile(file){
   $('#prErr').textContent='';$('#prBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
   try{
-    await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-    let wb;
-    if(/\.csv$/i.test(file.name)){const txt=await file.text();wb=XLSX.read(txt.replace(/^﻿/,''),{type:'string',raw:true})}
-    else wb=XLSX.read(await file.arrayBuffer(),{type:'array',raw:true});
+    const wb=await readAnyFile(file,r=>{const m=prMapHeader(r);return(m.desc!=null||m.sku!=null)&&Object.keys(m).length>=2},sayTo('#prBox'));
     const parsed=parseProducts(wb);
     if(!parsed.recs.length)throw Error('ไม่พบรายการสินค้าในไฟล์ — ต้องมีคอลัมน์ชื่อสินค้า (หรือ SKU) และอย่างน้อย 1 คอลัมน์ข้อมูลอื่น');
     prImp={file:file.name,...parsed};showProductPreview();
@@ -1489,10 +1582,7 @@ function planContacts(recs,defRole){
 async function readContactFile(file){
   $('#ctErr').textContent='';$('#ctBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
   try{
-    await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-    let wb;
-    if(/\.csv$/i.test(file.name)){const txt=await file.text();wb=XLSX.read(txt.replace(/^﻿/,''),{type:'string',raw:true})}
-    else wb=XLSX.read(await file.arrayBuffer(),{type:'array',raw:true});
+    const wb=await readAnyFile(file,r=>{const m=ctMapHeader(r);return m.uid!=null&&m.name!=null},sayTo('#ctBox'));
     const parsed=parseContacts(wb);
     if(!parsed.recs.length)throw Error('ไม่พบรายชื่อในไฟล์ — ต้องมีคอลัมน์ UID และ ชื่อ');
     ctImp={file:file.name,...parsed};showContactPreview();
@@ -1981,10 +2071,7 @@ async function delImpFile(g){
 async function readImportFile(file){
   $('#impErr').textContent='';$('#impBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
   try{
-    await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-    let wb;
-    if(/\.csv$/i.test(file.name)){const txt=await file.text();wb=XLSX.read(txt.replace(/^﻿/,''),{type:'string',raw:true})}
-    else wb=XLSX.read(await file.arrayBuffer(),{type:'array',raw:true});
+    const wb=await readAnyFile(file,r=>{const m=mapHeader(r);return m.itemNo!=null&&Object.keys(m).length>=2},sayTo('#impBox'));
     const parsed=parseWorkbook(wb,file.name,$('#impDef').value);
     if(!parsed.recs.length)throw Error('ไม่พบรายการสินค้าในไฟล์ — ต้องมีคอลัมน์รหัสสินค้า (Item No) อย่างน้อย 1 คอลัมน์');
     impState={file:file.name,wb,...parsed};showImportPreview();
