@@ -62,6 +62,30 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn.sm{padding:4px 9px;font-size:13px}
 .btn.danger{color:var(--md2)}
+/* filter bars: one tidy grid on every screen — short labels, fields the same height and lined up on the bottom edge, a wider search box, buttons on their own row; one column on phones */
+.fbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 12px;align-items:end;margin:0 0 12px}
+.fbar>label{min-width:0}
+.fbar>label.f-q{grid-column:span 2}
+.fbar input:not([type=checkbox]),.fbar select{width:100%;height:40px;box-sizing:border-box}
+.fbar .f-chk{flex-direction:row;align-items:center;gap:8px;height:40px;box-sizing:border-box;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer}
+.fbar .f-chk input{width:18px;height:18px;margin:0;flex:none}
+.fbar .f-info{align-self:center;min-width:0}
+.fbar .f-act{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:flex-end}
+.fbar .f-act .f-chk{margin-right:auto}
+/* four-field bar (search + 3 selects): one row on wide screens, search on top of a 3-up row on tablets */
+.fbar.f4{grid-template-columns:2fr 1fr 1fr 1fr}
+.fbar.f4>label.f-q{grid-column:auto}
+@media (max-width:1099px){
+  .fbar.f4{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .fbar.f4>label.f-q{grid-column:1/-1}
+}
+@media (max-width:640px){
+  .fbar,.fbar.f4{grid-template-columns:1fr}
+  .fbar>label.f-q,.fbar.f4>label.f-q{grid-column:auto}
+  .fbar .f-act{justify-content:stretch}
+  .fbar .f-act .f-chk{flex:1 1 100%;margin-right:0}
+  .fbar .f-act .btn{flex:1 1 100%}
+}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 table{width:100%;border-collapse:collapse}
 th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -401,10 +425,10 @@ select,input,textarea{max-width:100%}
   <div class="card" id="onboard" hidden><h2>ยังไม่มีข้อมูลของทีม</h2><p class="muted" style="margin-top:0">โหลดรายการสินค้าและกฎ Shelf life จากคู่มือ Makro (ผักผลไม้นำเข้าและท้องถิ่น 69 รายการ) แล้วเพิ่ม Buyer / Commercial ทุกคนที่เปิดลิงก์นี้จะเห็นข้อมูลชุดเดียวกัน</p><div class="row w"><button class="btn pri" id="obSample">โหลดสินค้าตามคู่มือ Makro</button><button class="btn" id="obMigrate" hidden></button></div></div>
   <div class="tiles" id="tiles"></div>
   <div class="card">
-    <div class="row no-print" style="margin-bottom:12px">
-      <label style="flex:1;min-width:180px">ค้นหา (สินค้า / SKU / Buyer UID / ที่ตั้ง)<input id="q" placeholder="เช่น บลูเบอรี่"></label>
+    <div class="fbar no-print">
+      <label class="f-q">ค้นหา<input id="q" placeholder="สินค้า / SKU / Buyer UID / ที่ตั้ง เช่น บลูเบอรี่"></label>
       <label>สถานะ<select id="fSt"><option value="">ทั้งหมด</option></select></label>
-      <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="fHide"> ซ่อนรายการที่ทำแล้ว</label>
+      <label class="f-chk"><input type="checkbox" id="fHide"> ซ่อนรายการที่ทำแล้ว</label>
     </div>
     <div class="legend" id="dashLegend">
       <span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลดราคา 15%</span><span style="--c:var(--seg-md2)">ลดราคา 30%</span><span style="--c:var(--seg-pull)">Code 52</span><span class="today-key">กรอบสีม่วง = วันนี้</span>
@@ -494,14 +518,16 @@ select,input,textarea{max-width:100%}
     </div>
     <div class="tiles" id="nbsTiles" style="margin:12px 0"></div>
     <div class="row" id="nbsSummary" style="gap:8px;margin:0 0 12px;align-items:center"></div>
-    <div class="row" style="margin-bottom:10px">
-      <label style="flex:1;min-width:200px">ค้นหา (รหัส / ชื่อ / Buyer UID / ที่ตั้ง / Remark)<input id="nbsQ" placeholder="เช่น 210907 หรือ ชื่อสินค้า"></label>
+    <div class="fbar f4">
+      <label class="f-q">ค้นหา<input id="nbsQ" placeholder="รหัส / ชื่อ / Buyer UID / ที่ตั้ง / Remark"></label>
       <label>สถานะ<select id="nbsFSt"><option value="">ทั้งหมด</option></select></label>
       <label>ระดับ Aging<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="nbs">เกินเกณฑ์ NBS</option><option value="l1">Alert ขึ้นไป</option><option value="l2">Attention ขึ้นไป</option><option value="l3">Critical ขึ้นไป</option><option value="l4">Obsolete ขึ้นไป</option><option value="l5">Full Provision</option></select></label>
       <label>นับอายุ Aging จาก<select id="nbsBasis"><option value="sold">วันที่ไม่มียอดขาย (Last Sold)</option><option value="recv">วันที่รับสินค้าล่าสุด (Last Recv.)</option></select></label>
-      <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
-      <button type="button" class="btn w" id="nbsBulkBuyer" title="กำหนด Buyer ให้ทุกรายการที่กรองอยู่ในตารางตอนนี้">กำหนด Buyer ทั้งรายการที่กรอง</button>
-      <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
+      <div class="f-act">
+        <label class="f-chk"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
+        <button type="button" class="btn w" id="nbsBulkBuyer" title="กำหนด Buyer ให้ทุกรายการที่กรองอยู่ในตารางตอนนี้">กำหนด Buyer ทั้งรายการที่กรอง</button>
+        <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
+      </div>
     </div>
     <table class="resp nbs-tbl"><colgroup><col style="width:14%"><col style="width:7%"><col style="width:4%"><col style="width:6.5%"><col style="width:6.5%"><col style="width:6.5%"><col style="width:7.5%"><col style="width:10.5%"><col style="width:7.5%"><col style="width:14%"><col style="width:9.5%"><col style="width:6.5%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th><div class="th-in"><span>กลุ่ม<br>(Division)</span><button type="button" class="fbtn" data-f="div" title="Filter กลุ่ม" aria-label="Filter กลุ่ม"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th><div class="th-in"><span>Aging<br>Status</span><button type="button" class="fbtn" data-f="aging" title="Filter Aging Status" aria-label="Filter Aging Status"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>สถานะ</th><th>Buyer</th><th>Remark</th><th>บันทึกเมื่อ / จัดการ</th></tr></thead><tbody id="nbsBody"></tbody></table>
     <div id="nbsMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="nbsMoreTxt"></span><button class="btn" id="nbsMore">แสดงเพิ่ม 200 รายการ</button></div>
@@ -515,7 +541,7 @@ select,input,textarea{max-width:100%}
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">สินค้า & กฎ Shelf life</h2>
       <span class="row w"><button type="button" class="btn danger" id="prDelFile" title="ลบไฟล์ที่นำเข้า พร้อมสินค้าที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="prImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
     <p class="muted small">กฎตาม “คู่มือ อายุและการจัดการสินค้าผักและผลไม้” (ผ่านการตรวจสอบจากทีมจัดซื้อและ QA) · นับวันที่ 1 = วันรับสินค้า · ขายราคาเต็มครบ Shelf life → ลด 15% (Step 1) → ลด 30% (Step 2) → Code 52 · สินค้า Shelf life 1 วันข้าม Step 1 · อายุสินค้ากำหนดตามการจัดเรียงในตู้แช่ 0–4°C (ผักสลัด 6–8°C) หรือให้พิจารณาตามสภาพสินค้า</p>
-    <div class="row" style="margin:0 0 10px;align-items:center"><label style="flex:1;min-width:220px;max-width:520px">ค้นหาสินค้า (ชื่อ / รหัส / หมวด / Buyer UID / Commercial)<input id="pQ" type="search" placeholder="เช่น บลูเบอร์รี่ มะม่วง หรือ FF3" autocomplete="off"></label><span class="muted small" id="pQn" style="padding-bottom:9px"></span></div>
+    <div class="fbar"><label class="f-q">ค้นหาสินค้า<input id="pQ" type="search" placeholder="ชื่อ / รหัส / หมวด / Buyer UID / Commercial เช่น บลูเบอร์รี่ หรือ FF3" autocomplete="off"></label><span class="muted small f-info" id="pQn"></span></div>
     <table class="resp"><thead><tr><th>สินค้า</th><th>Shelf life</th><th><span class="hchip h-ok">ขายราคาเต็ม</span></th><th><span class="hchip h-md1">ลด 15%</span></th><th><span class="hchip h-md2">ลด 30%</span></th><th><span class="hchip h-pull">Code 52</span></th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
     <p class="muted small" style="margin:10px 0 0">รูปสินค้าส่วนใหญ่จาก Makro PRO · รูปเห็ดฟาง เงาะ ลิ้นจี่ ชมพู่ มะไฟ เป็นรูปประกอบจาก <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a> (Straw mushrooms; Rambutans — Muhammad Mahdi Karim; Lychee Fruit; Syzygium samarangense — Anagoria CC BY 3.0; Mafai — Xufanc CC BY-SA 3.0) · แบล็คเบอร์รี่เป็นรูปแบบแช่แข็งของเอโร่ · แก้เป็นรูปจริงได้ที่ปุ่ม “แก้ไข” ของสินค้า</p>
   </div>
@@ -525,7 +551,7 @@ select,input,textarea{max-width:100%}
 <section id="t-ct" hidden>
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn" onclick="exportContactsXlsx()" title="ส่งออกรายชื่อเป็น Excel ตามหัวตารางผังทีม">ส่งออก Excel</button><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
-    <div class="row" style="margin-bottom:10px"><label style="flex:1;min-width:180px">ค้นหา (UID / ชื่อ / หมวดสินค้า / เบอร์)<input id="ctQ" placeholder="เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small" id="ctCount" style="padding-bottom:8px"></span></div>
+    <div class="fbar"><label class="f-q">ค้นหา<input id="ctQ" placeholder="UID / ชื่อ / หมวดสินค้า / เบอร์ เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small f-info" id="ctCount"></span></div>
     <table class="resp ct-tbl"><colgroup><col style="width:7%"><col style="width:8%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:11%"><col style="width:5%"><col style="width:11%"><col style="width:10%"><col style="width:6%"><col style="width:7%"></colgroup><thead><tr><th>Area</th><th>Senior Director</th><th>Associate Director / Senior Manager</th><th>Area / Department</th><th>Senior Manager / Product Group</th><th>Buyer UID</th><th>Merchandise Mgr. Name</th><th>Art Grp No.</th><th>Description</th><th>Assistant</th><th>Junior Buyer / New Gen</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
   </div>
 </section>
