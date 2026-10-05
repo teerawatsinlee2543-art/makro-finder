@@ -19,9 +19,12 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sarabun,system-ui,sans-serif}
 header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
 h1{font-size:20px;margin:0}
-.brandbox{display:flex;align-items:center;gap:12px;background:var(--redbox);border:1.5px solid var(--redbox-line);border-radius:16px;padding:6px 20px 6px 8px;box-shadow:0 2px 8px #c628281a}
-.brandbox:has(#appLogo[hidden]){padding-left:18px}
-.brandbox h1{font-weight:800}
+/* pill-shaped light-red banner; the round logo overlaps its left end */
+.brandbox{position:relative;display:flex;align-items:center;background:var(--redbox);border-radius:999px;padding:11px 30px 11px 64px;margin-left:34px;min-height:52px}
+.brandbox .app-logo{position:absolute;left:-34px;top:50%;transform:translateY(-50%);width:76px;height:76px;filter:drop-shadow(0 3px 6px #0003)}
+.brandbox:has(#appLogo[hidden]){padding-left:28px;margin-left:0}
+.brandbox h1{font-size:26px;font-weight:800;line-height:1.1;letter-spacing:.01em;white-space:nowrap}
+@media (max-width:560px){.brandbox{padding:8px 20px 8px 50px;margin-left:26px;min-height:44px}.brandbox .app-logo{width:60px;height:60px;left:-26px}.brandbox h1{font-size:19px}.brandbox:has(#appLogo[hidden]){padding-left:20px;margin-left:0}}
 .today{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .jbadge{display:flex;align-items:center;gap:12px;padding:8px 16px 8px 14px;border-radius:14px;background:linear-gradient(135deg,#0b5cad,#1474d4);color:#fff;box-shadow:0 4px 14px #0b5cad40}
 .jlabel{font-size:11px;font-weight:700;letter-spacing:.08em;line-height:1.25;opacity:.85;text-align:right;padding-right:12px;border-right:1px solid #ffffff55}
