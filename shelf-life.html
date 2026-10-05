@@ -2102,14 +2102,14 @@ function nbsFiltered(){
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
 const PDF_CHIP={ok:['#e4f3ea','#1f7a45'],md1:['#fff3a6','#6b5800'],md2:['#ffdcb8','#9a4300'],pull:['#c62828','#fff'],obs:['#7f1d1d','#fff'],full:['#111','#fff']};
-function nbsPDFHtml(){
+function nbsPDFHtml(photos=true){
   const all=nbsFiltered(),total=(st.nbs||[]).length,now=new Date(),cnt={};all.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
   const chip=(t,k)=>{const c=PDF_CHIP[k]||PDF_CHIP.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
   const body=all.map(r=>{
     const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),b=st.contacts.find(x=>x.uid===r.buyerUid);
     const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${esc(a.next[0])}</div>`:''):esc(r.aging||'-');
-    const img=r.img||(MF.images&&MF.images[r.itemNo])||'';
-    return`<tr><td><div class="nm">${img?`<img class="th" src="${esc(img)}" alt="">`:'<span class="th ph"></span>'}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div></div></div></td>
+    const img=photos?(r.img||(MF.images&&MF.images[r.itemNo])||''):'';
+    return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(img)}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div></div></div></td>
 <td class="ctr"><span class="dv">${esc(r.division)}</span></td><td class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td><td>${esc(r.loc||'-')}</td>
 <td class="num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td class="num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
 <td class="num">${n==null?'-':`<b class="${over?'ov':''}">${n.toLocaleString()} วัน</b><div class="m">${over?'เกินเกณฑ์':'ไม่ถึงเกณฑ์'} ≥${lim}</div>`}</td><td>${ag}</td>
@@ -2139,14 +2139,19 @@ function printDoc(html){
   f.onload=()=>{const w=f.contentWindow,go=()=>{try{w.focus();w.print()}catch(e){toast('เปิดหน้าต่างพิมพ์ไม่ได้ — ลองกด Ctrl+P')}};
     /* wait for the fonts and for any product photos to finish loading (max 15 s) so the PDF doesn't print empty picture boxes */
     const fontsOk=w.document.fonts&&w.document.fonts.ready?Promise.race([w.document.fonts.ready,new Promise(r=>setTimeout(r,2500))]):Promise.resolve();
-    const imgsOk=Promise.race([Promise.all([...w.document.images].map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r}))),new Promise(r=>setTimeout(r,15000))]);
+    const pics=[...w.document.images],imgsOk=Promise.race([Promise.all(pics.map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r}))),new Promise(r=>setTimeout(r,Math.min(90000,15000+pics.length*100)))]);
     Promise.all([fontsOk,imgsOk]).then(go)};
   f.srcdoc=html;setTimeout(()=>f.remove(),180000);
   toast('เลือก “บันทึกเป็น PDF” (Save as PDF) ที่ปลายทางในหน้าต่างพิมพ์');
 }
-function nbsPDF(){
-  if(!nbsFiltered().length){toast('ไม่มีรายการให้ส่งออก');return}
-  printDoc(nbsPDFHtml());
+async function nbsPDF(){
+  const n=nbsFiltered().length;
+  if(!n){toast('ไม่มีรายการให้ส่งออก');return}
+  /* the photos come from Makro Finder's image list: make sure it is loaded before building the page */
+  if(MF.state==='idle'&&onMakroSite()){toast('กำลังโหลดรูปสินค้า…');await loadMakroData();for(let i=0;i<120&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250))}
+  /* every photo is 30-110 KB inside the PDF: up to 300 rows go in automatically, more is the user's call */
+  const photos=n<=300||await ask(`ส่งออก ${n.toLocaleString()} รายการ — ใส่รูปสินค้าไหม? รูปทำให้ไฟล์ PDF ใหญ่และโหลดนาน (แนะนำกรองให้เหลือไม่เกิน 300 รายการ) · ตกลง = ใส่รูป · ยกเลิก = ไม่ใส่รูป`);
+  printDoc(nbsPDFHtml(photos));
 }
 /* one A4 page layout for the other PDFs (same look as the Item NBS one) */
 const PDF_CHIP2={...PDF_CHIP,soon:['#fff2d6','#8a5a00'],err:['#ece6fb','#5b3fa8']};
