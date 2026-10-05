@@ -1313,15 +1313,9 @@ function parseAgingType(v){
   if(/bakery/.test(s))return 8;if(/fresh|egg/.test(s))return 4;if(/chilled|spice/.test(s))return 6;if(/frozen/.test(s))return 3;
   if(/non.?food/.test(s))return /pro/.test(s)?7:2;if(/dry/.test(s))return /fr.*pro/.test(s)?5:/fs.*pro/.test(s)?9:1;return'';
 }
-/* default Aging Type from Division + Department (Makro's 9 types); a type set on the item itself always wins */
+/* default Aging Type follows the group only (FF=Fresh & Egg, DF=Dry Food, NF=Nonfood); a type set on the item itself always wins */
 function agingTypeFor(r){
   if(AGING_TYPES[+r.agingType])return+r.agingType;
-  const d=String(r.dept||'').toUpperCase();
-  if(d){
-    if(/BAKERY/.test(d))return 8;
-    if(/PROLINE|PROFESSIONAL/.test(d))return r.division==='NF'?7:AGING_DEF[r.division]||1;
-    if(r.division==='FF'){if(/FROZEN/.test(d))return 3;if(/CHILL|SPICE/.test(d))return 6;return 4}
-  }
   return AGING_DEF[r.division]||1;
 }
 function agingInfo(r){
@@ -1382,7 +1376,7 @@ function nbsOpen(r){
   nbsEditId=r?r._id:null;nbsDraft=r?{barcode:r.barcode||'',img:r.img||'',locs:r.locs||[]}:{};
   $('#nbsTitle').textContent=r?'แก้ไข Item NBS':'เพิ่ม Item NBS';$('#nErr').textContent='';
   $('#nbsFind').hidden=r||!onMakroSite();if(!r&&onMakroSite())loadMakroData();
-  $('#nAgeType').innerHTML='<option value="">ตามกลุ่ม / แผนกอัตโนมัติ</option>'+Object.entries(AGING_TYPES).map(([k,v])=>`<option value="${k}">Type ${k} · ${esc(v.n)}</option>`).join('');
+  $('#nAgeType').innerHTML='<option value="">ตามกลุ่มอัตโนมัติ (FF / DF / NF)</option>'+Object.entries(AGING_TYPES).map(([k,v])=>`<option value="${k}">Type ${k} · ${esc(v.n)}</option>`).join('');
   $('#nStat').innerHTML=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
   const v=r||{division:nbsFilterDiv||'FF',itemNo:'',desc:'',lastSale:'',loc:'',stock:'',buyerUid:'',status:'check',remark:''};
   $('#nDiv').value=v.division;$('#nNo').value=v.itemNo||'';$('#nDesc').value=v.desc||'';$('#nLast').value=v.lastSaleDerived?'':v.lastSale||'';$('#nRecv').value=v.lastRecv||'';$('#nAgeType').value=v.agingType||'';$('#nDept').value=v.dept||'';$('#nLoc').value=v.loc||'';
