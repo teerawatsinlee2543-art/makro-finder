@@ -6881,62 +6881,17 @@ function lineCameraErrorHtml(){
 }
 
 // ==== สแกนบาร์โค้ดสำหรับพาเลท ====
-let palletScanControls=null,palletScanMode=null;
+let palletScanMode=null;
 let lastPalletScanCode=null,lastPalletScanAt=0;
 const SCAN_DEBOUNCE_MS=1500;
-let palletScanConfirmCode=null,palletScanConfirmCount=0;
-let palletScanLocked=false;
 function openPalletScan(mode){
   palletScanMode=mode;
-  const overlay=document.getElementById('palletScanOverlay');
-  const err=document.getElementById('palletScanError');
-  const hint=document.getElementById('palletScanHint');
-  err.style.display='none';
-  hint.style.display='block';
-  palletScanConfirmCode=null;palletScanConfirmCount=0;
-  palletScanLocked=false;
   document.getElementById('palletScanTitle').textContent=mode==='manage'?t('scanTitleManage'):(mode==='find'?t('scanTitleFind'):(mode==='palletloc'?t('scanTitleBay'):(mode==='newitembarcode'?t('scanTitleNewItemBarcode'):(mode==='movepallettarget'?t('scanTitleMoveTarget'):(mode==='wastelog'?t('wasteScanOverlayTitle'):t('scanTitleDelete'))))));
-  overlay.style.display='flex';
-  if(isLineAndroidBrowser()){
-    err.innerHTML=lineCameraErrorHtml();
-    err.style.display='block';
-    hint.style.display='none';
-    return;
-  }
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    err.textContent=t('cameraNotSupportedError');
-    err.style.display='block';
-    hint.style.display='none';
-    return;
-  }
-  const video=document.getElementById('palletScanVideo');
-  getZXingReader().decodeFromConstraints({video:SCAN_VIDEO_CONSTRAINTS},video,(result)=>{
-    if(palletScanLocked)return;
-    const r=result||tryRotatedDecode(video);
-    if(!r){ palletScanConfirmCode=null;palletScanConfirmCount=0; return; }
-    const code=r.getText().trim();
-    if(code===palletScanConfirmCode){ palletScanConfirmCount++; } else { palletScanConfirmCode=code; palletScanConfirmCount=1; }
-    const requiredScanConfirms=palletScanMode==='wastelog'?1:2;
-    if(palletScanConfirmCount>=requiredScanConfirms){
-      palletScanLocked=true;
-      handlePalletScanCode(code);
-    }
-  }).then(controls=>{
-    palletScanControls=controls;
-    if(overlay.style.display==='none'||palletScanLocked){ controls.stop(); palletScanControls=null; }
-  }).catch(()=>{
-    if(isLineAndroidBrowser()){
-      err.innerHTML=lineCameraErrorHtml();
-    } else {
-      err.textContent=t('cameraAccessDeniedError');
-    }
-    err.style.display='block';
-    hint.style.display='none';
-  });
+  startCameraScan({overlay:'palletScanOverlay',video:'palletScanVideo',err:'palletScanError',hint:'palletScanHint',confirms:mode==='wastelog'?1:2,onCode:handlePalletScanCode});
 }
 function closePalletScan(){
   document.getElementById('palletScanOverlay').style.display='none';
-  if(palletScanControls){ palletScanControls.stop(); palletScanControls=null; }
+  stopCameraScan();
   if(palletScanMode==='newitembarcode'){
     document.getElementById('newItemOverlay').style.display='flex';
   }
@@ -6946,9 +6901,9 @@ function closePalletScan(){
 }
 function handlePalletScanCode(code){
   const now=Date.now();
-  if(code===lastPalletScanCode&&(now-lastPalletScanAt)<SCAN_DEBOUNCE_MS)return;
+  if(code===lastPalletScanCode&&(now-lastPalletScanAt)<SCAN_DEBOUNCE_MS){ camScan.locked=false; return; } /* ข้ามค่าซ้ำเร็วเกินไป แต่ต้องปลดล็อกให้กล้องอ่านต่อ ไม่งั้นกล้องค้าง */
   lastPalletScanCode=code;lastPalletScanAt=now;
-  if(palletScanControls){ palletScanControls.stop(); palletScanControls=null; }
+  stopCameraScan();
   if(palletScanMode==='palletloc'){
     closePalletScan();
     palletListFilterText=code;
@@ -8309,50 +8264,54 @@ function tryRotatedDecode(video){
     return null;
   }
 }
-let scanControls=null;
-let scanConfirmCode=null,scanConfirmCount=0;
-function openScanner(){
-  const overlay=document.getElementById('scanOverlay');
-  const err=document.getElementById('scanError');
+// ลูปกล้องสแกนตัวเดียวของทั้งแอป (หน้าแรก พาเลท ของเสีย ใช้ตัวนี้หมด) ต่างกันแค่ overlay ที่เปิด จำนวนครั้งที่ต้องอ่านซ้ำ และสิ่งที่ทำหลังอ่านได้
+// o = {overlay, video, err, hint?, confirms, onCode(code)}  (ค่าเป็น id ของ element)
+let camScan={controls:null,run:null,code:null,count:0,locked:false};
+function stopCameraScan(){
+  if(camScan.controls){ camScan.controls.stop(); camScan.controls=null; }
+  camScan.run=null;
+}
+function startCameraScan(o){
+  const overlay=document.getElementById(o.overlay),err=document.getElementById(o.err),video=document.getElementById(o.video);
+  const hint=o.hint?document.getElementById(o.hint):null;
+  stopCameraScan();
+  const run=camScan.run={};
+  camScan.code=null;camScan.count=0;camScan.locked=false;
   err.style.display='none';err.textContent='';
+  if(hint)hint.style.display='block';
   overlay.style.display='flex';
-  scanConfirmCode=null;scanConfirmCount=0;
-  if(isLineAndroidBrowser()){
-    err.innerHTML=lineCameraErrorHtml();
+  const showErr=(html,text)=>{
+    if(html)err.innerHTML=html; else err.textContent=text;
     err.style.display='block';
-    return;
-  }
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    err.textContent=t('cameraNotSupportedError');
-    err.style.display='block';
-    return;
-  }
-  const video=document.getElementById('scanVideo');
+    if(hint)hint.style.display='none';
+  };
+  if(isLineAndroidBrowser()){ showErr(lineCameraErrorHtml()); return; }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ showErr(null,t('cameraNotSupportedError')); return; }
   getZXingReader().decodeFromConstraints({video:SCAN_VIDEO_CONSTRAINTS},video,(result)=>{
+    if(camScan.run!==run||camScan.locked)return;
     const r=result||tryRotatedDecode(video);
-    if(!r){ scanConfirmCode=null;scanConfirmCount=0; return; }
+    if(!r){ camScan.code=null;camScan.count=0; return; }
     const code=r.getText().trim();
-    // ต้องอ่านค่าเดียวกันซ้ำ 2 ครั้งติดกันก่อนถึงจะยอมรับผล กันกรณีกล้องอ่านลายเส้น/สิ่งของทั่วไปผิดเป็นบาร์โค้ดแบบครั้งเดียว
-    if(code===scanConfirmCode){ scanConfirmCount++; } else { scanConfirmCode=code; scanConfirmCount=1; }
-    if(scanConfirmCount>=2){
-      closeScanner();
-      search(code);
+    // ต้องอ่านค่าเดียวกันซ้ำตามจำนวนครั้งที่กำหนดติดกันก่อนถึงจะยอมรับผล กันกรณีกล้องอ่านลายเส้น/สิ่งของทั่วไปผิดเป็นบาร์โค้ดแบบครั้งเดียว
+    if(code===camScan.code){ camScan.count++; } else { camScan.code=code; camScan.count=1; }
+    if(camScan.count>=o.confirms){
+      camScan.locked=true;
+      o.onCode(code);
     }
   }).then(controls=>{
-    scanControls=controls;
-    if(overlay.style.display==='none'){ controls.stop(); scanControls=null; }
+    if(camScan.run!==run||camScan.locked||overlay.style.display==='none'){ controls.stop(); return; }
+    camScan.controls=controls;
   }).catch(()=>{
-    if(isLineAndroidBrowser()){
-      err.innerHTML=lineCameraErrorHtml();
-    } else {
-      err.textContent=t('cameraAccessDeniedError');
-    }
-    err.style.display='block';
+    if(camScan.run!==run)return;
+    if(isLineAndroidBrowser()) showErr(lineCameraErrorHtml()); else showErr(null,t('cameraAccessDeniedError'));
   });
+}
+function openScanner(){
+  startCameraScan({overlay:'scanOverlay',video:'scanVideo',err:'scanError',confirms:2,onCode:code=>{ closeScanner(); search(code); }});
 }
 function closeScanner(){
   document.getElementById('scanOverlay').style.display='none';
-  if(scanControls){ scanControls.stop(); scanControls=null; }
+  stopCameraScan();
 }
 
 let currentRole=null;
