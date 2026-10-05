@@ -174,6 +174,13 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 .chk{flex-direction:row;align-items:flex-start;gap:8px;font-size:14px;color:var(--ink);font-weight:600}
 .chk input{margin-top:3px}
 .imp-def{margin-top:12px;display:grid;gap:4px;max-width:340px}
+.pcell{display:flex;gap:12px;align-items:flex-start}
+.pc-body{min-width:0;flex:1}
+.pimg{width:64px;height:64px;flex:none;border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--line);display:block}
+.pimg.lg{width:76px;height:76px}
+.pimg img{width:100%;height:100%;object-fit:contain;display:block}
+.pimg.none{background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa3b2' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10Z'/%3E%3Cpath d='M2 21c0-3 1.9-5.4 5.1-6.3C9.5 14 12 12.5 14 10'/%3E%3C/svg%3E") center/42% no-repeat}
+.dp-imgrow{display:flex;gap:12px;align-items:center;margin:2px 0 10px}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
 .redbox.remark{background:var(--redbox-ink);color:#fff;border-color:var(--redbox-ink)}
 .remark-field{grid-column:span 2}
@@ -416,6 +423,7 @@ dialog::backdrop{background:#0008}
   <h2 id="dpTitle">สินค้า</h2>
   <div class="grid2">
     <label>Description<input name="desc" required></label>
+    <label>รูปสินค้า (รหัสสินค้า Makro Finder หรือ URL รูป)<input name="img" placeholder="เช่น 411671 — เว้นว่าง = ใช้รูปมาตรฐาน"></label>
     <label>SKU / Item code (ถ้ามี)<input name="sku"></label>
     <label>ประเภท<select name="origin"><option value="import">ผักผลไม้นำเข้า</option><option value="local">ผักผลไม้ท้องถิ่น</option><option value="other">อื่นๆ</option></select></label>
     <label>หมวด<input name="cat"></label>
@@ -429,6 +437,7 @@ dialog::backdrop{background:#0008}
     <label>Buyer UID<select name="buyerUid"></select></label>
     <label>Commercial<select name="comUid"></select></label>
   </div>
+  <div class="dp-imgrow"><span id="dpImgPrev"></span><span class="muted small" id="dpImgHint"></span></div>
   <p class="small muted" id="dpMan" style="margin-bottom:0"></p>
   <div id="dpPrev" style="margin-top:12px"></div>
   <p class="err-text" id="dpErr"></p>
@@ -566,6 +575,15 @@ const BUYER_ITEMS={FV2:['บล็อคโคลี่','กะหล่ำด�
   FF1A:['เงาะ','ลิ้นจี่','มังคุด (กก.ละ)','ลองกอง / ลางสาด','ลำไย','มะม่วงสุก','สละไทย','มะม่วงดิบ','แก้วมังกร (ไทย)','ส้มไทย','มังคุด (แพ็คละ)','ส้มโอ'],
   FF1:['เมล่อน','แคนตาลูป','สับปะรด','แตงโม','ขนุน']};
 const BUYER_OF={};Object.entries(BUYER_ITEMS).forEach(([u,l])=>l.forEach(d=>BUYER_OF[d]=u));
+/* photos for the manual's items, taken from Makro Finder's item images (item_images.json); a product's own `img` overrides it.
+   Items with no photo in Makro Finder show a leaf placeholder until someone picks one in the product editor. */
+const PRODUCT_IMG={'บล็อคโคลี่':'https://images.mango-prod.siammakro.cloud/SOURCE/3caf08ba5c624367ac9c3f0a47f24396','ราสเบอร์รี่':'https://images.mango-prod.siammakro.cloud/SOURCE/13e39bae919441258a62bd8423a2decc','เชอร์รี่':'https://images.mango-prod.siammakro.cloud/product-images/161492952908036-31e8be62-f3d5-4d28-9ecb-0cccac058fb0.jpeg','พีช':'https://images.mango-prod.siammakro.cloud/SOURCE/cfd54418a60c412085dbf112d08e3581','สตรอเบอร์รี่นำเข้า':'https://images.mango-prod.siammakro.cloud/product-images/375305406892026-df39d6f6-2843-452c-9e4b-4d54fb91e781.jpeg','องุ่น (ทุกสี)':'https://images.mango-prod.siammakro.cloud/SOURCE/0ddb93caeb234dd4a37917744a27aa92','องุ่นไชมัสคัส':'https://images.mango-prod.siammakro.cloud/product-images/7499788222659-b6508b21-3460-43a9-a696-73078d5f1cfb.jpeg','ทับทิมอินเดีย':'https://images.mango-prod.siammakro.cloud/SOURCE/543f36c4e5354e23bbd68723e43bf566','ทับทิมจีน':'https://images.mango-prod.siammakro.cloud/SOURCE/543f36c4e5354e23bbd68723e43bf566','แก้วมังกร (นำเข้า)':'https://images.mango-prod.siammakro.cloud/product-images/404427573132064-c012365c-967b-46cd-8682-0bfad3bfd8c6.jpeg','สาลี่หิมะ':'https://images.mango-prod.siammakro.cloud/SOURCE/5cff6c4a2d5e4d279481c199552dbb01','สาลี่ทอง':'https://images.mango-prod.siammakro.cloud/product-images/979263672938805-7cb9c586-8378-4623-b893-18f5e36d4bdb.jpeg','สาลี่หอม':'https://images.mango-prod.siammakro.cloud/SOURCE/ab4f400a969f4de281343361bb7f3df1','แพร':'https://images.mango-prod.siammakro.cloud/SOURCE/ab4f400a969f4de281343361bb7f3df1','เสาวรส (นำเข้า)':'https://images.mango-prod.siammakro.cloud/SOURCE/bb191af6e8ff421e89edf9b6b7da99e6','พลับ':'https://images.mango-prod.siammakro.cloud/product-images/459705886178698-f67bcbab-6e22-4c87-827a-bcd32222976e.jpeg','สละอินโด':'https://images.mango-prod.siammakro.cloud/product-images/266178696274678-ae4d44c2-6463-4cfa-9005-63b7bceecf60.jpeg','แนคทารีน':'https://images.mango-prod.siammakro.cloud/product-images/994842479743027-c07b1afa-652e-4a8f-a694-10aa5256cf8a.jpeg','กีวี่':'https://images.mango-prod.siammakro.cloud/product-images/587110981347771-d152ab88-7498-4545-84a5-f34e083b3afa.jpeg','ส้มนำเข้า':'https://images.mango-prod.siammakro.cloud/product-images/7606381772995-928396a4-ff31-47b6-b465-62ff0e0bdbd3.jpeg','อโวคาโด':'https://images.mango-prod.siammakro.cloud/SOURCE/e3051fea05d74334b60e16c773208890','บลูเบอรี่':'https://images.mango-prod.siammakro.cloud/product-images/375935097804250-011049e5-5c14-4721-84fb-2f8536fbdcc8.jpeg','มันหวานญี่ปุ่น':'https://images.mango-prod.siammakro.cloud/SOURCE/c137ee20fd424eeabf77a163b395ce49','แอปเปิ้ลโอริน':'https://images.mango-prod.siammakro.cloud/product-images/7275694948547-4f31cce8-0966-4c8e-ae7f-c1a43e9e99ab.jpeg','แอปเปิ้ลเซไกอิจิ':'https://images.mango-prod.siammakro.cloud/product-images/602445214359462-3bd2da83-7a0e-4ea5-8ab6-46bd99ea5473.jpeg','แอปเปิ้ลมุทสึ':'https://images.mango-prod.siammakro.cloud/product-images/602445214359462-3bd2da83-7a0e-4ea5-8ab6-46bd99ea5473.jpeg','แอปเปิ้ลคินเซย':'https://images.mango-prod.siammakro.cloud/product-images/602445214359462-3bd2da83-7a0e-4ea5-8ab6-46bd99ea5473.jpeg','แอปเปิ้ลซันฟูจิ':'https://images.mango-prod.siammakro.cloud/product-images/890585750916416-fe92fecc-a207-4a51-bd0d-9b786dcff3b4.jpeg','แอปเปิ้ลแดง':'https://images.mango-prod.siammakro.cloud/product-images/381336425116408-6336f50b-40a2-4a30-850f-9cd59475fb17.jpeg','แอปเปิ้ลเขียว':'https://images.mango-prod.siammakro.cloud/product-images/7275694948547-4f31cce8-0966-4c8e-ae7f-c1a43e9e99ab.jpeg','แอปเปิ้ลอื่นๆ':'https://images.mango-prod.siammakro.cloud/product-images/713881995139327-a44f29c0-38b3-4135-b084-d923f507dbfa.jpeg','นางรมหลวง':'https://images.mango-prod.siammakro.cloud/product-images/7606382461123-a8405b3f-40b9-421c-bb56-58a1b4f49dd4.jpeg','เห็ดนางฟ้า':'https://images.mango-prod.siammakro.cloud/SOURCE/3556e429e9cc4aad8d793b2db8360d03','เห็ดหูหนู':'https://images.mango-prod.siammakro.cloud/SOURCE/b3c733a43da24501b98397cef5c1f4a1','เห็ดเปาฮื้อ':'https://images.mango-prod.siammakro.cloud/SOURCE/e563ac5ca8c947a5a5d6af07de82dbd1','เห็ดเข็มทอง':'https://images.mango-prod.siammakro.cloud/SOURCE/0763b5e6f19242cb993c550b477b5dbe','เห็ดแครง':'https://images.mango-prod.siammakro.cloud/SOURCE/911c4bdb7160423a9adff1526a52bacb','สตรอเบอร์รี่ไทย':'https://images.mango-prod.siammakro.cloud/product-images/375305406892026-df39d6f6-2843-452c-9e4b-4d54fb91e781.jpeg','ฝรั่ง':'https://images.mango-prod.siammakro.cloud/SOURCE/0f48b74c1584416fa9c74adf9621dc1a','สละไทย':'https://images.mango-prod.siammakro.cloud/product-images/266178696274678-ae4d44c2-6463-4cfa-9005-63b7bceecf60.jpeg','มันฝรั่ง':'https://images.mango-prod.siammakro.cloud/SOURCE/ec4a469a7dd8485281ad5cbf5bd328b4','ผักสลัด':'https://images.mango-prod.siammakro.cloud/SOURCE/fa793bc8ac6f4b57b0d32e950d702e00','เมล่อน':'https://images.mango-prod.siammakro.cloud/product-images/210417002769973-6ed8b925-6e98-40fb-a99b-78c4b9348b16.jpeg','แคนตาลูป':'https://images.mango-prod.siammakro.cloud/product-images/744823429316792-0c62e666-fde5-4ec3-9085-5fe9e56e1d14.jpeg','แก้วมังกร (ไทย)':'https://images.mango-prod.siammakro.cloud/product-images/404427573132064-c012365c-967b-46cd-8682-0bfad3bfd8c6.jpeg','สับปะรด':'https://images.mango-prod.siammakro.cloud/product-images/7497378824387-9b89cfa0-d2d2-42f7-a493-2cfd1513c1c8.jpeg','แตงโม':'https://images.mango-prod.siammakro.cloud/product-images/45545000331879-a463151d-84ea-4dcf-b882-7bc787e0c41a.jpeg','กล้วยหอม':'https://images.mango-prod.siammakro.cloud/product-images/7416140234947-ef05144d-21b4-4cb3-bd77-92f1662b90c1.jpeg','มัน':'https://images.mango-prod.siammakro.cloud/product-images/843740519643741-b862861a-9b97-488a-9839-3aa80e773535.jpeg','เสาวรส (ไทย)':'https://images.mango-prod.siammakro.cloud/SOURCE/bb191af6e8ff421e89edf9b6b7da99e6','อโวคาโดไทย':'https://images.mango-prod.siammakro.cloud/SOURCE/412e976db1254f12af3819c499210b4c','ขนุน':'https://images.mango-prod.siammakro.cloud/product-images/7352897142979-399f47cd-0ce3-434e-927c-b8e4c3bd5570.jpeg','ส้มโอ':'https://images.mango-prod.siammakro.cloud/product-images/7275693146307-fe6ed5e7-ee6b-4790-9c21-1d70125fb153.jpeg','ส้มไทย':'https://images.mango-prod.siammakro.cloud/product-images/779317206776432-a3ab62fc-d4c8-48f4-81cb-ef8f49956e38.jpeg','มะม่วงสุก':'https://images.mango-prod.siammakro.cloud/SOURCE/54638dde583c4f4eac2cfa7e71478fbd','มะม่วงดิบ':'https://images.mango-prod.siammakro.cloud/SOURCE/8d02d3b7bb2440219c2afdf42636326b'};
+const prodImg=p=>(p&&(p.img||PRODUCT_IMG[p.desc]))||'';
+function pimg(p,cls){const u=prodImg(p);return u?`<span class="pimg ${cls||''}"><img src="${esc(u)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('none');this.remove()"></span>`:`<span class="pimg none ${cls||''}"></span>`}
+function resolveImg(raw){raw=String(raw||'').trim();if(!raw)return{url:''};
+  if(/^https?:\/\//i.test(raw))return{url:raw};
+  if(/^\d{3,9}$/.test(raw)){const u=MF.state==='ready'?MF.images[raw]:null;return u?{url:u}:{url:'',err:MF.state==='ready'?'ไม่พบรูปของรหัส '+raw+' ใน Makro Finder':'ยังโหลดข้อมูลสินค้าไม่เสร็จ — รอสักครู่แล้วลองใหม่'}}
+  return{url:'',err:'ใส่รหัสสินค้า Makro Finder (ตัวเลข) หรือ URL ที่ขึ้นต้นด้วย https://'}}
 const comOf=(origin,buyer)=>origin==='import'?'9746':/^FV1/.test(buyer)?'8890':origin==='local'?'8718':'';
 function manualProducts(){const out=[];
   for(const origin of ['import','local'])for(const [shelf,names] of Object.entries(MANUAL[origin].items))
@@ -874,7 +892,7 @@ function renderDash(){
     const by=done&&b.ackBy?(mode==='sheet'?` โดย ${esc(b.ackBy)}`:` โดย <span data-uid="${esc(b.ackBy)}">${b.ackBy===myId?'คุณ':'…'}</span>`):'';
     return`<tr class="has-meta${done?" acted":""}">
     <td data-l="สถานะ"><div>${chip(e.st,e.label)}${done?`<div class="small" style="margin-top:4px">✓ ทำแล้ว${by}</div>`:''}</div></td>
-    <td data-l="สินค้า"><div>${ii?.img?`<img class="pthumb" src="${esc(ii.img)}" alt="" loading="lazy">`:""}<b>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(ii.locs))}</b></div>`:""}${b.note?`<div class="redbox" style="margin-top:6px"><b>หมายเหตุ:</b> ${esc(b.note)}</div>`:''}${b.remark?`<div class="redbox remark" style="margin-top:6px"><b>Remark:</b> ${esc(b.remark)}</div>`:''}</div></td>
+    <td data-l="สินค้า"><div>${(ii?.img||prodImg(p))?`<img class="pthumb" src="${esc(ii?.img||prodImg(p))}" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(ii.locs))}</b></div>`:""}${b.note?`<div class="redbox" style="margin-top:6px"><b>หมายเหตุ:</b> ${esc(b.note)}</div>`:''}${b.remark?`<div class="redbox remark" style="margin-top:6px"><b>Remark:</b> ${esc(b.remark)}</div>`:''}</div></td>
     <td data-l="Julian รับ" class="num"><div><b>${jul(e.prod).ddd}</b><div class="small">${fmt(e.prod)}</div></div></td>
     <td data-l="วางขาย"><div><span class="num">วันที่ ${e.day} / ${p.pullDay}</span>${strip(p,e.day)}</div></td>
     <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
@@ -1025,7 +1043,7 @@ function addPreview(){
   if(!p){$('#aPreview').innerHTML='<p class="muted">ยังไม่มีสินค้า — เพิ่มที่แท็บ “สินค้า & กฎลดราคา”</p>';return null}
   if(prod&&prod>today())msg+='<p class="err-text">วันรับสินค้าอยู่ในอนาคต — ตรวจสอบ Julian code</p>';
   const fd=firstMd(p)-1;
-  $('#aPreview').innerHTML=msg+`<div class="pv-head"><b class="pv-name">${esc(p.desc)}</b><span class="pill">Shelf life ${p.shelf} วัน</span><span class="pill pill-green">ขายราคาเต็ม ${fd>1?`วันที่ 1–${fd}`:'วันที่ 1'}</span>${p.temp?`<span class="pill">ตู้แช่ ${esc(p.temp)}</span>`:''}</div>${prod?'':'<p class="muted small" style="margin:6px 0 0">ใส่ Julian code หรือวันที่รับสินค้า เพื่อดูวันที่จริงของแต่ละขั้น</p>'}<div class="pv-body"><div class="pv-plan">${planHTML(p,prod)}</div><div class="pv-strip"><div class="clabel">Shelf life · แถบสี${prod?` · วันนี้ = วันที่ ${diffD(today(),prod)+1}`:""}</div>${strip(p,prod?diffD(today(),prod)+1:undefined).replace("class=\"strip\"","class=\"strip big\"")}<div class="legend sm"><span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลด 15%</span><span style="--c:var(--seg-md2)">ลด 30%</span><span style="--c:var(--seg-pull)">Code 52</span>${prod?`<span class="today-key">วันนี้</span>`:""}</div></div></div>
+  $('#aPreview').innerHTML=msg+`<div class="pv-head">${pimg(p,"lg")}<b class="pv-name">${esc(p.desc)}</b><span class="pill">Shelf life ${p.shelf} วัน</span><span class="pill pill-green">ขายราคาเต็ม ${fd>1?`วันที่ 1–${fd}`:'วันที่ 1'}</span>${p.temp?`<span class="pill">ตู้แช่ ${esc(p.temp)}</span>`:''}</div>${prod?'':'<p class="muted small" style="margin:6px 0 0">ใส่ Julian code หรือวันที่รับสินค้า เพื่อดูวันที่จริงของแต่ละขั้น</p>'}<div class="pv-body"><div class="pv-plan">${planHTML(p,prod)}</div><div class="pv-strip"><div class="clabel">Shelf life · แถบสี${prod?` · วันนี้ = วันที่ ${diffD(today(),prod)+1}`:""}</div>${strip(p,prod?diffD(today(),prod)+1:undefined).replace("class=\"strip\"","class=\"strip big\"")}<div class="legend sm"><span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลด 15%</span><span style="--c:var(--seg-md2)">ลด 30%</span><span style="--c:var(--seg-pull)">Code 52</span>${prod?`<span class="today-key">วันนี้</span>`:""}</div></div></div>
   <div class="ccards">${contactCard('Buyer',st.contacts.find(c=>c.uid===p.buyerUid),p.buyerUid)}${contactCard('Commercial',st.contacts.find(c=>c.uid===p.comUid),p.comUid)}</div>`;
   return prod&&!(j?.error)?prod:null;
 }
@@ -1047,7 +1065,7 @@ function renderProd(){
     const s=stages(p),f=k=>s.find(x=>x.k===k),k=esc(p._id);
     const rng=x=>x?`${x.label.replace('ลดราคา ','').replace(/ \(Step \d\)/,'')} · วันที่ ${x.from}${x.to!=null&&x.to>x.from?'–'+x.to:''}`:'<span class="muted">—</span>';
     const man=manualRule(p.shelf,p.origin),off=man&&['md1Day','md2Day','pullDay'].some(x=>man[x]!==p[x]);
-    return`<tr><td data-l="สินค้า"><div><b>${esc(p.desc)}</b><div class="muted small">${p.sku?esc(p.sku)+' · ':''}${ORIGINS[p.origin]||'อื่นๆ'}${p.temp?' · '+esc(p.temp):''}${off?' · <span class="err-text">ต่างจากคู่มือ</span>':''}</div>${strip(p)}</div></td>
+    return`<tr><td data-l="สินค้า"><div class="pcell">${pimg(p)}<div class="pc-body"><b>${esc(p.desc)}</b><div class="muted small">${p.sku?esc(p.sku)+" · ":""}${ORIGINS[p.origin]||"อื่นๆ"}${p.temp?' · '+esc(p.temp):''}${off?' · <span class="err-text">ต่างจากคู่มือ</span>':''}</div>${strip(p)}</div></div></td>
     <td data-l="Shelf life" class="num">${p.shelf} วัน</td><td data-l="ขายราคาเต็ม" class="num c-ok"><b>วันที่ 1${f("ok").to>1?"–"+f("ok").to:""}</b></td>
     <td data-l="ลด 15%" class="num c-md1">${rng(f('md1'))}</td><td data-l="ลด 30%" class="num c-md2">${rng(f('md2'))}</td>
     <td data-l="Code 52" class="num c-pull">วันที่ ${p.pullDay}${amPm(p)?' (บ่าย)':''}</td>
@@ -1055,9 +1073,10 @@ function renderProd(){
     <td><div class="row w" style="gap:4px;flex-wrap:nowrap"><button class="btn sm" onclick="editProduct('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delProduct('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
 const dlgProd=$('#dlgProd'),fP=$('#fProd');let editId=null;
-const NUMF=['shelf','md1Day','md1Pct','md2Day','md2Pct','pullDay'],TXTF=['sku','desc','cat','origin','temp','buyerUid','comUid'];
-function readProdForm(){const o={rv:2};TXTF.forEach(k=>o[k]=fP[k].value.trim());NUMF.forEach(k=>o[k]=+fP[k].value||0);return o}
-function prodPrev(){const o=readProdForm(),e=ruleError(o),man=manualRule(o.shelf,o.origin);$('#dpErr').textContent=e;
+const NUMF=['shelf','md1Day','md1Pct','md2Day','md2Pct','pullDay'],TXTF=['sku','desc','img','cat','origin','temp','buyerUid','comUid'];
+let prodImgErr="";
+function readProdForm(){const o={rv:2};TXTF.forEach(k=>o[k]=fP[k].value.trim());NUMF.forEach(k=>o[k]=+fP[k].value||0);const r=resolveImg(o.img);prodImgErr=r.err||"";o.img=r.url;return o}
+function prodPrev(){const o=readProdForm(),e=ruleError(o),man=manualRule(o.shelf,o.origin);$("#dpErr").textContent=e||prodImgErr;$("#dpImgPrev").innerHTML=pimg({desc:o.desc,img:o.img},"lg");$("#dpImgHint").textContent=o.img?"ใช้รูปที่กำหนดเอง":PRODUCT_IMG[o.desc]?"ใช้รูปมาตรฐานจาก Makro Finder":"ยังไม่มีรูปของสินค้านี้ — ใส่รหัสสินค้า Makro Finder (ตัวเลข) หรือ URL รูปในช่องรูปสินค้า";
   $('#dpMan').textContent=man?`คู่มือ Makro (${ORIGINS[o.origin]}, ${o.shelf} วัน): ลด 15% วันที่ ${man.md1Day||'—'} · ลด 30% วันที่ ${man.md2Day} · Code 52 วันที่ ${man.pullDay}`:`ไม่มีกฎสำหรับ ${ORIGINS[o.origin]||'อื่นๆ'} ${o.shelf} วันในคู่มือ — ปุ่มด้านล่างจะคำนวณแบบประมาณ`;
   $('#dpPrev').innerHTML=e?'':`${strip(o)}<div style="margin-top:10px">${planHTML(o,null)}</div>`}
 function editProduct(id){
@@ -1065,12 +1084,12 @@ function editProduct(id){
   const p=cur||{sku:'',desc:'',cat:'',origin:'import',temp:'0–4°C',shelf:7,...autoRule(7,'import'),buyerUid:'',comUid:''};
   $('#dpTitle').textContent=cur?'แก้ไขสินค้า':'เพิ่มสินค้า';
   fP.buyerUid.innerHTML=ctOptions(p.buyerUid,'Buyer');fP.comUid.innerHTML=ctOptions(p.comUid,'Commercial');
-  [...TXTF.filter(k=>k!=='buyerUid'&&k!=='comUid'),...NUMF].forEach(k=>fP[k].value=p[k]??'');prodPrev();dlgProd.showModal();
+  [...TXTF.filter(k=>k!=='buyerUid'&&k!=='comUid'),...NUMF].forEach(k=>fP[k].value=p[k]??'');if(onMakroSite())loadMakroData();prodPrev();dlgProd.showModal();
 }
 fP.oninput=prodPrev;
 $('#dpAuto').onclick=()=>{const r=autoRule(+fP.shelf.value,fP.origin.value);Object.entries(r).forEach(([k,v])=>fP[k].value=v);prodPrev()};
 fP.onsubmit=ev=>{
-  const o=readProdForm(),e=ruleError(o);
+  const o=readProdForm(),e=ruleError(o)||prodImgErr;
   if(e){ev.preventDefault();$('#dpErr').textContent=e;return}
   const dup=findProd(pkey(o));
   if(dup&&dup._id!==editId){ev.preventDefault();$('#dpErr').textContent='มีสินค้า SKU/ชื่อนี้อยู่แล้ว';return}
