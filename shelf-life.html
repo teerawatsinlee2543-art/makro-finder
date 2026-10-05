@@ -480,7 +480,8 @@ dialog::backdrop{background:#0008}
 <dialog id="dlgNbs" class="nbs-dlg"><div>
   <h2 id="nbsTitle">เพิ่ม Item NBS</h2>
   <div id="nbsFind" hidden>
-    <label>ค้นหาสินค้าจาก Makro Finder (รหัส บาร์โค้ด หรือชื่อ)<input id="nQ" placeholder="เช่น 210907 หรือ ชื่อสินค้า" autocomplete="off"></label>
+    <div class="search-row"><label class="grow">ค้นหาสินค้าจาก Makro Finder (รหัส บาร์โค้ด หรือชื่อ)<input id="nQ" placeholder="เช่น 210907 หรือ ชื่อสินค้า" autocomplete="off"></label>
+      <button type="button" class="btn scan-btn" id="nScanBtn" title="สแกนบาร์โค้ดด้วยกล้อง"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M7 8v8M10 8v8M13 8v8M16 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>สแกนสินค้า</button></div>
     <p class="muted small" id="nStatus" style="margin:4px 0 0"></p>
     <div id="nResults" class="mf-results"></div>
   </div>
@@ -488,13 +489,13 @@ dialog::backdrop{background:#0008}
   <div class="lot-grid" style="margin-top:12px">
     <label>กลุ่มสินค้า<select id="nDiv"><option value="FF">FF · Fresh Food</option><option value="DF">DF · Dry Food</option><option value="NF">NF · Non Food</option></select></label>
     <label>รหัสสินค้า (Item No)<input id="nNo" inputmode="numeric" placeholder="เช่น 210907"></label>
-    <label>Last Recv. Date (ถ้าทราบ)<input type="date" id="nRecv"></label>
-    <label>Last Sold Date (ถ้าทราบ)<input type="date" id="nLast"></label>
+    <label>Stock คงเหลือ (ชิ้น)<input type="number" min="0" id="nStock" placeholder="0"></label>
     <label class="span3">ชื่อสินค้า<input id="nDesc" placeholder="ชื่อสินค้า"></label>
     <label>ที่ตั้ง / ชั้นวาง<input id="nLoc" placeholder="เช่น Loc 510 / Location 510-011"></label>
-    <label>Stock คงเหลือ (ชิ้น)<input type="number" min="0" id="nStock" placeholder="0"></label>
+    <label>Last Recv. Date (ถ้าทราบ)<input type="date" id="nRecv"></label>
+    <label>Last Sold Date (ถ้าทราบ)<input type="date" id="nLast"></label>
     <label>Buyer UID<select id="nBuyer"></select></label>
-    <label class="span3">สถานะ / การดำเนินการ<select id="nStat"></select></label>
+    <label class="span2">สถานะ / การดำเนินการ<select id="nStat"></select></label>
     <label class="span3">Remark<textarea id="nRemark" rows="2" maxlength="300" placeholder="รายละเอียดเพิ่มเติม เช่น เหตุผลที่ไม่ขายได้ สิ่งที่ขอให้ Buyer ดำเนินการ"></textarea></label>
   </div>
   <p class="err-text" id="nErr" style="margin:8px 0 0"></p>
@@ -1538,8 +1539,9 @@ try{const ro=new ResizeObserver(()=>{const s=document.documentElement.style;s.se
 /* compact Julian in the pinned tab bar once the big badge scrolls away */
 try{new IntersectionObserver(([en])=>$('#jmini').classList.toggle('show',!en.isIntersecting),{threshold:0}).observe(document.querySelector('.jbadge'))}catch(e){$('#jmini').classList.add('show')}
 /* camera barcode scan — same ZXing build and settings as Makro Finder's own scanner */
-let zxr=null,scanOn=false,scanLast=null,scanHits=0;
-async function openScan(){
+let zxr=null,scanOn=false,scanLast=null,scanHits=0,scanFor='mf';
+async function openScan(target){
+  scanFor=target==='nbs'?'nbs':'mf';
   const d=$('#dlgScan');$('#scanMsg').textContent='กำลังเปิดกล้อง…';d.showModal();
   if(!navigator.mediaDevices?.getUserMedia){$('#scanMsg').textContent='เบราว์เซอร์นี้ใช้กล้องไม่ได้ — พิมพ์บาร์โค้ดในช่องค้นหาแทน';return}
   try{
@@ -1556,14 +1558,22 @@ async function openScan(){
   }catch(e){$('#scanMsg').textContent='เปิดกล้องไม่ได้ — อนุญาตให้ใช้กล้องในเบราว์เซอร์ หรือพิมพ์บาร์โค้ดในช่องค้นหาแทน'}
 }
 function closeScan(){scanOn=false;try{zxr&&zxr.reset()}catch(e){}const d=$('#dlgScan');if(d.open)d.close()}
+async function useScannedNbs(code){
+  $('#nQ').value=code;
+  if(MF.state!=='ready'){toast('กำลังโหลดข้อมูลสินค้า…');await loadMakroData();for(let i=0;i<120&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250))}
+  const h=mfSearch(code);
+  if(h.length&&(h[0].barcode===code||MF.bar.get(code)===h[0].itemNo||h[0].itemNo===code)){nbsPick(h[0].itemNo);const dup=(st.nbs||[]).some(r=>r.itemNo===h[0].itemNo&&r._id!==nbsEditId);toast(dup?'พบสินค้า: '+h[0].desc+' — มีใน Item NBS แล้ว':'พบสินค้า: '+h[0].desc)}
+  else{nbsSearch();toast(h.length?'เลือกสินค้าจากรายการ':'ไม่พบบาร์โค้ด '+code+' ใน Makro Finder')}
+}
 async function useScanned(code){
+  if(scanFor==='nbs')return useScannedNbs(code);
   $('#mfQ').value=code;
   if(MF.state!=='ready'){toast('กำลังโหลดข้อมูลสินค้า…');await loadMakroData();for(let i=0;i<120&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250))}
   const h=mfSearch(code);
   if(h.length&&(h[0].barcode===code||MF.bar.get(code)===h[0].itemNo||h[0].itemNo===code)){pickMf(h[0].itemNo);toast('พบสินค้า: '+h[0].desc)}
   else{renderMfResults();toast(h.length?'เลือกสินค้าจากรายการ':'ไม่พบบาร์โค้ด '+code+' ใน Makro Finder')}
 }
-$('#scanBtn').onclick=openScan;
+$('#scanBtn').onclick=()=>openScan('mf');$('#nScanBtn').onclick=()=>openScan('nbs');
 function resetAddForm(){
   ['#mfQ','#aJ','#aDate','#aLoc','#aRemarkOther'].forEach(s=>{const el=$(s);if(el)el.value=''});
   $('#aQty').value=1;$('#aRemark').value='';$('#aRemarkOtherWrap').hidden=true;
