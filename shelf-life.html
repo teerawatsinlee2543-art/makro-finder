@@ -201,6 +201,12 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 .td-next{margin-top:6px;padding-top:6px;border-top:1px dashed var(--redbox-line);font-weight:600;line-height:1.35}
 .td-lbl{display:inline-block;font-size:11px;font-weight:700;background:var(--redbox-ink);color:var(--redbox);border-radius:4px;padding:0 6px;margin-right:6px;vertical-align:1px}
 .td-when{font-weight:500;opacity:.85;margin-top:2px}
+/* contacts table: header in the colours of the Makro org chart */
+table.ct-tbl{table-layout:fixed}
+table.ct-tbl thead th{background:#ffc85c;color:#2b1d00;border:1px solid #8a6a1f;text-transform:none;letter-spacing:0;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center;padding:7px 5px;vertical-align:middle}
+table.ct-tbl td{padding:8px 6px;overflow-wrap:anywhere;font-size:13px}
+table.ct-tbl .cn{font-weight:700}
+table.ct-tbl .btn{white-space:nowrap}
 .actbtns{display:flex;flex-direction:column;gap:4px;align-items:stretch}
 table.nbs-tbl td.nsave .actbtns{flex-direction:row;flex-wrap:wrap;margin-top:6px;gap:4px}
 table.nbs-tbl td.nsave .actbtns .btn{flex:1 1 auto;text-align:center}
@@ -474,7 +480,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
     <div class="row" style="margin-bottom:10px"><label style="flex:1;min-width:180px">ค้นหา (UID / ชื่อ / หมวดสินค้า / เบอร์)<input id="ctQ" placeholder="เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small" id="ctCount" style="padding-bottom:8px"></span></div>
-    <table class="resp"><thead><tr><th>UID</th><th>ชื่อ</th><th>บทบาท</th><th>แผนก / หมวด</th><th>โทร</th><th>อีเมล / LINE</th><th>ผู้ติดต่อสำรอง</th><th>ใช้กับสินค้า</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
+    <table class="resp ct-tbl"><colgroup><col style="width:7%"><col style="width:8%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:11%"><col style="width:5%"><col style="width:11%"><col style="width:10%"><col style="width:6%"><col style="width:7%"></colgroup><thead><tr><th>Area</th><th>Senior Director</th><th>Associate Director / Senior Manager</th><th>Area</th><th>Senior Manager / Product Group</th><th>Buyer UID</th><th>Merchandise Mgr. Name</th><th>Art Grp No.</th><th>Description</th><th>Assistant</th><th>Junior Buyer / New Gen</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
   </div>
 </section>
 
@@ -1320,12 +1326,53 @@ function renderCt(){
     .sort((a,b)=>grpOf(a).localeCompare(grpOf(b))||(a.role===b.role?0:a.role==='Commercial'?-1:1)||String(a.uid).localeCompare(String(b.uid)));
   $('#ctCount').textContent=`${list.length} จาก ${st.contacts.length} รายการ`;
   let last=null;
-  $('#ctBody').innerHTML=list.map(c=>{const used=st.products.filter(p=>p.buyerUid===c.uid||p.comUid===c.uid).map(p=>p.desc),k=esc(c._id);
-    let head='';if(grpOf(c)!==last){last=grpOf(c);head=`<tr class="grp"><td colspan="9">${esc(last)}</td></tr>`}
-    return head+`<tr><td data-l="UID"><b>${esc(c.uid)}</b></td><td data-l="ชื่อ">${esc(c.name)}</td><td data-l="บทบาท">${esc(c.role)}</td><td data-l="แผนก">${esc(c.dept)}</td><td data-l="โทร" class="num">${esc(c.phone||'-')}</td><td data-l="อีเมล/LINE">${esc(c.email||'-')}</td><td data-l="สำรอง" class="small">${esc(c.backup||'-')}</td>
-    <td data-l="สินค้า" class="small">${used.length?esc(used.join(', ')):'<span class="muted">-</span>'}</td>
-    <td><div class="row w" style="gap:4px;flex-wrap:nowrap"><button class="btn sm" onclick="editContact('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delContact('${k}')">ลบ</button></div></td></tr>`}).join('');
+  $('#ctBody').innerHTML=list.map(c=>{const v=ctView(c),k=esc(c._id),used=st.products.filter(p=>p.buyerUid===c.uid||p.comUid===c.uid).length;
+    let head='';if(grpOf(c)!==last){last=grpOf(c);head=`<tr class="grp"><td colspan="12">${esc(last)}</td></tr>`}
+    const P=(name,ph,extra)=>name?`<div class="cn">${esc(name)}</div>${ph?`<div class="muted small num">${esc(ph)}</div>`:''}${extra||''}`:'<span class="muted">-</span>';
+    return head+`<tr><td data-l="Area" class="small">${esc(c.group||'-')}</td>
+    <td data-l="Senior Director" class="small">${P(v.sd)}</td>
+    <td data-l="Associate Director / Senior Manager" class="small">${P(v.ad)}</td>
+    <td data-l="Area (หมวด)" class="small">${esc(v.area||'-')}</td>
+    <td data-l="Senior Manager / Product Group" class="small">${v.smSelf?P(c.name,c.phone,`<div class="muted small">${esc(v.title)}</div>`):P(v.sm&&v.sm.name,v.sm&&v.sm.phone,v.sm?`<div class="muted small">${esc(v.sm.title)}</div>`:'')}</td>
+    <td data-l="Buyer UID"><b>${c.role==='Buyer'?esc(c.uid):'<span class="muted">-</span>'}</b>${v.codes?`<div class="muted small">${esc(v.codes)}</div>`:''}${used?`<div class="muted small" title="ใช้กับสินค้า ${used} รายการใน Shelf-Life">${used} สินค้า</div>`:''}</td>
+    <td data-l="Merchandise Mgr. Name" class="small">${c.role==='Buyer'?P(c.name,c.phone,c.email?`<div class="muted small">${esc(c.email)}</div>`:''):'<span class="muted">-</span>'}</td>
+    <td data-l="Art Grp No." class="small num">${v.arts.length?v.arts.map(a=>`<div>${esc(a[0])}</div>`).join(''):'<span class="muted">-</span>'}</td>
+    <td data-l="Description" class="small">${v.arts.length?v.arts.map(a=>`<div>${esc(a[1])}</div>`).join(''):esc(v.desc||'-')}</td>
+    <td data-l="Assistant" class="small">${v.asst.length?v.asst.map(x=>`<div>${esc(x)}</div>`).join(''):'<span class="muted">-</span>'}${v.merch?`<div class="muted small">Merch กลุ่ม ${esc(v.merch)}</div>`:''}</td>
+    <td data-l="Junior Buyer / New Gen" class="small">${v.jr.length?v.jr.map(x=>`<div>${esc(x)}</div>`).join(''):'<span class="muted">-</span>'}</td>
+    <td><div class="row w" style="gap:4px;flex-wrap:wrap"><button class="btn sm" onclick="editContact('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delContact('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
+/* the contact list is shown like the Makro team org chart (Area · Senior Director · Associate Director · Senior Manager / Product Group · Buyer UID · Merchandise Mgr. · Art Grp · Assistant · Junior Buyer) */
+function ctView(c){
+  const dept=String(c.dept||''),parts=dept.split(' · '),buyer=c.role==='Buyer',v={sd:'',ad:'',area:'',sm:null,smSelf:false,title:'',codes:'',arts:[],desc:'',asst:[],jr:[],merch:''};
+  const phoneOf=s=>(String(s).match(/(0\d{1,2}-?\d{3}-?\d{4})\s*$/)||[])[1]||'',nameOf=s=>String(s).replace(/\s*(0\d{1,2}-?\d{3}-?\d{4})\s*$/,'').trim();
+  const sd=st.contacts.find(x=>/^Senior Director/i.test(x.dept||'')&&String(x.group||'').startsWith('Dry Grocery'));
+  if(sd&&String(c.group||'').startsWith('Dry Grocery'))v.sd=sd.name;
+  /* backup text: "Asst. A #id phone · Jr. B · Merch กลุ่ม C #id phone · Assoc. Dir. D #id · phone" */
+  String(c.backup||'').split(' · ').forEach(seg=>{
+    let m;
+    if(m=seg.match(/^(?:Asst\.?|Assistant)\s+(.*)$/i))v.asst.push(m[1]);
+    else if(m=seg.match(/^Jr\.?(?: Buyer)?\s+(.*)$/i))v.jr.push(m[1]);
+    else if(m=seg.match(/^Merch\s*กลุ่ม\s+(.*)$/i))v.merch=m[1];
+    else if(m=seg.match(/^(?:Assoc\.? ?Dir\.?|Associate Director|Director)\s+(.*)$/i))v.ad=nameOf(m[1]);
+    else if(seg.trim()&&!/^\d/.test(seg))v.asst.push(seg.trim())});
+  /* "Asst. Name #id phone, Name2 ..." keeps working as plain text */
+  if(buyer){
+    const rest=parts.length>1?parts.slice(1).join(' · '):dept;v.area=parts.length>1?parts[0]:'';
+    v.arts=[...rest.matchAll(/(\d{1,4})\s+([^,]+?)(?=,\s*\d|$)/g)].map(m=>[m[1],m[2].trim()]);
+    if(!v.arts.length)v.desc=rest;
+    const cm=st.contacts.find(x=>x.role==='Commercial'&&(String(x.dept||'').match(/\(([^)]*)\)/)||[,''])[1].split(/\s*,\s*/).includes(c.uid));
+    if(cm){const t=String(cm.dept||'').split(' · ')[0];v.sm={name:cm.name,phone:cm.phone,title:t};
+      const ad=String(cm.backup||'').match(/(?:Assoc\.? ?Dir\.?|Associate Director|Director)\s+(.*?)(?:\s·\s|$)/i);if(ad&&!v.ad)v.ad=nameOf(ad[1])}
+  }else{
+    v.title=parts[0]||'';const mm=String(parts.slice(1).join(' · ')).match(/^(.*?)\s*(?:\(([^)]*)\))?$/);
+    v.area=mm?mm[1]:'';v.codes=mm&&mm[2]?mm[2]:'';
+    if(/^Senior Director/i.test(v.title)){v.sd=c.name;v.area='';v.smSelf=false}
+    else if(/^Associate Director/i.test(v.title)){v.ad=c.name;v.smSelf=false}
+    else v.smSelf=true;
+    if(v.smSelf){const ad=String(c.backup||'').match(/(?:Assoc\.? ?Dir\.?|Associate Director|Director)\s+(.*?)(?:\s·\s|$)/i);if(ad)v.ad=nameOf(ad[1])}
+    if(!v.smSelf)v.area=v.area||v.title}
+  return v}
 $('#ctQ').oninput=renderCt;$('#ctG').onchange=renderCt;
 const dlgCt=$('#dlgCt'),fC=$('#fCt');let ctId=null;
 const CTF=['uid','name','role','group','dept','phone','email','backup','artKeys'];
