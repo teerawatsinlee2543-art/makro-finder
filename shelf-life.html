@@ -477,11 +477,8 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
       <label>ผู้ติดต่อ (CSV: uid,name,role,dept,phone,email)<input type="file" accept=".csv,text/csv" id="impCt"></label>
       <label>กู้คืนข้อมูลสำรอง (JSON)<input type="file" accept=".json" id="impJson"></label>
     </div></div>
-  <div class="card" id="whoBox" hidden><h2>ชื่อของคุณ</h2><label style="max-width:360px">ใช้บันทึกว่าใครกด “ทำแล้ว” (เก็บในเครื่องนี้)<input id="whoName" placeholder="เช่น ธีรวัฒน์ (Fresh)"></label></div>
-  <div class="card w"><h2>ล้างข้อมูล</h2>
-    <p class="muted small" id="storeNote"></p>
-    <div class="row"><button class="btn" onclick="purgeOld()">ลบล็อตที่เลย Code 52 เกิน 7 วัน</button>
-    <button class="btn danger" onclick="resetSample()">ล้างทั้งหมดแล้วโหลดคู่มือใหม่</button></div></div>
+  <div id="whoBox" hidden><input id="whoName" type="hidden"></div>
+  <p id="storeNote" hidden></p>
 </section>
 </main>
 
@@ -951,7 +948,7 @@ function applyRole(){
   m.className='chip '+(team?'s-ok':mode==='local'?'s-soon':'s-err');
   $('#storeNote').textContent=mode==='db'?'ข้อมูลชุดนี้ใช้ร่วมกันทั้งทีม — ทุกคนที่เปิดลิงก์เห็นข้อมูลเดียวกันทันที การลบมีผลกับทุกคน'
     :mode==='sheet'?'ข้อมูลเก็บใน '+REMOTE_NAME+' ใช้ร่วมกันทั้งทีม — หน้าจะดึงข้อมูลใหม่ทุก '+(REMOTE==='supabase'?10:30)+' วินาที การลบมีผลกับทุกคน':'ข้อมูลเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น — สำรองเป็น JSON เป็นประจำ';
-  $('#whoBox').hidden=mode!=='sheet';
+  $('#whoBox').hidden=true; /* the "ชื่อของคุณ" card was removed; a name saved earlier in this browser is still used */
 }
 async function connect(){
   const c=window.claude;
@@ -1562,10 +1559,7 @@ readFile($('#impCt'),t=>{const ok=parseCSV(t).filter(r=>r.uid).map(r=>({uid:r.ui
     .then(y=>y&&notice(`นำเข้าผู้ติดต่อ ${ok.length} รายการ`))});
 readFile($('#impJson'),t=>{const o=JSON.parse(t);if(!o.products||!o.batches)throw Error('ไฟล์ไม่ใช่ข้อมูลสำรองของโปรแกรมนี้');
   ask(mode==='db'?'แทนที่ข้อมูลของทั้งทีมด้วยไฟล์สำรองนี้?':'แทนที่ข้อมูลปัจจุบันทั้งหมด?').then(y=>{if(y)act(()=>replaceAll(o),'กู้คืนข้อมูลแล้ว')})});
-function purgeOld(){const old=st.batches.filter(b=>evalBatch(b).left<-7);
-  if(!old.length)return toast('ไม่มีล็อตที่เลย Code 52 เกิน 7 วัน');
-  act(async()=>{for(const b of old)await rmItem('batches',b)},`ลบ ${old.length} ล็อต`)}
-async function resetSample(){if(!await ask(mode==='db'?'ลบข้อมูลของทั้งทีม (สินค้า ผู้ติดต่อ ล็อต) แล้วโหลดสินค้าตามคู่มือใหม่?':'ลบข้อมูลทั้งหมดแล้วโหลดสินค้าตามคู่มือใหม่?'))return;act(()=>replaceAll(seed(mode!=='db')),'โหลดข้อมูลตามคู่มือแล้ว')}
+/* data reset / purge buttons were removed from the import-export tab */
 $('#obSample').onclick=()=>act(()=>replaceAll(seed(false)),'โหลดสินค้าตามคู่มือ Makro แล้ว');
 $('#obMigrate').onclick=()=>{const lc=loadLocal();if(lc)act(()=>replaceAll(lc),'ย้ายข้อมูลขึ้นข้อมูลทีมแล้ว')};
 
