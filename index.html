@@ -6887,7 +6887,7 @@ const SCAN_DEBOUNCE_MS=1500;
 function openPalletScan(mode){
   palletScanMode=mode;
   document.getElementById('palletScanTitle').textContent=mode==='manage'?t('scanTitleManage'):(mode==='find'?t('scanTitleFind'):(mode==='palletloc'?t('scanTitleBay'):(mode==='newitembarcode'?t('scanTitleNewItemBarcode'):(mode==='movepallettarget'?t('scanTitleMoveTarget'):(mode==='wastelog'?t('wasteScanOverlayTitle'):t('scanTitleDelete'))))));
-  startCameraScan({overlay:'palletScanOverlay',video:'palletScanVideo',err:'palletScanError',hint:'palletScanHint',confirms:mode==='wastelog'?1:2,onCode:handlePalletScanCode});
+  startCameraScan({overlay:'palletScanOverlay',video:'palletScanVideo',err:'palletScanError',hint:'palletScanHint',confirms:mode==='wastelog'?1:2,skipUrlQr:!(mode==='palletloc'||mode==='newitembarcode'||mode==='movepallettarget'),onCode:handlePalletScanCode});
 }
 function closePalletScan(){
   document.getElementById('palletScanOverlay').style.display='none';
@@ -8266,18 +8266,35 @@ function tryRotatedDecode(video){
 }
 // ลูปกล้องสแกนตัวเดียวของทั้งแอป (หน้าแรก พาเลท ของเสีย ใช้ตัวนี้หมด) ต่างกันแค่ overlay ที่เปิด จำนวนครั้งที่ต้องอ่านซ้ำ และสิ่งที่ทำหลังอ่านได้
 // o = {overlay, video, err, hint?, confirms, onCode(code)}  (ค่าเป็น id ของ element)
-let camScan={controls:null,run:null,code:null,count:0,locked:false};
+let camScan={controls:null,run:null,code:null,count:0,locked:false,video:null};
+// ปิดกล้องให้หมดจริง: นอกจากสั่ง controls.stop() แล้วยังปิด track ของสตรีมที่ผูกกับ <video> เอง กันกรณี iPhone/มือถือบางรุ่นยังค้างไฟกล้อง (จุดเขียว) หลังสแกนเสร็จ
 function stopCameraScan(){
-  if(camScan.controls){ camScan.controls.stop(); camScan.controls=null; }
+  if(camScan.controls){ try{ camScan.controls.stop(); }catch(e){} camScan.controls=null; }
+  const v=camScan.video;
+  if(v){
+    try{ if(v.srcObject&&v.srcObject.getTracks)v.srcObject.getTracks().forEach(tr=>tr.stop()); }catch(e){}
+    try{ v.pause(); v.srcObject=null; }catch(e){}
+    camScan.video=null;
+  }
   camScan.run=null;
+}
+// QR บนป้ายสินค้า (ลิงก์ truce ของ Makro) ไม่ใช่เลขสินค้า: โหมดที่หาสินค้าให้ข้าม QR ที่เป็นลิงก์ แล้วอ่านบาร์โค้ดแท่งต่อ
+function isUrlQr(r,code){
+  try{ return r.getBarcodeFormat()===ZXing.BarcodeFormat.QR_CODE&&/^https?:\/\//i.test(code); }catch(e){ return false; }
 }
 function startCameraScan(o){
   const overlay=document.getElementById(o.overlay),err=document.getElementById(o.err),video=document.getElementById(o.video);
   const hint=o.hint?document.getElementById(o.hint):null;
   stopCameraScan();
   const run=camScan.run={};
-  camScan.code=null;camScan.count=0;camScan.locked=false;
+  camScan.code=null;camScan.count=0;camScan.locked=false;camScan.video=video;
   err.style.display='none';err.textContent='';
+  let noteTimer=null;
+  const note=msg=>{
+    err.textContent=msg;err.style.display='block';
+    clearTimeout(noteTimer);
+    noteTimer=setTimeout(()=>{ if(camScan.run===run){ err.style.display='none';err.textContent=''; } },3000);
+  };
   if(hint)hint.style.display='block';
   overlay.style.display='flex';
   const showErr=(html,text)=>{
@@ -8292,6 +8309,7 @@ function startCameraScan(o){
     const r=result||tryRotatedDecode(video);
     if(!r){ camScan.code=null;camScan.count=0; return; }
     const code=r.getText().trim();
+    if(o.skipUrlQr&&isUrlQr(r,code)){ camScan.code=null;camScan.count=0; note('ข้าม QR บนป้าย — เล็งกล้องที่บาร์โค้ดแท่งแทน'); return; }
     // ต้องอ่านค่าเดียวกันซ้ำตามจำนวนครั้งที่กำหนดติดกันก่อนถึงจะยอมรับผล กันกรณีกล้องอ่านลายเส้น/สิ่งของทั่วไปผิดเป็นบาร์โค้ดแบบครั้งเดียว
     if(code===camScan.code){ camScan.count++; } else { camScan.code=code; camScan.count=1; }
     if(camScan.count>=o.confirms){
@@ -8307,12 +8325,22 @@ function startCameraScan(o){
   });
 }
 function openScanner(){
-  startCameraScan({overlay:'scanOverlay',video:'scanVideo',err:'scanError',confirms:2,onCode:code=>{ closeScanner(); search(code); }});
+  startCameraScan({overlay:'scanOverlay',video:'scanVideo',err:'scanError',confirms:2,skipUrlQr:true,onCode:code=>{ closeScanner(); search(code); }});
 }
 function closeScanner(){
   document.getElementById('scanOverlay').style.display='none';
   stopCameraScan();
 }
+// สลับแอป/ล็อกหน้าจอ/ปิดแท็บ ขณะกล้องเปิดอยู่ ให้ปิดกล้องทันที ไม่ให้ค้างอยู่เบื้องหลัง
+function closeCameraIfHidden(){
+  if(!document.hidden&&!(arguments[0]&&arguments[0].type==='pagehide'))return;
+  const so=document.getElementById('scanOverlay'),po=document.getElementById('palletScanOverlay');
+  if(so&&so.style.display==='flex')closeScanner();
+  else if(po&&po.style.display==='flex')closePalletScan();
+  else stopCameraScan();
+}
+document.addEventListener('visibilitychange',closeCameraIfHidden);
+window.addEventListener('pagehide',closeCameraIfHidden);
 
 let currentRole=null;
 function showGRHome(sess){
