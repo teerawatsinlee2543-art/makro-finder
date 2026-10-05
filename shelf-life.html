@@ -529,7 +529,6 @@ select,input,textarea{max-width:100%}
       <label>นับอายุ Aging จาก<select id="nbsBasis"><option value="sold">วันที่ไม่มียอดขาย (Last Sold)</option><option value="recv">วันที่รับสินค้าล่าสุด (Last Recv.)</option></select></label>
       <div class="f-act">
         <label class="f-chk"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
-        <button type="button" class="btn w" id="nbsBulkBuyer" title="กำหนด Buyer ให้ทุกรายการที่กรองอยู่ในตารางตอนนี้">กำหนด Buyer ทั้งรายการที่กรอง</button>
         <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
       </div>
     </div>
@@ -2242,7 +2241,6 @@ async function bulkBuyerGo(){
     if(rule&&bc&&!ctKeys(bc).some(k=>k.toLowerCase()===rule.toLowerCase()))await patchItem('contacts',bc,{artKeys:[...ctKeys(bc),rule].join(', ')})},`กำหนด Buyer ให้ ${rows.length.toLocaleString()} รายการแล้ว${rule&&bc?' · จำกฎไว้ที่ '+uid:''}`);
   renderNbs();
 }
-$('#nbsBulkBuyer').onclick=bulkBuyerOpen;
 $('#bbClean').onclick=async()=>{
   const stale=(st.nbs||[]).filter(r=>r.buyerUid&&!st.contacts.some(c=>c.uid===r.buyerUid));
   if(!stale.length||!await ask(`ล้าง Buyer ของ ${stale.length.toLocaleString()} รายการที่ไม่พบในรายชื่อ?  (ทุกคนในทีมเห็นการเปลี่ยนนี้)`))return;
