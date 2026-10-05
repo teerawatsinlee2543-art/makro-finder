@@ -203,7 +203,8 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 .td-when{font-weight:500;opacity:.85;margin-top:2px}
 /* contacts table: header in the colours of the Makro org chart */
 table.ct-tbl{table-layout:fixed}
-table.ct-tbl thead th{background:#ffc85c;color:#2b1d00;border:1px solid #8a6a1f;text-transform:none;letter-spacing:0;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center;padding:7px 5px;vertical-align:middle}
+table.ct-tbl thead th{background:#ffc85c;color:#2b1d00;border:0;text-transform:none;letter-spacing:0;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center;padding:7px 5px;vertical-align:middle}
+table.ct-tbl thead th:first-child{border-radius:10px 0 0 10px}table.ct-tbl thead th:last-child{border-radius:0 10px 10px 0}
 table.ct-tbl td{padding:8px 6px;overflow-wrap:anywhere;font-size:13px}
 table.ct-tbl .cn{font-weight:700}
 .bcard{display:flex;flex-direction:column;gap:2px;font-size:12.5px;line-height:1.35}
@@ -485,7 +486,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
     <div class="row" style="margin-bottom:10px"><label style="flex:1;min-width:180px">ค้นหา (UID / ชื่อ / หมวดสินค้า / เบอร์)<input id="ctQ" placeholder="เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small" id="ctCount" style="padding-bottom:8px"></span></div>
-    <table class="resp ct-tbl"><colgroup><col style="width:7%"><col style="width:8%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:11%"><col style="width:5%"><col style="width:11%"><col style="width:10%"><col style="width:6%"><col style="width:7%"></colgroup><thead><tr><th>Area</th><th>Senior Director</th><th>Associate Director / Senior Manager</th><th>Area</th><th>Senior Manager / Product Group</th><th>Buyer UID</th><th>Merchandise Mgr. Name</th><th>Art Grp No.</th><th>Description</th><th>Assistant</th><th>Junior Buyer / New Gen</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
+    <table class="resp ct-tbl"><colgroup><col style="width:7%"><col style="width:8%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:11%"><col style="width:5%"><col style="width:11%"><col style="width:10%"><col style="width:6%"><col style="width:7%"></colgroup><thead><tr><th>Area</th><th>Senior Director</th><th>Associate Director / Senior Manager</th><th>Area / Department</th><th>Senior Manager / Product Group</th><th>Buyer UID</th><th>Merchandise Mgr. Name</th><th>Art Grp No.</th><th>Description</th><th>Assistant</th><th>Junior Buyer / New Gen</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
   </div>
 </section>
 
@@ -1337,7 +1338,7 @@ function renderCt(){
     return head+`<tr><td data-l="Area" class="small">${esc(c.group||'-')}</td>
     <td data-l="Senior Director" class="small">${P(v.sd)}</td>
     <td data-l="Associate Director / Senior Manager" class="small">${P(v.ad)}</td>
-    <td data-l="Area (หมวด)" class="small">${esc(v.area||'-')}</td>
+    <td data-l="Area / Department" class="small">${esc(v.area||'-')}</td>
     <td data-l="Senior Manager / Product Group" class="small">${v.smSelf?P(c.name,c.phone,`<div class="muted small">${esc(v.title)}</div>`):P(v.sm&&v.sm.name,v.sm&&v.sm.phone,v.sm?`<div class="muted small">${esc(v.sm.title)}</div>`:'')}</td>
     <td data-l="Buyer UID"><b>${c.role==='Buyer'?esc(c.uid):'<span class="muted">-</span>'}</b>${v.codes?`<div class="muted small">${esc(v.codes)}</div>`:''}${used?`<div class="muted small" title="ใช้กับสินค้า ${used} รายการใน Shelf-Life">${used} สินค้า</div>`:''}</td>
     <td data-l="Merchandise Mgr. Name" class="small">${c.role==='Buyer'?P(c.name,c.phone,c.email?`<div class="muted small">${esc(c.email)}</div>`:''):'<span class="muted">-</span>'}</td>
