@@ -159,7 +159,7 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 .imp-drop b{color:var(--ink);font-size:16px}
 .imp-drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--card))}
 .imp-file{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 10px}
-.imp-tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.imp-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
 @media (max-width:640px){.imp-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .imp-tiles>div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;gap:0}
 .imp-tiles b{font-size:20px;font-variant-numeric:tabular-nums}
@@ -170,6 +170,8 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 .imp-sample table{font-size:12.5px;min-width:520px}
 .imp-sample th{position:static;font-size:11.5px;padding:6px 8px}
 .imp-sample td{padding:5px 8px}
+.imp-div{margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:13.5px}
+.imp-divchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .imp-opts{margin-top:12px}
 .chk{flex-direction:row;align-items:flex-start;gap:8px;font-size:14px;color:var(--ink);font-weight:600}
 .chk input{margin-top:3px}
@@ -501,7 +503,7 @@ dialog::backdrop{background:#0008}
     <label class="chk"><input type="checkbox" id="impAuto" checked> ปิดงานอัตโนมัติ: รายการที่เคยนำเข้ามา แต่ไม่อยู่ในไฟล์นี้แล้ว (แปลว่าเริ่มมียอดขาย)</label>
   </div>
   <div class="imp-def"><label>กลุ่มเริ่มต้น (ใช้เมื่อไฟล์ไม่ระบุกลุ่ม)<select id="impDef"><option value="FF">FF · Fresh Food</option><option value="DF" selected>DF · Dry Food</option><option value="NF">NF · Non Food</option></select></label>
-    <p class="muted small" style="margin:0">ระบบเดากลุ่มจาก: คอลัมน์กลุ่ม → ชื่อชีต (เช่น FF, DF, NF) → ชื่อไฟล์ → ค่านี้</p></div>
+    <p class="muted small" style="margin:0">ถ้าไฟล์มีคอลัมน์ <b>Division</b> ระบบใช้ตามนั้น 100% (FRESH FOOD = FF · DRY FOOD = DF · NON FOOD = NF) ถ้าไม่มี จะเดาจาก: ชื่อชีต → ชื่อไฟล์ → ค่านี้</p></div>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="impCancel">ปิด</button><button type="button" class="btn pri save-btn" id="impGo" disabled>นำเข้าและเริ่ม Monitor</button></div>
 </div></dialog>
 
@@ -1307,9 +1309,13 @@ const NBS_COLS=[
   ['loc',/^(loc|location|ที่ตั้ง|ตำแหน่ง|ตำแหน่งจัดเก็บ|shelf|ชั้นวาง)/],
   ['buyer',/(buyeruid|buyerid|buyer|ผู้ซื้อ|บายเออร์)/]];
 function mapHeader(row){const m={},used=new Set();
-  (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of NBS_COLS){if(!m[f]&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
+  (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of NBS_COLS){if(!m[f]&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});
+  /* a column named "Division" always wins over generic group/dept/category columns, and is then followed strictly */
+  const j=(row||[]).findIndex(h=>/division|^div$|ดิวิชั่น|ดิวิชัน/.test(normH(h)));
+  if(j>=0){Object.keys(m).forEach(k=>{if(m[k]===j)delete m[k]});m.division=j;m.divStrict=true}
+  return m}
 function divFrom(t){t=String(t??'').trim();if(!t)return'';const u=t.toUpperCase();
-  if(/(^|[^A-Z])NF([^A-Z]|$)|NON.?FOOD|ไม่ใช่อาหาร|NONFOOD/.test(u))return'NF';
+  if(/(^|[^A-Z])NF([^A-Z]|$)|NON.?FOOD|ไม่ใช่อาหาร|นอน.?ฟู/.test(u))return'NF';
   if(/(^|[^A-Z])FF([^A-Z]|$)|FRESH|สด|ผัก|ผลไม้|เนื้อ|ปลา|อาหารทะเล|เบเกอรี่|BAKERY|DELI/.test(u))return'FF';
   if(/(^|[^A-Z])DF([^A-Z]|$)|DRY|GROCERY|แห้ง|FOOD/.test(u))return'DF';return''}
 function toIsoDate(v){
@@ -1325,7 +1331,7 @@ const cleanNo=v=>{let s=String(v??'').trim();if(/^\d+\.0+$/.test(s))s=s.replace(
 const numOr=v=>{const n=parseFloat(String(v??'').replace(/,/g,''));return isNaN(n)?'':n};
 function divFromName(s){const m=String(s||'').match(/(^|[^a-z])(ff|df|nf)([^a-z]|$)/i);return m?m[2].toUpperCase():divFrom(s)}
 function parseWorkbook(wb,fileName,defDiv){
-  const recs=new Map(),info={sheets:[],skipped:0,cols:{},byDivSource:{}};
+  const recs=new Map(),info={sheets:[],skipped:0,cols:{},byDivSource:{},divVals:{},badDiv:0};
   for(const sn of wb.SheetNames){
     const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
     let hi=-1,m=null;
@@ -1340,27 +1346,39 @@ function parseWorkbook(wb,fileName,defDiv){
       if(!no&&!desc){continue}
       if(!no||/^(total|grand|รวม|หมายเหตุ)/i.test(no)||!/\d/.test(no)){info.skipped++;continue}
       let div='',src='';
-      if(m.division!=null){div=divFrom(r[m.division]);if(div)src='คอลัมน์กลุ่ม'}
-      if(!div&&sheetDiv){div=sheetDiv;src='ชื่อชีต'}
-      if(!div&&fileDiv){div=fileDiv;src='ชื่อไฟล์'}
-      if(!div){div=defDiv;src='ค่าเริ่มต้น'}
+      if(m.divStrict){ /* a Division column exists: use it 100% — never guess from the sheet/file name or the default */
+        const raw=String(r[m.division]??'').trim(),key=(raw||'(ว่าง)').toUpperCase();div=divFrom(raw);src='คอลัมน์ Division';
+        const e=info.divVals[key]||(info.divVals[key]={div:div||'',n:0});e.n++;
+        if(!div){info.badDiv++;continue}
+      }else{
+        if(m.division!=null){div=divFrom(r[m.division]);if(div)src='คอลัมน์กลุ่ม'}
+        if(!div&&sheetDiv){div=sheetDiv;src='ชื่อชีต'}
+        if(!div&&fileDiv){div=fileDiv;src='ชื่อไฟล์'}
+        if(!div){div=defDiv;src='ค่าเริ่มต้น'}
+      }
       let last=m.lastSale!=null?toIsoDate(r[m.lastSale]):'';
       if(!last&&m.days!=null){const d=numOr(r[m.days]);if(d!==''&&d>=0)last=iso(addD(today(),-Math.round(d)))}
       let buyer='';if(m.buyer!=null){const b=String(r[m.buyer]??'').trim().toUpperCase();const c=st.contacts.find(x=>String(x.uid).toUpperCase()===b&&x.role==='Buyer');if(c)buyer=c.uid}
       recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
-    info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>info.cols[k]=true);
+    info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict")info.cols[k]=true});
   }
   return{recs:[...recs.values()],info};
 }
 const nbsKey=r=>r.division+'|'+r.itemNo;
 const nbsId=r=>'n_'+r.division+'_'+String(r.itemNo).replace(/[^A-Za-z0-9_-]/g,'_');
+/* an item imported earlier under another group (e.g. everything defaulted to DF) is MOVED to the group the file says,
+   keeping its status / remark / buyer, instead of being duplicated or auto-closed */
+function altOf(r,ex,taken){return (st.nbs||[]).find(o=>o.itemNo===r.itemNo&&o.division!==r.division&&o.source==='import'&&!taken.has(o._id))}
 function planImport(recs,autoClose){
   const ex=new Map((st.nbs||[]).map(r=>[nbsKey(r),r])),keys=new Set(recs.map(nbsKey)),divs=new Set(recs.map(r=>r.division));
-  let add=0,upd=0;recs.forEach(r=>ex.has(nbsKey(r))?upd++:add++);
-  const close=autoClose?(st.nbs||[]).filter(r=>r.source==='import'&&r.status!=='done'&&divs.has(r.division)&&!keys.has(nbsKey(r))):[];
-  return{add,upd,close,divs:[...divs]};
+  const moves=[],moved=new Set();
+  recs.forEach(r=>{if(ex.has(nbsKey(r)))return;const alt=altOf(r,ex,moved);if(alt&&!keys.has(nbsKey(alt))){moves.push({rec:r,alt});moved.add(alt._id)}});
+  const moveKeys=new Set(moves.map(m=>nbsKey(m.rec)));
+  let add=0,upd=0;recs.forEach(r=>ex.has(nbsKey(r))?upd++:(moveKeys.has(nbsKey(r))?0:add++));
+  const close=autoClose?(st.nbs||[]).filter(r=>r.source==='import'&&r.status!=='done'&&divs.has(r.division)&&!keys.has(nbsKey(r))&&!moved.has(r._id)):[];
+  return{add,upd,close,moves,moveKeys,divs:[...divs]};
 }
 let impState=null;
 function openImport(){impState=null;$('#impBox').innerHTML='';$('#impDrop').hidden=false;$('#impGo').disabled=true;$('#impGo').textContent='นำเข้าและเริ่ม Monitor';$('#impOpts').hidden=true;$('#impErr').textContent='';$('#impFile').value='';$('#dlgImp').showModal()}
@@ -1384,9 +1402,10 @@ function showImportPreview(){
   $('#impOpts').hidden=false;$('#impGo').disabled=false;$('#impDrop').hidden=true;
   $('#impBox').innerHTML=`<div class="imp-file"><b>${esc(impState.file)}</b> <span class="muted small">· ${recs.length.toLocaleString()} รายการ${info.skipped?` · ข้าม ${info.skipped} แถวที่ไม่ใช่สินค้า`:''}</span> <button type="button" class="btn sm" id="impChange">เลือกไฟล์อื่น</button></div>
   <div class="imp-tiles"><div><b>${cnt.FF.toLocaleString()}</b><span>FF</span></div><div><b>${cnt.DF.toLocaleString()}</b><span>DF</span></div><div><b>${cnt.NF.toLocaleString()}</b><span>NF</span></div>
-  <div class="t-new"><b>${plan.add.toLocaleString()}</b><span>รายการใหม่</span></div><div><b>${plan.upd.toLocaleString()}</b><span>อัปเดตของเดิม</span></div><div class="${plan.close.length?'t-close':''}"><b>${plan.close.length.toLocaleString()}</b><span>ปิดงานอัตโนมัติ</span></div></div>
+  <div class="t-new"><b>${plan.add.toLocaleString()}</b><span>รายการใหม่</span></div><div><b>${plan.upd.toLocaleString()}</b><span>อัปเดตของเดิม</span></div>${plan.moves.length?`<div class="t-close"><b>${plan.moves.length.toLocaleString()}</b><span>ย้ายกลุ่มให้ถูก</span></div>`:""}<div class="${plan.close.length?'t-close':''}"><b>${plan.close.length.toLocaleString()}</b><span>ปิดงานอัตโนมัติ</span></div></div>
   <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>COL_LBL[k]||k).join(' · ')}</p>
-  <p class="small muted" style="margin:2px 0 0">แยกกลุ่มจาก: ${Object.entries(info.byDivSource).map(([k,v])=>`${esc(k)} (${v.toLocaleString()})`).join(' · ')}${info.byDivSource['ค่าเริ่มต้น']?' — ถ้าไม่ถูก เลือก “กลุ่มเริ่มต้น” ด้านล่างแล้วเลือกไฟล์ใหม่':''}</p>
+  ${Object.keys(info.divVals).length?`<div class="imp-div"><b>กลุ่มจากคอลัมน์ Division (ใช้ตามค่าในไฟล์ 100%):</b><div class="imp-divchips">${Object.entries(info.divVals).sort((a,b)=>b[1].n-a[1].n).map(([k,e])=>`<span class="chip ${e.div?'div-'+e.div.toLowerCase():'s-pull'}">${esc(k)} → ${e.div||'ไม่รู้จัก'} · ${e.n.toLocaleString()}</span>`).join('')}</div>${info.badDiv?`<p class="err-text small" style="margin:6px 0 0">ข้าม ${info.badDiv.toLocaleString()} แถวที่ค่า Division ไม่ใช่ FRESH FOOD / DRY FOOD / NON FOOD (ไม่นำเข้า เพราะไม่เดากลุ่มให้)</p>`:''}</div>`:''}
+  ${Object.keys(info.divVals).length?'':`<p class="small muted" style="margin:2px 0 0">แยกกลุ่มจาก: ${Object.entries(info.byDivSource).map(([k,v])=>`${esc(k)} (${v.toLocaleString()})`).join(' · ')}${info.byDivSource['ค่าเริ่มต้น']?' — ถ้าไม่ถูก เลือก “กลุ่มเริ่มต้น” ด้านล่างแล้วเลือกไฟล์ใหม่':''}</p>`}
   ${hasDays?`<p class="small" style="margin:2px 0 0"><b>ระดับเตือนที่ระบบจะเฝ้าระวัง:</b> <span class="chip s-md1">30+ วัน ${al[0]}</span> <span class="chip s-md2">60+ วัน ${al[1]}</span> <span class="chip s-pull">90+ วัน ${al[2]}</span></p>`:'<p class="small muted" style="margin:2px 0 0">ไฟล์นี้ไม่มีวันที่ขายล่าสุด — ระบบจะบันทึกรายการเป็น “รอตรวจสอบ” โดยไม่นับวัน</p>'}
   <div class="imp-sample"><table><thead><tr><th>กลุ่ม</th><th>รหัส</th><th>ชื่อสินค้า</th><th>ขายล่าสุด</th><th>Stock</th><th>ที่ตั้ง</th></tr></thead><tbody>${recs.slice(0,6).map(r=>`<tr><td>${r.division}</td><td>${esc(r.itemNo)}</td><td>${esc(r.desc||'—')}</td><td>${r.lastSale?fmt(fromIso(r.lastSale)):'-'}</td><td>${r.stock===''?'-':esc(r.stock)}</td><td>${esc(r.loc||'-')}</td></tr>`).join('')}</tbody></table></div>`;
   $('#impChange').onclick=()=>{$('#impDrop').hidden=false;$('#impBox').innerHTML='';$('#impGo').disabled=true;impState=null;$('#impFile').value='';$('#impFile').click()};
@@ -1399,8 +1418,15 @@ async function runImport(){
   for(let i=0;i<60&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250));
   const ready=MF.state==='ready';
   const ok=await act(async()=>{
+    const mvBy=new Map(plan.moves.map(m=>[nbsKey(m.rec),m.alt]));
     for(const r of recs){
-      const it=ready?MF.items.get(r.itemNo):null,old=ex.get(nbsKey(r));
+      const it=ready?MF.items.get(r.itemNo):null,old=ex.get(nbsKey(r)),alt=old?null:mvBy.get(nbsKey(r));
+      if(alt){ /* wrong group before: recreate under the right group, keeping the team's status/remark/buyer */
+        const keep=body(alt);
+        await rmItem('nbs',alt);
+        await putItem('nbs',{...keep,_id:nbsId(r),division:r.division,desc:r.desc||it?.desc||alt.desc||'',barcode:r.barcode||it?.barcode||alt.barcode||'',loc:r.loc||alt.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),
+          lastSale:r.lastSale||alt.lastSale||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
+        continue}
       const desc=r.desc||it?.desc||old?.desc||'',barcode=r.barcode||it?.barcode||old?.barcode||'',loc=r.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):'')||old?.loc||'';
       if(old){await putItem('nbs',{...body(old),_id:old._id,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
         lastSeenAt:nowIso,updatedAt:nowIso,...(old.status==='done'&&old.autoClosed?{status:'check',autoClosed:false,autoNote:'กลับมาอยู่ในไฟล์ไม่มียอดขายอีกครั้ง'}:{})})}
@@ -1410,7 +1436,7 @@ async function runImport(){
     for(const old of plan.close)await putItem('nbs',{...body(old),_id:old._id,status:'done',autoClosed:true,autoNote:'ปิดอัตโนมัติ — ไม่อยู่ในไฟล์ไม่มียอดขายล่าสุด ('+fmt(today())+')',updatedAt:nowIso});
   },null);
   $('#impGo').disabled=false;$('#impGo').textContent='นำเข้าและเริ่ม Monitor';
-  if(ok){$('#dlgImp').close();toast(`นำเข้าแล้ว: ใหม่ ${plan.add} · อัปเดต ${plan.upd}${plan.close.length?` · ปิดงานอัตโนมัติ ${plan.close.length}`:''}`);nbsFilterDiv='';renderNbs()}
+  if(ok){$('#dlgImp').close();toast(`นำเข้าแล้ว: ใหม่ ${plan.add} · อัปเดต ${plan.upd}${plan.moves.length?` · ย้ายกลุ่ม ${plan.moves.length}`:''}${plan.close.length?` · ปิดงานอัตโนมัติ ${plan.close.length}`:''}`);nbsFilterDiv='';renderNbs()}
 }
 $('#nbsImport').onclick=openImport;
 $('#impCancel').onclick=()=>$('#dlgImp').close();$('#impGo').onclick=runImport;
