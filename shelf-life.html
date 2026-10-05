@@ -19,6 +19,9 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sarabun,system-ui,sans-serif}
 header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
 h1{font-size:20px;margin:0}
+.brandbox{display:flex;align-items:center;gap:12px;background:var(--redbox);border:1.5px solid var(--redbox-line);border-radius:16px;padding:6px 20px 6px 8px;box-shadow:0 2px 8px #c628281a}
+.brandbox:has(#appLogo[hidden]){padding-left:18px}
+.brandbox h1{font-weight:800}
 .today{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .jbadge{display:flex;align-items:center;gap:12px;padding:8px 16px 8px 14px;border-radius:14px;background:linear-gradient(135deg,#0b5cad,#1474d4);color:#fff;box-shadow:0 4px 14px #0b5cad40}
 .jlabel{font-size:11px;font-weight:700;letter-spacing:.08em;line-height:1.25;opacity:.85;text-align:right;padding-right:12px;border-right:1px solid #ffffff55}
@@ -295,7 +298,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 </head>
 <body>
 <header>
-  <div class="row" style="align-items:center;gap:10px"><a href="./" id="backMf" class="back-mf" hidden><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Makro Finder</a><img src="shrink-icon.png" alt="" class="app-logo" id="appLogo" hidden><h1>Shelf-Life Monitor</h1><span class="chip s-err" id="mode">กำลังเชื่อมต่อ…</span></div>
+  <div class="row" style="align-items:center;gap:10px"><a href="./" id="backMf" class="back-mf" hidden><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Makro Finder</a><div class="brandbox"><img src="shrink-icon.png" alt="" class="app-logo" id="appLogo" hidden><h1>Shelf-Life Monitor</h1></div><span class="chip s-err" id="mode">กำลังเชื่อมต่อ…</span></div>
   <div class="jbadge" title="Julian วันนี้ (ลำดับวันของปี)">
     <div class="jlabel">JULIAN<br>วันนี้</div>
     <div class="jnum" id="todayJ"></div>
