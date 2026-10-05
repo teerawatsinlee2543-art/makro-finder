@@ -221,6 +221,8 @@ dialog::backdrop{background:#0008}
 .toast.show{opacity:1}
 .err-text{color:var(--md2);font-weight:600}
 .howto{margin:0;padding-left:20px}
+.di-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.di-row>div{min-width:0}
 @media (min-width:821px){
   main:has(#t-nbs:not([hidden])){max-width:1560px}
   table.nbs-tbl{table-layout:fixed}
@@ -367,6 +369,7 @@ dialog::backdrop{background:#0008}
       <label>สถานะ<select id="nbsFSt"><option value="">ทั้งหมด</option></select></label>
       <label>ระดับเตือน<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="30">30+ วัน</option><option value="60">60+ วัน</option><option value="90">90+ วัน</option></select></label>
       <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
+      <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
     </div>
     <table class="resp nbs-tbl"><colgroup><col style="width:18%"><col style="width:6%"><col style="width:5%"><col style="width:10%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:7%"><col style="width:5%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th>กลุ่ม (Division)</th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th>Aging Status</th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
     <div id="nbsMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="nbsMoreTxt"></span><button class="btn" id="nbsMore">แสดงเพิ่ม 200 รายการ</button></div>
@@ -498,6 +501,12 @@ dialog::backdrop{background:#0008}
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="nCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="nSave">บันทึก</button></div>
 </div></dialog>
 
+<dialog id="dlgDelImp" class="nbs-dlg imp-dlg"><div>
+  <h2>ลบไฟล์ที่นำเข้า</h2>
+  <p class="muted small" style="margin:0 0 10px">เลือกไฟล์ที่ต้องการลบ — รายการสินค้าที่มาจากไฟล์นั้นจะถูกลบออกจากระบบ (ลบให้ทุกคนในทีม) ส่วนรายการที่เพิ่มเองด้วยมือจะไม่ถูกลบ</p>
+  <div id="delImpList"></div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="delImpClose">ปิด</button></div>
+</div></dialog>
 <dialog id="dlgImp" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้าข้อมูล Item NBS</h2>
   <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV ของรายงานสินค้าที่ไม่มียอดขายมาวาง ระบบอ่านคอลัมน์ให้เอง แยกกลุ่ม FF / DF / NF คำนวณจำนวนวันที่ไม่มียอดขาย และเริ่มเฝ้าระวังให้อัตโนมัติ</p>
@@ -1411,6 +1420,33 @@ function planImport(recs,autoClose){
 }
 let impState=null;
 function openImport(){impState=null;$('#impBox').innerHTML='';$('#impDrop').hidden=false;$('#impGo').disabled=true;$('#impGo').textContent='นำเข้าและเริ่ม Monitor';$('#impOpts').hidden=true;$('#impErr').textContent='';$('#impFile').value='';$('#dlgImp').showModal()}
+async function rmMany(col,list){
+  if(mode==='db'){for(const o of list)await rmItem(col,o);return}
+  const ids=new Set(list.map(o=>o._id));st[col]=st[col].filter(x=>!ids.has(x._id));
+  if(mode==='sheet'){for(const o of list)await sheetWrite({op:'delete',col,id:o._id});return}
+  saveLocal()}
+const impRunKey=r=>r.importRun||r.lastSeenAt||r.importedAt||'';
+function impGroups(){
+  const g=new Map();
+  (st.nbs||[]).filter(r=>r.source==='import').forEach(r=>{const k=impRunKey(r);if(!g.has(k))g.set(k,{key:k,rows:[],names:{}});const e=g.get(k);e.rows.push(r);if(r.importFile)e.names[r.importFile]=(e.names[r.importFile]||0)+1});
+  return[...g.values()].sort((a,b)=>String(b.key).localeCompare(String(a.key)));
+}
+const impEdited=r=>!!r.remark||!['check','done'].includes(r.status)||(r.status==='done'&&!r.autoClosed);
+function openDelImp(){renderDelImp();$('#dlgDelImp').showModal()}
+function renderDelImp(){
+  const gs=impGroups();
+  $('#delImpList').innerHTML=gs.length?gs.map((g,i)=>{
+    const name=Object.entries(g.names).sort((a,b)=>b[1]-a[1])[0]?.[0]||'ไฟล์นำเข้า (ไม่ทราบชื่อไฟล์)',d=g.key?new Date(g.key):null,open=g.rows.filter(r=>r.status!=='done').length,ed=g.rows.filter(impEdited).length,cnt={};
+    g.rows.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
+    return`<div class="di-row"><div><b>${esc(name)}</b><div class="muted small">${d&&!isNaN(d)?`นำเข้า ${fmt(d)} ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')} น. · `:''}${g.rows.length.toLocaleString()} รายการ (ยังไม่ปิดงาน ${open.toLocaleString()}) · ${Object.entries(cnt).map(([k,v])=>k+' '+v.toLocaleString()).join(' / ')}${ed?` · <span class="err-text">มีที่ทีมบันทึกแล้ว ${ed.toLocaleString()}</span>`:''}</div></div><button type="button" class="btn sm danger" data-i="${i}">ลบไฟล์นี้</button></div>`}).join(''):'<p class="muted">ยังไม่มีไฟล์ที่นำเข้า</p>';
+  $('#delImpList').querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>delImpFile(gs[+b.dataset.i]));
+}
+async function delImpFile(g){
+  const name=Object.entries(g.names).sort((a,b)=>b[1]-a[1])[0]?.[0]||'ไฟล์นำเข้า',ed=g.rows.filter(impEdited).length;
+  if(!await ask(`ลบไฟล์ “${name}” และรายการสินค้าจากไฟล์นี้ ${g.rows.length.toLocaleString()} รายการ ออกจากระบบ?${ed?`\nรวมรายการที่ทีมบันทึกสถานะ/Remark ไว้แล้ว ${ed.toLocaleString()} รายการ`:''}\n(ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)`))return;
+  const ok=await act(()=>rmMany('nbs',g.rows),`ลบไฟล์แล้ว (${g.rows.length.toLocaleString()} รายการ)`);
+  if(ok){renderNbs();renderDelImp()}
+}
 async function readImportFile(file){
   $('#impErr').textContent='';$('#impBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
   try{
@@ -1454,12 +1490,12 @@ async function runImport(){
         const keep=body(alt);
         await rmItem('nbs',alt);
         await putItem('nbs',{...keep,_id:nbsId(r),division:r.division,desc:r.desc||it?.desc||alt.desc||'',barcode:r.barcode||it?.barcode||alt.barcode||'',loc:r.loc||alt.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),
-          lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
+          importFile:impState.file,importRun:nowIso,lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
         continue}
       const desc=r.desc||it?.desc||old?.desc||'',barcode=r.barcode||it?.barcode||old?.barcode||'',loc=r.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):'')||old?.loc||'';
-      if(old){await putItem('nbs',{...body(old),_id:old._id,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!old.lastSaleDerived,lastRecv:r.lastRecv||old.lastRecv||'',aging:r.aging||old.aging||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
+      if(old){await putItem('nbs',{...body(old),_id:old._id,importFile:impState.file,importRun:nowIso,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!old.lastSaleDerived,lastRecv:r.lastRecv||old.lastRecv||'',aging:r.aging||old.aging||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
         lastSeenAt:nowIso,updatedAt:nowIso,...(old.status==='done'&&old.autoClosed?{status:'check',autoClosed:false,autoNote:'กลับมาอยู่ในไฟล์ไม่มียอดขายอีกครั้ง'}:{})})}
-      else await putItem('nbs',{_id:nbsId(r),division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,lastSaleDerived:r.lastSaleDerived,lastRecv:r.lastRecv||'',aging:r.aging||'',stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
+      else await putItem('nbs',{_id:nbsId(r),importFile:impState.file,importRun:nowIso,division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,lastSaleDerived:r.lastSaleDerived,lastRecv:r.lastRecv||'',aging:r.aging||'',stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
         source:'import',importedAt:nowIso,lastSeenAt:nowIso,createdAt:nowIso,createdBy:myId||null,updatedAt:nowIso});
     }
     for(const old of plan.close)await putItem('nbs',{...body(old),_id:old._id,status:'done',autoClosed:true,autoNote:'ปิดอัตโนมัติ — ไม่อยู่ในไฟล์ไม่มียอดขายล่าสุด ('+fmt(today())+')',updatedAt:nowIso});
@@ -1468,6 +1504,7 @@ async function runImport(){
   if(ok){$('#dlgImp').close();toast(`นำเข้าแล้ว: ใหม่ ${plan.add} · อัปเดต ${plan.upd}${plan.moves.length?` · ย้ายกลุ่ม ${plan.moves.length}`:''}${plan.close.length?` · ปิดงานอัตโนมัติ ${plan.close.length}`:''}`);nbsFilterDiv='';renderNbs()}
 }
 $('#nbsImport').onclick=openImport;
+$('#nbsDelFile').onclick=openDelImp;$('#delImpClose').onclick=()=>$('#dlgDelImp').close();
 $('#impCancel').onclick=()=>$('#dlgImp').close();$('#impGo').onclick=runImport;
 $('#impPick').onclick=()=>$('#impFile').click();
 $('#impFile').onchange=e=>{const f=e.target.files[0];if(f)readImportFile(f)};
