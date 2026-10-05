@@ -443,6 +443,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
       <label>ระดับ Aging<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="nbs">เกินเกณฑ์ NBS</option><option value="l1">Alert ขึ้นไป</option><option value="l2">Attention ขึ้นไป</option><option value="l3">Critical ขึ้นไป</option><option value="l4">Obsolete ขึ้นไป</option><option value="l5">Full Provision</option></select></label>
       <label>นับอายุ Aging จาก<select id="nbsBasis"><option value="sold">วันที่ไม่มียอดขาย (Last Sold)</option><option value="recv">วันที่รับสินค้าล่าสุด (Last Recv.)</option></select></label>
       <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
+      <button type="button" class="btn w" id="nbsBulkBuyer" title="กำหนด Buyer ให้ทุกรายการที่กรองอยู่ในตารางตอนนี้">กำหนด Buyer ทั้งรายการที่กรอง</button>
       <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
     </div>
     <table class="resp nbs-tbl"><colgroup><col style="width:18%"><col style="width:7.5%"><col style="width:4.5%"><col style="width:7.5%"><col style="width:7.5%"><col style="width:7.5%"><col style="width:8.5%"><col style="width:12%"><col style="width:8.5%"><col style="width:6%"><col style="width:7.5%"><col style="width:5%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th><div class="th-in"><span>กลุ่ม<br>(Division)</span><button type="button" class="fbtn" data-f="div" title="Filter กลุ่ม" aria-label="Filter กลุ่ม"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th><div class="th-in"><span>Aging<br>Status</span><button type="button" class="fbtn" data-f="aging" title="Filter Aging Status" aria-label="Filter Aging Status"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
@@ -587,6 +588,14 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="nCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="nSave">บันทึก</button></div>
 </div></dialog>
 
+<dialog id="dlgBulkBuyer" class="nbs-dlg"><div>
+  <h2>กำหนด Buyer ให้หลายรายการ</h2>
+  <p class="muted small" id="bbInfo" style="margin:0 0 10px"></p>
+  <label>Buyer<select id="bbBuyer"></select></label>
+  <label class="chk" style="margin-top:10px"><input type="checkbox" id="bbEmpty" checked> เฉพาะรายการที่ยังไม่มี Buyer</label>
+  <p class="muted small" style="margin:10px 0 0">ใช้ตัวกรองด้านบน (กลุ่ม, Department ผ่านช่องค้นหา, Aging, สถานะ) เลือกรายการให้ตรงก่อน แล้วค่อยกำหนด Buyer ให้ทั้งหมดในครั้งเดียว</p>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="bbCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="bbGo">กำหนด Buyer</button></div>
+</div></dialog>
 <dialog id="dlgDelImp" class="nbs-dlg imp-dlg"><div>
   <h2 id="delImpTitle">ลบไฟล์ที่นำเข้า</h2>
   <p class="muted small" id="delImpDesc" style="margin:0 0 10px">เลือกไฟล์ที่ต้องการลบ — รายการสินค้าที่มาจากไฟล์นั้นจะถูกลบออกจากระบบ (ลบให้ทุกคนในทีม) ส่วนรายการที่เพิ่มเองด้วยมือจะไม่ถูกลบ</p>
@@ -1964,7 +1973,7 @@ function renderNbs(){
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
   $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,b=st.contacts.find(x=>x.uid===r.buyerUid),img=r.img||(MF.images&&MF.images[r.itemNo])||'';
     return`<tr class="${r.status==='done'?'acted':''}">
-    <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div></dl></div></td>
+    <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div>${r.artGrp?`<div><dt>Art Grp :</dt><dd>${esc(r.artGrp)}</dd></div>`:''}</dl></div></td>
     <td data-l="กลุ่ม (Division)"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></td>
     <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td>
     <td data-l="Location" class="small">${esc(r.loc||'-')}</td>
@@ -1976,6 +1985,33 @@ function renderNbs(){
     <td data-l="Buyer / Remark" class="small">${r.buyerUid?`<b>${esc(r.buyerUid)}</b>${b?' '+esc(b.name):''}`:'<span class="muted">-</span>'}${r.remark?`<div class="redbox" style="margin-top:4px">${esc(r.remark)}</div>`:''}</td>
     <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.</div>${r.source==='import'?'<div class="muted">จากไฟล์</div>':''}`:'-'}</td>
     <td><div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
+}
+/* bulk: give every item currently shown (all filters applied) one Buyer */
+function bulkBuyerOpen(){
+  const rows=nbsFiltered();if(!rows.length){toast('ไม่มีรายการในตารางที่จะกำหนด Buyer');return}
+  const bs=st.contacts.filter(c=>c.role==='Buyer').sort((a,b)=>String(a.group).localeCompare(String(b.group))||String(a.uid).localeCompare(String(b.uid)));
+  $('#bbBuyer').innerHTML='<option value="">— เลือก Buyer —</option>'+bs.map(c=>`<option value="${esc(c.uid)}">${esc(c.uid)} · ${esc(c.name)} · ${esc(c.group||'')}</option>`).join('')+'<option value="__clear">ล้าง Buyer (ไม่ระบุ)</option>';
+  const noBuyer=rows.filter(r=>!r.buyerUid).length;
+  $('#bbInfo').innerHTML=`ตารางตอนนี้แสดง <b>${rows.length.toLocaleString()}</b> รายการ (ยังไม่มี Buyer ${noBuyer.toLocaleString()} รายการ)`;
+  $('#dlgBulkBuyer').showModal();
+}
+async function bulkBuyerGo(){
+  const v=$('#bbBuyer').value;if(!v){toast('เลือก Buyer ก่อน');return}
+  const uid=v==='__clear'?'':v,rows=nbsFiltered().filter(r=>!$('#bbEmpty').checked||!r.buyerUid||uid==='');
+  if(!rows.length){toast('ไม่มีรายการที่ต้องกำหนด');return}
+  const who=uid?`${uid} ${st.contacts.find(c=>c.uid===uid)?.name||''}`:'ไม่ระบุ';
+  if(!await ask(`กำหนด Buyer “${who}” ให้ ${rows.length.toLocaleString()} รายการ?  (ทุกคนในทีมเห็นการเปลี่ยนนี้)`))return;
+  $('#dlgBulkBuyer').close();
+  const now=new Date().toISOString();
+  await act(async()=>{for(const r of rows)await patchItem('nbs',r,{buyerUid:uid,updatedAt:now,updatedBy:myId||null})},`กำหนด Buyer ให้ ${rows.length.toLocaleString()} รายการแล้ว`);
+  renderNbs();
+}
+$('#nbsBulkBuyer').onclick=bulkBuyerOpen;$('#bbCancel').onclick=()=>$('#dlgBulkBuyer').close();$('#bbGo').onclick=bulkBuyerGo;
+/* Art Group number -> Buyer, using the art-group numbers written in the Buyer contacts' department text (e.g. "Commodity · 22 Cooking Oil") */
+function buyerByArt(no){
+  no=String(no||'').trim();if(!/^\d{1,4}$/.test(no))return'';
+  const re=new RegExp('(^|[\\s,·])'+no+'(?=\\s+\\p{L})','u'),hit=st.contacts.filter(c=>c.role==='Buyer'&&re.test(String(c.dept||'')));
+  return hit.length===1?hit[0].uid:'';
 }
 function nbsBuyerOptions(sel){
   const div=$('#nDiv').value,l=st.contacts.filter(c=>c.role==='Buyer'&&divGroupOk(div,c.group)).sort((a,b)=>String(a.uid).localeCompare(String(b.uid)));
@@ -2035,6 +2071,7 @@ $('#t-nbs thead').onclick=e=>{const b=e.target.closest('.fbtn');if(b)openFMenu(b
 const normH=s=>String(s??'').toLowerCase().replace(/[\s._\-\/()\[\]:]/g,'');
 /* header → field, first match wins; order matters (days before stock, so "จำนวนวัน…" is not read as stock) */
 const NBS_COLS=[
+  ['artGrp',/(artgrp|artgroup|articlegroup|กลุ่มสินค้าart|artกลุ่ม)/],
   ['agingType',/(agingtype|agetype|ประเภทaging|ประเภทการaging)/],
   ['aging',/(agingstatus|agestatus|agingcategory|agingbucket|agingband|สถานะอายุ|^aging$)/],
   ['lastRecv',/(lastrecv|lastreceiv|lastrcv|lastgr|วันที่รับล่าสุด|รับล่าสุด|วันที่รับสินค้าล่าสุด|วันรับล่าสุด)/],
@@ -2100,12 +2137,12 @@ function parseWorkbook(wb,fileName,defDiv){
       }
       let last=m.lastSale!=null?toIsoDate(r[m.lastSale]):'',derived=false;
       const recv=m.lastRecv!=null?toIsoDate(r[m.lastRecv]):'';
-      const dept=m.dept!=null?String(r[m.dept]??'').trim():'',aging=m.aging!=null?String(r[m.aging]??'').trim():'',agingType=m.agingType!=null?parseAgingType(r[m.agingType]):'';
+      const artGrp=m.artGrp!=null?cleanNo(r[m.artGrp]):'',dept=m.dept!=null?String(r[m.dept]??'').trim():'',aging=m.aging!=null?String(r[m.aging]??'').trim():'',agingType=m.agingType!=null?parseAgingType(r[m.agingType]):'';
       let dv=m.days!=null?numOr(r[m.days]):'';
       if(dv===''&&/^\d+$/.test(aging))dv=+aging;
       if(!last&&dv!==''&&dv>=0){last=iso(addD(today(),-Math.round(dv)));derived=true}
       let buyer='';if(m.buyer!=null){const b=String(r[m.buyer]??'').trim().toUpperCase();const c=st.contacts.find(x=>String(x.uid).toUpperCase()===b&&x.role==='Buyer');if(c)buyer=c.uid}
-      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
+      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer||buyerByArt(artGrp)});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
     info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict")info.cols[k]=true});
@@ -2183,7 +2220,7 @@ async function readImportFile(file){
     impState={file:file.name,wb,...parsed};showImportPreview();
   }catch(e){impState=null;$('#impBox').innerHTML='';$('#impErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
 }
-const COL_LBL={itemNo:'รหัสสินค้า',desc:'ชื่อสินค้า',barcode:'บาร์โค้ด',division:'กลุ่ม',lastSale:'Last Sold Date',lastRecv:'Last Recv. Date',aging:'Aging Status (ไฟล์)',agingType:'Aging Type',dept:'Department',days:'NBS (วันที่ไม่มียอดขาย)',stock:'Stock',loc:'ที่ตั้ง',buyer:'Buyer'};
+const COL_LBL={itemNo:'รหัสสินค้า',desc:'ชื่อสินค้า',barcode:'บาร์โค้ด',division:'กลุ่ม',lastSale:'Last Sold Date',lastRecv:'Last Recv. Date',aging:'Aging Status (ไฟล์)',agingType:'Aging Type',dept:'Department',artGrp:'Art Grp',days:'NBS (วันที่ไม่มียอดขาย)',stock:'Stock',loc:'ที่ตั้ง',buyer:'Buyer'};
 function showImportPreview(){
   const {recs,info}=impState,plan=planImport(recs,$('#impAuto').checked),cnt={FF:0,DF:0,NF:0};recs.forEach(r=>cnt[r.division]++);
   const days=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null,hasDays=recs.some(r=>r.lastSale);
@@ -2214,12 +2251,12 @@ async function runImport(){
         const keep=body(alt);
         await rmItem('nbs',alt);
         await putItem('nbs',{...keep,_id:nbsId(r),division:r.division,desc:r.desc||it?.desc||alt.desc||'',barcode:r.barcode||it?.barcode||alt.barcode||'',loc:r.loc||alt.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),
-          importFile:impState.file,importRun:nowIso,lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',agingType:r.agingType||alt.agingType||'',dept:r.dept||alt.dept||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
+          importFile:impState.file,importRun:nowIso,lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',agingType:r.agingType||alt.agingType||'',dept:r.dept||alt.dept||'',artGrp:r.artGrp||alt.artGrp||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
         continue}
       const desc=r.desc||it?.desc||old?.desc||'',barcode=r.barcode||it?.barcode||old?.barcode||'',loc=r.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):'')||old?.loc||'';
-      if(old){await putItem('nbs',{...body(old),_id:old._id,importFile:impState.file,importRun:nowIso,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!old.lastSaleDerived,lastRecv:r.lastRecv||old.lastRecv||'',aging:r.aging||old.aging||'',agingType:r.agingType||old.agingType||'',dept:r.dept||old.dept||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
+      if(old){await putItem('nbs',{...body(old),_id:old._id,importFile:impState.file,importRun:nowIso,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!old.lastSaleDerived,lastRecv:r.lastRecv||old.lastRecv||'',aging:r.aging||old.aging||'',agingType:r.agingType||old.agingType||'',dept:r.dept||old.dept||'',artGrp:r.artGrp||old.artGrp||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
         lastSeenAt:nowIso,updatedAt:nowIso,...(old.status==='done'&&old.autoClosed?{status:'check',autoClosed:false,autoNote:'กลับมาอยู่ในไฟล์ไม่มียอดขายอีกครั้ง'}:{})})}
-      else await putItem('nbs',{_id:nbsId(r),importFile:impState.file,importRun:nowIso,division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,lastSaleDerived:r.lastSaleDerived,lastRecv:r.lastRecv||'',aging:r.aging||'',agingType:r.agingType||'',dept:r.dept||'',stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
+      else await putItem('nbs',{_id:nbsId(r),importFile:impState.file,importRun:nowIso,division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,lastSaleDerived:r.lastSaleDerived,lastRecv:r.lastRecv||'',aging:r.aging||'',agingType:r.agingType||'',dept:r.dept||'',artGrp:r.artGrp||'',stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
         source:'import',importedAt:nowIso,lastSeenAt:nowIso,createdAt:nowIso,createdBy:myId||null,updatedAt:nowIso});
     }
     for(const old of plan.close)await putItem('nbs',{...body(old),_id:old._id,status:'done',autoClosed:true,autoNote:'ปิดอัตโนมัติ — ไม่อยู่ในไฟล์ไม่มียอดขายล่าสุด ('+fmt(today())+')',updatedAt:nowIso});
