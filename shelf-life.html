@@ -255,6 +255,8 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 .agnext b{font-variant-numeric:tabular-nums}
 .chip.mini{padding:0 8px;font-size:11.5px}
 .s-obs{color:#fff;background:#7f1d1d}.s-full{color:#fff;background:#111;box-shadow:inset 0 0 0 1px #888}
+.pdf-btn{background:var(--redbox);color:var(--redbox-ink);border-color:var(--redbox-line);font-weight:800}
+.pdf-btn:hover{filter:brightness(.97);border-color:var(--redbox-ink)}
 .fbtn{flex:none;display:inline-flex;align-items:center;gap:2px;padding:4px 5px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--muted);cursor:pointer}
 .fbtn:hover{background:var(--bg);border-color:var(--line);color:var(--ink)}
 .fbtn.on{background:var(--accent);color:var(--accent-ink)}
@@ -585,7 +587,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
   <h2 id="outTitle">ส่งออก</h2>
   <p class="muted small" style="margin-top:0">คัดลอกแล้ววางลง Excel / Notepad หรือกดดาวน์โหลด (ถ้าเบราว์เซอร์อนุญาต)</p>
   <textarea id="outText" rows="12" style="width:100%;font-family:ui-monospace,Consolas,monospace;font-size:12px" readonly></textarea>
-  <div class="row" style="justify-content:flex-end;margin-top:10px"><button type="button" class="btn" id="outDl">ดาวน์โหลดไฟล์</button><button type="button" class="btn pri" id="outCopy">คัดลอก</button><button class="btn">ปิด</button></div>
+  <div class="row" style="justify-content:flex-end;margin-top:10px"><button type="button" class="btn pdf-btn" id="outPdf" hidden title="พิมพ์ / บันทึกเป็น PDF ตามตัวกรองที่เลือกอยู่"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="vertical-align:-3px;margin-right:5px"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>PDF</button><button type="button" class="btn" id="outDl">ดาวน์โหลดไฟล์</button><button type="button" class="btn pri" id="outCopy">คัดลอก</button><button class="btn">ปิด</button></div>
 </form></dialog>
 
 <div class="toast" id="toast"></div>
@@ -1230,7 +1232,8 @@ function copyText(txt,okMsg){
   const fb=()=>{const t=document.createElement('textarea');t.value=txt;document.body.append(t);t.select();try{document.execCommand('copy');toast(okMsg)}catch(e){toast('คัดลอกไม่ได้ — เลือกข้อความแล้วกด Ctrl+C')}t.remove()};
   try{navigator.clipboard.writeText(txt).then(()=>toast(okMsg),fb)}catch(e){fb()}
 }
-function dl(name,text,type){
+function dl(name,text,type,pdf){
+  $('#outPdf').hidden=!pdf;$('#outPdf').onclick=pdf||null;
   $('#outTitle').textContent=name;$('#outText').value=text.replace(/^﻿/,'');
   $('#outCopy').onclick=()=>copyText($('#outText').value,'คัดลอกแล้ว');
   $('#outDl').hidden=mode==='db';
@@ -1356,6 +1359,49 @@ function nbsAgingText(r){
   return`<span class="chip s-${k}">${lb}</span>${pv?`<div class="small" style="margin-top:2px"><b>Provision ${pv}%</b></div>`:''}<div class="muted small">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`
     +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> → <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">≈ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>');
 }
+/* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
+function nbsFiltered(){
+  const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value;
+  return rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):(agingInfo(r).level??-1)>=+fa.slice(1)))
+    &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+}
+const PDF_CHIP={ok:['#e4f3ea','#1f7a45'],md1:['#fff3a6','#6b5800'],md2:['#ffdcb8','#9a4300'],pull:['#c62828','#fff'],obs:['#7f1d1d','#fff'],full:['#111','#fff']};
+function nbsPDFHtml(){
+  const all=nbsFiltered(),total=(st.nbs||[]).length,now=new Date(),cnt={};all.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
+  const chip=(t,k)=>{const c=PDF_CHIP[k]||PDF_CHIP.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
+  const body=all.map(r=>{
+    const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),b=st.contacts.find(x=>x.uid===r.buyerUid);
+    const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${esc(a.next[0])}</div>`:''):esc(r.aging||'-');
+    return`<tr><td><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div></td>
+<td class="ctr"><b>${esc(r.division)}</b></td><td class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td><td>${esc(r.loc||'-')}</td>
+<td class="num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td class="num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
+<td class="num">${n==null?'-':`<b class="${over?'ov':''}">${n.toLocaleString()} วัน</b><div class="m">${over?'เกินเกณฑ์':'ไม่ถึงเกณฑ์'} ≥${lim}</div>`}</td><td>${ag}</td>
+<td>${esc(s[1])}</td><td>${r.buyerUid?`<b>${esc(r.buyerUid)}</b>${b?' '+esc(b.name):''}`:'-'}${r.remark?`<div class="rm">${esc(r.remark)}</div>`:''}</td></tr>`}).join('');
+  return`<!doctype html><html lang="th"><head><meta charset="utf-8"><title>Item NBS ${iso(today())}</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>@page{size:A4 landscape;margin:9mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;font:9.5px/1.35 Sarabun,"Segoe UI",Tahoma,sans-serif;color:#1d2433}
+h1{font-size:18px;margin:0 0 2px;color:#9f1d1d}.sub{color:#667085;font-size:10px;margin:0 0 6px}
+.sum{display:flex;gap:6px;margin:0 0 8px;flex-wrap:wrap}.sum span{border:1px solid #f5c2c0;background:#fdecec;color:#7a1d1d;border-radius:99px;padding:1px 9px;font-weight:700}
+table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#fdecec;color:#7a1d1d;text-align:left;padding:5px 5px;border-bottom:2px solid #e8a3a0;font-size:9.5px}
+td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-wrap:anywhere}thead{display:table-header-group}tr{page-break-inside:avoid}tbody tr:nth-child(even) td{background:#fdf8f8}
+.m{color:#667085;font-size:8.5px}.num{white-space:nowrap}.ctr{text-align:center}.ov{color:#b42318}.c{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px}
+.rm{margin-top:2px;background:#fdecec;border:1px solid #f5c2c0;border-radius:4px;padding:1px 4px;color:#9f1d1d}</style></head><body>
+<h1>Item NBS · สินค้าที่ไม่มียอดขาย</h1>
+<p class="sub">พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · แสดง ${all.length.toLocaleString()} จาก ${total.toLocaleString()} รายการ${all.length<total?' (ตามตัวกรองที่เลือกอยู่)':''} · เกณฑ์ NBS: FF ≥5 / DF ≥7 / NF ≥10 วัน · Aging ตามตาราง Aging Stock</p>
+<div class="sum">${Object.entries(NBS_DIV).map(([k,l])=>`<span>${k} · ${l} ${(cnt[k]||0).toLocaleString()}</span>`).join('')}</div>
+<table><colgroup><col style="width:25%"><col style="width:5%"><col style="width:5%"><col style="width:10%"><col style="width:8%"><col style="width:8%"><col style="width:8.5%"><col style="width:13%"><col style="width:7%"><col style="width:10.5%"></colgroup>
+<thead><tr><th>ชื่อสินค้า</th><th class="ctr">กลุ่ม</th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th>Aging Status</th><th>สถานะ</th><th>Buyer / Remark</th></tr></thead><tbody>${body}</tbody></table></body></html>`;
+}
+function nbsPDF(){
+  if(!nbsFiltered().length){toast('ไม่มีรายการให้ส่งออก');return}
+  const f=document.createElement('iframe');f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';document.body.append(f);
+  f.onload=()=>{const w=f.contentWindow,go=()=>{try{w.focus();w.print()}catch(e){toast('เปิดหน้าต่างพิมพ์ไม่ได้ — ลองกด Ctrl+P')}};
+    (w.document.fonts&&w.document.fonts.ready?Promise.race([w.document.fonts.ready,new Promise(r=>setTimeout(r,2500))]):Promise.resolve()).then(go)};
+  f.srcdoc=nbsPDFHtml();setTimeout(()=>f.remove(),180000);
+  toast('เลือก “บันทึกเป็น PDF” (Save as PDF) ที่ปลายทางในหน้าต่างพิมพ์');
+}
 function renderNbs(){
   if(!$('#nbsBody'))return;
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',!!nbsColF[b.dataset.f]));
@@ -1364,10 +1410,8 @@ function renderNbs(){
   const lv=[0,1,2,3,4,5].map(n=>open.filter(r=>(agingInfo(r).level??-1)===n).length),nOver=open.filter(nbsOver).length,lastImp=rows.reduce((m,r)=>r.importedAt&&r.importedAt>m?r.importedAt:m,''),li=lastImp?new Date(lastImp):null;
   $('#nbsSummary').innerHTML=(li?`<span class="pill">นำเข้าล่าสุด <b>${fmt(li)} ${String(li.getHours()).padStart(2,'0')}.${String(li.getMinutes()).padStart(2,'0')} น.</b></span>`:'')
     +(open.some(r=>r.lastSale||r.lastRecv)?`<span class="pill">เกินเกณฑ์ NBS <b>${nOver.toLocaleString()}</b></span>`+AGING_LV.slice(1).map((l,i)=>`<span class="chip s-${l[1]}">${l[0]} ${lv[i+1].toLocaleString()}</span>`).join(''):'');
-  const q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value;
-  const all=rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):(agingInfo(r).level??-1)>=+fa.slice(1)))
-    &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode].join(' ').toLowerCase().includes(q)))
-    .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  /* filters live in nbsFiltered() */
+  const all=nbsFiltered();
   const list=all.slice(0,nbsLimit);
   $('#nbsEmpty').hidden=all.length>0||mode==='init';
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
@@ -1429,7 +1473,7 @@ async function nbsSave(){
 function nbsCSV(){
   const rows=[['division','department','item_no','description','barcode','stock','location','last_recv_date','last_sold_date','nbs_days','nbs_threshold','aging_status','aging_type','days_to_next_status','next_status','status','buyer_uid','remark','created_at']];
   (st.nbs||[]).forEach(r=>rows.push([r.division,r.dept||'',r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',nbsOver(r)?'เกินเกณฑ์':'ยังไม่ถึงเกณฑ์',(()=>{const a=agingInfo(r);return a.level!=null?AGING_LV[a.level][0]:r.aging||''})(),agingInfo(r).name,agingInfo(r).left??'',agingInfo(r).next?agingInfo(r).next[0]:'',nStat(r.status)[1],r.buyerUid||'',r.remark||'',r.createdAt||'']));
-  dl(`item-nbs_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8');
+  dl(`item-nbs_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8',nbsPDF);
 }
 $('#nbsAdd').onclick=()=>nbsOpen(null);$('#nbsExport').onclick=nbsCSV;
 $('#nCancel').onclick=()=>$('#dlgNbs').close();$('#nSave').onclick=nbsSave;
