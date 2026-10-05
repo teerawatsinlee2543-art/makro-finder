@@ -485,7 +485,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 <!-- CONTACTS -->
 <section id="t-ct" hidden>
   <div class="card">
-    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn" onclick="exportContactsXlsx()" title="ส่งออกรายชื่อเป็น Excel ตามหัวตารางผังทีม">ส่งออก Excel</button><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
     <div class="row" style="margin-bottom:10px"><label style="flex:1;min-width:180px">ค้นหา (UID / ชื่อ / หมวดสินค้า / เบอร์)<input id="ctQ" placeholder="เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small" id="ctCount" style="padding-bottom:8px"></span></div>
     <table class="resp ct-tbl"><colgroup><col style="width:7%"><col style="width:8%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:11%"><col style="width:5%"><col style="width:11%"><col style="width:10%"><col style="width:6%"><col style="width:7%"></colgroup><thead><tr><th>Area</th><th>Senior Director</th><th>Associate Director / Senior Manager</th><th>Area / Department</th><th>Senior Manager / Product Group</th><th>Buyer UID</th><th>Merchandise Mgr. Name</th><th>Art Grp No.</th><th>Description</th><th>Assistant</th><th>Junior Buyer / New Gen</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
   </div>
@@ -515,6 +515,8 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
     <div class="dgrid">
       <button type="button" class="dtile" onclick="exportBatchesCSV()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 4h14v16H5zM5 9h14M5 14h14M10 4v16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>ล็อต + สถานะวันนี้</b><span class="muted small">ตารางล็อตทั้งหมดพร้อมสถานะ (CSV / Excel)</span></button>
       <button type="button" class="dtile" onclick="nbsCSV()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>Item NBS</b><span class="muted small">รายการสินค้าไม่มียอดขาย (CSV / PDF)</span></button>
+      <button type="button" class="dtile" onclick="exportContactsXlsx()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2 .7 3.2 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>รายชื่อ Buyer / Commercial</b><span class="muted small">Excel จัดหัวตารางแบบผังทีม — นำเข้ากลับได้ทันที</span></button>
+      <button type="button" class="dtile" onclick="exportContactsXlsx(true)"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>แม่แบบรายชื่อ Buyer</b><span class="muted small">ไฟล์ Excel เปล่าพร้อมตัวอย่าง 1 แถว สำหรับกรอกแล้วนำเข้า</span></button>
       <button type="button" class="dtile" onclick="downloadTemplate()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>แม่แบบสินค้า</b><span class="muted small">ไฟล์ CSV ตัวอย่างสำหรับนำเข้าสินค้า</span></button>
       <button type="button" class="dtile" onclick="exportJSON()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2.2 2.2L15.5 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>สำรองข้อมูลทั้งหมด</b><span class="muted small">ทุกอย่างในระบบ รวมรูปที่ถ่าย/แนบ (JSON)</span></button>
     </div>
@@ -1516,7 +1518,7 @@ const orgTitle=s=>String(s||'').toLowerCase().replace(/\s*&\s*/g,' & ').replace(
 function parseOrgChart(items,fileName){
   const recs=[],byUid=new Map();
   const add=(r)=>{const k=r.uid.toUpperCase();if(!byUid.has(k)){byUid.set(k,r);recs.push(r)}};
-  let group='';const gm=String(fileName||'').match(/(Dry Grocery Non Food|Dry Grocery Food|Fresh Food|Non ?Food)/i);if(gm)group=gm[1];
+  let group='';const gm=String(fileName||'').match(/(Dry Grocery Non[\s-]*Food|Dry Grocery Food|Fresh Food|Non ?Food)/i);if(gm)group=gm[1];else if(/(^|[^A-Za-z])FF[\s_-]*Directory/i.test(String(fileName||'')))group='Fresh Food';
   const buyers=[],srs=[],codeLists=[];let hdr=null;
   const pages=[...new Set(items.map(i=>i.page||1))].sort((a,b)=>a-b);
   pages.forEach(pg=>{
@@ -1543,7 +1545,7 @@ function parseOrgChart(items,fileName){
     const codes=codeCells.filter(c=>/^[A-Z]{1,4}\d{0,2}[A-Z]?$/.test(c.text)).map(c=>({code:c.text,y:c.y,page:pg}));
     codeCells.filter(c=>/,/.test(c.text)&&/^[A-Z0-9, ]+$/.test(c.text)).forEach(c=>codeLists.push({y:c.y,page:pg,codes:c.text.split(/\s*,\s*/)}));
     /* area labels (several lines -> one label) */
-    const areaCells=body.filter(c=>bandOf(c)==='area'&&c.x0>=hdr.area-30).sort((a,b)=>a.y-b.y),labels=[];
+    const areaCells=body.filter(c=>bandOf(c)==='area'&&c.x0>=hdr.area-30&&!orgPhone(c.text)&&!/^(M\.|Tel\.)/i.test(c.text)).sort((a,b)=>a.y-b.y),labels=[];
     areaCells.forEach(c=>{const L=labels[labels.length-1];if(L&&c.y-L.yEnd<=8){L.text+=' '+c.text;L.yEnd=c.y}else labels.push({y:c.y,yEnd:c.y,text:c.text})});
     labels.forEach(L=>{L.pg=/\(\s*product group\s*\)/i.test(L.text);L.text=orgTitle(L.text.replace(/\(\s*product group\s*\)/i,''))});
     /* art groups: number + (wrapped) description */
@@ -1566,6 +1568,7 @@ function parseOrgChart(items,fileName){
     P.sm.forEach(p=>{let L=null;labels.forEach(l=>{if(Math.abs(l.y-p.y)<=4)L=l});const ad=P.ad.find(a=>Math.abs(a.y-p.y)<=4);srs.push({p,L,ad,page:pg})});
   });
   if(!buyers.length)return{recs:[],info:{}};
+  group=group.replace(/non[\s-]*food/i,'Non Food').replace(/^dry grocery/i,'Dry Grocery');
   const clean=s=>String(s).replace(/\.{2,}/g,'.'),fmtP=p=>`${clean(p.name)}${p.id?' #'+p.id:''}${p.phone?' '+p.phone:''}`,nm=p=>p.id?`${clean(p.name)} (#${p.id})`:clean(p.name);
   buyers.filter(b=>b.p).forEach(b=>{
     const bk=[];
@@ -1701,37 +1704,112 @@ $('#prPick').onclick=()=>$('#prFile').click();$('#prFile').onchange=e=>{const f=
 
 /* ---------- import Buyer / Commercial contacts from Excel / CSV ---------- */
 const CT_COLS=[
-  ['backup',/(backup|สำรอง|^jr|assistant|ผู้ช่วย)/],
+  /* the Makro org-chart layout (one row per Buyer) and the flat contact layout are both understood */
+  ['sd',/^(seniordirector|director)/],
+  ['ad',/^associatedirector/],
+  ['sm',/^(seniormanager|productgroupmanager|srmgr|divisionproductmgr)/],
+  ['art',/^(artgrp|artgroup)/],
+  ['asst',/^assistant/],
+  ['jr',/^(junior|jr)/],
+  ['desc',/^description$/],
+  ['backup',/(backup|สำรอง|ผู้ช่วย)/],
   ['uid',/^(uid|buyeruid|commercialuid|userid|employeeid|empid|id|รหัสพนักงาน|รหัสผู้ซื้อ|รหัส)$/],
   ['role',/^(role|บทบาท|ตำแหน่ง|position|type|ประเภท)/],
   ['email',/(email|mail|อีเมล|line|ไลน์)/],
   ['phone',/(phone|tel|mobile|โทร|เบอร์|มือถือ)/],
   ['dept',/(dept|department|แผนก|หมวด|category|section)/],
-  ['group',/(^group|กลุ่ม|หน่วยงาน|division|^org)/],
+  ['group',/(^group|กลุ่ม|หน่วยงาน|division|^org|^area$)/],
   ['name',/(name|ชื่อ)/]];
-const CT_FIELDS=['name','role','group','dept','phone','email','backup'],CT_LBL={uid:'UID',name:'ชื่อ',role:'บทบาท',group:'กลุ่ม',dept:'แผนก / หมวด',phone:'โทร',email:'อีเมล / LINE',backup:'ผู้ติดต่อสำรอง'};
+const CT_FIELDS=['name','role','group','dept','phone','email','backup','artKeys'],CT_LBL={uid:'UID',name:'ชื่อ / Merchandise Mgr.',role:'บทบาท',group:'Area / กลุ่ม',dept:'Area / Department',phone:'โทร',email:'อีเมล / LINE',backup:'ผู้ติดต่อสำรอง',sd:'Senior Director',ad:'Associate Director',sm:'Senior Manager / Product Group',art:'Art Grp No.',desc:'Description',asst:'Assistant',jr:'Junior Buyer / New Gen',artKeys:'สินค้าที่ดูแล'};
 function ctMapHeader(row){const m={},used=new Set();
   (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of CT_COLS){if(m[f]==null&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
 const ctRole=(v,def)=>{const s=String(v||'').trim();if(!s)return def||'';return/commercial|คอมเมอร์เชียล/i.test(s)?'Commercial':/buyer|ผู้ซื้อ|บายเออร์/i.test(s)?'Buyer':'อื่นๆ'};
 const ctCell=(v,f)=>{if(v==null)return'';const s=typeof v==='number'?String(v):String(v).replace(/\s+/g,' ').trim();return f==='phone'&&/^[689]\d{8}$/.test(s)?'0'+s:s};
+const ctLines=v=>String(v??'').split(/\r?\n/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
+const ctPhoneIn=s=>{const m=String(s).match(/(?:^|[^\d])(0\d[\d\- ]{7,12}\d)/);if(!m)return'';const d=m[1].replace(/\D/g,'');return d.length===10?`${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`:d.length===9?`${d.slice(0,2)}-${d.slice(2,5)}-${d.slice(5)}`:''};
+/* "Name #8608 / M. 083-237-3813 / Senior Manager" -> {name,id,phone,title} */
+function ctPerson(raw){
+  const L=ctLines(raw);if(!L.length)return null;let id='',phone='',title='',name='';
+  L.forEach((l,i)=>{const ph=ctPhoneIn(l);
+    if(ph&&/^(M\.?|Tel\.?|โทร)?\s*[\d\- ()+]+$/.test(l.replace(/^(M\.?|Tel\.?|โทร)\s*/i,'')))phone=phone||ph;
+    else if(i>0&&/(manager|mgr|director|group|buyer|assistant)/i.test(l))title=title||l;
+    else if(!name){
+      const base=l.replace(/\s*(M\.?\s*)?0\d[\d\- ]{7,12}\d.*$/,'').trim(),keep=base.match(/\(#\s*(\d{3,5})\)/);
+      if(keep){name=base;id=keep[1]} /* "Name (#id) — note": keep the text as written */
+      else{const m=base.match(/#\s*(\d{3,5})/);if(m)id=m[1];name=base.replace(/\s*\(?#\s*\d{3,5}\)?/g,'').trim()}}});
+  if(!phone)phone=ctPhoneIn(L.join(" "));
+  if(/^(vacant|ว่าง|-)$/i.test(name))return null;
+  return name?{name,id,phone,title}:null}
+const ctInitials=g=>String(g||'').split(/\s+/).filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,5)||'CT';
+const ctNm=p=>p.id&&!/\(#\s*\d{3,5}\)/.test(p.name)?`${p.name} (#${p.id})`:p.name;
+/* export the contact list as an Excel file in the org-chart layout (one row per Buyer), which the import reads straight back */
+const CT_XL_HDR=['Area','Senior Director','Associate Director / Senior Manager','Area / Department','Senior Manager / Product Group','Buyer UID','Merchandise Mgr. Name','Art Grp No.','Description','Assistant','Junior Buyer / New Gen'];
+async function exportContactsXlsx(template){
+  await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+  const P=(n,ph,x)=>[n,ph,x].filter(Boolean).join('\n'),rows=[CT_XL_HDR],used=new Set();
+  const buyers=(template?[]:st.contacts).filter(c=>c.role==='Buyer').sort((a,b)=>String(a.group||'').localeCompare(String(b.group||''))||String(ctView(a).area).localeCompare(String(ctView(b).area))||String(a.uid).localeCompare(String(b.uid)));
+  buyers.forEach(b=>{const v=ctView(b);if(v.sm)used.add(v.sm.name);
+    rows.push([b.group||'',v.sd,v.ad,v.area,v.sm?P(v.sm.name,v.sm.phone,v.sm.title):'',b.uid,P(b.name,b.phone),v.arts.map(a=>a[0]).join('\n'),v.arts.length?v.arts.map(a=>a[1]).join('\n'):v.desc,[...v.asst,...(v.merch?['Merch กลุ่ม '+v.merch]:[])].join('\n'),v.jr.join('\n')])});
+  (template?[]:st.contacts).filter(c=>c.role!=='Buyer'&&!used.has(c.name)).forEach(c=>{const v=ctView(c),cell=P(c.name,c.phone,v.title);
+    rows.push([c.group||'',/^Senior Director/i.test(v.title)?cell:'',/^Associate Director/i.test(v.title)?cell:'',v.area&&!/^(Senior|Associate) /i.test(v.title)?v.area:'',(!/^(Senior Director|Associate Director)/i.test(v.title))?cell:'','','','','','',''])});
+  if(template||rows.length===1)rows.push(['Dry Grocery Food','Hyesung Baik','Warisara K. (#8663)\n081-966-5421','Commodity','Nichapa B.\n096-659-3663\nSenior Manager','F6','Janjira S. (#8608)\n083-237-3813','22','Cooking Oil','Mananchaya S. #8769','Supisara R.']);
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[16,16,22,20,24,10,26,10,28,26,22].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Buyer-Commercial');
+  XLSX.writeFile(wb,template?'buyer-commercial_template.xlsx':`buyer-commercial_${iso(today())}.xlsx`);
+}
 let ctImp=null;
 function parseContacts(wb){
-  const recs=new Map(),info={cols:{},rows:0,skipped:0};
+  const recs=new Map(),info={cols:{},rows:0,skipped:0},coms=new Map(),execs=[];
   for(const sn of wb.SheetNames){
     const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
     let hi=-1,m=null;
     for(let i=0;i<Math.min(rows.length,25);i++){const mm=ctMapHeader(rows[i]);if(mm.uid!=null&&mm.name!=null){hi=i;m=mm;break}}
     if(hi<0)continue;
     Object.keys(m).forEach(k=>info.cols[k]=true);
+    const org=['sd','ad','sm','art','desc','asst','jr'].some(k=>m[k]!=null);let group='';
     for(let i=hi+1;i<rows.length;i++){
-      const r=rows[i],uid=ctCell(r[m.uid],'uid');
-      if(!uid){if(r.some(x=>String(x).trim()))info.skipped++;continue}
-      const o={uid};CT_FIELDS.forEach(f=>{o[f]=m[f]!=null?ctCell(r[m[f]],f):''});
+      const r=rows[i],cell=f=>m[f]!=null?r[m[f]]:'',uid=ctCell(r[m.uid],'uid');
+      if(m.group!=null&&ctCell(r[m.group]))group=ctCell(r[m.group]);
+      const sm=m.sm!=null?ctPerson(cell('sm')):null,ad=m.ad!=null?ctPerson(cell('ad')):null,sd=m.sd!=null?ctPerson(cell('sd')):null,area=m.dept!=null?ctCell(cell('dept')):'';
+      if(!uid){ /* a row with no Buyer UID may still carry a manager / director */
+        const any=r.some(x=>String(x).trim());
+        if(org&&(sm||ad||sd)){[[sm,'Senior Manager'],[ad,'Associate Director'],[sd,'Senior Director']].forEach(([p,t])=>{if(p)execs.push({p,title:p.title||t,group,area})});continue}
+        if(any)info.skipped++;continue}
+      const o={uid};CT_FIELDS.forEach(f=>{o[f]=m[f]!=null&&f!=='backup'?ctCell(r[m[f]],f):''});
+      if(!o.group)o.group=group;
+      if(org){
+        const np=ctPerson(cell('name'));
+        if(np){o.name=ctNm(np);if(np.phone&&!o.phone)o.phone=np.phone}
+        const arts=m.art!=null?ctLines(cell('art')):[],descs=m.desc!=null?ctLines(cell('desc')):[];
+        const pairs=arts.length&&descs.length?(arts.length===descs.length?arts.map((a,k)=>`${a} ${descs[k]}`):[arts.join(', ')+' '+descs.join(', ')]):(descs.length?descs:arts);
+        o.dept=[area,pairs.join(', ')].filter(Boolean).join(' · ');
+        const bk=[];
+        if(m.backup!=null&&ctCell(cell('backup')))bk.push(ctCell(cell('backup')));
+        const as=m.asst!=null?ctLines(cell('asst')):[],jr=m.jr!=null?ctLines(cell('jr')):[];
+        const merch=as.filter(l=>/^merch/i.test(l)).map(l=>l.replace(/^merch\s*กลุ่ม\s*/i,''));
+        const asp=as.filter(l=>!/^merch/i.test(l));
+        if(asp.length)bk.push('Asst. '+asp.join(', '));if(jr.length)bk.push('Jr. '+jr.join(', '));merch.forEach(x=>bk.push('Merch กลุ่ม '+x));
+        o.backup=bk.join(' · ');
+        if(!o.role)o.role='Buyer';
+        if(sm){const k=(sm.id||sm.name).toLowerCase(),c=coms.get(k)||{p:sm,title:sm.title||'Senior Manager',group:o.group,areas:new Set(),codes:[],ad:null};
+          if(area)c.areas.add(area);c.codes.push(uid);if(ad&&!c.ad)c.ad=ad;coms.set(k,c)}
+        else if(ad)execs.push({p:ad,title:ad.title||'Associate Director',group:o.group,area:''});
+        if(sd)execs.push({p:sd,title:'Senior Director',group:o.group,area:''});
+      }else{o.backup=m.backup!=null?ctCell(cell('backup')):''}
       if(o.role)o.role=ctRole(o.role,'');
       const key=uid.toUpperCase();
       recs.set(key,{...(recs.get(key)||{}),...Object.fromEntries(Object.entries(o).filter(([k,v])=>v!==''||k==='uid'))});info.rows++;
     }
   }
+  /* managers and directors named in the chart become Commercial contacts */
+  const addC=(p,title,group,areaTxt,codes,ad)=>{
+    const uid=p.id||`${ctInitials(group)}-${p.name.split(/\s+/)[0].replace(/\W/g,'')}`,key=uid.toUpperCase();
+    if(recs.has(key))return;
+    recs.set(key,{uid,name:ctNm(p),role:'Commercial',group,dept:[title,areaTxt?areaTxt+(codes&&codes.length?` (${codes.join(', ')})`:''):''].filter(Boolean).join(' · '),phone:p.phone||'',
+      backup:ad?`Assoc. Dir. ${ad.name}${ad.id?' #'+ad.id:''}${ad.phone?' · '+ad.phone:''}`:''})};
+  coms.forEach(c=>addC(c.p,c.title,c.group,[...c.areas].join(' / '),c.codes,c.ad));
+  execs.forEach(e=>addC(e.p,e.title,e.group,e.area,null,null));
+  if(coms.size||execs.length){info.cols.role=true;info.cols.group=true}
   return{recs:[...recs.values()],info};
 }
 function planContacts(recs,defRole){
@@ -1760,8 +1838,13 @@ async function readContactFile(file){
       const items=isPdfFile(file)?await pdfItems(file,say):await ocrItems(file,say),wb=XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(itemsToRows(items,detect,!isPdfFile(file)||items.ocr)),'ไฟล์');
       parsed=parseContacts(wb);
-      /* no UID / name table: try the Makro team org chart (Buyer UID, Merchandise Mgr., Assistant ...) */
-      if(!parsed.recs.length){const o=parseOrgChart(items,file.name);if(o.recs.length)parsed={recs:o.recs,info:{cols:{uid:1,name:1,role:1,group:1,dept:1,phone:1,backup:1},rows:o.recs.length,skipped:0,org:true}}}
+      /* a PDF table where several people share one cell comes out as one long "name": that is not usable */
+      const badName=n=>{const s=String(n||'').replace(/\(#\s*\d{3,5}\)/g,'');return/#|\bM\.\s*\d|\bTel\./i.test(s)||s.length>60},people=parsed.recs.filter(r=>r.role!=='Commercial'),
+        junk=people.length>0&&people.filter(r=>badName(r.name)||/\s/.test(r.uid)||String(r.uid).length>14).length/people.length>.2;
+      /* no usable UID / name table: try the Makro team org chart (Buyer UID, Merchandise Mgr., Assistant ...) */
+      if(!parsed.recs.length||junk){const o=parseOrgChart(items,file.name);
+        if(o.recs.length>=(junk?3:1))parsed={recs:o.recs,info:{cols:{uid:1,name:1,role:1,group:1,dept:1,phone:1,backup:1},rows:o.recs.length,skipped:0,org:true,partial:junk}};
+        else if(junk)throw Error('PDF นี้มีหลายคนรวมอยู่ในช่องเดียว จึงอ่านแยกรายคนไม่แม่น — ให้ใช้ไฟล์ Excel ตามแม่แบบ (ดาวน์โหลดได้ที่แท็บ นำเข้า/ส่งออก)')}
     }else parsed=parseContacts(await readAnyFile(file,detect,say));
     if(!parsed.recs.length)throw Error('ไม่พบรายชื่อในไฟล์ — ต้องมีตารางที่มี UID และ ชื่อ หรือเป็นแผนผังทีม Buyer / Commercial ของ Makro');
     ctImp={file:file.name,...parsed};showContactPreview();
@@ -1775,7 +1858,7 @@ function showContactPreview(){
   $('#ctBox').innerHTML=`<div class="imp-file"><b>${esc(ctImp.file)}</b> <span class="muted small">· ${recs.length.toLocaleString()} รายชื่อ${info.skipped?` · ข้าม ${info.skipped} แถวที่ไม่มี UID`:''}</span> <button type="button" class="btn sm" id="ctChange">เลือกไฟล์อื่น</button></div>
   <div class="imp-tiles"><div class="t-new"><b>${plan.add.length.toLocaleString()}</b><span>รายชื่อใหม่</span></div><div><b>${plan.upd.length.toLocaleString()}</b><span>อัปเดตข้อมูล</span></div><div><b>${plan.same.toLocaleString()}</b><span>ไม่เปลี่ยนแปลง</span></div><div class="${plan.missing.length?'t-close':''}"><b>${plan.missing.length.toLocaleString()}</b><span>ไม่อยู่ในไฟล์</span></div></div>
   <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>CT_LBL[k]||k).join(' · ')}</p>
-  ${info.org?'<p class="small" style="margin:6px 0 0">อ่านจากแผนผังทีม (Org Chart) ของ Makro — UID = รหัส Buyer UID, ชื่อ = Merchandise Mgr. · กรุณาตรวจรายชื่อและเบอร์โทรในตัวอย่างก่อนกดนำเข้า</p>':''}
+  ${info.org?`<p class="small" style="margin:6px 0 0">อ่านจากแผนผังทีม (Org Chart) ของ Makro — UID = รหัส Buyer UID, ชื่อ = Merchandise Mgr. · กรุณาตรวจรายชื่อและเบอร์โทรในตัวอย่างก่อนกดนำเข้า</p>${info.partial?'<p class="small err-text" style="margin:6px 0 0">ผังนี้จัดหน้าแบบหลายคนต่อหนึ่งรหัส ระบบอ่านจาก PDF ได้ไม่ครบและอาจคลาดเคลื่อน — แนะนำให้ใช้ไฟล์ Excel ตามแม่แบบ (แท็บ นำเข้า/ส่งออก → แม่แบบรายชื่อ Buyer)</p>':''}`:''}
   ${rows.length?`<div class="imp-sample"><table><thead><tr><th>UID</th><th>ชื่อ</th><th>สิ่งที่จะเปลี่ยน</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>${plan.upd.length+plan.add.length>8?`<p class="muted small" style="margin:4px 0 0">แสดง 8 รายการแรก จากทั้งหมด ${(plan.upd.length+plan.add.length).toLocaleString()} รายการที่มีการเปลี่ยนแปลง</p>`:''}`:'<p class="small muted" style="margin:8px 0 0">ข้อมูลในไฟล์ตรงกับที่มีอยู่แล้วทั้งหมด ไม่มีอะไรต้องอัปเดต</p>'}`;
   $('#ctChange').onclick=()=>{$('#ctDrop').hidden=false;$('#ctBox').innerHTML='';$('#ctGo').disabled=true;ctImp=null;$('#ctFile').value='';$('#ctFile').click()};
 }
