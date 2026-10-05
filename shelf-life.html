@@ -237,6 +237,15 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 #pQn{font-weight:700;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:13.5px!important;align-self:flex-end;margin-bottom:9px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) :is(#q,#nbsQ,#pQ,#ctQ,#mfQ,#nQ){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}}
 :root[data-theme="dark"] :is(#q,#nbsQ,#pQ,#ctQ,#mfQ,#nQ){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}
+.fbtn{display:inline-flex;align-items:center;gap:2px;vertical-align:middle;margin-left:2px;padding:3px 4px;border:1px solid transparent;border-radius:6px;background:none;color:var(--muted);cursor:pointer}
+.fbtn:hover{background:var(--bg);border-color:var(--line);color:var(--ink)}
+.fbtn.on{background:var(--accent);color:var(--accent-ink)}
+.fmenu{position:fixed;z-index:60;min-width:220px;max-width:320px;max-height:min(60vh,380px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px #0003;padding:6px}
+.fmenu label{flex-direction:row;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
+.fmenu label:hover{background:var(--bg)}
+.fmenu input{accent-color:var(--accent);width:16px;height:16px;padding:0}
+.fmenu .fcnt{margin-left:auto;color:var(--muted);font-weight:400;font-size:12.5px;padding-left:10px}
+.fmenu .fall{border-bottom:1px solid var(--line);border-radius:8px 8px 0 0;margin-bottom:4px}
 .di-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
 .di-row>div{min-width:0}
 @media (min-width:821px){
@@ -387,7 +396,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
       <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
       <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
     </div>
-    <table class="resp nbs-tbl"><colgroup><col style="width:18%"><col style="width:6%"><col style="width:5%"><col style="width:10%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:7%"><col style="width:5%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th>กลุ่ม (Division)</th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th>Aging Status</th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
+    <table class="resp nbs-tbl"><colgroup><col style="width:16%"><col style="width:8%"><col style="width:5%"><col style="width:10%"><col style="width:8%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:7%"><col style="width:5%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th>กลุ่ม (Division) <button type="button" class="fbtn" data-f="div" title="Filter กลุ่ม" aria-label="Filter กลุ่ม"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th>Aging Status <button type="button" class="fbtn" data-f="aging" title="Filter Aging Status" aria-label="Filter Aging Status"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
     <div id="nbsMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="nbsMoreTxt"></span><button class="btn" id="nbsMore">แสดงเพิ่ม 200 รายการ</button></div>
     <p class="muted" id="nbsEmpty" hidden>ยังไม่มีรายการ — กด “+ เพิ่ม Item NBS” เพื่อบันทึกสินค้าที่ไม่มียอดขาย</p>
   </div>
@@ -1251,6 +1260,39 @@ const NBS_STAT=[['check','รอตรวจสอบ','s-err'],['wait','แจ�
 const nStat=k=>NBS_STAT.find(x=>x[0]===k)||NBS_STAT[0];
 const divGroupOk=(div,g)=>div==='FF'?String(g).startsWith('Fresh Food'):div==='DF'?g==='Dry Grocery Food':div==='NF'?g==='Dry Grocery Non Food':true;
 let nbsFilterDiv='',nbsEditId=null,nbsDraft={};
+/* Excel-style column filters (Division, Aging Status): null = no filter, Set = values to show */
+const nbsColF={div:null,aging:null};
+const agingKey=r=>String(r.aging||'').trim()||(nbsLevel(nbsDays(r))||[''])[0]||'(ว่าง)';
+function colOpts(f){
+  const m=new Map();(st.nbs||[]).forEach(r=>{const k=f==='div'?r.division:agingKey(r);m.set(k,(m.get(k)||0)+1)});
+  const o=[...m.entries()];
+  return f==='div'?o.sort((a,b)=>Object.keys(NBS_DIV).indexOf(a[0])-Object.keys(NBS_DIV).indexOf(b[0])):o.sort((a,b)=>a[0].localeCompare(b[0],'th',{numeric:true}));
+}
+let fMenu=null;
+function closeFMenu(){if(fMenu){fMenu.el.remove();fMenu=null}}
+function renderFMenu(){
+  const {f,el}=fMenu,opts=colOpts(f),sel=nbsColF[f],on=k=>!sel||sel.has(k),n=opts.filter(([k])=>on(k)).length;
+  el.innerHTML=`<label class="fall"><input type="checkbox" data-all${n===opts.length?' checked':''}> <span>(เลือกทั้งหมด)</span></label>`
+    +opts.map(([k,c])=>`<label><input type="checkbox" value="${esc(k)}"${on(k)?' checked':''}> <span>${f==='div'&&NBS_DIV[k]?esc(k+' · '+NBS_DIV[k]):esc(k)}</span><span class="fcnt">${c.toLocaleString()}</span></label>`).join('')
+    ||'<p class="muted small" style="margin:8px">ยังไม่มีข้อมูล</p>';
+  const a=el.querySelector('[data-all]');if(a)a.indeterminate=n>0&&n<opts.length;
+}
+function openFMenu(btn){
+  const f=btn.dataset.f;if(fMenu&&fMenu.f===f){closeFMenu();return}closeFMenu();
+  const el=document.createElement('div');el.className='fmenu';document.body.append(el);fMenu={f,el,btn};renderFMenu();
+  const r=btn.getBoundingClientRect();el.style.top=(r.bottom+4)+'px';el.style.left=Math.max(8,Math.min(r.left,innerWidth-el.offsetWidth-8))+'px';
+  el.onchange=e=>{
+    const opts=colOpts(f).map(x=>x[0]);let vals;
+    if(e.target.matches('[data-all]'))vals=e.target.checked?opts:[];
+    else vals=[...el.querySelectorAll('input[value]:checked')].map(i=>i.value);
+    nbsColF[f]=vals.length===opts.length?null:new Set(vals);
+    if(f==='div')nbsFilterDiv='';
+    nbsLimit=200;renderFMenu();renderNbs();
+  };
+}
+document.addEventListener('click',e=>{if(fMenu&&!fMenu.el.contains(e.target)&&!fMenu.btn.contains(e.target))closeFMenu()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFMenu()});
+window.addEventListener('scroll',closeFMenu);window.addEventListener('resize',closeFMenu);
 const nbsDays=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null;
 const nbsLevel=d=>d==null?null:d>=90?['วิกฤต 90+ วัน','s-pull']:d>=60?['เร่งด่วน 60+ วัน','s-md2']:d>=30?['เฝ้าระวัง 30+ วัน','s-md1']:null;
 let nbsLimit=200;
@@ -1265,13 +1307,14 @@ function nbsAgingText(r){
 }
 function renderNbs(){
   if(!$('#nbsBody'))return;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',!!nbsColF[b.dataset.f]));
   const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0},open=rows.filter(r=>r.status!=='done');open.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
   $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k} · ${l}</span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ยังไม่ปิดงาน</span></button>`).join('');
   const lv=[30,60,90].map(n=>open.filter(r=>(nbsDays(r)??-1)>=n).length),lastImp=rows.reduce((m,r)=>r.importedAt&&r.importedAt>m?r.importedAt:m,''),li=lastImp?new Date(lastImp):null;
   $('#nbsSummary').innerHTML=(li?`<span class="pill">นำเข้าล่าสุด <b>${fmt(li)} ${String(li.getHours()).padStart(2,'0')}.${String(li.getMinutes()).padStart(2,'0')} น.</b></span>`:'')
     +(open.some(r=>r.lastSale)?`<span class="chip s-md1">30+ วัน ${lv[0].toLocaleString()}</span><span class="chip s-md2">60+ วัน ${lv[1].toLocaleString()}</span><span class="chip s-pull">90+ วัน ${lv[2].toLocaleString()}</span>`:'');
   const q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=+$('#nbsFAl').value||0;
-  const all=rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(nbsDays(r)??-1)>=fa)
+  const all=rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(nbsDays(r)??-1)>=fa)
     &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode].join(' ').toLowerCase().includes(q)))
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
   const list=all.slice(0,nbsLimit);
@@ -1343,7 +1386,8 @@ let nbsT;$('#nQ').oninput=()=>{clearTimeout(nbsT);nbsT=setTimeout(nbsSearch,150)
 $('#nResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)nbsPick(b.dataset.no)};
 const nbsRe=()=>{nbsLimit=200;renderNbs()};$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
 $('#nbsFSt').innerHTML+=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
-$('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;nbsLimit=200;renderNbs()};
+$('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;nbsColF.div=null;nbsLimit=200;renderNbs()};
+$('#t-nbs thead').onclick=e=>{const b=e.target.closest('.fbtn');if(b)openFMenu(b)};
 /* ---------- Item NBS: import an Excel/CSV report and monitor it automatically ---------- */
 const normH=s=>String(s??'').toLowerCase().replace(/[\s._\-\/()\[\]:]/g,'');
 /* header → field, first match wins; order matters (days before stock, so "จำนวนวัน…" is not read as stock) */
