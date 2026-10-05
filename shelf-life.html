@@ -429,7 +429,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 <section id="t-prod" hidden>
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">สินค้า & กฎ Shelf life</h2>
-      <span class="row w"><button class="btn imp-btn" id="prImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
+      <span class="row w"><button type="button" class="btn danger" id="prDelFile" title="ลบไฟล์ที่นำเข้า พร้อมสินค้าที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="prImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
     <p class="muted small">กฎตาม “คู่มือ อายุและการจัดการสินค้าผักและผลไม้” (ผ่านการตรวจสอบจากทีมจัดซื้อและ QA) · นับวันที่ 1 = วันรับสินค้า · ขายราคาเต็มครบ Shelf life → ลด 15% (Step 1) → ลด 30% (Step 2) → Code 52 · สินค้า Shelf life 1 วันข้าม Step 1 · อายุสินค้ากำหนดตามการจัดเรียงในตู้แช่ 0–4°C (ผักสลัด 6–8°C) หรือให้พิจารณาตามสภาพสินค้า</p>
     <div class="row" style="margin:0 0 10px;align-items:center"><label style="flex:1;min-width:220px;max-width:520px">ค้นหาสินค้า (ชื่อ / รหัส / หมวด / Buyer UID / Commercial)<input id="pQ" type="search" placeholder="เช่น บลูเบอร์รี่ มะม่วง หรือ FF3" autocomplete="off"></label><span class="muted small" id="pQn" style="padding-bottom:9px"></span></div>
     <table class="resp"><thead><tr><th>สินค้า</th><th>Shelf life</th><th><span class="hchip h-ok">ขายราคาเต็ม</span></th><th><span class="hchip h-md1">ลด 15%</span></th><th><span class="hchip h-md2">ลด 30%</span></th><th><span class="hchip h-pull">Code 52</span></th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
@@ -440,7 +440,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 <!-- CONTACTS -->
 <section id="t-ct" hidden>
   <div class="card">
-    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
     <div class="row" style="margin-bottom:10px"><label style="flex:1;min-width:180px">ค้นหา (UID / ชื่อ / หมวดสินค้า / เบอร์)<input id="ctQ" placeholder="เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small" id="ctCount" style="padding-bottom:8px"></span></div>
     <table class="resp"><thead><tr><th>UID</th><th>ชื่อ</th><th>บทบาท</th><th>แผนก / หมวด</th><th>โทร</th><th>อีเมล / LINE</th><th>ผู้ติดต่อสำรอง</th><th>ใช้กับสินค้า</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
   </div>
@@ -554,8 +554,8 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 </div></dialog>
 
 <dialog id="dlgDelImp" class="nbs-dlg imp-dlg"><div>
-  <h2>ลบไฟล์ที่นำเข้า</h2>
-  <p class="muted small" style="margin:0 0 10px">เลือกไฟล์ที่ต้องการลบ — รายการสินค้าที่มาจากไฟล์นั้นจะถูกลบออกจากระบบ (ลบให้ทุกคนในทีม) ส่วนรายการที่เพิ่มเองด้วยมือจะไม่ถูกลบ</p>
+  <h2 id="delImpTitle">ลบไฟล์ที่นำเข้า</h2>
+  <p class="muted small" id="delImpDesc" style="margin:0 0 10px">เลือกไฟล์ที่ต้องการลบ — รายการสินค้าที่มาจากไฟล์นั้นจะถูกลบออกจากระบบ (ลบให้ทุกคนในทีม) ส่วนรายการที่เพิ่มเองด้วยมือจะไม่ถูกลบ</p>
   <div id="delImpList"></div>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="delImpClose">ปิด</button></div>
 </div></dialog>
@@ -1356,10 +1356,10 @@ function showProductPreview(){
 }
 async function runProductImport(){
   if(!prImp)return;
-  const plan=planProducts(prImp.recs);
+  const plan=planProducts(prImp.recs),runAt=new Date().toISOString();
   $('#prGo').disabled=true;$('#prGo').textContent='กำลังนำเข้า…';
   const ok=await act(async()=>{
-    for(const a of plan.add)await putItem('products',a);
+    for(const a of plan.add)await putItem('products',{...a,source:'import',importFile:prImp.file,importRun:runAt});
     for(const u of plan.upd){const {_id,...d}=u.next;await putItem('products',{...d,_id:u.ex._id})}
   },null);
   $('#prGo').textContent='นำเข้าสินค้า';
@@ -1447,11 +1447,11 @@ function showContactPreview(){
 }
 async function runContactImport(){
   if(!ctImp)return;
-  const plan=planContacts(ctImp.recs,$('#ctDefRole').value),del=$('#ctDel').checked?plan.missing:[];
+  const plan=planContacts(ctImp.recs,$('#ctDefRole').value),del=$('#ctDel').checked?plan.missing:[],runAt=new Date().toISOString();
   if(del.length&&!await ask(`ลบรายชื่อที่ไม่อยู่ในไฟล์ ${del.length.toLocaleString()} รายการ และล้าง Buyer/Commercial ในสินค้าที่ผูกอยู่?  (ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)`))return;
   $('#ctGo').disabled=true;$('#ctGo').textContent='กำลังนำเข้า…';
   const ok=await act(async()=>{
-    for(const a of plan.add)await putItem('contacts',a);
+    for(const a of plan.add)await putItem('contacts',{...a,source:'import',importFile:ctImp.file,importRun:runAt});
     for(const u of plan.upd)await patchItem('contacts',u.ex,u.patch);
     if(del.length){const uids=new Set(del.map(c=>c.uid));
       for(const p of st.products.filter(p=>uids.has(p.buyerUid)||uids.has(p.comUid)))
@@ -1839,27 +1839,46 @@ async function rmMany(col,list){
   const ids=new Set(list.map(o=>o._id));st[col]=st[col].filter(x=>!ids.has(x._id));
   if(mode==='sheet'){for(const o of list)await sheetWrite({op:'delete',col,id:o._id});return}
   saveLocal()}
+/* "ลบไฟล์ที่นำเข้า": remove everything an import file ADDED (Item NBS, products, Buyer / Commercial). Updates made to existing rows are not undone. */
 const impRunKey=r=>r.importRun||r.lastSeenAt||r.importedAt||'';
+let delCol='nbs';
+const DEL_CFG={
+  nbs:{title:'ลบไฟล์ที่นำเข้า · Item NBS',noun:'รายการสินค้า',desc:'เลือกไฟล์ที่ต้องการลบ — รายการสินค้าที่มาจากไฟล์นั้นจะถูกลบออกจากระบบ (ลบให้ทุกคนในทีม) ส่วนรายการที่เพิ่มเองด้วยมือจะไม่ถูกลบ'},
+  products:{title:'ลบไฟล์ที่นำเข้า · สินค้า & กฎ Shelf life',noun:'สินค้า',desc:'เลือกไฟล์ที่ต้องการลบ — สินค้าที่ไฟล์นั้น “เพิ่มเข้ามาใหม่” จะถูกลบออกจากระบบ (ลบให้ทุกคนในทีม) สินค้าเดิมที่ไฟล์เพียงอัปเดตข้อมูลจะไม่ถูกลบและไม่ย้อนกลับค่าเดิม'},
+  contacts:{title:'ลบไฟล์ที่นำเข้า · Buyer / Commercial',noun:'รายชื่อ',desc:'เลือกไฟล์ที่ต้องการลบ — รายชื่อที่ไฟล์นั้น “เพิ่มเข้ามาใหม่” จะถูกลบออกจากระบบ (ลบให้ทุกคนในทีม) และล้าง Buyer/Commercial ในสินค้าที่ผูกกับรายชื่อนั้น รายชื่อเดิมที่ไฟล์เพียงอัปเดตข้อมูลจะไม่ถูกลบ'}};
 function impGroups(){
   const g=new Map();
-  (st.nbs||[]).filter(r=>r.source==='import').forEach(r=>{const k=impRunKey(r);if(!g.has(k))g.set(k,{key:k,rows:[],names:{}});const e=g.get(k);e.rows.push(r);if(r.importFile)e.names[r.importFile]=(e.names[r.importFile]||0)+1});
+  (st[delCol]||[]).filter(r=>r.source==='import'&&(delCol==='nbs'||r.importRun)).forEach(r=>{const k=impRunKey(r);if(!g.has(k))g.set(k,{key:k,rows:[],names:{}});const e=g.get(k);e.rows.push(r);if(r.importFile)e.names[r.importFile]=(e.names[r.importFile]||0)+1});
   return[...g.values()].sort((a,b)=>String(b.key).localeCompare(String(a.key)));
 }
 const impEdited=r=>!!r.remark||!['check','done'].includes(r.status)||(r.status==='done'&&!r.autoClosed);
-function openDelImp(){renderDelImp();$('#dlgDelImp').showModal()}
+function openDelImp(col){delCol=col||'nbs';$('#delImpTitle').textContent=DEL_CFG[delCol].title;$('#delImpDesc').textContent=DEL_CFG[delCol].desc;renderDelImp();$('#dlgDelImp').showModal()}
+function impUsage(g){ /* what else points at the rows of this file */
+  if(delCol==='products'){const keys=new Set(g.rows.map(pkey));return st.batches.filter(b=>keys.has(b.sku)).length}
+  if(delCol==='contacts'){const u=new Set(g.rows.map(c=>c.uid));return st.products.filter(p=>u.has(p.buyerUid)||u.has(p.comUid)).length}
+  return 0}
 function renderDelImp(){
-  const gs=impGroups();
+  const gs=impGroups(),cfg=DEL_CFG[delCol];
   $('#delImpList').innerHTML=gs.length?gs.map((g,i)=>{
-    const name=Object.entries(g.names).sort((a,b)=>b[1]-a[1])[0]?.[0]||'ไฟล์นำเข้า (ไม่ทราบชื่อไฟล์)',d=g.key?new Date(g.key):null,open=g.rows.filter(r=>r.status!=='done').length,ed=g.rows.filter(impEdited).length,cnt={};
-    g.rows.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
-    return`<div class="di-row"><div><b>${esc(name)}</b><div class="muted small">${d&&!isNaN(d)?`นำเข้า ${fmt(d)} ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')} น. · `:''}${g.rows.length.toLocaleString()} รายการ (ยังไม่ปิดงาน ${open.toLocaleString()}) · ${Object.entries(cnt).map(([k,v])=>k+' '+v.toLocaleString()).join(' / ')}${ed?` · <span class="err-text">มีที่ทีมบันทึกแล้ว ${ed.toLocaleString()}</span>`:''}</div></div><button type="button" class="btn sm danger" data-i="${i}">ลบไฟล์นี้</button></div>`}).join(''):'<p class="muted">ยังไม่มีไฟล์ที่นำเข้า</p>';
+    const name=Object.entries(g.names).sort((a,b)=>b[1]-a[1])[0]?.[0]||'ไฟล์นำเข้า (ไม่ทราบชื่อไฟล์)',d=g.key?new Date(g.key):null,cnt={};let extra='';
+    if(delCol==='nbs'){const open=g.rows.filter(r=>r.status!=='done').length,ed=g.rows.filter(impEdited).length;g.rows.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
+      extra=` (ยังไม่ปิดงาน ${open.toLocaleString()}) · ${Object.entries(cnt).map(([k,v])=>k+' '+v.toLocaleString()).join(' / ')}${ed?` · <span class="err-text">มีที่ทีมบันทึกแล้ว ${ed.toLocaleString()}</span>`:''}`}
+    else{const used=impUsage(g);if(used)extra=delCol==='products'?` · <span class="err-text">มีล็อตที่ใช้สินค้านี้ ${used.toLocaleString()} ล็อต</span>`:` · <span class="err-text">ผูกกับสินค้า ${used.toLocaleString()} รายการ</span>`}
+    return`<div class="di-row"><div><b>${esc(name)}</b><div class="muted small">${d&&!isNaN(d)?`นำเข้า ${fmt(d)} ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')} น. · `:''}เพิ่มเข้ามา ${g.rows.length.toLocaleString()} ${cfg.noun}${extra}</div></div><button type="button" class="btn sm danger" data-i="${i}">ลบไฟล์นี้</button></div>`}).join(''):`<p class="muted">ยังไม่มีไฟล์ที่นำเข้า${delCol==='nbs'?'':' (แสดงเฉพาะไฟล์ที่นำเข้าหลังจากเพิ่มปุ่มนี้)'}</p>`;
   $('#delImpList').querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>delImpFile(gs[+b.dataset.i]));
 }
 async function delImpFile(g){
-  const name=Object.entries(g.names).sort((a,b)=>b[1]-a[1])[0]?.[0]||'ไฟล์นำเข้า',ed=g.rows.filter(impEdited).length;
-  if(!await ask(`ลบไฟล์ “${name}” และรายการสินค้าจากไฟล์นี้ ${g.rows.length.toLocaleString()} รายการ ออกจากระบบ?${ed?`\nรวมรายการที่ทีมบันทึกสถานะ/Remark ไว้แล้ว ${ed.toLocaleString()} รายการ`:''}\n(ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)`))return;
-  const ok=await act(()=>rmMany('nbs',g.rows),`ลบไฟล์แล้ว (${g.rows.length.toLocaleString()} รายการ)`);
-  if(ok){renderNbs();renderDelImp()}
+  const cfg=DEL_CFG[delCol],name=Object.entries(g.names).sort((a,b)=>b[1]-a[1])[0]?.[0]||'ไฟล์นำเข้า',n=g.rows.length.toLocaleString();
+  let warn='';
+  if(delCol==='nbs'){const ed=g.rows.filter(impEdited).length;if(ed)warn=`\nรวมรายการที่ทีมบันทึกสถานะ/Remark ไว้แล้ว ${ed.toLocaleString()} รายการ`}
+  else{const used=impUsage(g);if(used)warn=delCol==='products'?`\nมีล็อตที่ใช้สินค้าเหล่านี้ ${used.toLocaleString()} ล็อต — ล็อตจะแสดงเป็น “ไม่พบสินค้า”`:`\nสินค้า ${used.toLocaleString()} รายการที่ผูกกับรายชื่อเหล่านี้จะถูกล้าง Buyer/Commercial`}
+  if(!await ask(`ลบไฟล์ “${name}” และ${cfg.noun}ที่ไฟล์นี้เพิ่มเข้ามา ${n} รายการ ออกจากระบบ?${warn}\n(ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)`))return;
+  const ok=await act(async()=>{
+    if(delCol==='contacts'){const u=new Set(g.rows.map(c=>c.uid));
+      for(const p of st.products.filter(p=>u.has(p.buyerUid)||u.has(p.comUid)))
+        await patchItem('products',p,{...(u.has(p.buyerUid)?{buyerUid:''}:{}),...(u.has(p.comUid)?{comUid:''}:{})})}
+    await rmMany(delCol,g.rows)},`ลบไฟล์แล้ว (${n} รายการ)`);
+  if(ok){renderAll();renderDelImp()}
 }
 async function readImportFile(file){
   $('#impErr').textContent='';$('#impBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
@@ -1918,7 +1937,7 @@ async function runImport(){
   if(ok){$('#dlgImp').close();toast(`นำเข้าแล้ว: ใหม่ ${plan.add} · อัปเดต ${plan.upd}${plan.moves.length?` · ย้ายกลุ่ม ${plan.moves.length}`:''}${plan.close.length?` · ปิดงานอัตโนมัติ ${plan.close.length}`:''}`);nbsFilterDiv='';renderNbs()}
 }
 $('#nbsImport').onclick=openImport;
-$('#nbsDelFile').onclick=openDelImp;$('#delImpClose').onclick=()=>$('#dlgDelImp').close();
+$('#nbsDelFile').onclick=()=>openDelImp('nbs');$('#prDelFile').onclick=()=>openDelImp('products');$('#ctDelFile').onclick=()=>openDelImp('contacts');$('#delImpClose').onclick=()=>$('#dlgDelImp').close();
 $('#impCancel').onclick=()=>$('#dlgImp').close();$('#impGo').onclick=runImport;
 $('#impPick').onclick=()=>$('#impFile').click();
 $('#impFile').onchange=e=>{const f=e.target.files[0];if(f)readImportFile(f)};
