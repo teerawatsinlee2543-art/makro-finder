@@ -239,6 +239,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 :root[data-theme="dark"] :is(#q,#nbsQ,#pQ,#ctQ,#mfQ,#nQ){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}
 .th-in{display:flex;align-items:center;gap:6px}
 .th-in>span{line-height:1.25}
+.s-obs{color:#fff;background:#7f1d1d}.s-full{color:#fff;background:#111;box-shadow:inset 0 0 0 1px #888}
 .fbtn{flex:none;display:inline-flex;align-items:center;gap:2px;padding:4px 5px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--muted);cursor:pointer}
 .fbtn:hover{background:var(--bg);border-color:var(--line);color:var(--ink)}
 .fbtn.on{background:var(--accent);color:var(--accent-ink)}
@@ -394,7 +395,8 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
     <div class="row" style="margin-bottom:10px">
       <label style="flex:1;min-width:200px">ค้นหา (รหัส / ชื่อ / Buyer UID / ที่ตั้ง / Remark)<input id="nbsQ" placeholder="เช่น 210907 หรือ ชื่อสินค้า"></label>
       <label>สถานะ<select id="nbsFSt"><option value="">ทั้งหมด</option></select></label>
-      <label>ระดับเตือน<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="30">30+ วัน</option><option value="60">60+ วัน</option><option value="90">90+ วัน</option></select></label>
+      <label>ระดับ Aging<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="nbs">เกินเกณฑ์ NBS</option><option value="l1">Alert ขึ้นไป</option><option value="l2">Attention ขึ้นไป</option><option value="l3">Critical ขึ้นไป</option><option value="l4">Obsolete ขึ้นไป</option><option value="l5">Full Provision</option></select></label>
+      <label>นับอายุ Aging จาก<select id="nbsBasis"><option value="sold">วันที่ไม่มียอดขาย (Last Sold)</option><option value="recv">วันที่รับสินค้าล่าสุด (Last Recv.)</option></select></label>
       <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
       <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
     </div>
@@ -521,8 +523,9 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
     <label>ที่ตั้ง / ชั้นวาง<input id="nLoc" placeholder="เช่น Loc 510 / Location 510-011"></label>
     <label>Last Recv. Date (ถ้าทราบ)<input type="date" id="nRecv"></label>
     <label>Last Sold Date (ถ้าทราบ)<input type="date" id="nLast"></label>
+    <label>Aging Type<select id="nAgeType"></select></label>
     <label>Buyer UID<select id="nBuyer"></select></label>
-    <label class="span2">สถานะ / การดำเนินการ<select id="nStat"></select></label>
+    <label>สถานะ / การดำเนินการ<select id="nStat"></select></label>
     <label class="span3">Remark<textarea id="nRemark" rows="2" maxlength="300" placeholder="รายละเอียดเพิ่มเติม เช่น เหตุผลที่ไม่ขายได้ สิ่งที่ขอให้ Buyer ดำเนินการ"></textarea></label>
   </div>
   <p class="err-text" id="nErr" style="margin:8px 0 0"></p>
@@ -1264,11 +1267,11 @@ const divGroupOk=(div,g)=>div==='FF'?String(g).startsWith('Fresh Food'):div==='D
 let nbsFilterDiv='',nbsEditId=null,nbsDraft={};
 /* Excel-style column filters (Division, Aging Status): null = no filter, Set = values to show */
 const nbsColF={div:null,aging:null};
-const agingKey=r=>String(r.aging||'').trim()||(nbsLevel(nbsDays(r))||[''])[0]||'(ว่าง)';
+const agingKey=r=>{const a=agingInfo(r);return a.level!=null?AGING_LV[a.level][0]:String(r.aging||'').trim()||'(ไม่ทราบอายุ)'};
 function colOpts(f){
   const m=new Map();(st.nbs||[]).forEach(r=>{const k=f==='div'?r.division:agingKey(r);m.set(k,(m.get(k)||0)+1)});
   const o=[...m.entries()];
-  return f==='div'?o.sort((a,b)=>Object.keys(NBS_DIV).indexOf(a[0])-Object.keys(NBS_DIV).indexOf(b[0])):o.sort((a,b)=>a[0].localeCompare(b[0],'th',{numeric:true}));
+  return f==='div'?o.sort((a,b)=>Object.keys(NBS_DIV).indexOf(a[0])-Object.keys(NBS_DIV).indexOf(b[0])):o.sort((a,b)=>{const i=x=>{const j=AGING_LV.findIndex(l=>l[0]===x);return j<0?99:j};return i(a[0])-i(b[0])||a[0].localeCompare(b[0],'th',{numeric:true})});
 }
 let fMenu=null;
 function closeFMenu(){if(fMenu){fMenu.el.remove();fMenu=null}}
@@ -1296,27 +1299,48 @@ document.addEventListener('click',e=>{if(fMenu&&!fMenu.el.contains(e.target)&&!f
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFMenu()});
 window.addEventListener('scroll',closeFMenu);window.addEventListener('resize',closeFMenu);
 const nbsDays=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null;
-const nbsLevel=d=>d==null?null:d>=90?['วิกฤต 90+ วัน','s-pull']:d>=60?['เร่งด่วน 60+ วัน','s-md2']:d>=30?['เฝ้าระวัง 30+ วัน','s-md1']:null;
+/* Makro "Aging Stock" table: 9 aging types x 5 statuses (Alert / Attention / Critical / Obsolete / Full Provision), thresholds in days.
+   Makro NBS work-instruction: stock-check items with no sales for FF&Bakery >=5 days, Dry Food >=7 days, Non Food/Professional >=10 days. */
+const AGING_TYPES={1:{n:'Dry Food',t:[45,90,120,150,180]},2:{n:'Nonfood',t:[90,120,180,210,240]},3:{n:'Frozen & Professional',t:[150,180,240,270,360]},
+  4:{n:'Fresh & Egg',t:[30,60,90,120,150]},5:{n:'DRY (FR Professional)',t:[90,120,180,210,240]},6:{n:'Chilled & Spice',t:[90,150,180,270,360]},
+  7:{n:'Nonfood Professional',t:[150,180,240,270,360]},8:{n:'Bakery',t:[45,90,120,150,180]},9:{n:'DRY (FS Professional)',t:[90,120,180,210,240]}};
+const AGING_LV=[['ปกติ','ok'],['Alert','md1'],['Attention','md2'],['Critical','pull'],['Obsolete','obs'],['Full Provision','full']],AGING_PROV=[0,0,0,25,50,100];
+const AGING_DEF={FF:4,DF:1,NF:2},NBS_LIMIT={FF:5,DF:7,NF:10};
+let agingBasis='sold';try{agingBasis=localStorage.getItem('shelfLifeMonitor.agingBasis')==='recv'?'recv':'sold'}catch(e){}
+function parseAgingType(v){
+  const s=String(v??'').trim().toLowerCase();if(!s)return'';if(/^[1-9]$/.test(s))return+s;
+  if(/bakery/.test(s))return 8;if(/fresh|egg/.test(s))return 4;if(/chilled|spice/.test(s))return 6;if(/frozen/.test(s))return 3;
+  if(/non.?food/.test(s))return /pro/.test(s)?7:2;if(/dry/.test(s))return /fr.*pro/.test(s)?5:/fs.*pro/.test(s)?9:1;return'';
+}
+function agingInfo(r){
+  const type=AGING_TYPES[+r.agingType]?+r.agingType:AGING_DEF[r.division]||1,T=AGING_TYPES[type].t;
+  const age=agingBasis==='recv'?(r.lastRecv?diffD(today(),fromIso(r.lastRecv)):null):nbsDays(r);
+  const level=age==null?null:T.filter(x=>age>=x).length;
+  return{type,name:AGING_TYPES[type].n,T,age,level};
+}
+const nbsOver=r=>{const n=nbsDays(r);return n!=null&&n>=(NBS_LIMIT[r.division]||10)};
 let nbsLimit=200;
 function nbsDaysText(r){
   const n=nbsDays(r);if(n==null)return'<span class="muted">ไม่ระบุ / ไม่เคยขาย</span>';
-  const lv=nbsLevel(n);return`<b class="${n>=30?'err-text':''}">${n} วัน</b>`;
+  const lim=NBS_LIMIT[r.division]||10,over=n>=lim;
+  return`<b class="${over?'err-text':''}"${over?'':' style="color:var(--ok)"'}>${n.toLocaleString()} วัน</b><div class="small ${over?'err-text':'muted'}">${over?`เกินเกณฑ์ ≥${lim}`:`ไม่ถึงเกณฑ์ ≥${lim}`}</div>`;
 }
 function nbsAgingText(r){
-  const lv=nbsLevel(nbsDays(r)),t=String(r.aging||'').trim();
-  if(!t&&!lv)return'<span class="muted">-</span>';
-  return`<span class="chip ${lv&&r.status!=='done'?lv[1]:'s-ok'}">${esc(t||lv[0])}</span>`;
+  const a=agingInfo(r),t=String(r.aging||'').trim();
+  if(a.level==null)return t?`<span class="chip s-err">${esc(t)}</span><div class="muted small">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>`:'<span class="muted">-</span>';
+  const [lb,k]=AGING_LV[a.level],pv=AGING_PROV[a.level];
+  return`<span class="chip s-${k}">${lb}</span>${pv?`<div class="small" style="margin-top:2px"><b>Provision ${pv}%</b></div>`:''}<div class="muted small">${esc(a.name)} · อายุ ${a.age.toLocaleString()} วัน</div>`;
 }
 function renderNbs(){
   if(!$('#nbsBody'))return;
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',!!nbsColF[b.dataset.f]));
   const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0},open=rows.filter(r=>r.status!=='done');open.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
   $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k} · ${l}</span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ยังไม่ปิดงาน</span></button>`).join('');
-  const lv=[30,60,90].map(n=>open.filter(r=>(nbsDays(r)??-1)>=n).length),lastImp=rows.reduce((m,r)=>r.importedAt&&r.importedAt>m?r.importedAt:m,''),li=lastImp?new Date(lastImp):null;
+  const lv=[0,1,2,3,4,5].map(n=>open.filter(r=>(agingInfo(r).level??-1)===n).length),nOver=open.filter(nbsOver).length,lastImp=rows.reduce((m,r)=>r.importedAt&&r.importedAt>m?r.importedAt:m,''),li=lastImp?new Date(lastImp):null;
   $('#nbsSummary').innerHTML=(li?`<span class="pill">นำเข้าล่าสุด <b>${fmt(li)} ${String(li.getHours()).padStart(2,'0')}.${String(li.getMinutes()).padStart(2,'0')} น.</b></span>`:'')
-    +(open.some(r=>r.lastSale)?`<span class="chip s-md1">30+ วัน ${lv[0].toLocaleString()}</span><span class="chip s-md2">60+ วัน ${lv[1].toLocaleString()}</span><span class="chip s-pull">90+ วัน ${lv[2].toLocaleString()}</span>`:'');
-  const q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=+$('#nbsFAl').value||0;
-  const all=rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(nbsDays(r)??-1)>=fa)
+    +(open.some(r=>r.lastSale||r.lastRecv)?`<span class="pill">เกินเกณฑ์ NBS <b>${nOver.toLocaleString()}</b></span>`+AGING_LV.slice(1).map((l,i)=>`<span class="chip s-${l[1]}">${l[0]} ${lv[i+1].toLocaleString()}</span>`).join(''):'');
+  const q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value;
+  const all=rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):(agingInfo(r).level??-1)>=+fa.slice(1)))
     &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode].join(' ').toLowerCase().includes(q)))
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
   const list=all.slice(0,nbsLimit);
@@ -1346,9 +1370,10 @@ function nbsOpen(r){
   nbsEditId=r?r._id:null;nbsDraft=r?{barcode:r.barcode||'',img:r.img||'',locs:r.locs||[]}:{};
   $('#nbsTitle').textContent=r?'แก้ไข Item NBS':'เพิ่ม Item NBS';$('#nErr').textContent='';
   $('#nbsFind').hidden=r||!onMakroSite();if(!r&&onMakroSite())loadMakroData();
+  $('#nAgeType').innerHTML='<option value="">ตามกลุ่มอัตโนมัติ (FF=Fresh & Egg · DF=Dry Food · NF=Nonfood)</option>'+Object.entries(AGING_TYPES).map(([k,v])=>`<option value="${k}">Type ${k} · ${esc(v.n)}</option>`).join('');
   $('#nStat').innerHTML=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
   const v=r||{division:nbsFilterDiv||'FF',itemNo:'',desc:'',lastSale:'',loc:'',stock:'',buyerUid:'',status:'check',remark:''};
-  $('#nDiv').value=v.division;$('#nNo').value=v.itemNo||'';$('#nDesc').value=v.desc||'';$('#nLast').value=v.lastSaleDerived?'':v.lastSale||'';$('#nRecv').value=v.lastRecv||'';$('#nLoc').value=v.loc||'';
+  $('#nDiv').value=v.division;$('#nNo').value=v.itemNo||'';$('#nDesc').value=v.desc||'';$('#nLast').value=v.lastSaleDerived?'':v.lastSale||'';$('#nRecv').value=v.lastRecv||'';$('#nAgeType').value=v.agingType||'';$('#nLoc').value=v.loc||'';
   $('#nStock').value=v.stock??'';$('#nStat').value=v.status;$('#nRemark').value=v.remark||'';nbsBuyerOptions(v.buyerUid);
   $('#nQ').value='';$('#nResults').innerHTML='';renderNbsPicked();renderNbsStatus();$('#dlgNbs').showModal();
 }
@@ -1368,7 +1393,7 @@ async function nbsSave(){
   const no=$('#nNo').value.trim(),desc=$('#nDesc').value.trim();
   if(!no&&!desc){$('#nErr').textContent='กรอกรหัสสินค้าหรือชื่อสินค้าอย่างน้อย 1 อย่าง';return}
   const prev=nbsEditId?byId('nbs',nbsEditId):null,now=new Date().toISOString();
-  const o={...(prev?body(prev):{}),division:$('#nDiv').value,itemNo:no,desc,loc:$('#nLoc').value.trim(),lastSale:$('#nLast').value||(prev&&prev.lastSaleDerived?prev.lastSale:''),lastSaleDerived:!$('#nLast').value&&!!(prev&&prev.lastSaleDerived),lastRecv:$('#nRecv').value,
+  const o={...(prev?body(prev):{}),division:$('#nDiv').value,itemNo:no,desc,loc:$('#nLoc').value.trim(),lastSale:$('#nLast').value||(prev&&prev.lastSaleDerived?prev.lastSale:''),lastSaleDerived:!$('#nLast').value&&!!(prev&&prev.lastSaleDerived),lastRecv:$('#nRecv').value,agingType:$('#nAgeType').value?+$('#nAgeType').value:'',
     stock:$('#nStock').value===''?'':+$('#nStock').value,buyerUid:$('#nBuyer').value,status:$('#nStat').value,remark:$('#nRemark').value.trim(),
     barcode:nbsDraft.barcode||'',img:nbsDraft.img||'',locs:nbsDraft.locs||[],updatedAt:now,updatedBy:myId||null};
   if(!prev){o.createdAt=now;o.createdBy=myId||null}
@@ -1377,8 +1402,8 @@ async function nbsSave(){
   await act(()=>putItem('nbs',o),prev?'บันทึกการแก้ไขแล้ว':'เพิ่มรายการแล้ว');
 }
 function nbsCSV(){
-  const rows=[['division','item_no','description','barcode','stock','location','last_recv_date','last_sold_date','nbs_days','aging_status','status','buyer_uid','remark','created_at']];
-  (st.nbs||[]).forEach(r=>rows.push([r.division,r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',r.aging||(nbsLevel(nbsDays(r))||[''])[0],nStat(r.status)[1],r.buyerUid||'',r.remark||'',r.createdAt||'']));
+  const rows=[['division','item_no','description','barcode','stock','location','last_recv_date','last_sold_date','nbs_days','nbs_threshold','aging_status','aging_type','status','buyer_uid','remark','created_at']];
+  (st.nbs||[]).forEach(r=>rows.push([r.division,r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',nbsOver(r)?'เกินเกณฑ์':'ยังไม่ถึงเกณฑ์',(()=>{const a=agingInfo(r);return a.level!=null?AGING_LV[a.level][0]:r.aging||''})(),agingInfo(r).name,nStat(r.status)[1],r.buyerUid||'',r.remark||'',r.createdAt||'']));
   dl(`item-nbs_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8');
 }
 $('#nbsAdd').onclick=()=>nbsOpen(null);$('#nbsExport').onclick=nbsCSV;
@@ -1386,7 +1411,7 @@ $('#nCancel').onclick=()=>$('#dlgNbs').close();$('#nSave').onclick=nbsSave;
 $('#nDiv').onchange=()=>nbsBuyerOptions($('#nBuyer').value);
 let nbsT;$('#nQ').oninput=()=>{clearTimeout(nbsT);nbsT=setTimeout(nbsSearch,150)};
 $('#nResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)nbsPick(b.dataset.no)};
-const nbsRe=()=>{nbsLimit=200;renderNbs()};$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
+const nbsRe=()=>{nbsLimit=200;renderNbs()};$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsBasis').value=agingBasis;$('#nbsBasis').onchange=()=>{agingBasis=$('#nbsBasis').value;try{localStorage.setItem('shelfLifeMonitor.agingBasis',agingBasis)}catch(e){}nbsRe()};$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
 $('#nbsFSt').innerHTML+=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
 $('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;nbsColF.div=null;nbsLimit=200;renderNbs()};
 $('#t-nbs thead').onclick=e=>{const b=e.target.closest('.fbtn');if(b)openFMenu(b)};
@@ -1394,6 +1419,7 @@ $('#t-nbs thead').onclick=e=>{const b=e.target.closest('.fbtn');if(b)openFMenu(b
 const normH=s=>String(s??'').toLowerCase().replace(/[\s._\-\/()\[\]:]/g,'');
 /* header → field, first match wins; order matters (days before stock, so "จำนวนวัน…" is not read as stock) */
 const NBS_COLS=[
+  ['agingType',/(agingtype|agetype|ประเภทaging|ประเภทการaging)/],
   ['aging',/(agingstatus|agestatus|agingcategory|agingbucket|agingband|สถานะอายุ|^aging$)/],
   ['lastRecv',/(lastrecv|lastreceiv|lastrcv|lastgr|วันที่รับล่าสุด|รับล่าสุด|วันที่รับสินค้าล่าสุด|วันรับล่าสุด)/],
   ['lastSale',/(lastsale|lastsold|วันที่ขายล่าสุด|ขายล่าสุด|วันที่ขายครั้งล่าสุด)/],
@@ -1455,12 +1481,12 @@ function parseWorkbook(wb,fileName,defDiv){
       }
       let last=m.lastSale!=null?toIsoDate(r[m.lastSale]):'',derived=false;
       const recv=m.lastRecv!=null?toIsoDate(r[m.lastRecv]):'';
-      const aging=m.aging!=null?String(r[m.aging]??'').trim():'';
+      const aging=m.aging!=null?String(r[m.aging]??'').trim():'',agingType=m.agingType!=null?parseAgingType(r[m.agingType]):'';
       let dv=m.days!=null?numOr(r[m.days]):'';
       if(dv===''&&/^\d+$/.test(aging))dv=+aging;
       if(!last&&dv!==''&&dv>=0){last=iso(addD(today(),-Math.round(dv)));derived=true}
       let buyer='';if(m.buyer!=null){const b=String(r[m.buyer]??'').trim().toUpperCase();const c=st.contacts.find(x=>String(x.uid).toUpperCase()===b&&x.role==='Buyer');if(c)buyer=c.uid}
-      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
+      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
     info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict")info.cols[k]=true});
@@ -1522,7 +1548,7 @@ async function readImportFile(file){
     impState={file:file.name,wb,...parsed};showImportPreview();
   }catch(e){impState=null;$('#impBox').innerHTML='';$('#impErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
 }
-const COL_LBL={itemNo:'รหัสสินค้า',desc:'ชื่อสินค้า',barcode:'บาร์โค้ด',division:'กลุ่ม',lastSale:'Last Sold Date',lastRecv:'Last Recv. Date',aging:'Aging Status',days:'NBS (วันที่ไม่มียอดขาย)',stock:'Stock',loc:'ที่ตั้ง',buyer:'Buyer'};
+const COL_LBL={itemNo:'รหัสสินค้า',desc:'ชื่อสินค้า',barcode:'บาร์โค้ด',division:'กลุ่ม',lastSale:'Last Sold Date',lastRecv:'Last Recv. Date',aging:'Aging Status (ไฟล์)',agingType:'Aging Type',days:'NBS (วันที่ไม่มียอดขาย)',stock:'Stock',loc:'ที่ตั้ง',buyer:'Buyer'};
 function showImportPreview(){
   const {recs,info}=impState,plan=planImport(recs,$('#impAuto').checked),cnt={FF:0,DF:0,NF:0};recs.forEach(r=>cnt[r.division]++);
   const days=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null,hasDays=recs.some(r=>r.lastSale);
@@ -1553,12 +1579,12 @@ async function runImport(){
         const keep=body(alt);
         await rmItem('nbs',alt);
         await putItem('nbs',{...keep,_id:nbsId(r),division:r.division,desc:r.desc||it?.desc||alt.desc||'',barcode:r.barcode||it?.barcode||alt.barcode||'',loc:r.loc||alt.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),
-          importFile:impState.file,importRun:nowIso,lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
+          importFile:impState.file,importRun:nowIso,lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',agingType:r.agingType||alt.agingType||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
         continue}
       const desc=r.desc||it?.desc||old?.desc||'',barcode=r.barcode||it?.barcode||old?.barcode||'',loc=r.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):'')||old?.loc||'';
-      if(old){await putItem('nbs',{...body(old),_id:old._id,importFile:impState.file,importRun:nowIso,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!old.lastSaleDerived,lastRecv:r.lastRecv||old.lastRecv||'',aging:r.aging||old.aging||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
+      if(old){await putItem('nbs',{...body(old),_id:old._id,importFile:impState.file,importRun:nowIso,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!old.lastSaleDerived,lastRecv:r.lastRecv||old.lastRecv||'',aging:r.aging||old.aging||'',agingType:r.agingType||old.agingType||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
         lastSeenAt:nowIso,updatedAt:nowIso,...(old.status==='done'&&old.autoClosed?{status:'check',autoClosed:false,autoNote:'กลับมาอยู่ในไฟล์ไม่มียอดขายอีกครั้ง'}:{})})}
-      else await putItem('nbs',{_id:nbsId(r),importFile:impState.file,importRun:nowIso,division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,lastSaleDerived:r.lastSaleDerived,lastRecv:r.lastRecv||'',aging:r.aging||'',stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
+      else await putItem('nbs',{_id:nbsId(r),importFile:impState.file,importRun:nowIso,division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,lastSaleDerived:r.lastSaleDerived,lastRecv:r.lastRecv||'',aging:r.aging||'',agingType:r.agingType||'',stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
         source:'import',importedAt:nowIso,lastSeenAt:nowIso,createdAt:nowIso,createdBy:myId||null,updatedAt:nowIso});
     }
     for(const old of plan.close)await putItem('nbs',{...body(old),_id:old._id,status:'done',autoClosed:true,autoNote:'ปิดอัตโนมัติ — ไม่อยู่ในไฟล์ไม่มียอดขายล่าสุด ('+fmt(today())+')',updatedAt:nowIso});
