@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Shelf-Life Monitor</title>
+<link rel="icon" href="shrink-icon.webp" type="image/webp">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f5f6f8;--card:#fff;--ink:#1d2433;--muted:#667085;--line:#e2e5ea;--accent:#0b5cad;--accent-ink:#fff;
@@ -154,6 +155,7 @@ nav#tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;box-shadow:
 table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-inset-top,0px));z-index:5;background:var(--card);box-shadow:inset 0 -1px 0 var(--line)}
 #dashLegend{position:sticky;top:calc(var(--navh,52px) + env(safe-area-inset-top,0px));z-index:6;background:var(--card);padding:10px 0 8px;margin:-2px 0 0}
 #t-dash table.resp thead th{top:calc(var(--navh,52px) + var(--legh,44px) + env(safe-area-inset-top,0px))}
+.app-logo{width:44px;height:44px;object-fit:contain;flex:none}
 .back-mf{display:inline-flex;align-items:center;gap:4px;padding:7px 14px 7px 10px;border-radius:999px;background:#e30613;color:#fff;font-weight:700;font-size:14px;text-decoration:none;box-shadow:0 2px 6px #e3061340;transition:background .15s,transform .15s}
 .back-mf:hover{background:#c00510;transform:translateX(-2px)}
 .back-mf:focus-visible{outline:3px solid #e3061366;outline-offset:2px}
@@ -189,7 +191,7 @@ dialog::backdrop{background:#0008}
 </head>
 <body>
 <header>
-  <div class="row" style="align-items:center;gap:10px"><a href="./" id="backMf" class="back-mf" hidden><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Makro Finder</a><h1>Shelf-Life Monitor</h1><span class="chip s-err" id="mode">กำลังเชื่อมต่อ…</span></div>
+  <div class="row" style="align-items:center;gap:10px"><a href="./" id="backMf" class="back-mf" hidden><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Makro Finder</a><img src="shrink-icon.webp" alt="" class="app-logo" id="appLogo" hidden><h1>Shelf-Life Monitor</h1><span class="chip s-err" id="mode">กำลังเชื่อมต่อ…</span></div>
   <div class="jbadge" title="Julian วันนี้ (ลำดับวันของปี)">
     <div class="jlabel">JULIAN<br>วันนี้</div>
     <div class="jnum" id="todayJ"></div>
@@ -1065,7 +1067,7 @@ $('#fSt').innerHTML+=ST.map(([k,l])=>`<option value="${k}">${l}</option>`).join(
 $('#q').oninput=renderDash;$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
 $('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add')loadMakroData()};
-if(onMakroSite()){$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
+if(onMakroSite()){$('#appLogo').hidden=false;$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
 /* came from Makro Finder in this tab → go back in history so its page/search state is kept */
 $('#backMf').onclick=e=>{try{const r=new URL(document.referrer);if(r.origin===location.origin&&r.pathname.replace(/index\.html$/,'')===new URL('./',location.href).pathname&&history.length>1){e.preventDefault();history.back()}}catch(x){}};
 let mfT;$('#mfQ').oninput=()=>{clearTimeout(mfT);mfT=setTimeout(renderMfResults,150)};
