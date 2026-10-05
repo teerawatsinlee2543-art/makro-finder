@@ -6983,6 +6983,10 @@ function handlePalletScanCode(code){
     if(altKey!==null)item=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
   }
   if(!item){
+    const inStore=inStoreItemNo(code);
+    if(inStore)item=PRODUCTS_BY_KEY.find(x=>x.itemNo===inStore);
+  }
+  if(!item){
     showPalletToast(t('itemNotInSystemToast'));
     setTimeout(()=>{
       if(document.getElementById('palletScanOverlay').style.display!=='none')openPalletScan(palletScanMode);
@@ -7977,6 +7981,16 @@ loadProductData();
 // ตัดเลข 0 นำหน้าบาร์โค้ดออกก่อนเทียบ เพราะ Item Master บางแถวถูก Excel อ่านคอลัมน์ Barcode เป็นตัวเลข
 // ทำให้ 0 นำหน้าหายไปตอนโหลดข้อมูล (เช่น "0123456789012" กลายเป็น "123456789012") แต่กล้องสแกนได้ค่าเต็มที่มี 0 นำหน้าอยู่เสมอ
 function normBarcode(s){ return String(s||'').replace(/^0+(?=\d)/,''); }
+// ป้ายราคาที่ร้านพิมพ์เอง (ผลไม้แพ็ค เช่น บลูเบอร์รี่ สตรอว์เบอร์รี่ กีวี) เป็นบาร์โค้ด EAN-8 รูปแบบ 2 + เลข Item 6 หลัก + เลขตรวจสอบ เช่น 2 398507 0
+// ตัวสแกนอ่านค่าเต็ม 8 หลักได้ แต่ Item Master เก็บแค่ 6 หลักกลาง จึงไม่เจอ: ตรวจเลขตรวจสอบ EAN-8 ให้ผ่านก่อน แล้วคืนเลข Item 6 หลัก ไม่ตรงรูปแบบคืน null
+function inStoreItemNo(code){
+  const s=String(code||'').trim();
+  if(!/^2d{7}$/.test(s))return null;
+  let sum=0;
+  for(let i=0;i<7;i++)sum+=(+s[i])*(i%2===0?3:1);
+  if((10-sum%10)%10!==+s[7])return null;
+  return s.slice(1,7);
+}
 function findMatches(query){
   const q=query.trim();
   if(!q)return[];
@@ -7998,6 +8012,11 @@ function findMatches(query){
   if(altKey!==null){
     const altItem=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
     if(altItem&&!exact.includes(altItem))exact.unshift(altItem);
+  }
+  const inStore=inStoreItemNo(q);
+  if(inStore){
+    const it=PRODUCTS_BY_KEY.find(x=>x.itemNo===inStore);
+    if(it&&!exact.includes(it))exact.unshift(it);
   }
   return exact.concat(partial,locExact,locPartial);
 }
@@ -9020,6 +9039,10 @@ function handleWasteAddChoiceManualInput(code){
     if(altKey!==null)item=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
   }
   if(!item){
+    const inStore=inStoreItemNo(code);
+    if(inStore)item=PRODUCTS_BY_KEY.find(x=>x.itemNo===inStore);
+  }
+  if(!item){
     const pluItemNo=resolveWastePluCode(code);
     if(pluItemNo!==code){
       item=PRODUCTS_BY_KEY.find(x=>x.itemNo===pluItemNo);
@@ -9292,6 +9315,10 @@ function applyWasteScanCode(code){
   if(!item){
     const altKey=ALT_BARCODES[code]!==undefined?code:(ALT_BARCODES[codeNorm]!==undefined?codeNorm:null);
     if(altKey!==null)item=PRODUCTS_INDEX[ALT_BARCODES[altKey]];
+  }
+  if(!item){
+    const inStore=inStoreItemNo(code);
+    if(inStore)item=PRODUCTS_BY_KEY.find(x=>x.itemNo===inStore);
   }
   if(!item){
     const pluItemNo=resolveWastePluCode(code);
