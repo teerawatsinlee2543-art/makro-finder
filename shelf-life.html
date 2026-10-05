@@ -227,6 +227,21 @@ table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-in
 .nmeta dd{margin:0;flex:1;min-width:0;overflow-wrap:normal;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 .nmeta dd b{font-weight:800}
 .ndept{font-size:11.5px;font-weight:700;letter-spacing:.02em;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 7px;line-height:1.5}
+.dcard{padding:18px}
+.dhead{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.dhead h2{margin:0 0 2px;font-size:18px}.dhead p{margin:0}
+.dico{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center}
+.dico-out{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line)}
+.dico-in{background:color-mix(in srgb,var(--accent) 12%,var(--card));color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--card))}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.dtile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s}
+.dtile:hover{transform:translateY(-2px);box-shadow:0 6px 16px #0000001a;border-color:var(--accent)}
+.dtile b{font-size:15.5px}
+.dti{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:var(--muted);margin-bottom:4px}
+.dtile-in .dti{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,var(--card))}
+.dtile-warn{background:var(--redbox);border-color:var(--redbox-line)}
+.dtile-warn .dti{color:var(--redbox-ink);border-color:var(--redbox-line)}
+.dtile-warn:hover{border-color:var(--redbox-ink)}
 .photo-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .photo-btn{display:inline-flex;align-items:center;gap:6px;border-color:var(--accent);color:var(--accent);font-weight:700}
 .pthumb{width:44px;height:44px;object-fit:contain;border-radius:6px;background:#fff;float:left;margin:0 8px 4px 0}
@@ -470,16 +485,24 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 
 <!-- DATA -->
 <section id="t-data" hidden>
-  <div class="card"><h2>ส่งออก</h2>
-    <div class="row"><button class="btn" onclick="exportBatchesCSV()">ล็อต + สถานะวันนี้ (CSV/Excel)</button>
-    <button class="btn" onclick="exportJSON()">สำรองข้อมูลทั้งหมด (JSON)</button>
-    <button class="btn" onclick="downloadTemplate()">แม่แบบ CSV สินค้า</button></div></div>
-  <div class="card w"><h2>นำเข้า</h2>
-    <div class="grid2">
-      <label>สินค้า (CSV ตามแม่แบบ — SKU หรือชื่อซ้ำจะถูกอัปเดต · เว้นวันว่าง = ใช้กฎตามคู่มือ)<input type="file" accept=".csv,text/csv" id="impProd"></label>
-      <label>ผู้ติดต่อ (CSV: uid,name,role,dept,phone,email)<input type="file" accept=".csv,text/csv" id="impCt"></label>
-      <label>กู้คืนข้อมูลสำรอง (JSON)<input type="file" accept=".json" id="impJson"></label>
-    </div></div>
+  <div class="card dcard">
+    <div class="dhead"><span class="dico dico-out"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h2>ส่งออกข้อมูล</h2><p class="muted small">ดาวน์โหลดข้อมูลไปเปิดใน Excel หรือเก็บไว้เป็นไฟล์สำรอง</p></div></div>
+    <div class="dgrid">
+      <button type="button" class="dtile" onclick="exportBatchesCSV()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 4h14v16H5zM5 9h14M5 14h14M10 4v16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>ล็อต + สถานะวันนี้</b><span class="muted small">ตารางล็อตทั้งหมดพร้อมสถานะ (CSV / Excel)</span></button>
+      <button type="button" class="dtile" onclick="nbsCSV()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>Item NBS</b><span class="muted small">รายการสินค้าไม่มียอดขาย (CSV / PDF)</span></button>
+      <button type="button" class="dtile" onclick="downloadTemplate()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>แม่แบบสินค้า</b><span class="muted small">ไฟล์ CSV ตัวอย่างสำหรับนำเข้าสินค้า</span></button>
+      <button type="button" class="dtile" onclick="exportJSON()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2.2 2.2L15.5 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>สำรองข้อมูลทั้งหมด</b><span class="muted small">ทุกอย่างในระบบ รวมรูปที่ถ่าย/แนบ (JSON)</span></button>
+    </div>
+  </div>
+  <div class="card dcard w">
+    <div class="dhead"><span class="dico dico-in"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h2>นำเข้าข้อมูล</h2><p class="muted small">ลากไฟล์ Excel / CSV มาวาง ระบบจับคู่รายการเดิมให้และอัปเดตเป็นข้อมูลล่าสุด · ก่อนบันทึกจะมีตัวอย่างให้ตรวจก่อนทุกครั้ง</p></div></div>
+    <div class="dgrid">
+      <button type="button" class="dtile dtile-in" onclick="openImportPr()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3c4 0 7 3 7 7 0 5-4 9-7 11-3-2-7-6-7-11 0-4 3-7 7-7zM12 3c0 3 0 6 0 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>สินค้า &amp; กฎ Shelf life</b><span class="muted small">เพิ่ม/อัปเดตสินค้า อายุ และวันลดราคา</span></button>
+      <button type="button" class="dtile dtile-in" onclick="openImportCt()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2 .7 3.2 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>Buyer / Commercial</b><span class="muted small">รายชื่อ เบอร์โทร อีเมล ผู้ติดต่อสำรอง</span></button>
+      <button type="button" class="dtile dtile-in" onclick="openImport()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>Item NBS</b><span class="muted small">รายงานสินค้าไม่มียอดขาย แยก FF / DF / NF</span></button>
+      <label class="dtile dtile-warn" for="impJson"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>กู้คืนข้อมูลสำรอง</b><span class="muted small">ไฟล์ JSON จากปุ่มสำรอง — แทนที่ข้อมูลปัจจุบันทั้งหมด</span><input type="file" accept=".json" id="impJson" hidden></label>
+    </div>
+  </div>
   <div id="whoBox" hidden><input id="whoName" type="hidden"></div>
   <p id="storeNote" hidden></p>
 </section>
@@ -1548,18 +1571,6 @@ const ORIG_IN=v=>{v=String(v||'').trim().toLowerCase();return/import|นำเ�
 const plain=()=>{const o={};COLS.forEach(c=>o[c]=st[c].map(body));return o};
 function exportJSON(){dl(`shelf-life-backup_${iso(today())}.json`,JSON.stringify(plain(),null,1),'application/json')}
 const readFile=(inp,fn)=>inp.onchange=()=>{const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{fn(r.result)}catch(e){notice('นำเข้าไม่สำเร็จ: '+e.message)}inp.value=''};r.readAsText(f,'utf-8')};
-readFile($('#impProd'),t=>{const ok=[],bad=[];parseCSV(t).forEach(r=>{
-  const shelf=+r.shelf_life,desc=r.description||r.desc||'';if(!(r.sku||desc)||!(shelf>=1)){bad.push(r.sku||desc||'(ว่าง)');return}
-  const origin=ORIG_IN(r.origin),has=r.code52_day!==''&&r.code52_day!=null;
-  const o={sku:r.sku||'',desc:desc||r.sku,cat:origin==='other'?(r.category||''):MANUAL[origin].label,origin,temp:r.temp||'',shelf,
-    ...(has?{md1Day:+r.step1_day||0,md1Pct:+r.step1_pct||15,md2Day:+r.step2_day||0,md2Pct:+r.step2_pct||30,pullDay:+r.code52_day}:autoRule(shelf,origin)),
-    buyerUid:r.buyer_uid||'',comUid:r.commercial_uid||'',rv:2};
-  if(ruleError(o)){bad.push(pkey(o));return}ok.push(o)});
-  act(async()=>{for(const o of ok){const ex=findProd(pkey(o));await putItem('products',{...o,_id:ex?._id})}})
-    .then(y=>y&&notice(`นำเข้าสินค้า ${ok.length} รายการ${bad.length?`\nข้าม (ข้อมูลไม่ถูกต้อง): ${bad.join(', ')}`:''}`))});
-readFile($('#impCt'),t=>{const ok=parseCSV(t).filter(r=>r.uid).map(r=>({uid:r.uid,name:r.name||r.uid,role:r.role||'Buyer',dept:r.dept||'',phone:r.phone||'',email:r.email||'',backup:r.backup||'',group:r.group||''}));
-  act(async()=>{for(const o of ok){const ex=st.contacts.find(x=>x.uid===o.uid);await putItem('contacts',{...o,_id:ex?._id})}})
-    .then(y=>y&&notice(`นำเข้าผู้ติดต่อ ${ok.length} รายการ`))});
 readFile($('#impJson'),t=>{const o=JSON.parse(t);if(!o.products||!o.batches)throw Error('ไฟล์ไม่ใช่ข้อมูลสำรองของโปรแกรมนี้');
   ask(mode==='db'?'แทนที่ข้อมูลของทั้งทีมด้วยไฟล์สำรองนี้?':'แทนที่ข้อมูลปัจจุบันทั้งหมด?').then(y=>{if(y)act(()=>replaceAll(o),'กู้คืนข้อมูลแล้ว')})});
 /* data reset / purge buttons were removed from the import-export tab */
