@@ -152,6 +152,28 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 .chip.div-df{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--card))}
 .chip.div-nf{color:var(--today);background:color-mix(in srgb,var(--today) 14%,var(--card))}
 .nbs-dlg{width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto}
+.imp-btn{display:inline-flex;align-items:center;gap:6px;border-color:#0b5cad;color:#0b5cad;font-weight:700}
+.imp-btn:hover{background:color-mix(in srgb,#0b5cad 10%,var(--card))}
+.imp-dlg{width:min(780px,calc(100vw - 24px))}
+.imp-drop{border:2.5px dashed var(--line);border-radius:14px;padding:28px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:var(--accent);background:var(--bg);transition:border-color .15s,background .15s}
+.imp-drop b{color:var(--ink);font-size:16px}
+.imp-drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--card))}
+.imp-file{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 10px}
+.imp-tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+@media (max-width:640px){.imp-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.imp-tiles>div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;gap:0}
+.imp-tiles b{font-size:20px;font-variant-numeric:tabular-nums}
+.imp-tiles span{font-size:12px;color:var(--muted);font-weight:600}
+.imp-tiles .t-new{border-color:var(--ok)}.imp-tiles .t-new b{color:var(--ok)}
+.imp-tiles .t-close{border-color:var(--md1)}.imp-tiles .t-close b{color:var(--md1)}
+.imp-sample{overflow-x:auto;margin-top:10px;border:1px solid var(--line);border-radius:10px}
+.imp-sample table{font-size:12.5px;min-width:520px}
+.imp-sample th{position:static;font-size:11.5px;padding:6px 8px}
+.imp-sample td{padding:5px 8px}
+.imp-opts{margin-top:12px}
+.chk{flex-direction:row;align-items:flex-start;gap:8px;font-size:14px;color:var(--ink);font-weight:600}
+.chk input{margin-top:3px}
+.imp-def{margin-top:12px;display:grid;gap:4px;max-width:340px}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
 .redbox.remark{background:var(--redbox-ink);color:#fff;border-color:var(--redbox-ink)}
 .remark-field{grid-column:span 2}
@@ -318,15 +340,18 @@ dialog::backdrop{background:#0008}
   <div class="card">
     <div class="add-head">
       <h2>Item NBS <span class="muted small" style="font-weight:400">· สินค้าที่ไม่มียอดขายเลย (FF / DF / NF)</span></h2>
-      <span class="row w"><button class="btn" id="nbsExport">ส่งออก CSV</button><button class="btn pri" id="nbsAdd">+ เพิ่ม Item NBS</button></span>
+      <span class="row w"><button class="btn" id="nbsExport">ส่งออก CSV</button><button class="btn imp-btn" id="nbsImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" id="nbsAdd">+ เพิ่ม Item NBS</button></span>
     </div>
     <div class="tiles" id="nbsTiles" style="margin:12px 0"></div>
+    <div class="row" id="nbsSummary" style="gap:8px;margin:0 0 12px;align-items:center"></div>
     <div class="row" style="margin-bottom:10px">
       <label style="flex:1;min-width:200px">ค้นหา (รหัส / ชื่อ / Buyer UID / ที่ตั้ง / Remark)<input id="nbsQ" placeholder="เช่น 210907 หรือ ชื่อสินค้า"></label>
       <label>สถานะ<select id="nbsFSt"><option value="">ทั้งหมด</option></select></label>
+      <label>ระดับเตือน<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="30">30+ วัน</option><option value="60">60+ วัน</option><option value="90">90+ วัน</option></select></label>
       <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
     </div>
     <table class="resp"><thead><tr><th>สินค้า</th><th>กลุ่ม</th><th>ที่ตั้ง</th><th>ไม่มียอดขาย</th><th>Stock</th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th><th></th></tr></thead><tbody id="nbsBody"></tbody></table>
+    <div id="nbsMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="nbsMoreTxt"></span><button class="btn" id="nbsMore">แสดงเพิ่ม 200 รายการ</button></div>
     <p class="muted" id="nbsEmpty" hidden>ยังไม่มีรายการ — กด “+ เพิ่ม Item NBS” เพื่อบันทึกสินค้าที่ไม่มียอดขาย</p>
   </div>
 </section>
@@ -449,6 +474,26 @@ dialog::backdrop{background:#0008}
   </div>
   <p class="err-text" id="nErr" style="margin:8px 0 0"></p>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="nCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="nSave">บันทึก</button></div>
+</div></dialog>
+
+<dialog id="dlgImp" class="nbs-dlg imp-dlg"><div>
+  <h2>นำเข้าข้อมูล Item NBS</h2>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV ของรายงานสินค้าที่ไม่มียอดขายมาวาง ระบบอ่านคอลัมน์ให้เอง แยกกลุ่ม FF / DF / NF คำนวณจำนวนวันที่ไม่มียอดขาย และเริ่มเฝ้าระวังให้อัตโนมัติ</p>
+  <div id="impDrop" class="imp-drop" tabindex="0">
+    <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>ลากไฟล์มาวางที่นี่</b>
+    <span class="muted small">หรือ</span>
+    <button type="button" class="btn pri" id="impPick">เลือกไฟล์จากเครื่อง</button>
+    <input type="file" id="impFile" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+  </div>
+  <div id="impBox"></div>
+  <p class="err-text" id="impErr" style="margin:8px 0 0"></p>
+  <div id="impOpts" class="imp-opts" hidden>
+    <label class="chk"><input type="checkbox" id="impAuto" checked> ปิดงานอัตโนมัติ: รายการที่เคยนำเข้ามา แต่ไม่อยู่ในไฟล์นี้แล้ว (แปลว่าเริ่มมียอดขาย)</label>
+  </div>
+  <div class="imp-def"><label>กลุ่มเริ่มต้น (ใช้เมื่อไฟล์ไม่ระบุกลุ่ม)<select id="impDef"><option value="FF">FF · Fresh Food</option><option value="DF" selected>DF · Dry Food</option><option value="NF">NF · Non Food</option></select></label>
+    <p class="muted small" style="margin:0">ระบบเดากลุ่มจาก: คอลัมน์กลุ่ม → ชื่อชีต (เช่น FF, DF, NF) → ชื่อไฟล์ → ค่านี้</p></div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="impCancel">ปิด</button><button type="button" class="btn pri save-btn" id="impGo" disabled>นำเข้าและเริ่ม Monitor</button></div>
 </div></dialog>
 
 <dialog id="dlgAsk"><form method="dialog">
@@ -610,22 +655,35 @@ async function fbInit(){
   if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
   fdb=firebase.firestore();
 }
-const fbRef=c=>fdb.collection('makroFinder').doc('shelfLife_'+c);
-const fbItems=(c,snap)=>Object.entries(snap.exists?(snap.data().items||{}):{}).map(([id,d])=>({...d,_id:id}));
-async function fbPull(){const out={ok:true};for(const c of COLS)out[c]=fbItems(c,await fbRef(c).get());return out}
+/* Item NBS lists can be thousands of rows (Excel imports) and one Firestore document holds ≤1 MB,
+   so the `nbs` collection is spread over NBS_SHARDS documents (shelfLife_nbs_0 … _7) by a hash of the item id. */
+const NBS_SHARDS=8;
+const shardOf=id=>{let h=0;for(const ch of String(id))h=(h*31+ch.charCodeAt(0))>>>0;return h%NBS_SHARDS};
+const docKey=(c,id)=>c==='nbs'?'nbs_'+shardOf(id):c;
+const fbDoc=key=>fdb.collection('makroFinder').doc('shelfLife_'+key);
+const fbKeys=c=>c==='nbs'?Array.from({length:NBS_SHARDS},(_,i)=>'nbs_'+i):[c];
+const fbItems=snap=>Object.entries(snap.exists?(snap.data().items||{}):{}).map(([id,d])=>({...d,_id:id}));
+async function fbPull(){const out={ok:true};for(const c of COLS){out[c]=[];for(const k of fbKeys(c))out[c].push(...fbItems(await fbDoc(k).get()))}return out}
 function fbSubscribe(){
-  COLS.forEach(c=>fbRef(c).onSnapshot(s=>{
-    if(!s.exists&&!s.metadata.fromCache)fbRef(c).set({items:{},updatedAt:Date.now()},{merge:true}).catch(()=>{});
-    st[c]=fbItems(c,s).map(x=>c==='products'?normProduct(x):x);loaded[c]=true;lastPull=Date.now();renderAll();applyRole();
-  },()=>toast('การเชื่อมต่อฐานข้อมูลหยุด — โหลดหน้าใหม่')));
+  COLS.forEach(c=>{
+    const keys=fbKeys(c),parts=keys.map(()=>null);
+    keys.forEach((k,i)=>fbDoc(k).onSnapshot(s=>{
+      if(!s.exists&&!s.metadata.fromCache)fbDoc(k).set({items:{},updatedAt:Date.now()},{merge:true}).catch(()=>{});
+      parts[i]=fbItems(s);
+      st[c]=[].concat(...parts.map(p=>p||[])).map(x=>c==='products'?normProduct(x):x);
+      loaded[c]=parts.every(Boolean);lastPull=Date.now();renderAll();applyRole();
+    },()=>toast('การเชื่อมต่อฐานข้อมูลหยุด — โหลดหน้าใหม่')));
+  });
 }
 async function fbCall(req){
   const FS=firebase.firestore,b=fdb.batch(),now=Date.now();
   if(req.op==='replace'){
-    COLS.forEach(c=>{const items={};(req.data[c]||[]).forEach(o=>{const{_id,...d}=o;items[String(_id)]=d});b.set(fbRef(c),{items,updatedAt:now})});
+    COLS.forEach(c=>{const by={};fbKeys(c).forEach(k=>by[k]={});
+      (req.data[c]||[]).forEach(o=>{const{_id,...d}=o;by[docKey(c,_id)][String(_id)]=d});
+      Object.entries(by).forEach(([k,items])=>b.set(fbDoc(k),{items,updatedAt:now}))});
   }else{
-    const by={};(req.op==='bulk'?req.writes:[req]).forEach(w=>{(by[w.col]=by[w.col]||new Map()).set(String(w.id),w.op==='delete'?FS.FieldValue.delete():w.data)});
-    for(const c in by){const args=['updatedAt',now];by[c].forEach((v,id)=>args.push(new FS.FieldPath('items',id),v));b.update(fbRef(c),...args)}
+    const by={};(req.op==='bulk'?req.writes:[req]).forEach(w=>{const k=docKey(w.col,w.id);(by[k]=by[k]||new Map()).set(String(w.id),w.op==='delete'?FS.FieldValue.delete():w.data)});
+    for(const k in by){const args=['updatedAt',now];by[k].forEach((v,id)=>args.push(new FS.FieldPath('items',id),v));b.update(fbDoc(k),...args)}
   }
   try{await b.commit()}catch(e){throw{code:e.code==='permission-denied'||e.code==='not-found'?'remote_rejected':e.code==='resource-exhausted'?'resource_exhausted':'unavailable',message:e.message}}
   return{ok:true};
@@ -745,7 +803,8 @@ function applyRole(){
 async function connect(){
   const c=window.claude;
   if(c?.use){try{[db,usr]=await Promise.all([c.use('db'),c.use('user')])}catch(e){db=null}}
-  if(!db&&!c?.use&&REMOTE){
+  /* a file opened from disk (or a test page) must never touch the team database */
+  if(!db&&!c?.use&&REMOTE&&location.protocol!=='file:'){
     mode='sheet';try{myId=localStorage.getItem('shelfLifeMonitor.name')||null}catch(e){}
     $('#whoName').value=myId||'';applyRole();renderAll();
     if(REMOTE==='firebase'){try{await fbInit();fbSubscribe()}catch(e){toast('เชื่อมต่อฐานข้อมูล Makro Finder ไม่ได้ — ตรวจสอบอินเทอร์เน็ตแล้วโหลดหน้าใหม่')}return}
@@ -893,7 +952,7 @@ async function loadMakroData(){
     MF.images=imgs||{};MF.list=[...MF.items.values()];MF.state='ready';
     loadMakroExtra();
   }catch(e){MF.state='error';console.warn('Makro Finder data',e)}
-  renderMfStatus();renderDash();
+  renderMfStatus();renderDash();renderNbs();
 }
 /* Item Master items that have no shelf location yet (many fresh items live only here) — large file, loaded after the main list */
 async function loadMakroExtra(){
@@ -1130,29 +1189,37 @@ const NBS_STAT=[['check','รอตรวจสอบ','s-err'],['wait','แจ�
 const nStat=k=>NBS_STAT.find(x=>x[0]===k)||NBS_STAT[0];
 const divGroupOk=(div,g)=>div==='FF'?String(g).startsWith('Fresh Food'):div==='DF'?g==='Dry Grocery Food':div==='NF'?g==='Dry Grocery Non Food':true;
 let nbsFilterDiv='',nbsEditId=null,nbsDraft={};
+const nbsDays=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null;
+const nbsLevel=d=>d==null?null:d>=90?['วิกฤต 90+ วัน','s-pull']:d>=60?['เร่งด่วน 60+ วัน','s-md2']:d>=30?['เฝ้าระวัง 30+ วัน','s-md1']:null;
+let nbsLimit=200;
 function nbsDaysText(r){
-  if(!r.lastSale)return'<span class="muted">ไม่ระบุ / ไม่เคยขาย</span>';
-  const n=diffD(today(),fromIso(r.lastSale));return`<b class="${n>=30?'err-text':''}">${n} วัน</b><div class="muted small">ขายล่าสุด ${fmt(fromIso(r.lastSale))}</div>`;
+  const n=nbsDays(r);if(n==null)return'<span class="muted">ไม่ระบุ / ไม่เคยขาย</span>';
+  const lv=nbsLevel(n);return`<b class="${n>=30?'err-text':''}">${n} วัน</b><div class="muted small">ขายล่าสุด ${fmt(fromIso(r.lastSale))}</div>${lv&&r.status!=='done'?`<span class="chip ${lv[1]}" style="margin-top:3px">${lv[0]}</span>`:''}`;
 }
 function renderNbs(){
   if(!$('#nbsBody'))return;
-  const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0};rows.forEach(r=>{if(r.status!=='done')cnt[r.division]=(cnt[r.division]||0)+1});
-  $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k} · ${l}</span><b>${cnt[k]||0}</b><span class="muted small">รายการที่ยังไม่ปิดงาน</span></button>`).join('');
-  const q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked;
-  const list=rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!fs||r.status===fs)&&!(hide&&r.status==='done')
+  const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0},open=rows.filter(r=>r.status!=='done');open.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
+  $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k} · ${l}</span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ยังไม่ปิดงาน</span></button>`).join('');
+  const lv=[30,60,90].map(n=>open.filter(r=>(nbsDays(r)??-1)>=n).length),lastImp=rows.reduce((m,r)=>r.importedAt&&r.importedAt>m?r.importedAt:m,''),li=lastImp?new Date(lastImp):null;
+  $('#nbsSummary').innerHTML=(li?`<span class="pill">นำเข้าล่าสุด <b>${fmt(li)} ${String(li.getHours()).padStart(2,'0')}.${String(li.getMinutes()).padStart(2,'0')} น.</b></span>`:'')
+    +(open.some(r=>r.lastSale)?`<span class="chip s-md1">30+ วัน ${lv[0].toLocaleString()}</span><span class="chip s-md2">60+ วัน ${lv[1].toLocaleString()}</span><span class="chip s-pull">90+ วัน ${lv[2].toLocaleString()}</span>`:'');
+  const q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=+$('#nbsFAl').value||0;
+  const all=rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(nbsDays(r)??-1)>=fa)
     &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode].join(' ').toLowerCase().includes(q)))
-    .sort((a,b)=>(a.status==='done')-(b.status==='done')||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
-  $('#nbsEmpty').hidden=list.length>0||mode==='init';
-  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,b=st.contacts.find(x=>x.uid===r.buyerUid);
+    .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  const list=all.slice(0,nbsLimit);
+  $('#nbsEmpty').hidden=all.length>0||mode==='init';
+  $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
+  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,b=st.contacts.find(x=>x.uid===r.buyerUid),img=r.img||(MF.images&&MF.images[r.itemNo])||'';
     return`<tr class="${r.status==='done'?'acted':''}">
-    <td data-l="สินค้า"><div>${r.img?`<img class="pthumb" src="${esc(r.img)}" alt="" loading="lazy">`:''}<b>${esc(r.desc||'—')}</b><div class="muted small">${esc(r.itemNo||'')}${r.barcode?' · '+esc(r.barcode):''}</div></div></td>
+    <td data-l="สินค้า"><div>${img?`<img class="pthumb" src="${esc(img)}" alt="" loading="lazy">`:''}<b>${esc(r.desc||'—')}</b><div class="muted small">${esc(r.itemNo||'')}${r.barcode?' · '+esc(r.barcode):''}</div></div></td>
     <td data-l="กลุ่ม"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></td>
     <td data-l="ที่ตั้ง" class="small">${esc(r.loc||'-')}</td>
     <td data-l="ไม่มียอดขาย" class="num">${nbsDaysText(r)}</td>
     <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td>
-    <td data-l="สถานะ"><span class="chip ${s[2]}">${esc(s[1])}</span></td>
+    <td data-l="สถานะ"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</td>
     <td data-l="Buyer / Remark" class="small">${r.buyerUid?`<b>${esc(r.buyerUid)}</b>${b?' '+esc(b.name):''}`:'<span class="muted">-</span>'}${r.remark?`<div class="redbox" style="margin-top:4px">${esc(r.remark)}</div>`:''}</td>
-    <td data-l="บันทึกเมื่อ" class="small num">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.</div>`:'-'}</td>
+    <td data-l="บันทึกเมื่อ" class="small num">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.</div>${r.source==='import'?'<div class="muted">นำเข้าจากไฟล์</div>':''}`:'-'}</td>
     <td><div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
 function nbsBuyerOptions(sel){
@@ -1204,9 +1271,140 @@ $('#nCancel').onclick=()=>$('#dlgNbs').close();$('#nSave').onclick=nbsSave;
 $('#nDiv').onchange=()=>nbsBuyerOptions($('#nBuyer').value);
 let nbsT;$('#nQ').oninput=()=>{clearTimeout(nbsT);nbsT=setTimeout(nbsSearch,150)};
 $('#nResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)nbsPick(b.dataset.no)};
-$('#nbsQ').oninput=renderNbs;$('#nbsFSt').onchange=renderNbs;$('#nbsHide').onchange=renderNbs;
+const nbsRe=()=>{nbsLimit=200;renderNbs()};$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
 $('#nbsFSt').innerHTML+=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
-$('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;renderNbs()};
+$('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;nbsLimit=200;renderNbs()};
+/* ---------- Item NBS: import an Excel/CSV report and monitor it automatically ---------- */
+const normH=s=>String(s??'').toLowerCase().replace(/[\s._\-\/()\[\]:]/g,'');
+/* header → field, first match wins; order matters (days before stock, so "จำนวนวัน…" is not read as stock) */
+const NBS_COLS=[
+  ['days',/(daysnosale|nosaledays|daywithoutsale|daysnosales|noofdays|วันที่ไม่มียอดขาย|จำนวนวัน|ไม่มียอดขาย|วันไม่มียอดขาย|agingdays|aging)/],
+  ['lastSale',/(lastsale|lastsold|วันที่ขายล่าสุด|ขายล่าสุด|วันที่ขายครั้งล่าสุด)/],
+  ['barcode',/(barcode|บาร์โค้ด|^ean$|^upc$)/],
+  ['itemNo',/^(itemno|itemnumber|itemcode|itemid|item|sku|article|articleno|รหัสสินค้า|รหัสไอเท็ม|รหัส|ไอเท็ม|ไอเทม|itemnum|artno)$/],
+  ['desc',/(itemdesc|description|productname|itemname|ชื่อสินค้า|ชื่อไอเท็ม|รายการสินค้า|รายละเอียดสินค้า|^desc$|^name$|^ชื่อ$|^รายการ$)/],
+  ['division',/^(division|group|dept|department|category|กลุ่ม|กลุ่มสินค้า|แผนก|หมวด|หมวดสินค้า|ffdfnf|div|type|ประเภท|ประเภทสินค้า)$/],
+  ['stock',/(stock|onhand|soh|qty|quantity|คงเหลือ|สต็อก|สต๊อก|ยอดคงเหลือ|จำนวน)/],
+  ['loc',/^(loc|location|ที่ตั้ง|ตำแหน่ง|ตำแหน่งจัดเก็บ|shelf|ชั้นวาง)/],
+  ['buyer',/(buyeruid|buyerid|buyer|ผู้ซื้อ|บายเออร์)/]];
+function mapHeader(row){const m={},used=new Set();
+  (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of NBS_COLS){if(!m[f]&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
+function divFrom(t){t=String(t??'').trim();if(!t)return'';const u=t.toUpperCase();
+  if(/(^|[^A-Z])NF([^A-Z]|$)|NON.?FOOD|ไม่ใช่อาหาร|NONFOOD/.test(u))return'NF';
+  if(/(^|[^A-Z])FF([^A-Z]|$)|FRESH|สด|ผัก|ผลไม้|เนื้อ|ปลา|อาหารทะเล|เบเกอรี่|BAKERY|DELI/.test(u))return'FF';
+  if(/(^|[^A-Z])DF([^A-Z]|$)|DRY|GROCERY|แห้ง|FOOD/.test(u))return'DF';return''}
+function toIsoDate(v){
+  if(v==null||v==='')return'';
+  if(v instanceof Date&&!isNaN(v))return iso(new Date(v.getFullYear(),v.getMonth(),v.getDate()));
+  if(typeof v==='number'&&v>20000&&v<80000){const d=new Date(Math.round((v-25569)*864e5));return iso(new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()))}
+  const s=String(v).trim();let m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
+  if(m){let y=+m[1];if(y>2400)y-=543;return iso(new Date(y,+m[2]-1,+m[3]))}
+  m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/);
+  if(m){let y=+m[3];if(y>2400)y-=543;else if(y<100)y+=2000;return iso(new Date(y,+m[2]-1,+m[1]))}
+  return''}
+const cleanNo=v=>{let s=String(v??'').trim();if(/^\d+\.0+$/.test(s))s=s.replace(/\.0+$/,'');return s};
+const numOr=v=>{const n=parseFloat(String(v??'').replace(/,/g,''));return isNaN(n)?'':n};
+function divFromName(s){const m=String(s||'').match(/(^|[^a-z])(ff|df|nf)([^a-z]|$)/i);return m?m[2].toUpperCase():divFrom(s)}
+function parseWorkbook(wb,fileName,defDiv){
+  const recs=new Map(),info={sheets:[],skipped:0,cols:{},byDivSource:{}};
+  for(const sn of wb.SheetNames){
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
+    let hi=-1,m=null;
+    for(let i=0;i<Math.min(rows.length,25);i++){const mm=mapHeader(rows[i]);if(mm.itemNo!=null&&Object.keys(mm).length>=2){hi=i;m=mm;break}}
+    if(hi<0){ /* no header: first column = item no, second = description */
+      const digits=rows.slice(0,30).filter(r=>/^\d{3,9}$/.test(cleanNo(r[0]))).length;
+      if(digits>=Math.min(5,rows.length)&&rows.length){m={itemNo:0,desc:1};hi=-1}else{info.sheets.push({name:sn,rows:0,note:'ไม่พบคอลัมน์รหัสสินค้า'});continue}
+    }
+    const sheetDiv=divFromName(sn),fileDiv=divFromName(fileName);let n=0;
+    for(let i=hi+1;i<rows.length;i++){
+      const r=rows[i],no=cleanNo(r[m.itemNo]),desc=String(m.desc!=null?r[m.desc]:'').trim();
+      if(!no&&!desc){continue}
+      if(!no||/^(total|grand|รวม|หมายเหตุ)/i.test(no)||!/\d/.test(no)){info.skipped++;continue}
+      let div='',src='';
+      if(m.division!=null){div=divFrom(r[m.division]);if(div)src='คอลัมน์กลุ่ม'}
+      if(!div&&sheetDiv){div=sheetDiv;src='ชื่อชีต'}
+      if(!div&&fileDiv){div=fileDiv;src='ชื่อไฟล์'}
+      if(!div){div=defDiv;src='ค่าเริ่มต้น'}
+      let last=m.lastSale!=null?toIsoDate(r[m.lastSale]):'';
+      if(!last&&m.days!=null){const d=numOr(r[m.days]);if(d!==''&&d>=0)last=iso(addD(today(),-Math.round(d)))}
+      let buyer='';if(m.buyer!=null){const b=String(r[m.buyer]??'').trim().toUpperCase();const c=st.contacts.find(x=>String(x.uid).toUpperCase()===b&&x.role==='Buyer');if(c)buyer=c.uid}
+      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
+      info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
+    }
+    info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>info.cols[k]=true);
+  }
+  return{recs:[...recs.values()],info};
+}
+const nbsKey=r=>r.division+'|'+r.itemNo;
+const nbsId=r=>'n_'+r.division+'_'+String(r.itemNo).replace(/[^A-Za-z0-9_-]/g,'_');
+function planImport(recs,autoClose){
+  const ex=new Map((st.nbs||[]).map(r=>[nbsKey(r),r])),keys=new Set(recs.map(nbsKey)),divs=new Set(recs.map(r=>r.division));
+  let add=0,upd=0;recs.forEach(r=>ex.has(nbsKey(r))?upd++:add++);
+  const close=autoClose?(st.nbs||[]).filter(r=>r.source==='import'&&r.status!=='done'&&divs.has(r.division)&&!keys.has(nbsKey(r))):[];
+  return{add,upd,close,divs:[...divs]};
+}
+let impState=null;
+function openImport(){impState=null;$('#impBox').innerHTML='';$('#impDrop').hidden=false;$('#impGo').disabled=true;$('#impGo').textContent='นำเข้าและเริ่ม Monitor';$('#impOpts').hidden=true;$('#impErr').textContent='';$('#impFile').value='';$('#dlgImp').showModal()}
+async function readImportFile(file){
+  $('#impErr').textContent='';$('#impBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
+  try{
+    await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+    let wb;
+    if(/\.csv$/i.test(file.name)){const txt=await file.text();wb=XLSX.read(txt.replace(/^﻿/,''),{type:'string',raw:true})}
+    else wb=XLSX.read(await file.arrayBuffer(),{type:'array',raw:true});
+    const parsed=parseWorkbook(wb,file.name,$('#impDef').value);
+    if(!parsed.recs.length)throw Error('ไม่พบรายการสินค้าในไฟล์ — ต้องมีคอลัมน์รหัสสินค้า (Item No) อย่างน้อย 1 คอลัมน์');
+    impState={file:file.name,wb,...parsed};showImportPreview();
+  }catch(e){impState=null;$('#impBox').innerHTML='';$('#impErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
+}
+const COL_LBL={itemNo:'รหัสสินค้า',desc:'ชื่อสินค้า',barcode:'บาร์โค้ด',division:'กลุ่ม',lastSale:'ขายล่าสุด',days:'จำนวนวันที่ไม่มียอดขาย',stock:'Stock',loc:'ที่ตั้ง',buyer:'Buyer'};
+function showImportPreview(){
+  const {recs,info}=impState,plan=planImport(recs,$('#impAuto').checked),cnt={FF:0,DF:0,NF:0};recs.forEach(r=>cnt[r.division]++);
+  const days=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null,hasDays=recs.some(r=>r.lastSale);
+  const al=[30,60,90].map(n=>recs.filter(r=>days(r)!=null&&days(r)>=n).length);
+  $('#impOpts').hidden=false;$('#impGo').disabled=false;$('#impDrop').hidden=true;
+  $('#impBox').innerHTML=`<div class="imp-file"><b>${esc(impState.file)}</b> <span class="muted small">· ${recs.length.toLocaleString()} รายการ${info.skipped?` · ข้าม ${info.skipped} แถวที่ไม่ใช่สินค้า`:''}</span> <button type="button" class="btn sm" id="impChange">เลือกไฟล์อื่น</button></div>
+  <div class="imp-tiles"><div><b>${cnt.FF.toLocaleString()}</b><span>FF</span></div><div><b>${cnt.DF.toLocaleString()}</b><span>DF</span></div><div><b>${cnt.NF.toLocaleString()}</b><span>NF</span></div>
+  <div class="t-new"><b>${plan.add.toLocaleString()}</b><span>รายการใหม่</span></div><div><b>${plan.upd.toLocaleString()}</b><span>อัปเดตของเดิม</span></div><div class="${plan.close.length?'t-close':''}"><b>${plan.close.length.toLocaleString()}</b><span>ปิดงานอัตโนมัติ</span></div></div>
+  <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>COL_LBL[k]||k).join(' · ')}</p>
+  <p class="small muted" style="margin:2px 0 0">แยกกลุ่มจาก: ${Object.entries(info.byDivSource).map(([k,v])=>`${esc(k)} (${v.toLocaleString()})`).join(' · ')}${info.byDivSource['ค่าเริ่มต้น']?' — ถ้าไม่ถูก เลือก “กลุ่มเริ่มต้น” ด้านล่างแล้วเลือกไฟล์ใหม่':''}</p>
+  ${hasDays?`<p class="small" style="margin:2px 0 0"><b>ระดับเตือนที่ระบบจะเฝ้าระวัง:</b> <span class="chip s-md1">30+ วัน ${al[0]}</span> <span class="chip s-md2">60+ วัน ${al[1]}</span> <span class="chip s-pull">90+ วัน ${al[2]}</span></p>`:'<p class="small muted" style="margin:2px 0 0">ไฟล์นี้ไม่มีวันที่ขายล่าสุด — ระบบจะบันทึกรายการเป็น “รอตรวจสอบ” โดยไม่นับวัน</p>'}
+  <div class="imp-sample"><table><thead><tr><th>กลุ่ม</th><th>รหัส</th><th>ชื่อสินค้า</th><th>ขายล่าสุด</th><th>Stock</th><th>ที่ตั้ง</th></tr></thead><tbody>${recs.slice(0,6).map(r=>`<tr><td>${r.division}</td><td>${esc(r.itemNo)}</td><td>${esc(r.desc||'—')}</td><td>${r.lastSale?fmt(fromIso(r.lastSale)):'-'}</td><td>${r.stock===''?'-':esc(r.stock)}</td><td>${esc(r.loc||'-')}</td></tr>`).join('')}</tbody></table></div>`;
+  $('#impChange').onclick=()=>{$('#impDrop').hidden=false;$('#impBox').innerHTML='';$('#impGo').disabled=true;impState=null;$('#impFile').value='';$('#impFile').click()};
+}
+async function runImport(){
+  if(!impState)return;
+  const {recs}=impState,autoClose=$('#impAuto').checked,plan=planImport(recs,autoClose),nowIso=new Date().toISOString(),ex=new Map((st.nbs||[]).map(r=>[nbsKey(r),r]));
+  $('#impGo').disabled=true;$('#impGo').textContent='กำลังนำเข้า…';
+  if(onMakroSite()&&MF.state==='idle')loadMakroData();
+  for(let i=0;i<60&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250));
+  const ready=MF.state==='ready';
+  const ok=await act(async()=>{
+    for(const r of recs){
+      const it=ready?MF.items.get(r.itemNo):null,old=ex.get(nbsKey(r));
+      const desc=r.desc||it?.desc||old?.desc||'',barcode=r.barcode||it?.barcode||old?.barcode||'',loc=r.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):'')||old?.loc||'';
+      if(old){await putItem('nbs',{...body(old),_id:old._id,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
+        lastSeenAt:nowIso,updatedAt:nowIso,...(old.status==='done'&&old.autoClosed?{status:'check',autoClosed:false,autoNote:'กลับมาอยู่ในไฟล์ไม่มียอดขายอีกครั้ง'}:{})})}
+      else await putItem('nbs',{_id:nbsId(r),division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
+        source:'import',importedAt:nowIso,lastSeenAt:nowIso,createdAt:nowIso,createdBy:myId||null,updatedAt:nowIso});
+    }
+    for(const old of plan.close)await putItem('nbs',{...body(old),_id:old._id,status:'done',autoClosed:true,autoNote:'ปิดอัตโนมัติ — ไม่อยู่ในไฟล์ไม่มียอดขายล่าสุด ('+fmt(today())+')',updatedAt:nowIso});
+  },null);
+  $('#impGo').disabled=false;$('#impGo').textContent='นำเข้าและเริ่ม Monitor';
+  if(ok){$('#dlgImp').close();toast(`นำเข้าแล้ว: ใหม่ ${plan.add} · อัปเดต ${plan.upd}${plan.close.length?` · ปิดงานอัตโนมัติ ${plan.close.length}`:''}`);nbsFilterDiv='';renderNbs()}
+}
+$('#nbsImport').onclick=openImport;
+$('#impCancel').onclick=()=>$('#dlgImp').close();$('#impGo').onclick=runImport;
+$('#impPick').onclick=()=>$('#impFile').click();
+$('#impFile').onchange=e=>{const f=e.target.files[0];if(f)readImportFile(f)};
+$('#impAuto').onchange=()=>{if(impState)showImportPreview()};
+const drop=$('#impDrop');
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>{const f=e.dataTransfer?.files?.[0];if(f)readImportFile(f)});
+/* a file dropped anywhere on the open dialog also works */
+$('#dlgImp').addEventListener('dragover',e=>e.preventDefault());
+$('#dlgImp').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readImportFile(f)});
 /* ---------- boot ---------- */
 function renderAll(){
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
