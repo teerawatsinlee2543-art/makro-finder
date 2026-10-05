@@ -206,6 +206,11 @@ table.ct-tbl{table-layout:fixed}
 table.ct-tbl thead th{background:#ffc85c;color:#2b1d00;border:1px solid #8a6a1f;text-transform:none;letter-spacing:0;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center;padding:7px 5px;vertical-align:middle}
 table.ct-tbl td{padding:8px 6px;overflow-wrap:anywhere;font-size:13px}
 table.ct-tbl .cn{font-weight:700}
+.bcard{display:flex;flex-direction:column;gap:2px;font-size:12.5px;line-height:1.35}
+.bc-uid{display:inline-block;align-self:flex-start;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 8px;font-weight:800;letter-spacing:.02em}
+.bc-l{display:flex;flex-direction:column}
+.bc-l span{color:var(--muted);font-size:11.5px}
+.bc-l b{font-weight:600;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 table.ct-tbl .btn{white-space:nowrap}
 .actbtns{display:flex;flex-direction:column;gap:4px;align-items:stretch}
 table.nbs-tbl td.nsave .actbtns{flex-direction:row;flex-wrap:wrap;margin-top:6px;gap:4px}
@@ -457,7 +462,7 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
       <button type="button" class="btn w" id="nbsBulkBuyer" title="กำหนด Buyer ให้ทุกรายการที่กรองอยู่ในตารางตอนนี้">กำหนด Buyer ทั้งรายการที่กรอง</button>
       <button type="button" class="btn danger w" id="nbsDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายการสินค้าจากไฟล์นั้น">ลบไฟล์ที่นำเข้า</button>
     </div>
-    <table class="resp nbs-tbl"><colgroup><col style="width:18%"><col style="width:7.5%"><col style="width:4.5%"><col style="width:7.5%"><col style="width:7.5%"><col style="width:7.5%"><col style="width:8.5%"><col style="width:12%"><col style="width:8.5%"><col style="width:10%"><col style="width:8.5%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th><div class="th-in"><span>กลุ่ม<br>(Division)</span><button type="button" class="fbtn" data-f="div" title="Filter กลุ่ม" aria-label="Filter กลุ่ม"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th><div class="th-in"><span>Aging<br>Status</span><button type="button" class="fbtn" data-f="aging" title="Filter Aging Status" aria-label="Filter Aging Status"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ / จัดการ</th></tr></thead><tbody id="nbsBody"></tbody></table>
+    <table class="resp nbs-tbl"><colgroup><col style="width:16%"><col style="width:7%"><col style="width:4%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:8%"><col style="width:11%"><col style="width:8%"><col style="width:17%"><col style="width:8%"></colgroup><thead><tr><th>ชื่อสินค้า</th><th><div class="th-in"><span>กลุ่ม<br>(Division)</span><button type="button" class="fbtn" data-f="div" title="Filter กลุ่ม" aria-label="Filter กลุ่ม"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th><div class="th-in"><span>Aging<br>Status</span><button type="button" class="fbtn" data-f="aging" title="Filter Aging Status" aria-label="Filter Aging Status"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16l-6 7v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 3h16" stroke="#2f9e5b" stroke-width="2.4" stroke-linecap="round"/></svg><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ / จัดการ</th></tr></thead><tbody id="nbsBody"></tbody></table>
     <div id="nbsMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="nbsMoreTxt"></span><button class="btn" id="nbsMore">แสดงเพิ่ม 200 รายการ</button></div>
     <p class="muted" id="nbsEmpty" hidden>ยังไม่มีรายการ — กด “+ เพิ่ม Item NBS” เพื่อบันทึกสินค้าที่ไม่มียอดขาย</p>
   </div>
@@ -1342,6 +1347,13 @@ function renderCt(){
     <td data-l="Junior Buyer / New Gen" class="small">${v.jr.length?v.jr.map(x=>`<div>${esc(x)}</div>`).join(''):'<span class="muted">-</span>'}</td>
     <td><div class="row w" style="gap:4px;flex-wrap:wrap"><button class="btn sm" onclick="editContact('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delContact('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
+/* the Buyer shown inside an Item NBS row: Buyer UID, Merchandise Mgr. name, Area, Description, Assistant, Junior Buyer (like the org chart) */
+function buyerCardHtml(b){
+  const v=ctView(b),
+    clean=String(b.name||'').replace(/\s*M\.?\s*0[\d\- ]{8,}.*$/,'').trim()||b.name,ph=b.phone||((String(b.name||'').match(/0\d[\d\- ]{7,12}\d/)||[])[0]||'');
+  const L=(k,val)=>val?`<div class="bc-l"><span>${k}</span><b>${esc(val)}</b></div>`:'';
+  const desc=v.arts.length?v.arts.map(a=>a[0]+' '+a[1]).join(', '):v.desc;
+  return`<div class="bcard"><div class="bc-uid">${esc(b.uid)}</div>${L('Merchandise Mgr.',clean+(ph?' · '+ph:''))}${L('Area',v.area)}${L('Description',desc)}${L('Assistant',v.asst.join(', '))}${L('Junior Buyer',v.jr.join(', '))}</div>`}
 /* the contact list is shown like the Makro team org chart (Area · Senior Director · Associate Director · Senior Manager / Product Group · Buyer UID · Merchandise Mgr. · Art Grp · Assistant · Junior Buyer) */
 function ctView(c){
   const dept=String(c.dept||''),parts=dept.split(' · '),buyer=c.role==='Buyer',v={sd:'',ad:'',area:'',sm:null,smSelf:false,title:'',codes:'',arts:[],desc:'',asst:[],jr:[],merch:''};
@@ -2037,7 +2049,7 @@ function renderNbs(){
     <td data-l="ไม่มียอดขาย (NBS)" class="num">${nbsDaysText(r)}</td>
     <td data-l="Aging Status">${nbsAgingText(r)}</td>
     <td data-l="สถานะ"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</td>
-    <td data-l="Buyer / Remark" class="small">${r.buyerUid?`<b>${esc(r.buyerUid)}</b>${b?' '+esc(b.name):''}`:'<span class="muted">-</span>'}${r.remark?`<div class="redbox" style="margin-top:4px">${esc(r.remark)}</div>`:''}</td>
+    <td data-l="Buyer / Remark" class="small">${r.buyerUid?(b?buyerCardHtml(b):`<b>${esc(r.buyerUid)}</b>`):'<span class="muted">-</span>'}${r.remark?`<div class="redbox" style="margin-top:4px">${esc(r.remark)}</div>`:''}</td>
     <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}<div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
 /* bulk: give every item currently shown (all filters applied) one Buyer */
