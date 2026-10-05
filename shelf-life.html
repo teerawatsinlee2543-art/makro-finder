@@ -189,6 +189,9 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 .pimg img{width:100%;height:100%;object-fit:contain;display:block}
 .pimg.none{background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa3b2' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10Z'/%3E%3Cpath d='M2 21c0-3 1.9-5.4 5.1-6.3C9.5 14 12 12.5 14 10'/%3E%3C/svg%3E") center/42% no-repeat}
 .dp-imgrow{display:flex;gap:12px;align-items:center;margin:2px 0 10px}
+.photo-side{display:flex;flex-direction:column;gap:6px;align-items:flex-start;min-width:0}
+.photo-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.photo-side .muted{line-height:1.35}
 .redbox{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.45;font-weight:600}
 .redbox.remark{background:var(--redbox-ink);color:#fff;border-color:var(--redbox-ink)}
 .remark-field{grid-column:span 2}
@@ -516,14 +519,6 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
   <div class="grid2">
     <label>Description<input name="desc" required></label>
     <label>รูปสินค้า (รหัสสินค้า Makro Finder หรือ URL รูป)<input name="img" placeholder="เช่น 411671 — เว้นว่าง = ใช้รูปมาตรฐาน"></label>
-    <div class="photo-row" style="grid-column:1/-1">
-      <button type="button" class="btn photo-btn" id="dpCamBtn"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 8h3l1.6-2h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.4" fill="none" stroke="currentColor" stroke-width="1.9"/></svg>ถ่ายรูป</button>
-      <button type="button" class="btn photo-btn" id="dpFileBtn"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 12.5l-7.8 7.8a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>แนบไฟล์รูป</button>
-      <button type="button" class="btn sm danger" id="dpPhotoDel" hidden>ลบรูปที่ตั้งเอง</button>
-      <span class="muted small" id="dpPhotoMsg">ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน</span>
-      <input type="file" id="dpCam" accept="image/*" capture="environment" hidden>
-      <input type="file" id="dpFile" accept="image/*" hidden>
-    </div>
     <label>SKU / Item code (ถ้ามี)<input name="sku"></label>
     <label>ประเภท<select name="origin"><option value="import">ผักผลไม้นำเข้า</option><option value="local">ผักผลไม้ท้องถิ่น</option><option value="other">อื่นๆ</option></select></label>
     <label>หมวด<input name="cat"></label>
@@ -537,7 +532,10 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
     <label>Buyer UID<select name="buyerUid"></select></label>
     <label>Commercial<select name="comUid"></select></label>
   </div>
-  <div class="dp-imgrow"><span id="dpImgPrev"></span><span class="muted small" id="dpImgHint"></span></div>
+  <div class="dp-imgrow"><span id="dpImgPrev"></span>
+    <div class="photo-side"><div class="photo-btns"><button type="button" class="btn photo-btn" id="dpCamBtn"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 8h3l1.6-2h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.4" fill="none" stroke="currentColor" stroke-width="1.9"/></svg>ถ่ายรูป</button><button type="button" class="btn photo-btn" id="dpFileBtn"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 12.5l-7.8 7.8a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>แนบไฟล์รูป</button><button type="button" class="btn sm danger" id="dpPhotoDel" hidden>ลบรูปที่ตั้งเอง</button></div>
+      <span class="muted small" id="dpImgHint"></span><span class="muted small" id="dpPhotoMsg">ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน</span>
+      <input type="file" id="dpCam" accept="image/*" capture="environment" hidden><input type="file" id="dpFile" accept="image/*" hidden></div></div>
   <p class="small muted" id="dpMan" style="margin-bottom:0"></p>
   <div id="dpPrev" style="margin-top:12px"></div>
   <p class="err-text" id="dpErr"></p>
