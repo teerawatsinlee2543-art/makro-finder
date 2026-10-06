@@ -649,7 +649,7 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
 <nav id="tabs">
   <button data-tab="dash" class="on">ภาพรวมวันนี้</button>
   <button data-tab="add">+ Monitor item</button>
-  <button data-tab="nbs">Item NBS</button>
+  <button data-tab="nbs">Item NBS<span class="tabcnt" id="nbsBadge" hidden></span></button>
   <button data-tab="oos">OOS+<span class="tabcnt" id="oosBadge" hidden></span></button>
   <button data-tab="prod">สินค้า & กฎลดราคา</button>
   <button data-tab="ct">Buyer / Commercial</button>
@@ -3349,6 +3349,7 @@ function templatePDFHtml(){
 }
 function templatePDF(){printDoc(templatePDFHtml())}
 function nbsBannerUpdate(open,nOver){
+  const bd=$('#nbsBadge');if(bd){bd.hidden=!open.length;bd.textContent=open.length.toLocaleString();bd.classList.toggle('late',nOver>0)} /* same badge as OOS+: all open items, red when some are over the NBS limit */
   const bn=$('#nbsBanner');if(!bn)return;
   bn.hidden=!open.length;bn.classList.toggle('late',nOver>0);
   $('#nbsBannerTxt').textContent=`Item NBS มีสินค้าไม่มียอดขาย ${open.length.toLocaleString()} รายการ${nOver?` · เกินเกณฑ์ NBS ${nOver.toLocaleString()} รายการ`:''}`;
