@@ -637,7 +637,10 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
 /* Buyer / Commercial has 14 columns: use the wide page like Item NBS */
 @media (min-width:1181px){main:has(#t-ct:not([hidden])){max-width:1560px}}
 /* %Shrink: same look as OOS+ (search box, FF / DF / NF tiles, ranking chart, cards) */
-#shrQ{background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b5cad' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px 50%/20px;border:2px solid var(--accent);border-radius:12px;padding:11px 14px 11px 42px;font-size:16px;font-weight:600;box-shadow:0 2px 10px #0b5cad26}
+#shrDivTiles .tile{position:relative}
+.dvpct{position:absolute;top:9px;right:11px;display:inline-flex;align-items:baseline;gap:4px;padding:2px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--muted);box-shadow:0 1px 3px #0001}
+.dvpct b{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.dvpct.neg b{color:#c62828}.dvpct.pos b{color:#1f7a45}#shrQ{background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b5cad' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px 50%/20px;border:2px solid var(--accent);border-radius:12px;padding:11px 14px 11px 42px;font-size:16px;font-weight:600;box-shadow:0 2px 10px #0b5cad26}
 #shrQ::placeholder{color:var(--muted);font-weight:400}
 #shrQ:focus{outline:0;box-shadow:0 0 0 4px #0b5cad33,0 2px 10px #0b5cad26}
 label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
@@ -664,7 +667,8 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
   #shrDivTiles .tile{padding:8px 8px 8px 9px;min-width:0}
   #shrDivTiles .tile.dv{border-left-width:5px}
   #shrDivTiles .tile b{font-size:20px;margin:2px 0}
-  #shrDivTiles .dvl,#shrDivTiles .tl{display:none}
+  #shrDivTiles .dvl,#shrDivTiles .tl,#shrDivTiles .dpl{display:none}
+  #shrDivTiles .dvpct{top:6px;right:6px;padding:0 6px}#shrDivTiles .dvpct b{font-size:12.5px}
   #shrDivTiles .chip{font-size:12px;padding:1px 8px}
   #shrDivTiles .small{font-size:11px;line-height:1.2}
   #t-shr .add-head>.row{width:100%;flex-wrap:nowrap;gap:6px}
@@ -3701,7 +3705,10 @@ function renderShr(){
   const byDiv={},nDiv={},gainDiv={};
   elig.forEach(it=>{const d=it.div||'-',l=lossOf(it);byDiv[d]=(byDiv[d]||0)+l;if(l>0)nDiv[d]=(nDiv[d]||0)+1;const v=shrVal(it,b==='pct'?'mtd':b);if(v!=null&&v<0)gainDiv[d]=(gainDiv[d]||0)-v});
   if(shrDiv==='-'&&!(byDiv['-']))shrDiv='';
-  const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${shrDiv===k?' sel':''}" data-div="${k}">${chip}<b>${shrBk(byDiv[k]||0)}</b><span class="muted small"><span class="tl">ทิ้ง </span>${(nDiv[k]||0).toLocaleString()} รายการ${gainDiv[k]?`<span class="tl"> · ได้คืน ${shrBk(gainDiv[k])}</span>`:''}</span></button>`;
+  /* %Actual Shrinkage of each group, as in the Power BI report: the group's Actual Shrinkage (net, gains included) ÷ the group's Sales (always from the sales + shrink report, whatever view is chosen) */
+  const dvA={},dvS={};m.items.forEach(it=>{if(!it.hasSales)return;const d=it.div||'-';if(it.sales!=null)dvS[d]=(dvS[d]||0)+it.sales;if(it.amt!=null)dvA[d]=(dvA[d]||0)+it.amt});
+  const dvPct=k=>dvS[k]>0&&SHR.sales?`<span class="dvpct ${dvA[k]<0?'neg':dvA[k]>0?'pos':''}" title="%Actual Shrinkage = Actual Shrinkage รวมของกลุ่ม ÷ ยอดขายรวมของกลุ่ม (ติดลบ = ของหาย / ทิ้งมากกว่าที่ได้คืน)"><span class="dpl">%Actual Shrink </span><b>${shrPct((dvA[k]||0)/dvS[k])}</b></span>`:'';
+  const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${shrDiv===k?' sel':''}" data-div="${k}">${dvPct(k)}${chip}<b>${shrBk(byDiv[k]||0)}</b><span class="muted small"><span class="tl">ทิ้ง </span>${(nDiv[k]||0).toLocaleString()} รายการ${gainDiv[k]?`<span class="tl"> · ได้คืน ${shrBk(gainDiv[k])}</span>`:''}</span></button>`;
   $('#shrDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
   /* summary tiles follow the group */
   const sub=elig.filter(it=>!shrDiv||it.div===shrDiv),gross=sub.reduce((s,it)=>s+lossOf(it),0),nLoss=sub.filter(it=>lossOf(it)>0).length;
