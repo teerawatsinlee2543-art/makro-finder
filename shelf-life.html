@@ -351,6 +351,14 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .oosc.lv-done{border-left-color:var(--line);opacity:.78}
 .oosc-h{display:flex;gap:10px;align-items:flex-start}
 .oosc-t{min-width:0;flex:1;overflow-wrap:anywhere}
+.stkb{position:fixed;z-index:90;display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:18px;background:#1f7a45;box-shadow:0 12px 32px #0007}
+.stkb::after{content:"";position:absolute;left:var(--tx,50%);margin-left:-11px;border:11px solid transparent}
+.stkb.up::after{top:100%;border-top-color:#1f7a45;border-bottom:0}.stkb.down::after{bottom:100%;border-bottom-color:#1f7a45;border-top:0}
+.stkb-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;color:#fff;font-size:.85rem}.stkb-h b{margin-right:auto}
+.stkb-t,.stkb-x{border:1px solid #ffffff88;background:transparent;color:#fff;border-radius:999px;padding:3px 10px;font:inherit;cursor:pointer}.stkb-t.on{background:#fff;color:#1f7a45;font-weight:700}.stkb-x{padding:3px 9px}
+.stkb-o{color:#fff;text-decoration:underline;white-space:nowrap}
+.stkb iframe{flex:1;min-height:0;width:100%;border:0;border-radius:12px;background:#fff}
+.stkb-n{color:#e4f3ea;font-size:.72rem;line-height:1.3}
 .btn.stk{flex:none;margin-left:auto;background:#1f7a45;border-color:#1f7a45;color:#fff;font-weight:600;white-space:nowrap}.btn.stk:hover{background:#18633a;border-color:#18633a}
 .oosc-m{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .oosc-f{display:flex;flex-wrap:wrap;gap:2px 14px}
@@ -2415,16 +2423,36 @@ function oosCard(r,ctx){
   const acts=r.status==='need'?`<button type="button" class="btn pri sm" onclick="oosStart('${k}')">เริ่มเติม</button><button type="button" class="btn sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button>`
     :r.status==='doing'?`<button type="button" class="btn pri sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button><button type="button" class="btn sm" onclick="oosBack('${k}')">กลับเป็นต้องเติม</button>`
     :`<button type="button" class="btn sm" onclick="oosBack('${k}')">เปิดใหม่ (ต้องเติม)</button>`;
-  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div><div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}')">ดู Stock</button></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div><div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}',this)">ดู Stock</button></div>
     <div class="oosc-m">${dv?`<span class="chip div-${dv.toLowerCase()}">${dv}</span>`:''}${r.bucket&&OOS_BK[r.bucket]?`<span class="chip s-${OOS_BK[r.bucket][2]}">${esc(OOS_BK[r.bucket][0])}</span>`:''}<span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
     ${oosFactsHtml(r)}
     <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
     <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
 /* "ดู Stock": the Makro stock web. {item} in a link is replaced by the Item No. The Makro web needs its own login (never stored here).
-   Computer: two pop-up windows side by side (left / right). Phone / tablet (or when a 2nd pop-up is blocked): one tap = one page, from a small picker.
+   Computer: two pop-up windows side by side (left / right).
+   Phone / tablet: a green speech bubble under / over the button with the page inside it (two pages = two tabs in the bubble); a link opens it in a normal tab when the web refuses to be embedded.
    Set the stock-page links below when they are known. */
 const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','https://ssmobile.siammakro.co.th/login.html'];
 const STOCK_LABELS=['หน้า Stock 1','หน้า Stock 2'];
+let stkBubble=null;
+function stkClose(){if(!stkBubble)return;window.removeEventListener('scroll',stkBubble.fn,true);window.removeEventListener('resize',stkBubble.fn);document.removeEventListener('keydown',stkBubble.key);stkBubble.el.remove();stkBubble=null}
+function stkPlace(){
+  if(!stkBubble)return;const {el,btn}=stkBubble,r=btn.getBoundingClientRect(),vw=window.innerWidth,vh=window.innerHeight,w=Math.min(vw-16,460);
+  let h=Math.min(Math.round(vh*.62),480);const room={up:r.top-22,down:vh-r.bottom-22},side=room.up>=h||room.up>=room.down?'up':'down';
+  h=Math.max(240,Math.min(h,room[side]));
+  const left=Math.min(Math.max(8,r.right-w),vw-w-8),top=side==='up'?Math.max(8,r.top-h-14):Math.min(r.bottom+14,vh-h-8);
+  el.className='stkb '+side;el.style.cssText=`left:${left}px;top:${top}px;width:${w}px;height:${h}px;--tx:${Math.round(Math.min(Math.max(26,r.left+r.width/2-left),w-26))}px`;
+}
+function stkOpen(btn,no,urls){
+  const same=stkBubble&&stkBubble.btn===btn;stkClose();if(same)return; /* second tap on the same button closes it */
+  const el=document.createElement('div');
+  el.innerHTML=`<div class="stkb-h"><b>Stock · Item ${esc(no)}</b>${urls.length>1?urls.map((u,i)=>`<button type="button" class="stkb-t${i?'':' on'}" data-i="${i}">${esc(STOCK_LABELS[i]||'หน้า '+(i+1))}</button>`).join(''):''}<a class="stkb-o" target="_blank" rel="noopener" href="${esc(urls[0])}">เปิดแท็บใหม่ ↗</a><button type="button" class="stkb-x" aria-label="ปิด">✕</button></div><iframe src="${esc(urls[0])}" referrerpolicy="no-referrer"></iframe><div class="stkb-n">ถ้าหน้าว่างเปล่า = เว็บไม่ให้ฝัง กด “เปิดแท็บใหม่” · คัดลอก Item No ไว้แล้ว</div>`;
+  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.classList.contains('stkb-x')){stkClose();return}
+    if(b.dataset.i!=null){el.querySelectorAll('.stkb-t').forEach(t=>t.classList.toggle('on',t===b));el.querySelector('iframe').src=urls[+b.dataset.i];el.querySelector('.stkb-o').href=urls[+b.dataset.i]}};
+  document.body.appendChild(el);
+  const fn=()=>stkPlace(),key=e=>{if(e.key==='Escape')stkClose()};
+  stkBubble={el,btn,fn,key};window.addEventListener('scroll',fn,true);window.addEventListener('resize',fn);document.addEventListener('keydown',key);stkPlace();
+}
 function oosStockPick(no,urls){
   const d=document.createElement('dialog');
   d.innerHTML=`<h3 style="margin:0 0 4px">ดู Stock · Item ${esc(no)}</h3><p class="muted small" style="margin:0 0 12px">คัดลอก Item No ไว้แล้ว — แตะเปิดทีละหน้า แล้ววางค้นหา</p>
@@ -2432,15 +2460,14 @@ function oosStockPick(no,urls){
   d.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.x){d.close();return}window.open(urls[+b.dataset.i],'_blank')};
   d.onclose=()=>d.remove();document.body.appendChild(d);d.showModal();
 }
-function oosStock(id){
+function oosStock(id,btn){
   const r=oosAll().find(x=>x._id===id);if(!r)return;
   const no=String(r.itemNo||''),urls=STOCK_URLS.map(u=>u.replace(/\{item\}/g,encodeURIComponent(no))),uniq=[...new Set(urls)];
-  try{navigator.clipboard&&navigator.clipboard.writeText(no)}catch(e){}
   const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||window.innerWidth<700;
-  if(phone){ /* a phone can't place two windows side by side and blocks the 2nd pop-up: one page opens directly, several go through the picker */
-    if(uniq.length>1){oosStockPick(no,uniq);return}
-    if(!window.open(uniq[0],'_blank'))oosStockPick(no,uniq);else toast(`เปิดหน้า Stock แล้ว · คัดลอก Item No ${no} ไว้ให้วางค้นหา`);
-    return}
+  if(phone&&btn){stkOpen(btn,no,uniq);try{navigator.clipboard&&navigator.clipboard.writeText(no)}catch(e){}return}
+  try{navigator.clipboard&&navigator.clipboard.writeText(no)}catch(e){}
+  if(phone){if(uniq.length>1){oosStockPick(no,uniq);return}
+    if(!window.open(uniq[0],'_blank'))oosStockPick(no,uniq);else toast(`เปิดหน้า Stock แล้ว · คัดลอก Item No ${no} ไว้ให้วางค้นหา`);return}
   const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,half=Math.floor(W/2);
   const wins=urls.map((u,i)=>window.open(u,'mkStock'+i,`popup=yes,width=${half},height=${H},left=${L+i*half},top=${T}`));
   wins.forEach(w=>{try{w&&w.focus()}catch(e){}});
