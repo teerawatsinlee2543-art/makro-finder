@@ -591,6 +591,10 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   #t-data .dtile b{font-size:15px}
   #t-data .dtile>.small,#t-data .dtile>span:not(.dti){font-size:12.5px;line-height:1.25}
 }
+/* products: sort by Shelf life */
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+th.sortable:hover{color:var(--accent)}
+#shelfArrow{font-size:11px;color:var(--accent)}
 @media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
@@ -768,8 +772,8 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">สินค้า & กฎ Shelf life</h2>
       <span class="row w"><button type="button" class="btn danger" id="prDelFile" title="ลบไฟล์ที่นำเข้า พร้อมสินค้าที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="prImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
     <p class="muted small">กฎตาม “คู่มือ อายุและการจัดการสินค้าผักและผลไม้” (ผ่านการตรวจสอบจากทีมจัดซื้อและ QA) · นับวันที่ 1 = วันรับสินค้า · ขายราคาเต็มครบ Shelf life → ลด 15% (Step 1) → ลด 30% (Step 2) → Code 52 · สินค้า Shelf life 1 วันข้าม Step 1 · อายุสินค้ากำหนดตามการจัดเรียงในตู้แช่ 0–4°C (ผักสลัด 6–8°C) หรือให้พิจารณาตามสภาพสินค้า</p>
-    <div class="fbar"><label class="f-q">ค้นหาสินค้า<input id="pQ" type="search" placeholder="ชื่อ / รหัส / หมวด / Buyer UID / Commercial เช่น บลูเบอร์รี่ หรือ FF3" autocomplete="off"></label><span class="muted small f-info" id="pQn"></span></div>
-    <table class="resp"><thead><tr><th>สินค้า</th><th>Shelf life</th><th><span class="hchip h-ok">ขายราคาเต็ม</span></th><th><span class="hchip h-md1">ลด 15%</span></th><th><span class="hchip h-md2">ลด 30%</span></th><th><span class="hchip h-pull">Code 52</span></th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
+    <div class="fbar"><label class="f-q">ค้นหาสินค้า<input id="pQ" type="search" placeholder="ชื่อ / รหัส / หมวด / Buyer UID / Commercial เช่น บลูเบอร์รี่ หรือ FF3" autocomplete="off"></label><label>เรียงตาม<select id="pSort"><option value="shelf-asc">Shelf life สั้น → ยาว</option><option value="shelf-desc">Shelf life ยาว → สั้น</option><option value="origin">กลุ่มที่มา (นำเข้า / ในประเทศ) แล้ว Shelf life</option><option value="name">ชื่อสินค้า ก → ฮ</option></select></label><span class="muted small f-info" id="pQn"></span></div>
+    <table class="resp"><thead><tr><th>สินค้า</th><th id="thShelf" class="sortable" title="กดเพื่อเรียงตาม Shelf life (สั้น → ยาว / ยาว → สั้น)">Shelf life <span id="shelfArrow"></span></th><th><span class="hchip h-ok">ขายราคาเต็ม</span></th><th><span class="hchip h-md1">ลด 15%</span></th><th><span class="hchip h-md2">ลด 30%</span></th><th><span class="hchip h-pull">Code 52</span></th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
     <p class="muted small" style="margin:10px 0 0">รูปสินค้าส่วนใหญ่จาก Makro PRO · รูปเห็ดฟาง เงาะ ลิ้นจี่ ชมพู่ มะไฟ เป็นรูปประกอบจาก <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a> (Straw mushrooms; Rambutans — Muhammad Mahdi Karim; Lychee Fruit; Syzygium samarangense — Anagoria CC BY 3.0; Mafai — Xufanc CC BY-SA 3.0) · แบล็คเบอร์รี่เป็นรูปแบบแช่แข็งของเอโร่ · แก้เป็นรูปจริงได้ที่ปุ่ม “แก้ไข” ของสินค้า</p>
   </div>
 </section>
@@ -1636,7 +1640,10 @@ $('#aSave').onclick=async()=>{
 
 /* ---------- products ---------- */
 function renderProd(){
-  const pq=($('#pQ')?.value||'').trim().toLowerCase(),all=bySku(),shown=pq?all.filter(p=>[p.desc,p.sku,p.cat,p.buyerUid,p.comUid,ORIGINS[p.origin],p.temp].join(' ').toLowerCase().includes(pq)):all;
+  const pq=($('#pQ')?.value||'').trim().toLowerCase(),all=bySku(),filtered=pq?all.filter(p=>[p.desc,p.sku,p.cat,p.buyerUid,p.comUid,ORIGINS[p.origin],p.temp].join(' ').toLowerCase().includes(pq)):all;
+  const mode=$('#pSort')?$('#pSort').value:'shelf-asc',nm=(a,b)=>String(a.desc).localeCompare(String(b.desc),'th');
+  const shown=mode==='origin'?filtered:[...filtered].sort(mode==='shelf-desc'?(a,b)=>b.shelf-a.shelf||nm(a,b):mode==='name'?nm:(a,b)=>a.shelf-b.shelf||nm(a,b));
+  if($('#shelfArrow'))$('#shelfArrow').textContent=mode==='shelf-asc'?'▲':mode==='shelf-desc'?'▼':'';
   if($('#pQn'))$('#pQn').textContent=pq?`พบ ${shown.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`:`${all.length.toLocaleString()} รายการ`;
   if(pq&&!shown.length){$('#prodBody').innerHTML='<tr><td colspan="9" class="muted">ไม่พบสินค้าที่ตรงกับคำค้นหา</td></tr>';return}
   $('#prodBody').innerHTML=shown.map(p=>{
@@ -3677,7 +3684,9 @@ function renderAll(){
   renderDash();renderProd();renderCt();renderNbs();renderOos();addPreview();julTab();
 }
 $('#fSt').innerHTML+=ST.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
-$('#q').oninput=renderDash;$('#pQ').oninput=renderProd;$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
+$('#q').oninput=renderDash;$('#pQ').oninput=renderProd;try{const sv=localStorage.getItem('slm.pSort');if(sv&&[...$('#pSort').options].some(o=>o.value===sv))$('#pSort').value=sv}catch(e){}
+$('#pSort').onchange=()=>{try{localStorage.setItem('slm.pSort',$('#pSort').value)}catch(e){}renderProd()};
+$('#thShelf').onclick=()=>{const s=$('#pSort');s.value=s.value==='shelf-asc'?'shelf-desc':'shelf-asc';s.onchange()};$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
 $('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs'||b.dataset.tab==='oos')loadMakroData();if(b.dataset.tab==='nbs')renderNbs();if(b.dataset.tab==='oos')renderOos()};
 if(onMakroSite()){$('#appLogo').hidden=false;$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
