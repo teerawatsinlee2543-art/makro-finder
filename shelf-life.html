@@ -2418,7 +2418,18 @@ function oosCard(r,ctx){
     <div class="oosc-m">${dv?`<span class="chip div-${dv.toLowerCase()}">${dv}</span>`:''}${r.bucket&&OOS_BK[r.bucket]?`<span class="chip s-${OOS_BK[r.bucket][2]}">${esc(OOS_BK[r.bucket][0])}</span>`:''}<span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
     ${oosFactsHtml(r)}
     <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
-    <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
+    <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosStock('${k}')">ดู Stock</button><button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
+/* "ดู Stock": two pop-up windows side by side (left / right) on the Makro stock web. {item} in a link is replaced by the Item No.
+   The Makro web needs its own login (never stored here). Set the two stock-page links below when they are known. */
+const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','https://ssmobile.siammakro.co.th/login.html'];
+function oosStock(id){
+  const r=oosAll().find(x=>x._id===id);if(!r)return;
+  const no=String(r.itemNo||''),sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,half=Math.floor(W/2);
+  try{navigator.clipboard&&navigator.clipboard.writeText(no)}catch(e){}
+  const wins=STOCK_URLS.map((u,i)=>window.open(u.replace(/\{item\}/g,encodeURIComponent(no)),'mkStock'+i,`popup=yes,width=${half},height=${H},left=${L+i*half},top=${T}`));
+  if(wins.some(w=>!w))toast('เบราว์เซอร์บล็อก popup — กดอนุญาต popup ของเว็บนี้ที่แถบที่อยู่ แล้วกด “ดู Stock” อีกครั้ง');
+  else toast(`เปิดหน้า Stock 2 หน้าต่างแล้ว · คัดลอก Item No ${no} ไว้ให้วางค้นหา`);
+}
 function renderOos(){
   const all=oosAll(),active=all.filter(r=>r.status!=='done'),late=active.filter(r=>oosLevel(r)==='late'),need=all.filter(r=>r.status==='need'),doing=all.filter(r=>r.status==='doing');
   const t0=new Date();t0.setHours(0,0,0,0);const doneToday=all.filter(r=>r.status==='done'&&oosDoneMs(r)>=t0.getTime());
