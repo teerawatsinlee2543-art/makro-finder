@@ -2420,16 +2420,31 @@ function oosCard(r,ctx){
     ${oosFactsHtml(r)}
     <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
     <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
-/* "ดู Stock": two pop-up windows side by side (left / right) on the Makro stock web. {item} in a link is replaced by the Item No.
-   The Makro web needs its own login (never stored here). Set the two stock-page links below when they are known. */
+/* "ดู Stock": the Makro stock web. {item} in a link is replaced by the Item No. The Makro web needs its own login (never stored here).
+   Computer: two pop-up windows side by side (left / right). Phone / tablet (or when a 2nd pop-up is blocked): one tap = one page, from a small picker.
+   Set the stock-page links below when they are known. */
 const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','https://ssmobile.siammakro.co.th/login.html'];
+const STOCK_LABELS=['หน้า Stock 1','หน้า Stock 2'];
+function oosStockPick(no,urls){
+  const d=document.createElement('dialog');
+  d.innerHTML=`<h3 style="margin:0 0 4px">ดู Stock · Item ${esc(no)}</h3><p class="muted small" style="margin:0 0 12px">คัดลอก Item No ไว้แล้ว — แตะเปิดทีละหน้า แล้ววางค้นหา</p>
+    <div style="display:grid;gap:8px">${urls.map((u,i)=>`<button type="button" class="btn pri" data-i="${i}">เปิด${esc(STOCK_LABELS[i]||'หน้า '+(i+1))}</button>`).join('')}<button type="button" class="btn" data-x="1">ปิด</button></div>`;
+  d.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.x){d.close();return}window.open(urls[+b.dataset.i],'_blank')};
+  d.onclose=()=>d.remove();document.body.appendChild(d);d.showModal();
+}
 function oosStock(id){
   const r=oosAll().find(x=>x._id===id);if(!r)return;
-  const no=String(r.itemNo||''),sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,half=Math.floor(W/2);
+  const no=String(r.itemNo||''),urls=STOCK_URLS.map(u=>u.replace(/\{item\}/g,encodeURIComponent(no))),uniq=[...new Set(urls)];
   try{navigator.clipboard&&navigator.clipboard.writeText(no)}catch(e){}
-  const wins=STOCK_URLS.map((u,i)=>window.open(u.replace(/\{item\}/g,encodeURIComponent(no)),'mkStock'+i,`popup=yes,width=${half},height=${H},left=${L+i*half},top=${T}`));
+  const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||window.innerWidth<700;
+  if(phone){ /* a phone can't place two windows side by side and blocks the 2nd pop-up: one page opens directly, several go through the picker */
+    if(uniq.length>1){oosStockPick(no,uniq);return}
+    if(!window.open(uniq[0],'_blank'))oosStockPick(no,uniq);else toast(`เปิดหน้า Stock แล้ว · คัดลอก Item No ${no} ไว้ให้วางค้นหา`);
+    return}
+  const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,half=Math.floor(W/2);
+  const wins=urls.map((u,i)=>window.open(u,'mkStock'+i,`popup=yes,width=${half},height=${H},left=${L+i*half},top=${T}`));
   wins.forEach(w=>{try{w&&w.focus()}catch(e){}});
-  if(wins.some(w=>!w))toast('เบราว์เซอร์บล็อก popup — กดอนุญาต popup ของเว็บนี้ที่แถบที่อยู่ แล้วกด “ดู Stock” อีกครั้ง');
+  if(wins.some(w=>!w))oosStockPick(no,uniq);
   else toast(`เปิดหน้า Stock 2 หน้าต่างแล้ว · คัดลอก Item No ${no} ไว้ให้วางค้นหา`);
 }
 function renderOos(){
