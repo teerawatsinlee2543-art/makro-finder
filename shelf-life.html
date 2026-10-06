@@ -513,7 +513,31 @@ select,input,textarea{max-width:100%}
   .lot-grid{grid-template-columns:1fr}
   .lot-grid .span3{grid-column:auto}
 }
-$1{display:none!important}body{background:#fff}.card{border:0}}
+/* ===== computer screens ===== */
+#t-jul .grid2>.card{border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:14px;background:var(--card);box-shadow:0 2px 10px #0000000d}
+#t-jul .grid2>.card h2{margin-top:0}
+label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
+#aQty{background:var(--card);border:2px solid var(--accent);border-radius:12px;padding:10px 14px;font-size:16px;font-weight:700;box-shadow:0 2px 10px #0b5cad26}
+#aQty:focus{outline:0;box-shadow:0 0 0 4px #0b5cad33,0 2px 10px #0b5cad26}
+#aJ,#aDate,#aQty{height:54px;box-sizing:border-box;width:100%}
+@media (min-width:701px){
+  #t-jul>.grid2{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+  .dgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .lot-grid{align-items:end}
+}
+@media (max-width:700px){
+  #t-jul>.grid2>.card:nth-child(3){grid-column:1/-1}
+  /* "Makro Finder" back button with the team-data chip right under it */
+  header>.row{display:grid!important;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"back brand" "mode brand";gap:3px 8px!important;align-items:center}
+  header .back-mf{grid-area:back;justify-self:start}
+  header>.row>.brandbox{grid-area:brand}
+  header>.row #mode{grid-area:mode;justify-self:start;margin-left:0}
+  /* search field and the red Scan button on one line */
+  .search-row{flex-wrap:nowrap;gap:8px}
+  .search-row .grow{flex:1 1 0;min-width:0}
+  .search-row .scan-btn{flex:none;padding-left:10px;padding-right:10px}
+}
+@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
 <body>
@@ -714,7 +738,7 @@ $1{display:none!important}body{background:#fff}.card{border:0}}
     <div class="card"><h2>Julian → วันที่</h2>
       <label>Julian code<input id="jC" inputmode="numeric" maxlength="5" placeholder="277 หรือ 26277"></label>
       <p id="jCout" style="font-size:18px"></p></div>
-    <div class="card" style="grid-column:1/-1"><h2>กำหนดการจาก Julian วันรับ</h2>
+    <div class="card"><h2>กำหนดการจาก Julian วันรับ</h2>
       <label>สินค้า<select id="jSku"></select></label>
       <label style="margin-top:8px">Julian วันรับสินค้า<input id="jC2" inputmode="numeric"></label>
       <div id="jPlan" style="margin-top:10px"></div></div>
@@ -3209,7 +3233,7 @@ function renderNbs(){
   if(!$('#nbsBody'))return;
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',!!nbsColF[b.dataset.f]));
   const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0},open=rows.filter(r=>r.status!=='done');open.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
-  $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k} · ${l}</span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ยังไม่ปิดงาน</span></button>`).join('');
+  $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile dv dv-${k.toLowerCase()}${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k} · ${l}</span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ยังไม่ปิดงาน</span></button>`).join('');
   const lv=[0,1,2,3,4,5].map(n=>open.filter(r=>(agingInfo(r).level??-1)===n).length),nOver=open.filter(nbsOver).length,lastImp=rows.reduce((m,r)=>r.importedAt&&r.importedAt>m?r.importedAt:m,''),li=lastImp?new Date(lastImp):null;
   $('#nbsSummary').innerHTML=(li?`<span class="pill">นำเข้าล่าสุด <b>${fmt(li)} ${String(li.getHours()).padStart(2,'0')}.${String(li.getMinutes()).padStart(2,'0')} น.</b></span>`:'')
     +(open.some(r=>r.lastSale||r.lastRecv)?`<span class="pill">เกินเกณฑ์ NBS <b>${nOver.toLocaleString()}</b></span>`+AGING_LV.slice(1).map((l,i)=>`<span class="chip s-${l[1]}">${l[0]} ${lv[i+1].toLocaleString()}</span>`).join(''):'');
