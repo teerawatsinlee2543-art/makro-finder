@@ -469,7 +469,51 @@ select,input,textarea{max-width:100%}
   nav button{padding:8px 10px;font-size:14px}
   table.resp tbody,table.nbs-tbl tbody,table.ct-tbl tbody{grid-template-columns:1fr}
 }
-@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
+/* ===== phone layout ===== */
+@media (max-width:1100px){
+  table.resp td.pact{justify-content:flex-end}
+  table.resp td.pact::before{display:none}
+  table.resp td.pact>*{flex:0 0 auto}
+}
+@media (max-width:700px){
+  /* logo bar + Julian pinned at the very top, tabs pinned right under them */
+  header{position:sticky;top:env(safe-area-inset-top,0px);z-index:22;padding:6px 10px;gap:5px 8px}
+  header>.row{width:100%;gap:8px!important;flex-wrap:nowrap}
+  header .back-mf{flex:none;padding:6px 10px;font-size:13px}
+  header>.row .chip{flex:none;font-size:11px;padding:2px 8px;margin-left:auto}
+  .brandbox{padding:4px 14px 4px 40px;margin-left:24px;min-height:36px;min-width:0}
+  .brandbox .app-logo{width:46px;height:46px;left:-24px}
+  .brandbox h1{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .jbadge{width:100%;justify-content:flex-start;gap:8px;padding:3px 10px;border-radius:10px;box-shadow:none}
+  .jlabel{font-size:10px;padding-right:8px;white-space:nowrap}
+  .jlabel br{display:none}
+  .jnum{font-size:22px;padding:1px 9px 2px;border-radius:8px}
+  .jside{flex-direction:row;align-items:center;gap:6px;min-width:0;flex:1}
+  .jsub{font-size:12px;white-space:nowrap;flex:none}
+  .jdate{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  nav#tabs{top:calc(var(--hdrh,0px) + env(safe-area-inset-top,0px))}
+  .jmini{display:none!important}
+  /* OOS+ FF / DF / NF: one row */
+  #oosDivTiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  #oosDivTiles .tile{padding:8px 8px 8px 9px;min-width:0}
+  #oosDivTiles .tile.dv{border-left-width:5px}
+  #oosDivTiles .tile b{font-size:22px;margin:2px 0}
+  #oosDivTiles .dvl,#oosDivTiles .tl{display:none}
+  #oosDivTiles .chip{font-size:12px;padding:1px 8px}
+  #oosDivTiles .small{font-size:11px;line-height:1.2}
+  /* import / export: two tiles per row, fits the screen */
+  .dgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .dtile{padding:10px;min-width:0;overflow-wrap:anywhere}
+  .dtile b{font-size:14px}
+  .dtile .small,.dtile span:not(.dti){font-size:12px}
+  .dti{width:34px;height:34px}
+}
+@media (max-width:560px){
+  /* Add monitor item: one field per line */
+  .lot-grid{grid-template-columns:1fr}
+  .lot-grid .span3{grid-column:auto}
+}
+$1{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
 <body>
@@ -670,7 +714,7 @@ select,input,textarea{max-width:100%}
     <div class="card"><h2>Julian → วันที่</h2>
       <label>Julian code<input id="jC" inputmode="numeric" maxlength="5" placeholder="277 หรือ 26277"></label>
       <p id="jCout" style="font-size:18px"></p></div>
-    <div class="card"><h2>กำหนดการจาก Julian วันรับ</h2>
+    <div class="card" style="grid-column:1/-1"><h2>กำหนดการจาก Julian วันรับ</h2>
       <label>สินค้า<select id="jSku"></select></label>
       <label style="margin-top:8px">Julian วันรับสินค้า<input id="jC2" inputmode="numeric"></label>
       <div id="jPlan" style="margin-top:10px"></div></div>
@@ -1526,7 +1570,7 @@ function renderProd(){
     <td data-l="ลด 15%" class="num c-md1">${rng(f('md1'))}</td><td data-l="ลด 30%" class="num c-md2">${rng(f('md2'))}</td>
     <td data-l="Code 52" class="num c-pull">วันที่ ${p.pullDay}${amPm(p)?' (บ่าย)':''}</td>
     <td data-l="Buyer UID">${esc(p.buyerUid||'-')}</td><td data-l="Commercial">${esc(p.comUid||'-')}</td>
-    <td><div class="row w" style="gap:4px;flex-wrap:nowrap"><button class="btn sm" onclick="editProduct('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delProduct('${k}')">ลบ</button></div></td></tr>`}).join('');
+    <td class="pact"><div class="row w" style="gap:4px;flex-wrap:nowrap"><button class="btn sm" onclick="editProduct('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delProduct('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
 const dlgProd=$('#dlgProd'),fP=$('#fProd');let editId=null;
 const NUMF=['shelf','md1Day','md1Pct','md2Day','md2Pct','pullDay'],TXTF=['sku','desc','img','cat','origin','temp','buyerUid','comUid'];
@@ -2522,8 +2566,8 @@ function renderOos(){
   const ctx=oosDivCtx(),byDiv={},lateDiv={};
   active.forEach(r=>{const d=oosDiv(r,ctx)||'-';byDiv[d]=(byDiv[d]||0)+1;if(oosLevel(r)==='late')lateDiv[d]=(lateDiv[d]||0)+1});
   if(oosDivFilter==='-'&&!byDiv['-'])oosDivFilter=''; /* the "ไม่ระบุกลุ่ม" tile disappears once nothing is left in it */
-  const divTile=(k,chipHtml)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${oosDivFilter===k?' sel':''}" data-div="${k}">${chipHtml}<b>${(byDiv[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ต้องเติม${lateDiv[k]?` · <span class="err-text">ค้างเกิน ${OOS_LATE_H} ชม. ${lateDiv[k].toLocaleString()}</span>`:''}</span></button>`;
-  $('#oosDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k} · ${l}</span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
+  const divTile=(k,chipHtml)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${oosDivFilter===k?' sel':''}" data-div="${k}">${chipHtml}<b>${(byDiv[k]||0).toLocaleString()}</b><span class="muted small"><span class="tl">รายการที่ต้องเติม</span>${lateDiv[k]?`<span class="tl"> · </span><span class="err-text">ค้างเกิน ${OOS_LATE_H} ชม. ${lateDiv[k].toLocaleString()}</span>`:''}</span></button>`;
+  $('#oosDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
   /* status tiles follow the selected group */
   const sub=all.filter(r=>oosInDiv(r,ctx)),sActive=sub.filter(r=>r.status!=='done'),sLate=sActive.filter(r=>oosLevel(r)==='late'),sDoneToday=sub.filter(r=>r.status==='done'&&oosDoneMs(r)>=t0.getTime());
   $('#oosTiles').innerHTML=[['need','ต้องเติม','md1',sub.filter(r=>r.status==='need').length],['doing','กำลังเติม','soon',sub.filter(r=>r.status==='doing').length],['late','ค้างเกิน '+OOS_LATE_H+' ชม.','pull',sLate.length],['done','เติมแล้ววันนี้','ok',sDoneToday.length]]
@@ -3564,7 +3608,10 @@ let mfT;$('#mfQ').oninput=()=>{clearTimeout(mfT);mfT=setTimeout(renderMfResults,
 $('#mfQ').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const h=mfSearch($('#mfQ').value);if(h.length===1||(h[0]&&/^\d+$/.test($('#mfQ').value.trim())))pickMf(h[0].itemNo)}};
 $('#mfResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)pickMf(b.dataset.no)};
 /* keep sticky table headers just under the pinned tab bar */
-try{const ro=new ResizeObserver(()=>{const s=document.documentElement.style;s.setProperty('--navh',$('#tabs').offsetHeight+'px');s.setProperty('--legh',$('#dashLegend').offsetHeight+'px')});ro.observe($('#tabs'));ro.observe($('#dashLegend'))}catch(e){}
+try{const ph=matchMedia('(max-width:700px)'),hd=document.querySelector('header');
+  const upd=()=>{const s=document.documentElement.style,h=ph.matches?hd.offsetHeight:0; /* phone: the logo bar + Julian are pinned above the tabs */
+    s.setProperty('--hdrh',h+'px');s.setProperty('--navh',($('#tabs').offsetHeight+h)+'px');s.setProperty('--legh',$('#dashLegend').offsetHeight+'px')};
+  const ro=new ResizeObserver(upd);ro.observe($('#tabs'));ro.observe($('#dashLegend'));ro.observe(hd);ph.addEventListener('change',upd);window.addEventListener('resize',upd);upd()}catch(e){}
 /* compact Julian in the pinned tab bar once the big badge scrolls away */
 try{new IntersectionObserver(([en])=>$('#jmini').classList.toggle('show',!en.isIntersecting),{threshold:0}).observe(document.querySelector('.jbadge'))}catch(e){$('#jmini').classList.add('show')}
 /* camera barcode scan — same ZXing build and settings as Makro Finder's own scanner */
