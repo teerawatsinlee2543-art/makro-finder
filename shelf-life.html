@@ -356,6 +356,25 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .c-md2{color:var(--md2);font-weight:700}
 .oos-dchips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
 .oos-dchips:empty{display:none}
+/* frequency: mini bars on every card, ranking chart above the list */
+.oosc-freq{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:12.5px}
+.oosc-freq span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.oosc-freq em{font-style:normal;color:var(--muted);font-size:11.5px}
+.oosc-freq i{display:block;height:5px;border-radius:3px;background:linear-gradient(90deg,#d6453d var(--w),color-mix(in srgb,var(--muted) 22%,transparent) 0)}
+.oosc-freq small{color:var(--muted);font-size:11.5px}
+.oos-chart{margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-left:6px solid #d6453d;border-radius:12px;background:color-mix(in srgb,#d6453d 6%,var(--card))}
+.oc-h{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.oc-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.oc-seg button{font:inherit;font-weight:600;padding:5px 12px;border:0;background:var(--card);color:var(--ink);cursor:pointer}
+.oc-seg button+button{border-left:1px solid var(--line)}
+.oc-seg button.on{background:#d6453d;color:#fff}
+.oc-r{display:grid;grid-template-columns:minmax(110px,32%) 1fr auto;gap:10px;align-items:center;width:100%;padding:4px 2px;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.oc-r:hover{background:color-mix(in srgb,#d6453d 9%,transparent)}
+.oc-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.oc-b{display:block;height:12px;border-radius:6px;background:color-mix(in srgb,var(--muted) 18%,transparent);overflow:hidden}
+.oc-b i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#e8837b,#d6453d)}
+.oc-v{font-size:12.5px;white-space:nowrap;min-width:92px;text-align:right}
+@media (max-width:560px){.oc-r{grid-template-columns:1fr auto;grid-template-areas:"n v" "b b"}.oc-n{grid-area:n}.oc-v{grid-area:v}.oc-b{grid-area:b}}
 .oos-dchips .btn.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .oosc-note{padding:6px 8px;border:1px dashed var(--line);border-radius:8px;background:var(--bg);font-size:13px;overflow-wrap:anywhere}
 .oosc-photo{width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
@@ -605,6 +624,7 @@ select,input,textarea{max-width:100%}
         <button type="button" class="btn danger w" id="oosClearDone" title="ลบรายการที่เติมแล้วออกจากรายการ (ทุกคนในทีมเห็นการลบ)">ลบรายการที่เติมแล้ว</button>
       </div>
     </div>
+    <div id="oosChart"></div>
     <div id="oosList" class="oos-list"></div>
     <div id="oosMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="oosMoreTxt"></span><button class="btn" id="oosMore">แสดงเพิ่ม</button></div>
     <p class="muted" id="oosEmpty" hidden>ยังไม่มีรายการ OOS — กด “นำเข้ารายงาน” หรือ “+ เพิ่มรายการ” เมื่อเจอสินค้าหมดชั้นหรือหมดสต็อก</p>
@@ -2226,6 +2246,24 @@ function oosVisible(ctx){
 const oosNum=v=>{const n=parseFloat(String(v??'').replace(/,/g,''));return isNaN(n)?null:n};
 const oosFmtN=n=>n==null?'':(Math.abs(n)>=100||Number.isInteger(n)?Math.round(n):Math.round(n*10)/10).toLocaleString();
 const oosBuyerName=r=>{const c=r.buyerUid?(st.contacts||[]).find(x=>x.uid===r.buyerUid):null;return r.buyerName||(c&&c.name)||''};
+/* how often an item was short (times = order lines, days = delivery days) over the last 3 days / 7 days / the whole file */
+const OOS_PERIODS=[['3','3 วัน','freq3','days3'],['7','7 วัน','freq7','days7'],['all','ทั้งหมด','freqAll','daysAll']];
+function oosFreqHtml(r){
+  if(r.freqAll==null)return'';
+  const mx=Math.max(1,oosNum(r.freqAll)||0);
+  return`<div class="oosc-freq" title="ความถี่ที่ขาด: จำนวนครั้ง (บรรทัดออเดอร์) และจำนวนวัน นับถอยหลังจากวันส่งมอบล่าสุดในไฟล์">`+OOS_PERIODS.map(([,l,tk,dk])=>{const t=oosNum(r[tk])||0,d=oosNum(r[dk])||0;
+    return`<span><em>${l}</em><b>${t.toLocaleString()}</b> ครั้ง<i style="--w:${Math.round(t/mx*100)}%"></i><small>${d.toLocaleString()} วัน</small></span>`}).join('')+`</div>`}
+let oosFreqP='7';
+/* the chart above the list: the 10 items that were short most often among the cards currently listed, for the chosen period */
+function oosChartHtml(rows){
+  const withF=rows.filter(r=>r.freqAll!=null);
+  if(!withF.length)return'';
+  const [,lab,tk,dk]=OOS_PERIODS.find(x=>x[0]===oosFreqP)||OOS_PERIODS[1];
+  const ranked=withF.map(r=>({r,t:oosNum(r[tk])||0,d:oosNum(r[dk])||0})).filter(x=>x.t>0).sort((a,b)=>b.t-a.t||b.d-a.d||(oosNum(b.r.freqAll)||0)-(oosNum(a.r.freqAll)||0)).slice(0,10);
+  const mx=ranked.length?ranked[0].t:1,rep=withF.filter(r=>(oosNum(r[tk])||0)>=2).length;
+  const seg=OOS_PERIODS.map(([k,l])=>`<button type="button" class="${oosFreqP===k?'on':''}" data-p="${k}">${l}</button>`).join('');
+  const bars=ranked.length?ranked.map(({r,t,d})=>`<button type="button" class="oc-r" data-no="${esc(r.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(r.desc||r.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(t/mx*100))}%"></i></span><span class="oc-v"><b>${t.toLocaleString()}</b> ครั้ง · ${d.toLocaleString()} วัน</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ขาดในช่วงนี้</p>';
+  return`<div class="oos-chart"><div class="oc-h"><div><b>ความถี่ที่ขาด · ${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ขาดซ้ำตั้งแต่ 2 ครั้ง ${rep.toLocaleString()} จาก ${withF.length.toLocaleString()} รายการ</span></div><div class="oc-seg">${seg}</div></div>${bars}</div>`}
 function oosFactsHtml(r){
   const dms=oosNum(r.dms),sd=oosNum(r.stockDay),dn=oosNum(r.dmsNew),by=oosBuyerName(r),bits=[],out=[];
   if(r.assignDept)bits.push(`<span>แผนกที่เติม: <b>${esc(r.assignDept)}</b></span>`);
@@ -2241,6 +2279,7 @@ function oosFactsHtml(r){
   if(r.chronicDays>=3)b2.push(`<b class="c-md2">ขาดซ้ำ ${r.chronicDays} วันในเดือน</b>`);
   if(r.reason)b2.push(`สาเหตุ: ${esc(r.reason)}`);
   if(b2.length)out.push(`<div class="oosc-f small muted">${b2.join(' · ')}</div>`);
+  if(r.freqAll!=null)out.push(oosFreqHtml(r));
   if(r.bucket&&OOS_BK[r.bucket])out.push(`<div class="small"><b>ต้องทำ:</b> ${esc(OOS_BK[r.bucket][1])}</div>`);
   if(r.dmsNote)out.push(`<div class="muted small">${esc(r.dmsNote)}</div>`);
   return out.join('')}
@@ -2282,6 +2321,7 @@ function renderOos(){
   const sel=$('#oosFWho'),cur=sel.value,names=[...new Set(all.map(r=>r.assignee).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   sel.innerHTML='<option value="">ทั้งหมด</option>'+names.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('');
   const rows=oosVisible(ctx),shown=rows.slice(0,oosLimit);
+  $('#oosChart').innerHTML=oosChartHtml(rows);
   $('#oosList').innerHTML=shown.map(r=>oosCard(r,ctx)).join('');
   $('#oosEmpty').hidden=rows.length>0;$('#oosEmpty').textContent=all.length?'ไม่มีรายการที่ตรงกับตัวกรอง':'ยังไม่มีรายการ OOS — กด “นำเข้ารายงาน” หรือ “+ เพิ่มรายการ” เมื่อเจอสินค้าหมดชั้นหรือหมดสต็อก';
   $('#oosMoreWrap').hidden=rows.length<=oosLimit;$('#oosMoreTxt').textContent=`แสดง ${shown.length.toLocaleString()} จาก ${rows.length.toLocaleString()} รายการ`;
@@ -2348,6 +2388,9 @@ $('#oosDivTiles').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;oos
 $('#oosMore').onclick=()=>{oosLimit+=60;renderOos()};
 let oosQT;$('#oosQ').oninput=()=>{clearTimeout(oosQT);oosQT=setTimeout(()=>{oosLimit=60;renderOos()},150)};
 ['#oosFSt','#oosFWho','#oosFBk','#oosFDept','#oosSort','#oosHide'].forEach(s=>$(s).onchange=()=>{oosLimit=60;renderOos()});
+$('#oosChart').onclick=e=>{
+  const sg=e.target.closest('.oc-seg button');if(sg){oosFreqP=sg.dataset.p;renderOos();return}
+  const bar=e.target.closest('.oc-r');if(bar){$('#oosQ').value=bar.dataset.no;oosLimit=60;renderOos();$('#oosList').scrollIntoView({block:'nearest',behavior:'smooth'})}};
 $('#oosDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=$('#oosFDept');d.value=d.value===b.dataset.d?'':b.dataset.d;oosLimit=60;renderOos()};
 $('#oosBannerGo').onclick=()=>document.querySelector('#tabs button[data-tab="oos"]').click();
 setInterval(()=>{if(!document.hidden)renderOos()},60000); /* the "ค้าง … ชม." counters and colours move on without a click */
@@ -2523,7 +2566,10 @@ function oosWindowRows(imp,win){
     const foundAt=dt.toDateString()===n.toDateString()?n.toISOString():dt.toISOString();
     const short=withB.reduce((s,[l])=>s+l.short,0),loss=withB.reduce((s,[l])=>s+l.loss,0);
     const stockDayRaw=it.sdLast;
-    rows.push({itemNo:it.itemNo,desc:it.desc,barcode:lastL.barcode,loc:lastL.loc,division:it.div,dept:it.dept,assignDept:oosAssignDept(it.dept,it.bu),
+    /* how often the item was short: order lines (times) and distinct delivery days, over the last 3 days, last 7 days and the whole file (counted back from the latest delivery day; "not a stock problem" lines are not counted) */
+    const freq=n=>{const mn=n?imp.info.maxDay-(n-1)*OOS_DAY:-Infinity,l2=it.lines.filter(l=>l.day>=mn&&oosLineBucket(l)!=='D');return[l2.length,new Set(l2.map(l=>l.day)).size]};
+    const [t3,d3]=freq(3),[t7,d7]=freq(7),[ta,da]=freq(0);
+    rows.push({freq3:t3,freq7:t7,freqAll:ta,days3:d3,days7:d7,daysAll:da,itemNo:it.itemNo,desc:it.desc,barcode:lastL.barcode,loc:lastL.loc,division:it.div,dept:it.dept,assignDept:oosAssignDept(it.dept,it.bu),
       buyerUid:it.bu,buyerName:it.bn,dms:it.dmsRaw===''?null:it.dmsRaw,stockDay:stockDayRaw===''?null:stockDayRaw,dmsNew:it.dmsNew,dmsOld:it.dmsOld,dmsNote:it.dmsNote,
       bucket,reason,shortQty:Math.round(short*100)/100,shortUnit:it.w?'กก.':'หน่วย',weight:it.w,lossBaht:Math.round(loss),chronicDays:it.soDays,orderWay:it.ow,repl:it.repl,
       stock:'',foundAt,who:'',note:''});
@@ -2576,7 +2622,7 @@ function showOosPreview(){
 const oosExtra=x=>{
   const e={};
   ['division','dept','assignDept','buyerUid','buyerName','bucket','reason','shortUnit','orderWay','repl','dmsNote'].forEach(k=>{if(x[k])e[k]=x[k]});
-  ['dms','stockDay','dmsNew','dmsOld','shortQty','lossBaht','chronicDays'].forEach(k=>{if(x[k]!=null&&x[k]!=='')e[k]=x[k]});
+  ['dms','stockDay','dmsNew','dmsOld','shortQty','lossBaht','chronicDays','freq3','freq7','freqAll','days3','days7','daysAll'].forEach(k=>{if(x[k]!=null&&x[k]!=='')e[k]=x[k]});
   if(x.weight)e.weight=true;
   return e};
 async function runOosImport(){
