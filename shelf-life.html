@@ -672,16 +672,19 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
 }
 /* tabs on a computer: eleven things in one row must fit without a scrollbar */
 @media (min-width:701px){
-  nav{gap:2px;padding:8px 12px}
+  nav{gap:2px;padding:6px 12px;align-items:center}
   nav button{padding:8px 9px;font-size:14.5px}
   .tabcnt{margin-left:4px;padding:0 5px}
-  .jmini .jm-y{display:none}
+  /* the same Julian badge as at the top of the page, a little smaller, pinned at the right end of the tab bar */
+  .jmini{gap:9px;padding:4px 14px 4px 10px;border-radius:12px;box-shadow:0 3px 10px #0b5cad40}
+  .jmini .jlabel{font-size:9.5px;padding-right:9px;line-height:1.2}
+  .jmini b{font-size:26px;padding:2px 10px 4px;border-radius:9px;box-shadow:inset 0 -2px 0 #00000014}
+  .jmini .jside{gap:2px}
+  .jmini .jsub{font-size:11px;padding:0 8px}
+  .jmini .jdate{font-size:11.5px}
 }
-@media (min-width:701px) and (max-width:1500px){
-  nav button{padding:8px 7px;font-size:14px}
-  .jmini .jm-l{display:none}
-  .jmini{padding:3px 4px 3px 6px}
-}@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
+@media (min-width:701px) and (max-width:1500px){nav button{padding:8px 7px;font-size:14px}.jmini .jdate{display:none}.jmini{padding-right:10px}}
+@media (min-width:701px) and (max-width:1240px){.jmini .jside{display:none}.jmini{padding-right:8px}}@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
 <body>
@@ -703,7 +706,7 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
   <button data-tab="ct">Buyer / Commercial</button>
   <button data-tab="jul">แปลง Julian</button>
   <button data-tab="data">นำเข้า/ส่งออก</button>
-  <div class="jmini" id="jmini" aria-hidden="true"><span class="jm-l">JULIAN</span><b id="jmNum"></b><span class="jm-y" id="jmY"></span></div>
+  <div class="jmini" id="jmini" aria-hidden="true"><div class="jlabel">JULIAN<br>วันนี้</div><b id="jmNum"></b><div class="jside"><span class="jsub" id="jmY"></span><span class="jdate" id="jmDate"></span></div></div>
 </nav>
 <main>
 
@@ -4476,7 +4479,7 @@ $('#dlgImp').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransf
 /* ---------- boot ---------- */
 function renderAll(){
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent=jul(t).y2;
+  $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent="YYDDD "+jul(t).y2;$("#jmDate").textContent=$("#todayTxt").textContent;
   const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML=prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
   renderDash();renderProd();renderCt();renderNbs();renderOos();addPreview();julTab();
 }
