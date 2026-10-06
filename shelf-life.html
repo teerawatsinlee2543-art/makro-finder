@@ -603,6 +603,10 @@ th.sortable:hover{color:var(--accent)}
   #oosMain.drill .oos-chart{margin:0}
   #oosMain.drill .oos-list{grid-template-columns:minmax(0,1fr);align-items:start}
 }
+/* selected tile: clear red frame; the others fade while one is selected */
+.tile.sel{outline:3px solid #e0262d;outline-offset:0;box-shadow:0 4px 16px #e0262d3d;position:relative}
+.tiles:has(>.tile.sel)>.tile:not(.sel){opacity:.42;filter:saturate(.45)}
+.tiles:has(>.tile.sel)>.tile:not(.sel):hover{opacity:.8}
 @media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
