@@ -2234,6 +2234,11 @@ function brMapHeader(row){const m={},used=new Set();
 const brClassNo=v=>{const m=String(v??'').trim().match(/^(\d{1,4})(?!\d)/);return m?m[1]:''};
 /* a contact's UID can hold several codes: "FP, FP2, FR5, FR7", "F3A & F3E", "FEX, FD8" */
 const ctUidTokens=u=>String(u||'').replace(/\([^)]*\)/g,' ').split(/\s*(?:,|&|\/|\band\b)\s*|\s+/i).map(s=>s.trim()).filter(Boolean);
+/* the Buyer contact for a buyer_uid written in a file: exact UID first, then one of the codes a contact holds. The contact list writes DFS2 in some places and DSF3 in others (same code, letters swapped): DSF counts as DFS. */
+function ctFindBuyer(uid){
+  uid=String(uid||'').trim();if(!uid)return null;
+  const lc=s=>String(s).trim().toLowerCase().replace(/^dsf/,'dfs'),buyers=(st.contacts||[]).filter(c=>c.role==='Buyer');
+  return buyers.find(c=>lc(c.uid)===lc(uid))||buyers.find(c=>ctUidTokens(c.uid).some(t=>lc(t)===lc(uid)))||null}
 let brImp=null;
 function parseBuyerRules(wb){
   const seen=new Set(),rules=[],info={rows:0,dups:0,skipped:0};
@@ -2257,9 +2262,7 @@ function planBuyerRules(imp,o){
   imp.rules.forEach(r=>{let e=byUid.get(r.uid);if(!e)byUid.set(r.uid,e={uid:r.uid,name:r.name,nos:new Set()});e.nos.add(r.no);
     let s=clsUids.get(r.no);if(!s)clsUids.set(r.no,s=new Set());s.add(r.uid)});
   const amb=[...clsUids.entries()].filter(([,s])=>s.size>1).map(([no,s])=>({no,uids:[...s].sort(),name:(imp.rules.find(r=>r.no===no)||{}).cls||no}));
-  /* the contact list writes DFS2 in some places and DSF3 in others (same code, letters swapped): treat DSF as DFS */
-  const lc=s=>String(s).trim().toLowerCase().replace(/^dsf/,'dfs');
-  const findC=uid=>buyers.find(c=>lc(c.uid)===lc(uid))||buyers.find(c=>ctUidTokens(c.uid).some(t=>lc(t)===lc(uid)))||null;
+  const findC=ctFindBuyer;
   const per=new Map(),lost=[];
   byUid.forEach(e=>{const c=findC(e.uid);if(!c){lost.push({uid:e.uid,name:e.name,n:e.nos.size});return}
     let p=per.get(c._id);if(!p)per.set(c._id,p={c,uids:[],nos:new Set()});p.uids.push(e.uid);e.nos.forEach(n=>p.nos.add(n))});
@@ -3216,7 +3219,7 @@ $('#t-nbs thead').onclick=e=>{const b=e.target.closest('.fbtn');if(b)openFMenu(b
 const normH=s=>String(s??'').toLowerCase().replace(/[\s._\-\/()\[\]:]/g,'');
 /* header → field, first match wins; order matters (days before stock, so "จำนวนวัน…" is not read as stock) */
 const NBS_COLS=[
-  ['artGrp',/(artgrp|artgroup|articlegroup|กลุ่มสินค้าart|artกลุ่ม)/],
+  ['artGrp',/(artgrp|artgroup|articlegroup|กลุ่มสินค้าart|artกลุ่ม|^class$|^classno$|^classcode$)/],
   ['agingType',/(agingtype|agetype|ประเภทaging|ประเภทการaging)/],
   ['aging',/(agingstatus|agestatus|agingcategory|agingbucket|agingband|สถานะอายุ|^aging$)/],
   ['lastRecv',/(lastrecv|lastreceiv|lastrcv|lastgr|วันที่รับล่าสุด|รับล่าสุด|วันที่รับสินค้าล่าสุด|วันรับล่าสุด)/],
@@ -3228,7 +3231,8 @@ const NBS_COLS=[
   ['division',/^(division|group|dept|department|category|กลุ่ม|กลุ่มสินค้า|แผนก|หมวด|หมวดสินค้า|ffdfnf|div|type|ประเภท|ประเภทสินค้า)$/],
   ['stock',/(stock|onhand|soh|qty|quantity|คงเหลือ|สต็อก|สต๊อก|ยอดคงเหลือ|จำนวน)/],
   ['loc',/^(loc|location|ที่ตั้ง|ตำแหน่ง|ตำแหน่งจัดเก็บ|shelf|ชั้นวาง)/],
-  ['buyer',/(buyeruid|buyerid|buyer|ผู้ซื้อ|บายเออร์)/]];
+  ['buyer',/^(buyeruid|buyerid|buyercode|buyer|ผู้ซื้อ|บายเออร์|รหัสbuyer)$/],
+  ['buyerName',/^(buyername|ชื่อbuyer|ชื่อผู้ซื้อ)$/]];
 function mapHeader(row){const m={},used=new Set();
   (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of NBS_COLS){if(!m[f]&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});
   /* a column named "Division" always wins over generic group/dept/category columns, and is then followed strictly */
@@ -3255,7 +3259,7 @@ const cleanNo=v=>{let s=String(v??'').trim();if(/^\d+\.0+$/.test(s))s=s.replace(
 const numOr=v=>{const n=parseFloat(String(v??'').replace(/,/g,''));return isNaN(n)?'':n};
 function divFromName(s){const m=String(s||'').match(/(^|[^a-z])(ff|df|nf)([^a-z]|$)/i);return m?m[2].toUpperCase():divFrom(s)}
 function parseWorkbook(wb,fileName,defDiv){
-  const recs=new Map(),info={sheets:[],skipped:0,cols:{},byDivSource:{},divVals:{},badDiv:0};
+  const recs=new Map(),info={sheets:[],skipped:0,cols:{},byDivSource:{},divVals:{},badDiv:0,bsrc:{file:0,rule:0,unknown:0,none:0},buyerUnknown:{}};
   for(const sn of wb.SheetNames){
     const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
     let hi=-1,m=null;
@@ -3282,12 +3286,18 @@ function parseWorkbook(wb,fileName,defDiv){
       }
       let last=m.lastSale!=null?toIsoDate(r[m.lastSale]):'',derived=false;
       const recv=m.lastRecv!=null?toIsoDate(r[m.lastRecv]):'';
-      const artGrp=m.artGrp!=null?cleanNo(r[m.artGrp]):'',dept=m.dept!=null?String(r[m.dept]??'').trim():'',aging=m.aging!=null?String(r[m.aging]??'').trim():'',agingType=m.agingType!=null?parseAgingType(r[m.agingType]):'';
+      /* an Art Grp / Class cell can read "681 Cereal Milk": the number is the Art Grp */
+      const agRaw=m.artGrp!=null?r[m.artGrp]:'',agm=String(agRaw??'').trim().match(/^(\d{1,4})\s+\S/),artGrp=agm?agm[1]:cleanNo(agRaw),dept=m.dept!=null?String(r[m.dept]??'').trim():'',aging=m.aging!=null?String(r[m.aging]??'').trim():'',agingType=m.agingType!=null?parseAgingType(r[m.agingType]):'';
       let dv=m.days!=null?numOr(r[m.days]):'';
       if(dv===''&&/^\d+$/.test(aging))dv=+aging;
       if(!last&&dv!==''&&dv>=0){last=iso(addD(today(),-Math.round(dv)));derived=true}
-      let buyer='';if(m.buyer!=null){const b=String(r[m.buyer]??'').trim().toUpperCase();const c=st.contacts.find(x=>String(x.uid).toUpperCase()===b&&x.role==='Buyer');if(c)buyer=c.uid}
-      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer||buyerFor({division:div,artGrp,dept,desc})});
+      /* Buyer: the file's buyer_uid is the source of truth (matched to the contact list, also when a contact holds several codes); a code that is not in the list is kept as written;
+         without one, the "สินค้าที่ดูแล" rules decide from the Art Grp / Class */
+      let buyer='',bsrc='';
+      if(m.buyer!=null){const raw=String(r[m.buyer]??'').trim();if(raw){const c=ctFindBuyer(raw);buyer=c?c.uid:raw;bsrc=c?'file':'unknown';if(!c)info.buyerUnknown[raw]=(info.buyerUnknown[raw]||0)+1}}
+      if(!buyer){const ru=buyerFor({division:div,artGrp,dept,desc});if(ru){buyer=ru;bsrc='rule'}}
+      info.bsrc[bsrc||'none']++;
+      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
     info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict")info.cols[k]=true});
@@ -3372,7 +3382,7 @@ async function readImportFile(file){
     impState={file:file.name,wb,...parsed};showImportPreview();
   }catch(e){impState=null;$('#impBox').innerHTML='';$('#impErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
 }
-const COL_LBL={itemNo:'รหัสสินค้า',desc:'ชื่อสินค้า',barcode:'บาร์โค้ด',division:'กลุ่ม',lastSale:'Last Sold Date',lastRecv:'Last Recv. Date',aging:'Aging Status (ไฟล์)',agingType:'Aging Type',dept:'Department',artGrp:'Art Grp',days:'NBS (วันที่ไม่มียอดขาย)',stock:'Stock',loc:'ที่ตั้ง',buyer:'Buyer'};
+const COL_LBL={buyerName:'ชื่อ Buyer',itemNo:'รหัสสินค้า',desc:'ชื่อสินค้า',barcode:'บาร์โค้ด',division:'กลุ่ม',lastSale:'Last Sold Date',lastRecv:'Last Recv. Date',aging:'Aging Status (ไฟล์)',agingType:'Aging Type',dept:'Department',artGrp:'Art Grp',days:'NBS (วันที่ไม่มียอดขาย)',stock:'Stock',loc:'ที่ตั้ง',buyer:'Buyer'};
 function showImportPreview(){
   const {recs,info}=impState,plan=planImport(recs,$('#impAuto').checked),cnt={FF:0,DF:0,NF:0};recs.forEach(r=>cnt[r.division]++);
   const days=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null,hasDays=recs.some(r=>r.lastSale);
@@ -3382,6 +3392,11 @@ function showImportPreview(){
   <div class="imp-tiles"><div><b>${cnt.FF.toLocaleString()}</b><span>FF</span></div><div><b>${cnt.DF.toLocaleString()}</b><span>DF</span></div><div><b>${cnt.NF.toLocaleString()}</b><span>NF</span></div>
   <div class="t-new"><b>${plan.add.toLocaleString()}</b><span>รายการใหม่</span></div><div><b>${plan.upd.toLocaleString()}</b><span>อัปเดตของเดิม</span></div>${plan.moves.length?`<div class="t-close"><b>${plan.moves.length.toLocaleString()}</b><span>ย้ายกลุ่มให้ถูก</span></div>`:""}<div class="${plan.close.length?'t-close':''}"><b>${plan.close.length.toLocaleString()}</b><span>ปิดงานอัตโนมัติ</span></div></div>
   <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>COL_LBL[k]||k).join(' · ')}</p>
+  ${(()=>{const b=info.bsrc||{},unk=Object.entries(info.buyerUnknown||{}).sort((x,y)=>y[1]-x[1]);
+    const no=!info.cols.buyer&&!info.cols.artGrp;
+    return`<p class="small" style="margin:6px 0 0"><b>Buyer:</b> จากคอลัมน์ buyer_uid ${(b.file||0).toLocaleString()} · จากกฎ Class / Art Grp ${(b.rule||0).toLocaleString()} · รหัสที่ไม่พบในรายชื่อ ${(b.unknown||0).toLocaleString()} · ยังไม่มี ${(b.none||0).toLocaleString()}</p>`
+    +(unk.length?`<p class="small err-text" style="margin:2px 0 0">รหัส Buyer ในไฟล์ที่ไม่มีในรายชื่อ Buyer / Commercial: ${esc(unk.slice(0,10).map(([k,n])=>k+' ('+n+')').join(', '))}${unk.length>10?' …':''} — ระบบเก็บรหัสไว้ตามไฟล์ เพิ่มรายชื่อให้ครบแล้ว Buyer จะแสดงเต็ม</p>`:'')
+    +(no?`<p class="small err-text" style="margin:2px 0 0">ไฟล์นี้ไม่มีคอลัมน์ <b>buyer_uid</b> หรือ <b>Class / Art Grp</b> ระบบจึงเติม Buyer ให้ไม่ได้ — เพิ่มคอลัมน์เหล่านี้ตอน Export รายงาน (ตัวเดียวกับไฟล์ data ที่มี Division · Dept · Class · buyer_uid · Buyer Name) หรือนำเข้า “Item → Art Grp” แล้วนำเข้าไฟล์นี้ซ้ำ</p>`:'')})()}
   ${Object.keys(info.divVals).length?`<div class="imp-div"><b>กลุ่มจากคอลัมน์ Division (ใช้ตามค่าในไฟล์ 100%):</b><div class="imp-divchips">${Object.entries(info.divVals).sort((a,b)=>b[1].n-a[1].n).map(([k,e])=>`<span class="chip ${e.div?'div-'+e.div.toLowerCase():'s-pull'}">${esc(k)} → ${e.div||'ไม่รู้จัก'} · ${e.n.toLocaleString()}</span>`).join('')}</div>${info.badDiv?`<p class="err-text small" style="margin:6px 0 0">ข้าม ${info.badDiv.toLocaleString()} แถวที่ค่า Division ไม่ใช่ FRESH FOOD / DRY FOOD / NON FOOD (ไม่นำเข้า เพราะไม่เดากลุ่มให้)</p>`:''}</div>`:''}
   ${Object.keys(info.divVals).length?'':`<p class="small muted" style="margin:2px 0 0">แยกกลุ่มจาก: ${Object.entries(info.byDivSource).map(([k,v])=>`${esc(k)} (${v.toLocaleString()})`).join(' · ')}${info.byDivSource['ค่าเริ่มต้น']?' — ถ้าไม่ถูก เลือก “กลุ่มเริ่มต้น” ด้านล่างแล้วเลือกไฟล์ใหม่':''}</p>`}
   ${hasDays?`<p class="small" style="margin:2px 0 0"><b>ระดับเตือนที่ระบบจะเฝ้าระวัง:</b> <span class="chip s-md1">30+ วัน ${al[0]}</span> <span class="chip s-md2">60+ วัน ${al[1]}</span> <span class="chip s-pull">90+ วัน ${al[2]}</span></p>`:'<p class="small muted" style="margin:2px 0 0">ไฟล์นี้ไม่มีวันที่ขายล่าสุด — ระบบจะบันทึกรายการเป็น “รอตรวจสอบ” โดยไม่นับวัน</p>'}
