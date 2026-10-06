@@ -371,18 +371,21 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .oosc-freq em{font-style:normal;color:var(--muted);font-size:11.5px}
 .oosc-freq i{display:block;height:5px;border-radius:3px;background:linear-gradient(90deg,#d6453d var(--w),color-mix(in srgb,var(--muted) 22%,transparent) 0)}
 .oosc-freq small{color:var(--muted);font-size:11.5px}
-.oos-chart{margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-left:6px solid #d6453d;border-radius:12px;background:color-mix(in srgb,#d6453d 6%,var(--card))}
+.oos-chart{margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-left:6px solid #7a4fd6;border-radius:12px;background:color-mix(in srgb,#7a4fd6 6%,var(--card))}
 .oc-h{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin-bottom:8px}
 .oc-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .oc-seg button{font:inherit;font-weight:600;padding:5px 12px;border:0;background:var(--card);color:var(--ink);cursor:pointer}
 .oc-seg button+button{border-left:1px solid var(--line)}
-.oc-seg button.on{background:#d6453d;color:#fff}
+.oc-seg button.on{background:#7a4fd6;color:#fff}
 .oc-r{display:grid;grid-template-columns:minmax(110px,32%) 1fr auto;gap:10px;align-items:center;width:100%;padding:4px 2px;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.oc-r:hover{background:color-mix(in srgb,#d6453d 9%,transparent)}
+.oc-r:hover{background:color-mix(in srgb,#7a4fd6 9%,transparent)}
 .oc-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
 .oc-b{display:block;height:12px;border-radius:6px;background:color-mix(in srgb,var(--muted) 18%,transparent);overflow:hidden}
-.oc-b i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#e8837b,#d6453d)}
+.oc-b i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#b9a0f0,#7a4fd6)}
 .oc-v{font-size:12.5px;white-space:nowrap;min-width:92px;text-align:right}
+.oc-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.oc-back{font:inherit;font-weight:700;padding:5px 12px;border:1px solid #7a4fd6;border-radius:8px;background:#fff;color:#7a4fd6;cursor:pointer}
+.oc-back:hover{background:#7a4fd6;color:#fff}
 @media (max-width:560px){.oc-r{grid-template-columns:1fr auto;grid-template-areas:"n v" "b b"}.oc-n{grid-area:n}.oc-v{grid-area:v}.oc-b{grid-area:b}}
 .oos-dchips .btn.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .oosc-note{padding:6px 8px;border:1px dashed var(--line);border-radius:8px;background:var(--bg);font-size:13px;overflow-wrap:anywhere}
@@ -2508,14 +2511,14 @@ function oosFreqHtml(r){
 let oosFreqP='7';
 /* the chart above the list: the 10 items that were short most often among the cards currently listed, for the chosen period */
 function oosChartHtml(rows){
-  const withF=rows.filter(r=>r.freqAll!=null);
-  if(!withF.length)return'';
+  const withF=rows.filter(r=>r.freqAll!=null),qs=$('#oosQ').value.trim();
+  if(!withF.length&&!qs)return'';
   const [,lab,tk,dk]=OOS_PERIODS.find(x=>x[0]===oosFreqP)||OOS_PERIODS[1];
   const ranked=withF.map(r=>({r,t:oosNum(r[tk])||0,d:oosNum(r[dk])||0})).filter(x=>x.t>0).sort((a,b)=>b.t-a.t||b.d-a.d||(oosNum(b.r.freqAll)||0)-(oosNum(a.r.freqAll)||0)).slice(0,10);
   const mx=ranked.length?ranked[0].t:1,rep=withF.filter(r=>(oosNum(r[tk])||0)>=2).length;
   const seg=OOS_PERIODS.map(([k,l])=>`<button type="button" class="${oosFreqP===k?'on':''}" data-p="${k}">${l}</button>`).join('');
   const bars=ranked.length?ranked.map(({r,t,d})=>`<button type="button" class="oc-r" data-no="${esc(r.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(r.desc||r.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(t/mx*100))}%"></i></span><span class="oc-v"><b>${t.toLocaleString()}</b> ครั้ง · ${d.toLocaleString()} วัน</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ขาดในช่วงนี้</p>';
-  return`<div class="oos-chart"><div class="oc-h"><div><b>ความถี่ที่ขาด · ${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ขาดซ้ำตั้งแต่ 2 ครั้ง ${rep.toLocaleString()} จาก ${withF.length.toLocaleString()} รายการ</span></div><div class="oc-seg">${seg}</div></div>${bars}</div>`}
+  return`<div class="oos-chart"><div class="oc-h"><div><b>ความถี่ที่ขาด · ${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ขาดซ้ำตั้งแต่ 2 ครั้ง ${rep.toLocaleString()} จาก ${withF.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
 function oosFactsHtml(r){
   const dms=oosNum(r.dms),sd=oosNum(r.stockDay),dn=oosNum(r.dmsNew),by=oosBuyerName(r),bits=[],out=[];
   if(r.assignDept)bits.push(`<span>แผนกที่เติม: <b>${esc(r.assignDept)}</b></span>`);
@@ -2723,6 +2726,7 @@ $('#oosMore').onclick=()=>{oosLimit+=60;renderOos()};
 let oosQT;$('#oosQ').oninput=()=>{clearTimeout(oosQT);oosQT=setTimeout(()=>{oosLimit=60;renderOos()},150)};
 ['#oosFSt','#oosFWho','#oosFBk','#oosFDept','#oosSort','#oosHide'].forEach(s=>$(s).onchange=()=>{oosLimit=60;renderOos()});
 $('#oosChart').onclick=e=>{
+  const bk=e.target.closest('.oc-back');if(bk){$('#oosQ').value='';oosLimit=60;renderOos();$('#oosChart').scrollIntoView({block:'nearest',behavior:'smooth'});return}
   const sg=e.target.closest('.oc-seg button');if(sg){oosFreqP=sg.dataset.p;renderOos();return}
   const bar=e.target.closest('.oc-r');if(bar){$('#oosQ').value=bar.dataset.no;oosLimit=60;renderOos();$('#oosList').scrollIntoView({block:'nearest',behavior:'smooth'})}};
 $('#oosDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=$('#oosFDept');d.value=d.value===b.dataset.d?'':b.dataset.d;oosLimit=60;renderOos()};
