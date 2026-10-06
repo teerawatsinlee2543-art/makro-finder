@@ -541,6 +541,31 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   .search-row .grow{flex:1 1 0;min-width:0}
   .search-row .scan-btn{flex:none;padding-left:10px;padding-right:10px}
 }
+/* ===== phone fit ===== */
+.ts{display:none}
+@media (max-width:700px){
+  /* bigger logo and red pill */
+  .brandbox{padding:6px 12px 6px 56px;margin-left:36px;min-height:50px}
+  .brandbox .app-logo{width:70px;height:70px;left:-36px}
+  .brandbox h1{font-size:16px}
+  /* OOS+: the three top buttons on one line */
+  #t-oos .add-head>.row{width:100%;flex-wrap:nowrap;gap:6px}
+  #t-oos .add-head>.row>.btn{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
+  /* Item NBS FF / DF / NF: one row */
+  #nbsTiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  #nbsTiles .tile{padding:8px 8px 8px 9px;min-width:0}
+  #nbsTiles .tile.dv{border-left-width:5px}
+  #nbsTiles .tile b{font-size:22px;margin:2px 0}
+  #nbsTiles .dvl,#nbsTiles .tl{display:none}
+  #nbsTiles .ts{display:inline}
+  #nbsTiles .chip{font-size:12px;padding:1px 8px}
+  #nbsTiles .small{font-size:11px;line-height:1.2}
+  /* nothing wider than the screen (date fields on iPhone are the usual offender) */
+  input,select,textarea{max-width:100%;min-width:0;box-sizing:border-box}
+  input[type=date],input[type=time],input[type=datetime-local]{width:100%;-webkit-appearance:none;appearance:none;display:block;min-height:48px}
+  main,section,.card{max-width:100%}
+  .lot-grid>*,.grid2>*,.grid>*,.row>*{min-width:0}
+}
 @media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
@@ -1682,7 +1707,7 @@ function renderCt(){
     <td data-l="Description" class="small">${v.arts.length?v.arts.map(a=>`<div>${esc(a[1])}</div>`).join(''):esc(v.desc||'-')}</td>
     <td data-l="Assistant" class="small">${v.asst.length?v.asst.map(x=>`<div>${esc(x)}</div>`).join(''):'<span class="muted">-</span>'}${v.merch?`<div class="muted small">Merch กลุ่ม ${esc(v.merch)}</div>`:''}</td>
     <td data-l="Junior Buyer / New Gen" class="small">${v.jr.length?v.jr.map(x=>`<div>${esc(x)}</div>`).join(''):'<span class="muted">-</span>'}</td>
-    <td><div class="row w" style="gap:4px;flex-wrap:wrap"><button class="btn sm" onclick="editContact('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delContact('${k}')">ลบ</button></div></td></tr>`}).join('');
+    <td class="pact"><div class="row w" style="gap:4px;flex-wrap:wrap"><button class="btn sm" onclick="editContact('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delContact('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
 /* the Buyer shown inside an Item NBS row: Buyer UID, Merchandise Mgr. name, Area, Description, Assistant, Junior Buyer (like the org chart) */
 function buyerCardHtml(b){
@@ -3237,7 +3262,7 @@ function renderNbs(){
   if(!$('#nbsBody'))return;
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',!!nbsColF[b.dataset.f]));
   const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0},open=rows.filter(r=>r.status!=='done');open.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
-  $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile dv dv-${k.toLowerCase()}${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k} · ${l}</span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ยังไม่ปิดงาน</span></button>`).join('');
+  $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile dv dv-${k.toLowerCase()}${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small"><span class="tl">รายการที่ยังไม่ปิดงาน</span><span class="ts">ยังไม่ปิดงาน</span></span></button>`).join('');
   const lv=[0,1,2,3,4,5].map(n=>open.filter(r=>(agingInfo(r).level??-1)===n).length),nOver=open.filter(nbsOver).length,lastImp=rows.reduce((m,r)=>r.importedAt&&r.importedAt>m?r.importedAt:m,''),li=lastImp?new Date(lastImp):null;
   $('#nbsSummary').innerHTML=(li?`<span class="pill">นำเข้าล่าสุด <b>${fmt(li)} ${String(li.getHours()).padStart(2,'0')}.${String(li.getMinutes()).padStart(2,'0')} น.</b></span>`:'')
     +(open.some(r=>r.lastSale||r.lastRecv)?`<span class="pill">เกินเกณฑ์ NBS <b>${nOver.toLocaleString()}</b></span>`+AGING_LV.slice(1).map((l,i)=>`<span class="chip s-${l[1]}">${l[0]} ${lv[i+1].toLocaleString()}</span>`).join(''):'');
