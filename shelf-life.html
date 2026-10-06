@@ -646,7 +646,7 @@ select,input,textarea{max-width:100%}
 <!-- CONTACTS -->
 <section id="t-ct" hidden>
   <div class="card">
-    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn" onclick="exportContactsXlsx()" title="ส่งออกรายชื่อเป็น Excel ตามหัวตารางผังทีม">ส่งออก Excel</button><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn" onclick="exportContactsXlsx()" title="ส่งออกรายชื่อเป็น Excel ตามหัวตารางผังทีม">ส่งออก Excel</button><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="ctRules" title="นำเข้าตาราง Class → Buyer เพื่อเขียนกฎ “สินค้าที่ดูแล” ให้ Buyer ทุกคน แล้วช่อง Buyer ใน Item NBS จะเติมเองตามเลข Class / Art Grp">นำเข้ากฎ Buyer</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
     <div class="fbar"><label class="f-q">ค้นหา<input id="ctQ" placeholder="UID / ชื่อ / หมวดสินค้า / เบอร์ เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small f-info" id="ctCount"></span></div>
     <table class="resp ct-tbl"><colgroup><col style="width:7%"><col style="width:8%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:11%"><col style="width:5%"><col style="width:11%"><col style="width:10%"><col style="width:6%"><col style="width:7%"></colgroup><thead><tr><th>Area</th><th>Senior Director</th><th>Associate Director / Senior Manager</th><th>Area / Department</th><th>Senior Manager / Product Group</th><th>Buyer UID</th><th>Merchandise Mgr. Name</th><th>Art Grp No.</th><th>Description</th><th>Assistant</th><th>Junior Buyer / New Gen</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
   </div>
@@ -688,6 +688,7 @@ select,input,textarea{max-width:100%}
       <button type="button" class="dtile dtile-in" onclick="openImportPr()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3c4 0 7 3 7 7 0 5-4 9-7 11-3-2-7-6-7-11 0-4 3-7 7-7zM12 3c0 3 0 6 0 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>สินค้า &amp; กฎ Shelf life</b><span class="muted small">เพิ่ม/อัปเดตสินค้า อายุ และวันลดราคา</span></button>
       <button type="button" class="dtile dtile-in" onclick="openImportCt()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2 .7 3.2 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>Buyer / Commercial</b><span class="muted small">รายชื่อ เบอร์โทร อีเมล ผู้ติดต่อสำรอง</span></button>
       <button type="button" class="dtile dtile-in" onclick="openImport()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>Item NBS</b><span class="muted small">รายงานสินค้าไม่มียอดขาย แยก FF / DF / NF</span></button>
+      <button type="button" class="dtile dtile-in" onclick="openImportBr()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 7h5M16 11h5M16 15h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>กฎ Buyer (Class → Buyer)</b><span class="muted small">เขียนเลข Class ที่แต่ละ Buyer ดูแล เพื่อเติมช่อง Buyer ใน Item NBS อัตโนมัติ</span></button>
       <button type="button" class="dtile dtile-in" onclick="openImportArt()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h6M4 12h6M4 17h6M14 7h6M14 12h6M14 17h6M10 7l4 5-4 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>Item → Art Grp</b><span class="muted small">ตารางจับคู่เลข Item กับ Art Grp — ใส่ให้ Item NBS แล้วกำหนด Buyer อัตโนมัติ</span></button>
       <label class="dtile dtile-warn" for="impJson"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>กู้คืนข้อมูลสำรอง</b><span class="muted small">ไฟล์ JSON จากปุ่มสำรอง — แทนที่ข้อมูลปัจจุบันทั้งหมด</span><input type="file" accept=".json" id="impJson" hidden></label>
     </div>
@@ -851,6 +852,25 @@ select,input,textarea{max-width:100%}
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="oiCancel">ปิด</button><button type="button" class="btn pri save-btn" id="oiGo" disabled>นำเข้า OOS</button></div>
 </div></dialog>
 
+<dialog id="dlgBr" class="nbs-dlg imp-dlg"><div>
+  <h2>นำเข้ากฎ Buyer (Class → Buyer)</h2>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel / CSV ที่มีคอลัมน์ <b>Division · Dept · Class · buyer_uid · Buyer Name</b> มาวาง ระบบเขียนเลข Class ที่แต่ละ Buyer ดูแลลงช่อง “สินค้าที่ดูแล” ของ Buyer คนนั้น (เลข Class = เลข Art Grp) แล้ว Item NBS ที่มี Art Grp จะได้ Buyer เองอัตโนมัติ · <b>แถวที่เหมือนกันทุกช่องนับเป็น 1 กฎ</b> ไฟล์ใหญ่หลักแสนแถวก็ใช้ได้ · Class ที่มีหลาย Buyer ระบบจะไม่เดา</p>
+  <div id="brDrop" class="imp-drop" tabindex="0">
+    <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span>
+    <button type="button" class="btn pri" id="brPick">เลือกไฟล์จากเครื่อง</button>
+    <input type="file" id="brFile" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+    <span class="muted small">คอลัมน์ที่อ่านได้: Division · Dept · Class · buyer_uid · Buyer Name</span>
+  </div>
+  <div id="brBox"></div>
+  <p class="err-text" id="brErr" style="margin:8px 0 0"></p>
+  <div id="brOpts" class="imp-opts" hidden>
+    <label class="chk"><input type="checkbox" id="brApply" checked> กำหนด Buyer ให้ Item NBS ที่มี Art Grp แล้วแต่ยังไม่มี Buyer ทันที (ไม่ทับ Buyer ที่ตั้งไว้แล้ว)</label>
+    <label class="chk"><input type="checkbox" id="brReplace"> ทับเลข Class เดิมที่ตั้งไว้ในช่อง “สินค้าที่ดูแล” (ไม่ติ๊ก = เพิ่มต่อจากของเดิม · กฎแบบ dept: / kw: ไม่ถูกลบ)</label>
+  </div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="brCancel">ปิด</button><button type="button" class="btn pri save-btn" id="brGo" disabled>เขียนกฎให้ Buyer</button></div>
+</div></dialog>
+
 <dialog id="dlgArt" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้าตาราง Item → Art Grp</h2>
   <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls), CSV, PDF หรือรูปภาพของตารางที่มีเลข <b>Item</b> คู่กับ <b>Art Grp</b> มาวาง ระบบใส่ Art Grp ให้ Item NBS ที่เลข Item ตรงกัน แล้วกำหนด Buyer ให้ตามเลข Art Grp ที่ Buyer ดูแล (ใน Buyer / Commercial) · ถ้าไฟล์ไม่มีหัวคอลัมน์ ให้เรียงคอลัมน์แรก = Item คอลัมน์ที่สอง = Art Grp</p>
@@ -859,7 +879,7 @@ select,input,textarea{max-width:100%}
     <b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span>
     <button type="button" class="btn pri" id="amPick">เลือกไฟล์จากเครื่อง</button>
     <input type="file" id="amFile" accept=".xlsx,.xls,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp,image/*,application/pdf" hidden>
-    <span class="muted small">คอลัมน์ที่อ่านได้: Item No · Art Grp (No.) · ชื่อ Art Grp (ไม่บังคับ)</span>
+    <span class="muted small">คอลัมน์ที่อ่านได้: Item No · Art Grp (No.) หรือ Class (เช่น "681 Cereal Milk") · ชื่อ Art Grp (ไม่บังคับ)</span>
   </div>
   <div id="amBox"></div>
   <p class="err-text" id="amErr" style="margin:8px 0 0"></p>
@@ -2124,7 +2144,7 @@ $('#ctDel').onchange=()=>{if(ctImp)showContactPreview()};$('#ctDefRole').onchang
 const AM_COLS=[
   ['item',/^(itemno|item|itemnumber|itemcode|article|articleno|articlenumber|sku|รหัส|รหัสสินค้า|เลขสินค้า|เลขitem|เลขที่สินค้า)$/],
   ['artName',/(artgrpdesc|artgroupdesc|artdesc|artname|articlegroupdesc|ชื่อart|รายละเอียดart)/],
-  ['art',/(artgrpno|artgrp|artgroup|articlegroup|artno|artnumber|artกลุ่ม|กลุ่มสินค้าart|^art$|เลขart)/]];
+  ['art',/(artgrpno|artgrp|artgroup|articlegroup|artno|artnumber|artกลุ่ม|กลุ่มสินค้าart|^art$|เลขart|^class$|^classno$|^classcode$)/]];
 function amMapHeader(row){const m={},used=new Set();
   (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of AM_COLS){if(m[f]==null&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
 /* numbers compare without leading zeros / ".0" from Excel: 042081 = 42081, 22.0 = 22 */
@@ -2132,7 +2152,10 @@ const amNum=v=>{const s=String(v??'').trim().replace(/\.0+$/,'');return/^\d+$/.t
 let artImp=null;
 function parseArtMap(wb){
   const map=new Map(),names=new Map(),info={cols:{},rows:0,skipped:0,conflicts:0,headerless:false};
-  const take=(item,art,name)=>{info.rows++;const k=amNum(item),a=amNum(art);if(!k||!a){info.skipped++;return}
+  const take=(item,art,name)=>{info.rows++;
+    /* a Class column holds "681 Cereal Milk": the number is the Art Grp, the rest is its name */
+    const cm=typeof art==='string'?art.trim().match(/^(\d{1,4})\s+(\S.*)$/):null;if(cm){art=cm[1];if(!name)name=cm[2]}
+    const k=amNum(item),a=amNum(art);if(!k||!a){info.skipped++;return}
     if(map.has(k)&&map.get(k)!==a){info.conflicts++;return} /* same Item with two different Art Grp: the first one wins */
     map.set(k,a);if(name&&String(name).trim()&&!names.has(a))names.set(a,String(name).trim())};
   for(const sn of wb.SheetNames){
@@ -2201,6 +2224,104 @@ $('#amBuyer').onchange=$('#amOver').onchange=()=>{if(artImp)showArtPreview()};
   ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
   $('#dlgArt').addEventListener('dragover',e=>e.preventDefault());
   $('#dlgArt').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readArtFile(f)})})();
+
+/* ---------- import Buyer rules from a "Class -> Buyer" table (Division / Dept / Class / buyer_uid / Buyer Name) ----------
+   The class number is the Art Grp number. Every Buyer gets the class numbers he or she looks after written into "สินค้าที่ดูแล"; buyerFor() uses them to fill Buyer on Item NBS rows that carry an Art Grp.
+   The file repeats the same line thousands of times (one line per item): lines that are identical in every column count once. */
+const BR_COLS=[['div',/^division$/],['dept',/^(dept|department)$/],['cls',/^(class|classno|classcode)$/],['uid',/^(buyeruid|buyerid)$/],['name',/^buyername$/]];
+function brMapHeader(row){const m={},used=new Set();
+  (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of BR_COLS){if(m[f]==null&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
+const brClassNo=v=>{const m=String(v??'').trim().match(/^(\d{1,4})(?!\d)/);return m?m[1]:''};
+/* a contact's UID can hold several codes: "FP, FP2, FR5, FR7", "F3A & F3E", "FEX, FD8" */
+const ctUidTokens=u=>String(u||'').replace(/\([^)]*\)/g,' ').split(/\s*(?:,|&|\/|\band\b)\s*|\s+/i).map(s=>s.trim()).filter(Boolean);
+let brImp=null;
+function parseBuyerRules(wb){
+  const seen=new Set(),rules=[],info={rows:0,dups:0,skipped:0};
+  for(const sn of wb.SheetNames){
+    const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
+    let hi=-1,m=null;
+    for(let i=0;i<Math.min(raw.length,25);i++){const mm=brMapHeader(raw[i]);if(mm.cls!=null&&mm.uid!=null){hi=i;m=mm;break}}
+    if(hi<0)continue;
+    for(let i=hi+1;i<raw.length;i++){
+      const r=raw[i];if(r.every(c=>String(c).trim()===''))continue;info.rows++;
+      const f={div:String(r[m.div]??'').trim(),dept:String(r[m.dept]??'').trim(),cls:String(r[m.cls]??'').trim(),uid:String(r[m.uid]??'').trim(),name:String(r[m.name]??'').trim()};
+      const no=brClassNo(f.cls);if(!f.uid||!no){info.skipped++;continue}
+      const key=[f.div,f.dept,f.cls,f.uid,f.name].join('\u0001');
+      if(seen.has(key)){info.dups++;continue}
+      seen.add(key);rules.push({...f,no});
+    }
+  }
+  return{rules,info}}
+function planBuyerRules(imp,o){
+  const buyers=st.contacts.filter(c=>c.role==='Buyer'),byUid=new Map(),clsUids=new Map();
+  imp.rules.forEach(r=>{let e=byUid.get(r.uid);if(!e)byUid.set(r.uid,e={uid:r.uid,name:r.name,nos:new Set()});e.nos.add(r.no);
+    let s=clsUids.get(r.no);if(!s)clsUids.set(r.no,s=new Set());s.add(r.uid)});
+  const amb=[...clsUids.entries()].filter(([,s])=>s.size>1).map(([no,s])=>({no,uids:[...s].sort(),name:(imp.rules.find(r=>r.no===no)||{}).cls||no}));
+  /* the contact list writes DFS2 in some places and DSF3 in others (same code, letters swapped): treat DSF as DFS */
+  const lc=s=>String(s).trim().toLowerCase().replace(/^dsf/,'dfs');
+  const findC=uid=>buyers.find(c=>lc(c.uid)===lc(uid))||buyers.find(c=>ctUidTokens(c.uid).some(t=>lc(t)===lc(uid)))||null;
+  const per=new Map(),lost=[];
+  byUid.forEach(e=>{const c=findC(e.uid);if(!c){lost.push({uid:e.uid,name:e.name,n:e.nos.size});return}
+    let p=per.get(c._id);if(!p)per.set(c._id,p={c,uids:[],nos:new Set()});p.uids.push(e.uid);e.nos.forEach(n=>p.nos.add(n))});
+  const isNo=k=>/^\d+$/.test(k),rows=[];
+  per.forEach(p=>{
+    const keys=ctKeys(p.c),have=new Set(keys.filter(isNo).map(amNum)),nos=[...p.nos].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+    const added=nos.filter(n=>!have.has(amNum(n))),next=o.replace?[...keys.filter(k=>!isNo(k)),...nos]:[...keys,...added];
+    const changed=o.replace?next.join(', ')!==keys.join(', '):added.length>0;
+    rows.push({c:p.c,uids:p.uids,nos,added,next:next.join(', '),changed});
+  });
+  rows.sort((a,b)=>String(a.c.uid).localeCompare(String(b.c.uid),undefined,{numeric:true}));
+  const noRules=buyers.filter(c=>!per.has(c._id));
+  return{rows,lost,amb,noRules,buyersInFile:byUid.size,classes:clsUids.size}}
+const brOpts=()=>({replace:$('#brReplace').checked,apply:$('#brApply').checked});
+async function readBuyerRulesFile(file){
+  $('#brErr').textContent='';$('#brBox').innerHTML='<p class="muted">กำลังอ่านไฟล์ (ไฟล์ใหญ่อาจใช้เวลาสักครู่)…</p>';
+  try{
+    await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+    await new Promise(r=>setTimeout(r,30)); /* let the message paint before the heavy read */
+    const wb=/\.csv$/i.test(file.name)?XLSX.read((await file.text()).replace(/^﻿/,''),{type:'string',raw:true}):XLSX.read(await file.arrayBuffer(),{type:'array',raw:true}),parsed=parseBuyerRules(wb);
+    if(!parsed.rules.length)throw Error('ไม่พบกฎในไฟล์ — ต้องมีคอลัมน์ Class และ buyer_uid (กับ Division, Dept, Buyer Name)');
+    brImp={file:file.name,...parsed};showBuyerRulesPreview();
+  }catch(e){brImp=null;$('#brBox').innerHTML='';$('#brErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
+}
+function showBuyerRulesPreview(){
+  const {file,info,rules}=brImp,plan=planBuyerRules(brImp,brOpts());brImp.plan=plan;
+  const nbsWith=(st.nbs||[]).filter(r=>!r.buyerUid&&r.artGrp).length,nChg=plan.rows.filter(r=>r.changed).length,nAdd=plan.rows.reduce((s,r)=>s+r.added.length,0);
+  $('#brOpts').hidden=false;$('#brDrop').hidden=true;$('#brGo').disabled=!nChg;
+  const sample=plan.rows.filter(r=>r.changed).slice(0,10).map(r=>`<tr><td><b>${esc(r.c.uid)}</b><div class="muted small">${esc(r.c.name||'')}</div></td><td class="num">${r.added.length.toLocaleString()}</td><td class="small">${esc(r.nos.slice(0,10).join(', '))}${r.nos.length>10?` … (+${r.nos.length-10})`:''}</td></tr>`).join('');
+  const amb=plan.amb.slice(0,6).map(a=>`<div class="small"><b>${esc(a.name)}</b> → ${esc(a.uids.join(', '))}</div>`).join('');
+  $('#brBox').innerHTML=`<div class="imp-file"><b>${esc(file)}</b> <span class="muted small">· ${info.rows.toLocaleString()} แถว → <b>${rules.length.toLocaleString()} กฎไม่ซ้ำ</b> (ตัดแถวที่เหมือนกันทุกช่องออก ${info.dups.toLocaleString()} แถว${info.skipped?` · ข้าม ${info.skipped.toLocaleString()} แถวที่ไม่มี Class / UID`:''})</span> <button type="button" class="btn sm" id="brChange">เลือกไฟล์อื่น</button></div>
+  <div class="imp-tiles"><div class="t-new"><b>${plan.rows.length.toLocaleString()}</b><span>Buyer ที่พบในรายชื่อ (จาก ${plan.buyersInFile.toLocaleString()} UID ในไฟล์)</span></div><div class="t-new"><b>${nChg.toLocaleString()}</b><span>Buyer ที่จะได้กฎเพิ่ม</span></div><div><b>${nAdd.toLocaleString()}</b><span>เลข Class ที่จะเพิ่ม</span></div><div><b>${plan.amb.length.toLocaleString()}</b><span>Class ที่มีหลาย Buyer (ไม่เดา)</span></div></div>
+  ${plan.lost.length?`<p class="small err-text" style="margin:8px 0 0"><b>UID ในไฟล์ที่ไม่พบในรายชื่อ Buyer / Commercial ${plan.lost.length.toLocaleString()} รหัส:</b> ${esc(plan.lost.slice(0,14).map(x=>x.uid).join(', '))}${plan.lost.length>14?' …':''} — ตรวจการสะกด (เช่น DFS กับ DSF) หรือเพิ่มรายชื่อก่อนนำเข้าซ้ำ</p>`:''}
+  ${plan.noRules.length?`<p class="small muted" style="margin:6px 0 0">Buyer ในระบบที่ไม่มีกฎจากไฟล์นี้ ${plan.noRules.length.toLocaleString()} คน</p>`:''}
+  ${nbsWith?`<p class="small" style="margin:6px 0 0">Item NBS ที่มี Art Grp แล้วแต่ยังไม่มี Buyer ตอนนี้ ${nbsWith.toLocaleString()} รายการ</p>`:'<p class="small muted" style="margin:6px 0 0">ตอนนี้ยังไม่มี Item NBS ที่มี Art Grp — นำเข้า “Item → Art Grp” (ใช้คอลัมน์ Class ได้) เพื่อให้กฎเหล่านี้เริ่มทำงาน</p>'}
+  ${sample?`<div class="imp-sample"><table><thead><tr><th>Buyer</th><th>เพิ่ม</th><th>เลข Class ที่ดูแล</th></tr></thead><tbody>${sample}</tbody></table></div>${nChg>10?`<p class="muted small" style="margin:4px 0 0">แสดง 10 คนแรกจาก ${nChg.toLocaleString()} คน</p>`:''}`:'<p class="small muted" style="margin:8px 0 0">ไม่มีกฎใหม่ให้เพิ่ม — Buyer ทุกคนมีเลข Class เหล่านี้อยู่แล้ว</p>'}
+  ${amb?`<details style="margin-top:8px"><summary class="small">Class ที่มีหลาย Buyer (ตัวอย่าง) — ระบบจะไม่กำหนด Buyer ให้ ต้องเลือกเองหรือมีเลข Art Grp ละเอียดกว่านี้</summary>${amb}</details>`:''}`;
+  $('#brChange').onclick=()=>{$('#brDrop').hidden=false;$('#brBox').innerHTML='';$('#brGo').disabled=true;brImp=null;$('#brFile').value='';$('#brFile').click()};
+}
+async function runBuyerRules(){
+  if(!brImp)return;
+  const o=brOpts(),plan=planBuyerRules(brImp,o),todo=plan.rows.filter(r=>r.changed),nAdd=todo.reduce((s,r)=>s+r.added.length,0);
+  if(!todo.length)return;
+  if(!await ask(`เขียนกฎ “สินค้าที่ดูแล” ให้ Buyer ${todo.length.toLocaleString()} คน (เพิ่มเลข Class ${nAdd.toLocaleString()} ตัว${o.replace?' · ทับเลข Class เดิมที่ตั้งไว้':''})?  (ทุกคนในทีมเห็นการเปลี่ยนนี้)`))return;
+  $('#brGo').disabled=true;$('#brGo').textContent='กำลังบันทึก…';
+  const now=new Date().toISOString();
+  let ok=await act(async()=>{for(const r of todo)await patchItem('contacts',r.c,{artKeys:r.next,updatedAt:now})},null),filled=0;
+  if(ok&&o.apply){
+    const hit=(st.nbs||[]).filter(r=>!r.buyerUid&&r.artGrp).map(r=>[r,buyerFor(r)]).filter(x=>x[1]);filled=hit.length;
+    if(hit.length)ok=await act(async()=>{for(const [r,u] of hit)await patchItem('nbs',r,{buyerUid:u,updatedAt:now})},null)}
+  $('#brGo').textContent='เขียนกฎให้ Buyer';
+  if(ok){$('#dlgBr').close();renderAll();toast(`เขียนกฎให้ Buyer ${todo.length.toLocaleString()} คนแล้ว${o.apply?` · กำหนด Buyer ให้ Item NBS ${filled.toLocaleString()} รายการ`:''}`)}else showBuyerRulesPreview();
+}
+function openImportBr(){brImp=null;$('#brBox').innerHTML='';$('#brDrop').hidden=false;$('#brGo').disabled=true;$('#brGo').textContent='เขียนกฎให้ Buyer';$('#brOpts').hidden=true;$('#brErr').textContent='';$('#brFile').value='';$('#dlgBr').showModal()}
+$('#ctRules').onclick=openImportBr;$('#brCancel').onclick=()=>$('#dlgBr').close();$('#brGo').onclick=runBuyerRules;
+$('#brPick').onclick=()=>$('#brFile').click();$('#brFile').onchange=e=>{const f=e.target.files[0];if(f)readBuyerRulesFile(f)};
+$('#brReplace').onchange=$('#brApply').onchange=()=>{if(brImp)showBuyerRulesPreview()};
+(()=>{const d=$('#brDrop');
+  ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));
+  ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+  $('#dlgBr').addEventListener('dragover',e=>e.preventDefault());
+  $('#dlgBr').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readBuyerRulesFile(f)})})();
 
 /* ---------- OOS+ : out-of-shelf / out-of-stock items the team has to refill ----------
    record = {itemNo, desc, loc, stock, status:'need'|'doing'|'done', assignee, note, foundAt, doneAt, img:'img:<id>' (shelf photo in `imgs`), source:'import'|'manual'} */
@@ -2746,7 +2867,9 @@ const NBS_STAT=[['check','รอตรวจสอบ','s-err'],['wait','แจ�
   ['move','ย้ายตำแหน่ง / จัดวางใหม่','s-md2'],['transfer','โอนออก Store ใกล้เคียง','s-md2'],['cancel','ขอยกเลิก Item / ตัดออกจากสินค้าที่ขาย','s-pull'],
   ['writeoff','ทำลาย / Write-off','s-pull'],['done','แก้ไขแล้ว (ปิดงาน)','s-ok']];
 const nStat=k=>NBS_STAT.find(x=>x[0]===k)||NBS_STAT[0];
-const divGroupOk=(div,g)=>div==='FF'?String(g).startsWith('Fresh Food'):div==='DF'?g==='Dry Grocery Food':div==='NF'?g==='Dry Grocery Non Food':true;
+/* a Buyer's group must fit the item's group. Group names in the contact list vary ("Commercial Fresh Food", "Commercial - Dry Grocery Food", "Commercial Dry Grocery Non-Food"), so match on the words; a group that names none of the three fits everything */
+const divGroupOk=(div,g)=>{const s=String(g||'').toLowerCase(),nf=/non[\s-]*food/.test(s),ff=/fresh/.test(s),df=/dry/.test(s)&&!nf;
+  if(!ff&&!df&&!nf)return true;return div==='FF'?ff:div==='DF'?df:div==='NF'?nf:true};
 let nbsFilterDiv='',nbsEditId=null,nbsDraft={};
 /* Excel-style column filters (Division, Aging Status): null = no filter, Set = values to show */
 const nbsColF={div:null,aging:null};
@@ -3015,9 +3138,9 @@ function buyerFor(rec){
   st.contacts.filter(c=>c.role==='Buyer'&&divGroupOk(rec.division,c.group)).forEach(c=>ctKeys(c).forEach(k=>{
     const m=k.match(/^(dept|d|kw|art):\s*(.+)$/i),t=m?(m[1].toLowerCase()==='d'?'dept':m[1].toLowerCase()):(/^\d+$/.test(k)?'art':'kw'),v=(m?m[2]:k).trim().toLowerCase();
     if(!v)return;
-    if(t==='art'&&art&&v===art)hits.art.add(c.uid);else if(t==='kw'&&name.includes(v))hits.kw.add(c.uid);else if(t==='dept'&&dept&&v===dept)hits.dept.add(c.uid)}));
+    if(t==='art'&&art&&amNum(v)===amNum(art))hits.art.add(c.uid);else if(t==='kw'&&name.includes(v))hits.kw.add(c.uid);else if(t==='dept'&&dept&&v===dept)hits.dept.add(c.uid)}));
   for(const t of ['art','kw','dept'])if(hits[t].size===1)return[...hits[t]][0];
-  return art?buyerByArt(art):'';
+  return art?buyerByArt(art,rec.division):'';
 }
 async function applyBuyerRules(){
   const hit=(st.nbs||[]).filter(r=>!r.buyerUid).map(r=>[r,buyerFor(r)]).filter(x=>x[1]);
@@ -3033,7 +3156,8 @@ function buyersByArt(no){
   const re=new RegExp('(^|[\\s,·])'+no+'(?=\\s+\\p{L})','u');
   return st.contacts.filter(c=>c.role==='Buyer'&&(re.test(String(c.dept||''))||ctKeys(c).some(k=>/^\d+$/.test(k)&&k.replace(/^0+(?=\d)/,'')===no)));
 }
-function buyerByArt(no){const h=buyersByArt(no);return h.length===1?h[0].uid:''}
+/* the one Buyer who holds this Art Grp (within the item's group when it is known); more than one → '' (never guess) */
+function buyerByArt(no,div){const h=buyersByArt(no).filter(c=>!div||divGroupOk(div,c.group));return h.length===1?h[0].uid:''}
 function nbsBuyerOptions(sel){
   const div=$('#nDiv').value,l=st.contacts.filter(c=>c.role==='Buyer'&&divGroupOk(div,c.group)).sort((a,b)=>String(a.uid).localeCompare(String(b.uid)));
   $('#nBuyer').innerHTML='<option value="">— ไม่ระบุ —</option>'+l.map(c=>`<option value="${esc(c.uid)}"${c.uid===sel?' selected':''}>${esc(c.uid)} · ${esc(c.name)}</option>`).join('')
