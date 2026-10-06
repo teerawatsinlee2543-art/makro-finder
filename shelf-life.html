@@ -670,7 +670,18 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
   #t-shr .add-head>.row{width:100%;flex-wrap:nowrap;gap:6px}
   #t-shr .add-head>.row>.btn{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
 }
-@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
+/* tabs on a computer: eleven things in one row must fit without a scrollbar */
+@media (min-width:701px){
+  nav{gap:2px;padding:8px 12px}
+  nav button{padding:8px 9px;font-size:14.5px}
+  .tabcnt{margin-left:4px;padding:0 5px}
+  .jmini .jm-y{display:none}
+}
+@media (min-width:701px) and (max-width:1500px){
+  nav button{padding:8px 7px;font-size:14px}
+  .jmini .jm-l{display:none}
+  .jmini{padding:3px 4px 3px 6px}
+}@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
 <body>
