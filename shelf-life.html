@@ -577,6 +577,7 @@ select,input,textarea{max-width:100%}
       <h2>OOS+ <span class="muted small" style="font-weight:400">· สินค้าหมดชั้น / หมดสต็อก — เตือนให้เติม</span></h2>
       <span class="row w"><button type="button" class="btn" id="oosAdd">+ เพิ่มรายการ</button><button type="button" class="btn imp-btn" id="oosImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span>
     </div>
+    <div class="tiles" id="oosDivTiles" style="margin:12px 0 0"></div>
     <div class="tiles" id="oosTiles" style="margin:12px 0"></div>
     <div class="fbar f4">
       <label class="f-q">ค้นหา<input id="oosQ" placeholder="รหัส / ชื่อสินค้า / ตำแหน่ง / ผู้รับผิดชอบ / หมายเหตุ"></label>
@@ -773,6 +774,7 @@ select,input,textarea{max-width:100%}
     <label style="grid-column:1/-1">ชื่อสินค้า<input name="desc" required></label>
     <label>สถานะ<select name="status"><option value="need">ต้องเติม</option><option value="doing">กำลังเติม</option><option value="done">เติมแล้ว</option></select></label>
     <label>ผู้รับผิดชอบเติม<input name="assignee" list="oosWhoList" placeholder="ชื่อน้อง / ผู้เติม" autocomplete="off"><datalist id="oosWhoList"></datalist></label>
+    <label>กลุ่ม<select name="division"><option value="">ไม่ระบุ (ดึงจาก Item NBS ให้ถ้ามี)</option><option value="FF">FF · Fresh Food</option><option value="DF">DF · Dry Food</option><option value="NF">NF · Non Food</option></select></label>
     <label>สต็อกในระบบ (ถ้ามี)<input name="stock" inputmode="numeric" placeholder="เช่น 12"></label>
     <label>เวลาที่ตรวจพบ<input name="foundAt" type="datetime-local"></label>
     <label style="grid-column:1/-1">หมายเหตุ<textarea name="note" rows="2" placeholder="เช่น ของอยู่ชั้นลอย / รอสินค้าเข้า / ต้องสั่งเพิ่ม"></textarea></label>
@@ -2170,10 +2172,20 @@ const oosDur=h=>{h=Math.max(0,h);if(h<1)return`${Math.max(1,Math.round(h*60))} �
 const oosFmt=ms=>{const d=new Date(ms);return`${fmt(d)} ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')} น.`};
 const oosLocalInput=iso=>{const d=new Date(iso),p=n=>String(n).padStart(2,'0');return isNaN(d)?'':`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`};
 const oosMe=()=>{try{return localStorage.getItem('shelfLifeMonitor.oosName')||localStorage.getItem('shelfLifeMonitor.name')||''}catch(e){return''}};
-let oosTile='',oosLimit=60;
-function oosVisible(){
+let oosTile='',oosLimit=60,oosDivFilter='';
+/* the group (FF / DF / NF) of an OOS item: its own value (report column or the form) → the Item NBS row with the same Item No → the Category when it belongs to one group only in Item NBS.
+   Item NBS is only used to look the group up; every count and list in OOS+ is made of OOS+ records. */
+function oosDivCtx(){
+  const byNo=new Map(),dd=new Map();
+  (st.nbs||[]).forEach(n=>{const k=amNum(n.itemNo);if(k&&n.division&&!byNo.has(k))byNo.set(k,n.division);
+    const d=String(n.dept||'').trim().toLowerCase();if(d&&n.division){const c=dd.get(d);dd.set(d,c===undefined?n.division:c===n.division?c:null)}});
+  return{byNo,dd}}
+const oosDiv=(r,ctx)=>{if(r.division&&NBS_DIV[r.division])return r.division;const k=amNum(r.itemNo);if(k&&ctx.byNo.has(k))return ctx.byNo.get(k);const d=String(r.dept||'').trim().toLowerCase();return d&&ctx.dd.get(d)||''};
+const oosInDiv=(r,ctx)=>!oosDivFilter||(oosDivFilter==='-'?oosDiv(r,ctx)==='':oosDiv(r,ctx)===oosDivFilter);
+function oosVisible(ctx){
   const q=$('#oosQ').value.trim().toLowerCase(),fs=$('#oosFSt').value,fw=$('#oosFWho').value,hide=$('#oosHide').checked,t0=new Date();t0.setHours(0,0,0,0);
   const rows=oosAll().filter(r=>{
+    if(!oosInDiv(r,ctx))return false;
     if(oosTile==='need'&&r.status!=='need')return false;
     if(oosTile==='doing'&&r.status!=='doing')return false;
     if(oosTile==='late'&&oosLevel(r)!=='late')return false;
@@ -2185,15 +2197,15 @@ function oosVisible(){
   const s=$('#oosSort').value;
   return rows.sort((a,b)=>(a.status==='done')-(b.status==='done')||(a.status==='done'?oosDoneMs(b)-oosDoneMs(a):
     (s==='loc'?String(a.loc||'~').localeCompare(String(b.loc||'~'),'th',{numeric:true}):s==='name'?String(a.desc||'').localeCompare(String(b.desc||''),'th'):0)||oosMs(a)-oosMs(b)))}
-function oosCard(r){
-  const lv=oosLevel(r),k=esc(r._id),s=OOS_ST[r.status]||OOS_ST.need,th=(MF.images&&MF.images[r.itemNo])||'',ph=String(r.img||'').startsWith('img:')?imgData(String(r.img).slice(4)):'';
+function oosCard(r,ctx){
+  const dv=oosDiv(r,ctx),lv=oosLevel(r),k=esc(r._id),s=OOS_ST[r.status]||OOS_ST.need,th=(MF.images&&MF.images[r.itemNo])||'',ph=String(r.img||'').startsWith('img:')?imgData(String(r.img).slice(4)):'';
   const age=r.status==='done'?`<span class="muted small">ใช้เวลา ${oosDur(((r.doneAt?new Date(r.doneAt).getTime():Date.now())-oosMs(r))/36e5)}${r.doneAt?' · เติมเมื่อ '+oosFmt(oosDoneMs(r)):''}</span>`
     :`<span class="chip s-${lv==='late'?'pull':lv==='warn'?'md2':'ok'}">ค้าง ${oosDur(oosHours(r))}</span>`;
   const acts=r.status==='need'?`<button type="button" class="btn pri sm" onclick="oosStart('${k}')">เริ่มเติม</button><button type="button" class="btn sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button>`
     :r.status==='doing'?`<button type="button" class="btn pri sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button><button type="button" class="btn sm" onclick="oosBack('${k}')">กลับเป็นต้องเติม</button>`
     :`<button type="button" class="btn sm" onclick="oosBack('${k}')">เปิดใหม่ (ต้องเติม)</button>`;
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div><div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div></div>
-    <div class="oosc-m"><span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
+    <div class="oosc-m">${dv?`<span class="chip div-${dv.toLowerCase()}">${dv}</span>`:''}<span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
     <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
     <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
 function renderOos(){
@@ -2204,12 +2216,20 @@ function renderOos(){
   const bn=$('#oosBanner');bn.hidden=!active.length;bn.classList.toggle('late',late.length>0);
   $('#oosBannerTxt').textContent=`OOS+ มีสินค้าต้องเติม ${need.length.toLocaleString()} รายการ${doing.length?` · กำลังเติม ${doing.length.toLocaleString()}`:''}${late.length?` · ค้างเกิน ${OOS_LATE_H} ชม. ${late.length.toLocaleString()} รายการ`:''}`;
   if($('#t-oos').hidden)return;
-  $('#oosTiles').innerHTML=[['need','ต้องเติม','md1',need.length],['doing','กำลังเติม','soon',doing.length],['late','ค้างเกิน '+OOS_LATE_H+' ชม.','pull',late.length],['done','เติมแล้ววันนี้','ok',doneToday.length]]
+  /* group tiles (FF / DF / NF): count of OOS+ items still to refill per group; click = show only that group */
+  const ctx=oosDivCtx(),byDiv={},lateDiv={};
+  active.forEach(r=>{const d=oosDiv(r,ctx)||'-';byDiv[d]=(byDiv[d]||0)+1;if(oosLevel(r)==='late')lateDiv[d]=(lateDiv[d]||0)+1});
+  if(oosDivFilter==='-'&&!byDiv['-'])oosDivFilter=''; /* the "ไม่ระบุกลุ่ม" tile disappears once nothing is left in it */
+  const divTile=(k,chipHtml)=>`<button type="button" class="tile${oosDivFilter===k?' sel':''}" data-div="${k}">${chipHtml}<b>${(byDiv[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ต้องเติม${lateDiv[k]?` · <span class="err-text">ค้างเกิน ${OOS_LATE_H} ชม. ${lateDiv[k].toLocaleString()}</span>`:''}</span></button>`;
+  $('#oosDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k} · ${l}</span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
+  /* status tiles follow the selected group */
+  const sub=all.filter(r=>oosInDiv(r,ctx)),sActive=sub.filter(r=>r.status!=='done'),sLate=sActive.filter(r=>oosLevel(r)==='late'),sDoneToday=sub.filter(r=>r.status==='done'&&oosDoneMs(r)>=t0.getTime());
+  $('#oosTiles').innerHTML=[['need','ต้องเติม','md1',sub.filter(r=>r.status==='need').length],['doing','กำลังเติม','soon',sub.filter(r=>r.status==='doing').length],['late','ค้างเกิน '+OOS_LATE_H+' ชม.','pull',sLate.length],['done','เติมแล้ววันนี้','ok',sDoneToday.length]]
     .map(([k,l,c,n])=>`<button type="button" class="tile${oosTile===k?' sel':''}" data-t="${k}"><span class="chip s-${c}">${l}</span><b>${n.toLocaleString()}</b><span class="muted small">รายการ</span></button>`).join('');
   const sel=$('#oosFWho'),cur=sel.value,names=[...new Set(all.map(r=>r.assignee).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   sel.innerHTML='<option value="">ทั้งหมด</option>'+names.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('');
-  const rows=oosVisible(),shown=rows.slice(0,oosLimit);
-  $('#oosList').innerHTML=shown.map(oosCard).join('');
+  const rows=oosVisible(ctx),shown=rows.slice(0,oosLimit);
+  $('#oosList').innerHTML=shown.map(r=>oosCard(r,ctx)).join('');
   $('#oosEmpty').hidden=rows.length>0;$('#oosEmpty').textContent=all.length?'ไม่มีรายการที่ตรงกับตัวกรอง':'ยังไม่มีรายการ OOS — กด “นำเข้ารายงาน” หรือ “+ เพิ่มรายการ” เมื่อเจอสินค้าหมดชั้นหรือหมดสต็อก';
   $('#oosMoreWrap').hidden=rows.length<=oosLimit;$('#oosMoreTxt').textContent=`แสดง ${shown.length.toLocaleString()} จาก ${rows.length.toLocaleString()} รายการ`;
 }
@@ -2226,7 +2246,7 @@ function oosEdit(id,focusWho){
   const r=id?byId('oos',id):null;oosEditId=r?r._id:null;
   $('#oosTitle').textContent=r?'แก้ไขรายการ OOS':'เพิ่มรายการ OOS';$('#oErr').textContent='';
   const v=r||{itemNo:'',desc:'',loc:'',status:'need',assignee:oosMe(),stock:'',foundAt:new Date().toISOString(),note:''};
-  fOos.itemNo.value=v.itemNo||'';fOos.desc.value=v.desc||'';fOos.loc.value=v.loc||'';fOos.status.value=v.status;fOos.assignee.value=v.assignee||'';
+  fOos.itemNo.value=v.itemNo||'';fOos.desc.value=v.desc||'';fOos.loc.value=v.loc||'';fOos.status.value=v.status;fOos.division.value=v.division||'';fOos.assignee.value=v.assignee||'';
   fOos.stock.value=v.stock??'';fOos.foundAt.value=oosLocalInput(v.foundAt);fOos.note.value=v.note||'';
   const pid=oosPhotoId(r);oosPhoto={id:pid,data:null,old:pid};oosPhotoPrev();
   $('#oPhotoMsg').textContent='ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน';
@@ -2250,7 +2270,7 @@ fOos.onsubmit=ev=>{
   if(no&&status!=='done'&&oosAll().some(x=>x._id!==oosEditId&&x.status!=='done'&&amNum(x.itemNo)===amNum(no))){ev.preventDefault();$('#oErr').textContent='Item นี้มีรายการ OOS ที่ยังไม่เติมอยู่แล้ว';return}
   const old=oosEditId?byId('oos',oosEditId):null,now=new Date().toISOString(),ph={...oosPhoto},keep=!!ph.id,who=f.assignee.value.trim();
   try{if(who)localStorage.setItem('shelfLifeMonitor.oosName',who)}catch(e){}
-  const rec={...(old?body(old):{}),itemNo:no,desc,loc:f.loc.value.trim(),stock:f.stock.value.trim(),status,assignee:who,note:f.note.value.trim(),
+  const rec={...(old?body(old):{}),itemNo:no,desc,loc:f.loc.value.trim(),division:f.division.value,stock:f.stock.value.trim(),status,assignee:who,note:f.note.value.trim(),
     foundAt:f.foundAt.value?new Date(f.foundAt.value).toISOString():(old?.foundAt||now),img:keep?'img:'+ph.id:'',
     doneAt:status==='done'?(old?.doneAt||now):'',doneBy:status==='done'?(old?.doneBy||who):'',updatedAt:now,...(old?{}:{source:'manual',createdAt:now,createdBy:myId||null})};
   act(async()=>{
@@ -2265,6 +2285,7 @@ $('#oosClearDone').onclick=async()=>{
   act(async()=>{for(const r of l){const ph=oosPhotoId(r)?byId('imgs',oosPhotoId(r)):null;await rmItem('oos',r);if(ph)await rmItem('imgs',ph)}},`ลบแล้ว ${l.length.toLocaleString()} รายการ`)};
 $('#oosAdd').onclick=()=>oosEdit();
 $('#oosTiles').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;oosTile=oosTile===b.dataset.t?'':b.dataset.t;oosLimit=60;renderOos()};
+$('#oosDivTiles').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;oosDivFilter=oosDivFilter===b.dataset.div?'':b.dataset.div;oosLimit=60;renderOos()};
 $('#oosMore').onclick=()=>{oosLimit+=60;renderOos()};
 let oosQT;$('#oosQ').oninput=()=>{clearTimeout(oosQT);oosQT=setTimeout(()=>{oosLimit=60;renderOos()},150)};
 ['#oosFSt','#oosFWho','#oosSort','#oosHide'].forEach(s=>$(s).onchange=()=>{oosLimit=60;renderOos()});
@@ -2276,6 +2297,8 @@ const OOS_COLS=[
   ['barcode',/(barcode|บาร์โค้ด|^ean$|^gtin$)/],
   ['desc',/^(itemdesc|itemdescription|description|desc|name|itemname|productname|ชื่อสินค้า|ชื่อ|สินค้า|รายการสินค้า|รายการ)$/],
   ['loc',/(location|^loc$|ตำแหน่ง|ชั้น|bay)/],
+  ['div',/^(division|div|group|กลุ่ม|กลุ่มสินค้า|ffdfnf)$/],
+  ['dept',/(category|dept|department|หมวด|แผนก)/],
   ['stock',/(stock|onhand|qty|quantity|คงเหลือ|สต็อก|จำนวน)/],
   ['found',/(datetime|date|time|วันที่|เวลา|ตรวจพบ)/],
   ['who',/(assign|owner|ผู้รับผิดชอบ|ผู้เติม|พนักงาน)/],
@@ -2296,7 +2319,7 @@ let oosImp=null;
 function parseOosFile(wb){
   const rows=[],info={cols:{},skipped:0,headerless:false},seen=new Map();
   const take=(g)=>{const no=String(g.item??'').trim().replace(/\.0+$/,'');if(!no){info.skipped++;return}
-    const x={itemNo:no,barcode:String(g.barcode??'').trim(),desc:String(g.desc??'').trim(),loc:String(g.loc??'').trim(),stock:String(g.stock??'').trim(),foundAt:oosParseDate(g.found),who:String(g.who??'').trim(),note:String(g.note??'').trim()};
+    const x={itemNo:no,barcode:String(g.barcode??'').trim(),desc:String(g.desc??'').trim(),loc:String(g.loc??'').trim(),division:divFrom(g.div),dept:String(g.dept??'').trim(),stock:String(g.stock??'').trim(),foundAt:oosParseDate(g.found),who:String(g.who??'').trim(),note:String(g.note??'').trim()};
     const k=amNum(no);if(seen.has(k))rows[seen.get(k)]=x;else{seen.set(k,rows.length);rows.push(x)}}; /* the same Item twice: the last row wins */
   for(const sn of wb.SheetNames){
     const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
@@ -2325,7 +2348,7 @@ async function readOosFile(file){
     oosImp={file:file.name,...parsed};showOosPreview();
   }catch(e){oosImp=null;$('#oiBox').innerHTML='';$('#oiErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
 }
-const OOS_COL_LBL={item:'Item No',barcode:'บาร์โค้ด',desc:'ชื่อสินค้า',loc:'ตำแหน่ง',stock:'สต็อก',found:'วันที่/เวลา',who:'ผู้รับผิดชอบ',note:'หมายเหตุ'};
+const OOS_COL_LBL={item:'Item No',barcode:'บาร์โค้ด',desc:'ชื่อสินค้า',loc:'ตำแหน่ง',div:'กลุ่ม (FF/DF/NF)',dept:'หมวด',stock:'สต็อก',found:'วันที่/เวลา',who:'ผู้รับผิดชอบ',note:'หมายเหตุ'};
 function showOosPreview(){
   const {file,info,rows}=oosImp,plan=planOos(oosImp,{close:$('#oiClose').checked});oosImp.plan=plan;
   $('#oiOpts').hidden=false;$('#oiDrop').hidden=true;$('#oiGo').disabled=!(plan.add.length||plan.upd.length||plan.reopen.length||plan.close.length);
@@ -2344,9 +2367,10 @@ async function runOosImport(){
   for(let i=0;i<60&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250));
   const ready=MF.state==='ready',fill=x=>{const it=ready?MF.items.get(x.itemNo):null;return{desc:x.desc||it?.desc||'',loc:x.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),barcode:x.barcode||it?.barcode||''}};
   const ok=await act(async()=>{
-    for(const x of plan.add){const f=fill(x);await putItem('oos',{itemNo:x.itemNo,desc:f.desc,loc:f.loc,barcode:f.barcode,stock:x.stock,status:'need',assignee:x.who,note:x.note,foundAt:x.foundAt||now,source:'import',importFile:file,importRun:now,createdAt:now,createdBy:myId||null,updatedAt:now})}
-    for(const {ex,x} of plan.reopen){const f=fill(x);await patchItem('oos',ex,{status:'need',doneAt:'',doneBy:'',autoClosed:false,foundAt:x.foundAt||now,desc:ex.desc||f.desc,loc:x.loc||ex.loc||f.loc,stock:x.stock||ex.stock||'',...(x.who?{assignee:x.who}:{}),importFile:file,importRun:now,updatedAt:now})}
+    for(const x of plan.add){const f=fill(x);await putItem('oos',{itemNo:x.itemNo,desc:f.desc,loc:f.loc,barcode:f.barcode,division:x.division,dept:x.dept,stock:x.stock,status:'need',assignee:x.who,note:x.note,foundAt:x.foundAt||now,source:'import',importFile:file,importRun:now,createdAt:now,createdBy:myId||null,updatedAt:now})}
+    for(const {ex,x} of plan.reopen){const f=fill(x);await patchItem('oos',ex,{status:'need',doneAt:'',doneBy:'',autoClosed:false,foundAt:x.foundAt||now,desc:ex.desc||f.desc,loc:x.loc||ex.loc||f.loc,...(x.division?{division:x.division}:{}),...(x.dept?{dept:x.dept}:{}),stock:x.stock||ex.stock||'',...(x.who?{assignee:x.who}:{}),importFile:file,importRun:now,updatedAt:now})}
     for(const {ex,x} of plan.upd){const f=fill(x),p={};
+      if(x.division&&!ex.division)p.division=x.division;if(x.dept&&!ex.dept)p.dept=x.dept;
       if(!ex.desc&&f.desc)p.desc=f.desc;if(!ex.loc&&(x.loc||f.loc))p.loc=x.loc||f.loc;if(x.stock&&x.stock!==String(ex.stock??''))p.stock=x.stock;if(!ex.note&&x.note)p.note=x.note;
       if(Object.keys(p).length)await patchItem('oos',ex,{...p,updatedAt:now})}
     for(const r of plan.close)await patchItem('oos',r,{status:'done',doneAt:now,doneBy:'ปิดอัตโนมัติ',autoClosed:true,updatedAt:now});
