@@ -2157,6 +2157,7 @@ const CT_COLS=[
   ['sd',/^(seniordirector|director)/],
   ['ad',/^associatedirector/],
   ['sm',/^(seniormanager|productgroupmanager|srmgr|divisionproductmgr)/],
+  ['sub',/^(artgrpsub|artgroupsub|subno|subgrp)/],
   ['art',/^(artgrp|artgroup)/],
   ['asst',/^assistant/],
   ['jr',/^(junior|jr)/],
@@ -2192,17 +2193,17 @@ function ctPerson(raw){
 const ctInitials=g=>String(g||'').split(/\s+/).filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,5)||'CT';
 const ctNm=p=>p.id&&!/\(#\s*\d{3,5}\)/.test(p.name)?`${p.name} (#${p.id})`:p.name;
 /* export the contact list as an Excel file in the org-chart layout (one row per Buyer), which the import reads straight back */
-const CT_XL_HDR=['Area','Senior Director','Associate Director / Senior Manager','Area / Department','Senior Manager / Product Group','Buyer UID','Merchandise Mgr. Name','Art Grp No.','Description','Assistant','Junior Buyer / New Gen'];
+const CT_XL_HDR=['Area','Senior Director','Associate Director / Senior Manager','Area / Department','Senior Manager / Product Group','Buyer UID','Merchandise Mgr. Name','Art Grp No.','Art Grp Sub No','Description','Assistant','Junior Buyer / New Gen'];
 async function exportContactsXlsx(template){
   await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
   const P=(n,ph,x)=>[n,ph,x].filter(Boolean).join('\n'),rows=[CT_XL_HDR],used=new Set();
   const buyers=(template?[]:st.contacts).filter(c=>c.role==='Buyer').sort((a,b)=>String(a.group||'').localeCompare(String(b.group||''))||String(ctView(a).area).localeCompare(String(ctView(b).area))||String(a.uid).localeCompare(String(b.uid)));
   buyers.forEach(b=>{const v=ctView(b);if(v.sm)used.add(v.sm.name);
-    rows.push([b.group||'',v.sd,v.ad,v.area,v.sm?P(v.sm.name,v.sm.phone,v.sm.title):'',b.uid,P(b.name,b.phone),v.arts.map(a=>a[0]).join('\n'),v.arts.length?v.arts.map(a=>a[1]).join('\n'):v.desc,[...v.asst,...(v.merch?['Merch กลุ่ม '+v.merch]:[])].join('\n'),v.jr.join('\n')])});
+    rows.push([b.group||'',v.sd,v.ad,v.area,v.sm?P(v.sm.name,v.sm.phone,v.sm.title):'',b.uid,P(b.name,b.phone),v.arts.map(a=>a[0]).join('\n'),v.arts.map(a=>ctKeys(b).filter(k=>k.replace(/^0+(?=\d)/,'').startsWith(amNum(a[0])+'@')).map(k=>k.split('@')[1]).join(', ')).join('\n'),v.arts.length?v.arts.map(a=>a[1]).join('\n'):v.desc,[...v.asst,...(v.merch?['Merch กลุ่ม '+v.merch]:[])].join('\n'),v.jr.join('\n')])});
   (template?[]:st.contacts).filter(c=>c.role!=='Buyer'&&!used.has(c.name)).forEach(c=>{const v=ctView(c),cell=P(c.name,c.phone,v.title);
-    rows.push([c.group||'',/^Senior Director/i.test(v.title)?cell:'',/^Associate Director/i.test(v.title)?cell:'',v.area&&!/^(Senior|Associate) /i.test(v.title)?v.area:'',(!/^(Senior Director|Associate Director)/i.test(v.title))?cell:'','','','','','',''])});
-  if(template||rows.length===1)rows.push(['Dry Grocery Food','Hyesung Baik','Warisara K. (#8663)\n081-966-5421','Commodity','Nichapa B.\n096-659-3663\nSenior Manager','F6','Janjira S. (#8608)\n083-237-3813','22','Cooking Oil','Mananchaya S. #8769','Supisara R.']);
-  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[16,16,22,20,24,10,26,10,28,26,22].map(w=>({wch:w}));
+    rows.push([c.group||'',/^Senior Director/i.test(v.title)?cell:'',/^Associate Director/i.test(v.title)?cell:'',v.area&&!/^(Senior|Associate) /i.test(v.title)?v.area:'',(!/^(Senior Director|Associate Director)/i.test(v.title))?cell:'','','','','','','',''])});
+  if(template||rows.length===1)rows.push(['Dry Grocery Food','Hyesung Baik','Warisara K. (#8663)\n081-966-5421','Commodity','Nichapa B.\n096-659-3663\nSenior Manager','F6','Janjira S. (#8608)\n083-237-3813','22','','Cooking Oil','Mananchaya S. #8769','Supisara R.']);
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[16,16,22,20,24,10,26,10,14,28,26,22].map(w=>({wch:w}));
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Buyer-Commercial');
   XLSX.writeFile(wb,template?'buyer-commercial_template.xlsx':`buyer-commercial_${iso(today())}.xlsx`);
 }
@@ -2230,6 +2231,13 @@ function parseContacts(wb){
         const np=ctPerson(cell('name'));
         if(np){o.name=ctNm(np);if(np.phone&&!o.phone)o.phone=np.phone}
         const arts=m.art!=null?ctLines(cell('art')):[],descs=m.desc!=null?ctLines(cell('desc')):[];
+        /* "Art Grp Sub No" column: one line per Art Grp line (blank, * or all = the whole Class); several subs on a line are separated by comma / space.
+           A Sub rule is written as Class@Sub (e.g. 27@10) in the Buyer's rules and beats a plain Class rule when the Sub of the item is known */
+        if(m.sub!=null&&arts.length){const raw=String(cell('sub')??'').split(/\r?\n/).map(x=>x.trim()),toks=[];
+          arts.forEach((a,k)=>{const cls=((String(a).match(/^\d+/)||[''])[0]).replace(/^0+(?=\d)/,'');if(!cls)return;
+            const line=raw.length===arts.length?raw[k]:(arts.length===1?raw.filter(Boolean).join(','):'');
+            if(!line||/^(\*|all|ทั้งหมด)$/i.test(line))return;(line.match(/\d+/g)||[]).forEach(x=>toks.push(cls+'@'+x.replace(/^0+(?=\d)/,'')))});
+          if(toks.length)o.artKeys=[...new Set(toks)].join(', ')}
         const pairs=arts.length&&descs.length?(arts.length===descs.length?arts.map((a,k)=>`${a} ${descs[k]}`):[arts.join(', ')+' '+descs.join(', ')]):(descs.length?descs:arts);
         o.dept=[area,pairs.join(', ')].filter(Boolean).join(' · ');
         const bk=[];
@@ -2266,8 +2274,10 @@ function planContacts(recs,defRole){
   const roles=new Set(recs.map(r=>r.role||defRole)),groups=new Set(recs.map(r=>r.group).filter(Boolean));
   recs.forEach(r=>{
     const key=r.uid.toUpperCase(),ex=byUid.get(key);seen.add(key);
-    if(!ex){add.push({uid:r.uid,name:r.name||r.uid,role:r.role||defRole,group:r.group||'',dept:r.dept||'',phone:r.phone||'',email:r.email||'',backup:r.backup||''});return}
+    if(!ex){add.push({uid:r.uid,name:r.name||r.uid,role:r.role||defRole,group:r.group||'',dept:r.dept||'',phone:r.phone||'',email:r.email||'',backup:r.backup||'',artKeys:r.artKeys||''});return}
     const patch={},ch=[];CT_FIELDS.forEach(f=>{
+      if(f==='artKeys'){const want=String(r.artKeys||'').split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean),have=ctKeys(ex),low=new Set(have.map(k=>k.toLowerCase())),nw=want.filter(k=>!low.has(k.toLowerCase()));
+        if(nw.length){patch.artKeys=[...have,...nw].join(', ');ch.push(['artKeys',ex.artKeys||'',patch.artKeys])}return}
       if(!r[f]||r[f]===(ex[f]??''))return;
       /* from an org chart only the name and phone are reliable enough to overwrite; the rest only fills blanks, and a longer saved name ("… — Jr. Buyer") is kept */
       if(r._org&&f!=='name'&&f!=='phone'&&ex[f])return;
@@ -2579,7 +2589,7 @@ function planItemCls(o){
     else if(amNum(cur)!==amNum(m.g))s.conflict++;
     if(r.buyerUid)s.keep++;
     else if(o.buyer){ /* the Class decides the Buyer: the row's own group is tried first, then without it (class numbers belong to one group, and some reports put department names in the Division column) */
-      const b=buyerFor({...r,artGrp:cls,artSub:false})||buyerFor({...r,division:'',artGrp:cls,artSub:false});
+      const b=buyerFor({...r,artGrp:cls,artSub:false,subNo:m.s})||buyerFor({...r,division:'',artGrp:cls,artSub:false,subNo:m.s});
       const bs=b?'':buyerBySub(r.itemNo,cls);
       if(b){patch.buyerUid=b;s.fillBuyer++}
       else if(bs){patch.buyerUid=bs;s.fillBuyer++;s.bySub++}
@@ -3569,12 +3579,14 @@ function buyerByItem(no){
 function buyerFor(rec){
   /* "Art Grp Sub No" (Negative Stock Monitor) is a sub-code inside a Dept, NOT the 3-digit Class the rules are written for: never match it by number */
   if(rec.artSub)return buyerByItem(rec.itemNo);
-  const art=String(rec.artGrp||'').trim().toLowerCase(),dept=String(rec.dept||'').trim().toLowerCase(),name=String(rec.desc||'').toLowerCase(),hits={art:new Set(),kw:new Set(),dept:new Set()};
+  const art=String(rec.artGrp||'').trim().toLowerCase(),dept=String(rec.dept||'').trim().toLowerCase(),name=String(rec.desc||'').toLowerCase(),hits={sub:new Set(),art:new Set(),kw:new Set(),dept:new Set()};
   st.contacts.filter(c=>c.role==='Buyer'&&divGroupOk(rec.division,c.group)).forEach(c=>ctKeys(c).forEach(k=>{
+    const sm=k.match(/^(\d+)\s*@\s*(\d+)$/); /* Class@Sub rule: only when the Sub of this item is known (item master) */
+    if(sm){if(art&&rec.subNo&&amNum(sm[1])===amNum(art)&&amNum(sm[2])===amNum(rec.subNo))hits.sub.add(c.uid);return}
     const m=k.match(/^(dept|d|kw|art):\s*(.+)$/i),t=m?(m[1].toLowerCase()==='d'?'dept':m[1].toLowerCase()):(/^\d+$/.test(k)?'art':'kw'),v=(m?m[2]:k).trim().toLowerCase();
     if(!v)return;
     if(t==='art'&&art&&amNum(v)===amNum(art))hits.art.add(c.uid);else if(t==='kw'&&name.includes(v))hits.kw.add(c.uid);else if(t==='dept'&&dept&&v===dept)hits.dept.add(c.uid)}));
-  for(const t of ['art','kw','dept'])if(hits[t].size===1)return[...hits[t]][0];
+  for(const t of ['sub','art','kw','dept'])if(hits[t].size===1)return[...hits[t]][0];
   return(art?buyerByArt(art,rec.division):'')||buyerByItem(rec.itemNo);
 }
 async function applyBuyerRules(){
@@ -3589,7 +3601,7 @@ async function applyBuyerRules(){
 function buyersByArt(no){
   no=String(no||'').trim();if(!/^\d{1,4}$/.test(no))return[];
   const re=new RegExp('(^|[\\s,·])'+no+'(?=\\s+\\p{L})','u');
-  return st.contacts.filter(c=>c.role==='Buyer'&&(re.test(String(c.dept||''))||ctKeys(c).some(k=>/^\d+$/.test(k)&&k.replace(/^0+(?=\d)/,'')===no)));
+  return st.contacts.filter(c=>c.role==='Buyer'&&(re.test(String(c.dept||''))||ctKeys(c).some(k=>(/^\d+$/.test(k)&&k.replace(/^0+(?=\d)/,'')===no)||k.replace(/^0+(?=\d)/,'').startsWith(no+'@'))));
 }
 /* the one Buyer who holds this Art Grp (within the item's group when it is known); more than one → '' (never guess) */
 function buyerByArt(no,div){const h=buyersByArt(no).filter(c=>!div||divGroupOk(div,c.group));return h.length===1?h[0].uid:''}
@@ -3724,7 +3736,7 @@ function parseWorkbook(wb,fileName,defDiv){
       /* an Art Grp / Class cell can read "681 Cereal Milk": the number is the Art Grp */
       let agRaw=m.artGrp!=null?r[m.artGrp]:'',agm=String(agRaw??'').trim().match(/^(\d{1,4})\s+\S/),artGrp=agm?agm[1]:cleanNo(agRaw),dept=m.dept!=null?String(r[m.dept]??'').trim():'',aging=m.aging!=null?String(r[m.aging]??'').trim():'',agingType=m.agingType!=null?parseAgingType(r[m.agingType]):'';
       /* the item master (Barcode.csv), when this browser has it: the real Class replaces an empty value or a Sub No */
-      let sub=artSub;if(ITEMCLS&&(!artGrp||sub)){const mm=ITEMCLS.get(amNum(no));if(mm){artGrp=String(mm.g);sub=false;info.clsMaster=(info.clsMaster||0)+1}}
+      let sub=artSub,subNo='';if(ITEMCLS){const mm=ITEMCLS.get(amNum(no));if(mm){subNo=mm.s;if(!artGrp||sub){artGrp=String(mm.g);sub=false;info.clsMaster=(info.clsMaster||0)+1}}}
       let dv=m.days!=null?numOr(r[m.days]):'';
       if(dv===''&&/^\d+$/.test(aging))dv=+aging;
       if(!last&&dv!==''&&dv>=0){last=iso(addD(today(),-Math.round(dv)));derived=true}
@@ -3732,7 +3744,7 @@ function parseWorkbook(wb,fileName,defDiv){
          without one, the "สินค้าที่ดูแล" rules decide from the Art Grp / Class */
       let buyer='',bsrc='';
       if(m.buyer!=null){const raw=String(r[m.buyer]??'').trim();if(raw){const c=ctFindBuyer(raw);buyer=c?c.uid:raw;bsrc=c?'file':'unknown';if(!c)info.buyerUnknown[raw]=(info.buyerUnknown[raw]||0)+1}}
-      if(!buyer){const ru=buyerFor({division:div,artGrp,artSub:sub,dept,desc,itemNo:no})||(!sub&&artGrp?buyerBySub(no,artGrp):'');if(ru){buyer=ru;bsrc='rule'}}
+      if(!buyer){const ru=buyerFor({division:div,artGrp,artSub:sub,subNo,dept,desc,itemNo:no})||(!sub&&artGrp?buyerBySub(no,artGrp):'');if(ru){buyer=ru;bsrc='rule'}}
       if(sub&&artGrp)info.artSubRows=(info.artSubRows||0)+1;
       info.bsrc[bsrc||'none']++;
       recs.set(div+'|'+no,{artSub:sub,division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
