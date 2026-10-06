@@ -865,6 +865,7 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
       <button type="button" class="dtile dtile-in" onclick="openImportCt()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2 .7 3.2 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>Buyer / Commercial</b><span class="muted small">รายชื่อ เบอร์โทร อีเมล ผู้ติดต่อสำรอง</span></button>
       <button type="button" class="dtile dtile-in" onclick="openImport()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>Item NBS</b><span class="muted small">รายงานสินค้าไม่มียอดขาย แยก FF / DF / NF</span></button>
       <button type="button" class="dtile dtile-in" onclick="openImportBr()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 7h5M16 11h5M16 15h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>กฎ Buyer (Class → Buyer)</b><span class="muted small">เขียนเลข Class ที่แต่ละ Buyer ดูแล เพื่อเติมช่อง Buyer ใน Item NBS อัตโนมัติ</span></button>
+      <button type="button" class="dtile dtile-in" onclick="openItemCls()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M17 6v12M20 6v12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>ทะเบียนสินค้า (Barcode) → Class / Buyer</b><span class="muted small">อ่านไฟล์ Barcode.csv เพื่อเติม Class และ Buyer ให้ Item NBS ตามเลข Item</span></button>
       <button type="button" class="dtile dtile-in" onclick="openImportArt()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h6M4 12h6M4 17h6M14 7h6M14 12h6M14 17h6M10 7l4 5-4 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>Item → Art Grp</b><span class="muted small">ตารางจับคู่เลข Item กับ Art Grp — ใส่ให้ Item NBS แล้วกำหนด Buyer อัตโนมัติ</span></button>
       <label class="dtile dtile-warn" for="impJson"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>กู้คืนข้อมูลสำรอง</b><span class="muted small">ไฟล์ JSON จากปุ่มสำรอง — แทนที่ข้อมูลปัจจุบันทั้งหมด</span><input type="file" accept=".json" id="impJson" hidden></label>
     </div>
@@ -1028,6 +1029,24 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="oiCancel">ปิด</button><button type="button" class="btn pri save-btn" id="oiGo" disabled>นำเข้า OOS</button></div>
 </div></dialog>
 
+<dialog id="dlgIc" class="nbs-dlg imp-dlg"><div>
+  <h2>ทะเบียนสินค้า (Barcode.csv) → Class / Buyer</h2>
+  <p class="muted small" style="margin:0 0 10px">เลือกไฟล์ทะเบียนสินค้าที่มีคอลัมน์ <b>Dept no · Art Grp No · Art Grp Sub No · Barcode · Art No</b> แอปอ่านไฟล์ในเครื่องนี้ ไม่อัปโหลดขึ้นเว็บ แล้วเติม <b>เลข Class (Art Grp No)</b> ให้ Item NBS ตามเลข Item และหา <b>Buyer</b> จากกฎ Class → Buyer (ไม่ทับ Buyer ที่ตั้งไว้แล้ว และไม่เดาถ้า Class นั้นมีหลาย Buyer)</p>
+  <div id="icStored" class="small muted" style="margin:0 0 8px"></div>
+  <div id="icDrop" class="imp-drop" tabindex="0">
+    <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>ลากไฟล์ Barcode.csv มาวางที่นี่</b><span class="muted small">หรือ</span>
+    <button type="button" class="btn pri" id="icPick">เลือกไฟล์จากเครื่อง</button>
+    <input type="file" id="icFile" accept=".csv,.txt" hidden>
+    <span class="muted small">ไฟล์ใหญ่ (ประมาณ 11 MB) ใช้เวลาอ่านไม่กี่วินาที</span>
+  </div>
+  <div id="icBox"></div>
+  <p class="err-text" id="icErr" style="margin:8px 0 0"></p>
+  <div id="icOpts" class="imp-opts" hidden>
+    <label class="chk"><input type="checkbox" id="icBuyer" checked> เติม Buyer ให้รายการที่ยังไม่มี Buyer (จากกฎ Class → Buyer)</label>
+  </div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn" id="icForget" hidden>ลบทะเบียนที่จำไว้ในเครื่องนี้</button><button type="button" class="btn cancel-btn" id="icCancel">ปิด</button><button type="button" class="btn pri save-btn" id="icGo" disabled>เติมข้อมูลให้ Item NBS</button></div>
+</div></dialog>
 <dialog id="dlgBr" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้ากฎ Buyer (Class → Buyer)</h2>
   <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel / CSV ที่มีคอลัมน์ <b>Division · Dept · Class · buyer_uid · Buyer Name</b> มาวาง ระบบเขียนเลข Class ที่แต่ละ Buyer ดูแลลงช่อง “สินค้าที่ดูแล” ของ Buyer คนนั้น (เลข Class = เลข Art Grp) แล้ว Item NBS ที่มี Art Grp จะได้ Buyer เองอัตโนมัติ · <b>แถวที่เหมือนกันทุกช่องนับเป็น 1 กฎ</b> ไฟล์ใหญ่หลักแสนแถวก็ใช้ได้ · Class ที่มีหลาย Buyer ระบบจะไม่เดา</p>
@@ -2505,6 +2524,104 @@ $('#brReplace').onchange=$('#brApply').onchange=()=>{if(brImp)showBuyerRulesPrev
   $('#dlgBr').addEventListener('dragover',e=>e.preventDefault());
   $('#dlgBr').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readBuyerRulesFile(f)})})();
 
+/* ---------- Item master (Barcode.csv): Art No -> Dept / Art Grp (= Class) / Sub ----------
+   The file is read in THIS browser and kept in this browser only (IndexedDB) — it is never uploaded.
+   It gives every Item NBS row its real Class (Art Grp No); the Buyer then comes from the Class → Buyer rules. */
+let ITEMCLS=null,ITEMCLS_INFO=null,icImp=null;
+const iclOpen=()=>new Promise(res=>{try{const rq=indexedDB.open('slm-itemcls',1);rq.onupgradeneeded=()=>rq.result.createObjectStore('kv');rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);rq.onblocked=()=>res(null)}catch(e){res(null)}});
+async function iclSave(info,text){const db=await iclOpen();if(!db)return false;return new Promise(res=>{try{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put({info,text},'map');tx.oncomplete=()=>res(true);tx.onerror=()=>res(false);tx.onabort=()=>res(false)}catch(e){res(false)}})}
+async function iclLoad(){const db=await iclOpen();if(!db)return;const rec=await new Promise(res=>{try{const g=db.transaction('kv').objectStore('kv').get('map');g.onsuccess=()=>res(g.result||null);g.onerror=()=>res(null)}catch(e){res(null)}});if(rec&&rec.text){ITEMCLS=iclFromText(rec.text);ITEMCLS_INFO=rec.info}}
+async function iclForget(){const db=await iclOpen();ITEMCLS=null;ITEMCLS_INFO=null;if(!db)return;try{db.transaction('kv','readwrite').objectStore('kv').delete('map')}catch(e){}}
+function iclFromText(t){const m=new Map();let i=0;const n=t.length;while(i<n){let j=t.indexOf('\n',i);if(j<0)j=n;const p=t.slice(i,j).split('\t');if(p.length>=3)m.set(p[0],{d:p[1],g:p[2],s:p[3]||''});i=j+1}return m}
+/* plain text, one pass, no spreadsheet library: the file has ~214,000 lines */
+function parseBarcodeCsv(text){
+  text=text.replace(/^﻿/,'');
+  let p=0,hdr=null;
+  for(let k=0;k<30&&p<text.length;k++){let e=text.indexOf('\n',p);if(e<0)e=text.length;
+    const cells=text.slice(p,e).replace(/\r$/,'').split(',').map(normH);
+    const art=cells.findIndex(c=>c==='artno'||c==='itemno'||c==='item'),grp=cells.findIndex(c=>c==='artgrpno'||c==='artgrp'||c==='class'||c==='classno'),
+      dept=cells.findIndex(c=>c==='deptno'||c==='dept'),sub=cells.findIndex(c=>c==='artgrpsubno'||c==='subno');
+    p=e+1;if(art>=0&&grp>=0){hdr={art,grp,dept,sub};break}}
+  if(!hdr)throw Error('ไม่พบหัวคอลัมน์ Art No และ Art Grp No ในไฟล์');
+  const lim=Math.max(hdr.art,hdr.grp,hdr.dept,hdr.sub)+1,map=new Map(),out=[];let rows=0;
+  while(p<text.length){let e=text.indexOf('\n',p);if(e<0)e=text.length;let line=text.slice(p,e);p=e+1;if(!line)continue;
+    if(line.charCodeAt(line.length-1)===13)line=line.slice(0,-1);
+    const c=line.split(',',lim),no=(c[hdr.art]||'').trim();if(!/^\d+$/.test(no))continue;rows++;
+    const k=amNum(no);if(map.has(k))continue;
+    const d=hdr.dept>=0?amNum(c[hdr.dept]):'',g=amNum(c[hdr.grp]),s=hdr.sub>=0?amNum(c[hdr.sub]):'';if(!/^\d+$/.test(g))continue;
+    map.set(k,{d,g,s});out.push(k+'\t'+d+'\t'+g+'\t'+s)}
+  return{map,rows,text:out.join('\n')}
+}
+/* what would change: the Class of every Item NBS row (when it is empty or only a Sub No) and, where it is empty, the Buyer from the rules */
+function planItemCls(o){
+  const rows=st.nbs||[],hasRules=(st.contacts||[]).some(c=>ctKeys(c).some(k=>/^\d+$/.test(k)));
+  const s={total:rows.length,found:0,notFound:0,fillCls:0,fillBuyer:0,amb:0,noRule:0,conflict:0,keep:0},list=[];
+  for(const r of rows){
+    const m=ITEMCLS.get(amNum(r.itemNo));if(!m){s.notFound++;continue}s.found++;
+    const cur=String(r.artGrp||'').trim(),useCls=!cur||!!r.artSub,patch={};let cls=cur;
+    if(useCls){cls=m.g;patch.artGrp=m.g;patch.artSub=false;s.fillCls++}
+    else if(amNum(cur)!==amNum(m.g))s.conflict++;
+    if(r.buyerUid)s.keep++;
+    else if(o.buyer){ /* the Class decides the Buyer: the row's own group is tried first, then without it (class numbers belong to one group, and some reports put department names in the Division column) */
+      const b=buyerFor({...r,artGrp:cls,artSub:false})||buyerFor({...r,division:'',artGrp:cls,artSub:false});
+      if(b){patch.buyerUid=b;s.fillBuyer++}
+      else if(buyersByArt(cls).length>1)s.amb++;else s.noRule++}
+    if(Object.keys(patch).length)list.push({r,patch,cls})}
+  return{s,list,hasRules}
+}
+const icOpts=()=>({buyer:$('#icBuyer').checked});
+async function readIcFile(file){
+  $('#icErr').textContent='';$('#icBox').innerHTML='<p class="muted">กำลังอ่านไฟล์ (ไฟล์ใหญ่ ใช้เวลาไม่กี่วินาที)…</p>';
+  try{
+    await new Promise(r=>setTimeout(r,30));
+    const parsed=parseBarcodeCsv(await file.text());
+    if(!parsed.map.size)throw Error('ไม่พบแถวสินค้าในไฟล์');
+    ITEMCLS=parsed.map;ITEMCLS_INFO={file:file.name,n:parsed.map.size,rows:parsed.rows,savedAt:new Date().toISOString()};
+    const saved=await iclSave(ITEMCLS_INFO,parsed.text);
+    icImp={file:file.name,saved};showIcPreview();
+  }catch(e){icImp=null;$('#icBox').innerHTML='';$('#icErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
+}
+function showIcPreview(){
+  if(!ITEMCLS)return;
+  const plan=planItemCls(icOpts()),{s,list,hasRules}=plan,info=ITEMCLS_INFO||{};icImp=icImp||{file:info.file};icImp.plan=plan;
+  $('#icOpts').hidden=false;$('#icDrop').hidden=true;$('#icGo').disabled=!list.length;$('#icForget').hidden=false;
+  const sample=list.slice(0,8).map(x=>`<tr><td class="small"><b>${esc(x.r.itemNo)}</b><div class="muted">${esc(String(x.r.desc||'').slice(0,40))}</div></td><td class="num">${esc(x.patch.artGrp||x.cls)}</td><td>${x.patch.buyerUid?esc(x.patch.buyerUid):'<span class="muted">—</span>'}</td></tr>`).join('');
+  $('#icBox').innerHTML=`<div class="imp-file"><b>${esc(icImp.file||info.file||'')}</b> <span class="muted small">· ${(info.n||ITEMCLS.size).toLocaleString()} สินค้าในทะเบียน${icImp.saved===false?' · <span class="err-text">จำไว้ในเครื่องนี้ไม่ได้ (ต้องเลือกไฟล์ใหม่ทุกครั้ง)</span>':' · จำไว้ในเครื่องนี้แล้ว'}</span> <button type="button" class="btn sm" id="icChange">เปลี่ยนไฟล์</button></div>
+  <div class="imp-tiles"><div class="t-new"><b>${s.found.toLocaleString()}</b><span>Item NBS ที่พบในทะเบียน (จาก ${s.total.toLocaleString()})</span></div><div class="t-new"><b>${s.fillCls.toLocaleString()}</b><span>จะเติมเลข Class</span></div><div class="t-new"><b>${s.fillBuyer.toLocaleString()}</b><span>จะเติม Buyer</span></div></div>
+  <p class="small" style="margin:8px 0 0">Buyer ที่ยังไม่ได้: กำกวม (Class นี้มีหลาย Buyer) <b>${s.amb.toLocaleString()}</b> · ยังไม่มีกฎ <b>${s.noRule.toLocaleString()}</b> · ตั้งไว้แล้ว (ไม่แตะ) <b>${s.keep.toLocaleString()}</b> · ไม่พบเลข Item ในทะเบียน <b>${s.notFound.toLocaleString()}</b></p>
+  ${!hasRules?'<p class="small err-text" style="margin:6px 0 0"><b>ยังไม่มีกฎ Class → Buyer ในระบบ</b> — ถ้าต้องการให้เติม Buyer ให้นำเข้า “กฎ Buyer (Class → Buyer)” ก่อน (เติมเลข Class ได้เลยไม่ต้องรอ)</p>':''}
+  ${s.conflict?`<p class="small" style="margin:6px 0 0;color:var(--soon)">รายการ ${s.conflict.toLocaleString()} แถวมีเลข Class ที่ตั้งไว้ต่างจากทะเบียน — ระบบไม่ทับ</p>`:''}
+  ${sample?`<div class="imp-sample"><table><thead><tr><th>Item</th><th>Class</th><th>Buyer</th></tr></thead><tbody>${sample}</tbody></table></div>${list.length>8?`<p class="muted small" style="margin:4px 0 0">แสดง 8 รายการแรกจาก ${list.length.toLocaleString()}</p>`:''}`:'<p class="muted small" style="margin:8px 0 0">ไม่มีรายการที่ต้องเติมเพิ่ม</p>'}`;
+  $('#icChange').onclick=()=>{$('#icDrop').hidden=false;$('#icBox').innerHTML='';$('#icGo').disabled=true;$('#icFile').value='';$('#icFile').click()};
+  $('#icStored').textContent='';
+}
+async function runItemCls(){
+  if(!ITEMCLS||!icImp||!icImp.plan)return;
+  const plan=planItemCls(icOpts()),list=plan.list;if(!list.length)return;
+  if(!await ask(`เติมเลข Class ${plan.s.fillCls.toLocaleString()} แถว และ Buyer ${plan.s.fillBuyer.toLocaleString()} แถวให้ Item NBS?  (ทุกคนในทีมเห็นการเปลี่ยนนี้ · ไม่ทับ Buyer ที่ตั้งไว้แล้ว)`))return;
+  const now=new Date().toISOString(),btn=$('#icGo');btn.disabled=true;
+  const ok=await act(async()=>{let done=0;
+    for(let i=0;i<list.length;i+=10){await Promise.all(list.slice(i,i+10).map(x=>patchItem('nbs',x.r,{...x.patch,updatedAt:now})));done=Math.min(list.length,i+10);btn.textContent=`กำลังบันทึก ${done.toLocaleString()} / ${list.length.toLocaleString()}…`}},null);
+  btn.textContent='เติมข้อมูลให้ Item NBS';
+  if(ok){$('#dlgIc').close();renderAll();toast(`เติมแล้ว: Class ${plan.s.fillCls.toLocaleString()} · Buyer ${plan.s.fillBuyer.toLocaleString()} แถว`)}else showIcPreview();
+}
+function openItemCls(){
+  icImp=null;$('#icBox').innerHTML='';$('#icErr').textContent='';$('#icFile').value='';$('#icGo').disabled=true;$('#icGo').textContent='เติมข้อมูลให้ Item NBS';$('#icForget').hidden=true;
+  if(ITEMCLS){$('#icStored').textContent='';showIcPreview()}
+  else{$('#icDrop').hidden=false;$('#icOpts').hidden=true;$('#icStored').textContent='ยังไม่มีทะเบียนสินค้าในเครื่องนี้'}
+  $('#dlgIc').showModal();
+}
+$('#icCancel').onclick=()=>$('#dlgIc').close();$('#icGo').onclick=runItemCls;
+$('#icPick').onclick=()=>$('#icFile').click();$('#icFile').onchange=e=>{const f=e.target.files[0];if(f)readIcFile(f)};
+$('#icBuyer').onchange=()=>{if(ITEMCLS)showIcPreview()};
+$('#icForget').onclick=async()=>{if(!await ask('ลบทะเบียนสินค้าที่จำไว้ในเครื่องนี้? (ไม่กระทบข้อมูลทีม)'))return;await iclForget();$('#icBox').innerHTML='';$('#icDrop').hidden=false;$('#icOpts').hidden=true;$('#icGo').disabled=true;$('#icForget').hidden=true;$('#icStored').textContent='ลบทะเบียนในเครื่องนี้แล้ว'};
+(()=>{const d=$('#icDrop');
+  ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));
+  ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+  $('#dlgIc').addEventListener('dragover',e=>e.preventDefault());
+  $('#dlgIc').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readIcFile(f)})})();
+iclLoad().catch(()=>{});
+
 /* ---------- OOS+ : out-of-shelf / out-of-stock items the team has to refill ----------
    record = {itemNo, desc, loc, stock, status:'need'|'doing'|'done', assignee, note, foundAt, doneAt, img:'img:<id>' (shelf photo in `imgs`), source:'import'|'manual'} */
 const OOS_ST={need:['ต้องเติม','md1'],doing:['กำลังเติม','soon'],done:['เติมแล้ว','ok']};
@@ -3587,7 +3704,9 @@ function parseWorkbook(wb,fileName,defDiv){
       let last=m.lastSale!=null?toIsoDate(r[m.lastSale]):'',derived=false;
       const recv=m.lastRecv!=null?toIsoDate(r[m.lastRecv]):'';
       /* an Art Grp / Class cell can read "681 Cereal Milk": the number is the Art Grp */
-      const agRaw=m.artGrp!=null?r[m.artGrp]:'',agm=String(agRaw??'').trim().match(/^(\d{1,4})\s+\S/),artGrp=agm?agm[1]:cleanNo(agRaw),dept=m.dept!=null?String(r[m.dept]??'').trim():'',aging=m.aging!=null?String(r[m.aging]??'').trim():'',agingType=m.agingType!=null?parseAgingType(r[m.agingType]):'';
+      let agRaw=m.artGrp!=null?r[m.artGrp]:'',agm=String(agRaw??'').trim().match(/^(\d{1,4})\s+\S/),artGrp=agm?agm[1]:cleanNo(agRaw),dept=m.dept!=null?String(r[m.dept]??'').trim():'',aging=m.aging!=null?String(r[m.aging]??'').trim():'',agingType=m.agingType!=null?parseAgingType(r[m.agingType]):'';
+      /* the item master (Barcode.csv), when this browser has it: the real Class replaces an empty value or a Sub No */
+      let sub=artSub;if(ITEMCLS&&(!artGrp||sub)){const mm=ITEMCLS.get(amNum(no));if(mm){artGrp=String(mm.g);sub=false;info.clsMaster=(info.clsMaster||0)+1}}
       let dv=m.days!=null?numOr(r[m.days]):'';
       if(dv===''&&/^\d+$/.test(aging))dv=+aging;
       if(!last&&dv!==''&&dv>=0){last=iso(addD(today(),-Math.round(dv)));derived=true}
@@ -3595,10 +3714,10 @@ function parseWorkbook(wb,fileName,defDiv){
          without one, the "สินค้าที่ดูแล" rules decide from the Art Grp / Class */
       let buyer='',bsrc='';
       if(m.buyer!=null){const raw=String(r[m.buyer]??'').trim();if(raw){const c=ctFindBuyer(raw);buyer=c?c.uid:raw;bsrc=c?'file':'unknown';if(!c)info.buyerUnknown[raw]=(info.buyerUnknown[raw]||0)+1}}
-      if(!buyer){const ru=buyerFor({division:div,artGrp,artSub,dept,desc,itemNo:no});if(ru){buyer=ru;bsrc='rule'}}
-      if(artSub&&artGrp)info.artSubRows=(info.artSubRows||0)+1;
+      if(!buyer){const ru=buyerFor({division:div,artGrp,artSub:sub,dept,desc,itemNo:no});if(ru){buyer=ru;bsrc='rule'}}
+      if(sub&&artGrp)info.artSubRows=(info.artSubRows||0)+1;
       info.bsrc[bsrc||'none']++;
-      recs.set(div+'|'+no,{artSub,division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
+      recs.set(div+'|'+no,{artSub:sub,division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
     info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict")info.cols[k]=true});
@@ -3697,6 +3816,7 @@ function showImportPreview(){
     const no=!info.cols.buyer&&(!info.cols.artGrp||info.artSubRows>=info.bsrc.none+info.bsrc.rule+info.bsrc.file+info.bsrc.unknown);
     return`<p class="small" style="margin:6px 0 0"><b>Buyer:</b> จากคอลัมน์ buyer_uid ${(b.file||0).toLocaleString()} · จากกฎ Class / Art Grp ${(b.rule||0).toLocaleString()} · รหัสที่ไม่พบในรายชื่อ ${(b.unknown||0).toLocaleString()} · ยังไม่มี ${(b.none||0).toLocaleString()}</p>`
     +(unk.length?`<p class="small err-text" style="margin:2px 0 0">รหัส Buyer ในไฟล์ที่ไม่มีในรายชื่อ Buyer / Commercial: ${esc(unk.slice(0,10).map(([k,n])=>k+' ('+n+')').join(', '))}${unk.length>10?' …':''} — ระบบเก็บรหัสไว้ตามไฟล์ เพิ่มรายชื่อให้ครบแล้ว Buyer จะแสดงเต็ม</p>`:'')
+    +(info.clsMaster?`<p class="small" style="margin:2px 0 0">เติมเลข Class จากทะเบียนสินค้า (Barcode) ${info.clsMaster.toLocaleString()} รายการ</p>`:'')
     +(info.artSubRows?`<p class="small" style="margin:2px 0 0">เลขในคอลัมน์ “Art Grp Sub No” (${info.artSubRows.toLocaleString()} รายการ) เป็นรหัสย่อยในแต่ละ Dept ไม่ใช่เลข Class จึงไม่ใช้จับ Buyer ตามกฎ — ระบบหา Buyer จาก buyer_uid ในไฟล์ หรือจากสินค้าตัวเดียวกันในข้อมูล OOS+ เท่านั้น ถ้ายังว่างให้นำเข้า “Item → Art Grp” (Class) ภายหลัง</p>`:'')
     +(no?`<p class="small err-text" style="margin:2px 0 0">ไฟล์นี้ไม่มีคอลัมน์ <b>buyer_uid</b> หรือ <b>Class / Art Grp</b> ระบบจึงเติม Buyer ให้ไม่ได้ — เพิ่มคอลัมน์เหล่านี้ตอน Export รายงาน (ตัวเดียวกับไฟล์ data ที่มี Division · Dept · Class · buyer_uid · Buyer Name) หรือนำเข้า “Item → Art Grp” แล้วนำเข้าไฟล์นี้ซ้ำ</p>`:'')})()}
   ${Object.keys(info.divVals).length?`<div class="imp-div"><b>กลุ่มจากคอลัมน์ Division (ใช้ตามค่าในไฟล์ 100%):</b><div class="imp-divchips">${Object.entries(info.divVals).sort((a,b)=>b[1].n-a[1].n).map(([k,e])=>`<span class="chip ${e.div?'div-'+e.div.toLowerCase():'s-pull'}">${esc(k)} → ${e.div||'ไม่รู้จัก'} · ${e.n.toLocaleString()}</span>`).join('')}</div>${info.badDiv?`<p class="err-text small" style="margin:6px 0 0">ข้าม ${info.badDiv.toLocaleString()} แถวที่ค่า Division ไม่ใช่ FRESH FOOD / DRY FOOD / NON FOOD (ไม่นำเข้า เพราะไม่เดากลุ่มให้)</p>`:''}</div>`:''}
