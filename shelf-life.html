@@ -560,7 +560,8 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   #nbsTiles .tile.dv{border-left-width:5px}
   #nbsTiles .tile b{font-size:22px;margin:2px 0}
   #nbsTiles .dvl,#nbsTiles .tl{display:none}
-  #nbsTiles .ts{display:inline}
+  #nbsTiles .ts{display:block}
+  #nbsTiles .err-text{display:block}
   #nbsTiles .chip{font-size:12px;padding:1px 8px}
   #nbsTiles .small{font-size:11px;line-height:1.2}
   /* nothing wider than the screen (date fields on iPhone are the usual offender) */
@@ -615,6 +616,24 @@ th.sortable:hover{color:var(--accent)}
 }
 .oosc.stk-blink{outline:4px solid #ffd400;outline-offset:2px;animation:stkBlink .8s ease-in-out infinite alternate}
 @media (prefers-reduced-motion:reduce){.oosc.stk-blink{animation:none;outline-color:#e0262d}}
+/* Item NBS: the five Aging levels, pinned, filling the width, tappable */
+.lvbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;position:sticky;top:calc(var(--navh,52px) + env(safe-area-inset-top,0px));z-index:7;background:var(--card);padding:8px 0;margin:0 0 8px;box-shadow:0 8px 8px -9px #0006}
+.lvbar:empty{display:none}
+.lvb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;padding:10px 6px;border:0;border-radius:12px;font:inherit;cursor:pointer;text-align:center;overflow-wrap:anywhere;line-height:1.15;transition:opacity .15s,transform .1s}
+.lvb b{font-size:26px;font-variant-numeric:tabular-nums}
+.lvb span{font-size:14px;font-weight:700}
+.lvb:hover{transform:translateY(-1px)}
+.lvb.sel{outline:3px solid #e0262d;outline-offset:1px;box-shadow:0 4px 14px #e0262d3d}
+.lvbar.has-sel .lvb:not(.sel){opacity:.42;filter:saturate(.45)}
+.lvbar.has-sel .lvb:not(.sel):hover{opacity:.8}
+table.nbs-tbl{scroll-margin-top:calc(var(--navh,52px) + var(--lvlh,0px) + 12px)}
+table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(safe-area-inset-top,0px))}
+@media (max-width:560px){
+  .lvbar{gap:5px;padding:6px 0}
+  .lvb{padding:7px 2px;border-radius:10px}
+  .lvb b{font-size:19px}
+  .lvb span{font-size:10.5px}
+}
 @media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
@@ -740,11 +759,12 @@ th.sortable:hover{color:var(--accent)}
       <span class="row w"><button class="btn" id="nbsExport">ส่งออก CSV</button><button class="btn imp-btn" id="nbsImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" id="nbsAdd">+ เพิ่ม Item NBS</button></span>
     </div>
     <div class="tiles" id="nbsTiles" style="margin:12px 0"></div>
-    <div class="row" id="nbsSummary" style="gap:8px;margin:0 0 12px;align-items:center"></div>
+    <div class="row" id="nbsSummary" style="gap:8px;margin:0 0 8px;align-items:center"></div>
+    <div class="lvbar" id="nbsLevels"></div>
     <div class="fbar f4">
       <label class="f-q">ค้นหา<input id="nbsQ" placeholder="รหัส / ชื่อ / Buyer UID / ที่ตั้ง / Remark"></label>
       <label>สถานะ<select id="nbsFSt"><option value="">ทั้งหมด</option></select></label>
-      <label>ระดับ Aging<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="nbs">เกินเกณฑ์ NBS</option><option value="l1">Alert ขึ้นไป</option><option value="l2">Attention ขึ้นไป</option><option value="l3">Critical ขึ้นไป</option><option value="l4">Obsolete ขึ้นไป</option><option value="l5">Full Provision</option></select></label>
+      <label>ระดับ Aging<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="nbs">เกินเกณฑ์ NBS</option><option value="l1">Alert ขึ้นไป</option><option value="l2">Attention ขึ้นไป</option><option value="l3">Critical ขึ้นไป</option><option value="l4">Obsolete ขึ้นไป</option><option value="l5">Full Provision</option><option value="e1">เฉพาะ Alert</option><option value="e2">เฉพาะ Attention</option><option value="e3">เฉพาะ Critical</option><option value="e4">เฉพาะ Obsolete</option><option value="e5">เฉพาะ Full Provision</option></select></label>
       <label>นับอายุ Aging จาก<select id="nbsBasis"><option value="sold">วันที่ไม่มียอดขาย (Last Sold)</option><option value="recv">วันที่รับสินค้าล่าสุด (Last Recv.)</option></select></label>
       <div class="f-act">
         <label class="f-chk"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
@@ -3217,7 +3237,7 @@ function nbsAgingText(r){
 /* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
 function nbsFiltered(){
   const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value;
-  return rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):(agingInfo(r).level??-1)>=+fa.slice(1)))
+  return rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
     &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q)))
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
@@ -3341,7 +3361,11 @@ function renderNbs(){
   const lv=[0,1,2,3,4,5].map(n=>open.filter(r=>(agingInfo(r).level??-1)===n).length),nOver=open.filter(nbsOver).length,lastImp=rows.reduce((m,r)=>r.importedAt&&r.importedAt>m?r.importedAt:m,''),li=lastImp?new Date(lastImp):null;
   nbsBannerUpdate(open,nOver);
   $('#nbsSummary').innerHTML=(li?`<span class="pill">นำเข้าล่าสุด <b>${fmt(li)} ${String(li.getHours()).padStart(2,'0')}.${String(li.getMinutes()).padStart(2,'0')} น.</b></span>`:'')
-    +(open.some(r=>r.lastSale||r.lastRecv)?`<span class="pill">เกินเกณฑ์ NBS <b>${nOver.toLocaleString()}</b></span>`+AGING_LV.slice(1).map((l,i)=>`<span class="chip s-${l[1]}">${l[0]} ${lv[i+1].toLocaleString()}</span>`).join(''):'');
+    +(open.some(r=>r.lastSale||r.lastRecv)?`<span class="pill">เกินเกณฑ์ NBS <b>${nOver.toLocaleString()}</b></span>`:'');
+  /* the five Aging levels: a pinned bar of big buttons that fills the width; a tap lists only the items at that level (tap again = all) */
+  const cur=$('#nbsFAl').value;
+  $('#nbsLevels').innerHTML=open.some(r=>r.lastSale||r.lastRecv)?AGING_LV.slice(1).map((l,i)=>`<button type="button" class="lvb s-${l[1]}${cur==='e'+(i+1)?' sel':''}" data-lv="${i+1}" title="แสดงเฉพาะรายการระดับ ${esc(l[0])}"><b>${lv[i+1].toLocaleString()}</b><span>${esc(l[0])}</span></button>`).join(''):'';
+  $('#nbsLevels').classList.toggle('has-sel',/^e\d$/.test(cur));
   /* filters live in nbsFiltered() */
   const all=nbsFiltered();
   const list=all.slice(0,nbsLimit);
@@ -3483,7 +3507,9 @@ $('#nCancel').onclick=()=>$('#dlgNbs').close();$('#nSave').onclick=nbsSave;
 $('#nDiv').onchange=()=>nbsBuyerOptions($('#nBuyer').value);
 let nbsT;$('#nQ').oninput=()=>{clearTimeout(nbsT);nbsT=setTimeout(nbsSearch,150)};
 $('#nResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)nbsPick(b.dataset.no)};
-const nbsRe=()=>{nbsLimit=200;renderNbs()};$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsBasis').value=agingBasis;$('#nbsBasis').onchange=()=>{agingBasis=$('#nbsBasis').value;try{localStorage.setItem('shelfLifeMonitor.agingBasis',agingBasis)}catch(e){}nbsRe()};$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
+const nbsRe=()=>{nbsLimit=200;renderNbs()};
+$('#nbsLevels').onclick=e=>{const b=e.target.closest('.lvb');if(!b)return;const v='e'+b.dataset.lv,sel=$('#nbsFAl');sel.value=sel.value===v?'':v;nbsRe();
+  if(sel.value){const t=document.querySelector('table.nbs-tbl');if(t)t.scrollIntoView({block:'start',behavior:'smooth'})}}; /* jump to the list of that level */$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsBasis').value=agingBasis;$('#nbsBasis').onchange=()=>{agingBasis=$('#nbsBasis').value;try{localStorage.setItem('shelfLifeMonitor.agingBasis',agingBasis)}catch(e){}nbsRe()};$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
 $('#nbsFSt').innerHTML+=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
 $('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;nbsColF.div=null;nbsLimit=200;renderNbs()};
 $('#t-nbs thead').onclick=e=>{const b=e.target.closest('.fbtn');if(b)openFMenu(b)};
@@ -3741,8 +3767,8 @@ $('#mfResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)pickMf(b.da
 /* keep sticky table headers just under the pinned tab bar */
 try{const ph=matchMedia('(max-width:700px)'),hd=document.querySelector('header');
   const upd=()=>{const s=document.documentElement.style,h=ph.matches?hd.offsetHeight:0; /* phone: the logo bar + Julian are pinned above the tabs */
-    s.setProperty('--hdrh',h+'px');s.setProperty('--navh',($('#tabs').offsetHeight+h)+'px');s.setProperty('--legh',$('#dashLegend').offsetHeight+'px')};
-  const ro=new ResizeObserver(upd);ro.observe($('#tabs'));ro.observe($('#dashLegend'));ro.observe(hd);ph.addEventListener('change',upd);window.addEventListener('resize',upd);upd()}catch(e){}
+    s.setProperty('--hdrh',h+'px');s.setProperty('--navh',($('#tabs').offsetHeight+h)+'px');s.setProperty('--legh',$('#dashLegend').offsetHeight+'px');const lb=$('#nbsLevels');s.setProperty('--lvlh',(lb?lb.offsetHeight:0)+'px')};
+  const ro=new ResizeObserver(upd);ro.observe($('#tabs'));ro.observe($('#dashLegend'));ro.observe(hd);ro.observe($('#nbsLevels'));ph.addEventListener('change',upd);window.addEventListener('resize',upd);upd()}catch(e){}
 /* compact Julian in the pinned tab bar once the big badge scrolls away */
 try{new IntersectionObserver(([en])=>$('#jmini').classList.toggle('show',!en.isIntersecting),{threshold:0}).observe(document.querySelector('.jbadge'))}catch(e){$('#jmini').classList.add('show')}
 /* camera barcode scan — same ZXing build and settings as Makro Finder's own scanner */
