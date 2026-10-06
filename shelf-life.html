@@ -3644,7 +3644,7 @@ const SHR_BASES=[['mtd','ยอดทิ้ง ฿ (MTD)'],['pct','%Shrink'],['c
 let shrBasis='',shrTile='',shrDiv='',shrLimit=60,shrDrill=false;
 const shrHas=b=>b==='code'?SHR.code.length>0:!!SHR.sales;
 const shrFind=id=>{const m=shrBuild();return m.items.find(x=>x._id===id)};
-const shrEligible=(it,b)=>b==='pct'?it.pct!=null:shrVal(it,b)!=null;
+const shrEligible=(it,b)=>b==='pct'?(it.pct!=null||it.amt!=null):shrVal(it,b)!=null; /* the %Shrink view lists the same items as the ฿ view (a few have a shrink amount but no % because their sales are blank); they just rank last */
 function shrLevel(it,b){const v=shrVal(it,b),r=b==='code'?null:shrRate(it);if(v==null||v<=0)return'done';if(v>=SHR_HI||(r!=null&&r>=SHR_P5))return'late';if(v>=SHR_BIG||(r!=null&&r>=SHR_P1))return'warn';return'ok'}
 function shrVisible(m,b){
   const q=$('#shrQ').value.trim().toLowerCase(),fr=$('#shrFRs').value,fc=$('#shrFCls').value,fd=$('#shrFDept').value,fw=$('#shrFWho').value,hide=$('#shrHide').checked,s=$('#shrSort').value;
@@ -3654,7 +3654,7 @@ function shrVisible(m,b){
     const v=shrVal(it,b),r=shrRate(it);
     if(shrTile==='big'&&!(v!=null&&v>=SHR_BIG))return false;
     if(shrTile==='hi'&&!(r!=null&&r>=SHR_P1))return false;
-    if(hide&&!(b==='pct'?(r!=null&&r>0):(v!=null&&v>0)))return false;
+    if(hide&&!((v!=null&&v>0)||(b==='pct'&&r!=null&&r>0)))return false;
     if(fr&&!it.rs.has(fr))return false;
     if(fc&&it.cn!==fc)return false;
     if(fd&&it.dlbl!==fd)return false;
