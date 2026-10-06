@@ -381,7 +381,7 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .oc-r:hover{background:color-mix(in srgb,#7a4fd6 9%,transparent)}
 .oc-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
 .oc-b{display:block;height:12px;border-radius:6px;background:color-mix(in srgb,var(--muted) 18%,transparent);overflow:hidden}
-.oc-b i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#b9a0f0,#7a4fd6)}
+.oc-b i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,color-mix(in srgb,var(--c,#7a4fd6) 50%,#fff),var(--c,#7a4fd6))} /* rank colour: top = red, then orange, down to yellow */
 .oc-v{font-size:12.5px;white-space:nowrap;min-width:92px;text-align:right}
 .oc-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .oc-back{font:inherit;font-weight:700;padding:5px 12px;border:1px solid #7a4fd6;border-radius:8px;background:#fff;color:#7a4fd6;cursor:pointer}
@@ -2544,7 +2544,7 @@ function oosChartHtml(rows){
   const ranked=withF.map(r=>({r,t:oosNum(r[tk])||0,d:oosNum(r[dk])||0})).filter(x=>x.t>0).sort((a,b)=>b.t-a.t||b.d-a.d||(oosNum(b.r.freqAll)||0)-(oosNum(a.r.freqAll)||0)).slice(0,10);
   const mx=ranked.length?ranked[0].t:1,rep=withF.filter(r=>(oosNum(r[tk])||0)>=2).length;
   const seg=OOS_PERIODS.map(([k,l])=>`<button type="button" class="${oosFreqP===k?'on':''}" data-p="${k}">${l}</button>`).join('');
-  const bars=ranked.length?ranked.map(({r,t,d})=>`<button type="button" class="oc-r" data-no="${esc(r.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(r.desc||r.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(t/mx*100))}%"></i></span><span class="oc-v"><b>${t.toLocaleString()}</b> ครั้ง · ${d.toLocaleString()} วัน</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ขาดในช่วงนี้</p>';
+  const bars=ranked.length?ranked.map(({r,t,d},ix)=>`<button type="button" class="oc-r" data-no="${esc(r.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(r.desc||r.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(t/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v"><b>${t.toLocaleString()}</b> ครั้ง · ${d.toLocaleString()} วัน</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ขาดในช่วงนี้</p>';
   return`<div class="oos-chart"><div class="oc-h"><div><b>ความถี่ที่ขาด · ${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ขาดซ้ำตั้งแต่ 2 ครั้ง ${rep.toLocaleString()} จาก ${withF.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
 function oosFactsHtml(r){
   const dms=oosNum(r.dms),sd=oosNum(r.stockDay),dn=oosNum(r.dmsNew),by=oosBuyerName(r),bits=[],out=[];
