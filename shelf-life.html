@@ -607,6 +607,14 @@ th.sortable:hover{color:var(--accent)}
 .tile.sel{outline:3px solid #e0262d;outline-offset:0;box-shadow:0 4px 16px #e0262d3d;position:relative}
 .tiles:has(>.tile.sel)>.tile:not(.sel){opacity:.42;filter:saturate(.45)}
 .tiles:has(>.tile.sel)>.tile:not(.sel):hover{opacity:.8}
+/* the item whose Stock box is open blinks yellow -> red */
+@keyframes stkBlink{
+  0%{outline-color:#ffd400;box-shadow:0 0 0 0 #ffd40000,0 0 14px 2px #ffd400aa}
+  50%{outline-color:#ff8a00;box-shadow:0 0 0 4px #ff8a0030,0 0 22px 6px #ff8a00aa}
+  100%{outline-color:#e0262d;box-shadow:0 0 0 6px #e0262d33,0 0 26px 8px #e0262dbb}
+}
+.oosc.stk-blink{outline:4px solid #ffd400;outline-offset:2px;animation:stkBlink .8s ease-in-out infinite alternate}
+@media (prefers-reduced-motion:reduce){.oosc.stk-blink{animation:none;outline-color:#e0262d}}
 @media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
@@ -2576,7 +2584,7 @@ const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','https://ssmobil
 const STOCK_LABELS=['หน้า Stock 1','หน้า Stock 2'];
 let stkBubble=null,stkSelfBack=0;
 function stkClose(viaPop){
-  if(!stkBubble)return;const b=stkBubble;stkBubble=null;
+  if(!stkBubble)return;const b=stkBubble;stkBubble=null;document.querySelectorAll('.oosc.stk-blink').forEach(c=>c.classList.remove('stk-blink'));
   window.removeEventListener('scroll',b.scroll,true);window.removeEventListener('blur',b.engage);document.removeEventListener('pointerdown',b.release,true);window.removeEventListener('resize',b.place);document.removeEventListener('keydown',b.key);b.el.remove();b.tail.remove();
   if(!viaPop&&b.pushed&&history.state&&history.state.stk){try{stkSelfBack++;history.back()}catch(e){stkSelfBack--}} /* drop the history entry we added, so "back" afterwards leaves the page normally */
 }
@@ -2597,8 +2605,16 @@ function stkPlace(){
   el.style.cssText=`left:${left}px;top:8px;width:${w}px;height:${h}px`;stkFit();stkTrack();
 }
 /* follow the scrolling: the bubble belongs to ONE card. When that card is no longer what the user is looking at (mostly scrolled away / hidden behind the bubble / gone), close the bubble */
+/* the card being looked up blinks (yellow -> red) while its Stock box is open, so it is clear which item it is */
+function stkMark(){
+  const s=stkBubble;if(!s)return;let b=s.btn;
+  if(!b.isConnected){b=[...document.querySelectorAll('.btn.stk')].find(x=>(x.getAttribute('onclick')||'').includes("'"+s.id+"'"));if(b)s.btn=b}
+  const card=b&&b.closest('.oosc');
+  document.querySelectorAll('.oosc.stk-blink').forEach(c=>{if(c!==card)c.classList.remove('stk-blink')});
+  if(card)card.classList.add('stk-blink');
+}
 function stkTrack(){
-  if(!stkBubble)return;const {el,btn,id}=stkBubble;
+  if(!stkBubble)return;const {el,btn,id}=stkBubble;stkMark();
   /* the user is typing / tapping INSIDE the bubble (login fields…): the keyboard opening scrolls and resizes the page — never close it then */
   if(stkBubble.engaged||(document.activeElement&&document.activeElement.tagName==='IFRAME'&&el.contains(document.activeElement))){stkTail();return}
   let b=btn;if(!b.isConnected){b=[...document.querySelectorAll('.btn.stk')].find(x=>(x.getAttribute('onclick')||'').includes("'"+id+"'"));if(b)stkBubble.btn=b}
@@ -2685,7 +2701,7 @@ function renderOos(){
   const rows=oosVisible(ctx),shown=rows.slice(0,oosLimit);
   $('#oosChart').innerHTML=oosChartHtml(rows);
   $('#oosMain').classList.toggle('drill',oosDrill&&!!$('#oosQ').value.trim());
-  $('#oosList').innerHTML=shown.map(r=>oosCard(r,ctx)).join('');
+  $('#oosList').innerHTML=shown.map(r=>oosCard(r,ctx)).join('');stkMark();
   $('#oosEmpty').hidden=rows.length>0;$('#oosEmpty').textContent=all.length?'ไม่มีรายการที่ตรงกับตัวกรอง':'ยังไม่มีรายการ OOS — กด “นำเข้ารายงาน” หรือ “+ เพิ่มรายการ” เมื่อเจอสินค้าหมดชั้นหรือหมดสต็อก';
   $('#oosMoreWrap').hidden=rows.length<=oosLimit;$('#oosMoreTxt').textContent=`แสดง ${shown.length.toLocaleString()} จาก ${rows.length.toLocaleString()} รายการ`;
 }
