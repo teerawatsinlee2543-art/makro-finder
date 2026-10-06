@@ -860,7 +860,7 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
       <label>รหัสเหตุผล<select id="shrFRs"><option value="">ทั้งหมด</option></select></label>
       <label>Class<select id="shrFCls"><option value="">ทั้งหมด</option></select></label>
       <label>แผนก<select id="shrFDept"><option value="">ทั้งหมด</option></select></label>
-      <label>Buyer<select id="shrFWho"><option value="">ทั้งหมด</option></select></label>
+      <label>Buyer / Commercial<select id="shrFWho"><option value="">ทั้งหมด</option></select></label>
       <label>เรียงตาม<select id="shrSort"><option value="basis">ทิ้งมากสุดก่อน (ตามกราฟ)</option><option value="amt">ยอดทิ้ง ฿ มากสุด</option><option value="pct">%Shrink สูงสุด</option><option value="sales">ยอดขายมากสุด</option><option value="name">ชื่อสินค้า</option></select></label>
       <div class="f-act">
         <label class="f-chk"><input type="checkbox" id="shrHide" checked> ซ่อนที่ไม่ได้ทิ้ง</label>
@@ -3600,7 +3600,9 @@ function shrBuild(){
   if(SHR.sales)SHR.sales.rows.forEach(r=>{const it=get(r.i);it.hasSales=true;it.itemNo=r.i;it.desc=r.n||it.desc;it.div=r.dv;it.dp=r.dp;it.dn=r.dn;it.cn=r.cn;it.cl=r.cl;it.sales=r.s;it.pct=r.p;it.amt=r.a});
   SHR.code.forEach(r=>{const it=get(r.i);it.hasCode=true;if(!it.desc)it.desc=r.n;if(!it.dp&&r.dp){it.dp=r.dp;it.dn=SHR_DEPT[r.dp]||''}if(!it.cn&&r.cn){it.cn=r.cn;it.cl=r.cl}
     const x=it.rs.get(r.r)||{q:0,c:0,n:0};x.q+=r.q||0;x.c+=r.c;x.n++;it.rs.set(r.r,x);it.cc+=r.c;it.cq+=r.q||0});
-  const items=[...by.values()],buyers=new Map();
+  const items=[...by.values()],buyers=new Map(),coms=new Map();
+  /* Commercial of a Buyer: the Commercial contacts list the Buyer UIDs they cover in brackets ("Senior Manager · Frozen (FF1, FF2)") */
+  const comBy=new Map();(st.contacts||[]).filter(c=>c.role==='Commercial').forEach(c=>{const mm=String(c.dept||'').match(/\(([^)]*)\)/);if(!mm)return;mm[1].split(/\s*,\s*/).forEach(u=>{u=u.trim().toUpperCase();if(u){if(!comBy.has(u))comBy.set(u,[]);comBy.get(u).push(c)}})});
   items.forEach(it=>{
     if(!it.dn&&it.dp)it.dn=SHR_DEPT[it.dp]||'';
     if(!it.div)it.div=shrDivOfDept(it.dp);
@@ -3608,8 +3610,10 @@ function shrBuild(){
     const m=ITEMCLS?ITEMCLS.get(amNum(it.itemNo)):null;if(!it.cn&&m)it.cn=String(m.g);
     let uid='';try{uid=buyerFor({division:it.div,artGrp:it.cn,subNo:m?m.s:'',itemNo:it.itemNo,desc:it.desc,dept:it.dlbl})||''}catch(e){}
     it.buyer=uid;if(uid&&!buyers.has(uid)){const c=ctFindBuyer(uid);buyers.set(uid,c&&c.name||'')}
-    it.q=[it.itemNo,it.desc,it.cl,it.cn,it.dlbl,it.div,uid,buyers.get(uid)].join(' ').toLowerCase()});
-  return SHR_MEMO={key,items,buyers,depts:[...new Set(items.map(i=>i.dlbl).filter(Boolean))].sort(),classes:[...new Map(items.filter(i=>i.cn).map(i=>[i.cn,i.cn+' '+i.cl])).entries()].sort((a,b)=>amNum(a[0])-amNum(b[0])),reasons:[...new Set(SHR.code.map(r=>r.r))].sort((a,b)=>(+a||1e9)-(+b||1e9)||a.localeCompare(b))}}
+    /* no single Buyer for this Class (shared / unknown): show the Commercial(s) of the Buyers who hold the Class instead */
+    it.coms=[];if(!uid&&it.cn){const seen=new Set();buyersByArt(String(amNum(it.cn))).filter(c=>divGroupOk(it.div,c.group)).forEach(b=>(comBy.get(String(b.uid).toUpperCase())||[]).forEach(c=>{if(!seen.has(c.uid)){seen.add(c.uid);it.coms.push(c)}}));if(it.coms.length>3)it.coms=[];it.coms.forEach(c=>coms.set(c.uid,c))}
+    it.q=[it.itemNo,it.desc,it.cl,it.cn,it.dlbl,it.div,uid,buyers.get(uid),...it.coms.map(c=>c.name+' '+c.uid)].join(' ').toLowerCase()});
+  return SHR_MEMO={key,items,buyers,coms,depts:[...new Set(items.map(i=>i.dlbl).filter(Boolean))].sort(),classes:[...new Map(items.filter(i=>i.cn).map(i=>[i.cn,i.cn+' '+i.cl])).entries()].sort((a,b)=>amNum(a[0])-amNum(b[0])),reasons:[...new Set(SHR.code.map(r=>r.r))].sort((a,b)=>(+a||1e9)-(+b||1e9)||a.localeCompare(b))}}
 const shrRs=rc=>{const n=SHR.names[rc]!=null&&SHR.names[rc]!==''?SHR.names[rc]:SHR_RS0[rc];return n?rc+' · '+n:'รหัส '+rc};
 /* the numbers behind the three views: money lost (positive = thrown away) per basis, and the loss as a share of sales */
 const shrVal=(it,b)=>b==='code'?(it.hasCode?-it.cc:null):(it.amt==null?null:-it.amt);
@@ -3636,7 +3640,7 @@ function shrVisible(m,b){
     if(fr&&!it.rs.has(fr))return false;
     if(fc&&it.cn!==fc)return false;
     if(fd&&it.dlbl!==fd)return false;
-    if(fw&&it.buyer!==fw)return false;
+    if(fw&&(fw.startsWith('c:')?!it.coms.some(c=>c.uid===fw.slice(2)):it.buyer!==fw))return false;
     return!q||it.q.includes(q)});
   const nul=x=>x==null?-Infinity:x;
   return rows.sort((a,c)=>s==='name'?String(a.desc).localeCompare(String(c.desc),'th'):s==='sales'?nul(c.sales)-nul(a.sales):s==='pct'?nul(shrRate(c))-nul(shrRate(a)):s==='amt'?nul(shrVal(c,b==='code'?'code':'mtd'))-nul(shrVal(a,b==='code'?'code':'mtd')):nul(shrMetric(c,b))-nul(shrMetric(a,b))||String(a.desc).localeCompare(String(c.desc),'th'))}
@@ -3649,6 +3653,7 @@ function shrChartHtml(rows,b){
   const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(m/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${val(it)}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ทิ้งในช่วงนี้</p>';
   const tot=rows.reduce((s,it)=>{const v=shrVal(it,b==='pct'?'mtd':b);return s+(v!=null&&v>0?v:0)},0);
   return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · รวม ${shrBaht(tot)} จาก ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
+const shrComHtml=it=>{if(!it.coms.length)return'<div class="muted small">ยังไม่ทราบ Buyer / Commercial</div>';const t=c=>String(c.dept||'').split(' · ')[0];return`<div class="small">Commercial: ${it.coms.map(c=>`<b>${esc(c.name)}</b>${t(c)?` <span class="muted">(${esc(t(c))})</span>`:''}`).join('  /  ')}<div class="muted small">ไม่มี Buyer คนเดียวที่ดูแล Class นี้ — แสดง Commercial ของ Buyer ที่ดูแลร่วมกัน</div></div>`};
 function shrCard(it,b){
   const lv=shrLevel(it,b),th=(MF.images&&MF.images[it.itemNo])||'',k=esc(it._id),v=shrVal(it,b),r=shrRate(it);
   const LV={late:['ทิ้งหนัก','pull'],warn:['ทิ้งปานกลาง','md2'],ok:['ทิ้งเล็กน้อย','ok'],done:['ไม่ได้ทิ้ง','ok']}[lv];
@@ -3662,7 +3667,7 @@ function shrCard(it,b){
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div><div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}',this)">ดู Stock</button></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
     ${bits.length?`<div class="oosc-f small">${bits.join('')}</div>`:''}${rsHtml}
-    ${it.buyer?`<div class="small">Buyer: <b>${esc(by||it.buyer)}</b>${by?` <span class="muted">(${esc(it.buyer)})</span>`:''}</div>`:'<div class="muted small">ยังไม่ทราบ Buyer</div>'}</div>`}
+    ${it.buyer?`<div class="small">Buyer: <b>${esc(by||it.buyer)}</b>${by?` <span class="muted">(${esc(it.buyer)})</span>`:''}</div>`:shrComHtml(it)}</div>`}
 function shrSrcHtml(){
   const f=SHR.files,sa=f.find(x=>x.kind==='sales'),co=f.filter(x=>x.kind==='code');
   if(!f.length)return'';
@@ -3701,7 +3706,7 @@ function renderShr(){
   $('#shrDeptTiles').innerHTML=Object.entries(dcnt).sort((a,c)=>c[1]-a[1]).map(([d,n])=>`<button type="button" class="btn sm${dsel.value===d?' sel':''}" data-d="${esc(d)}">${esc(d)} <b>${shrBk(n)}</b></button>`).join('');
   const rsel=$('#shrFRs'),rcur=rsel.value;rsel.innerHTML='<option value="">ทั้งหมด</option>'+m.reasons.map(rc=>`<option value="${esc(rc)}"${rc===rcur?' selected':''}>${esc(shrRs(rc))}</option>`).join('');
   const csel=$('#shrFCls'),ccur=csel.value;csel.innerHTML='<option value="">ทั้งหมด</option>'+m.classes.map(([n,l])=>`<option value="${esc(n)}"${n===ccur?' selected':''}>${esc(l)}</option>`).join('');
-  const wsel=$('#shrFWho'),wcur=wsel.value;wsel.innerHTML='<option value="">ทั้งหมด</option>'+[...m.buyers.entries()].sort((a,c)=>a[0].localeCompare(c[0])).map(([u,n])=>`<option value="${esc(u)}"${u===wcur?' selected':''}>${esc(u)}${n?' · '+esc(n):''}</option>`).join('');
+  const wsel=$('#shrFWho'),wcur=wsel.value;wsel.innerHTML='<option value="">ทั้งหมด</option>'+[...m.buyers.entries()].sort((a,c)=>a[0].localeCompare(c[0])).map(([u,n])=>`<option value="${esc(u)}"${u===wcur?' selected':''}>${esc(u)}${n?' · '+esc(n):''}</option>`).join('')+(m.coms.size?'<optgroup label="Commercial (Class ที่ยังไม่ระบุ Buyer)">'+[...m.coms.values()].map(c=>`<option value="c:${esc(c.uid)}"${'c:'+c.uid===wcur?' selected':''}>${esc(c.name)}</option>`).join('')+'</optgroup>':'');
   const rows=shrVisible(m,b),shown=rows.slice(0,shrLimit);
   $('#shrChart').innerHTML=shrChartHtml(rows,b);
   $('#shrMain').classList.toggle('drill',shrDrill&&!!$('#shrQ').value.trim());
@@ -3728,9 +3733,9 @@ function renderShr(){
 async function shrExport(){
   const m=shrBuild(),b=shrBasis,rows=shrVisible(m,b);if(!rows.length)return;
   await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-  const rcs=m.reasons,head=['Item No','ชื่อสินค้า','กลุ่ม','Department','Class','Buyer UID','Buyer','ยอดขาย MTD','Actual Shrinkage MTD','%Actual Shrinkage','ทิ้งตาม By Code (฿)','จำนวนตาม By Code',...rcs.map(rc=>shrRs(rc)+' (฿)')];
-  const out=rows.map(it=>{const by=(SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||'';return[it.itemNo,it.desc,it.div,it.dlbl,(it.cn+' '+it.cl).trim(),it.buyer,by,it.sales==null?'':it.sales,it.amt==null?'':it.amt,it.pct==null?'':it.pct,it.hasCode?Math.round(it.cc*100)/100:'',it.hasCode?it.cq:'',...rcs.map(rc=>it.rs.has(rc)?Math.round(it.rs.get(rc).c*100)/100:'')]});
-  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=[10,36,6,22,26,9,22,12,12,10,12,10,...rcs.map(()=>14)].map(w=>({wch:w}));
+  const rcs=m.reasons,head=['Item No','ชื่อสินค้า','กลุ่ม','Department','Class','Buyer UID','Buyer','Commercial (ถ้าไม่มี Buyer)','ยอดขาย MTD','Actual Shrinkage MTD','%Actual Shrinkage','ทิ้งตาม By Code (฿)','จำนวนตาม By Code',...rcs.map(rc=>shrRs(rc)+' (฿)')];
+  const out=rows.map(it=>{const by=(SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||'';return[it.itemNo,it.desc,it.div,it.dlbl,(it.cn+' '+it.cl).trim(),it.buyer,by,it.coms.map(c=>c.name).join(' / '),it.sales==null?'':it.sales,it.amt==null?'':it.amt,it.pct==null?'':it.pct,it.hasCode?Math.round(it.cc*100)/100:'',it.hasCode?it.cq:'',...rcs.map(rc=>it.rs.has(rc)?Math.round(it.rs.get(rc).c*100)/100:'')]});
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=[10,36,6,22,26,9,22,26,12,12,10,12,10,...rcs.map(()=>14)].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,ws,'%Shrink');XLSX.writeFile(wb,'Shrink-'+new Date().toISOString().slice(0,10)+'.xlsx');toast('ดาวน์โหลดรายการ %Shrink แล้ว');
 }
 $('#shrXlsx').onclick=shrExport;
