@@ -54,6 +54,12 @@ body.busy{cursor:progress}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tile b{display:block;font-size:26px;font-variant-numeric:tabular-nums}
 .tile.sel{outline:2px solid var(--accent)}
+/* OOS+ group tiles: a light tint of the group colour and a colour bar on the left, so they stand apart from the status tiles below */
+.tile.dv{border-left-width:7px}
+.tile.dv-ff{background:color-mix(in srgb,var(--ok) 13%,var(--card));border-left-color:var(--ok)}
+.tile.dv-df{background:color-mix(in srgb,var(--accent) 12%,var(--card));border-left-color:var(--accent)}
+.tile.dv-nf{background:color-mix(in srgb,var(--today) 12%,var(--card));border-left-color:var(--today)}
+.tile.dv-x{background:color-mix(in srgb,var(--muted) 12%,var(--card));border-left-color:var(--muted)}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
 label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:600}
 input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
@@ -2262,7 +2268,7 @@ function renderOos(){
   const ctx=oosDivCtx(),byDiv={},lateDiv={};
   active.forEach(r=>{const d=oosDiv(r,ctx)||'-';byDiv[d]=(byDiv[d]||0)+1;if(oosLevel(r)==='late')lateDiv[d]=(lateDiv[d]||0)+1});
   if(oosDivFilter==='-'&&!byDiv['-'])oosDivFilter=''; /* the "ไม่ระบุกลุ่ม" tile disappears once nothing is left in it */
-  const divTile=(k,chipHtml)=>`<button type="button" class="tile${oosDivFilter===k?' sel':''}" data-div="${k}">${chipHtml}<b>${(byDiv[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ต้องเติม${lateDiv[k]?` · <span class="err-text">ค้างเกิน ${OOS_LATE_H} ชม. ${lateDiv[k].toLocaleString()}</span>`:''}</span></button>`;
+  const divTile=(k,chipHtml)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${oosDivFilter===k?' sel':''}" data-div="${k}">${chipHtml}<b>${(byDiv[k]||0).toLocaleString()}</b><span class="muted small">รายการที่ต้องเติม${lateDiv[k]?` · <span class="err-text">ค้างเกิน ${OOS_LATE_H} ชม. ${lateDiv[k].toLocaleString()}</span>`:''}</span></button>`;
   $('#oosDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k} · ${l}</span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
   /* status tiles follow the selected group */
   const sub=all.filter(r=>oosInDiv(r,ctx)),sActive=sub.filter(r=>r.status!=='done'),sLate=sActive.filter(r=>oosLevel(r)==='late'),sDoneToday=sub.filter(r=>r.status==='done'&&oosDoneMs(r)>=t0.getTime());
