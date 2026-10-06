@@ -2449,8 +2449,11 @@ function stkFit(){
   fr.style.width=Math.round(W/s)+'px';fr.style.height=Math.round(H/s)+'px';fr.style.transform=s<1?`scale(${s})`:'none';
 }
 function stkPlace(){
-  if(!stkBubble)return;const {el}=stkBubble,vw=window.innerWidth,vh=window.innerHeight,w=Math.min(vw-16,360),h=Math.max(260,Math.min(Math.round(vh*.56),440));
-  el.style.cssText=`left:${Math.round((vw-w)/2)}px;top:8px;width:${w}px;height:${h}px`;stkFit();stkTrack();
+  if(!stkBubble)return;const {el}=stkBubble,vw=window.innerWidth,vh=window.innerHeight;let w=Math.min(vw-16,360),h=Math.max(260,Math.min(Math.round(vh*.56),440)),left=Math.round((vw-w)/2);
+  /* a computer screen (mouse, wide): the box is twice as big and sits on the side opposite to its card, so it never hides the card it belongs to */
+  if(vw>=900&&!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)){
+    w=Math.min(vw-24,720);h=Math.min(Math.round(vh*.85),880);const bt=stkBubble.btn.getBoundingClientRect();left=bt.left+bt.width/2<vw/2?vw-w-12:12}
+  el.style.cssText=`left:${left}px;top:8px;width:${w}px;height:${h}px`;stkFit();stkTrack();
 }
 /* follow the scrolling: the bubble belongs to ONE card. When that card is no longer what the user is looking at (mostly scrolled away / hidden behind the bubble / gone), close the bubble */
 function stkTrack(){
@@ -2458,7 +2461,10 @@ function stkTrack(){
   let b=btn;if(!b.isConnected){b=[...document.querySelectorAll('.btn.stk')].find(x=>(x.getAttribute('onclick')||'').includes("'"+id+"'"));if(b)stkBubble.btn=b}
   const card=b&&b.closest('.oosc');if(!card||!card.isConnected){stkClose();return}
   const br=el.getBoundingClientRect(),cr=card.getBoundingClientRect(),vh=window.innerHeight;
-  const vis=Math.min(cr.bottom,vh)-Math.max(cr.top,br.bottom); /* the part of the card that is on screen and not under the bubble */
+  /* the part of the card that is on screen and not under the bubble, as an equivalent height */
+  const vTop=Math.max(cr.top,0),vBot=Math.min(cr.bottom,vh),inView=Math.max(0,vBot-vTop)*cr.width;
+  const ox=Math.max(0,Math.min(cr.right,br.right)-Math.max(cr.left,br.left)),oy=Math.max(0,Math.min(vBot,br.bottom)-Math.max(vTop,br.top));
+  const vis=(inView-ox*oy)/Math.max(cr.width,1);
   if(vis<Math.min(cr.height*.4,140)){stkClose();return}
   stkTail();
 }
