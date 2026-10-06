@@ -634,6 +634,8 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
   .lvb b{font-size:19px}
   .lvb span{font-size:10.5px}
 }
+/* Buyer / Commercial has 14 columns: use the wide page like Item NBS */
+@media (min-width:1181px){main:has(#t-ct:not([hidden])){max-width:1560px}}
 @media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
@@ -824,7 +826,7 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn" onclick="exportContactsXlsx()" title="ส่งออกรายชื่อเป็น Excel ตามหัวตารางผังทีม">ส่งออก Excel</button><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="ctRules" title="นำเข้าตาราง Class → Buyer เพื่อเขียนกฎ “สินค้าที่ดูแล” ให้ Buyer ทุกคน แล้วช่อง Buyer ใน Item NBS จะเติมเองตามเลข Class / Art Grp">นำเข้ากฎ Buyer</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
     <div class="fbar"><label class="f-q">ค้นหา<input id="ctQ" placeholder="UID / ชื่อ / หมวดสินค้า / เบอร์ เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small f-info" id="ctCount"></span></div>
-    <table class="resp ct-tbl"><colgroup><col style="width:7%"><col style="width:8%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:11%"><col style="width:5%"><col style="width:11%"><col style="width:10%"><col style="width:6%"><col style="width:7%"></colgroup><thead><tr><th>Area</th><th>Senior Director</th><th>Associate Director / Senior Manager</th><th>Area / Department</th><th>Senior Manager / Product Group</th><th>Buyer UID</th><th>Merchandise Mgr. Name</th><th>Art Grp No.</th><th>Description</th><th>Assistant</th><th>Junior Buyer / New Gen</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
+    <table class="resp ct-tbl"><colgroup><col style="width:6%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:5%"><col style="width:10%"><col style="width:4%"><col style="width:11%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:6%"></colgroup><thead><tr><th>Area</th><th>Senior Director</th><th>Associate Director</th><th>Area / Department</th><th>Senior Manager</th><th>Product Group Manager</th><th>Buyer UID</th><th>Merchandise Mgr. Name</th><th>Art Grp No.</th><th>Description</th><th>Junior Mer Manager</th><th>Assistant Buyer</th><th>Junior Buyer / New Gen</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
   </div>
 </section>
 
@@ -917,6 +919,16 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
     <label>โทร<input name="phone"></label>
     <label>อีเมล / LINE<input name="email"></label>
     <label style="grid-column:1/-1">ผู้ติดต่อสำรอง (Jr. Merchandise / Assistant Buyer)<input name="backup"></label>
+    <details style="grid-column:1/-1"><summary class="small"><b>ตามผังทีม (Director · Associate Director · Sr. Manager · Product Group · Merchandise Mgr. · Description · Jr. Mer Manager · Assistant Buyer · Junior Buyer)</b> — หนึ่งคนต่อบรรทัด รูปแบบ “ชื่อ #รหัส · เบอร์”</summary>
+      <div class="grid2" style="margin-top:8px">
+        <label>Senior Director<textarea name="xSd" rows="2"></textarea></label><label>Associate Director<textarea name="xAd" rows="2"></textarea></label>
+        <label>Senior Manager<textarea name="xSm" rows="2"></textarea></label><label>Product Group Manager<textarea name="xPg" rows="2"></textarea></label>
+        <label>Area / Department<input name="xDept"></label><label>Art Grp No. (หนึ่งเลขต่อบรรทัด)<textarea name="xArt" rows="2"></textarea></label>
+        <label style="grid-column:1/-1">Merchandise Mgr. (ทุกคน)<textarea name="xMerch" rows="2"></textarea></label>
+        <label style="grid-column:1/-1">Description (หนึ่งรายการต่อบรรทัด)<textarea name="xDesc" rows="2"></textarea></label>
+        <label>Junior Mer Manager<textarea name="xJmm" rows="2"></textarea></label><label>Assistant Buyer<textarea name="xAsb" rows="2"></textarea></label>
+        <label>Junior Buyer / New Gen<textarea name="xJr" rows="2"></textarea></label>
+      </div></details>
     <label style="grid-column:1/-1">สินค้าที่ดูแล — ใช้จับ Buyer ให้รายการ Item NBS อัตโนมัติตอนนำเข้า<textarea name="artKeys" rows="2" placeholder="คั่นด้วยเครื่องหมายจุลภาค เช่น 22, 240, dept:HOUSE HOLD, kw:ผงซักฟอก"></textarea></label>
     <p class="muted small" style="grid-column:1/-1;margin:-6px 0 0">ตัวเลข = รหัส Art Grp · dept:ชื่อ = Department ตรงกันทั้งชื่อ · kw:คำ = คำที่อยู่ในชื่อสินค้า (พิมพ์คำเปล่าๆ ก็นับเป็น kw) — จับให้เฉพาะเมื่อมี Buyer เพียงคนเดียวที่ตรง</p>
   </div>
@@ -1781,24 +1793,34 @@ function renderCt(){
   const q=$('#ctQ').value.trim().toLowerCase(),g=$('#ctG').value;
   const groups=[...new Set(st.contacts.map(grpOf))].sort();
   $('#ctG').innerHTML='<option value="">ทุกกลุ่ม</option>'+groups.map(x=>`<option${x===g?' selected':''}>${esc(x)}</option>`).join('');
-  const list=st.contacts.filter(c=>(!g||grpOf(c)===g)&&(!q||[c.uid,c.name,c.dept,c.backup,c.phone].join(' ').toLowerCase().includes(q)))
+  const list=st.contacts.filter(c=>(!g||grpOf(c)===g)&&(!q||[c.uid,c.name,c.dept,c.backup,c.phone,...CT_X.map(k=>c[k])].join(' ').toLowerCase().includes(q)))
     .sort((a,b)=>grpOf(a).localeCompare(grpOf(b))||(a.role===b.role?0:a.role==='Commercial'?-1:1)||String(a.uid).localeCompare(String(b.uid)));
   $('#ctCount').textContent=`${list.length} จาก ${st.contacts.length} รายการ`;
   let last=null;
   $('#ctBody').innerHTML=list.map(c=>{const v=ctView(c),k=esc(c._id),used=st.products.filter(p=>p.buyerUid===c.uid||p.comUid===c.uid).length;
-    let head='';if(grpOf(c)!==last){last=grpOf(c);head=`<tr class="grp"><td colspan="12">${esc(last)}</td></tr>`}
+    let head='';if(grpOf(c)!==last){last=grpOf(c);head=`<tr class="grp"><td colspan="14">${esc(last)}</td></tr>`}
     const P=(name,ph,extra)=>name?`<div class="cn">${esc(name)}</div>${ph?`<div class="muted small num">${esc(ph)}</div>`:''}${extra||''}`:'<span class="muted">-</span>';
+    /* people are shown name + phone; several people in one cell = one per line */
+    const PL=ls=>ls.length?ls.map(l=>{const a=l.split(' · ');return`<div class="cn">${esc(a[0])}</div>${a[1]?`<div class="muted small num">${esc(a.slice(1).join(' · '))}</div>`:''}`}).join(''):'<span class="muted">-</span>';
+    const X=v.x,isB=c.role==='Buyer',cm=v.sm,cmPg=!!cm&&/^Product Group/i.test(cm.title||''),pgSelf=v.smSelf&&/^Product Group/i.test(v.title),smSelf=v.smSelf&&!pgSelf,
+      leg=(n,ph,t)=>P(n,ph,t?`<div class="muted small">${esc(t)}</div>`:'');
+    const cSm=X&&X.sm.length?PL(X.sm):smSelf?leg(c.name,c.phone,v.title):(cm&&!cmPg?leg(cm.name,cm.phone,cm.title):'<span class="muted">-</span>'),
+      cPg=X&&X.pg.length?PL(X.pg):pgSelf?leg(c.name,c.phone,v.title):(cmPg?leg(cm.name,cm.phone,cm.title):'<span class="muted">-</span>'),
+      arts=X&&X.art.length?X.art:v.arts.map(a=>a[0]),
+      cDesc=X&&X.desc.length?X.desc.map(d=>`<div>${esc(d)}</div>`).join(''):(v.arts.length?v.arts.map(a=>`<div>${esc(a[1])}</div>`).join(''):esc(v.desc||'-'));
     return head+`<tr><td data-l="Area" class="small">${esc(c.group||'-')}</td>
-    <td data-l="Senior Director" class="small">${P(v.sd)}</td>
-    <td data-l="Associate Director / Senior Manager" class="small">${P(v.ad)}</td>
-    <td data-l="Area / Department" class="small">${esc(v.area||'-')}</td>
-    <td data-l="Senior Manager / Product Group" class="small">${v.smSelf?P(c.name,c.phone,`<div class="muted small">${esc(v.title)}</div>`):P(v.sm&&v.sm.name,v.sm&&v.sm.phone,v.sm?`<div class="muted small">${esc(v.sm.title)}</div>`:'')}</td>
-    <td data-l="Buyer UID"><b>${c.role==='Buyer'?esc(c.uid):'<span class="muted">-</span>'}</b>${v.codes?`<div class="muted small">${esc(v.codes)}</div>`:''}${used?`<div class="muted small" title="ใช้กับสินค้า ${used} รายการใน Shelf-Life">${used} สินค้า</div>`:''}</td>
-    <td data-l="Merchandise Mgr. Name" class="small">${c.role==='Buyer'?P(c.name,c.phone,c.email?`<div class="muted small">${esc(c.email)}</div>`:''):'<span class="muted">-</span>'}</td>
-    <td data-l="Art Grp No." class="small num">${v.arts.length?v.arts.map(a=>`<div>${esc(a[0])}</div>`).join(''):'<span class="muted">-</span>'}</td>
-    <td data-l="Description" class="small">${v.arts.length?v.arts.map(a=>`<div>${esc(a[1])}</div>`).join(''):esc(v.desc||'-')}</td>
-    <td data-l="Assistant" class="small">${v.asst.length?v.asst.map(x=>`<div>${esc(x)}</div>`).join(''):'<span class="muted">-</span>'}${v.merch?`<div class="muted small">Merch กลุ่ม ${esc(v.merch)}</div>`:''}</td>
-    <td data-l="Junior Buyer / New Gen" class="small">${v.jr.length?v.jr.map(x=>`<div>${esc(x)}</div>`).join(''):'<span class="muted">-</span>'}</td>
+    <td data-l="Senior Director" class="small">${X&&X.sd.length?PL(X.sd):P(v.sd)}</td>
+    <td data-l="Associate Director" class="small">${X&&X.ad.length?PL(X.ad):P(v.ad)}</td>
+    <td data-l="Area / Department" class="small">${esc((X&&X.dept)||v.area||'-')}</td>
+    <td data-l="Senior Manager" class="small">${cSm}</td>
+    <td data-l="Product Group Manager" class="small">${cPg}</td>
+    <td data-l="Buyer UID"><b>${isB?esc(c.uid):'<span class="muted">-</span>'}</b>${v.codes?`<div class="muted small">${esc(v.codes)}</div>`:''}${used?`<div class="muted small" title="ใช้กับสินค้า ${used} รายการใน Shelf-Life">${used} สินค้า</div>`:''}</td>
+    <td data-l="Merchandise Mgr. Name" class="small">${isB?(X&&X.merch.length?PL(X.merch):P(c.name,c.phone,c.email?`<div class="muted small">${esc(c.email)}</div>`:'')):'<span class="muted">-</span>'}</td>
+    <td data-l="Art Grp No." class="small num">${arts.length?arts.map(a=>`<div>${esc(a)}</div>`).join(''):'<span class="muted">-</span>'}</td>
+    <td data-l="Description" class="small">${cDesc}</td>
+    <td data-l="Junior Mer Manager" class="small">${X?PL(X.jmm):'<span class="muted">-</span>'}</td>
+    <td data-l="Assistant Buyer" class="small">${X&&X.asb.length?PL(X.asb):(v.asst.length?v.asst.map(x=>`<div>${esc(x)}</div>`).join(''):'<span class="muted">-</span>')}${v.merch?`<div class="muted small">Merch กลุ่ม ${esc(v.merch)}</div>`:''}</td>
+    <td data-l="Junior Buyer / New Gen" class="small">${X&&X.jr.length?PL(X.jr):(v.jr.length?v.jr.map(x=>`<div>${esc(x)}</div>`).join(''):'<span class="muted">-</span>')}</td>
     <td class="pact"><div class="row w" style="gap:4px;flex-wrap:wrap"><button class="btn sm" onclick="editContact('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delContact('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
 /* the Buyer shown inside an Item NBS row: Buyer UID, Merchandise Mgr. name, Area, Description, Assistant, Junior Buyer (like the org chart) */
@@ -1838,10 +1860,14 @@ function ctView(c){
     else v.smSelf=true;
     if(v.smSelf){const ad=String(c.backup||'').match(/(?:Assoc\.? ?Dir\.?|Associate Director|Director)\s+(.*?)(?:\s·\s|$)/i);if(ad)v.ad=nameOf(ad[1])}
     if(!v.smSelf)v.area=v.area||v.title}
+  const XL=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
+  v.hasX=CT_X.some(k=>c[k]);
+  if(v.hasX)v.x={sd:XL(c.xSd),ad:XL(c.xAd),sm:XL(c.xSm),pg:XL(c.xPg),merch:XL(c.xMerch),desc:XL(c.xDesc),art:XL(c.xArt),dept:String(c.xDept||'').trim(),jmm:XL(c.xJmm),asb:XL(c.xAsb),jr:XL(c.xJr)};
   return v}
 $('#ctQ').oninput=renderCt;$('#ctG').onchange=renderCt;
 const dlgCt=$('#dlgCt'),fC=$('#fCt');let ctId=null;
-const CTF=['uid','name','role','group','dept','phone','email','backup','artKeys'];
+const CT_X=['xSd','xAd','xSm','xPg','xDept','xMerch','xDesc','xArt','xJmm','xAsb','xJr']; /* the org-chart columns of a contact: one value (or one person per line) each */
+const CTF=['uid','name','role','group','dept','phone','email','backup','artKeys',...CT_X];
 function editContact(id){const cur=id?byId('contacts',id):null;ctId=cur?id:null;const c=cur||{uid:'',name:'',role:'Buyer',group:$('#ctG').value,dept:'',phone:'',email:''};CTF.forEach(k=>fC[k].value=c[k]??'');dlgCt.showModal()}
 fC.onsubmit=ev=>{
   const o={};CTF.forEach(k=>o[k]=fC[k].value.trim());
@@ -2034,6 +2060,143 @@ function parseOrgChart(items,fileName){
       backup:ad?`Assoc. Dir. ${ad.name}${ad.id?' #'+ad.id:''}${ad.phone?' · '+ad.phone:''}`:''})});
   return{recs,info:{org:true}}}
 
+/* ---------- Buyer org chart PDF read by its TABLE BORDERS ----------
+   The Makro directories (Dry Grocery Food / Non Food / Fresh Food) are Excel tables printed to PDF: people sit in merged cells.
+   Each page is drawn to a picture to find the cell borders (vertical lines = columns, horizontal lines of each column = its merged rows),
+   so every Buyer UID gets exactly the people / text of the cells that cover its rows: Director, Associate Director, Sr. Manager, Product Group Manager,
+   Merchandise Mgr(s), Description, Junior Mer Manager, Assistant Buyer, Junior Buyer. */
+const ORG_S=2;
+async function orgPdfPages(file,say){
+  const pdfjs=await getPdfjs(),doc=await pdfjs.getDocument({data:await file.arrayBuffer()}).promise,pages=[];
+  for(let p=1;p<=Math.min(doc.numPages,30);p++){
+    if(say)say(`กำลังอ่านตารางจาก PDF หน้า ${p}/${doc.numPages}…`);
+    const pg=await doc.getPage(p),vp=pg.getViewport({scale:1}),tc=await pg.getTextContent(),items=[];
+    tc.items.forEach(it=>{const s=(it.str||'').replace(/\u0000/g,'').trim();if(!s)return;const t=pdfjs.Util.transform(vp.transform,it.transform);
+      items.push({str:s,x:t[4],y:t[5],w:it.width*vp.scale,h:Math.hypot(t[2],t[3])||8})});
+    if(!items.some(i=>/^Buyer\s*UID/i.test(i.str))){pages.push({p,items,skip:true});continue}
+    const rv=pg.getViewport({scale:ORG_S}),c=document.createElement('canvas');c.width=Math.ceil(rv.width);c.height=Math.ceil(rv.height);
+    const g=c.getContext('2d',{willReadFrequently:true});g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);
+    await pg.render({canvasContext:g,viewport:rv}).promise;
+    const W=c.width,H=c.height,d=g.getImageData(0,0,W,H).data,dark=new Uint8Array(W*H);
+    for(let i=0;i<W*H;i++)dark[i]=(d[i*4]+d[i*4+1]+d[i*4+2])/3<200?1:0;
+    pages.push({p,items,B:{W,H,dark}});c.width=c.height=1}
+  return pages}
+const orgRuns=(arr,minFrac)=>{const out=[];let s=-1;for(let i=0;i<=arr.length;i++){const on=i<arr.length&&arr[i]>=minFrac;if(on&&s<0)s=i;if(!on&&s>=0){out.push((s+i-1)/2);s=-1}}return out};
+/* vertical borders of the table that starts at y0: x of every line that runs down at least 60 pt from there, and where the table ends */
+function orgVLines(B,y0,yMax){
+  const ys=Math.max(0,Math.round(y0*ORG_S)),ye=Math.min(B.H,Math.round(yMax*ORG_S)),minRun=60*ORG_S,xs=[],ends=[];
+  for(let x=0;x<B.W;x++){let y=ys,gap=0,last=ys;
+    for(;y<ye;y++){if(B.dark[y*B.W+x]){last=y;gap=0}else if(++gap>4)break}
+    if(last-ys>=minRun){xs.push(x);ends.push(last)}}
+  const m=[];xs.forEach((x,i)=>{const l=m[m.length-1];if(l&&x-l.x1<=3){l.x1=x;l.e.push(ends[i])}else m.push({x0:x,x1:x,e:[ends[i]]})});
+  const lines=m.map(l=>(l.x0+l.x1)/2/ORG_S),merged=[];lines.forEach(x=>{const l=merged[merged.length-1];if(l!=null&&x-l<=6)merged[merged.length-1]=(l+x)/2;else merged.push(x)});
+  const all=ends.slice().sort((a,b)=>a-b);return{lines:merged,bottom:(all[all.length>>1]||ys)/ORG_S}}
+function orgHLines(B,x0,x1,y0,y1){x0=Math.max(0,Math.round(x0*ORG_S));x1=Math.min(B.W,Math.round(x1*ORG_S));y0=Math.max(0,Math.round(y0*ORG_S));y1=Math.min(B.H,Math.round(y1*ORG_S));if(x1<=x0||y1<=y0)return[];
+  const f=new Float32Array(y1-y0);for(let y=y0;y<y1;y++){let n=0;for(let x=x0;x<x1;x++)n+=B.dark[y*B.W+x];f[y-y0]=n/(x1-x0)}
+  return orgRuns(f,.95).map(y=>(y+y0)/ORG_S)}
+const orgNum=s=>{const d=String(s).replace(/\D/g,'');return d.length===10?`${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`:d.length===9?`${d.slice(0,2)}-${d.slice(2,5)}-${d.slice(5)}`:String(s).trim()};
+/* this PDF font prints Thai tone marks as Cyrillic look-alikes, and "ำ" as nikhahit + sara aa */
+const orgThai=s=>String(s).replace(/ѷ/g,'่').replace(/Ѹ/g,'้').replace(/ํ([่้๊๋])า/g,'$1ำ').replace(/ํา/g,'ำ');
+/* "Ekthida S #8123 M. 090-908-4767 Senior Manager" -> [{name,id,phone,title}]; several people can share one cell */
+function orgPersons(text){
+  const out=[],TITLE=/^\(?(senior manager|sr\.? ?manager|product group( manager)?|associate director|senior director|director|acting)\b/i;
+  String(text||'').split(/\s*;\s*/).forEach(chunk=>{const t=orgThai(chunk).replace(/\(\s*(#\s*\d{3,5})\s*\)/g,'$1').replace(/\s+/g,' ').trim();if(t)one(t)});
+  return out;
+  function one(t){
+  const push=(txt,phone)=>{txt=txt.replace(/^[\s,;|·]+|[\s,;|·]+$/g,'');
+    if(!txt){if(phone&&out.length){const l=out[out.length-1];l.phone=l.phone?l.phone+' / '+orgNum(phone):orgNum(phone)}return}
+    let note='';txt=txt.replace(/\((acting|new gen|vacant)[^)]*\)/ig,m=>{note=m;return' '}).replace(/^(role expansion|vacant)\s+/i,m=>{note=m.trim();return''}).trim();
+    if(TITLE.test(txt)&&out.length){const l=out[out.length-1];l.title=(l.title?l.title+' ':'')+txt.replace(/^[\s()]+|[\s()]+$/g,'');return}
+    const m=txt.match(/^(.*?)\s*#\s*(\d{3,5}|x{3,5})\b\s*(.*)$/i);let name=(m?m[1]:txt).trim(),id=m&&/\d/.test(m[2])?m[2]:'',tail=m?m[3].trim():'';
+    name=name.replace(/\s*#\s*$/,'').replace(/^(OB|RMM)\s+\d.*?\s+(?=[A-Z])/,'').replace(/^(role expansion|vacant)\s+/i,'').replace(/\s+/g,' ').trim();
+    if(!name||/^vacant$/i.test(name)||name.length<3||!/\p{L}/u.test(name))return;
+    if(!id){const m2=name.match(/^(.*?)\s+(\d{4,5})$/);if(m2){name=m2[1];id=m2[2]}} /* "Sarocha T. 8605" (no #) */
+    name=name.replace(/\.{2,}/g,'.');
+    /* a name with neither an employee id nor a phone number must look like a person's name; labels ("Bakery", "FF4 Frozen Food", "Last Day 7/8") are not people */
+    if(!id&&!phone&&(!/^[A-Z][A-Za-z'’.-]+(\s+[A-Z][A-Za-z'’.-]*){1,3}(\s*\([A-Za-z]+\))?$/.test(name)||/\b(food|frozen|chilled|dairy|bakery|delicatessen|manager|director|group|division|expansion|last|day|team|support|assistant|department|area)\b/i.test(name)))return
+    out.push({name,id,phone:phone?orgNum(phone):'',title:'',note:(note+' '+tail).trim()})};
+  const re=/(?:\bM\.?|\bTel\.?)\s*(0[\d\- ]{7,13}\d)|(?<![\d])(0\d{1,2}-\d{3}-\d{4})(?![\d])|(?<![\d])(0\d{9})(?![\d])/gi;let last=0,m;
+  while((m=re.exec(t))){push(t.slice(last,m.index),m[1]||m[2]||m[3]);last=re.lastIndex}
+  const tail=t.slice(last).trim();if(tail)push(tail,'')}
+}
+const orgP=p=>`${p.name}${p.id?' #'+p.id:''}${p.phone?' · '+p.phone:''}${p.title?' ('+p.title+')':''}`;
+/* the text of the items in a y-range / x-range, line by line */
+function orgText(items,x0,x1,y0,y1){
+  const its=items.filter(i=>i.x+i.w/2>=x0&&i.x+i.w/2<x1&&i.y>y0&&i.y<=y1).sort((a,b)=>a.y-b.y||a.x-b.x),lines=[];
+  its.forEach(i=>{const L=lines[lines.length-1];if(L&&Math.abs(i.y-L.y)<=2.5){L.s+=' '+i.str}else lines.push({y:i.y,s:i.str})});
+  return lines.map(l=>orgThai(l.s).replace(/\s+/g,' ').trim()).filter(Boolean)}
+const ORG_FIELDS=[
+  ['uid',/^buyer\s*uid/i],['merch',/^merchandise/i],['art',/^art\s*grp/i],['jmm',/^(junior|jur\.?|jr\.?)\s*mer/i],['jr',/^junior\s*buyer/i],['asb',/^assistant/i],
+  ['desc',/^description/i],['pg',/(product group manager|division\s*\/?\s*product|^product group)/i],['sm',/^(senior manager|sr\.?\s*mgr|sr\.?\s*manager)/i],
+  ['ad',/^associate director/i],['sd',/^(senior )?director/i],['dept',/^department/i],['area',/^area/i]];
+const ORG_CODE=/^[A-Z][A-Z0-9]{0,5}(\s*&\s*[A-Z][A-Z0-9]{0,5})*$/,ORG_NOCODE=/^(RMM|PM|TBA|NA)$/;
+function parseOrgTable(pages,fileName){
+  const recs=[],byUid=new Map(),heads=[],commercials=new Map();
+  let group='';const gm=String(fileName||'').match(/(Dry Grocery Non[\s-]*Food|Dry Grocery Food|Fresh Food|Non ?Food)/i);if(gm)group=gm[1];else if(/(^|[^A-Za-z])FF[\s_-]*Directory/i.test(String(fileName||'')))group='Fresh Food';
+  const grpWord=s=>(String(s).match(/(Dry Grocery Non[\s-]*Food|Dry Grocery Food|Fresh Food|Non[\s-]?Food)/i)||[])[1]||'';
+  const isHead=i=>/^(area|senior director|director|associate director|senior manager|sr\.?\s*mgr|division|product group|department|buyer uid|merchandise|name|art grp|no\.|description|assistant|junior|jur\.|jr\.|mer\b|manager|buyer)/i.test(i.str)||/^(\/|&|and)$/i.test(i.str);
+  for(const pg of pages){
+    if(pg.skip)continue;
+    const {items,B}=pg,H=B.H/ORG_S,tabs=items.filter(i=>/^Buyer\s*UID/i.test(i.str)).sort((a,b)=>a.y-b.y);
+    tabs.forEach((hdrItem,ti)=>{
+      const hy=hdrItem.y,regionEnd=tabs[ti+1]?tabs[ti+1].y-16:H,vl=orgVLines(B,hy+4,regionEnd);
+      if(vl.lines.length<4)return;
+      const tb=Math.min(regionEnd,vl.bottom+2),iv=[];for(let i=0;i<vl.lines.length-1;i++)if(vl.lines[i+1]-vl.lines[i]>12)iv.push([vl.lines[i],vl.lines[i+1]]);
+      const hdr=items.filter(i=>Math.abs(i.y-hy)<=14&&isHead(i));
+      const field=iv.map(([a,b])=>({a,b,t:hdr.filter(i=>i.x+i.w/2>=a&&i.x+i.w/2<b).sort((p,q)=>p.y-q.y||p.x-q.x).map(i=>i.str).join(' ')}));
+      let seenArea=0;
+      field.forEach(f=>{f.f='';if(!f.t)return;const hit=ORG_FIELDS.find(([k,re])=>re.test(f.t));if(hit){f.f=hit[0];if(f.f==='area'){seenArea++;if(seenArea>1)f.f='dept'}}});
+      field.forEach((f,i)=>{if(!f.f&&i>0&&field[i-1].f)f.f=field[i-1].f}); /* an interval without its own header text belongs to the column on its left */
+      const cols={};field.forEach(f=>{if(f.f)(cols[f.f]=cols[f.f]||[]).push(f)});
+      if(!cols.uid)return;
+      const u=cols.uid[0],ub=orgHLines(B,u.a+2,u.b-2,hy-3,tb+2);
+      if(ub.length<2)return;
+      const hb=ub[0],bodyY0=Math.max(hb,Math.max(...hdr.map(i=>i.y))+0.5);
+      const memo={},segsOf=f=>{if(memo[f])return memo[f];const c=cols[f];if(!c)return memo[f]=[];const b=orgHLines(B,c[0].a+2,c[0].b-2,hb-1.5,tb+2),s=[];for(let i=0;i<b.length-1;i++)s.push([b[i],b[i+1]]);return memo[f]=s};
+      const textIn=(f,y0,y1)=>{const o=[];cols[f].forEach(c=>o.push(...orgText(items,c.a,c.b,Math.max(y0,bodyY0),Math.min(y1,tb+1))));return o};
+      /* the cells of column f that cover the rows y0..y1: one coarser merged cell, or several finer ones */
+      const cellsFor=(f,y0,y1)=>segsOf(f).filter(([a,b])=>((a+b)/2>=y0-1&&(a+b)/2<=y1+1)||((y0+y1)/2>=a-1&&(y0+y1)/2<=b+1));
+      const peopleFor=(f,y0,y1)=>{const o=[];cellsFor(f,y0,y1).forEach(([a,b])=>orgPersons(textIn(f,a,b).join(' ')).forEach(p=>{if(!o.some(q=>q.name===p.name&&q.id===p.id))o.push(p)}));return o};
+      const linesFor=(f,y0,y1)=>{const o=[];cellsFor(f,y0,y1).forEach(([a,b])=>{const t=textIn(f,a,b).join(' ').replace(/\s+/g,' ').trim();if(t&&!o.includes(t))o.push(t)});return o};
+      if(cols.area&&!group){const g=grpWord(textIn('area',hb,tb).join(' '));if(g)group=g}
+      segsOf('uid').forEach(([y0,y1])=>{
+        const code=textIn('uid',y0,y1).join(' ').replace(/\s+/g,' ').trim();
+        if(!code)return;
+        if(/,/.test(code)&&/^[A-Z0-9 ,&]+$/.test(code)){ /* a list of codes: the people of this row head the whole group of Buyers */
+          const hd=peopleFor('merch',y0,y1);if(hd.length)heads.push({codes:code.split(/\s*,\s*/),head:hd[0]});return}
+        if(!ORG_CODE.test(code)||ORG_NOCODE.test(code))return;
+        const had=byUid.get(code.toUpperCase());
+        if(had&&had.ti!==pg.p+'-'+ti){ /* the same code in another table (e.g. OB = Own Brand in every department): keep the first one, only note the department */
+          const dk2=cols.dept?'dept':(cols.area?'area':'');if(dk2){const t=linesFor(dk2,y0,y1).join(' ');if(t&&!grpWord(t)&&!had.depts.includes(t))had.depts.push(t)}return}
+        const r=had||{uid:code,ti:pg.p+'-'+ti,sd:[],ad:[],sm:[],pg:[],merch:[],desc:[],art:[],jmm:[],asb:[],jr:[],depts:[]};
+        const add=(k,arr)=>arr.forEach(p=>{if(!r[k].some(q=>q.name===p.name&&q.id===p.id))r[k].push(p)});
+        ['sd','ad','sm','pg','merch','jmm','asb','jr'].forEach(k=>{if(cols[k])add(k,peopleFor(k,y0,y1))});
+        const dk=cols.dept?'dept':(cols.area?'area':'');
+        if(dk){const t=linesFor(dk,y0,y1).join(' ');if(t&&!grpWord(t)&&!r.depts.includes(t))r.depts.push(t)}
+        if(cols.art){ /* Art Grp No. + its name, one pair per row of the Art Grp column */
+          cellsFor('art',y0,y1).forEach(([a,b])=>{const no=(textIn('art',a,b).join(' ').match(/\d{1,4}/)||[''])[0];if(!no)return;
+            const nm=cols.desc?textIn('desc',a,b).join(' ').replace(/\s+/g,' ').trim():'';if(!r.art.some(x=>x[0]===no))r.art.push([no,nm])})}
+        else if(cols.desc)linesFor('desc',y0,y1).forEach(t=>{if(!r.desc.includes(t))r.desc.push(t)});
+        byUid.set(code.toUpperCase(),r)})})}
+  if(!byUid.size)return{recs:[],info:{}};
+  group=group.replace(/non[\s-]*food/i,'Non Food').replace(/^dry grocery/i,'Dry Grocery');
+  const clean=s=>String(s).replace(/\.{2,}/g,'.'),pp=p=>`${clean(p.name)}${p.id?' #'+p.id:''}${p.phone?' '+p.phone:''}`;
+  byUid.forEach(r=>{
+    const m0=r.merch[0],hd=heads.find(h=>h.codes.includes(r.uid)),bk=[],dept=r.depts.join(' / ');
+    if(r.asb.length)bk.push('Asst. '+r.asb.map(pp).join(', '));
+    if(r.jr.length)bk.push('Jr. '+r.jr.map(pp).join(', '));
+    if(hd)bk.push('Merch กลุ่ม '+pp(hd.head));
+    const arts=r.art.map(a=>`${a[0]} ${orgTitle(a[1])}`.trim()).join(', '),deptTxt=[dept,arts||r.desc.join(', ')].filter(Boolean).join(' · ');
+    const o={_org:true,uid:r.uid,name:m0?(m0.id?`${clean(m0.name)} (#${m0.id})`:clean(m0.name)):r.uid,role:'Buyer',group,dept:deptTxt,phone:m0?m0.phone.split(' / ')[0]:'',email:'',backup:bk.join(' · '),
+      xSd:r.sd.map(orgP).join('\n'),xAd:r.ad.map(orgP).join('\n'),xSm:r.sm.map(orgP).join('\n'),xPg:r.pg.map(orgP).join('\n'),xDept:dept,
+      xMerch:r.merch.map(orgP).join('\n'),xDesc:(r.art.length?r.art.map(a=>orgTitle(a[1])):r.desc).join('\n'),xArt:r.art.map(a=>a[0]).join('\n'),
+      xJmm:r.jmm.map(orgP).join('\n'),xAsb:r.asb.map(orgP).join('\n'),xJr:r.jr.map(orgP).join('\n')};
+    recs.push(o);
+    [['Senior Manager',r.sm],['Product Group',r.pg]].forEach(([ttl,ps])=>ps.forEach(p=>{if(!p.id)return;const c=commercials.get(p.id)||{p,ttl,areas:new Set(),codes:[]};if(dept)c.areas.add(dept);c.codes.push(r.uid);commercials.set(p.id,c)}))});
+  commercials.forEach((c,id)=>recs.push({_org:true,uid:id,name:`${clean(c.p.name)} (#${c.p.id})`,role:'Commercial',group,
+    dept:[c.ttl,[...c.areas].join(' / ')+(c.codes.length?` (${c.codes.join(', ')})`:'')].filter(Boolean).join(' · '),phone:c.p.phone.split(' / ')[0],email:'',backup:''}));
+  return{recs,info:{org:true,table:true}}}
+
 async function readAnyFile(file,detect,say){
   say=say||(()=>{});
   await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
@@ -2156,10 +2319,12 @@ const CT_COLS=[
   /* the Makro org-chart layout (one row per Buyer) and the flat contact layout are both understood */
   ['sd',/^(seniordirector|director)/],
   ['ad',/^associatedirector/],
-  ['sm',/^(seniormanager|productgroupmanager|srmgr|divisionproductmgr)/],
+  ['pg',/^(productgroupmanager|divisionproductmgr|divisionproduct|pgm)/],
+  ['sm',/^(seniormanager|srmgr|srmanager)/],
   ['sub',/^(artgrpsub|artgroupsub|subno|subgrp)/],
   ['art',/^(artgrp|artgroup)/],
   ['asst',/^assistant/],
+  ['jmm',/^(junior|jr|jur)\.?mer/],
   ['jr',/^(junior|jr)/],
   ['desc',/^description$/],
   ['backup',/(backup|สำรอง|ผู้ช่วย)/],
@@ -2170,7 +2335,7 @@ const CT_COLS=[
   ['dept',/(dept|department|แผนก|หมวด|category|section)/],
   ['group',/(^group|กลุ่ม|หน่วยงาน|division|^org|^area$)/],
   ['name',/(name|ชื่อ)/]];
-const CT_FIELDS=['name','role','group','dept','phone','email','backup','artKeys'],CT_LBL={uid:'UID',name:'ชื่อ / Merchandise Mgr.',role:'บทบาท',group:'Area / กลุ่ม',dept:'Area / Department',phone:'โทร',email:'อีเมล / LINE',backup:'ผู้ติดต่อสำรอง',sd:'Senior Director',ad:'Associate Director',sm:'Senior Manager / Product Group',art:'Art Grp No.',desc:'Description',asst:'Assistant',jr:'Junior Buyer / New Gen',artKeys:'สินค้าที่ดูแล'};
+const CT_FIELDS=['name','role','group','dept','phone','email','backup','artKeys',...CT_X],CT_LBL={xSd:'Senior Director',xAd:'Associate Director',xSm:'Senior Manager',xPg:'Product Group Manager',xDept:'Area / Department',xMerch:'Merchandise Mgr.',xDesc:'Description',xArt:'Art Grp No.',xJmm:'Junior Mer Manager',xAsb:'Assistant Buyer',xJr:'Junior Buyer',pg:'Product Group Manager',jmm:'Junior Mer Manager',uid:'UID',name:'ชื่อ / Merchandise Mgr.',role:'บทบาท',group:'Area / กลุ่ม',dept:'Area / Department',phone:'โทร',email:'อีเมล / LINE',backup:'ผู้ติดต่อสำรอง',sd:'Senior Director',ad:'Associate Director',sm:'Senior Manager / Product Group',art:'Art Grp No.',desc:'Description',asst:'Assistant',jr:'Junior Buyer / New Gen',artKeys:'สินค้าที่ดูแล'};
 function ctMapHeader(row){const m={},used=new Set();
   (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of CT_COLS){if(m[f]==null&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
 const ctRole=(v,def)=>{const s=String(v||'').trim();if(!s)return def||'';return/commercial|คอมเมอร์เชียล/i.test(s)?'Commercial':/buyer|ผู้ซื้อ|บายเออร์/i.test(s)?'Buyer':'อื่นๆ'};
@@ -2193,17 +2358,24 @@ function ctPerson(raw){
 const ctInitials=g=>String(g||'').split(/\s+/).filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,5)||'CT';
 const ctNm=p=>p.id&&!/\(#\s*\d{3,5}\)/.test(p.name)?`${p.name} (#${p.id})`:p.name;
 /* export the contact list as an Excel file in the org-chart layout (one row per Buyer), which the import reads straight back */
-const CT_XL_HDR=['Area','Senior Director','Associate Director / Senior Manager','Area / Department','Senior Manager / Product Group','Buyer UID','Merchandise Mgr. Name','Art Grp No.','Art Grp Sub No','Description','Assistant','Junior Buyer / New Gen'];
+const CT_XL_HDR=['Area','Senior Director','Associate Director','Area / Department','Senior Manager','Product Group Manager','Buyer UID','Merchandise Mgr. Name','Art Grp No.','Art Grp Sub No','Description','Junior Mer Manager','Assistant Buyer','Junior Buyer / New Gen'];
 async function exportContactsXlsx(template){
   await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
   const P=(n,ph,x)=>[n,ph,x].filter(Boolean).join('\n'),rows=[CT_XL_HDR],used=new Set();
   const buyers=(template?[]:st.contacts).filter(c=>c.role==='Buyer').sort((a,b)=>String(a.group||'').localeCompare(String(b.group||''))||String(ctView(a).area).localeCompare(String(ctView(b).area))||String(a.uid).localeCompare(String(b.uid)));
-  buyers.forEach(b=>{const v=ctView(b);if(v.sm)used.add(v.sm.name);
-    rows.push([b.group||'',v.sd,v.ad,v.area,v.sm?P(v.sm.name,v.sm.phone,v.sm.title):'',b.uid,P(b.name,b.phone),v.arts.map(a=>a[0]).join('\n'),v.arts.map(a=>ctKeys(b).filter(k=>k.replace(/^0+(?=\d)/,'').startsWith(amNum(a[0])+'@')).map(k=>k.split('@')[1]).join(', ')).join('\n'),v.arts.length?v.arts.map(a=>a[1]).join('\n'):v.desc,[...v.asst,...(v.merch?['Merch กลุ่ม '+v.merch]:[])].join('\n'),v.jr.join('\n')])});
-  (template?[]:st.contacts).filter(c=>c.role!=='Buyer'&&!used.has(c.name)).forEach(c=>{const v=ctView(c),cell=P(c.name,c.phone,v.title);
-    rows.push([c.group||'',/^Senior Director/i.test(v.title)?cell:'',/^Associate Director/i.test(v.title)?cell:'',v.area&&!/^(Senior|Associate) /i.test(v.title)?v.area:'',(!/^(Senior Director|Associate Director)/i.test(v.title))?cell:'','','','','','','',''])});
-  if(template||rows.length===1)rows.push(['Dry Grocery Food','Hyesung Baik','Warisara K. (#8663)\n081-966-5421','Commodity','Nichapa B.\n096-659-3663\nSenior Manager','F6','Janjira S. (#8608)\n083-237-3813','22','','Cooking Oil','Mananchaya S. #8769','Supisara R.']);
-  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[16,16,22,20,24,10,26,10,14,28,26,22].map(w=>({wch:w}));
+  buyers.forEach(b=>{const v=ctView(b),X=v.x,cm=v.sm;if(cm)used.add(cm.name);
+    const cmTxt=cm?P(cm.name,cm.phone,cm.title):'',cmPg=!!cm&&/^Product Group/i.test(cm.title||''),
+      arts=X&&X.art.length?X.art:v.arts.map(a=>a[0]),
+      subs=arts.map(a=>ctKeys(b).filter(k=>k.replace(/^0+(?=\d)/,'').startsWith(amNum(a)+'@')).map(k=>k.split('@')[1]).join(', ')).join('\n');
+    rows.push([b.group||'',X&&X.sd.length?X.sd.join('\n'):v.sd,X&&X.ad.length?X.ad.join('\n'):v.ad,(X&&X.dept)||v.area,
+      X&&X.sm.length?X.sm.join('\n'):(cmPg?'':cmTxt),X&&X.pg.length?X.pg.join('\n'):(cmPg?cmTxt:''),b.uid,X&&X.merch.length?X.merch.join('\n'):P(b.name,b.phone),
+      arts.join('\n'),subs,X&&X.desc.length?X.desc.join('\n'):(v.arts.length?v.arts.map(a=>a[1]).join('\n'):v.desc),X&&X.jmm.length?X.jmm.join('\n'):'',
+      X&&X.asb.length?X.asb.join('\n'):[...v.asst,...(v.merch?['Merch กลุ่ม '+v.merch]:[])].join('\n'),X&&X.jr.length?X.jr.join('\n'):v.jr.join('\n')])});
+  (template?[]:st.contacts).filter(c=>c.role!=='Buyer'&&!used.has(c.name)).forEach(c=>{const v=ctView(c),cell=P(c.name,c.phone,v.title),pg=/^Product Group/i.test(v.title);
+    rows.push([c.group||'',/^Senior Director/i.test(v.title)?cell:'',/^Associate Director/i.test(v.title)?cell:'',v.area&&!/^(Senior|Associate) /i.test(v.title)?v.area:'',
+      (!/^(Senior Director|Associate Director)/i.test(v.title)&&!pg)?cell:'',pg?cell:'','','','','','','','',''])});
+  if(template||rows.length===1)rows.push(['Dry Grocery Food','Hyesung Baik','Warisara K. (#8663)\n081-966-5421','Commodity','Nichapa B.\n096-659-3663\nSenior Manager','','F6','Janjira S. (#8608)\n083-237-3813','22','','Cooking Oil','','Mananchaya S. #8769','Supisara R.']);
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[16,16,22,20,24,24,10,26,10,14,28,22,26,22].map(w=>({wch:w}));
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Buyer-Commercial');
   XLSX.writeFile(wb,template?'buyer-commercial_template.xlsx':`buyer-commercial_${iso(today())}.xlsx`);
 }
@@ -2248,6 +2420,11 @@ function parseContacts(wb){
         if(asp.length)bk.push('Asst. '+asp.join(', '));if(jr.length)bk.push('Jr. '+jr.join(', '));merch.forEach(x=>bk.push('Merch กลุ่ม '+x));
         o.backup=bk.join(' · ');
         if(!o.role)o.role='Buyer';
+        const XP=ls=>ls.length?(orgPersons(ls.join(' ; ')).map(orgP).join('\n')||ls.join('\n')):'';
+        if(m.sd!=null)o.xSd=XP(ctLines(cell('sd')));if(m.ad!=null)o.xAd=XP(ctLines(cell('ad')));if(m.sm!=null)o.xSm=XP(ctLines(cell('sm')));if(m.pg!=null)o.xPg=XP(ctLines(cell('pg')));
+        if(m.name!=null)o.xMerch=XP(ctLines(cell('name')));if(m.jmm!=null)o.xJmm=XP(ctLines(cell('jmm')));
+        if(m.asst!=null)o.xAsb=XP(ctLines(cell('asst')).filter(l=>!/^merch/i.test(l)));if(m.jr!=null)o.xJr=XP(ctLines(cell('jr')));
+        if(m.dept!=null)o.xDept=ctCell(cell('dept'));if(descs.length)o.xDesc=descs.join('\n');if(arts.length)o.xArt=arts.map(a=>(String(a).match(/^\d+/)||[''])[0]).filter(Boolean).join('\n');
         if(sm){const k=(sm.id||sm.name).toLowerCase(),c=coms.get(k)||{p:sm,title:sm.title||'Senior Manager',group:o.group,areas:new Set(),codes:[],ad:null};
           if(area)c.areas.add(area);c.codes.push(uid);if(ad&&!c.ad)c.ad=ad;coms.set(k,c)}
         else if(ad)execs.push({p:ad,title:ad.title||'Associate Director',group:o.group,area:''});
@@ -2274,13 +2451,13 @@ function planContacts(recs,defRole){
   const roles=new Set(recs.map(r=>r.role||defRole)),groups=new Set(recs.map(r=>r.group).filter(Boolean));
   recs.forEach(r=>{
     const key=r.uid.toUpperCase(),ex=byUid.get(key);seen.add(key);
-    if(!ex){add.push({uid:r.uid,name:r.name||r.uid,role:r.role||defRole,group:r.group||'',dept:r.dept||'',phone:r.phone||'',email:r.email||'',backup:r.backup||'',artKeys:r.artKeys||''});return}
+    if(!ex){add.push({uid:r.uid,name:r.name||r.uid,role:r.role||defRole,group:r.group||'',dept:r.dept||'',phone:r.phone||'',email:r.email||'',backup:r.backup||'',artKeys:r.artKeys||'',...Object.fromEntries(CT_X.map(k=>[k,r[k]||'']))});return}
     const patch={},ch=[];CT_FIELDS.forEach(f=>{
       if(f==='artKeys'){const want=String(r.artKeys||'').split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean),have=ctKeys(ex),low=new Set(have.map(k=>k.toLowerCase())),nw=want.filter(k=>!low.has(k.toLowerCase()));
         if(nw.length){patch.artKeys=[...have,...nw].join(', ');ch.push(['artKeys',ex.artKeys||'',patch.artKeys])}return}
       if(!r[f]||r[f]===(ex[f]??''))return;
       /* from an org chart only the name and phone are reliable enough to overwrite; the rest only fills blanks, and a longer saved name ("… — Jr. Buyer") is kept */
-      if(r._org&&f!=='name'&&f!=='phone'&&ex[f])return;
+      if(r._org&&f!=='name'&&f!=='phone'&&!CT_X.includes(f)&&ex[f])return;
       if(r._org&&f==='name'&&String(ex[f]||'').startsWith(r[f]))return;
       patch[f]=r[f];ch.push([f,ex[f]||'',r[f]])});
     if(ch.length)upd.push({ex,patch,ch});else same++;
@@ -2292,7 +2469,11 @@ async function readContactFile(file){
   $('#ctErr').textContent='';$('#ctBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
   try{
     const say=sayTo('#ctBox'),detect=r=>{const m=ctMapHeader(r);return m.uid!=null&&m.name!=null};let parsed;
-    if(isPdfFile(file)||isImgFile(file)){
+    if(isPdfFile(file)){ /* the Makro directory PDFs: every cell by its borders (Director, Associate Director, Sr. Manager, Product Group, Merchandise Mgr., Description, Jr. Mer Manager, Assistant, Junior Buyer) */
+      try{const o=parseOrgTable(await orgPdfPages(file,say),file.name);
+        if(o.recs.filter(r=>r.role==='Buyer').length>=2)parsed={recs:o.recs,info:{cols:{uid:1,name:1,role:1,group:1,dept:1,phone:1,backup:1,sd:1,ad:1,sm:1,pg:1,desc:1,art:1,jmm:1,asst:1,jr:1},rows:o.recs.length,skipped:0,org:true}}
+      }catch(e){console.warn('org table reader',e)}}
+    if(parsed){}else if(isPdfFile(file)||isImgFile(file)){
       await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
       const items=isPdfFile(file)?await pdfItems(file,say):await ocrItems(file,say),wb=XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(itemsToRows(items,detect,!isPdfFile(file)||items.ocr)),'ไฟล์');
