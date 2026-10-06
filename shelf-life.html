@@ -645,6 +645,7 @@ th.sortable:hover{color:var(--accent)}
   <div class="card" id="localWarn" hidden style="border-color:var(--soon);background:var(--soonbg)"><h2 style="color:var(--soon)">ไม่ได้แสดงข้อมูลทีม</h2><p style="margin:0" id="localWhy"></p><p class="small" id="localTeamHint" style="margin:6px 0 0">ข้อมูลทีมอยู่ที่ <b>claude.ai/artifact/XwwnvaT9BChA7UbX8yj1Td</b> — เปิดลิงก์นี้ขณะล็อกอิน claude.ai ด้วยบัญชีองค์กร</p></div>
   <div class="card" id="onboard" hidden><h2>ยังไม่มีข้อมูลของทีม</h2><p class="muted" style="margin-top:0">โหลดรายการสินค้าและกฎ Shelf life จากคู่มือ Makro (ผักผลไม้นำเข้าและท้องถิ่น 69 รายการ) แล้วเพิ่ม Buyer / Commercial ทุกคนที่เปิดลิงก์นี้จะเห็นข้อมูลชุดเดียวกัน</p><div class="row w"><button class="btn pri" id="obSample">โหลดสินค้าตามคู่มือ Makro</button><button class="btn" id="obMigrate" hidden></button></div></div>
   <div class="card oos-banner" id="oosBanner" hidden><span id="oosBannerTxt"></span><button type="button" class="btn sm" id="oosBannerGo">ดูรายการ OOS+</button></div>
+  <div class="card oos-banner" id="nbsBanner" hidden><span id="nbsBannerTxt"></span><button type="button" class="btn sm" id="nbsBannerGo">ดูรายการ NBS</button></div>
   <div class="tiles" id="tiles"></div>
   <div class="card">
     <div class="fbar no-print">
@@ -2773,6 +2774,7 @@ $('#oosChart').onclick=e=>{
   const bar=e.target.closest('.oc-r');if(bar){oosDrill=true;$('#oosQ').value=bar.dataset.no;oosLimit=60;renderOos();$('#oosList').scrollIntoView({block:'nearest',behavior:'smooth'})}};
 $('#oosDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=$('#oosFDept');d.value=d.value===b.dataset.d?'':b.dataset.d;oosLimit=60;renderOos()};
 $('#oosBannerGo').onclick=()=>document.querySelector('#tabs button[data-tab="oos"]').click();
+$('#nbsBannerGo').onclick=()=>document.querySelector('#tabs button[data-tab="nbs"]').click();
 setInterval(()=>{if(!document.hidden)renderOos()},60000); /* the "ค้าง … ชม." counters and colours move on without a click */
 /* ---- import an OOS report (Excel / CSV) ----
    Two kinds of file are understood:
@@ -3326,12 +3328,18 @@ function templatePDFHtml(){
     foot:`<p class="note"><b>วิธีกรอก:</b> ถ้าเว้นวันลดราคาและ Code 52 ว่าง ระบบคำนวณให้ตามคู่มือ Makro จาก Shelf life และประเภท · วันที่ 1 = วันรับสินค้า · ถ้า SKU หรือชื่อสินค้าซ้ำกับที่มีอยู่ ระบบอัปเดตรายการเดิม · ช่องที่เว้นว่างจะไม่ทับข้อมูลเดิม</p>`});
 }
 function templatePDF(){printDoc(templatePDFHtml())}
+function nbsBannerUpdate(open,nOver){
+  const bn=$('#nbsBanner');if(!bn)return;
+  bn.hidden=!open.length;bn.classList.toggle('late',nOver>0);
+  $('#nbsBannerTxt').textContent=`Item NBS มีสินค้าไม่มียอดขาย ${open.length.toLocaleString()} รายการ${nOver?` · เกินเกณฑ์ NBS ${nOver.toLocaleString()} รายการ`:''}`;
+}
 function renderNbs(){
   if(!$('#nbsBody'))return;
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',!!nbsColF[b.dataset.f]));
-  const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0},open=rows.filter(r=>r.status!=='done');open.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
-  $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile dv dv-${k.toLowerCase()}${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small"><span class="tl">รายการที่ยังไม่ปิดงาน</span><span class="ts">ยังไม่ปิดงาน</span></span></button>`).join('');
+  const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0},open=rows.filter(r=>r.status!=='done');open.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});const ov={};open.forEach(r=>{if(nbsOver(r))ov[r.division]=(ov[r.division]||0)+1});
+  $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile dv dv-${k.toLowerCase()}${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small"><span class="tl">รายการที่ยังไม่ปิดงาน</span><span class="ts">ยังไม่ปิดงาน</span>${ov[k]?`<span class="tl"> · </span><span class="err-text">เกินเกณฑ์ NBS ${ov[k].toLocaleString()}</span>`:''}</span></button>`).join('');
   const lv=[0,1,2,3,4,5].map(n=>open.filter(r=>(agingInfo(r).level??-1)===n).length),nOver=open.filter(nbsOver).length,lastImp=rows.reduce((m,r)=>r.importedAt&&r.importedAt>m?r.importedAt:m,''),li=lastImp?new Date(lastImp):null;
+  nbsBannerUpdate(open,nOver);
   $('#nbsSummary').innerHTML=(li?`<span class="pill">นำเข้าล่าสุด <b>${fmt(li)} ${String(li.getHours()).padStart(2,'0')}.${String(li.getMinutes()).padStart(2,'0')} น.</b></span>`:'')
     +(open.some(r=>r.lastSale||r.lastRecv)?`<span class="pill">เกินเกณฑ์ NBS <b>${nOver.toLocaleString()}</b></span>`+AGING_LV.slice(1).map((l,i)=>`<span class="chip s-${l[1]}">${l[0]} ${lv[i+1].toLocaleString()}</span>`).join(''):'');
   /* filters live in nbsFiltered() */
