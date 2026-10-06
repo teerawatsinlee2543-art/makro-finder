@@ -75,13 +75,15 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 /* four-field bar (search + 3 selects): one row on wide screens, search on top of a 3-up row on tablets */
 .fbar.f4{grid-template-columns:2fr 1fr 1fr 1fr}
 .fbar.f4>label.f-q{grid-column:auto}
+.fbar.f6{grid-template-columns:2fr repeat(5,1fr)}
+.fbar.f6>label.f-q{grid-column:auto}
 @media (max-width:1099px){
-  .fbar.f4{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .fbar.f4>label.f-q{grid-column:1/-1}
+  .fbar.f4,.fbar.f6{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .fbar.f4>label.f-q,.fbar.f6>label.f-q{grid-column:1/-1}
 }
 @media (max-width:640px){
-  .fbar,.fbar.f4{grid-template-columns:1fr}
-  .fbar>label.f-q,.fbar.f4>label.f-q{grid-column:auto}
+  .fbar,.fbar.f4,.fbar.f6{grid-template-columns:1fr}
+  .fbar>label.f-q,.fbar.f4>label.f-q,.fbar.f6>label.f-q{grid-column:auto}
   .fbar .f-act{justify-content:stretch}
   .fbar .f-act .f-chk{flex:1 1 100%;margin-right:0}
   .fbar .f-act .btn{flex:1 1 100%}
@@ -344,6 +346,11 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .oosc-h{display:flex;gap:10px;align-items:flex-start}
 .oosc-t{min-width:0;flex:1;overflow-wrap:anywhere}
 .oosc-m{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.oosc-f{display:flex;flex-wrap:wrap;gap:2px 14px}
+.c-md2{color:var(--md2);font-weight:700}
+.oos-dchips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.oos-dchips:empty{display:none}
+.oos-dchips .btn.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .oosc-note{padding:6px 8px;border:1px dashed var(--line);border-radius:8px;background:var(--bg);font-size:13px;overflow-wrap:anywhere}
 .oosc-photo{width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 .oosc-a{display:flex;flex-wrap:wrap;gap:8px}
@@ -579,9 +586,12 @@ select,input,textarea{max-width:100%}
     </div>
     <div class="tiles" id="oosDivTiles" style="margin:12px 0 0"></div>
     <div class="tiles" id="oosTiles" style="margin:12px 0"></div>
-    <div class="fbar f4">
-      <label class="f-q">ค้นหา<input id="oosQ" placeholder="รหัส / ชื่อสินค้า / ตำแหน่ง / ผู้รับผิดชอบ / หมายเหตุ"></label>
+    <div class="oos-dchips" id="oosDeptTiles"></div>
+    <div class="fbar f6">
+      <label class="f-q">ค้นหา<input id="oosQ" placeholder="รหัส / ชื่อสินค้า / ตำแหน่ง / Buyer / แผนก / ผู้รับผิดชอบ"></label>
       <label>สถานะ<select id="oosFSt"><option value="">ทั้งหมด</option><option value="need">ต้องเติม</option><option value="doing">กำลังเติม</option><option value="done">เติมแล้ว</option></select></label>
+      <label>ประเภทปัญหา<select id="oosFBk"><option value="">ทั้งหมด</option><option value="stock">มีของในระบบ (A + B)</option><option value="A">มีของในระบบ · หาไม่เจอ</option><option value="B">สต็อกในระบบไม่ตรง</option><option value="C">ของหมดจริง</option><option value="X">ยังไม่ระบุสาเหตุ</option></select></label>
+      <label>แผนกที่เติม<select id="oosFDept"><option value="">ทั้งหมด</option></select></label>
       <label>ผู้รับผิดชอบ<select id="oosFWho"><option value="">ทั้งหมด</option></select></label>
       <label>เรียงตาม<select id="oosSort"><option value="age">ค้างนานสุดก่อน</option><option value="loc">ตำแหน่งชั้น</option><option value="name">ชื่อสินค้า</option></select></label>
       <div class="f-act">
@@ -777,6 +787,12 @@ select,input,textarea{max-width:100%}
     <label>กลุ่ม<select name="division"><option value="">ไม่ระบุ (ดึงจาก Item NBS ให้ถ้ามี)</option><option value="FF">FF · Fresh Food</option><option value="DF">DF · Dry Food</option><option value="NF">NF · Non Food</option></select></label>
     <label>สต็อกในระบบ (ถ้ามี)<input name="stock" inputmode="numeric" placeholder="เช่น 12"></label>
     <label>เวลาที่ตรวจพบ<input name="foundAt" type="datetime-local"></label>
+    <label>Buyer (ชื่อ)<input name="buyerName" list="oosBuyerList" placeholder="เช่น คุณเอ" autocomplete="off"><datalist id="oosBuyerList"></datalist></label>
+    <label>Buyer UID<input name="buyerUid" placeholder="เช่น F6"></label>
+    <label>DMS (ยอดขายเฉลี่ย/วัน)<input name="dms" inputmode="decimal" placeholder="เช่น 26"></label>
+    <label>Stock Day (วันที่สต็อกพอขาย)<input name="stockDay" inputmode="decimal" placeholder="เช่น 13"></label>
+    <label>แผนกที่เติม<input name="assignDept" list="oosDeptList" placeholder="เช่น 02 เนื้อสัตว์" autocomplete="off"><datalist id="oosDeptList"></datalist></label>
+    <label>ประเภทปัญหา<select name="bucket"><option value="">ไม่ระบุ</option><option value="A">มีของในระบบ · หาไม่เจอ → ตรวจหา + เติมชั้น</option><option value="B">สต็อกในระบบไม่ตรง → นับ / ปรับสต็อก</option><option value="C">ของหมดจริง → สั่งของ / ตามซัพ</option><option value="X">ยังไม่ระบุสาเหตุ</option></select></label>
     <label style="grid-column:1/-1">หมายเหตุ<textarea name="note" rows="2" placeholder="เช่น ของอยู่ชั้นลอย / รอสินค้าเข้า / ต้องสั่งเพิ่ม"></textarea></label>
   </div>
   <div class="oos-photo">
@@ -800,6 +816,7 @@ select,input,textarea{max-width:100%}
     <button type="button" class="btn pri" id="oiPick">เลือกไฟล์จากเครื่อง</button>
     <input type="file" id="oiFile" accept=".xlsx,.xls,.xlsm,.csv" hidden>
   </div>
+  <div id="oiWin" class="imp-def" hidden><label>ช่วงวันส่งมอบที่นำมาเป็นรายการ OOS (นับถอยหลังจากวันล่าสุดในไฟล์)<select id="oiWinSel"><option value="1">วันล่าสุด 1 วัน</option><option value="3" selected>3 วันล่าสุด (แนะนำ)</option><option value="7">7 วันล่าสุด</option><option value="all">ทั้งไฟล์</option></select></label></div>
   <div id="oiBox"></div>
   <p class="err-text" id="oiErr" style="margin:8px 0 0"></p>
   <div id="oiOpts" class="imp-opts" hidden>
@@ -2183,7 +2200,7 @@ function oosDivCtx(){
 const oosDiv=(r,ctx)=>{if(r.division&&NBS_DIV[r.division])return r.division;const k=amNum(r.itemNo);if(k&&ctx.byNo.has(k))return ctx.byNo.get(k);const d=String(r.dept||'').trim().toLowerCase();return d&&ctx.dd.get(d)||''};
 const oosInDiv=(r,ctx)=>!oosDivFilter||(oosDivFilter==='-'?oosDiv(r,ctx)==='':oosDiv(r,ctx)===oosDivFilter);
 function oosVisible(ctx){
-  const q=$('#oosQ').value.trim().toLowerCase(),fs=$('#oosFSt').value,fw=$('#oosFWho').value,hide=$('#oosHide').checked,t0=new Date();t0.setHours(0,0,0,0);
+  const q=$('#oosQ').value.trim().toLowerCase(),fs=$('#oosFSt').value,fw=$('#oosFWho').value,fb=$('#oosFBk').value,fd=$('#oosFDept').value,hide=$('#oosHide').checked,t0=new Date();t0.setHours(0,0,0,0);
   const rows=oosAll().filter(r=>{
     if(!oosInDiv(r,ctx))return false;
     if(oosTile==='need'&&r.status!=='need')return false;
@@ -2193,10 +2210,34 @@ function oosVisible(ctx){
     if(!oosTile&&!fs&&hide&&r.status==='done')return false;
     if(fs&&r.status!==fs)return false;
     if(fw&&(r.assignee||'')!==fw)return false;
-    return!q||[r.itemNo,r.desc,r.loc,r.assignee,r.note].join(' ').toLowerCase().includes(q)});
+    if(fb){const b=r.bucket||'';if(fb==='stock'?!(b==='A'||b==='B'):b!==fb)return false}
+    if(fd&&(r.assignDept||'')!==fd)return false;
+    return!q||[r.itemNo,r.desc,r.loc,r.assignee,r.note,r.buyerName,r.buyerUid,r.dept].join(' ').toLowerCase().includes(q)});
   const s=$('#oosSort').value;
   return rows.sort((a,b)=>(a.status==='done')-(b.status==='done')||(a.status==='done'?oosDoneMs(b)-oosDoneMs(a):
     (s==='loc'?String(a.loc||'~').localeCompare(String(b.loc||'~'),'th',{numeric:true}):s==='name'?String(a.desc||'').localeCompare(String(b.desc||''),'th'):0)||oosMs(a)-oosMs(b)))}
+/* Buyer, DMS and Stock Day (days of cover the system believed it had) shown on the card; empty values are left out */
+const oosNum=v=>{const n=parseFloat(String(v??'').replace(/,/g,''));return isNaN(n)?null:n};
+const oosFmtN=n=>n==null?'':(Math.abs(n)>=100||Number.isInteger(n)?Math.round(n):Math.round(n*10)/10).toLocaleString();
+const oosBuyerName=r=>{const c=r.buyerUid?(st.contacts||[]).find(x=>x.uid===r.buyerUid):null;return r.buyerName||(c&&c.name)||''};
+function oosFactsHtml(r){
+  const dms=oosNum(r.dms),sd=oosNum(r.stockDay),dn=oosNum(r.dmsNew),by=oosBuyerName(r),bits=[],out=[];
+  if(r.assignDept)bits.push(`<span>แผนกที่เติม: <b>${esc(r.assignDept)}</b></span>`);
+  if(by||r.buyerUid)bits.push(`<span>Buyer: <b>${esc(by||r.buyerUid)}</b>${by&&r.buyerUid?` <span class="muted">(${esc(r.buyerUid)})</span>`:''}</span>`);
+  if(dms!=null&&dms>0)bits.push(`<span>DMS <b>${oosFmtN(dms)}</b>${dn!=null&&dn!==dms?` → ใหม่ <b>${oosFmtN(dn)}</b> <span class="${dn>dms?'c-md2':'muted'}">(${dn>=dms?'+':''}${Math.round((dn/dms-1)*100)}%)</span>`:''}</span>`);
+  else if(dn!=null)bits.push(`<span>DMS เดิมใช้ไม่ได้ → ค่าชั่วคราว <b>${oosFmtN(dn)}</b></span>`);
+  else if(dms!=null)bits.push(`<span>DMS <b>${oosFmtN(dms)}</b> <span class="muted">(ใช้ไม่ได้)</span></span>`);
+  if(sd!=null)bits.push(`<span>Stock Day <b>${oosFmtN(sd)}</b> วัน</span>`);
+  if(bits.length)out.push(`<div class="oosc-f small">${bits.join('')}</div>`);
+  const sq=oosNum(r.shortQty),ls=oosNum(r.lossBaht),b2=[];
+  if(sq!=null)b2.push(`ขาด ${oosFmtN(sq)} ${esc(r.shortUnit||'หน่วย')}`);
+  if(ls)b2.push(`฿${ls.toLocaleString()}`);
+  if(r.chronicDays>=3)b2.push(`<b class="c-md2">ขาดซ้ำ ${r.chronicDays} วันในเดือน</b>`);
+  if(r.reason)b2.push(`สาเหตุ: ${esc(r.reason)}`);
+  if(b2.length)out.push(`<div class="oosc-f small muted">${b2.join(' · ')}</div>`);
+  if(r.bucket&&OOS_BK[r.bucket])out.push(`<div class="small"><b>ต้องทำ:</b> ${esc(OOS_BK[r.bucket][1])}</div>`);
+  if(r.dmsNote)out.push(`<div class="muted small">${esc(r.dmsNote)}</div>`);
+  return out.join('')}
 function oosCard(r,ctx){
   const dv=oosDiv(r,ctx),lv=oosLevel(r),k=esc(r._id),s=OOS_ST[r.status]||OOS_ST.need,th=(MF.images&&MF.images[r.itemNo])||'',ph=String(r.img||'').startsWith('img:')?imgData(String(r.img).slice(4)):'';
   const age=r.status==='done'?`<span class="muted small">ใช้เวลา ${oosDur(((r.doneAt?new Date(r.doneAt).getTime():Date.now())-oosMs(r))/36e5)}${r.doneAt?' · เติมเมื่อ '+oosFmt(oosDoneMs(r)):''}</span>`
@@ -2205,7 +2246,8 @@ function oosCard(r,ctx){
     :r.status==='doing'?`<button type="button" class="btn pri sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button><button type="button" class="btn sm" onclick="oosBack('${k}')">กลับเป็นต้องเติม</button>`
     :`<button type="button" class="btn sm" onclick="oosBack('${k}')">เปิดใหม่ (ต้องเติม)</button>`;
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div><div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div></div>
-    <div class="oosc-m">${dv?`<span class="chip div-${dv.toLowerCase()}">${dv}</span>`:''}<span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
+    <div class="oosc-m">${dv?`<span class="chip div-${dv.toLowerCase()}">${dv}</span>`:''}${r.bucket&&OOS_BK[r.bucket]?`<span class="chip s-${OOS_BK[r.bucket][2]}">${esc(OOS_BK[r.bucket][0])}</span>`:''}<span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
+    ${oosFactsHtml(r)}
     <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
     <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
 function renderOos(){
@@ -2226,6 +2268,11 @@ function renderOos(){
   const sub=all.filter(r=>oosInDiv(r,ctx)),sActive=sub.filter(r=>r.status!=='done'),sLate=sActive.filter(r=>oosLevel(r)==='late'),sDoneToday=sub.filter(r=>r.status==='done'&&oosDoneMs(r)>=t0.getTime());
   $('#oosTiles').innerHTML=[['need','ต้องเติม','md1',sub.filter(r=>r.status==='need').length],['doing','กำลังเติม','soon',sub.filter(r=>r.status==='doing').length],['late','ค้างเกิน '+OOS_LATE_H+' ชม.','pull',sLate.length],['done','เติมแล้ววันนี้','ok',sDoneToday.length]]
     .map(([k,l,c,n])=>`<button type="button" class="tile${oosTile===k?' sel':''}" data-t="${k}"><span class="chip s-${c}">${l}</span><b>${n.toLocaleString()}</b><span class="muted small">รายการ</span></button>`).join('');
+  /* refill departments: a chip per department with the items still to refill (inside the selected group), and the select of the filter bar */
+  const dsel=$('#oosFDept'),dcur=dsel.value,dnames=[...new Set(all.map(r=>r.assignDept).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  dsel.innerHTML='<option value="">ทั้งหมด</option>'+dnames.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
+  const dcnt={};sActive.forEach(r=>{if(r.assignDept)dcnt[r.assignDept]=(dcnt[r.assignDept]||0)+1});
+  $('#oosDeptTiles').innerHTML=Object.entries(dcnt).sort((a,b)=>b[1]-a[1]).map(([d,n])=>`<button type="button" class="btn sm${dsel.value===d?' sel':''}" data-d="${esc(d)}">${esc(d)} <b>${n.toLocaleString()}</b></button>`).join('');
   const sel=$('#oosFWho'),cur=sel.value,names=[...new Set(all.map(r=>r.assignee).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   sel.innerHTML='<option value="">ทั้งหมด</option>'+names.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('');
   const rows=oosVisible(ctx),shown=rows.slice(0,oosLimit);
@@ -2248,11 +2295,17 @@ function oosEdit(id,focusWho){
   const v=r||{itemNo:'',desc:'',loc:'',status:'need',assignee:oosMe(),stock:'',foundAt:new Date().toISOString(),note:''};
   fOos.itemNo.value=v.itemNo||'';fOos.desc.value=v.desc||'';fOos.loc.value=v.loc||'';fOos.status.value=v.status;fOos.division.value=v.division||'';fOos.assignee.value=v.assignee||'';
   fOos.stock.value=v.stock??'';fOos.foundAt.value=oosLocalInput(v.foundAt);fOos.note.value=v.note||'';
+  fOos.buyerName.value=v.buyerName||'';fOos.buyerUid.value=v.buyerUid||'';fOos.dms.value=v.dms??'';fOos.stockDay.value=v.stockDay??'';
+  fOos.assignDept.value=v.assignDept||'';fOos.bucket.value=v.bucket||'';
+  $('#oosDeptList').innerHTML=[...new Set([...Object.entries(OOS_DEPT).map(([c,n])=>c+' '+n),'05C นม-ไข่-แช่เย็น','05F แช่แข็ง',...oosAll().map(x=>x.assignDept).filter(Boolean)])].sort().map(n=>`<option value="${esc(n)}">`).join('');
+  $('#oosBuyerList').innerHTML=(st.contacts||[]).filter(c=>c.role==='Buyer'&&c.name).map(c=>`<option value="${esc(c.name)}" label="${esc(c.uid)}">`).join('');
   const pid=oosPhotoId(r);oosPhoto={id:pid,data:null,old:pid};oosPhotoPrev();
   $('#oPhotoMsg').textContent='ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน';
   $('#oosWhoList').innerHTML=[...new Set(oosAll().map(x=>x.assignee).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th')).map(n=>`<option value="${esc(n)}">`).join('');
   if(onMakroSite())loadMakroData();$('#dlgOos').showModal();if(focusWho)fOos.assignee.focus()}
 /* typing an Item No fills the name and shelf location from Makro Finder when they are still empty */
+/* picking a Buyer name from the contacts list fills the UID when it is still empty */
+fOos.buyerName.onchange=()=>{const c=(st.contacts||[]).find(x=>x.role==='Buyer'&&x.name===fOos.buyerName.value.trim());if(c&&!fOos.buyerUid.value)fOos.buyerUid.value=c.uid};
 fOos.itemNo.onchange=()=>{const it=MF.state==='ready'?MF.items.get(fOos.itemNo.value.trim()):null;if(!it)return;if(!fOos.desc.value)fOos.desc.value=it.desc;if(!fOos.loc.value)fOos.loc.value=locText(it.locs.slice(0,2))};
 async function oosTakePhoto(file){
   if(!file)return;
@@ -2270,7 +2323,7 @@ fOos.onsubmit=ev=>{
   if(no&&status!=='done'&&oosAll().some(x=>x._id!==oosEditId&&x.status!=='done'&&amNum(x.itemNo)===amNum(no))){ev.preventDefault();$('#oErr').textContent='Item นี้มีรายการ OOS ที่ยังไม่เติมอยู่แล้ว';return}
   const old=oosEditId?byId('oos',oosEditId):null,now=new Date().toISOString(),ph={...oosPhoto},keep=!!ph.id,who=f.assignee.value.trim();
   try{if(who)localStorage.setItem('shelfLifeMonitor.oosName',who)}catch(e){}
-  const rec={...(old?body(old):{}),itemNo:no,desc,loc:f.loc.value.trim(),division:f.division.value,stock:f.stock.value.trim(),status,assignee:who,note:f.note.value.trim(),
+  const rec={...(old?body(old):{}),itemNo:no,desc,loc:f.loc.value.trim(),division:f.division.value,stock:f.stock.value.trim(),buyerName:f.buyerName.value.trim(),buyerUid:f.buyerUid.value.trim(),dms:oosNum(f.dms.value)??'',stockDay:oosNum(f.stockDay.value)??'',assignDept:f.assignDept.value.trim(),bucket:f.bucket.value,status,assignee:who,note:f.note.value.trim(),
     foundAt:f.foundAt.value?new Date(f.foundAt.value).toISOString():(old?.foundAt||now),img:keep?'img:'+ph.id:'',
     doneAt:status==='done'?(old?.doneAt||now):'',doneBy:status==='done'?(old?.doneBy||who):'',updatedAt:now,...(old?{}:{source:'manual',createdAt:now,createdBy:myId||null})};
   act(async()=>{
@@ -2288,10 +2341,16 @@ $('#oosTiles').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;oosTil
 $('#oosDivTiles').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;oosDivFilter=oosDivFilter===b.dataset.div?'':b.dataset.div;oosLimit=60;renderOos()};
 $('#oosMore').onclick=()=>{oosLimit+=60;renderOos()};
 let oosQT;$('#oosQ').oninput=()=>{clearTimeout(oosQT);oosQT=setTimeout(()=>{oosLimit=60;renderOos()},150)};
-['#oosFSt','#oosFWho','#oosSort','#oosHide'].forEach(s=>$(s).onchange=()=>{oosLimit=60;renderOos()});
+['#oosFSt','#oosFWho','#oosFBk','#oosFDept','#oosSort','#oosHide'].forEach(s=>$(s).onchange=()=>{oosLimit=60;renderOos()});
+$('#oosDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=$('#oosFDept');d.value=d.value===b.dataset.d?'':b.dataset.d;oosLimit=60;renderOos()};
 $('#oosBannerGo').onclick=()=>document.querySelector('#tabs button[data-tab="oos"]').click();
 setInterval(()=>{if(!document.hidden)renderOos()},60000); /* the "ค้าง … ชม." counters and colours move on without a click */
-/* ---- import an OOS report (Excel / CSV): Item No required, everything else optional ---- */
+/* ---- import an OOS report (Excel / CSV) ----
+   Two kinds of file are understood:
+   (1) a plain list: Item No required, everything else optional, one row per item;
+   (2) the O2O "shortage report" (many lines per item: Delivery Date, Final Reason, DMS, Stock Day, Buyer, Dept ...).
+       It is cleaned, cut to a window of delivery days, grouped per item, each item gets a problem type (A/B/C/X), a refill department
+       and a recalculated DMS. */
 const OOS_COLS=[
   ['item',/^(itemno|item|itemnumber|itemcode|article|articleno|sku|รหัส|รหัสสินค้า|เลขสินค้า|เลขitem)$/],
   ['barcode',/(barcode|บาร์โค้ด|^ean$|^gtin$)/],
@@ -2299,10 +2358,24 @@ const OOS_COLS=[
   ['loc',/(location|^loc$|ตำแหน่ง|ชั้น|bay)/],
   ['div',/^(division|div|group|กลุ่ม|กลุ่มสินค้า|ffdfnf)$/],
   ['dept',/(category|dept|department|หมวด|แผนก)/],
-  ['stock',/(stock|onhand|qty|quantity|คงเหลือ|สต็อก|จำนวน)/],
-  ['found',/(datetime|date|time|วันที่|เวลา|ตรวจพบ)/],
+  ['buyerUid',/^(buyeruid|buyerid)$/],
+  ['buyerName',/^(buyername|ชื่อbuyer)$/],
+  ['dms',/^dms$/],
+  ['stockDay',/^(stockday|stockdays|daysofstock|วันสต็อก)$/],
+  ['short',/^(itemqtyshortage|shortageqty|qtyshortage|shortqty|จำนวนขาด)$/],
+  ['ordered',/^(customerordered|orderedqty|orderqty)$/],
+  ['reason',/^(finalreason)$/],
+  ['reason2',/^(shortagereason|reason|เหตุผล|สาเหตุ)$/],
+  ['loss',/^(saleloss)$/],
+  ['wsku',/^(weightsku)$/],
+  ['ps',/^(processstatus)$/],
+  ['ow',/^(orderway)$/],
+  ['repl',/^(replmethod)$/],
+  ['deliv',/^(deliverydate|วันส่งมอบ|วันที่ส่งมอบ)$/],
+  ['stock',/^(onhand|stockonhand|stockqty|stock|qty|quantity|คงเหลือ|สต็อก|จำนวน)$/],
+  ['found',/^(datetime|date|time|วันที่|เวลา|ตรวจพบ|วันที่ตรวจพบ|orderdate|founddate|foundat)$/],
   ['who',/(assign|owner|ผู้รับผิดชอบ|ผู้เติม|พนักงาน)/],
-  ['note',/(remark|note|หมายเหตุ)/]];
+  ['note',/^(remark|note|หมายเหตุ|remarks)$/]];
 function oosMapHeader(row){const m={},used=new Set();
   (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of OOS_COLS){if(m[f]==null&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
 /* Excel serial / dd/mm/yyyy [hh:mm] (Buddhist years too) / ISO → ISO string; a date with no time that is today counts as "now" */
@@ -2315,62 +2388,206 @@ function oosParseDate(v){
   if(isNaN(d))return'';
   const n=new Date();if(d.getHours()===0&&d.getMinutes()===0&&d.toDateString()===n.toDateString())return n.toISOString();
   return d.toISOString()}
+/* a delivery date → local midnight (ms) */
+function oosDayMs(v){
+  let d;
+  if(typeof v==='number'&&v>20000&&v<80000){const u=new Date(Math.floor(v)*864e5-25569*864e5);d=new Date(u.getUTCFullYear(),u.getUTCMonth(),u.getUTCDate())}
+  else{const s=oosParseDate(v);if(!s)return null;const t=new Date(s);d=new Date(t.getFullYear(),t.getMonth(),t.getDate())}
+  return isNaN(d)?null:d.getTime()}
+const OOS_DAY=864e5;
 let oosImp=null;
+/* reason codes of the O2O report: 1 not found · 2 order too small · 3 stock record wrong · 4 not found before cut-off · 5/6 supplier/DC · 12 ordered without checking stock = stock-out problems;
+   7 size/weight · 8 quality · 9 discounted · 10 discontinued · 11/13/14 order mistakes or cancels = not a stock problem */
+const OOS_SO=new Set([1,2,3,4,5,6,12]),OOS_NOTSTOCK=new Set([7,8,9,10,11,13,14]);
+const oosReasonCode=t=>{const m=String(t??'').match(/^\s*(\d+)\s*\./);return m?+m[1]:0};
+/* problem type per line: A = system shows stock but it could not be found (check + refill the shelf) · B = stock record wrong (count / adjust stock) ·
+   C = really out (order, chase supplier, check Min-Max) · X = reason missing · D = not a stock problem (left out of the list) */
+function oosLineBucket(l){
+  const rc=l.rc;
+  if(!rc||(rc>14))return'X';
+  if(OOS_NOTSTOCK.has(rc))return'D';
+  if(rc===2||rc===5||rc===6)return'C';
+  if(l.sd!=null&&l.sd<0)return'B';
+  if(l.sd===0&&l.dms!=null&&l.dms>0)return'C';
+  return rc===3?'B':'A'}
+const OOS_BK={A:['มีของในระบบ · หาไม่เจอ','ตรวจหาของ + เติมชั้น','soon'],B:['สต็อกในระบบไม่ตรง','นับสต็อก / ปรับสต็อก','err'],C:['ของหมดจริง','ตรวจ Min-Max / สั่งของ / ตามซัพ','pull'],X:['ยังไม่ระบุสาเหตุ','ให้ทีม O2O ระบุสาเหตุ','md1']};
+/* refill department = the Dept of the item; Frozen & Dairy (05) is split by buyer: FD* / FG = chilled (นม-ไข่-แช่เย็น), the rest = frozen */
+const OOS_DEPT={'01':'ผักผลไม้','02':'เนื้อสัตว์','03':'ปลา/อาหารทะเลสด','04':'เบเกอรี่','05':'แช่แข็ง/นม-ไข่','06':'ขนมขบเคี้ยว','07':'ของจำเป็น','08':'ของแห้ง/ของชำ','09':'เครื่องดื่ม','10':'เครื่องสำอาง-ยา-ซักล้าง','32':'เสื้อผ้าชาย','33':'สิ่งทอ','34':'อาหารสัตว์เลี้ยง','41':'เครื่องใช้ไฟฟ้า','45':'ของใช้ในบ้าน','46':'เครื่องเขียน'};
+function oosAssignDept(dept,buyerUid){
+  const m=String(dept||'').trim().match(/^(\d{1,2})\s*(.*)$/);if(!m)return String(dept||'').trim();
+  const code=m[1].padStart(2,'0');
+  if(code==='05')return /^(FD|FG$)/i.test(String(buyerUid||'').trim())?'05C นม-ไข่-แช่เย็น':'05F แช่แข็ง';
+  return code+' '+(OOS_DEPT[code]||m[2]||'')}
 function parseOosFile(wb){
-  const rows=[],info={cols:{},skipped:0,headerless:false},seen=new Map();
+  const rows=[],lines=[],info={cols:{},skipped:0,headerless:false,o2o:false,nonPos:0,stale:0,minDay:null,maxDay:null,span:0,items:0},seen=new Map();
+  const num=v=>{const n=parseFloat(String(v??'').replace(/,/g,''));return isNaN(n)?null:n};
   const take=(g)=>{const no=String(g.item??'').trim().replace(/\.0+$/,'');if(!no){info.skipped++;return}
-    const x={itemNo:no,barcode:String(g.barcode??'').trim(),desc:String(g.desc??'').trim(),loc:String(g.loc??'').trim(),division:divFrom(g.div),dept:String(g.dept??'').trim(),stock:String(g.stock??'').trim(),foundAt:oosParseDate(g.found),who:String(g.who??'').trim(),note:String(g.note??'').trim()};
+    const x={itemNo:no,barcode:String(g.barcode??'').trim(),desc:String(g.desc??'').trim(),loc:String(g.loc??'').trim(),division:divFrom(g.div),dept:String(g.dept??'').trim(),stock:String(g.stock??'').trim(),foundAt:oosParseDate(g.found),who:String(g.who??'').trim(),note:String(g.note??'').trim(),
+      buyerUid:String(g.buyerUid??'').trim(),buyerName:String(g.buyerName??'').trim(),dms:num(g.dms),stockDay:num(g.stockDay)};
     const k=amNum(no);if(seen.has(k))rows[seen.get(k)]=x;else{seen.set(k,rows.length);rows.push(x)}}; /* the same Item twice: the last row wins */
+  const takeLine=(g)=>{
+    const no=String(g.item??'').trim().replace(/\.0+$/,'');if(!no){info.skipped++;return}
+    const short=num(g.short)??0,ps=String(g.ps??'').trim().toLowerCase();
+    if(!(short>0)){info.nonPos++;return}                       /* over-shipped / zero lines are not shortages */
+    if(ps==='out_for_delivery'||ps==='shipped'){info.stale++;return}
+    const day=oosDayMs(g.deliv);if(day==null){info.skipped++;return}
+    const rt=String(g.reason||g.reason2||'').trim();
+    const l={k:amNum(no),itemNo:no,desc:String(g.desc??'').trim().replace(/\s+/g,' '),div:divFrom(g.div),dept:String(g.dept??'').trim(),bu:String(g.buyerUid??'').trim(),bn:String(g.buyerName??'').trim(),
+      dms:num(g.dms),sd:num(g.stockDay),short,loss:(num(g.loss)||0)/100,rc:oosReasonCode(g.reason)||oosReasonCode(g.reason2),rt:rt.replace(/^\d+\.\s*/,''),
+      day,w:(num(g.wsku)||0)>0,ow:String(g.ow??'').trim(),repl:String(g.repl??'').trim(),barcode:String(g.barcode??'').trim(),loc:String(g.loc??'').trim()};
+    lines.push(l);if(info.minDay==null||day<info.minDay)info.minDay=day;if(info.maxDay==null||day>info.maxDay)info.maxDay=day};
   for(const sn of wb.SheetNames){
     const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
     let hi=-1,m=null;
     for(let i=0;i<Math.min(raw.length,25);i++){const mm=oosMapHeader(raw[i]);if(mm.item!=null){hi=i;m=mm;break}}
     if(hi>=0){Object.keys(m).forEach(k=>info.cols[k]=true);
-      for(let i=hi+1;i<raw.length;i++){const r=raw[i];if(r.every(c=>String(c).trim()===''))continue;const g={};Object.entries(m).forEach(([f,c])=>g[f]=r[c]);take(g)}
+      const o2o=m.short!=null&&m.deliv!=null;if(o2o)info.o2o=true;
+      for(let i=hi+1;i<raw.length;i++){const r=raw[i];if(r.every(c=>String(c).trim()===''))continue;const g={};Object.entries(m).forEach(([f,c])=>g[f]=r[c]);(o2o?takeLine:take)(g)}
       continue}
     /* no header row: first column = Item (3-9 digits), second = name */
     const body=raw.filter(r=>r.some(c=>String(c).trim()!=='')),ok=body.filter(r=>/^\d{3,9}(\.0+)?$/.test(String(r[0]).trim()));
     if(body.length&&ok.length/body.length>=.7&&ok.length>=3){info.headerless=true;info.cols.item=true;if(ok.some(r=>String(r[1]||'').trim()))info.cols.desc=true;ok.forEach(r=>take({item:r[0],desc:r[1]}))}
   }
-  return{rows,info}}
+  if(info.minDay!=null)info.span=Math.round((info.maxDay-info.minDay)/OOS_DAY)+1;
+  info.items=new Set(lines.map(l=>l.k)).size;
+  return{rows,lines,info}}
+/* ---- per-item analysis of an O2O report: problem type, stock-out days, and the recalculated DMS ----
+   DMS_new = B + L + H
+   B = the latest DMS, but if that is below the month's average while its Stock Day was 1 or less (the dip is probably caused by the stock-out) B = the month's average
+   L = lost demand per day = (1/days) × Σ over delivery days of min(units short that day, max(3, B)) — only stock-out reasons, only non-weight items
+   H = B × min(25%, 0.25 × stock-out days / days) — extra safety for items that keep running out
+   an item with no usable DMS (blank / 0 / negative) gets 0.25 + lost demand per day (cap 3 × its median daily short); weight items without DMS get no estimate
+   a change above +100% is cut to ×2 and flagged for the Buyer */
+const OOS_KAPPA=.25,OOS_HCAP=.25;
+function oosAnalyze(imp){
+  if(imp.an)return imp.an;
+  const days=Math.max(1,imp.info.span||31),by=new Map();
+  imp.lines.forEach(l=>{let it=by.get(l.k);if(!it)by.set(l.k,it={k:l.k,lines:[]});it.lines.push(l)});
+  const items=[];
+  for(const it of by.values()){
+    it.lines.sort((a,b)=>a.day-b.day);
+    const ls=it.lines,last=ls[ls.length-1],lastOf=f=>{for(let i=ls.length-1;i>=0;i--){const v=ls[i][f];if(v!==''&&v!=null)return v}return''};
+    it.itemNo=last.itemNo;it.desc=lastOf('desc');it.dept=lastOf('dept');it.div=lastOf('div');it.bu=lastOf('bu');it.bn=lastOf('bn');it.ow=lastOf('ow');it.repl=lastOf('repl');
+    it.w=ls.some(l=>l.w);
+    /* one DMS reading per delivery day (the last line of the day) */
+    const perDay=new Map();ls.forEach(l=>{if(l.dms!=null&&l.dms>0)perDay.set(l.day,l)});
+    const rd=[...perDay.values()].sort((a,b)=>a.day-b.day);
+    it.dmsRaw=lastOf('dms');it.sdLast=lastOf('sd');
+    /* per-day units short for stock-out reasons */
+    const dayShort=new Map(),dayShortAll=new Map(),soDays=new Set();
+    ls.forEach(l=>{if(OOS_SO.has(l.rc)){soDays.add(l.day);dayShortAll.set(l.day,(dayShortAll.get(l.day)||0)+l.short);if(!l.w)dayShort.set(l.day,(dayShort.get(l.day)||0)+l.short)}});
+    it.soDays=soDays.size;
+    it.phantom=ls.filter(l=>(l.rc===1||l.rc===3||l.rc===4)&&l.sd!=null&&l.sd>=3).length;
+    const adv=[],note=[];
+    let old=null,B=null,newDms=null,L=0,H=0;
+    if(rd.length){
+      const latest=rd[rd.length-1],mean=rd.reduce((s,l)=>s+l.dms,0)/rd.length;
+      old=latest.dms;B=latest.dms>=mean?latest.dms:((latest.sd!=null&&latest.sd<=1)?mean:latest.dms);
+      if(!it.w)dayShort.forEach(sh=>{L+=Math.min(sh,Math.max(3,B))});L/=days;
+      H=B*Math.min(OOS_HCAP,OOS_KAPPA*it.soDays/days);
+      newDms=B+L+H;
+      if(newDms>old*2){newDms=old*2;note.push('เปลี่ยนเกิน +100% จึงจำกัดไว้ที่ 2 เท่า — ให้ Buyer ตรวจ')}
+      if(it.w)note.push('สินค้าชั่งน้ำหนัก: หน่วยของ DMS ยังไม่ยืนยัน (ใช้เฉพาะส่วนปรับตามวันที่ขาด)');
+    }else{
+      const v=[...dayShortAll.values()].sort((a,b)=>a-b),med=v.length?v[Math.floor(v.length/2)]:0;let s=0;v.forEach(sh=>{s+=Math.min(sh,Math.max(3,3*med))});
+      newDms=.25+s/days;note.push(it.w?'DMS เดิมใช้ไม่ได้ — ค่าชั่วคราวเป็น กก./วัน คิดจากยอดที่ขาดเท่านั้น ควรคำนวณจากประวัติยอดขาย':'DMS เดิมใช้ไม่ได้ (ว่าง / 0 / ติดลบ) — ใช้ค่าชั่วคราว ควรคำนวณจากประวัติยอดขาย');
+    }
+    const r1=n=>n==null?null:(n>=100?Math.round(n):Math.round(n*10)/10);
+    it.dmsOld=old;it.dmsB=r1(B);it.dmsL=L;it.dmsH=H;it.dmsNew=r1(newDms);it.dmsInvalid=!rd.length;
+    it.dmsChange=(old&&newDms!=null)?(newDms/old-1):null;
+    if(it.phantom)note.push(`Stock Day ≥ 3 แต่หยิบของไม่ได้ ${it.phantom} ครั้ง — นับสต็อก / ปรับ on-hand ก่อน (DMS ใหม่แก้ได้แค่ส่วนน้อย)`);
+    it.dmsNote=note.join(' · ');
+    items.push(it);
+  }
+  return imp.an={items,byKey:new Map(items.map(i=>[i.k,i])),days};
+}
+/* the items shown in OOS+ for a window of the last `win` delivery days (0 = the whole file) */
+function oosWindowRows(imp,win){
+  const an=oosAnalyze(imp),min=win?imp.info.maxDay-(win-1)*OOS_DAY:-Infinity,rows=[];let dropD=0;
+  const bkOrder=['A','B','C','X'];
+  for(const it of an.items){
+    const ls=it.lines.filter(l=>l.day>=min);if(!ls.length)continue;
+    const withB=ls.map(l=>[l,oosLineBucket(l)]).filter(x=>x[1]!=='D');
+    if(!withB.length){dropD++;continue}
+    const cnt={};withB.forEach(([,b])=>cnt[b]=(cnt[b]||0)+1);
+    const bucket=bkOrder.slice().sort((a,b)=>(cnt[b]||0)-(cnt[a]||0)||bkOrder.indexOf(a)-bkOrder.indexOf(b))[0];
+    const rc={};withB.forEach(([l])=>{const t=l.rt||'ไม่ระบุสาเหตุ';rc[t]=(rc[t]||0)+1});
+    const reason=Object.entries(rc).sort((a,b)=>b[1]-a[1])[0][0];
+    const lastL=withB[withB.length-1][0],day=lastL.day,n=new Date(),dt=new Date(day);
+    const foundAt=dt.toDateString()===n.toDateString()?n.toISOString():dt.toISOString();
+    const short=withB.reduce((s,[l])=>s+l.short,0),loss=withB.reduce((s,[l])=>s+l.loss,0);
+    const stockDayRaw=it.sdLast;
+    rows.push({itemNo:it.itemNo,desc:it.desc,barcode:lastL.barcode,loc:lastL.loc,division:it.div,dept:it.dept,assignDept:oosAssignDept(it.dept,it.bu),
+      buyerUid:it.bu,buyerName:it.bn,dms:it.dmsRaw===''?null:it.dmsRaw,stockDay:stockDayRaw===''?null:stockDayRaw,dmsNew:it.dmsNew,dmsOld:it.dmsOld,dmsNote:it.dmsNote,
+      bucket,reason,shortQty:Math.round(short*100)/100,shortUnit:it.w?'กก.':'หน่วย',weight:it.w,lossBaht:Math.round(loss),chronicDays:it.soDays,orderWay:it.ow,repl:it.repl,
+      stock:'',foundAt,who:'',note:''});
+  }
+  return{rows,dropD}}
+const oosImpRows=(imp,o)=>imp.info.o2o?oosWindowRows(imp,o&&o.win!=null?o.win:3):{rows:imp.rows,dropD:0};
 function planOos(imp,o){
   const pick=new Map();
   oosAll().forEach(r=>{const k=amNum(r.itemNo);if(!k)return;const c=pick.get(k);if(!c||(c.status==='done'&&r.status!=='done')||(c.status===r.status&&oosMs(r)>oosMs(c)))pick.set(k,r)});
-  const add=[],upd=[],reopen=[],seen=new Set();
-  imp.rows.forEach(x=>{const k=amNum(x.itemNo);seen.add(k);const ex=pick.get(k);if(!ex)add.push(x);else if(ex.status==='done')reopen.push({ex,x});else upd.push({ex,x})});
+  const add=[],upd=[],reopen=[],seen=new Set(),{rows,dropD}=oosImpRows(imp,o);
+  rows.forEach(x=>{const k=amNum(x.itemNo);seen.add(k);const ex=pick.get(k);if(!ex)add.push(x);else if(ex.status==='done')reopen.push({ex,x});else upd.push({ex,x})});
   const close=o.close?oosAll().filter(r=>r.status!=='done'&&r.source==='import'&&!seen.has(amNum(r.itemNo))):[];
-  return{add,upd,reopen,close}}
+  return{add,upd,reopen,close,dropD,rows}}
 async function readOosFile(file){
   $('#oiErr').textContent='';$('#oiBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
   try{
     const wb=await readAnyFile(file,r=>oosMapHeader(r).item!=null,sayTo('#oiBox')),parsed=parseOosFile(wb);
-    if(!parsed.rows.length)throw Error('ไม่พบรายการในไฟล์ — ต้องมีคอลัมน์ Item No (หรือเรียงคอลัมน์แรก = Item No)');
-    oosImp={file:file.name,...parsed};showOosPreview();
+    if(!parsed.rows.length&&!parsed.lines.length)throw Error('ไม่พบรายการในไฟล์ — ต้องมีคอลัมน์ Item No (หรือเรียงคอลัมน์แรก = Item No)');
+    oosImp={file:file.name,...parsed};oosLastImp=oosImp;showOosPreview();
   }catch(e){oosImp=null;$('#oiBox').innerHTML='';$('#oiErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}
 }
-const OOS_COL_LBL={item:'Item No',barcode:'บาร์โค้ด',desc:'ชื่อสินค้า',loc:'ตำแหน่ง',div:'กลุ่ม (FF/DF/NF)',dept:'หมวด',stock:'สต็อก',found:'วันที่/เวลา',who:'ผู้รับผิดชอบ',note:'หมายเหตุ'};
+let oosLastImp=null;
+const OOS_COL_LBL={item:'Item No',barcode:'บาร์โค้ด',desc:'ชื่อสินค้า',loc:'ตำแหน่ง',div:'กลุ่ม (FF/DF/NF)',dept:'แผนก / หมวด',buyerUid:'Buyer UID',buyerName:'Buyer',dms:'DMS',stockDay:'Stock Day',short:'จำนวนที่ขาด',ordered:'จำนวนสั่ง',reason:'สาเหตุ (Final Reason)',reason2:'สาเหตุ',loss:'Sale Loss',wsku:'สินค้าชั่งน้ำหนัก',ps:'สถานะออเดอร์',ow:'Order Way',repl:'repl_method',deliv:'วันส่งมอบ',stock:'สต็อก',found:'วันที่/เวลา',who:'ผู้รับผิดชอบ',note:'หมายเหตุ'};
+const oosWinSel=()=>{const v=$('#oiWinSel').value;return v==='all'?0:+v};
+const oosDayTxt=ms=>ms==null?'':new Date(ms).toLocaleDateString('th-TH-u-ca-gregory',{day:'numeric',month:'short',year:'numeric'});
 function showOosPreview(){
-  const {file,info,rows}=oosImp,plan=planOos(oosImp,{close:$('#oiClose').checked});oosImp.plan=plan;
+  const {file,info,rows}=oosImp,o2o=info.o2o;
+  $('#oiWin').hidden=!o2o;
+  const plan=planOos(oosImp,{close:$('#oiClose').checked,win:o2o?oosWinSel():null});oosImp.plan=plan;
   $('#oiOpts').hidden=false;$('#oiDrop').hidden=true;$('#oiGo').disabled=!(plan.add.length||plan.upd.length||plan.reopen.length||plan.close.length);
-  const sample=[...plan.add.slice(0,6).map(x=>[x,'ใหม่']),...plan.reopen.slice(0,3).map(y=>[y.x,'เปิดซ้ำ'])].slice(0,8).map(([x,t])=>`<tr><td><b>${esc(x.itemNo)}</b></td><td>${esc(x.desc||(MF.state==='ready'&&MF.items.get(x.itemNo)?.desc)||'—')}</td><td>${esc(x.loc||'')}</td><td><span class="chip s-md1">${t}</span></td></tr>`).join('');
-  $('#oiBox').innerHTML=`<div class="imp-file"><b>${esc(file)}</b> <span class="muted small">· ${rows.length.toLocaleString()} รายการ${info.headerless?' · ไม่มีหัวคอลัมน์ (คอลัมน์ 1 = Item No, 2 = ชื่อ)':''}${info.skipped?` · ข้าม ${info.skipped.toLocaleString()} แถวที่ไม่มี Item No`:''}</span> <button type="button" class="btn sm" id="oiChange">เลือกไฟล์อื่น</button></div>
+  const sample=[...plan.add.slice(0,6).map(x=>[x,'ใหม่']),...plan.reopen.slice(0,3).map(y=>[y.x,'เปิดซ้ำ'])].slice(0,8).map(([x,t])=>`<tr><td><b>${esc(x.itemNo)}</b></td><td>${esc(x.desc||(MF.state==='ready'&&MF.items.get(x.itemNo)?.desc)||'—')}</td><td>${esc(x.assignDept||x.loc||'')}</td><td>${x.bucket?`<span class="chip s-${OOS_BK[x.bucket][2]}">${esc(OOS_BK[x.bucket][0])}</span>`:`<span class="chip s-md1">${t}</span>`}</td></tr>`).join('');
+  let o2oHtml='';
+  if(o2o){
+    const an=oosAnalyze(oosImp),bk={A:0,B:0,C:0,X:0},ds={},inv=plan.rows.filter(r=>r.dmsNew!=null&&r.dmsOld==null).length;
+    plan.rows.forEach(r=>{bk[r.bucket]++;ds[r.assignDept]=(ds[r.assignDept]||0)+1});
+    const up=an.items.filter(i=>i.dmsChange!=null),avg=up.length?up.reduce((s,i)=>s+i.dmsChange,0)/up.length:0,invAll=an.items.filter(i=>i.dmsInvalid).length;
+    o2oHtml=`<p class="small" style="margin:8px 0 0"><b>ช่วงวันส่งมอบในไฟล์:</b> ${oosDayTxt(info.minDay)} – ${oosDayTxt(info.maxDay)} (${info.span} วัน) · ${oosImp.lines.length.toLocaleString()} บรรทัด · ${an.items.length.toLocaleString()} สินค้า${info.nonPos?` · ตัดบรรทัดที่ไม่ได้ขาด ${info.nonPos}`:''}${info.stale?` · ตัดออเดอร์ที่ยังไม่จบ ${info.stale}`:''}</p>
+    <div class="imp-tiles"><div class="t-new"><b>${bk.A.toLocaleString()}</b><span>${esc(OOS_BK.A[0])}</span></div><div class="t-new"><b>${bk.B.toLocaleString()}</b><span>${esc(OOS_BK.B[0])}</span></div><div class="t-new"><b>${bk.C.toLocaleString()}</b><span>${esc(OOS_BK.C[0])}</span></div><div><b>${bk.X.toLocaleString()}</b><span>${esc(OOS_BK.X[0])}</span></div></div>
+    <p class="small" style="margin:8px 0 0"><b>แผนกที่ต้องเติม:</b> ${Object.entries(ds).sort((a,b)=>b[1]-a[1]).map(([d,n])=>`${esc(d)} ${n.toLocaleString()}`).join(' · ')||'—'}${plan.dropD?` · ไม่นับ ${plan.dropD.toLocaleString()} สินค้าที่ไม่ใช่ปัญหาสต็อก (ขนาด/น้ำหนัก, คุณภาพ, ลดราคา ฯลฯ)`:''}</p>
+    <p class="small" style="margin:6px 0 0"><b>DMS ใหม่ (คำนวณจากทั้งไฟล์):</b> ${up.length.toLocaleString()} สินค้าที่มี DMS ใช้ได้ เฉลี่ยเปลี่ยน ${avg>=0?'+':''}${(avg*100).toFixed(1)}% · ${invAll.toLocaleString()} สินค้าที่ DMS เดิมใช้ไม่ได้ (ว่าง / 0 / ติดลบ) ได้ค่าชั่วคราว <button type="button" class="btn sm" id="oiDmsXlsx">ดาวน์โหลดตาราง DMS ใหม่ (Excel)</button></p>`;
+  }
+  $('#oiBox').innerHTML=`<div class="imp-file"><b>${esc(file)}</b> <span class="muted small">· ${o2o?`${plan.rows.length.toLocaleString()} สินค้าในช่วงที่เลือก`:`${rows.length.toLocaleString()} รายการ`}${info.headerless?' · ไม่มีหัวคอลัมน์ (คอลัมน์ 1 = Item No, 2 = ชื่อ)':''}${info.skipped?` · ข้าม ${info.skipped.toLocaleString()} แถวที่ไม่มี Item No / วันที่`:''}</span> <button type="button" class="btn sm" id="oiChange">เลือกไฟล์อื่น</button></div>
   <div class="imp-tiles"><div class="t-new"><b>${plan.add.length.toLocaleString()}</b><span>รายการใหม่</span></div><div><b>${plan.reopen.length.toLocaleString()}</b><span>เปิดซ้ำ (เคยเติมแล้ว)</span></div><div><b>${plan.upd.length.toLocaleString()}</b><span>อยู่ในรายการเดิมแล้ว</span></div><div><b>${plan.close.length.toLocaleString()}</b><span>ปิดอัตโนมัติ</span></div></div>
-  <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>OOS_COL_LBL[k]||k).join(' · ')}</p>
-  ${sample?`<div class="imp-sample"><table><thead><tr><th>Item No</th><th>ชื่อสินค้า</th><th>ตำแหน่ง</th><th></th></tr></thead><tbody>${sample}</tbody></table></div>`:''}`;
+  <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>OOS_COL_LBL[k]||k).join(' · ')}</p>${o2oHtml}
+  ${sample?`<div class="imp-sample"><table><thead><tr><th>Item No</th><th>ชื่อสินค้า</th><th>${o2o?'แผนก':'ตำแหน่ง'}</th><th>${o2o?'ประเภท':''}</th></tr></thead><tbody>${sample}</tbody></table></div>`:''}`;
   $('#oiChange').onclick=()=>{$('#oiDrop').hidden=false;$('#oiBox').innerHTML='';$('#oiGo').disabled=true;oosImp=null;$('#oiFile').value='';$('#oiFile').click()};
+  const bx=$('#oiDmsXlsx');if(bx)bx.onclick=()=>oosExportDms(oosImp);
 }
+/* what the import writes onto a record */
+const oosExtra=x=>{
+  const e={};
+  ['division','dept','assignDept','buyerUid','buyerName','bucket','reason','shortUnit','orderWay','repl','dmsNote'].forEach(k=>{if(x[k])e[k]=x[k]});
+  ['dms','stockDay','dmsNew','dmsOld','shortQty','lossBaht','chronicDays'].forEach(k=>{if(x[k]!=null&&x[k]!=='')e[k]=x[k]});
+  if(x.weight)e.weight=true;
+  return e};
 async function runOosImport(){
   if(!oosImp)return;
-  const plan=planOos(oosImp,{close:$('#oiClose').checked}),now=new Date().toISOString(),file=oosImp.file;
+  const plan=planOos(oosImp,{close:$('#oiClose').checked,win:oosImp.info.o2o?oosWinSel():null}),now=new Date().toISOString(),file=oosImp.file;
   $('#oiGo').disabled=true;$('#oiGo').textContent='กำลังนำเข้า…';
   if(onMakroSite()&&MF.state==='idle')loadMakroData();
   for(let i=0;i<60&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250));
   const ready=MF.state==='ready',fill=x=>{const it=ready?MF.items.get(x.itemNo):null;return{desc:x.desc||it?.desc||'',loc:x.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),barcode:x.barcode||it?.barcode||''}};
+  const KEEP=['division','dept','assignDept'];  /* set only while still empty: the team may have changed them */
   const ok=await act(async()=>{
-    for(const x of plan.add){const f=fill(x);await putItem('oos',{itemNo:x.itemNo,desc:f.desc,loc:f.loc,barcode:f.barcode,division:x.division,dept:x.dept,stock:x.stock,status:'need',assignee:x.who,note:x.note,foundAt:x.foundAt||now,source:'import',importFile:file,importRun:now,createdAt:now,createdBy:myId||null,updatedAt:now})}
-    for(const {ex,x} of plan.reopen){const f=fill(x);await patchItem('oos',ex,{status:'need',doneAt:'',doneBy:'',autoClosed:false,foundAt:x.foundAt||now,desc:ex.desc||f.desc,loc:x.loc||ex.loc||f.loc,...(x.division?{division:x.division}:{}),...(x.dept?{dept:x.dept}:{}),stock:x.stock||ex.stock||'',...(x.who?{assignee:x.who}:{}),importFile:file,importRun:now,updatedAt:now})}
-    for(const {ex,x} of plan.upd){const f=fill(x),p={};
-      if(x.division&&!ex.division)p.division=x.division;if(x.dept&&!ex.dept)p.dept=x.dept;
+    for(const x of plan.add){const f=fill(x);await putItem('oos',{itemNo:x.itemNo,desc:f.desc,loc:f.loc,barcode:f.barcode,stock:x.stock,status:'need',assignee:x.who,note:x.note,foundAt:x.foundAt||now,source:'import',importFile:file,importRun:now,createdAt:now,createdBy:myId||null,updatedAt:now,...oosExtra(x)})}
+    for(const {ex,x} of plan.reopen){const f=fill(x),e=oosExtra(x);
+      await patchItem('oos',ex,{status:'need',doneAt:'',doneBy:'',autoClosed:false,foundAt:x.foundAt||now,desc:ex.desc||f.desc,loc:x.loc||ex.loc||f.loc,stock:x.stock||ex.stock||'',...(x.who?{assignee:x.who}:{}),...e,
+        ...Object.fromEntries(KEEP.filter(k=>ex[k]&&e[k]).map(k=>[k,ex[k]])),importFile:file,importRun:now,updatedAt:now})}
+    for(const {ex,x} of plan.upd){const f=fill(x),e=oosExtra(x),p={};
+      Object.entries(e).forEach(([k,v])=>{if(KEEP.includes(k)){if(!ex[k])p[k]=v}else if(String(ex[k]??'')!==String(v))p[k]=v});
       if(!ex.desc&&f.desc)p.desc=f.desc;if(!ex.loc&&(x.loc||f.loc))p.loc=x.loc||f.loc;if(x.stock&&x.stock!==String(ex.stock??''))p.stock=x.stock;if(!ex.note&&x.note)p.note=x.note;
       if(Object.keys(p).length)await patchItem('oos',ex,{...p,updatedAt:now})}
     for(const r of plan.close)await patchItem('oos',r,{status:'done',doneAt:now,doneBy:'ปิดอัตโนมัติ',autoClosed:true,updatedAt:now});
@@ -2378,10 +2595,48 @@ async function runOosImport(){
   $('#oiGo').disabled=false;$('#oiGo').textContent='นำเข้า OOS';
   if(ok){$('#dlgOosImp').close();renderOos();toast(`นำเข้า OOS แล้ว: ใหม่ ${plan.add.length} · เปิดซ้ำ ${plan.reopen.length}${plan.close.length?` · ปิดอัตโนมัติ ${plan.close.length}`:''}`)}else showOosPreview();
 }
-function openOosImport(){oosImp=null;$('#oiBox').innerHTML='';$('#oiDrop').hidden=false;$('#oiGo').disabled=true;$('#oiGo').textContent='นำเข้า OOS';$('#oiOpts').hidden=true;$('#oiErr').textContent='';$('#oiFile').value='';$('#oiClose').checked=false;if(onMakroSite())loadMakroData();$('#dlgOosImp').showModal()}
+function openOosImport(){oosImp=null;$('#oiBox').innerHTML='';$('#oiDrop').hidden=false;$('#oiGo').disabled=true;$('#oiGo').textContent='นำเข้า OOS';$('#oiOpts').hidden=true;$('#oiWin').hidden=true;$('#oiErr').textContent='';$('#oiFile').value='';$('#oiClose').checked=false;if(onMakroSite())loadMakroData();$('#dlgOosImp').showModal()}
+/* the full "new DMS" table for every item of the report (not only the ones in the OOS list) → Excel for the Buyers */
+function oosExportDms(imp){
+  if(!imp||!imp.info.o2o){toast('ต้องนำเข้ารายงานสินค้าขาด (O2O) ก่อน');return}
+  const an=oosAnalyze(imp),all=oosWindowRows(imp,0).rows,bkOf=new Map(all.map(r=>[amNum(r.itemNo),r.bucket])),n1=v=>v==null||v===''?'':Math.round(v*10)/10;
+  const head=['Item No','ชื่อสินค้า','แผนกที่เติม','Dept','Division','Buyer UID','Buyer','Order Way','repl_method','สินค้าชั่งน้ำหนัก','DMS เดิม (ล่าสุด)','DMS ใหม่','เปลี่ยน %','ส่วนฐาน B','ส่วนยอดที่ขาด L','ส่วนกันขาดซ้ำ H','Stock Day (ล่าสุด)','จำนวนวันที่ขาด','จำนวนบรรทัดที่ขาด','จำนวนที่ขาดรวม','หน่วย','Sale Loss (บาท)','ประเภทปัญหา','สิ่งที่ควรทำ','หมายเหตุ'];
+  const rows=an.items.map(it=>{
+    const bk=bkOf.get(it.k)||'',ls=it.lines,short=ls.reduce((s,l)=>s+l.short,0),loss=ls.reduce((s,l)=>s+l.loss,0),adv=[];
+    if(it.phantom)adv.push('นับสต็อก / ปรับ on-hand ให้ตรงก่อน แล้วค่อยสั่ง');
+    else if(bk==='C')adv.push('ตรวจ Min-Max / สั่งเพิ่ม / ตามซัพ');
+    else if(bk==='A')adv.push('ตรวจหาของในร้าน + เติมชั้น');
+    else if(bk==='B')adv.push('นับสต็อก / ปรับสต็อก');
+    if(it.dmsInvalid&&it.dmsNew!=null)adv.push('ตั้ง DMS ชั่วคราว '+it.dmsNew);else if(it.dmsChange!=null&&it.dmsChange>=.1)adv.push('ปรับ DMS ขึ้นเป็น '+it.dmsNew);
+    return[it.itemNo,it.desc,oosAssignDept(it.dept,it.bu),it.dept,it.div,it.bu,it.bn,it.ow,it.repl,it.w?'ใช่':'',it.dmsOld==null?'':it.dmsOld,it.dmsNew==null?'':it.dmsNew,it.dmsChange==null?'':Math.round(it.dmsChange*1000)/10,n1(it.dmsB),it.dmsInvalid?'':n1(it.dmsL),it.dmsInvalid?'':n1(it.dmsH),it.sdLast===''?'':it.sdLast,it.soDays,ls.length,Math.round(short*100)/100,it.w?'กก.':'หน่วย',Math.round(loss),bk&&OOS_BK[bk]?OOS_BK[bk][0]:'',adv.join(' · '),it.dmsNote]});
+  rows.sort((a,b)=>(b[21]-a[21]));
+  const dep={};an.items.forEach(it=>{const d=oosAssignDept(it.dept,it.bu),x=dep[d]||(dep[d]={items:0,lines:0,loss:0,A:0,B:0,C:0,X:0});x.items++;x.lines+=it.lines.length;x.loss+=it.lines.reduce((s,l)=>s+l.loss,0);const b=bkOf.get(it.k);if(b&&x[b]!=null)x[b]++});
+  const sumRows=Object.entries(dep).sort((a,b)=>a[0].localeCompare(b[0])).map(([d,x])=>[d,x.items,x.lines,Math.round(x.loss),x.A,x.B,x.C,x.X]);
+  const how=[['วิธีคำนวณ DMS ใหม่'],[''],
+    ['DMS ใหม่ = B + L + H'],
+    ['B  = DMS ล่าสุด · ถ้าต่ำกว่าค่าเฉลี่ยของเดือนและ Stock Day ล่าสุด ≤ 1 (ยอดขายตกเพราะของหมด) ใช้ค่าเฉลี่ยของเดือนแทน'],
+    ['L  = ยอดที่ขายไม่ได้ต่อวัน = (1/จำนวนวัน) × ผลรวมตามวันส่งมอบของ min(จำนวนที่ขายไม่ได้ในวันนั้น, max(3, B)) — เฉพาะสาเหตุที่เป็นของขาด (1,2,3,4,5,6,12) และไม่รวมสินค้าชั่งน้ำหนัก'],
+    ['H  = B × min(25%, 0.25 × จำนวนวันที่ขาด / จำนวนวัน) — กันขาดซ้ำสำหรับสินค้าที่ขาดบ่อย'],
+    ['สินค้าที่ DMS เดิมว่าง / 0 / ติดลบ: ใช้ 0.25 + ยอดที่ขายไม่ได้ต่อวัน (เพดาน 3 เท่าของค่ากลางรายวัน) เป็นค่าชั่วคราว'],
+    ['ถ้า DMS ใหม่เกิน 2 เท่าของเดิม จะจำกัดที่ 2 เท่า และให้ Buyer ตรวจ'],
+    [''],
+    ['ข้อควรระวัง'],
+    ['1) รายงานนี้มีเฉพาะบรรทัดที่ขาด (ไม่มีบรรทัดที่ส่งครบ) ยอดที่เห็นจึงเป็นขีดต่ำสุดของยอดที่เสียไป ยอดที่ขาดของออนไลน์น้อยมากเมื่อเทียบกับ DMS ของทั้งร้าน การปรับจึงขยับไม่มาก'],
+    ['2) ส่วนใหญ่ของที่ขาดเกิดตอนระบบยังเห็นว่ามีของ (สต็อกไม่ตรง / หาไม่เจอ) ต้องนับ / ปรับสต็อกควบคู่กับการปรับ DMS'],
+    ['3) ค่า 0.25 ใน H เป็นค่าตั้งต้นแบบระมัดระวัง ควรปรับให้เหมาะกับร้านเมื่อมียอดขายรายวันมาเทียบ'],
+    ['4) หน่วย DMS ของสินค้าชั่งน้ำหนักยังไม่ยืนยัน (กก. หรือ กรัม) โปรดตรวจกับเจ้าของข้อมูลก่อนนำไปใช้'],
+    ['5) Sale Loss ในไฟล์ต้นทางเป็นสตางค์ ตารางนี้แปลงเป็นบาทแล้ว']];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([head,...rows]),'DMS ใหม่');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['แผนกที่เติม','จำนวนสินค้า','จำนวนบรรทัดที่ขาด','Sale Loss (บาท)',OOS_BK.A[0],OOS_BK.B[0],OOS_BK.C[0],OOS_BK.X[0]],...sumRows]),'สรุปแผนก');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(how),'วิธีคำนวณ');
+  const ws=wb.Sheets['DMS ใหม่'];ws['!cols']=[10,34,20,22,12,9,22,10,10,8,10,10,9,9,9,9,9,9,9,10,8,11,22,40,60].map(w=>({wch:w}));
+  XLSX.writeFile(wb,'DMS-ใหม่-'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('ดาวน์โหลดตาราง DMS ใหม่แล้ว');
+}
 $('#oosImport').onclick=openOosImport;$('#oiCancel').onclick=()=>$('#dlgOosImp').close();$('#oiGo').onclick=runOosImport;
 $('#oiPick').onclick=()=>$('#oiFile').click();$('#oiFile').onchange=e=>{const f=e.target.files[0];if(f)readOosFile(f)};
-$('#oiClose').onchange=()=>{if(oosImp)showOosPreview()};
+$('#oiClose').onchange=$('#oiWinSel').onchange=()=>{if(oosImp)showOosPreview()};
 (()=>{const d=$('#oiDrop');
   ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));
   ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
