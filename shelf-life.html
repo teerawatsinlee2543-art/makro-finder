@@ -2177,9 +2177,9 @@ function planArt(imp,o){
   (st.nbs||[]).forEach(r=>{
     const k=amNum(r.itemNo),file=imp.map.get(k);if(file==null)return;
     keys.add(k);matched++;
-    const cur=String(r.artGrp||'').trim(),art=cur&&!o.over?cur:file,chArt=art!==cur;
+    const cur=String(r.artGrp||'').trim(),art=cur&&!o.over&&!r.artSub?cur:file,chArt=art!==cur||!!r.artSub;
     let buyer='';
-    if(o.buyer&&!r.buyerUid){buyer=buyerFor({...r,artGrp:art})||'';
+    if(o.buyer&&!r.buyerUid){buyer=buyerFor({...r,artGrp:art,artSub:chArt?false:r.artSub})||'';
       if(!buyer){const e=un.get(art)||{art,n:0,c:[]};e.n++;un.set(art,e)}}
     if(chArt||buyer)rows.push({r,art,chArt,buyer});
   });
@@ -2211,7 +2211,7 @@ async function runArtImport(){
   if(!await ask(`ใส่ / แก้ Art Grp ให้ ${plan.nArt.toLocaleString()} รายการ และกำหนด Buyer ให้ ${plan.nBuyer.toLocaleString()} รายการ?  (ทุกคนในทีมเห็นการเปลี่ยนนี้)`))return;
   const now=new Date().toISOString();
   $('#amGo').disabled=true;$('#amGo').textContent='กำลังบันทึก…';
-  const ok=await act(async()=>{for(const x of plan.rows)await patchItem('nbs',x.r,{...(x.chArt?{artGrp:x.art}:{}),...(x.buyer?{buyerUid:x.buyer}:{}),updatedAt:now})},null);
+  const ok=await act(async()=>{for(const x of plan.rows)await patchItem('nbs',x.r,{...(x.chArt?{artGrp:x.art,artSub:false}:{}),...(x.buyer?{buyerUid:x.buyer}:{}),updatedAt:now})},null);
   $('#amGo').textContent='นำเข้า Art Grp';
   if(ok){$('#dlgArt').close();renderNbs();toast(`นำเข้า Art Grp แล้ว: ใส่ / แก้ ${plan.nArt.toLocaleString()} · กำหนด Buyer ${plan.nBuyer.toLocaleString()}`)}else showArtPreview();
 }
@@ -3136,14 +3136,22 @@ $('#bbClean').onclick=async()=>{
 /* who looks after an item? rules written on each Buyer ("สินค้าที่ดูแล"): Art Grp number, dept:<Department>, kw:<word in the item name>.
    the most specific rule type with exactly one Buyer wins (Art Grp, then name word, then Department); ambiguous = leave blank */
 const ctKeys=c=>String(c.artKeys||'').split(/[,;\n]+/).map(s=>s.trim()).filter(Boolean);
+/* the Buyer already known for this very item in the OOS+ records (they carry the report's buyer_uid); only when all of them agree */
+function buyerByItem(no){
+  no=amNum(no);if(!no)return'';
+  const s=new Set((st.oos||[]).filter(o=>o.buyerUid&&amNum(o.itemNo)===no).map(o=>o.buyerUid));
+  return s.size===1?[...s][0]:'';
+}
 function buyerFor(rec){
+  /* "Art Grp Sub No" (Negative Stock Monitor) is a sub-code inside a Dept, NOT the 3-digit Class the rules are written for: never match it by number */
+  if(rec.artSub)return buyerByItem(rec.itemNo);
   const art=String(rec.artGrp||'').trim().toLowerCase(),dept=String(rec.dept||'').trim().toLowerCase(),name=String(rec.desc||'').toLowerCase(),hits={art:new Set(),kw:new Set(),dept:new Set()};
   st.contacts.filter(c=>c.role==='Buyer'&&divGroupOk(rec.division,c.group)).forEach(c=>ctKeys(c).forEach(k=>{
     const m=k.match(/^(dept|d|kw|art):\s*(.+)$/i),t=m?(m[1].toLowerCase()==='d'?'dept':m[1].toLowerCase()):(/^\d+$/.test(k)?'art':'kw'),v=(m?m[2]:k).trim().toLowerCase();
     if(!v)return;
     if(t==='art'&&art&&amNum(v)===amNum(art))hits.art.add(c.uid);else if(t==='kw'&&name.includes(v))hits.kw.add(c.uid);else if(t==='dept'&&dept&&v===dept)hits.dept.add(c.uid)}));
   for(const t of ['art','kw','dept'])if(hits[t].size===1)return[...hits[t]][0];
-  return art?buyerByArt(art,rec.division):'';
+  return(art?buyerByArt(art,rec.division):'')||buyerByItem(rec.itemNo);
 }
 async function applyBuyerRules(){
   const hit=(st.nbs||[]).filter(r=>!r.buyerUid).map(r=>[r,buyerFor(r)]).filter(x=>x[1]);
@@ -3269,6 +3277,7 @@ function parseWorkbook(wb,fileName,defDiv){
       if(digits>=Math.min(5,rows.length)&&rows.length){m={itemNo:0,desc:1};hi=-1}else{info.sheets.push({name:sn,rows:0,note:'ไม่พบคอลัมน์รหัสสินค้า'});continue}
     }
     const sheetDiv=divFromName(sn),fileDiv=divFromName(fileName);let n=0;
+    const artSub=hi>=0&&m.artGrp!=null&&/sub/.test(normH(rows[hi][m.artGrp])); /* header "Art Grp Sub No" = sub-code inside a Dept, not a Class */
     for(let i=hi+1;i<rows.length;i++){
       const r=rows[i],no=cleanNo(r[m.itemNo]),desc=String(m.desc!=null?r[m.desc]:'').trim();
       if(!no&&!desc){continue}
@@ -3295,9 +3304,10 @@ function parseWorkbook(wb,fileName,defDiv){
          without one, the "สินค้าที่ดูแล" rules decide from the Art Grp / Class */
       let buyer='',bsrc='';
       if(m.buyer!=null){const raw=String(r[m.buyer]??'').trim();if(raw){const c=ctFindBuyer(raw);buyer=c?c.uid:raw;bsrc=c?'file':'unknown';if(!c)info.buyerUnknown[raw]=(info.buyerUnknown[raw]||0)+1}}
-      if(!buyer){const ru=buyerFor({division:div,artGrp,dept,desc});if(ru){buyer=ru;bsrc='rule'}}
+      if(!buyer){const ru=buyerFor({division:div,artGrp,artSub,dept,desc,itemNo:no});if(ru){buyer=ru;bsrc='rule'}}
+      if(artSub&&artGrp)info.artSubRows=(info.artSubRows||0)+1;
       info.bsrc[bsrc||'none']++;
-      recs.set(div+'|'+no,{division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
+      recs.set(div+'|'+no,{artSub,division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
     info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict")info.cols[k]=true});
@@ -3393,9 +3403,10 @@ function showImportPreview(){
   <div class="t-new"><b>${plan.add.toLocaleString()}</b><span>รายการใหม่</span></div><div><b>${plan.upd.toLocaleString()}</b><span>อัปเดตของเดิม</span></div>${plan.moves.length?`<div class="t-close"><b>${plan.moves.length.toLocaleString()}</b><span>ย้ายกลุ่มให้ถูก</span></div>`:""}<div class="${plan.close.length?'t-close':''}"><b>${plan.close.length.toLocaleString()}</b><span>ปิดงานอัตโนมัติ</span></div></div>
   <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>COL_LBL[k]||k).join(' · ')}</p>
   ${(()=>{const b=info.bsrc||{},unk=Object.entries(info.buyerUnknown||{}).sort((x,y)=>y[1]-x[1]);
-    const no=!info.cols.buyer&&!info.cols.artGrp;
+    const no=!info.cols.buyer&&(!info.cols.artGrp||info.artSubRows>=info.bsrc.none+info.bsrc.rule+info.bsrc.file+info.bsrc.unknown);
     return`<p class="small" style="margin:6px 0 0"><b>Buyer:</b> จากคอลัมน์ buyer_uid ${(b.file||0).toLocaleString()} · จากกฎ Class / Art Grp ${(b.rule||0).toLocaleString()} · รหัสที่ไม่พบในรายชื่อ ${(b.unknown||0).toLocaleString()} · ยังไม่มี ${(b.none||0).toLocaleString()}</p>`
     +(unk.length?`<p class="small err-text" style="margin:2px 0 0">รหัส Buyer ในไฟล์ที่ไม่มีในรายชื่อ Buyer / Commercial: ${esc(unk.slice(0,10).map(([k,n])=>k+' ('+n+')').join(', '))}${unk.length>10?' …':''} — ระบบเก็บรหัสไว้ตามไฟล์ เพิ่มรายชื่อให้ครบแล้ว Buyer จะแสดงเต็ม</p>`:'')
+    +(info.artSubRows?`<p class="small" style="margin:2px 0 0">เลขในคอลัมน์ “Art Grp Sub No” (${info.artSubRows.toLocaleString()} รายการ) เป็นรหัสย่อยในแต่ละ Dept ไม่ใช่เลข Class จึงไม่ใช้จับ Buyer ตามกฎ — ระบบหา Buyer จาก buyer_uid ในไฟล์ หรือจากสินค้าตัวเดียวกันในข้อมูล OOS+ เท่านั้น ถ้ายังว่างให้นำเข้า “Item → Art Grp” (Class) ภายหลัง</p>`:'')
     +(no?`<p class="small err-text" style="margin:2px 0 0">ไฟล์นี้ไม่มีคอลัมน์ <b>buyer_uid</b> หรือ <b>Class / Art Grp</b> ระบบจึงเติม Buyer ให้ไม่ได้ — เพิ่มคอลัมน์เหล่านี้ตอน Export รายงาน (ตัวเดียวกับไฟล์ data ที่มี Division · Dept · Class · buyer_uid · Buyer Name) หรือนำเข้า “Item → Art Grp” แล้วนำเข้าไฟล์นี้ซ้ำ</p>`:'')})()}
   ${Object.keys(info.divVals).length?`<div class="imp-div"><b>กลุ่มจากคอลัมน์ Division (ใช้ตามค่าในไฟล์ 100%):</b><div class="imp-divchips">${Object.entries(info.divVals).sort((a,b)=>b[1].n-a[1].n).map(([k,e])=>`<span class="chip ${e.div?'div-'+e.div.toLowerCase():'s-pull'}">${esc(k)} → ${e.div||'ไม่รู้จัก'} · ${e.n.toLocaleString()}</span>`).join('')}</div>${info.badDiv?`<p class="err-text small" style="margin:6px 0 0">ข้าม ${info.badDiv.toLocaleString()} แถวที่ค่า Division ไม่ใช่ FRESH FOOD / DRY FOOD / NON FOOD (ไม่นำเข้า เพราะไม่เดากลุ่มให้)</p>`:''}</div>`:''}
   ${Object.keys(info.divVals).length?'':`<p class="small muted" style="margin:2px 0 0">แยกกลุ่มจาก: ${Object.entries(info.byDivSource).map(([k,v])=>`${esc(k)} (${v.toLocaleString()})`).join(' · ')}${info.byDivSource['ค่าเริ่มต้น']?' — ถ้าไม่ถูก เลือก “กลุ่มเริ่มต้น” ด้านล่างแล้วเลือกไฟล์ใหม่':''}</p>`}
@@ -3418,12 +3429,12 @@ async function runImport(){
         const keep=body(alt);
         await rmItem('nbs',alt);
         await putItem('nbs',{...keep,_id:nbsId(r),division:r.division,desc:r.desc||it?.desc||alt.desc||'',barcode:r.barcode||it?.barcode||alt.barcode||'',loc:r.loc||alt.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),
-          importFile:impState.file,importRun:nowIso,lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',agingType:r.agingType||alt.agingType||'',dept:r.dept||alt.dept||'',artGrp:r.artGrp||alt.artGrp||'',stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
+          importFile:impState.file,importRun:nowIso,lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',agingType:r.agingType||alt.agingType||'',dept:r.dept||alt.dept||'',artGrp:r.artGrp||alt.artGrp||'',artSub:r.artGrp?!!r.artSub:!!alt.artSub,stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
         continue}
       const desc=r.desc||it?.desc||old?.desc||'',barcode=r.barcode||it?.barcode||old?.barcode||'',loc=r.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):'')||old?.loc||'';
-      if(old){await putItem('nbs',{...body(old),_id:old._id,importFile:impState.file,importRun:nowIso,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!old.lastSaleDerived,lastRecv:r.lastRecv||old.lastRecv||'',aging:r.aging||old.aging||'',agingType:r.agingType||old.agingType||'',dept:r.dept||old.dept||'',artGrp:r.artGrp||old.artGrp||'',stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
+      if(old){await putItem('nbs',{...body(old),_id:old._id,importFile:impState.file,importRun:nowIso,desc,barcode,loc,lastSale:r.lastSale||old.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!old.lastSaleDerived,lastRecv:r.lastRecv||old.lastRecv||'',aging:r.aging||old.aging||'',agingType:r.agingType||old.agingType||'',dept:r.dept||old.dept||'',artGrp:r.artGrp||old.artGrp||'',artSub:r.artGrp?!!r.artSub:!!old.artSub,stock:r.stock!==''?r.stock:old.stock??'',buyerUid:old.buyerUid||r.buyerUid||'',
         lastSeenAt:nowIso,updatedAt:nowIso,...(old.status==='done'&&old.autoClosed?{status:'check',autoClosed:false,autoNote:'กลับมาอยู่ในไฟล์ไม่มียอดขายอีกครั้ง'}:{})})}
-      else await putItem('nbs',{_id:nbsId(r),importFile:impState.file,importRun:nowIso,division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,lastSaleDerived:r.lastSaleDerived,lastRecv:r.lastRecv||'',aging:r.aging||'',agingType:r.agingType||'',dept:r.dept||'',artGrp:r.artGrp||'',stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
+      else await putItem('nbs',{_id:nbsId(r),importFile:impState.file,importRun:nowIso,division:r.division,itemNo:r.itemNo,desc,barcode,loc,lastSale:r.lastSale,lastSaleDerived:r.lastSaleDerived,lastRecv:r.lastRecv||'',aging:r.aging||'',agingType:r.agingType||'',dept:r.dept||'',artGrp:r.artGrp||'',artSub:!!r.artSub,stock:r.stock,buyerUid:r.buyerUid,status:'check',remark:'',
         source:'import',importedAt:nowIso,lastSeenAt:nowIso,createdAt:nowIso,createdBy:myId||null,updatedAt:nowIso});
     }
     for(const old of plan.close)await putItem('nbs',{...body(old),_id:old._id,status:'done',autoClosed:true,autoNote:'ปิดอัตโนมัติ — ไม่อยู่ในไฟล์ไม่มียอดขายล่าสุด ('+fmt(today())+')',updatedAt:nowIso});
