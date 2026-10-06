@@ -2552,10 +2552,26 @@ function parseBarcodeCsv(text){
     map.set(k,{d,g,s});out.push(k+'\t'+d+'\t'+g+'\t'+s)}
   return{map,rows,text:out.join('\n')}
 }
+/* A Class that several Buyers share (e.g. 027 FROZEN FRUIT) is settled by the Art Grp SUB No: in the real data every (Dept | Class | Sub) belongs to ONE Buyer.
+   The Buyer of a Sub is learned from the OOS+ records whose Buyer the report gave (only when all of them agree, and only if that Buyer really holds the Class in the rules). */
+let SUBB=null,SUBB_KEY='';
+function subBuyers(){
+  const oos=st.oos||[],key=oos.length+':'+(ITEMCLS?ITEMCLS.size:0);if(SUBB&&SUBB_KEY===key)return SUBB;
+  const g=new Map();
+  if(ITEMCLS)for(const o of oos){if(!o.buyerUid)continue;const m=ITEMCLS.get(amNum(o.itemNo));if(!m)continue;const c=ctFindBuyer(o.buyerUid);if(!c)continue;
+    const k=m.d+'|'+m.g+'|'+m.s;let e=g.get(k);if(!e){e=new Map();g.set(k,e)}e.set(c.uid,(e.get(c.uid)||0)+1)}
+  const out=new Map();g.forEach((e,k)=>{if(e.size===1)out.set(k,[...e.keys()][0])});
+  SUBB=out;SUBB_KEY=key;return out;
+}
+function buyerBySub(itemNo,cls){
+  if(!ITEMCLS)return'';const m=ITEMCLS.get(amNum(itemNo));if(!m)return'';
+  const u=subBuyers().get(m.d+'|'+m.g+'|'+m.s);if(!u)return'';
+  return buyersByArt(cls).some(c=>c.uid===u)?u:''; /* a learned Buyer outside the rules for this Class is never used */
+}
 /* what would change: the Class of every Item NBS row (when it is empty or only a Sub No) and, where it is empty, the Buyer from the rules */
 function planItemCls(o){
   const rows=st.nbs||[],hasRules=(st.contacts||[]).some(c=>ctKeys(c).some(k=>/^\d+$/.test(k)));
-  const s={total:rows.length,found:0,notFound:0,fillCls:0,fillBuyer:0,amb:0,noRule:0,conflict:0,keep:0},list=[];
+  const s={total:rows.length,found:0,notFound:0,fillCls:0,fillBuyer:0,bySub:0,amb:0,noRule:0,conflict:0,keep:0},list=[];
   for(const r of rows){
     const m=ITEMCLS.get(amNum(r.itemNo));if(!m){s.notFound++;continue}s.found++;
     const cur=String(r.artGrp||'').trim(),useCls=!cur||!!r.artSub,patch={};let cls=cur;
@@ -2564,7 +2580,9 @@ function planItemCls(o){
     if(r.buyerUid)s.keep++;
     else if(o.buyer){ /* the Class decides the Buyer: the row's own group is tried first, then without it (class numbers belong to one group, and some reports put department names in the Division column) */
       const b=buyerFor({...r,artGrp:cls,artSub:false})||buyerFor({...r,division:'',artGrp:cls,artSub:false});
+      const bs=b?'':buyerBySub(r.itemNo,cls);
       if(b){patch.buyerUid=b;s.fillBuyer++}
+      else if(bs){patch.buyerUid=bs;s.fillBuyer++;s.bySub++}
       else if(buyersByArt(cls).length>1)s.amb++;else s.noRule++}
     if(Object.keys(patch).length)list.push({r,patch,cls})}
   return{s,list,hasRules}
@@ -2588,7 +2606,7 @@ function showIcPreview(){
   const sample=list.slice(0,8).map(x=>`<tr><td class="small"><b>${esc(x.r.itemNo)}</b><div class="muted">${esc(String(x.r.desc||'').slice(0,40))}</div></td><td class="num">${esc(x.patch.artGrp||x.cls)}</td><td>${x.patch.buyerUid?esc(x.patch.buyerUid):'<span class="muted">—</span>'}</td></tr>`).join('');
   $('#icBox').innerHTML=`<div class="imp-file"><b>${esc(icImp.file||info.file||'')}</b> <span class="muted small">· ${(info.n||ITEMCLS.size).toLocaleString()} สินค้าในทะเบียน${icImp.saved===false?' · <span class="err-text">จำไว้ในเครื่องนี้ไม่ได้ (ต้องเลือกไฟล์ใหม่ทุกครั้ง)</span>':' · จำไว้ในเครื่องนี้แล้ว'}</span> <button type="button" class="btn sm" id="icChange">เปลี่ยนไฟล์</button></div>
   <div class="imp-tiles"><div class="t-new"><b>${s.found.toLocaleString()}</b><span>Item NBS ที่พบในทะเบียน (จาก ${s.total.toLocaleString()})</span></div><div class="t-new"><b>${s.fillCls.toLocaleString()}</b><span>จะเติมเลข Class</span></div><div class="t-new"><b>${s.fillBuyer.toLocaleString()}</b><span>จะเติม Buyer</span></div></div>
-  <p class="small" style="margin:8px 0 0">Buyer ที่ยังไม่ได้: กำกวม (Class นี้มีหลาย Buyer) <b>${s.amb.toLocaleString()}</b> · ยังไม่มีกฎ <b>${s.noRule.toLocaleString()}</b> · ตั้งไว้แล้ว (ไม่แตะ) <b>${s.keep.toLocaleString()}</b> · ไม่พบเลข Item ในทะเบียน <b>${s.notFound.toLocaleString()}</b></p>
+  <p class="small" style="margin:8px 0 0">${s.bySub?`Buyer ที่แยกจาก Sub No (Class ที่หลาย Buyer ใช้ร่วมกัน เรียนรู้จากรายงาน OOS+): <b>${s.bySub.toLocaleString()}</b><br>`:''}Buyer ที่ยังไม่ได้: กำกวม (Class นี้มีหลาย Buyer และยังไม่รู้ Buyer ของ Sub นี้) <b>${s.amb.toLocaleString()}</b> · ยังไม่มีกฎ <b>${s.noRule.toLocaleString()}</b> · ตั้งไว้แล้ว (ไม่แตะ) <b>${s.keep.toLocaleString()}</b> · ไม่พบเลข Item ในทะเบียน <b>${s.notFound.toLocaleString()}</b></p>
   ${!hasRules?'<p class="small err-text" style="margin:6px 0 0"><b>ยังไม่มีกฎ Class → Buyer ในระบบ</b> — ถ้าต้องการให้เติม Buyer ให้นำเข้า “กฎ Buyer (Class → Buyer)” ก่อน (เติมเลข Class ได้เลยไม่ต้องรอ)</p>':''}
   ${s.conflict?`<p class="small" style="margin:6px 0 0;color:var(--soon)">รายการ ${s.conflict.toLocaleString()} แถวมีเลข Class ที่ตั้งไว้ต่างจากทะเบียน — ระบบไม่ทับ</p>`:''}
   ${sample?`<div class="imp-sample"><table><thead><tr><th>Item</th><th>Class</th><th>Buyer</th></tr></thead><tbody>${sample}</tbody></table></div>${list.length>8?`<p class="muted small" style="margin:4px 0 0">แสดง 8 รายการแรกจาก ${list.length.toLocaleString()}</p>`:''}`:'<p class="muted small" style="margin:8px 0 0">ไม่มีรายการที่ต้องเติมเพิ่ม</p>'}`;
@@ -3714,7 +3732,7 @@ function parseWorkbook(wb,fileName,defDiv){
          without one, the "สินค้าที่ดูแล" rules decide from the Art Grp / Class */
       let buyer='',bsrc='';
       if(m.buyer!=null){const raw=String(r[m.buyer]??'').trim();if(raw){const c=ctFindBuyer(raw);buyer=c?c.uid:raw;bsrc=c?'file':'unknown';if(!c)info.buyerUnknown[raw]=(info.buyerUnknown[raw]||0)+1}}
-      if(!buyer){const ru=buyerFor({division:div,artGrp,artSub:sub,dept,desc,itemNo:no});if(ru){buyer=ru;bsrc='rule'}}
+      if(!buyer){const ru=buyerFor({division:div,artGrp,artSub:sub,dept,desc,itemNo:no})||(!sub&&artGrp?buyerBySub(no,artGrp):'');if(ru){buyer=ru;bsrc='rule'}}
       if(sub&&artGrp)info.artSubRows=(info.artSubRows||0)+1;
       info.bsrc[bsrc||'none']++;
       recs.set(div+'|'+no,{artSub:sub,division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
