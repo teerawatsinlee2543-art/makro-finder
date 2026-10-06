@@ -2573,7 +2573,7 @@ const STOCK_LABELS=['หน้า Stock 1','หน้า Stock 2'];
 let stkBubble=null,stkSelfBack=0;
 function stkClose(viaPop){
   if(!stkBubble)return;const b=stkBubble;stkBubble=null;
-  window.removeEventListener('scroll',b.scroll,true);window.removeEventListener('resize',b.place);document.removeEventListener('keydown',b.key);b.el.remove();b.tail.remove();
+  window.removeEventListener('scroll',b.scroll,true);window.removeEventListener('blur',b.engage);document.removeEventListener('pointerdown',b.release,true);window.removeEventListener('resize',b.place);document.removeEventListener('keydown',b.key);b.el.remove();b.tail.remove();
   if(!viaPop&&b.pushed&&history.state&&history.state.stk){try{stkSelfBack++;history.back()}catch(e){stkSelfBack--}} /* drop the history entry we added, so "back" afterwards leaves the page normally */
 }
 window.addEventListener('popstate',()=>{if(stkSelfBack>0){stkSelfBack--;return}stkClose(true)}); /* the phone's Back button / swipe closes the bubble first */
@@ -2595,6 +2595,8 @@ function stkPlace(){
 /* follow the scrolling: the bubble belongs to ONE card. When that card is no longer what the user is looking at (mostly scrolled away / hidden behind the bubble / gone), close the bubble */
 function stkTrack(){
   if(!stkBubble)return;const {el,btn,id}=stkBubble;
+  /* the user is typing / tapping INSIDE the bubble (login fields…): the keyboard opening scrolls and resizes the page — never close it then */
+  if(stkBubble.engaged||(document.activeElement&&document.activeElement.tagName==='IFRAME'&&el.contains(document.activeElement))){stkTail();return}
   let b=btn;if(!b.isConnected){b=[...document.querySelectorAll('.btn.stk')].find(x=>(x.getAttribute('onclick')||'').includes("'"+id+"'"));if(b)stkBubble.btn=b}
   const card=b&&b.closest('.oosc');if(!card||!card.isConnected){stkClose();return}
   const br=el.getBoundingClientRect(),cr=card.getBoundingClientRect(),vh=window.innerHeight;
@@ -2618,13 +2620,17 @@ function stkTail(){
 function stkOpen(btn,no,urls,id){
   const same=stkBubble&&stkBubble.btn===btn;stkClose();if(same)return; /* second tap on the same button closes it */
   const el=document.createElement('div');el.className='stkb';
-  el.innerHTML=`<div class="stkb-h"><b>Stock · Item ${esc(no)}</b>${urls.length>1?urls.map((u,i)=>`<button type="button" class="stkb-t${i?'':' on'}" data-i="${i}">${esc(STOCK_LABELS[i]||'หน้า '+(i+1))}</button>`).join(''):''}<a class="stkb-o" target="_blank" rel="noopener" href="${esc(urls[0])}">เปิดแท็บใหม่ ↗</a><button type="button" class="stkb-x" aria-label="ปิด">✕</button></div><div class="stkb-w"><iframe src="${esc(urls[0])}" referrerpolicy="no-referrer"></iframe></div><div class="stkb-n">ว่างเปล่า = เว็บไม่ให้ฝัง → กด “เปิดแท็บใหม่” · คัดลอก Item No แล้ว</div>`;
+  el.innerHTML=`<div class="stkb-h"><b>Stock · Item ${esc(no)}</b>${urls.length>1?urls.map((u,i)=>`<button type="button" class="stkb-t${i?'':' on'}" data-i="${i}">${esc(STOCK_LABELS[i]||'หน้า '+(i+1))}</button>`).join(''):''}<a class="stkb-o" target="_blank" rel="noopener" href="${esc(urls[0])}">เปิดแท็บใหม่ ↗</a><button type="button" class="stkb-x" aria-label="ปิด">✕</button></div><div class="stkb-w"><iframe src="${esc(urls[0])}" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads"></iframe></div><div class="stkb-n">ว่างเปล่า = เว็บไม่ให้ฝัง → กด “เปิดแท็บใหม่” · คัดลอก Item No แล้ว</div>`;
   el.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.classList.contains('stkb-x')){stkClose();return}
     if(b.dataset.i!=null){el.querySelectorAll('.stkb-t').forEach(t=>t.classList.toggle('on',t===b));el.querySelector('iframe').src=urls[+b.dataset.i];el.querySelector('.stkb-o').href=urls[+b.dataset.i]}};
   document.body.appendChild(el);const tail=document.createElement('div');tail.className='stkb-tail';document.body.appendChild(tail);
   let raf=0;const scroll=()=>{stkTail();if(!raf)raf=setTimeout(()=>{raf=0;stkTrack()},60)},key=e=>{if(e.key==='Escape')stkClose()};
   let pushed=false;try{history.pushState({stk:1},'');pushed=true}catch(e){}
-  stkBubble={el,tail,btn,id,scroll,place:stkPlace,key,pushed};window.addEventListener('scroll',scroll,true);window.addEventListener('resize',stkPlace);document.addEventListener('keydown',key);stkPlace();
+  const engage=()=>{if(stkBubble&&stkBubble.el===el)stkBubble.engaged=true},release=e=>{if(stkBubble&&stkBubble.el===el&&!el.contains(e.target))stkBubble.engaged=false};
+  el.addEventListener('pointerdown',engage);el.addEventListener('touchstart',engage,{passive:true});
+  window.addEventListener('blur',engage); /* focus moved into the page inside the bubble */
+  document.addEventListener('pointerdown',release,true); /* a tap outside the bubble ends it */
+  stkBubble={el,tail,btn,id,scroll,place:stkPlace,key,pushed,engaged:false,engage,release};window.addEventListener('scroll',scroll,true);window.addEventListener('resize',stkPlace);document.addEventListener('keydown',key);stkPlace();
 }
 function oosStockPick(no,urls){
   const d=document.createElement('dialog');
