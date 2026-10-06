@@ -566,6 +566,16 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   main,section,.card{max-width:100%}
   .lot-grid>*,.grid2>*,.grid>*,.row>*{min-width:0}
 }
+/* ===== data page (computer): two boxes side by side, one long row per item ===== */
+@media (min-width:1000px){
+  #t-data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+  #t-data>.card{margin:0}
+  #t-data .dgrid{grid-template-columns:1fr;gap:10px}
+  #t-data .dtile{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i t" "i d";column-gap:16px;row-gap:2px;align-items:center;padding:12px 18px}
+  #t-data .dtile .dti{grid-area:i;margin:0}
+  #t-data .dtile b{grid-area:t;align-self:end}
+  #t-data .dtile>.small,#t-data .dtile>span:not(.dti){grid-area:d;align-self:start}
+}
 @media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
