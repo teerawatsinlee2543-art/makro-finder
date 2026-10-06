@@ -636,6 +636,40 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
 }
 /* Buyer / Commercial has 14 columns: use the wide page like Item NBS */
 @media (min-width:1181px){main:has(#t-ct:not([hidden])){max-width:1560px}}
+/* %Shrink: same look as OOS+ (search box, FF / DF / NF tiles, ranking chart, cards) */
+#shrQ{background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b5cad' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px 50%/20px;border:2px solid var(--accent);border-radius:12px;padding:11px 14px 11px 42px;font-size:16px;font-weight:600;box-shadow:0 2px 10px #0b5cad26}
+#shrQ::placeholder{color:var(--muted);font-weight:400}
+#shrQ:focus{outline:0;box-shadow:0 0 0 4px #0b5cad33,0 2px 10px #0b5cad26}
+label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #shrQ{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}}
+:root[data-theme="dark"] #shrQ{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}
+.shr-src{display:flex;flex-wrap:wrap;gap:2px 16px;margin:6px 0 0}
+.shr-src:empty{display:none}
+.shr-big{font-size:20px;font-weight:800;color:#c62828;font-variant-numeric:tabular-nums}
+.shr-rs{display:grid;gap:5px}
+.shr-r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"e b q" "i i i";gap:1px 10px;align-items:baseline;font-size:12.5px}
+.shr-r em{grid-area:e;font-style:normal;overflow-wrap:anywhere}
+.shr-r b{grid-area:b;font-variant-numeric:tabular-nums}
+.shr-r small{grid-area:q;color:var(--muted);font-size:11.5px;min-width:54px;text-align:right}
+.shr-r i{grid-area:i;display:block;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--c,#d6453d) var(--w),color-mix(in srgb,var(--muted) 22%,transparent) 0)}
+.sn-row{display:grid;gap:4px}
+.sn-row input{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+@media (min-width:1000px){
+  #shrMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+  #shrMain.drill .oos-chart{margin:0}
+  #shrMain.drill .oos-list{grid-template-columns:minmax(0,1fr);align-items:start}
+}
+@media (max-width:700px){
+  #shrDivTiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  #shrDivTiles .tile{padding:8px 8px 8px 9px;min-width:0}
+  #shrDivTiles .tile.dv{border-left-width:5px}
+  #shrDivTiles .tile b{font-size:20px;margin:2px 0}
+  #shrDivTiles .dvl,#shrDivTiles .tl{display:none}
+  #shrDivTiles .chip{font-size:12px;padding:1px 8px}
+  #shrDivTiles .small{font-size:11px;line-height:1.2}
+  #t-shr .add-head>.row{width:100%;flex-wrap:nowrap;gap:6px}
+  #t-shr .add-head>.row>.btn{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
+}
 @media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
@@ -653,6 +687,7 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
   <button data-tab="add">+ Monitor item</button>
   <button data-tab="nbs">Item NBS<span class="tabcnt" id="nbsBadge" hidden></span></button>
   <button data-tab="oos">OOS+<span class="tabcnt" id="oosBadge" hidden></span></button>
+  <button data-tab="shr" title="จำนวนสินค้าที่ทิ้งเกิน ฿1,000">%Shrink<span class="tabcnt" id="shrBadge" hidden></span></button>
   <button data-tab="prod">สินค้า & กฎลดราคา</button>
   <button data-tab="ct">Buyer / Commercial</button>
   <button data-tab="jul">แปลง Julian</button>
@@ -806,6 +841,36 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
     <div id="oosList" class="oos-list"></div></div>
     <div id="oosMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="oosMoreTxt"></span><button class="btn" id="oosMore">แสดงเพิ่ม</button></div>
     <p class="muted" id="oosEmpty" hidden>ยังไม่มีรายการ OOS — กด “นำเข้ารายงาน” หรือ “+ เพิ่มรายการ” เมื่อเจอสินค้าหมดชั้นหรือหมดสต็อก</p>
+  </div>
+</section>
+
+<!-- %SHRINK -->
+<section id="t-shr" hidden>
+  <div class="card">
+    <div class="add-head">
+      <h2>%Shrink <span class="muted small" style="font-weight:400">· หยุดทิ้ง — ทิ้งไปเท่าไรแล้ว ตัวไหนทิ้งเยอะสุด</span></h2>
+      <span class="row w"><button type="button" class="btn danger" id="shrDelFile" title="ลบข้อมูลของไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="shrXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">ดาวน์โหลด Excel</button><button type="button" class="btn imp-btn" id="shrImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span>
+    </div>
+    <p class="muted small shr-src" id="shrSrc"></p>
+    <div class="tiles" id="shrDivTiles" style="margin:12px 0 0"></div>
+    <div class="tiles" id="shrTiles" style="margin:12px 0"></div>
+    <div class="oos-dchips" id="shrDeptTiles"></div>
+    <div class="fbar f6">
+      <label class="f-q">ค้นหา<input id="shrQ" placeholder="รหัส / ชื่อสินค้า / Class / แผนก / Buyer"></label>
+      <label>รหัสเหตุผล<select id="shrFRs"><option value="">ทั้งหมด</option></select></label>
+      <label>Class<select id="shrFCls"><option value="">ทั้งหมด</option></select></label>
+      <label>แผนก<select id="shrFDept"><option value="">ทั้งหมด</option></select></label>
+      <label>Buyer<select id="shrFWho"><option value="">ทั้งหมด</option></select></label>
+      <label>เรียงตาม<select id="shrSort"><option value="basis">ทิ้งมากสุดก่อน (ตามกราฟ)</option><option value="amt">ยอดทิ้ง ฿ มากสุด</option><option value="pct">%Shrink สูงสุด</option><option value="sales">ยอดขายมากสุด</option><option value="name">ชื่อสินค้า</option></select></label>
+      <div class="f-act">
+        <label class="f-chk"><input type="checkbox" id="shrHide" checked> ซ่อนที่ไม่ได้ทิ้ง</label>
+        <button type="button" class="btn w" id="shrNames" title="ตั้งชื่อรหัสเหตุผล เช่น 52 = ทิ้ง">ตั้งชื่อรหัสเหตุผล</button>
+      </div>
+    </div>
+    <div id="shrMain"><div id="shrChart"></div>
+    <div id="shrList" class="oos-list"></div></div>
+    <div id="shrMoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="shrMoreTxt"></span><button class="btn" id="shrMore">แสดงเพิ่ม</button></div>
+    <p class="muted" id="shrEmpty" hidden></p>
   </div>
 </section>
 
@@ -1039,6 +1104,37 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
     <label class="chk"><input type="checkbox" id="oiClose"> ปิดอัตโนมัติ (เติมแล้ว) รายการที่นำเข้าจากไฟล์ก่อนหน้าแต่ไม่อยู่ในรายงานนี้ — ใช้เมื่อรายงานแสดง OOS ทั้งหมดของวันนั้น</label>
   </div>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="oiCancel">ปิด</button><button type="button" class="btn pri save-btn" id="oiGo" disabled>นำเข้า OOS</button></div>
+</div></dialog>
+
+<dialog id="dlgShImp" class="nbs-dlg imp-dlg"><div>
+  <h2>นำเข้ารายงาน %Shrink</h2>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV มาวางได้ <b>ทั้ง 2 ไฟล์พร้อมกัน</b> ระบบดูจากคอลัมน์ว่าเป็นไฟล์ไหน: <b>(1) By Code</b> — Department Number · Class Number · Item Number · Reasn Code Id · Shrinkage Qty · Shrinkage Cost Amt · Month (แยกว่าทิ้งเพราะเหตุผลอะไร ไฟล์ต่างช่วงวันที่นำเข้าต่อกันแล้วบวกรวม) และ <b>(2) ยอดขาย + Actual Shrinkage</b> — Division · Department · Class · Item No · Sales · %Actual Shrinkage · Actual Shrinkage (ไฟล์ใหม่แทนที่ไฟล์เดิม) ค่า<b>ติดลบ = เงินที่เสียไป (ทิ้ง)</b> · ข้อมูลเก็บในเครื่องนี้ ไม่ส่งขึ้นฐานข้อมูลทีม</p>
+  <div id="siDrop" class="imp-drop" tabindex="0">
+    <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>ลากไฟล์มาวางที่นี่ (ทีละหลายไฟล์ได้)</b><span class="muted small">หรือ</span>
+    <button type="button" class="btn pri" id="siPick">เลือกไฟล์จากเครื่อง</button>
+    <input type="file" id="siFile" accept=".xlsx,.xls,.xlsm,.csv" multiple hidden>
+  </div>
+  <div id="siBox"></div>
+  <p class="err-text" id="siErr" style="margin:8px 0 0"></p>
+  <div id="siOpts" class="imp-opts" hidden>
+    <label class="chk"><input type="checkbox" id="siClear"> ล้างข้อมูล %Shrink เดิมทั้งหมดก่อนนำเข้า (ใช้เมื่อนำเข้าช่วงวันที่ซ้ำกับของเดิม จะได้ไม่บวกซ้ำ)</label>
+  </div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="siCancel">ปิด</button><button type="button" class="btn pri save-btn" id="siGo" disabled>นำเข้า %Shrink</button></div>
+</div></dialog>
+
+<dialog id="dlgShDel" class="nbs-dlg imp-dlg"><div>
+  <h2>ลบไฟล์ %Shrink ที่นำเข้า</h2>
+  <p class="muted small" style="margin:0 0 10px">ลบข้อมูลของไฟล์ที่นำเข้าผิด หรือผิดช่วงวัน (ลบเฉพาะในเครื่องนี้ ไม่กระทบทีม)</p>
+  <div id="sdList" style="display:grid;gap:8px"></div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="sdClose">ปิด</button></div>
+</div></dialog>
+
+<dialog id="dlgShNm" class="nbs-dlg imp-dlg"><div>
+  <h2>ตั้งชื่อรหัสเหตุผล</h2>
+  <p class="muted small" style="margin:0 0 10px">รหัสในไฟล์ By Code ยังไม่มีชื่อ (รู้แน่ชัดแค่ 52 = Code 52 ตามกฎ Shelf life) ตั้งชื่อให้ทีมอ่านง่าย เช่น “ของเสีย” “หมดอายุ” “นับสต็อก” — เก็บในเครื่องนี้</p>
+  <div id="snList" style="display:grid;gap:8px"></div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="snCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="snSave">บันทึก</button></div>
 </div></dialog>
 
 <dialog id="dlgIc" class="nbs-dlg imp-dlg"><div>
@@ -3034,7 +3130,7 @@ function oosStockPick(no,urls){
   d.onclose=()=>d.remove();document.body.appendChild(d);d.showModal();
 }
 function oosStock(id,btn){
-  const r=oosAll().find(x=>x._id===id);if(!r)return;
+  const r=oosAll().find(x=>x._id===id)||shrFind(id);if(!r)return;
   const no=String(r.itemNo||''),urls=STOCK_URLS.map(u=>u.replace(/\{item\}/g,encodeURIComponent(no))),uniq=[...new Set(urls)];
   const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||window.innerWidth<700;
   if(btn){stkOpen(btn,no,uniq,id);try{navigator.clipboard&&navigator.clipboard.writeText(no)}catch(e){}return}
@@ -3449,6 +3545,263 @@ $('#oiClose').onchange=$('#oiWinSel').onchange=()=>{if(oosImp)showOosPreview()};
   ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
   $('#dlgOosImp').addEventListener('dragover',e=>e.preventDefault());
   $('#dlgOosImp').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readOosFile(f)})})();
+
+/* ---------- %Shrink (หยุดทิ้ง): how much was thrown away, and which items most ----------
+   Two reports, dropped in together or one by one (the app tells them apart by their columns):
+   · "By Code"  = Department Number · Class Number · Class · Item Number · Item · Reasn Code Id · Shrinkage Qty · Shrinkage Cost Amt · Month
+                  -> shrink per item per reason code (added up over every By Code file that was imported)
+   · "ยอดขาย + Actual Shrinkage" (Power BI export, filters in the first cell) = Division · Department · Class · Item No · Item Name · Sales · %Actual Shrinkage · Actual Shrinkage
+                  -> the store's shrink and sales of the period (the newest file replaces the older one)
+   a NEGATIVE cost / amount = money lost (thrown away); a positive one = stock that came back.
+   The data stays in this browser (IndexedDB) — nothing is written to the team database. */
+const SHR_DEPT={'01':'FRUIT & VEGETABLE','02':'BUTCHERY','03':'FISH','04':'BAKERY','05':'FROZEN & DAIRY','06':'SNACK & CONFECTIONARY','07':'BASIC COMMODITIES','08':'DRY GROCERY','09':'DRINK & BEVERAGE','10':'COSMETIC & DRUG','31':'LADYS WEAR','32':'MENS WEAR','33':'TEXTILE','34':'PROLINE','35':'ACCESORIES','37':'IN & OUT','41':'ELECTRIC','42':'OFFICE AUTOMATION','44':'D.I.Y.','45':'HOUSE HOLD','46':'STATIONERY'};
+const SHR_RS0={'52':'ทิ้ง / ถอดสินค้า (Code 52)'}; /* the only code whose meaning is known from the Shelf life rules; the team can name the others */
+const SHR_BIG=1000,SHR_HI=5000,SHR_P1=.01,SHR_P5=.05; /* ฿ / share of sales that make a "heavy" thrower */
+let SHR={files:[],code:[],sales:null,names:{}},SHR_REV=0,SHR_MEMO=null;
+const shrOpen=()=>new Promise(res=>{try{const rq=indexedDB.open('slm-shrink',1);rq.onupgradeneeded=()=>rq.result.createObjectStore('kv');rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);rq.onblocked=()=>res(null)}catch(e){res(null)}});
+async function shrSave(){const db=await shrOpen();if(!db)return false;return new Promise(res=>{try{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(SHR,'v1');tx.oncomplete=()=>res(true);tx.onerror=()=>res(false);tx.onabort=()=>res(false)}catch(e){res(false)}})}
+async function shrLoad(){const db=await shrOpen();if(!db)return;const rec=await new Promise(res=>{try{const g=db.transaction('kv').objectStore('kv').get('v1');g.onsuccess=()=>res(g.result||null);g.onerror=()=>res(null)}catch(e){res(null)}});
+  if(rec&&rec.files){SHR={files:rec.files||[],code:rec.code||[],sales:rec.sales||null,names:rec.names||{}};SHR_REV++}}
+const shrN=v=>{if(v===''||v==null)return null;const n=parseFloat(String(v).replace(/,/g,''));return isNaN(n)?null:n};
+const shrNo=v=>String(v??'').trim().replace(/\.0+$/,'');
+const shrDivOfDept=dp=>{const n=+dp;return !n?'':n<=5?'FF':n<=10?'DF':'NF'};
+/* ----- reading the two reports ----- */
+const SHR_COLS_CODE=[['dp',/^(departmentnumber|deptnumber|deptno|departmentno)$/],['cn',/^(classnumber|classno)$/],['cl',/^class$/],['item',/^(itemnumber|itemno|itemcode)$/],['name',/^(item|itemname|description)$/],['rs',/^reasn?o?n?code(id)?$/],['qty',/^(shrinkageqty|shrinkqty)$/],['cost',/^(shrinkagecostamt|shrinkagecost|shrinkcostamt)$/],['month',/^month$/]];
+const SHR_COLS_SALES=[['div',/^division$/],['dept',/^(department|dept)$/],['cls',/^class$/],['item',/^(itemno|itemnumber|itemcode)$/],['name',/^(itemname|item|description)$/],['sales',/^sales$/],['pct',/^(%actualshrinkage|actualshrinkage%|%shrinkage)$/],['amt',/^(actualshrinkage|shrinkageamt)$/]];
+function shrMapHeader(row,cols){const m={},used=new Set();(row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of cols){if(m[f]==null&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});return m}
+function shrParse(wb,fname){
+  for(const sn of wb.SheetNames){
+    const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
+    for(let i=0;i<Math.min(raw.length,40);i++){
+      const mc=shrMapHeader(raw[i],SHR_COLS_CODE),ms=shrMapHeader(raw[i],SHR_COLS_SALES);
+      if(mc.item!=null&&mc.rs!=null&&mc.cost!=null){
+        const rows=[];let skipped=0;const months=new Set();
+        for(let j=i+1;j<raw.length;j++){const r=raw[j],no=shrNo(r[mc.item]),c=shrN(r[mc.cost]);if(!no||c==null){if(r.some(x=>String(x).trim()!==''))skipped++;continue}
+          const dp=mc.dp!=null?String(shrNo(r[mc.dp])).padStart(2,'0'):'',m=mc.month!=null?String(r[mc.month]).trim():'';if(m)months.add(m);
+          rows.push({i:no,n:mc.name!=null?String(r[mc.name]).trim():'',dp:dp==='00'?'':dp,cn:mc.cn!=null?shrNo(r[mc.cn]):'',cl:mc.cl!=null?String(r[mc.cl]).trim():'',r:String(r[mc.rs]).trim(),q:mc.qty!=null?(shrN(r[mc.qty])||0):0,c,m})}
+        if(!rows.length)continue;
+        return{name:fname,kind:'code',rows,info:{skipped,months:[...months],items:new Set(rows.map(x=>amNum(x.i))).size,reasons:[...new Set(rows.map(x=>x.r))]}}}
+      if(ms.item!=null&&ms.sales!=null&&ms.amt!=null){
+        const meta={store:'',period:''};
+        for(let j=0;j<i;j++)raw[j].forEach(c=>{const t=String(c);let m=t.match(/store_name\s+is\s+(.+)/i);if(m)meta.store=m[1].trim();m=t.match(/selection_period\s+is\s+(\S+)/i);if(m)meta.period=m[1].trim()});
+        const rows=[];let skipped=0;
+        for(let j=i+1;j<raw.length;j++){const r=raw[j],no=shrNo(r[ms.item]);if(!no){if(r.some(x=>String(x).trim()!==''))skipped++;continue}
+          const dm=ms.dept!=null?String(r[ms.dept]).trim().match(/^(\d{1,2})\s*(.*)$/):null,cm=ms.cls!=null?String(r[ms.cls]).trim().match(/^(\d{1,4})\s*(.*)$/):null,dv=ms.div!=null?divFrom(r[ms.div]):'';
+          const dp=dm?dm[1].padStart(2,'0'):'';
+          rows.push({i:no,n:ms.name!=null?String(r[ms.name]).trim():'',dv:dv||shrDivOfDept(dp),dp,dn:dm?dm[2].trim():'',cn:cm?cm[1]:'',cl:cm?cm[2].trim():(ms.cls!=null?String(r[ms.cls]).trim():''),s:shrN(r[ms.sales]),p:ms.pct!=null?shrN(r[ms.pct]):null,a:shrN(r[ms.amt])})}
+        if(!rows.length)continue;
+        return{name:fname,kind:'sales',rows,info:{skipped,store:meta.store,period:meta.period,items:rows.length}}}}}
+  return null}
+/* ----- one record per item, joining the two reports ----- */
+function shrBuild(){
+  const key=SHR_REV+':'+(st.contacts||[]).length+':'+(ITEMCLS?ITEMCLS.size:0);
+  if(SHR_MEMO&&SHR_MEMO.key===key)return SHR_MEMO;
+  const by=new Map(),get=no=>{const k=amNum(no);let it=by.get(k);if(!it)by.set(k,it={_id:'sh'+k,itemNo:no,desc:'',div:'',dp:'',dn:'',cn:'',cl:'',sales:null,pct:null,amt:null,rs:new Map(),cc:0,cq:0,hasCode:false,hasSales:false,buyer:''});return it};
+  if(SHR.sales)SHR.sales.rows.forEach(r=>{const it=get(r.i);it.hasSales=true;it.itemNo=r.i;it.desc=r.n||it.desc;it.div=r.dv;it.dp=r.dp;it.dn=r.dn;it.cn=r.cn;it.cl=r.cl;it.sales=r.s;it.pct=r.p;it.amt=r.a});
+  SHR.code.forEach(r=>{const it=get(r.i);it.hasCode=true;if(!it.desc)it.desc=r.n;if(!it.dp&&r.dp){it.dp=r.dp;it.dn=SHR_DEPT[r.dp]||''}if(!it.cn&&r.cn){it.cn=r.cn;it.cl=r.cl}
+    const x=it.rs.get(r.r)||{q:0,c:0,n:0};x.q+=r.q||0;x.c+=r.c;x.n++;it.rs.set(r.r,x);it.cc+=r.c;it.cq+=r.q||0});
+  const items=[...by.values()],buyers=new Map();
+  items.forEach(it=>{
+    if(!it.dn&&it.dp)it.dn=SHR_DEPT[it.dp]||'';
+    if(!it.div)it.div=shrDivOfDept(it.dp);
+    it.dlbl=it.dp?(it.dp+' '+it.dn).trim():'';
+    const m=ITEMCLS?ITEMCLS.get(amNum(it.itemNo)):null;if(!it.cn&&m)it.cn=String(m.g);
+    let uid='';try{uid=buyerFor({division:it.div,artGrp:it.cn,subNo:m?m.s:'',itemNo:it.itemNo,desc:it.desc,dept:it.dlbl})||''}catch(e){}
+    it.buyer=uid;if(uid&&!buyers.has(uid)){const c=ctFindBuyer(uid);buyers.set(uid,c&&c.name||'')}
+    it.q=[it.itemNo,it.desc,it.cl,it.cn,it.dlbl,it.div,uid,buyers.get(uid)].join(' ').toLowerCase()});
+  return SHR_MEMO={key,items,buyers,depts:[...new Set(items.map(i=>i.dlbl).filter(Boolean))].sort(),classes:[...new Map(items.filter(i=>i.cn).map(i=>[i.cn,i.cn+' '+i.cl])).entries()].sort((a,b)=>amNum(a[0])-amNum(b[0])),reasons:[...new Set(SHR.code.map(r=>r.r))].sort((a,b)=>(+a||1e9)-(+b||1e9)||a.localeCompare(b))}}
+const shrRs=rc=>{const n=SHR.names[rc]!=null&&SHR.names[rc]!==''?SHR.names[rc]:SHR_RS0[rc];return n?rc+' · '+n:'รหัส '+rc};
+/* the numbers behind the three views: money lost (positive = thrown away) per basis, and the loss as a share of sales */
+const shrVal=(it,b)=>b==='code'?(it.hasCode?-it.cc:null):(it.amt==null?null:-it.amt);
+const shrRate=it=>it.pct==null?null:-it.pct;
+const shrMetric=(it,b)=>b==='pct'?shrRate(it):shrVal(it,b);
+const shrBaht=n=>'฿'+Math.round(n).toLocaleString();
+const shrBk=n=>{const a=Math.abs(n),s=n<0?'−':'';return a>=1e6?s+'฿'+(a/1e6).toFixed(2)+'M':a>=1e4?s+'฿'+(a/1e3).toFixed(1)+'k':s+'฿'+Math.round(a).toLocaleString()};
+const shrPct=r=>{if(r==null)return'';const a=Math.abs(r)*100;return(r<0?'−':'')+a.toFixed(a>=100?0:a>=10?1:2)+'%'};
+const SHR_BASES=[['mtd','ยอดทิ้ง ฿ (MTD)'],['pct','%Shrink'],['code','ตามรหัสเหตุผล']];
+let shrBasis='',shrTile='',shrDiv='',shrLimit=60,shrDrill=false;
+const shrHas=b=>b==='code'?SHR.code.length>0:!!SHR.sales;
+const shrFind=id=>{const m=shrBuild();return m.items.find(x=>x._id===id)};
+const shrEligible=(it,b)=>b==='pct'?it.pct!=null:shrVal(it,b)!=null;
+function shrLevel(it,b){const v=shrVal(it,b),r=b==='code'?null:shrRate(it);if(v==null||v<=0)return'done';if(v>=SHR_HI||(r!=null&&r>=SHR_P5))return'late';if(v>=SHR_BIG||(r!=null&&r>=SHR_P1))return'warn';return'ok'}
+function shrVisible(m,b){
+  const q=$('#shrQ').value.trim().toLowerCase(),fr=$('#shrFRs').value,fc=$('#shrFCls').value,fd=$('#shrFDept').value,fw=$('#shrFWho').value,hide=$('#shrHide').checked,s=$('#shrSort').value;
+  const rows=m.items.filter(it=>{
+    if(!shrEligible(it,b))return false;
+    if(shrDiv&&it.div!==shrDiv)return false;
+    const v=shrVal(it,b),r=shrRate(it);
+    if(shrTile==='big'&&!(v!=null&&v>=SHR_BIG))return false;
+    if(shrTile==='hi'&&!(r!=null&&r>=SHR_P1))return false;
+    if(hide&&!(b==='pct'?(r!=null&&r>0):(v!=null&&v>0)))return false;
+    if(fr&&!it.rs.has(fr))return false;
+    if(fc&&it.cn!==fc)return false;
+    if(fd&&it.dlbl!==fd)return false;
+    if(fw&&it.buyer!==fw)return false;
+    return!q||it.q.includes(q)});
+  const nul=x=>x==null?-Infinity:x;
+  return rows.sort((a,c)=>s==='name'?String(a.desc).localeCompare(String(c.desc),'th'):s==='sales'?nul(c.sales)-nul(a.sales):s==='pct'?nul(shrRate(c))-nul(shrRate(a)):s==='amt'?nul(shrVal(c,b==='code'?'code':'mtd'))-nul(shrVal(a,b==='code'?'code':'mtd')):nul(shrMetric(c,b))-nul(shrMetric(a,b))||String(a.desc).localeCompare(String(c.desc),'th'))}
+function shrChartHtml(rows,b){
+  const qs=$('#shrQ').value.trim();if(!rows.length&&!qs)return'';
+  const ranked=rows.map(it=>({it,m:shrMetric(it,b)})).filter(x=>x.m!=null&&x.m>0).sort((a,c)=>c.m-a.m).slice(0,10),mx=ranked.length?ranked[0].m:1;
+  const lab=b==='pct'?'%Shrink สูงสุด':b==='code'?'ทิ้งมากสุด · ตามรหัสเหตุผล':'ทิ้งมากสุด · MTD';
+  const seg=SHR_BASES.filter(([k])=>shrHas(k)).map(([k,l])=>`<button type="button" class="${b===k?'on':''}" data-p="${k}">${l}</button>`).join('');
+  const val=(it)=>{const v=shrVal(it,b),r=shrRate(it);return b==='pct'?`<b>${shrPct(r)}</b> · ${v!=null?shrBaht(v):''}`:b==='code'?`<b>${shrBaht(v)}</b> · ${Math.abs(it.cq).toLocaleString(undefined,{maximumFractionDigits:1})} ชิ้น`:`<b>${shrBaht(v)}</b>${r!=null?' · '+shrPct(r):''}`};
+  const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(m/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${val(it)}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ทิ้งในช่วงนี้</p>';
+  const tot=rows.reduce((s,it)=>{const v=shrVal(it,b==='pct'?'mtd':b);return s+(v!=null&&v>0?v:0)},0);
+  return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · รวม ${shrBaht(tot)} จาก ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
+function shrCard(it,b){
+  const lv=shrLevel(it,b),th=(MF.images&&MF.images[it.itemNo])||'',k=esc(it._id),v=shrVal(it,b),r=shrRate(it);
+  const LV={late:['ทิ้งหนัก','pull'],warn:['ทิ้งปานกลาง','md2'],ok:['ทิ้งเล็กน้อย','ok'],done:['ไม่ได้ทิ้ง','ok']}[lv];
+  const bits=[];
+  if(it.amt!=null){bits.push(`<span>${it.amt<0?'ทิ้ง':'ได้คืน'} MTD <b class="${it.amt<0?'c-md2':''}">${shrBaht(Math.abs(it.amt))}</b></span>`)}
+  if(it.sales!=null)bits.push(`<span>ยอดขาย <b>${shrBaht(it.sales)}</b></span>`);
+  if(r!=null)bits.push(`<span>%Shrink <b class="${r>=SHR_P1?'c-md2':''}">${shrPct(r)}</b></span>`);
+  const rsl=[...it.rs.entries()].sort((a,c)=>a[1].c-c[1].c),mx=Math.max(1,...rsl.map(([,x])=>Math.abs(x.c)));
+  const rsHtml=rsl.length?`<div class="shr-rs" title="แยกตามรหัสเหตุผล (By Code)">`+rsl.map(([rc,x])=>`<span class="shr-r"><em>${esc(shrRs(rc))}</em><i style="--w:${Math.max(4,Math.round(Math.abs(x.c)/mx*100))}%;--c:${x.c<0?'#d6453d':'#2e8b57'}"></i><b class="${x.c<0?'c-md2':''}">${x.c<0?'':'+'}${shrBaht(x.c)}</b><small>${x.q.toLocaleString(undefined,{maximumFractionDigits:1})} ชิ้น</small></span>`).join('')+`<span class="muted small">รวมตามรหัส <b>${it.cc<0?'':'+'}${shrBaht(it.cc)}</b> · ${it.cq.toLocaleString(undefined,{maximumFractionDigits:1})} ชิ้น</span></div>`:'';
+  const by=it.buyer?((SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||''):'';
+  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div><div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}',this)">ดู Stock</button></div>
+    <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
+    ${bits.length?`<div class="oosc-f small">${bits.join('')}</div>`:''}${rsHtml}
+    ${it.buyer?`<div class="small">Buyer: <b>${esc(by||it.buyer)}</b>${by?` <span class="muted">(${esc(it.buyer)})</span>`:''}</div>`:'<div class="muted small">ยังไม่ทราบ Buyer</div>'}</div>`}
+function shrSrcHtml(){
+  const f=SHR.files,sa=f.find(x=>x.kind==='sales'),co=f.filter(x=>x.kind==='code');
+  if(!f.length)return'';
+  const parts=[];
+  if(sa)parts.push(`<span>ยอดขาย + Actual Shrinkage: <b>${esc(sa.name)}</b>${sa.info&&sa.info.store?' · '+esc(sa.info.store):''}${sa.info&&sa.info.period?' · '+esc(sa.info.period):''} · ${sa.n.toLocaleString()} รายการ</span>`);
+  if(co.length)parts.push(`<span>By Code: <b>${co.map(x=>esc(x.name)).join(' + ')}</b> · ${SHR.code.length.toLocaleString()} บรรทัด${[...new Set(co.flatMap(x=>(x.info&&x.info.months)||[]))].length?' · '+[...new Set(co.flatMap(x=>x.info.months))].map(esc).join(', '):''}</span>`);
+  return parts.join('');}
+function renderShr(){
+  const m=shrBuild(),av=SHR_BASES.filter(([k])=>shrHas(k)).map(x=>x[0]);
+  if(!av.includes(shrBasis))shrBasis=av[0]||'mtd';
+  const b=shrBasis,bd=$('#shrBadge'),defB=av.includes('mtd')?'mtd':av[0]||'mtd',heavy=m.items.filter(it=>{const v=shrVal(it,defB);return v!=null&&v>=SHR_BIG}).length;
+  bd.hidden=!heavy;bd.textContent=heavy.toLocaleString();bd.classList.toggle('late',heavy>0);
+  if($('#t-shr').hidden)return;
+  $('#shrSrc').innerHTML=shrSrcHtml();
+  const elig=m.items.filter(it=>shrEligible(it,b)),lossOf=it=>{const v=shrVal(it,b==='pct'?'mtd':b);return v!=null&&v>0?v:0};
+  /* FF / DF / NF tiles: money thrown away per group; click = show only that group */
+  const byDiv={},nDiv={},gainDiv={};
+  elig.forEach(it=>{const d=it.div||'-',l=lossOf(it);byDiv[d]=(byDiv[d]||0)+l;if(l>0)nDiv[d]=(nDiv[d]||0)+1;const v=shrVal(it,b==='pct'?'mtd':b);if(v!=null&&v<0)gainDiv[d]=(gainDiv[d]||0)-v});
+  if(shrDiv==='-'&&!(byDiv['-']))shrDiv='';
+  const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${shrDiv===k?' sel':''}" data-div="${k}">${chip}<b>${shrBk(byDiv[k]||0)}</b><span class="muted small"><span class="tl">ทิ้ง </span>${(nDiv[k]||0).toLocaleString()} รายการ${gainDiv[k]?`<span class="tl"> · ได้คืน ${shrBk(gainDiv[k])}</span>`:''}</span></button>`;
+  $('#shrDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
+  /* summary tiles follow the group */
+  const sub=elig.filter(it=>!shrDiv||it.div===shrDiv),gross=sub.reduce((s,it)=>s+lossOf(it),0),nLoss=sub.filter(it=>lossOf(it)>0).length;
+  const salesSum=m.items.filter(it=>it.hasSales&&it.sales!=null&&(!shrDiv||it.div===shrDiv)).reduce((s,it)=>s+it.sales,0);
+  const rate=b!=='code'&&salesSum>0?gross/salesSum:null;
+  const nBig=sub.filter(it=>lossOf(it)>=SHR_BIG).length,nHi=sub.filter(it=>{const r=shrRate(it);return r!=null&&r>=SHR_P1}).length;
+  const tl=[['all','ทิ้งรวม','pull',shrBk(gross),`${nLoss.toLocaleString()} รายการ`],
+    ['rate','%Shrink รวม','md1',rate==null?'—':shrPct(rate),rate==null?'ต้องมีรายงานยอดขาย':`ของยอดขาย ${shrBk(salesSum)}`],
+    ['big','ทิ้งเกิน '+shrBaht(SHR_BIG),'soon',nBig.toLocaleString(),'รายการ'],
+    ['hi','ทิ้งเกิน 1% ของยอดขาย','md2',nHi.toLocaleString(),b==='code'?'ใช้กับยอดขาย MTD':'รายการ']];
+  $('#shrTiles').innerHTML=tl.map(([k,l,c,n,s])=>`<button type="button" class="tile${shrTile===k?' sel':''}" data-t="${k}"><span class="chip s-${c}">${l}</span><b>${n}</b><span class="muted small">${s}</span></button>`).join('');
+  /* department chips + selects */
+  const dsel=$('#shrFDept'),dcur=dsel.value;
+  dsel.innerHTML='<option value="">ทั้งหมด</option>'+m.depts.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
+  const dcnt={};sub.forEach(it=>{const l=lossOf(it);if(l>0&&it.dlbl)dcnt[it.dlbl]=(dcnt[it.dlbl]||0)+l});
+  $('#shrDeptTiles').innerHTML=Object.entries(dcnt).sort((a,c)=>c[1]-a[1]).map(([d,n])=>`<button type="button" class="btn sm${dsel.value===d?' sel':''}" data-d="${esc(d)}">${esc(d)} <b>${shrBk(n)}</b></button>`).join('');
+  const rsel=$('#shrFRs'),rcur=rsel.value;rsel.innerHTML='<option value="">ทั้งหมด</option>'+m.reasons.map(rc=>`<option value="${esc(rc)}"${rc===rcur?' selected':''}>${esc(shrRs(rc))}</option>`).join('');
+  const csel=$('#shrFCls'),ccur=csel.value;csel.innerHTML='<option value="">ทั้งหมด</option>'+m.classes.map(([n,l])=>`<option value="${esc(n)}"${n===ccur?' selected':''}>${esc(l)}</option>`).join('');
+  const wsel=$('#shrFWho'),wcur=wsel.value;wsel.innerHTML='<option value="">ทั้งหมด</option>'+[...m.buyers.entries()].sort((a,c)=>a[0].localeCompare(c[0])).map(([u,n])=>`<option value="${esc(u)}"${u===wcur?' selected':''}>${esc(u)}${n?' · '+esc(n):''}</option>`).join('');
+  const rows=shrVisible(m,b),shown=rows.slice(0,shrLimit);
+  $('#shrChart').innerHTML=shrChartHtml(rows,b);
+  $('#shrMain').classList.toggle('drill',shrDrill&&!!$('#shrQ').value.trim());
+  $('#shrList').innerHTML=shown.map(it=>shrCard(it,b)).join('');stkMark();
+  $('#shrEmpty').hidden=rows.length>0;$('#shrEmpty').textContent=m.items.length?'ไม่มีรายการที่ตรงกับตัวกรอง':'ยังไม่มีข้อมูล %Shrink — กด “นำเข้ารายงาน” แล้วลากไฟล์ By Code และไฟล์ยอดขาย + Actual Shrinkage (data (N).xlsx) มาวาง ได้ทั้ง 2 ไฟล์พร้อมกัน';
+  $('#shrMoreWrap').hidden=rows.length<=shrLimit;$('#shrMoreTxt').textContent=`แสดง ${shown.length.toLocaleString()} จาก ${rows.length.toLocaleString()} รายการ`;
+  $('#shrXlsx').disabled=!rows.length;
+}
+/* ----- the page's own controls ----- */
+(()=>{
+  const re=()=>{shrLimit=60;renderShr()};
+  let qt;$('#shrQ').oninput=()=>{shrDrill=false;clearTimeout(qt);qt=setTimeout(re,150)};
+  ['#shrFRs','#shrFCls','#shrFDept','#shrFWho','#shrSort','#shrHide'].forEach(s=>$(s).onchange=re);
+  $('#shrDivTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;shrDiv=shrDiv===t.dataset.div?'':t.dataset.div;re()};
+  $('#shrTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;const k=t.dataset.t;shrTile=(k==='all'||k==='rate')?'':shrTile===k?'':k;re()};
+  $('#shrDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b)return;const s=$('#shrFDept');s.value=s.value===b.dataset.d?'':b.dataset.d;re()};
+  $('#shrMain').addEventListener('click',e=>{
+    const sg=e.target.closest('.oc-seg button');if(sg){shrBasis=sg.dataset.p;re();return}
+    const bk=e.target.closest('.oc-back');if(bk){shrDrill=false;$('#shrQ').value='';re();$('#shrChart').scrollIntoView({block:'nearest',behavior:'smooth'});return}
+    const bar=e.target.closest('.oc-r');if(bar){shrDrill=true;$('#shrQ').value=bar.dataset.no;re();$('#shrList').scrollIntoView({block:'nearest',behavior:'smooth'})}});
+  $('#shrMore').onclick=()=>{shrLimit+=60;renderShr()};
+})();
+/* ----- Excel of what is listed ----- */
+async function shrExport(){
+  const m=shrBuild(),b=shrBasis,rows=shrVisible(m,b);if(!rows.length)return;
+  await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+  const rcs=m.reasons,head=['Item No','ชื่อสินค้า','กลุ่ม','Department','Class','Buyer UID','Buyer','ยอดขาย MTD','Actual Shrinkage MTD','%Actual Shrinkage','ทิ้งตาม By Code (฿)','จำนวนตาม By Code',...rcs.map(rc=>shrRs(rc)+' (฿)')];
+  const out=rows.map(it=>{const by=(SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||'';return[it.itemNo,it.desc,it.div,it.dlbl,(it.cn+' '+it.cl).trim(),it.buyer,by,it.sales==null?'':it.sales,it.amt==null?'':it.amt,it.pct==null?'':it.pct,it.hasCode?Math.round(it.cc*100)/100:'',it.hasCode?it.cq:'',...rcs.map(rc=>it.rs.has(rc)?Math.round(it.rs.get(rc).c*100)/100:'')]});
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=[10,36,6,22,26,9,22,12,12,10,12,10,...rcs.map(()=>14)].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws,'%Shrink');XLSX.writeFile(wb,'Shrink-'+new Date().toISOString().slice(0,10)+'.xlsx');toast('ดาวน์โหลดรายการ %Shrink แล้ว');
+}
+$('#shrXlsx').onclick=shrExport;
+/* ----- import: both files at once or one by one ----- */
+let shrImp=null;
+const SHR_KIND={code:'By Code · แยกตามรหัสเหตุผล',sales:'ยอดขาย + Actual Shrinkage'};
+async function shrReadFiles(files){
+  $('#siErr').textContent='';$('#siBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
+  const out=shrImp?shrImp.items.slice():[],errs=[];
+  for(const f of files){
+    try{await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+      const wb=await readAnyFile(f,()=>false,sayTo('#siBox')),p=shrParse(wb,f.name);
+      if(!p){errs.push(f.name+': ไม่รู้จักรายงานนี้ — ต้องมีคอลัมน์ Item Number + Reasn Code Id + Shrinkage Cost Amt (By Code) หรือ Item No + Sales + Actual Shrinkage');continue}
+      const i=out.findIndex(x=>x.name===f.name);if(i>=0)out.splice(i,1);out.push(p)}
+    catch(e){errs.push(f.name+': อ่านไม่สำเร็จ '+e.message)}}
+  shrImp=out.length?{items:out}:null;$('#siErr').textContent=errs.join(' · ');showShrPreview()}
+function showShrPreview(){
+  $('#siFile').value='';
+  if(!shrImp){$('#siBox').innerHTML='';$('#siDrop').hidden=false;$('#siGo').disabled=true;$('#siOpts').hidden=true;return}
+  $('#siDrop').hidden=true;$('#siOpts').hidden=false;$('#siGo').disabled=false;
+  const cards=shrImp.items.map(p=>{
+    let sum='';
+    if(p.kind==='code'){const loss=p.rows.reduce((s,r)=>s+(r.c<0?-r.c:0),0),net=p.rows.reduce((s,r)=>s+r.c,0),old=SHR.files.find(f=>f.kind==='code'&&f.name===p.name);
+      sum=`<div class="imp-tiles"><div class="t-new"><b>${p.info.items.toLocaleString()}</b><span>สินค้า</span></div><div class="t-new"><b>${shrBk(loss)}</b><span>ทิ้งรวม</span></div><div><b>${shrBk(net)}</b><span>สุทธิ (หักที่ได้คืน)</span></div><div><b>${p.info.reasons.length}</b><span>รหัสเหตุผล</span></div></div>
+      <p class="small" style="margin:6px 0 0">เดือน: <b>${p.info.months.map(esc).join(', ')||'—'}</b> · รหัส: ${p.info.reasons.map(r=>esc(shrRs(r))).join(' · ')}${old?' · <span class="err-text">ชื่อไฟล์นี้เคยนำเข้าแล้ว — จะแทนที่ข้อมูลของไฟล์นั้น</span>':''}</p>`}
+    else{const a=p.rows.reduce((s,r)=>s+(r.a!=null&&r.a<0?-r.a:0),0),sa=p.rows.reduce((s,r)=>s+(r.s||0),0),n=p.rows.filter(r=>r.a!=null&&r.a<0).length;
+      sum=`<div class="imp-tiles"><div class="t-new"><b>${p.rows.length.toLocaleString()}</b><span>สินค้า</span></div><div class="t-new"><b>${shrBk(a)}</b><span>ทิ้งรวม</span></div><div><b>${n.toLocaleString()}</b><span>รายการที่ทิ้ง</span></div><div><b>${shrBk(sa)}</b><span>ยอดขาย</span></div></div>
+      <p class="small" style="margin:6px 0 0">${p.info.store?'ร้าน: <b>'+esc(p.info.store)+'</b> · ':''}${p.info.period?'ช่วง: <b>'+esc(p.info.period)+'</b> · ':''}ไฟล์นี้เป็นภาพรวมของทั้งช่วง — จะ${SHR.sales?'<span class="err-text">แทนที่รายงานยอดขายเดิม</span>':'ใช้เป็นรายงานยอดขาย'}</p>`}
+    return`<div class="imp-file"><span class="chip ${p.kind==='code'?'s-md2':'s-md1'}">${SHR_KIND[p.kind]}</span> <b>${esc(p.name)}</b> <span class="muted small">· ${p.rows.length.toLocaleString()} บรรทัด${p.info.skipped?` · ข้าม ${p.info.skipped} แถว`:''}</span></div>${sum}`}).join('');
+  const have=SHR.files.length?`<p class="small muted" style="margin:8px 0 0">ที่นำเข้าไว้แล้ว: ${SHR.files.map(f=>esc(f.name)).join(' · ')}</p>`:'';
+  $('#siBox').innerHTML=cards+have+`<p style="margin:8px 0 0"><button type="button" class="btn sm" id="siMore">+ เพิ่มไฟล์อีก</button></p>`;
+  $('#siMore').onclick=()=>$('#siFile').click();
+}
+async function runShrImport(){
+  if(!shrImp)return;const now=new Date().toISOString(),n0=SHR.files.length;
+  if($('#siClear').checked)SHR={files:[],code:[],sales:null,names:SHR.names};
+  for(const p of shrImp.items){
+    const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    if(p.kind==='code'){const old=SHR.files.filter(f=>f.kind==='code'&&f.name===p.name).map(f=>f.id);
+      SHR.files=SHR.files.filter(f=>!old.includes(f.id));SHR.code=SHR.code.filter(r=>!old.includes(r.f));
+      p.rows.forEach(r=>SHR.code.push({...r,f:id}));SHR.files.push({id,name:p.name,kind:'code',at:now,n:p.rows.length,info:p.info})}
+    else{SHR.files=SHR.files.filter(f=>f.kind!=='sales');SHR.sales={f:id,rows:p.rows,meta:p.info};SHR.files.push({id,name:p.name,kind:'sales',at:now,n:p.rows.length,info:p.info})}}
+  SHR_REV++;shrTile='';shrDiv='';shrBasis='';
+  const cnt=shrImp.items.length;shrImp=null;$('#dlgShImp').close();renderShr();toast(`นำเข้า %Shrink แล้ว ${cnt} ไฟล์`);
+  shrSave().then(ok=>{if(!ok)toast('นำเข้าแล้ว แต่เบราว์เซอร์ไม่ยอมให้จำข้อมูลไว้ — ปิดหน้าแล้วต้องนำเข้าใหม่')}); /* saved in the background: the page never waits for the disk */
+}
+function openShrImport(){shrImp=null;$('#siBox').innerHTML='';$('#siDrop').hidden=false;$('#siGo').disabled=true;$('#siOpts').hidden=true;$('#siErr').textContent='';$('#siFile').value='';$('#siClear').checked=false;$('#dlgShImp').showModal()}
+$('#shrImport').onclick=openShrImport;$('#siCancel').onclick=()=>$('#dlgShImp').close();$('#siGo').onclick=runShrImport;
+$('#siPick').onclick=()=>$('#siFile').click();$('#siFile').onchange=e=>{const fs=[...e.target.files];if(fs.length)shrReadFiles(fs)};
+(()=>{const d=$('#siDrop');
+  ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));
+  ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+  $('#dlgShImp').addEventListener('dragover',e=>e.preventDefault());
+  $('#dlgShImp').addEventListener('drop',e=>{e.preventDefault();const fs=[...(e.dataTransfer?.files||[])];if(fs.length)shrReadFiles(fs)})})();
+/* ----- delete an imported file / name the reason codes ----- */
+function renderShrDel(){
+  const l=SHR.files;
+  $('#sdList').innerHTML=l.length?l.map(f=>`<div class="imp-file" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="chip ${f.kind==='code'?'s-md2':'s-md1'}">${f.kind==='code'?'By Code':'ยอดขาย'}</span><b style="flex:1;min-width:140px;overflow-wrap:anywhere">${esc(f.name)}</b><span class="muted small">${f.n.toLocaleString()} บรรทัด · ${oosFmt(new Date(f.at).getTime())}</span><button type="button" class="btn sm danger" data-id="${esc(f.id)}">ลบ</button></div>`).join(''):'<p class="muted">ยังไม่มีไฟล์ที่นำเข้า</p>'}
+$('#shrDelFile').onclick=()=>{renderShrDel();$('#dlgShDel').showModal()};
+$('#sdClose').onclick=()=>$('#dlgShDel').close();
+$('#sdList').onclick=async e=>{const b=e.target.closest('button[data-id]');if(!b)return;const f=SHR.files.find(x=>x.id===b.dataset.id);if(!f)return;
+  if(!await ask(`ลบข้อมูลของไฟล์ “${f.name}” (${f.n.toLocaleString()} บรรทัด)?  ลบเฉพาะในเครื่องนี้`))return;
+  SHR.files=SHR.files.filter(x=>x.id!==f.id);if(f.kind==='code')SHR.code=SHR.code.filter(r=>r.f!==f.id);else if(SHR.sales&&SHR.sales.f===f.id)SHR.sales=null;
+  SHR_REV++;shrBasis='';shrSave();renderShrDel();renderShr();toast('ลบข้อมูลของไฟล์นั้นแล้ว')};
+function openShrNames(){
+  const m=shrBuild();
+  $('#snList').innerHTML=m.reasons.length?m.reasons.map(rc=>{const x=SHR.code.filter(r=>r.r===rc),c=x.reduce((s,r)=>s+r.c,0);return`<label class="sn-row"><span><b>รหัส ${esc(rc)}</b><span class="muted small"> · ${x.length.toLocaleString()} บรรทัด · ${shrBaht(c)}</span></span><input data-rc="${esc(rc)}" value="${esc(SHR.names[rc]!=null?SHR.names[rc]:(SHR_RS0[rc]||''))}" placeholder="ชื่อเหตุผล เช่น ของเสีย / หมดอายุ / นับสต็อก"></label>`}).join(''):'<p class="muted">ยังไม่มีข้อมูล By Code — นำเข้าไฟล์ By Code ก่อน</p>';
+  $('#dlgShNm').showModal()}
+$('#shrNames').onclick=openShrNames;$('#snCancel').onclick=()=>$('#dlgShNm').close();
+$('#snSave').onclick=async()=>{$('#snList').querySelectorAll('input[data-rc]').forEach(i=>{const v=i.value.trim(),rc=i.dataset.rc;if(v===(SHR_RS0[rc]||''))delete SHR.names[rc];else SHR.names[rc]=v});SHR_REV++;shrSave();$('#dlgShNm').close();renderShr();toast('บันทึกชื่อรหัสเหตุผลแล้ว')};
+shrLoad().then(()=>{if(SHR.files.length)renderShr()});
 
 /* ---------- julian tab ---------- */
 function julTab(){
@@ -4116,7 +4469,7 @@ $('#q').oninput=renderDash;$('#pQ').oninput=renderProd;try{const sv=localStorage
 $('#pSort').onchange=()=>{try{localStorage.setItem('slm.pSort',$('#pSort').value)}catch(e){}renderProd()};
 $('#thShelf').onclick=()=>{const s=$('#pSort');s.value=s.value==='shelf-asc'?'shelf-desc':'shelf-asc';s.onchange()};$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
-$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs'||b.dataset.tab==='oos')loadMakroData();if(b.dataset.tab==='nbs')renderNbs();if(b.dataset.tab==='oos')renderOos()};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs'||b.dataset.tab==='oos'||b.dataset.tab==='shr')loadMakroData();if(b.dataset.tab==='nbs')renderNbs();if(b.dataset.tab==='oos')renderOos();if(b.dataset.tab==='shr')renderShr()};
 if(onMakroSite()){$('#appLogo').hidden=false;$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
 /* came from Makro Finder in this tab → go back in history so its page/search state is kept */
 $('#backMf').onclick=e=>{try{const r=new URL(document.referrer);if(r.origin===location.origin&&r.pathname.replace(/index\.html$/,'')===new URL('./',location.href).pathname&&history.length>1){e.preventDefault();history.back()}}catch(x){}};
