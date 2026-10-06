@@ -178,8 +178,9 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .meta{color:#7fb6ff}}
 :root[data-theme="dark"] .meta{color:#7fb6ff}
 @media (max-width:1100px){table.resp tr.has-meta{border-bottom:0;border-radius:10px 10px 0 0;margin-bottom:0}table.resp tr.meta-row{border-top:1px dashed var(--line);border-radius:0 0 10px 10px;margin-top:0}table.resp tr.meta-row td::before{display:none}}
-/* FF / DF / NF share one colour */
-.chip.div-ff,.chip.div-df,.chip.div-nf{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--card))}
+.chip.div-ff{color:var(--ok);background:var(--okbg)}
+.chip.div-df{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--card))}
+.chip.div-nf{color:var(--today);background:color-mix(in srgb,var(--today) 14%,var(--card))}
 .nbs-dlg{width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto}
 .imp-btn{display:inline-flex;align-items:center;gap:6px;border-color:#0b5cad;color:#0b5cad;font-weight:700}
 .imp-btn:hover{background:color-mix(in srgb,#0b5cad 10%,var(--card))}
@@ -2506,18 +2507,28 @@ function nbsFiltered(){
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
 const PDF_CHIP={ok:['#e4f3ea','#1f7a45'],md1:['#fff3a6','#6b5800'],md2:['#ffdcb8','#9a4300'],pull:['#c62828','#fff'],obs:['#7f1d1d','#fff'],full:['#111','#fff']};
+/* Division colours: FF green, DF blue, NF purple (same as the on-screen chips; printed with hard colours because the PDF page has no CSS variables) */
+const PDF_DIV={FF:['#e4f3ea','#1f7a45'],DF:['#e2ecf7','#0b5cad'],NF:['#efe7fd','#6d28d9']};
+const pdfDivChip=(d,t)=>{const c=PDF_DIV[d]||['#eef0f3','#475467'];return`<span class="dv" style="background:${c[0]};color:${c[1]}">${esc(t||d)}</span>`};
 function nbsPDFHtml(photos=true){
-  const all=nbsFiltered(),total=(st.nbs||[]).length,now=new Date(),cnt={};all.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});
-  const chip=(t,k)=>{const c=PDF_CHIP[k]||PDF_CHIP.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
+  const all=nbsFiltered(),total=(st.nbs||[]).length,now=new Date(),cnt={},lvc=[0,0,0,0,0,0];all.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1;const l=agingInfo(r).level;if(l!=null)lvc[l]++});
+  const P2={...PDF_CHIP,soon:['#fff2d6','#8a5a00'],err:['#ece6fb','#5b3fa8']};
+  const chip=(t,k)=>{const c=P2[k]||P2.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
+  /* the same fields the on-screen Buyer card shows */
+  const buyerPdf=b=>{const v=ctView(b),clean=String(b.name||'').replace(/\s*M\.?\s*0[\d\- ]{8,}.*$/,'').trim()||b.name,ph=b.phone||((String(b.name||'').match(/0\d[\d\- ]{7,12}\d/)||[])[0]||''),
+    L=(k,val)=>val?`<div class="m">${k}: <b>${esc(val)}</b></div>`:'',desc=v.arts.length?v.arts.map(a=>a[0]+' '+a[1]).join(', '):v.desc;
+    return`<b>${esc(b.uid)}</b>${L('Merchandise Mgr.',clean+(ph?' · '+ph:''))}${L('Area',v.area)}${L('Description',desc)}${L('Assistant',v.asst.join(', '))}${L('Junior Buyer',v.jr.join(', '))}`};
   const body=all.map(r=>{
-    const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),b=st.contacts.find(x=>x.uid===r.buyerUid);
-    const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${esc(a.next[0])}</div>`:''):esc(r.aging||'-');
+    const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),b=st.contacts.find(x=>x.uid===r.buyerUid),c=r.createdAt?new Date(r.createdAt):null;
+    const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${esc(a.next[0])}</div>`:'<div class="m">ถึงสถานะสูงสุดแล้ว</div>'):(String(r.aging||'').trim()?chip(String(r.aging).trim(),'err')+'<div class="m">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>':'-');
     const img=photos?(r.img||(MF.images&&MF.images[r.itemNo])||''):'';
-    return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(img)}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div></div></div></td>
-<td class="ctr"><span class="dv">${esc(r.division)}</span></td><td class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td><td>${esc(r.loc||'-')}</td>
+    return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(img)}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div>${r.artGrp?`<div class="m">Art Grp ${esc(r.artGrp)}</div>`:''}</div></div></td>
+<td class="ctr">${pdfDivChip(r.division)}</td><td class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td><td>${esc(r.loc||'-')}</td>
 <td class="num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td class="num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
-<td class="num">${n==null?'-':`<b class="${over?'ov':''}">${n.toLocaleString()} วัน</b><div class="m">${over?'เกินเกณฑ์':'ไม่ถึงเกณฑ์'} ≥${lim}</div>`}</td><td>${ag}</td>
-<td>${esc(s[1])}</td><td>${r.buyerUid?`<b>${esc(r.buyerUid)}</b>${b?' '+esc(b.name):''}`:'-'}${r.remark?`<div class="rm">${esc(r.remark)}</div>`:''}</td></tr>`}).join('');
+<td class="num">${n==null?'<span class="m">ไม่ระบุ / ไม่เคยขาย</span>':`<b class="${over?'ov':'okd'}">${n.toLocaleString()} วัน</b><div class="m ${over?'ov':''}">${over?'เกินเกณฑ์':'ไม่ถึงเกณฑ์'} ≥${lim}</div>`}</td><td>${ag}</td>
+<td>${chip(s[1],s[2].replace(/^s-/,''))}${r.autoNote?`<div class="m">${esc(r.autoNote)}</div>`:''}</td>
+<td>${r.buyerUid?(b?buyerPdf(b):`<b>${esc(r.buyerUid)}</b><div class="m">ไม่พบในรายชื่อ Buyer / Commercial</div>`):'-'}${r.remark?`<div class="rm">${esc(r.remark)}</div>`:''}</td>
+<td>${c&&!isNaN(c)?`${fmt(c)}<div class="m">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}</td></tr>`}).join('');
   return`<!doctype html><html lang="th"><head><meta charset="utf-8"><title>Item NBS ${iso(today())}</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>@page{size:A4 landscape;margin:9mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -2530,12 +2541,12 @@ td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-w
 .rm{margin-top:2px;background:#fdecec;border:1px solid #f5c2c0;border-radius:4px;padding:1px 4px;color:#9f1d1d}
 .nm{display:flex;gap:6px;align-items:flex-start}.nt{min-width:0;flex:1}
 .th{flex:none;width:38px;height:38px;object-fit:contain;border:1px solid #eadada;border-radius:5px;background:#fff}.th.ph{background:#f4eeee}
-.dv{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px;white-space:nowrap;background:#e4edfb;color:#0f4c9c}</style></head><body>
+.dv{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px;white-space:nowrap}.okd{color:#1f7a45}</style></head><body>
 <h1>Item NBS · สินค้าที่ไม่มียอดขาย</h1>
 <p class="sub">พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · แสดง ${all.length.toLocaleString()} จาก ${total.toLocaleString()} รายการ${all.length<total?' (ตามตัวกรองที่เลือกอยู่)':''} · เกณฑ์ NBS: FF ≥5 / DF ≥7 / NF ≥10 วัน · Aging ตามตาราง Aging Stock</p>
-<div class="sum">${Object.entries(NBS_DIV).map(([k,l])=>`<span>${k} · ${l} ${(cnt[k]||0).toLocaleString()}</span>`).join('')}</div>
-<table><colgroup><col style="width:25%"><col style="width:5%"><col style="width:5%"><col style="width:10%"><col style="width:8%"><col style="width:8%"><col style="width:8.5%"><col style="width:13%"><col style="width:7%"><col style="width:10.5%"></colgroup>
-<thead><tr><th>ชื่อสินค้า</th><th class="ctr">Division</th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th>Aging Status</th><th>สถานะ</th><th>Buyer / Remark</th></tr></thead><tbody>${body}</tbody></table></body></html>`;
+<div class="sum">${Object.entries(NBS_DIV).map(([k,l])=>{const c=PDF_DIV[k];return`<span style="background:${c[0]};color:${c[1]};border-color:${c[1]}66">${k} · ${l} ${(cnt[k]||0).toLocaleString()}</span>`}).join('')}${AGING_LV.slice(1).map((l,i)=>{const c=P2[l[1]];return`<span style="background:${c[0]};color:${c[1]};border-color:${c[1]}66">${l[0]} ${lvc[i+1].toLocaleString()}</span>`}).join('')}</div>
+<table><colgroup><col style="width:19.5%"><col style="width:5%"><col style="width:4.5%"><col style="width:7.5%"><col style="width:7%"><col style="width:7%"><col style="width:7.5%"><col style="width:11%"><col style="width:8.5%"><col style="width:17%"><col style="width:6%"></colgroup>
+<thead><tr><th>ชื่อสินค้า</th><th class="ctr">Division</th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th>Aging Status</th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th></tr></thead><tbody>${body}</tbody></table></body></html>`;
 }
 /* print a page of HTML through a hidden iframe: the browser's print dialog offers "Save as PDF" */
 function printDoc(html){
