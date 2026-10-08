@@ -1740,7 +1740,7 @@ function metaRow(b,done){
   const we=[0,6].includes(new Date().getDay());
   return`<tr class="meta-row${done?' acted':''}"><td colspan="9"><div class="meta">
     <div><b>Create (วันที่ทำ):</b> ${created}${b.addedBy&&mode==='sheet'?` · โดย ${esc(b.addedBy)}`:''}</div>
-    <div><b>เวลา:</b> <span class="${we?'':'hl'}">จ–ศ = 2 รอบ ทำก่อน 10.00 น. และ 14.00 น.</span> / <span class="${we?'hl':''}">ส–อา = 1 รอบ ทำก่อน 14.00 น.</span></div>
+    <div><b>เวลาติดต่อ Buyer / Commercial :</b> <span class="${we?'':'hl'}">จ–ศ = 2 รอบ ทำก่อน 10.00 น. และ 14.00 น.</span> / <span class="${we?'hl':''}">ส–อา = 1 รอบ ทำก่อน 14.00 น.</span></div>
   </div></td></tr>`;
 }
 async function fillNames(){
