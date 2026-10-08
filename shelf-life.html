@@ -743,7 +743,12 @@ label:has(>:is(#negQ,#dmsQ)){color:var(--accent);font-weight:800;font-size:14px}
 @media (max-height:520px){
   header{position:static!important}
   #oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles,.lvbar{position:static!important;box-shadow:none}
-}@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
+}/* camera button inside the search boxes (same red as the scan buttons) */
+label.has-scan{position:relative}
+label.has-scan>input{padding-right:50px!important}
+.scan-mini{position:absolute;right:4px;bottom:3px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;padding:0;border-radius:10px;border:1px solid #e30613;background:#e30613;color:#fff;cursor:pointer;line-height:0}
+.scan-mini:hover{background:#c00510}
+.scan-mini:focus-visible{outline:3px solid #ffd400;outline-offset:1px}@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
 <body>
@@ -4864,10 +4869,10 @@ try{let raf=0;const go=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(
   new MutationObserver(go).observe($('#tabs'),{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden']});go()}catch(e){}
 /* compact Julian in the pinned tab bar once the big badge scrolls away */
 try{new IntersectionObserver(([en])=>$('#jmini').classList.toggle('show',!en.isIntersecting),{threshold:0}).observe(document.querySelector('.jbadge'))}catch(e){$('#jmini').classList.add('show')}
-/* camera barcode scan — same ZXing build and settings as Makro Finder's own scanner */
-let zxr=null,scanOn=false,scanLast=null,scanHits=0,scanFor='mf';
-async function openScan(target){
-  scanFor=target==='nbs'?'nbs':'mf';
+/* camera barcode scan — ONE scanner for every place in this app (Monitor item, Item NBS, and the search / Item No box of every list page); same ZXing build and settings as Makro Finder's own scanner, which is a separate app and is not touched here */
+let zxr=null,scanOn=false,scanLast=null,scanHits=0,scanFor='mf',scanInput=null;
+async function openScan(target,inputEl){
+  scanFor=target==='nbs'?'nbs':target==='field'?'field':'mf';scanInput=target==='field'?inputEl:null;
   const d=$('#dlgScan');$('#scanMsg').textContent='กำลังเปิดกล้อง…';d.showModal();
   if(!navigator.mediaDevices?.getUserMedia){$('#scanMsg').textContent='เบราว์เซอร์นี้ใช้กล้องไม่ได้ — พิมพ์บาร์โค้ดในช่องค้นหาแทน';return}
   try{
@@ -4891,8 +4896,24 @@ async function useScannedNbs(code){
   if(h.length&&(h[0].barcode===code||MF.bar.get(code)===h[0].itemNo||h[0].itemNo===code)){nbsPick(h[0].itemNo);const dup=(st.nbs||[]).some(r=>r.itemNo===h[0].itemNo&&r._id!==nbsEditId);toast(dup?'พบสินค้า: '+h[0].desc+' — มีใน Item NBS แล้ว':'พบสินค้า: '+h[0].desc)}
   else{nbsSearch();toast(h.length?'เลือกสินค้าจากรายการ':'ไม่พบบาร์โค้ด '+code+' ใน Makro Finder')}
 }
+/* any search box: barcode -> Item No (Makro Finder data, then the barcodes already in OOS+ / Item NBS), written into the box so the page filters at once; unknown code = the code itself is searched */
+async function scanLookup(code){
+  if(MF.state!=='ready'){toast('กำลังโหลดข้อมูลสินค้า…');await loadMakroData();for(let i=0;i<120&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250))}
+  let itemNo='',desc='';
+  if(MF.state==='ready'){const h=mfSearch(code);if(h.length&&(h[0].barcode===code||MF.bar.get(code)===h[0].itemNo||h[0].itemNo===code)){itemNo=h[0].itemNo;desc=h[0].desc}}
+  if(!itemNo){const r=[...(st.oos||[]),...(st.nbs||[])].find(x=>x.barcode&&x.barcode===code);if(r){itemNo=r.itemNo;desc=r.desc||''}}
+  if(!itemNo){const p=(st.products||[]).find(x=>x.sku&&x.sku===code);if(p){itemNo=p.sku;desc=p.desc||''}}
+  return{itemNo,desc}
+}
+async function useScannedField(code){
+  const el=scanInput;if(!el)return;const r=await scanLookup(code),v=r.itemNo||code;
+  el.value=v;el.dispatchEvent(new Event(el.name==='itemNo'?'change':'input',{bubbles:true}));
+  try{el.focus({preventScroll:true})}catch(e){}
+  toast(r.itemNo?'พบสินค้า: '+(r.desc||r.itemNo)+' · ค้นหา '+v:'ไม่พบบาร์โค้ด '+code+' ในข้อมูล — ใช้ค่าที่สแกนค้นหา')
+}
 async function useScanned(code){
   if(scanFor==='nbs')return useScannedNbs(code);
+  if(scanFor==='field')return useScannedField(code);
   $('#mfQ').value=code;
   if(MF.state!=='ready'){toast('กำลังโหลดข้อมูลสินค้า…');await loadMakroData();for(let i=0;i<120&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250))}
   const h=mfSearch(code);
@@ -4900,6 +4921,15 @@ async function useScanned(code){
   else{renderMfResults();toast(h.length?'เลือกสินค้าจากรายการ':'ไม่พบบาร์โค้ด '+code+' ใน Makro Finder')}
 }
 $('#scanBtn').onclick=()=>openScan('mf');$('#nScanBtn').onclick=()=>openScan('nbs');
+/* a camera button inside every search / Item No box */
+const SCAN_SVG='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M7 8v8M10 8v8M13 8v8M16 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const SCAN_FIELDS=['#q','#nbsQ','#oosQ','#shrQ','#negQ','#dmsQ','#pQ','#fOos [name=itemNo]'];
+function scanInit(){
+  SCAN_FIELDS.forEach(sel=>{const inp=document.querySelector(sel);if(!inp||inp.dataset.scan)return;inp.dataset.scan='1';
+    const lab=inp.closest('label')||inp.parentElement;lab.classList.add('has-scan');
+    const b=document.createElement('button');b.type='button';b.className='scan-mini';b.title='สแกนบาร์โค้ดด้วยกล้อง';b.setAttribute('aria-label','สแกนบาร์โค้ดด้วยกล้อง');b.innerHTML=SCAN_SVG;
+    b.onclick=e=>{e.preventDefault();e.stopPropagation();openScan('field',inp)};lab.appendChild(b)})}
+scanInit();
 function resetAddForm(){
   ['#mfQ','#aJ','#aDate','#aLoc','#aRemarkOther'].forEach(s=>{const el=$(s);if(el)el.value=''});
   $('#aQty').value=1;$('#aRemark').value='';$('#aRemarkOtherWrap').hidden=true;
