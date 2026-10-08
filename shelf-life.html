@@ -4098,10 +4098,10 @@ function runIlImport(){
   ilSave(p).then(ok=>{if(!ok)toast('นำเข้าแล้ว แต่เบราว์เซอร์ไม่ยอมให้จำข้อมูลไว้ — ปิดหน้าแล้วต้องนำเข้าใหม่')})}
 async function ilExport(p){
   const m=ilBuild(p),rows=ilVisible(p,m);if(!rows.length)return;await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-  const head=['Item No','ชื่อสินค้า','กลุ่ม','Dept','Class','Buyer','Supplier','Item Status','Selling Price','ASOH (Stock)','USOH','On Order','In Transit','Avg Sale 28 Days','Last Month Sold','Curr Month Sold','Stock Day (ระบบ)','DMS จริง','Stock พอขาย (วัน)','สถานะสต็อก','DMS ระบบ (จาก Stock Day)','DMS ต่างจากระบบ %','มูลค่าติดลบ ฿','เสี่ยงเสียยอดขาย ฿/วัน','Stock เกิน 30 วัน ฿','สต็อกร่วม (~)'];
+  const head=['กลุ่ม','Item No','ชื่อสินค้า','ASOH (Stock)','Dept','Class','Buyer','Supplier','Item Status','Selling Price','USOH','On Order','In Transit','Avg Sale 28 Days','Last Month Sold','Curr Month Sold','Stock Day (ระบบ)','DMS จริง','Stock พอขาย (วัน)','สถานะสต็อก','DMS ระบบ (จาก Stock Day)','DMS ต่างจากระบบ %','มูลค่าติดลบ ฿','เสี่ยงเสียยอดขาย ฿/วัน','Stock เกิน 30 วัน ฿','สต็อกร่วม (~)'];
   const r2=x=>x==null?'':Math.round(x*100)/100;
-  const out=rows.map(it=>{const r=it.r;return[it.itemNo,it.desc,it.div,it.dlbl,it.cn,it.by,r.sp,r.st,r.pr,it.a,r.u,r.oo,r.it,r2(r.a28),r.lm,r.cm,r.sd==null?'':r.sd,r2(it.dms),r2(it.cover),IL_BK[it.bk][0],r2(it.sys),it.gap==null?'':Math.round(it.gap*100),r2(it.val),r2(it.risk),r2(it.over),it.shared?'ใช่':'']});
-  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=head.map((h,i)=>({wch:i===1?36:i===3?22:12}));XLSX.utils.book_append_sheet(wb,ws,IL_DEFS[p].title);XLSX.writeFile(wb,IL_DEFS[p].title.replace(/ /g,'')+'-'+new Date().toISOString().slice(0,10)+'.xlsx');toast('ดาวน์โหลดรายการแล้ว')}
+  const out=rows.map(it=>{const r=it.r;return[it.div,it.itemNo,it.desc,it.a,it.dlbl,it.cn,it.by,r.sp,r.st,r.pr,r.u,r.oo,r.it,r2(r.a28),r.lm,r.cm,r.sd==null?'':r.sd,r2(it.dms),r2(it.cover),IL_BK[it.bk][0],r2(it.sys),it.gap==null?'':Math.round(it.gap*100),r2(it.val),r2(it.risk),r2(it.over),it.shared?'ใช่':'']});
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=head.map((h,i)=>({wch:i===2?36:i===4?22:12}));XLSX.utils.book_append_sheet(wb,ws,IL_DEFS[p].title);XLSX.writeFile(wb,IL_DEFS[p].title.replace(/ /g,'')+'-'+new Date().toISOString().slice(0,10)+'.xlsx');toast('ดาวน์โหลดรายการแล้ว')}
 function ilInit(){
   const after=$('#t-shr');after.insertAdjacentHTML('afterend',ilSectionHtml('neg')+ilSectionHtml('dms'));document.body.insertAdjacentHTML('beforeend',ilDlgHtml);
   for(const p of ['neg','dms']){
