@@ -639,7 +639,25 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
 /* %Shrink: same look as OOS+ (search box, FF / DF / NF tiles, ranking chart, cards) */
 #shrDivTiles .tile{position:relative}
 /* FF / DF / NF pinned under the tab bar while the list scrolls (same as the Item NBS Aging bar) */
-#shrDivTiles{position:sticky;top:calc(var(--navh,52px) + env(safe-area-inset-top,0px));z-index:7;background:var(--card);padding:8px 0;margin:4px 0 0!important;box-shadow:0 8px 8px -9px #0006}
+#oosDivTiles,#shrDivTiles{position:sticky;top:calc(var(--navh,52px) + env(safe-area-inset-top,0px));z-index:7;background:var(--card);padding:8px 0;margin:4px 0 0!important;box-shadow:0 8px 8px -9px #0006}
+.tile .mini{display:none}
+:is(#oosDivTiles,#shrDivTiles).stuck{padding:4px 0;gap:6px}
+:is(#oosDivTiles,#shrDivTiles).stuck .tile{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;padding:4px 10px 4px 9px;min-width:0;border-radius:10px}
+:is(#oosDivTiles,#shrDivTiles).stuck .tile.dv{border-left-width:5px}
+:is(#oosDivTiles,#shrDivTiles).stuck .tile b{display:inline;font-size:17px;margin:0;line-height:1.2}
+:is(#oosDivTiles,#shrDivTiles).stuck .tile .chip{font-size:12px;padding:0 8px;flex:none}
+:is(#oosDivTiles,#shrDivTiles).stuck .tile .dvl,:is(#oosDivTiles,#shrDivTiles).stuck .tile .small{display:none}
+:is(#oosDivTiles,#shrDivTiles).stuck .tile .mini{display:inline;font-size:11px;color:var(--muted);white-space:nowrap}
+#shrDivTiles.stuck .dvpct{position:static;margin-left:auto;padding:0 8px;font-size:11px}
+#shrDivTiles.stuck .dvpct b{font-size:12.5px}
+@media (max-width:700px){
+  :is(#oosDivTiles,#shrDivTiles).stuck .tile .mini{display:none}
+  #oosDivTiles.stuck .tile{padding:4px 6px 4px 8px;gap:6px}
+  #shrDivTiles.stuck .tile{flex-wrap:wrap;gap:1px 6px;padding:3px 6px 3px 8px}
+  #shrDivTiles.stuck .tile b{order:3;width:100%;font-size:16px;line-height:1.15}
+  #shrDivTiles.stuck .dvpct{padding:0 6px;margin-left:auto}
+  #shrDivTiles.stuck .dvpct b{width:auto;order:0;font-size:11.5px}
+}
 .dvpct{position:absolute;top:9px;right:11px;display:inline-flex;align-items:baseline;gap:4px;padding:2px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--muted);box-shadow:0 1px 3px #0001}
 .dvpct b{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
 .dvpct.neg b{color:#c62828}.dvpct.pos b{color:#1f7a45}#shrQ{background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b5cad' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px 50%/20px;border:2px solid var(--accent);border-radius:12px;padding:11px 14px 11px 42px;font-size:16px;font-weight:600;box-shadow:0 2px 10px #0b5cad26}
@@ -1558,13 +1576,13 @@ let busy=false;
 async function act(fn,okMsg){
   if(!canWrite){toast('คุณดูข้อมูลได้อย่างเดียว');return false}
   if(busy){toast('กำลังบันทึกรายการก่อนหน้า…');return false}
-  busy=true;document.body.classList.add('busy');
+  busy=true;BBI=null;document.body.classList.add('busy');
   try{
     if(mode==='sheet'){queue=[];await fn();const ws=queue;queue=null;renderAll();if(ws.length)await retry(()=>sheetCall({op:'bulk',writes:ws}))}
     else{await fn();if(mode==='local')renderAll()}
     if(okMsg)toast(okMsg);return true}
   catch(e){queue=null;notice(dbErr(e));if(mode==='sheet'){busy=false;pull()}return false}
-  finally{busy=false;document.body.classList.remove('busy')}
+  finally{busy=false;BBI=null;document.body.classList.remove('busy')}
 }
 async function replaceAll(s){
   if(mode==='sheet'){const data={};COLS.forEach(c=>data[c]=(s[c]||[]).map(x=>({...body(x),_id:x._id||rid()})));
@@ -3175,7 +3193,7 @@ function renderOos(){
   const ctx=oosDivCtx(),byDiv={},lateDiv={};
   active.forEach(r=>{const d=oosDiv(r,ctx)||'-';byDiv[d]=(byDiv[d]||0)+1;if(oosLevel(r)==='late')lateDiv[d]=(lateDiv[d]||0)+1});
   if(oosDivFilter==='-'&&!byDiv['-'])oosDivFilter=''; /* the "ไม่ระบุกลุ่ม" tile disappears once nothing is left in it */
-  const divTile=(k,chipHtml)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${oosDivFilter===k?' sel':''}" data-div="${k}">${chipHtml}<b>${(byDiv[k]||0).toLocaleString()}</b><span class="muted small"><span class="tl">รายการที่ต้องเติม</span>${lateDiv[k]?`<span class="tl"> · </span><span class="err-text">ค้างเกิน ${OOS_LATE_H} ชม. ${lateDiv[k].toLocaleString()}</span>`:''}</span></button>`;
+  const divTile=(k,chipHtml)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${oosDivFilter===k?' sel':''}" data-div="${k}">${chipHtml}<b>${(byDiv[k]||0).toLocaleString()}</b><span class="mini">ต้องเติม</span><span class="muted small"><span class="tl">รายการที่ต้องเติม</span>${lateDiv[k]?`<span class="tl"> · </span><span class="err-text">ค้างเกิน ${OOS_LATE_H} ชม. ${lateDiv[k].toLocaleString()}</span>`:''}</span></button>`;
   $('#oosDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
   /* status tiles follow the selected group */
   const sub=all.filter(r=>oosInDiv(r,ctx)),sActive=sub.filter(r=>r.status!=='done'),sLate=sActive.filter(r=>oosLevel(r)==='late'),sDoneToday=sub.filter(r=>r.status==='done'&&oosDoneMs(r)>=t0.getTime());
@@ -3623,15 +3641,18 @@ function shrBuild(){
   const items=[...by.values()],buyers=new Map(),coms=new Map();
   /* Commercial of a Buyer: the Commercial contacts list the Buyer UIDs they cover in brackets ("Senior Manager · Frozen (FF1, FF2)") */
   const comBy=new Map();(st.contacts||[]).filter(c=>c.role==='Commercial').forEach(c=>{const mm=String(c.dept||'').match(/\(([^)]*)\)/);if(!mm)return;mm[1].split(/\s*,\s*/).forEach(u=>{u=u.trim().toUpperCase();if(u){if(!comBy.has(u))comBy.set(u,[]);comBy.get(u).push(c)}})});
+  /* the Buyer of a Class is the same for every item of it: work it out once per Class (+ Sub / department), not once per item; only items whose name hits a keyword rule are asked one by one */
+  const kwList=[];(st.contacts||[]).forEach(c=>{if(c.role!=='Buyer')return;ctKeys(c).forEach(k=>{if(/^\d+\s*@\s*\d+$/.test(k))return;const mm=k.match(/^(dept|d|kw|art):\s*(.+)$/i),t=mm?(mm[1].toLowerCase()==='d'?'dept':mm[1].toLowerCase()):(/^\d+$/.test(k)?'art':'kw'),v=(mm?mm[2]:k).trim().toLowerCase();if(t==='kw'&&v)kwList.push(v)})});
+  const bcache=new Map(),comCache=new Map(),classBuyer=(it,m)=>{const key=it.div+'|'+it.cn+'|'+(m?m.s:'')+'|'+it.dlbl;let v=bcache.get(key);if(v===undefined){v=buyerFor({division:it.div,artGrp:it.cn,subNo:m?m.s:'',itemNo:'',desc:'',dept:it.dlbl})||'';bcache.set(key,v)}return v};
   items.forEach(it=>{
     if(!it.dn&&it.dp)it.dn=SHR_DEPT[it.dp]||'';
     if(!it.div)it.div=shrDivOfDept(it.dp);
     it.dlbl=it.dp?(it.dp+' '+it.dn).trim():'';
     const m=ITEMCLS?ITEMCLS.get(amNum(it.itemNo)):null;if(!it.cn&&m)it.cn=String(m.g);
-    let uid='';try{uid=buyerFor({division:it.div,artGrp:it.cn,subNo:m?m.s:'',itemNo:it.itemNo,desc:it.desc,dept:it.dlbl})||''}catch(e){}
+    let uid='';try{uid=((kwList.length&&kwList.some(w=>String(it.desc).toLowerCase().includes(w)))?buyerFor({division:it.div,artGrp:it.cn,subNo:m?m.s:'',itemNo:it.itemNo,desc:it.desc,dept:it.dlbl}):classBuyer(it,m))||buyerByItem(it.itemNo)||''}catch(e){}
     it.buyer=uid;if(uid&&!buyers.has(uid)){const c=ctFindBuyer(uid);buyers.set(uid,c&&c.name||'')}
     /* no single Buyer for this Class (shared / unknown): show the Commercial(s) of the Buyers who hold the Class instead */
-    it.coms=[];if(!uid&&it.cn){const seen=new Set();buyersByArt(String(amNum(it.cn))).filter(c=>divGroupOk(it.div,c.group)).forEach(b=>(comBy.get(String(b.uid).toUpperCase())||[]).forEach(c=>{if(!seen.has(c.uid)){seen.add(c.uid);it.coms.push(c)}}));if(it.coms.length>3)it.coms=[];it.coms.forEach(c=>coms.set(c.uid,c))}
+    it.coms=[];if(!uid&&it.cn){const ck=it.div+'|'+it.cn;let cl=comCache.get(ck);if(!cl){const seen=new Set();cl=[];buyersByArt(String(amNum(it.cn))).filter(c=>divGroupOk(it.div,c.group)).forEach(b=>(comBy.get(String(b.uid).toUpperCase())||[]).forEach(c=>{if(!seen.has(c.uid)){seen.add(c.uid);cl.push(c)}}));if(cl.length>3)cl=[];comCache.set(ck,cl)}it.coms=cl;cl.forEach(c=>coms.set(c.uid,c))}
     it.q=[it.itemNo,it.desc,it.cl,it.cn,it.dlbl,it.div,uid,buyers.get(uid),...it.coms.map(c=>c.name+' '+c.uid)].join(' ').toLowerCase()});
   return SHR_MEMO={key,items,buyers,coms,depts:[...new Set(items.map(i=>i.dlbl).filter(Boolean))].sort(),classes:[...new Map(items.filter(i=>i.cn).map(i=>[i.cn,i.cn+' '+i.cl])).entries()].sort((a,b)=>amNum(a[0])-amNum(b[0])),reasons:[...new Set(SHR.code.map(r=>r.r))].sort((a,b)=>(+a||1e9)-(+b||1e9)||a.localeCompare(b))}}
 const shrRs=rc=>{const n=SHR.names[rc]!=null&&SHR.names[rc]!==''?SHR.names[rc]:SHR_RS0[rc];return n?rc+' · '+n:'รหัส '+rc};
@@ -3710,7 +3731,7 @@ function renderShr(){
   /* %Actual Shrinkage of each group, as in the Power BI report: the group's Actual Shrinkage (net, gains included) ÷ the group's Sales (always from the sales + shrink report, whatever view is chosen) */
   const dvA={},dvS={};m.items.forEach(it=>{if(!it.hasSales)return;const d=it.div||'-';if(it.sales!=null)dvS[d]=(dvS[d]||0)+it.sales;if(it.amt!=null)dvA[d]=(dvA[d]||0)+it.amt});
   const dvPct=k=>dvS[k]>0&&SHR.sales?`<span class="dvpct ${dvA[k]<0?'neg':dvA[k]>0?'pos':''}" title="%Actual Shrinkage = Actual Shrinkage รวมของกลุ่ม ÷ ยอดขายรวมของกลุ่ม (ติดลบ = ของหาย / ทิ้งมากกว่าที่ได้คืน)"><span class="dpl">%Actual Shrink </span><b>${shrPct((dvA[k]||0)/dvS[k])}</b></span>`:'';
-  const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${shrDiv===k?' sel':''}" data-div="${k}">${dvPct(k)}${chip}<b>${shrBk(byDiv[k]||0)}</b><span class="muted small"><span class="tl">ทิ้ง </span>${(nDiv[k]||0).toLocaleString()} รายการ${gainDiv[k]?`<span class="tl"> · ได้คืน ${shrBk(gainDiv[k])}</span>`:''}</span></button>`;
+  const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${shrDiv===k?' sel':''}" data-div="${k}">${dvPct(k)}${chip}<b>${shrBk(byDiv[k]||0)}</b><span class="mini">ทิ้ง</span><span class="muted small"><span class="tl">ทิ้ง </span>${(nDiv[k]||0).toLocaleString()} รายการ${gainDiv[k]?`<span class="tl"> · ได้คืน ${shrBk(gainDiv[k])}</span>`:''}</span></button>`;
   $('#shrDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
   /* summary tiles follow the group */
   const sub=elig.filter(it=>!shrDiv||it.div===shrDiv),gross=sub.reduce((s,it)=>s+lossOf(it),0),nLoss=sub.filter(it=>lossOf(it)>0).length;
@@ -3829,7 +3850,21 @@ function openShrNames(){
   $('#dlgShNm').showModal()}
 $('#shrNames').onclick=openShrNames;$('#snCancel').onclick=()=>$('#dlgShNm').close();
 $('#snSave').onclick=async()=>{$('#snList').querySelectorAll('input[data-rc]').forEach(i=>{const v=i.value.trim(),rc=i.dataset.rc;if(v===(SHR_RS0[rc]||''))delete SHR.names[rc];else SHR.names[rc]=v});SHR_REV++;shrSave();$('#dlgShNm').close();renderShr();toast('บันทึกชื่อรหัสเหตุผลแล้ว')};
-shrLoad().then(()=>{if(SHR.files.length)renderShr()});
+/* FF / DF / NF tiles stay under the tab bar while the list scrolls; once pinned they shrink to one thin line (group · number · what it is) so they hide as little as possible */
+/* %Shrink only needs the product pictures: fetch that small file instead of the whole item-location workbook (seconds of parsing) that the other tabs load */
+function loadMakroImages(){
+  if(!onMakroSite()||MF.state!=='idle'||MF.imgOnly)return;MF.imgOnly=true;
+  fetch('item_images.json').then(r=>r.ok?r.json():{}).then(j=>{if(MF.state!=='ready'){MF.images=j||{};if(!$('#t-shr').hidden)renderShr()}}).catch(()=>{});
+}
+function pinCompact(el){
+  if(!el)return;const sp=document.createElement('div');sp.style.cssText='height:0;margin:0;padding:0;pointer-events:none';el.parentNode.insertBefore(sp,el);
+  const upd=()=>{if(!el.offsetParent)return;const nb=document.querySelector('#tabs').getBoundingClientRect().bottom,stuck=sp.getBoundingClientRect().top<nb-1;
+    if(stuck===el.classList.contains('stuck'))return;
+    const h=el.offsetHeight;el.classList.toggle('stuck',stuck);sp.style.height=stuck?Math.max(0,h-el.offsetHeight)+'px':'0'}; /* the spacer keeps the page height the same, so nothing jumps when the tiles shrink */
+  window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',upd);$('#tabs').addEventListener('click',()=>setTimeout(upd,0));
+}
+pinCompact($('#oosDivTiles'));pinCompact($('#shrDivTiles'));
+shrLoad().then(()=>{if(SHR.files.length)(window.requestIdleCallback?requestIdleCallback(()=>renderShr(),{timeout:3000}):setTimeout(renderShr,800))}); /* the tab badge is worked out when the browser is idle, not while the page is starting */
 
 /* ---------- julian tab ---------- */
 function julTab(){
@@ -4160,10 +4195,12 @@ $('#bbClean').onclick=async()=>{
    the most specific rule type with exactly one Buyer wins (Art Grp, then name word, then Department); ambiguous = leave blank */
 const ctKeys=c=>String(c.artKeys||'').split(/[,;\n]+/).map(s=>s.trim()).filter(Boolean);
 /* the Buyer already known for this very item in the OOS+ records (they carry the report's buyer_uid); only when all of them agree */
+let BBI=null,BBI_KEY=''; /* item -> Buyers seen in the OOS+ records, built once (it used to scan every OOS record for every item: thousands x thousands) */
 function buyerByItem(no){
   no=amNum(no);if(!no)return'';
-  const s=new Set((st.oos||[]).filter(o=>o.buyerUid&&amNum(o.itemNo)===no).map(o=>o.buyerUid));
-  return s.size===1?[...s][0]:'';
+  const oos=st.oos||[],key=oos.length+'|'+(oos.length?oos[0]._id+oos[oos.length-1]._id:'');
+  if(!BBI||BBI_KEY!==key){BBI=new Map();oos.forEach(o=>{if(!o.buyerUid)return;const k=amNum(o.itemNo);if(!k)return;let s=BBI.get(k);if(!s)BBI.set(k,s=new Set());s.add(o.buyerUid)});BBI_KEY=key}
+  const s=BBI.get(no);return s&&s.size===1?[...s][0]:'';
 }
 function buyerFor(rec){
   /* "Art Grp Sub No" (Negative Stock Monitor) is a sub-code inside a Dept, NOT the 3-digit Class the rules are written for: never match it by number */
@@ -4497,7 +4534,7 @@ $('#q').oninput=renderDash;$('#pQ').oninput=renderProd;try{const sv=localStorage
 $('#pSort').onchange=()=>{try{localStorage.setItem('slm.pSort',$('#pSort').value)}catch(e){}renderProd()};
 $('#thShelf').onclick=()=>{const s=$('#pSort');s.value=s.value==='shelf-asc'?'shelf-desc':'shelf-asc';s.onchange()};$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
-$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs'||b.dataset.tab==='oos'||b.dataset.tab==='shr')loadMakroData();if(b.dataset.tab==='nbs')renderNbs();if(b.dataset.tab==='oos')renderOos();if(b.dataset.tab==='shr')renderShr()};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs'||b.dataset.tab==='oos')loadMakroData();if(b.dataset.tab==='shr')loadMakroImages();if(b.dataset.tab==='nbs')renderNbs();if(b.dataset.tab==='oos')renderOos();if(b.dataset.tab==='shr')renderShr()};
 if(onMakroSite()){$('#appLogo').hidden=false;$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
 /* came from Makro Finder in this tab → go back in history so its page/search state is kept */
 $('#backMf').onclick=e=>{try{const r=new URL(document.referrer);if(r.origin===location.origin&&r.pathname.replace(/index\.html$/,'')===new URL('./',location.href).pathname&&history.length>1){e.preventDefault();history.back()}}catch(x){}};
