@@ -141,7 +141,7 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .pill-green{color:var(--ok);border-color:var(--ok);background:var(--okbg)}
 .pill-red{color:var(--redbox-ink);border-color:var(--redbox-line);background:var(--redbox)}
 .pill-red b{color:inherit}
-.ccards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:14px}
+.ccards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px;margin-top:14px}
 .ccard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:2px;min-width:0}
 .clabel{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.03em;text-transform:uppercase}
 .clabel b{color:var(--accent);font-size:13px}
@@ -286,7 +286,7 @@ table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-in
 .dico{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center}
 .dico-out{background:var(--redbox);color:var(--redbox-ink);border:1px solid var(--redbox-line)}
 .dico-in{background:color-mix(in srgb,var(--accent) 12%,var(--card));color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--card))}
-.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:12px}
 .dtile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s}
 .dtile:hover{transform:translateY(-2px);box-shadow:0 6px 16px #0000001a;border-color:var(--accent)}
 .dtile b{font-size:15.5px}
@@ -344,7 +344,7 @@ nav button.on .tabcnt{background:var(--accent-ink);color:var(--accent)}
 nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .oos-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;border-color:var(--soon);background:var(--soonbg);color:var(--soon);font-weight:700}
 .oos-banner.late{border-color:#c62828;background:var(--redbox);color:var(--redbox-ink)}
-.oos-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
+.oos-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:12px;align-items:start}
 .oosc{display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px;border:1px solid var(--line);border-left:6px solid var(--seg-ok);border-radius:12px;background:var(--card)}
 .oosc.lv-warn{border-left-color:var(--seg-md2);background:var(--soonbg)}
 .oosc.lv-late{border-left-color:#c62828;background:var(--redbox)}
@@ -440,7 +440,7 @@ select,input,textarea{max-width:100%}
   table.resp,table.resp tbody{display:block;width:100%}
   table.resp td>*{flex:1;min-width:0;overflow-wrap:anywhere}
   .strip{max-width:100%}
-  table.resp tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;align-items:start}
+  table.resp tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:10px;align-items:start}
   table.resp tbody tr{margin-bottom:0}
   table.resp tbody tr.grp,table.resp tbody tr.meta-row{grid-column:1/-1}
   table.resp tbody#dashBody{display:block}
@@ -451,7 +451,7 @@ select,input,textarea{max-width:100%}
   table.nbs-tbl td,table.ct-tbl td,table.resp.ct-tbl td{display:flex;gap:10px;border:0;padding:4px 2px;white-space:normal;font-size:13px;overflow-wrap:anywhere}
   table.nbs-tbl td::before,table.ct-tbl td::before{content:attr(data-l);min-width:92px;max-width:40%;color:var(--muted);font-size:12px;font-weight:600}
   table.nbs-tbl,table.ct-tbl,table.nbs-tbl tbody,table.ct-tbl tbody{display:block;width:100%}
-  table.nbs-tbl tbody,table.ct-tbl tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;align-items:start}
+  table.nbs-tbl tbody,table.ct-tbl tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:10px;align-items:start}
   table.nbs-tbl td>*,table.ct-tbl td>*{flex:1;min-width:0;overflow-wrap:anywhere}
   table.ct-tbl tr.grp{grid-column:1/-1}
   table.nbs-tbl td.nsave .actbtns{margin-top:0}
@@ -711,7 +711,7 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
   .jmini .jdate{font-size:11.5px}
 }
 @media (min-width:701px) and (max-width:1700px){.jmini .jdate{display:none}.jmini{padding-right:10px}}
-@media (min-width:701px) and (max-width:1500px){.jmini .jside{display:none}.jmini{padding-right:8px}}/* Negative Stock + Stock to DMS: same look as OOS+ / %Shrink */
+@media (min-width:701px) and (max-width:1500px){.jmini .jside{display:none}.jmini{padding-right:8px}}/* Negative Stock + High Stock to DMS: same look as OOS+ / %Shrink */
 :is(#negQ,#dmsQ){background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b5cad' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px 50%/20px;border:2px solid var(--accent);border-radius:12px;padding:11px 14px 11px 42px;font-size:16px;font-weight:600;box-shadow:0 2px 10px #0b5cad26}
 :is(#negQ,#dmsQ)::placeholder{color:var(--muted);font-weight:400}
 :is(#negQ,#dmsQ):focus{outline:0;box-shadow:0 0 0 4px #0b5cad33,0 2px 10px #0b5cad26}
@@ -737,7 +737,11 @@ label:has(>:is(#negQ,#dmsQ)){color:var(--accent);font-weight:800;font-size:14px}
   :is(#t-neg,#t-dms) .add-head>.row{width:100%;flex-wrap:wrap;gap:6px}
   :is(#t-neg,#t-dms) .add-head>.row>.btn{flex:1 1 calc(50% - 6px);min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
 }
-@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
+/* short screens (a phone held sideways): the logo bar, the Julian badge and the FF / DF / NF tiles scroll away normally; only the tab bar stays */
+@media (max-height:520px){
+  header{position:static!important}
+  #oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles,.lvbar{position:static!important;box-shadow:none}
+}@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
 </head>
 <body>
@@ -756,7 +760,7 @@ label:has(>:is(#negQ,#dmsQ)){color:var(--accent);font-weight:800;font-size:14px}
   <button data-tab="oos">OOS+<span class="tabcnt" id="oosBadge" hidden></span></button>
   <button data-tab="shr" title="จำนวนสินค้าที่ทิ้งเกิน ฿1,000">%Shrink<span class="tabcnt" id="shrBadge" hidden></span></button>
   <button data-tab="neg" title="จำนวนสินค้าที่ Stock ติดลบ">Negative Stock<span class="tabcnt" id="negBadge" hidden></span></button>
-  <button data-tab="dms" title="จำนวนสินค้าที่หมด / ใกล้หมดแต่ยังขายอยู่">Stock to DMS<span class="tabcnt" id="dmsBadge" hidden></span></button>
+  <button data-tab="dms" title="จำนวนสินค้าที่หมด / ใกล้หมดแต่ยังขายอยู่">High Stock to DMS<span class="tabcnt" id="dmsBadge" hidden></span></button>
   <button data-tab="prod">สินค้า & กฎลดราคา</button>
   <button data-tab="ct">Buyer / Commercial</button>
   <button data-tab="jul">แปลง Julian</button>
@@ -3903,7 +3907,7 @@ function loadMakroImages(){
 }
 function pinCompact(el){
   if(!el)return;const sp=document.createElement('div');sp.style.cssText='height:0;margin:0;padding:0;pointer-events:none';el.parentNode.insertBefore(sp,el);
-  const upd=()=>{if(!el.offsetParent)return;const nb=document.querySelector('#tabs').getBoundingClientRect().bottom,stuck=sp.getBoundingClientRect().top<nb-1;
+  const upd=()=>{if(!el.offsetParent)return;if(innerHeight<=520){if(el.classList.contains('stuck')){el.classList.remove('stuck');sp.style.height='0'}return}const nb=document.querySelector('#tabs').getBoundingClientRect().bottom,stuck=sp.getBoundingClientRect().top<nb-1;
     if(stuck===el.classList.contains('stuck'))return;
     const h=el.offsetHeight;el.classList.toggle('stuck',stuck);sp.style.height=stuck?Math.max(0,h-el.offsetHeight)+'px':'0'}; /* the spacer keeps the page height the same, so nothing jumps when the tiles shrink */
   window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',upd);$('#tabs').addEventListener('click',()=>setTimeout(upd,0));
@@ -3911,12 +3915,12 @@ function pinCompact(el){
 pinCompact($('#oosDivTiles'));pinCompact($('#shrDivTiles'));
 shrLoad().then(()=>{if(SHR.files.length)(window.requestIdleCallback?requestIdleCallback(()=>renderShr(),{timeout:3000}):setTimeout(renderShr,800))}); /* the tab badge is worked out when the browser is idle, not while the page is starting */
 
-/* ---------- Negative Stock · Stock to DMS: two views of the same "Item List" report ----------
+/* ---------- Negative Stock · High Stock to DMS: two views of the same "Item List" report ----------
    Report = ItemList_Layout (Supplier · Buyer · Dept No. · Class · Item No · Description · Last Sales Day · Last Del Day · Selling Price · ASOH · USOH · On Order · In Transit ·
    Avg Sale 28 Days · Last Month Sold Qty · Curr Month Sold Qty · LY This Month Sold Qty · SOURCE METHOD · Reorder Way · Stock Day · Pack Size · Item Status · Aging Status · …)
    ASOH is the stock on hand (a "~" in front = the reduced-price item that shares the stock of its normal item, so it is shown but never counted twice).
    · Negative Stock = items whose ASOH is below 0 (needs a stock count / adjustment)
-   · Stock to DMS   = how many days the stock lasts at the REAL daily sales (Avg Sale 28 Days, Last Month, This Month) against the Stock Day the system shows
+   · High Stock to DMS   = how many days the stock lasts at the REAL daily sales (Avg Sale 28 Days, Last Month, This Month) against the Stock Day the system shows
    Each tab keeps its own file in this browser (IndexedDB); nothing goes to the team database. */
 const IL_COLS=[['sup',/^supplier$/],['by',/^buyer$/],['dp',/^(deptno|department|dept)$/],['cn',/^class$/],['item',/^itemno$/],['name',/^(description|itemname)$/],['ls',/^lastsalesday$/],['ld',/^lastdelday$/],['pr',/^sellingprice$/],['a',/^asoh$/],['u',/^usoh$/],['oo',/^onorder$/],['it',/^intransit$/],['a28',/^avgsale28days$/],['lm',/^lastmonthsoldqty$/],['cm',/^currmonthsoldqty$/],['ly',/^lythismonthsoldqty$/],['src',/^sourcemethod$/],['ro',/^reorderway$/],['sd',/^stockday$/],['pk',/^packsize$/],['st',/^itemstatus$/],['ag',/^agingstatus$/],['os',/^orderschedule$/],['dd',/^deliveryday$/]];
 const IL_DEFS={
@@ -3924,9 +3928,9 @@ const IL_DEFS={
     sorts:[['val','ติดลบมากสุด (มูลค่า ฿)'],['qty','ติดลบมากสุด (จำนวน)'],['sold','ขายเดือนนี้มากสุด'],['name','ชื่อสินค้า']],
     empty:'ยังไม่มีข้อมูล Negative Stock — กด “นำเข้ารายงาน” แล้วลากไฟล์ ItemList_Layout (ตัวกรอง Stock qty < 0) มาวาง',
     bases:[['val','มูลค่า ฿'],['qty','จำนวนติดลบ'],['sold','ขายเดือนนี้']]},
-  dms:{p:'dms',tab:'Stock to DMS',title:'Stock to DMS',sub:'· Stock พอขายกี่วัน เทียบกับยอดขายจริง (DMS)',tilesTxt:'เสี่ยง',fa:'สถานะสต็อก',fb:'สถานะสินค้า',hideTxt:'ซ่อนรายการลดราคา (~ สต็อกร่วม)',
+  dms:{p:'dms',tab:'High Stock to DMS',title:'High Stock to DMS',sub:'· Stock พอขายกี่วัน เทียบกับยอดขายจริง (DMS)',tilesTxt:'เสี่ยง',fa:'สถานะสต็อก',fb:'สถานะสินค้า',hideTxt:'ซ่อนรายการลดราคา (~ สต็อกร่วม)',
     sorts:[['risk','เสี่ยงขาดมากสุด (฿/วัน)'],['over','ล้นสต็อกมากสุด (฿)'],['gap','DMS ไม่ตรงมากสุด'],['cover','Stock พอขายน้อยสุด (วัน)'],['name','ชื่อสินค้า']],
-    empty:'ยังไม่มีข้อมูล Stock to DMS — กด “นำเข้ารายงาน” แล้วลากไฟล์ ItemList_Layout มาวาง',
+    empty:'ยังไม่มีข้อมูล High Stock to DMS — กด “นำเข้ารายงาน” แล้วลากไฟล์ ItemList_Layout มาวาง',
     bases:[['risk','เสี่ยงขาด ฿/วัน'],['over','ล้นสต็อก ฿'],['gap','DMS ไม่ตรง %']]}};
 const IL_BK={neg:['ของหมด / ติดลบ แต่ยังขายอยู่','pull'],low:['ใกล้หมด (ไม่ถึง 3 วัน)','md2'],ok:['Stock พอดี','ok'],over:['Stock ล้น (เกิน 30 วัน)','md1'],dead:['ไม่เคลื่อนไหว (มีของ ไม่มียอดขาย)','soon'],none:['ไม่มี Stock ไม่มียอดขาย','ok']};
 const IL_LOW=3,IL_OVER=30;
@@ -4819,7 +4823,7 @@ let mfT;$('#mfQ').oninput=()=>{clearTimeout(mfT);mfT=setTimeout(renderMfResults,
 $('#mfQ').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const h=mfSearch($('#mfQ').value);if(h.length===1||(h[0]&&/^\d+$/.test($('#mfQ').value.trim())))pickMf(h[0].itemNo)}};
 $('#mfResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)pickMf(b.dataset.no)};
 /* keep sticky table headers just under the pinned tab bar */
-try{const ph=matchMedia('(max-width:700px)'),hd=document.querySelector('header');
+try{const ph=matchMedia('(max-width:700px) and (min-height:521px)'),hd=document.querySelector('header'); /* a phone held sideways (short screen): nothing is pinned except the tab bar, so the list keeps the room */
   const upd=()=>{const s=document.documentElement.style,h=ph.matches?hd.offsetHeight:0; /* phone: the logo bar + Julian are pinned above the tabs */
     s.setProperty('--hdrh',h+'px');s.setProperty('--navh',($('#tabs').offsetHeight+h)+'px');s.setProperty('--legh',$('#dashLegend').offsetHeight+'px');const lb=$('#nbsLevels');s.setProperty('--lvlh',(lb?lb.offsetHeight:0)+'px')};
   const ro=new ResizeObserver(upd);ro.observe($('#tabs'));ro.observe($('#dashLegend'));ro.observe(hd);ro.observe($('#nbsLevels'));ph.addEventListener('change',upd);window.addEventListener('resize',upd);upd()}catch(e){}
