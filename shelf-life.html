@@ -2297,7 +2297,9 @@ function orgPersons(text){
     /* a name with neither an employee id nor a phone number must look like a person's name; labels ("Bakery", "FF4 Frozen Food", "Last Day 7/8") are not people */
     if(!id&&!phone&&(!/^[A-Z][A-Za-z'’.-]+(\s+[A-Z][A-Za-z'’.-]*){1,3}(\s*\([A-Za-z]+\))?$/.test(name)||/\b(food|frozen|chilled|dairy|bakery|delicatessen|manager|director|group|division|expansion|last|day|team|support|assistant|department|area|buyer|junior|senior|mgr|trainer|specialist)\b/i.test(name)))return
     out.push({name,id,phone:phone?orgNum(phone):'',title:'',note:(note+' '+tail).trim()})};
-  const re=/(?:\bM\.?|\bTel\.?)\s*(0[\d\- ]{7,13}\d)|(?<![\d])(0\d{1,2}-\d{3}-\d{4})(?![\d])|(?<![\d])(0\d{9})(?![\d])/gi;let last=0,m;
+  const re=(()=>{ /* built at run time: an older browser (before lookbehind support) would otherwise fail to read the whole page */
+    try{return new RegExp('(?:\\bM\\.?|\\bTel\\.?)\\s*(0[\\d\\- ]{7,13}\\d)|(?<![\\d])(0\\d{1,2}-\\d{3}-\\d{4})(?![\\d])|(?<![\\d])(0\\d{9})(?![\\d])','gi')}
+    catch(e){return /(?:\bM\.?|\bTel\.?)\s*(0[\d\- ]{7,13}\d)|(?:^|[^\d])(0\d{1,2}-\d{3}-\d{4})(?![\d])|(?:^|[^\d])(0\d{9})(?![\d])/gi}})();let last=0,m;
   while((m=re.exec(t))){push(t.slice(last,m.index),m[1]||m[2]||m[3]);last=re.lastIndex}
   const tail=t.slice(last).trim();if(tail)push(tail,'')}
 }
@@ -3213,8 +3215,8 @@ function oosStock(id,btn){
   const r=oosAll().find(x=>x._id===id)||shrFind(id)||ilFind(id);if(!r)return;
   const no=String(r.itemNo||''),urls=STOCK_URLS.map(u=>u.replace(/\{item\}/g,encodeURIComponent(no))),uniq=[...new Set(urls)];
   const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||window.innerWidth<700;
-  if(btn){stkOpen(btn,no,uniq,id);try{navigator.clipboard&&navigator.clipboard.writeText(no)}catch(e){}return}
-  try{navigator.clipboard&&navigator.clipboard.writeText(no)}catch(e){}
+  if(btn){stkOpen(btn,no,uniq,id);try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}return}
+  try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   if(phone){if(uniq.length>1){oosStockPick(no,uniq);return}
     if(!window.open(uniq[0],'_blank'))oosStockPick(no,uniq);else toast(`เปิดหน้า Stock แล้ว · คัดลอก Item No ${no} ไว้ให้วางค้นหา`);return}
   const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,half=Math.floor(W/2);
@@ -3614,7 +3616,7 @@ function oosExportDms(imp){
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['แผนกที่เติม','จำนวนสินค้า','จำนวนบรรทัดที่ขาด','Sale Loss (บาท)',OOS_BK.A[0],OOS_BK.B[0],OOS_BK.C[0],OOS_BK.X[0]],...sumRows]),'สรุปแผนก');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(how),'วิธีคำนวณ');
   const ws=wb.Sheets['DMS ใหม่'];ws['!cols']=[10,34,20,22,12,9,22,10,10,8,10,10,9,9,9,9,9,9,9,10,8,11,22,40,60].map(w=>({wch:w}));
-  XLSX.writeFile(wb,'DMS-ใหม่-'+new Date().toISOString().slice(0,10)+'.xlsx');
+  XLSX.writeFile(wb,'DMS-ใหม่-'+iso(today())+'.xlsx');
   toast('ดาวน์โหลดตาราง DMS ใหม่แล้ว');
 }
 $('#oosImport').onclick=openOosImport;$('#oiCancel').onclick=()=>$('#dlgOosImp').close();$('#oiGo').onclick=runOosImport;
@@ -3822,7 +3824,7 @@ async function shrExport(){
   const rcs=m.reasons,head=['กลุ่ม','Item No','ชื่อสินค้า','Department','Class','Buyer UID','Buyer','Commercial (ถ้าไม่มี Buyer)','ยอดขาย MTD','Actual Shrinkage MTD','%Actual Shrinkage','ทิ้งตาม By Code (฿)','จำนวนตาม By Code',...rcs.map(rc=>shrRs(rc)+' (฿)')];
   const out=rows.map(it=>{const by=(SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||'';return[it.div,it.itemNo,it.desc,it.dlbl,(it.cn+' '+it.cl).trim(),it.buyer,by,it.coms.map(c=>c.name).join(' / '),it.sales==null?'':it.sales,it.amt==null?'':it.amt,it.pct==null?'':it.pct,it.hasCode?Math.round(it.cc*100)/100:'',it.hasCode?it.cq:'',...rcs.map(rc=>it.rs.has(rc)?Math.round(it.rs.get(rc).c*100)/100:'')]});
   const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=[6,10,36,22,26,9,22,26,12,12,10,12,10,...rcs.map(()=>14)].map(w=>({wch:w}));
-  XLSX.utils.book_append_sheet(wb,ws,'%Shrink');XLSX.writeFile(wb,'Shrink-'+new Date().toISOString().slice(0,10)+'.xlsx');toast('ดาวน์โหลดรายการ %Shrink แล้ว');
+  XLSX.utils.book_append_sheet(wb,ws,'%Shrink');XLSX.writeFile(wb,'Shrink-'+iso(today())+'.xlsx');toast('ดาวน์โหลดรายการ %Shrink แล้ว');
 }
 $('#shrXlsx').onclick=shrExport;
 /* "ส่งออก CSV" on every list page: the same rows as the Excel button (or the OOS+ list), as CSV in the same copy / download window the Item NBS CSV uses */
@@ -4152,14 +4154,14 @@ async function ilExport(p){
     const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out],{cellDates:true,dateNF:'d/m/yyyy'});
     ws['!cols']=[22,9,15,10,46,13,13,8,10].map(w=>({wch:w}));
     for(let i=2;i<=out.length+1;i++){['F','G'].forEach(c=>{const x=ws[c+i];if(x&&x.t==='d')x.z='d/m/yyyy'});if(ws['H'+i])ws['H'+i].z='0.00';if(ws['I'+i])ws['I'+i].z='0.00;[Red]-0.00'}
-    XLSX.utils.book_append_sheet(wb,ws,'Negative Stock');XLSX.writeFile(wb,'NegativeStock-'+new Date().toISOString().slice(0,10)+'.xlsx');toast('ดาวน์โหลดรายการแล้ว');return}  const T=IL_T,base=['กลุ่ม','Item No','ชื่อสินค้า','ASOH (Stock)','Dept','Class','Buyer','Supplier','Item Status','Selling Price','USOH','On Order','In Transit','Avg Sale 28 Days','Last Month Sold','Curr Month Sold','Stock Day (ระบบ)'];
+    XLSX.utils.book_append_sheet(wb,ws,'Negative Stock');XLSX.writeFile(wb,'NegativeStock-'+iso(today())+'.xlsx');toast('ดาวน์โหลดรายการแล้ว');return}  const T=IL_T,base=['กลุ่ม','Item No','ชื่อสินค้า','ASOH (Stock)','Dept','Class','Buyer','Supplier','Item Status','Selling Price','USOH','On Order','In Transit','Avg Sale 28 Days','Last Month Sold','Curr Month Sold','Stock Day (ระบบ)'];
   const extra=p==='neg'?['มูลค่าติดลบ ฿','ต้องปรับ Stock (+ หน่วย)','ขายล่าสุด','รับล่าสุด','สต็อกร่วม (~)']
     :['DMS จริง (ต่อวัน)','Stock พอขาย (วัน)','ระดับแนะนำ','ส่วนเกินเกิน '+T+' วัน (หน่วย)','ส่วนเกิน ฿','มูลค่า Stock ฿','ต้องขายให้ได้/วัน (ระบาย '+T+' วัน)','ต้องเพิ่มกี่เท่าของ DMS','DMS ระบบ (จาก Stock Day)','DMS ต่างจากระบบ %','ขายล่าสุด','รับล่าสุด','สต็อกร่วม (~)'];
   const head=[...base,...extra],r2=x=>x==null?'':Math.round(x*100)/100;
   const out=rows.map(it=>{const r=it.r,b=[it.div,it.itemNo,it.desc,it.a,it.dlbl,it.cn,it.by,r.sp,r.st,r.pr,r.u,r.oo,r.it,r2(r.a28),r.lm,r.cm,r.sd==null?'':r.sd];
     if(p==='neg')return[...b,r2(it.val),r2(-it.a),ilYmd(r.ls),ilYmd(r.ld),it.shared?'ใช่':''];
     const h=it.hi;return[...b,r2(it.dms),h.dead?'ไม่มียอดขาย':r2(it.cover),IL_TIER[h.tier][0],r2(h.ex),r2(h.exVal),r2(h.stockVal),h.dead?'':r2(h.req),h.dead?'':r2(h.up),r2(it.sys),it.gap==null?'':Math.round(it.gap*100),ilYmd(r.ls),ilYmd(r.ld),it.shared?'ใช่':'']});
-  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=head.map((h,i)=>({wch:i===2?36:i===4?22:12}));XLSX.utils.book_append_sheet(wb,ws,IL_DEFS[p].title);XLSX.writeFile(wb,IL_DEFS[p].title.replace(/ /g,'')+'-'+new Date().toISOString().slice(0,10)+'.xlsx');toast('ดาวน์โหลดรายการแล้ว')}
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=head.map((h,i)=>({wch:i===2?36:i===4?22:12}));XLSX.utils.book_append_sheet(wb,ws,IL_DEFS[p].title);XLSX.writeFile(wb,IL_DEFS[p].title.replace(/ /g,'')+'-'+iso(today())+'.xlsx');toast('ดาวน์โหลดรายการแล้ว')}
 function ilInit(){
   const after=$('#t-shr');after.insertAdjacentHTML('afterend',ilSectionHtml('neg')+ilSectionHtml('dms'));document.body.insertAdjacentHTML('beforeend',ilDlgHtml);
   for(const p of ['neg','dms']){
@@ -4843,10 +4845,13 @@ $('#dlgImp').addEventListener('dragover',e=>e.preventDefault());
 $('#dlgImp').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readImportFile(f)});
 /* ---------- boot ---------- */
 function renderAll(){
+  BBI=null; /* the item -> Buyer table is rebuilt from the latest OOS+ records */
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent="YYDDD "+jul(t).y2;$("#jmDate").textContent=$("#todayTxt").textContent;
   const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML=prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
   renderDash();renderProd();renderCt();renderNbs();renderOos();addPreview();julTab();
+  /* the report pages keep their numbers fresh when contacts / OOS records arrive while they are open */
+  try{if(!$('#t-shr').hidden||SHR.files.length)renderShr();['neg','dms'].forEach(p=>{if(ILT[p])renderIlt(p)})}catch(e){}
 }
 $('#fSt').innerHTML+=ST.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
 $('#q').oninput=renderDash;$('#pQ').oninput=renderProd;try{const sv=localStorage.getItem('slm.pSort');if(sv&&[...$('#pSort').options].some(o=>o.value===sv))$('#pSort').value=sv}catch(e){}
