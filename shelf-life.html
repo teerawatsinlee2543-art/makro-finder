@@ -552,8 +552,8 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   .brandbox .app-logo{width:70px;height:70px;left:-36px}
   .brandbox h1{font-size:16px}
   /* OOS+: the three top buttons on one line */
-  #t-oos .add-head>.row{width:100%;flex-wrap:nowrap;gap:6px}
-  #t-oos .add-head>.row>.btn{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
+  :is(#t-oos,#t-nbs) .add-head>.row{width:100%;flex-wrap:wrap;gap:6px}
+  :is(#t-oos,#t-nbs) .add-head>.row>.btn{flex:1 1 calc(50% - 6px);min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
   /* Item NBS FF / DF / NF: one row */
   #nbsTiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
   #nbsTiles .tile{padding:8px 8px 8px 9px;min-width:0}
@@ -691,8 +691,8 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
   #shrDivTiles .dvpct{top:6px;right:6px;padding:0 6px}#shrDivTiles .dvpct b{font-size:12.5px}
   #shrDivTiles .chip{font-size:12px;padding:1px 8px}
   #shrDivTiles .small{font-size:11px;line-height:1.2}
-  #t-shr .add-head>.row{width:100%;flex-wrap:nowrap;gap:6px}
-  #t-shr .add-head>.row>.btn{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
+  #t-shr .add-head>.row{width:100%;flex-wrap:wrap;gap:6px}
+  #t-shr .add-head>.row>.btn{flex:1 1 calc(50% - 6px);min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
 }
 /* tabs on a computer: eleven tabs always in ONE row. A script (fitTabs) shrinks the tab text a little when the screen is narrow, so they fit whatever the font; the Julian chip sits at the right end */
 @media (min-width:701px){
@@ -734,8 +734,8 @@ label:has(>:is(#negQ,#dmsQ)){color:var(--accent);font-weight:800;font-size:14px}
   :is(#negDivTiles,#dmsDivTiles) :is(.dvl,.tl){display:none}
   :is(#negDivTiles,#dmsDivTiles) .chip{font-size:12px;padding:1px 8px}
   :is(#negDivTiles,#dmsDivTiles) .small{font-size:11px;line-height:1.2}
-  :is(#t-neg,#t-dms) .add-head>.row{width:100%;flex-wrap:nowrap;gap:6px}
-  :is(#t-neg,#t-dms) .add-head>.row>.btn{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
+  :is(#t-neg,#t-dms) .add-head>.row{width:100%;flex-wrap:wrap;gap:6px}
+  :is(#t-neg,#t-dms) .add-head>.row>.btn{flex:1 1 calc(50% - 6px);min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
 }
 @media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 </style>
@@ -889,7 +889,7 @@ label:has(>:is(#negQ,#dmsQ)){color:var(--accent);font-weight:800;font-size:14px}
   <div class="card">
     <div class="add-head">
       <h2>OOS+ <span class="muted small" style="font-weight:400">· สินค้าหมดชั้น / หมดสต็อก — เตือนให้เติม</span></h2>
-      <span class="row w"><button type="button" class="btn danger" id="oosDelFile" title="ลบรายการ OOS ที่มาจากไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="oosAdd">+ เพิ่มรายการ</button><button type="button" class="btn imp-btn" id="oosImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span>
+      <span class="row w"><button type="button" class="btn" id="oosCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV">ส่งออก CSV</button><button type="button" class="btn danger" id="oosDelFile" title="ลบรายการ OOS ที่มาจากไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="oosAdd">+ เพิ่มรายการ</button><button type="button" class="btn imp-btn" id="oosImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span>
     </div>
     <div class="tiles" id="oosDivTiles" style="margin:12px 0 0"></div>
     <div class="tiles" id="oosTiles" style="margin:12px 0"></div>
@@ -918,7 +918,7 @@ label:has(>:is(#negQ,#dmsQ)){color:var(--accent);font-weight:800;font-size:14px}
   <div class="card">
     <div class="add-head">
       <h2>%Shrink <span class="muted small" style="font-weight:400">· หยุดทิ้ง — ทิ้งไปเท่าไรแล้ว ตัวไหนทิ้งเยอะสุด</span></h2>
-      <span class="row w"><button type="button" class="btn danger" id="shrDelFile" title="ลบข้อมูลของไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="shrXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">ดาวน์โหลด Excel</button><button type="button" class="btn imp-btn" id="shrImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span>
+      <span class="row w"><button type="button" class="btn danger" id="shrDelFile" title="ลบข้อมูลของไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="shrCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV">ส่งออก CSV</button><button type="button" class="btn" id="shrXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">ดาวน์โหลด Excel</button><button type="button" class="btn imp-btn" id="shrImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span>
     </div>
     <p class="muted small shr-src" id="shrSrc"></p>
     <div class="tiles" id="shrDivTiles" style="margin:12px 0 0"></div>
@@ -3808,12 +3808,26 @@ function renderShr(){
 async function shrExport(){
   const m=shrBuild(),b=shrBasis,rows=shrVisible(m,b);if(!rows.length)return;
   await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-  const rcs=m.reasons,head=['Item No','ชื่อสินค้า','กลุ่ม','Department','Class','Buyer UID','Buyer','Commercial (ถ้าไม่มี Buyer)','ยอดขาย MTD','Actual Shrinkage MTD','%Actual Shrinkage','ทิ้งตาม By Code (฿)','จำนวนตาม By Code',...rcs.map(rc=>shrRs(rc)+' (฿)')];
-  const out=rows.map(it=>{const by=(SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||'';return[it.itemNo,it.desc,it.div,it.dlbl,(it.cn+' '+it.cl).trim(),it.buyer,by,it.coms.map(c=>c.name).join(' / '),it.sales==null?'':it.sales,it.amt==null?'':it.amt,it.pct==null?'':it.pct,it.hasCode?Math.round(it.cc*100)/100:'',it.hasCode?it.cq:'',...rcs.map(rc=>it.rs.has(rc)?Math.round(it.rs.get(rc).c*100)/100:'')]});
-  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=[10,36,6,22,26,9,22,26,12,12,10,12,10,...rcs.map(()=>14)].map(w=>({wch:w}));
+  const rcs=m.reasons,head=['กลุ่ม','Item No','ชื่อสินค้า','Department','Class','Buyer UID','Buyer','Commercial (ถ้าไม่มี Buyer)','ยอดขาย MTD','Actual Shrinkage MTD','%Actual Shrinkage','ทิ้งตาม By Code (฿)','จำนวนตาม By Code',...rcs.map(rc=>shrRs(rc)+' (฿)')];
+  const out=rows.map(it=>{const by=(SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||'';return[it.div,it.itemNo,it.desc,it.dlbl,(it.cn+' '+it.cl).trim(),it.buyer,by,it.coms.map(c=>c.name).join(' / '),it.sales==null?'':it.sales,it.amt==null?'':it.amt,it.pct==null?'':it.pct,it.hasCode?Math.round(it.cc*100)/100:'',it.hasCode?it.cq:'',...rcs.map(rc=>it.rs.has(rc)?Math.round(it.rs.get(rc).c*100)/100:'')]});
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=[6,10,36,22,26,9,22,26,12,12,10,12,10,...rcs.map(()=>14)].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,ws,'%Shrink');XLSX.writeFile(wb,'Shrink-'+new Date().toISOString().slice(0,10)+'.xlsx');toast('ดาวน์โหลดรายการ %Shrink แล้ว');
 }
 $('#shrXlsx').onclick=shrExport;
+/* "ส่งออก CSV" on every list page: the same rows as the Excel button (or the OOS+ list), as CSV in the same copy / download window the Item NBS CSV uses */
+async function xlsToCsv(fn,name){
+  await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+  const ow=XLSX.writeFile,ot=toast;let cap=null;XLSX.writeFile=w=>{cap=w};toast=()=>{};
+  try{await fn()}finally{XLSX.writeFile=ow;toast=ot}
+  if(!cap){ot('ไม่มีรายการให้ส่งออก');return}
+  dl(`${name}_${iso(today())}.csv`,'\ufeff'+XLSX.utils.sheet_to_csv(cap.Sheets[cap.SheetNames[0]]),'text/csv;charset=utf-8')}
+$('#shrCsv').onclick=()=>xlsToCsv(shrExport,'shrink');
+function oosCSV(){
+  const rows=oosVisible(oosDivCtx());if(!rows.length){toast('ไม่มีรายการให้ส่งออก');return}
+  const ctx=oosDivCtx(),head=['division','item_no','description','location','stock','status','assignee','buyer_uid','buyer_name','refill_dept','found_at','done_at','short_3d_times','short_3d_days','short_7d_times','short_7d_days','short_all_times','short_all_days','problem_type','dms','stock_day','dms_new','short_qty','loss_baht','reason','note'];
+  const out=rows.map(r=>[oosDiv(r,ctx)||'',r.itemNo,r.desc||'',r.loc||'',r.stock??'',(OOS_ST[r.status]||OOS_ST.need)[0],r.assignee||'',r.buyerUid||'',oosBuyerName(r),r.assignDept||'',r.foundAt||'',r.doneAt||'',r.freq3??'',r.days3??'',r.freq7??'',r.days7??'',r.freqAll??'',r.daysAll??'',r.bucket&&OOS_BK[r.bucket]?OOS_BK[r.bucket][0]:'',r.dms??'',r.stockDay??'',r.dmsNew??'',r.shortQty??'',r.lossBaht??'',r.reason||'',r.note||'']);
+  dl(`oos_${iso(today())}.csv`,toCSV([head,...out]),'text/csv;charset=utf-8')}
+$('#oosCsv').onclick=oosCSV;
 /* ----- import: both files at once or one by one ----- */
 let shrImp=null;
 const SHR_KIND={code:'By Code · แยกตามรหัสเหตุผล',sales:'ยอดขาย + Actual Shrinkage'};
@@ -4062,7 +4076,7 @@ function ilSectionHtml(p){
   const D=IL_DEFS[p];
   return`<section id="t-${p}" hidden><div class="card">
     <div class="add-head"><h2>${D.title} <span class="muted small" style="font-weight:400">${D.sub}</span></h2>
-      <span class="row w"><button type="button" class="btn danger" id="${p}DelFile" title="ลบข้อมูลที่นำเข้า (เฉพาะในเครื่องนี้)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="${p}Xlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">ดาวน์โหลด Excel</button><button type="button" class="btn imp-btn" id="${p}Import"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span></div>
+      <span class="row w"><button type="button" class="btn danger" id="${p}DelFile" title="ลบข้อมูลที่นำเข้า (เฉพาะในเครื่องนี้)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="${p}Csv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV">ส่งออก CSV</button><button type="button" class="btn" id="${p}Xlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">ดาวน์โหลด Excel</button><button type="button" class="btn imp-btn" id="${p}Import"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span></div>
     <p class="muted small shr-src" id="${p}Src"></p>
     <div class="tiles" id="${p}DivTiles" style="margin:12px 0 0"></div><div class="tiles" id="${p}Tiles" style="margin:12px 0"></div><div class="oos-dchips" id="${p}DeptTiles"></div>
     <div class="fbar f6"><label class="f-q">ค้นหา<input id="${p}Q" placeholder="รหัส / ชื่อสินค้า / Class / แผนก / Buyer / Supplier"></label>
@@ -4118,7 +4132,7 @@ function ilInit(){
       const bk=e.target.closest('.oc-back');if(bk){S.drill=false;$('#'+p+'Q').value='';re();$('#'+p+'Chart').scrollIntoView({block:'nearest',behavior:'smooth'});return}
       const bar=e.target.closest('.oc-r');if(bar){S.drill=true;$('#'+p+'Q').value=bar.dataset.no;re();$('#'+p+'List').scrollIntoView({block:'nearest',behavior:'smooth'})}});
     $('#'+p+'More').onclick=()=>{S.limit+=60;renderIlt(p)};
-    $('#'+p+'Import').onclick=()=>openIlImport(p);$('#'+p+'Xlsx').onclick=()=>ilExport(p);
+    $('#'+p+'Import').onclick=()=>openIlImport(p);$('#'+p+'Xlsx').onclick=()=>ilExport(p);$('#'+p+'Csv').onclick=()=>xlsToCsv(()=>ilExport(p),IL_DEFS[p].title.replace(/ /g,''));
     $('#'+p+'DelFile').onclick=async()=>{if(!ILT[p]){toast('ยังไม่มีไฟล์ที่นำเข้า');return}if(!await ask(`ลบข้อมูลของไฟล์ “${ILT[p].name}” ออกจาก ${IL_DEFS[p].title}?  ลบเฉพาะในเครื่องนี้`))return;ILT[p]=null;IL_REV[p]++;ilSave(p);renderIlt(p);toast('ลบข้อมูลแล้ว')};
     pinCompact($('#'+p+'DivTiles'));
   }
