@@ -546,6 +546,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .waste-io-del{color:#a85a00}
 .waste-io-imp{color:#0b5cad;border-color:#0b5cad}
 .waste-io-btn:active{opacity:.7}
+.waste-io-note{margin:6px 2px 0;font-size:13px;color:var(--color-text-secondary,#667085);text-align:center}
 .fb-export-btn{display:flex;align-items:center;gap:6px;background:#1D9E75;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .fb-export-btn:hover{background:#167a5b}
 .fb-export-btn i{font-size:15px}
@@ -892,10 +893,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <div class="feedback-card-title" style="color:var(--brand-red);justify-content:center;text-align:center;font-size:20px;margin-bottom:0"><i class="ti ti-sparkles" aria-hidden="true"></i> Weight Loss and Waste O2O</div>
         </div>
         <div class="waste-io-row">
-          <button type="button" class="waste-io-btn waste-io-del" id="wasteImportDelBtn" onclick="openWasteImportsList()">ลบไฟล์ที่นำเข้า</button>
-          <button type="button" class="waste-io-btn waste-io-imp" id="wasteImportBtn" onclick="document.getElementById('wasteImportFile').click()"><i class="ti ti-download" aria-hidden="true"></i> นำเข้าข้อมูล</button>
-          <input type="file" id="wasteImportFile" accept=".xlsx,.xls" hidden onchange="importWasteFromExcel(this)">
+          <button type="button" class="waste-io-btn waste-io-del" id="iLocDelBtn" onclick="openItemLocImportInfo()">ลบไฟล์ที่นำเข้า</button>
+          <button type="button" class="waste-io-btn waste-io-imp" id="iLocImportBtn" onclick="document.getElementById('iLocImportFile').click()"><i class="ti ti-download" aria-hidden="true"></i> นำเข้าข้อมูล</button>
+          <input type="file" id="iLocImportFile" accept=".xlsx,.xls" hidden onchange="importItemLocFromExcel(this)">
         </div>
+        <p class="waste-io-note">ใส่ไฟล์เพื่ออัพเดทข้อมูล Item Location</p>
       </div>
     </div>
 
@@ -3901,6 +3903,7 @@ let itemOverridesDocRef=null;
 let feedbackCollectionRef=null;
 let gpsCalibrationDocRef=null;
 let wasteLogCollectionRef=null;
+let itemLocMetaDocRef=null;
 try{
   if(FIREBASE_CONFIG){
     firebase.initializeApp(FIREBASE_CONFIG);
@@ -3915,6 +3918,7 @@ try{
     feedbackCollectionRef=mfCol;
     gpsCalibrationDocRef=mfCol.doc('gpsCalibration');
     wasteLogCollectionRef=mfCol;
+    itemLocMetaDocRef=mfCol.doc('itemLocImport');
   }
 }catch(e){
   console.error('Firebase init ไม่สำเร็จ',e);
@@ -7854,9 +7858,11 @@ function openStockEditor(itemNo,loc,location){
   persistStockOverrides();
   renderDetail(item);
 }
+let ITEM_LOC_IMPORT_META=null;
 function loadProductData(){
   const overridesPromise=loadOverridesData();
   const customItemsPromise=loadCustomItems();
+  const itemLocImportPromise=loadItemLocImport();
   // ตั้ง timeout 25 วิให้ fetch ไฟล์ Item Master (~2MB) เพราะเน็ตในโกดังบางจุดสัญญาณอ่อน/หลุดบ่อย
   // ถ้าไม่ตั้ง timeout ไว้ fetch ค้างได้นานเป็นนาทีหรือค้างตลอดไปโดยไม่มี error ให้ดัก ทำให้หน้าจอค้างที่ไอคอนโหลดตลอดไปไม่มีทางออก
   const xlsxAbort=new AbortController();
@@ -7910,8 +7916,16 @@ function loadProductData(){
       PRODUCTS_BY_KEY=Array.from(map.values());
       PRODUCTS_BY_KEY.forEach(item=>{ item.baseLocations=item.locations.slice(); });
     });
-  return Promise.all([xlsxPromise,overridesPromise,customItemsPromise])
-    .then(()=>{
+  /* if a team import exists the built-in file is only the fallback: a failed download of it must not block the page */
+  return Promise.all([xlsxPromise.then(()=>null,e=>e),overridesPromise,customItemsPromise,itemLocImportPromise])
+    .then(res=>{
+      const imp=res[3];
+      if(res[0]&&!(imp&&imp.items&&imp.items.length)) throw res[0];
+      if(imp&&imp.items&&imp.items.length){
+        PRODUCTS_BY_KEY=imp.items;
+        PRODUCTS_BY_KEY.forEach(item=>{ item.baseLocations=item.locations.slice(); });
+        ITEM_LOC_IMPORT_META=imp.meta||null;
+      }else ITEM_LOC_IMPORT_META=null;
       applyLocationOverridesToProducts();
       applyStockOverridesToProducts();
       PRODUCTS_INDEX={};
@@ -8579,113 +8593,210 @@ async function deleteWasteLog(log){
     catch(e){ console.error('ลบข้อมูลของเสียจาก Firestore ไม่สำเร็จ',e); }
   }
 }
-// ==== Weight Loss and Waste O2O: นำเข้าข้อมูลจากไฟล์ Excel (ไฟล์ที่ส่งออกจากหน้านี้) + ลบไฟล์ที่นำเข้า (เฉพาะพนักงาน) ====
-// ไฟล์ Excel: แถว 1 = วันที่/เวลา (dd/mm/yyyy), แถว 2 = หัวตาราง, แถวถัดไป = No · Item · Description · Piece · Weight · Qty/MU · Total Amount, แถวสุดท้าย = รวม
-function wasteIsoFromSlash(s){
-  const m=String(s||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  return m?(m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')):'';
+// ==== นำเข้าไฟล์ Item Location (ItemLocation_....xlsx) เพื่ออัพเดทข้อมูล Item Location ของทุกคนในทีม ====
+// ไฟล์ใหม่ = ข้อมูลตำแหน่งตั้งต้นแทนไฟล์ ItemLocation_23_Aug_2026.xlsx ของระบบ (ตำแหน่งที่พนักงานเพิ่ม/แก้เองยังคงอยู่) · เก็บบน Firestore เป็นก้อนเล็กๆ ใต้ makroFinder/itemLocImport/chunks
+// ทุกเครื่องเก็บสำเนาไว้ใน IndexedDB และโหลดก้อนใหม่เฉพาะเมื่อมีการนำเข้าไฟล์ใหม่ · ลบไฟล์ที่นำเข้า = กลับไปใช้ไฟล์ตั้งต้นของระบบ
+function iLocIdb(){
+  return new Promise((res,rej)=>{
+    if(!window.indexedDB) return rej(new Error('no indexedDB'));
+    const r=indexedDB.open('mf_itemloc',1);
+    r.onupgradeneeded=()=>r.result.createObjectStore('kv');
+    r.onsuccess=()=>res(r.result);
+    r.onerror=()=>rej(r.error);
+  });
 }
-function wasteImportDates(fileName,firstCellText){
-  const f=String(fileName||'').match(/(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})/);
-  if(f) return [f[1],f[2]];
-  const all=String(firstCellText||'').match(/\d{1,2}\/\d{1,2}\/\d{4}/g)||[];
-  if(all.length) return [wasteIsoFromSlash(all[0]),wasteIsoFromSlash(all[all.length>1?1:0])];
-  return null;
+/* the device cache is only an extra: if the browser's storage is blocked or stuck, give up after 8 s instead of holding the page back */
+const iLocTimed=(p,fallback)=>Promise.race([p,new Promise(res=>setTimeout(()=>res(fallback),8000))]);
+function iLocKvGet(k){
+  return iLocTimed((async()=>{
+    try{ const db=await iLocIdb(); return await new Promise((res,rej)=>{ const q=db.transaction('kv').objectStore('kv').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); }
+    catch(e){ return undefined; }
+  })(),undefined);
 }
-function wasteImportRows(aoa){
-  const rows=[];
-  for(let i=2;i<aoa.length;i++){
-    const r=aoa[i]||[];
-    const first=r[0];
-    if(typeof first==='string'&&first.trim()!==''&&isNaN(first)) continue; /* แถวรวม */
-    if([1,2,3,4,5,6].every(k=>r[k]===''||r[k]==null)) continue; /* แถวว่าง */
-    const s=v=>v==null?'':String(v);
-    rows.push({no:rows.length+1,itemNo:s(r[1]),desc:s(r[2]),image:null,piece:s(r[3]),weight:r[4]===''||r[4]==null?'0':s(r[4]),qtyMU:r[5]===''||r[5]==null?'1':s(r[5]),totalAmount:s(r[6])});
+function iLocKvSet(k,v){
+  return iLocTimed((async()=>{
+    try{ const db=await iLocIdb(); await new Promise((res,rej)=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').put(v,k); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); return true; }
+    catch(e){ return false; }
+  })(),false);
+}
+function iLocKvDel(k){
+  return iLocTimed((async()=>{
+    try{ const db=await iLocIdb(); await new Promise((res,rej)=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').delete(k); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); return true; }
+    catch(e){ return false; }
+  })(),false);
+}
+const iLocPack=it=>[it.itemNo,it.barcode||'',it.desc||'',it.remark||'',(it.locations||[]).map(l=>[l.loc,l.location,l.facing===undefined?'':l.facing,l.maxQty===undefined?'':l.maxQty])];
+const iLocUnpack=a=>({itemNo:a[0],barcode:a[1],desc:a[2],remark:a[3],locations:a[4].map(x=>({loc:x[0],location:x[1],facing:x[2],maxQty:x[3]}))});
+// same reading rules as the built-in file: one year per item (2026 first, else the older rows), no duplicate Loc / Location
+function parseItemLocationRows(rows){
+  const rowsByItem=new Map();
+  rows.forEach(r=>{
+    const itemNo=String(r['Item No']||'').trim();
+    const desc=String(r['Item Desc']||'').trim();
+    if(!itemNo||!desc)return;
+    const dateSerial=r['Date'];
+    if(typeof dateSerial!=='number')return;
+    const rowYear=new Date(Math.floor(dateSerial-25569)*86400*1000).getUTCFullYear();
+    let bucket=rowsByItem.get(itemNo);
+    if(!bucket){ bucket={y2026:[],yOld:[]}; rowsByItem.set(itemNo,bucket); }
+    (rowYear===2026?bucket.y2026:bucket.yOld).push(r);
+  });
+  const map=new Map();
+  rowsByItem.forEach(bucket=>{
+    const chosenRows=bucket.y2026.length?bucket.y2026:bucket.yOld;
+    chosenRows.forEach(r=>{
+      const itemNo=String(r['Item No']||'').trim();
+      const desc=String(r['Item Desc']||'').trim();
+      const barcode=String(r['Barcode']||'').trim();
+      const loc=String(r['Loc']||'').trim();
+      const location=String(r['Location']||'').trim();
+      const facing=r['Facing'];
+      const maxQty=r['Max Qty'];
+      const remark=String(r['Remark']||'').trim();
+      let item=map.get(itemNo);
+      if(!item){ item={itemNo,barcode,desc,remark,locations:[]}; map.set(itemNo,item); }
+      if(!item.barcode&&barcode)item.barcode=barcode;
+      if(!item.remark&&remark)item.remark=remark;
+      const dupe=item.locations.some(l=>l.loc===loc&&l.location===location);
+      if(!dupe&&(loc||location)) item.locations.push({loc,location,facing,maxQty});
+    });
+  });
+  return Array.from(map.values());
+}
+function iLocChunks(items,maxBytes){
+  const enc=new TextEncoder(),chunks=[];
+  let cur=[],size=2;
+  items.forEach(it=>{
+    const packed=iLocPack(it),len=enc.encode(JSON.stringify(packed)).length+1;
+    if(cur.length&&size+len>maxBytes){ chunks.push(cur); cur=[]; size=2; }
+    cur.push(packed); size+=len;
+  });
+  if(cur.length) chunks.push(cur);
+  return chunks.map(c=>JSON.stringify(c));
+}
+async function loadItemLocImport(){
+  try{
+    let meta=null,online=false;
+    if(itemLocMetaDocRef){
+      try{ const d=await itemLocMetaDocRef.get(); meta=(d.exists&&d.data()&&d.data().type==='itemLocImportMeta')?d.data():null; online=true; }
+      catch(e){ console.warn('อ่านข้อมูล Item Location ที่นำเข้าจาก Firestore ไม่ได้ ใช้สำเนาในเครื่องแทน',e); }
+    }
+    if(online&&(!meta||!meta.chunks)){ iLocKvDel('data'); return null; } /* nothing imported (the usual case): do not wait for the device cache at all */
+    const cached=await iLocKvGet('data');
+    if(!online) return (cached&&cached.items&&cached.items.length)?{meta:cached.meta,items:cached.items}:null;
+    if(cached&&cached.meta&&cached.meta.at===meta.at&&cached.items&&cached.items.length) return {meta,items:cached.items};
+    const items=[];
+    for(let k=0;k<meta.chunks;k++){
+      const d=await itemLocMetaDocRef.collection('chunks').doc(String(k)).get();
+      if(!d.exists) throw new Error('ขาดก้อนข้อมูลที่ '+k);
+      JSON.parse(d.data().json).forEach(a=>items.push(iLocUnpack(a)));
+    }
+    await iLocKvSet('data',{meta,items});
+    return {meta,items};
+  }catch(e){
+    console.error('โหลดข้อมูล Item Location ที่นำเข้าไม่สำเร็จ (ใช้ไฟล์ตั้งต้นแทน)',e);
+    return null;
   }
-  return rows;
 }
-async function importWasteFromExcel(inp){
+async function saveItemLocImport(name,items,locCount){
+  const strs=iLocChunks(items,600000);
+  const meta={type:'itemLocImportMeta',name,at:Date.now(),items:items.length,locs:locCount,chunks:strs.length,by:(()=>{ const s=getSession(); return s&&s.name?(s.name+' · '+(s.dept||'')):''; })()};
+  if(itemLocMetaDocRef){
+    let old=null;
+    try{ const d=await itemLocMetaDocRef.get(); old=d.exists?d.data():null; }catch(e){}
+    for(let k=0;k<strs.length;k++) await itemLocMetaDocRef.collection('chunks').doc(String(k)).set({json:strs[k],k,at:meta.at});
+    await itemLocMetaDocRef.set(meta); /* the small meta doc last: readers never see a half-written import */
+    if(old&&old.chunks>strs.length){ for(let k=strs.length;k<old.chunks;k++){ try{ await itemLocMetaDocRef.collection('chunks').doc(String(k)).delete(); }catch(e){} } }
+  }
+  await iLocKvSet('data',{meta,items});
+  return meta;
+}
+function applyItemLocImportInPlace(items,meta){
+  PRODUCTS_BY_KEY=items;
+  PRODUCTS_BY_KEY.forEach(item=>{ item.baseLocations=item.locations.slice(); });
+  ITEM_LOC_IMPORT_META=meta;
+  applyLocationOverridesToProducts();
+  applyStockOverridesToProducts();
+  PRODUCTS_INDEX={};
+  PRODUCTS_BY_KEY.forEach(item=>{ PRODUCTS_INDEX[item.itemNo]=item; });
+  mergeCustomItemsIntoProducts();
+  applyItemOverridesToProducts();
+  employeeOnlyItemsApplied=false; /* the employee-only items were dropped with the old list: add them again */
+  applyEmployeeOnlyVisibility();
+}
+function itemLocReload(){ location.reload(); }
+async function importItemLocFromExcel(inp){
   const file=inp&&inp.files&&inp.files[0];
   if(inp) inp.value='';
   if(!file||!isEmployee()) return;
+  const pin=prompt('กรอกรหัสพนักงานเพื่อยืนยันการนำเข้าข้อมูล Item Location (ข้อมูลของทุกคนในทีมจะเปลี่ยนตามไฟล์)');
+  if(pin===null) return;
+  if(!STAFF_PINS.includes(pin.trim())){ alert(t('wasteWrongPinAlert')); return; }
   try{
+    showWasteToast('กำลังอ่านไฟล์…');
     const buf=await file.arrayBuffer();
     const wb=XLSX.read(buf,{type:'array'});
-    const ws=wb.Sheets[wb.SheetNames[0]];
-    const aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
-    const rows=wasteImportRows(aoa);
-    if(!rows.length){ alert('ไม่พบรายการที่นำเข้าได้ในไฟล์นี้ (ต้องเป็นไฟล์ Excel ที่ส่งออกจากหน้า Weight Loss and Waste O2O)'); return; }
-    let dates=wasteImportDates(file.name,aoa[0]&&aoa[0][0]);
-    if(!dates){
-      const v=prompt('ไม่พบวันที่ในไฟล์ — ใส่วันที่ของข้อมูลนี้ (ปี-เดือน-วัน เช่น '+todayDateStr()+')',todayDateStr());
-      if(v===null) return;
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(v.trim())){ alert('รูปแบบวันที่ไม่ถูกต้อง'); return; }
-      dates=[v.trim(),v.trim()];
-    }
-    await loadAllWasteLogs();
-    const old=WASTE_LOGS_CACHE.find(l=>l.startDate===dates[0]&&l.endDate===dates[1]);
-    if(old){
-      const hasImg=(old.rows||[]).some(r=>r.image);
-      if(!confirm('มีบันทึกของวันที่ '+formatWasteRangeDMY({startDate:dates[0],endDate:dates[1]})+' อยู่แล้ว ('+(old.rows||[]).length+' รายการ) — แทนที่ด้วยข้อมูลจากไฟล์นี้ ('+rows.length+' รายการ)?'+(hasImg?'\nรูปภาพในบันทึกเดิมจะหายไป':''))) return;
-    }else if(!confirm('นำเข้า '+rows.length+' รายการ ของวันที่ '+formatWasteRangeDMY({startDate:dates[0],endDate:dates[1]})+' จากไฟล์ "'+file.name+'"?')) return;
-    const log=newWasteLog(dates[0],dates[1]);
-    log.rows=rows;
-    log.imp={id:'imp'+Date.now().toString(36),name:file.name,at:new Date().toISOString()};
-    await saveWasteLog(log);
-    showWasteToast('นำเข้าข้อมูลแล้ว '+rows.length+' รายการ');
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+    const items=parseItemLocationRows(rows);
+    const locCount=items.reduce((s,i)=>s+i.locations.length,0);
+    if(!items.length){ alert('ไม่พบข้อมูลที่นำเข้าได้ในไฟล์นี้ — ต้องเป็นไฟล์ Item Location (คอลัมน์ Item No, Item Desc, Date, Barcode, Loc, Location, Facing, Max Qty, Remark)'); return; }
+    if(!confirm('นำเข้า '+items.length.toLocaleString()+' สินค้า · '+locCount.toLocaleString()+' ตำแหน่ง จากไฟล์ "'+file.name+'"?\nข้อมูล Item Location ของทุกคนในทีมจะเปลี่ยนตามไฟล์นี้ (ตำแหน่งที่พนักงานเพิ่ม/แก้เองยังคงอยู่)')) return;
+    showWasteToast('กำลังบันทึก…');
+    const meta=await saveItemLocImport(file.name,items,locCount);
+    applyItemLocImportInPlace(items,meta);
+    showWasteToast('อัพเดทข้อมูล Item Location แล้ว ('+items.length.toLocaleString()+' สินค้า)');
   }catch(e){
     console.error(e);
-    alert('นำเข้าไฟล์ไม่สำเร็จ: '+e.message);
+    alert('นำเข้าไฟล์ไม่สำเร็จ: '+e.message+'\n(ถ้าขึ้นว่าไม่มีสิทธิ์ ให้แจ้งผู้ดูแลระบบเพื่อเปิดสิทธิ์เขียนข้อมูลให้ makroFinder/itemLocImport)');
   }
 }
-function wasteImportGroups(){
-  const g={};
-  WASTE_LOGS_CACHE.forEach(l=>{ if(!l||!l.imp)return; (g[l.imp.id]=g[l.imp.id]||{imp:l.imp,logs:[]}).logs.push(l); });
-  return Object.values(g).sort((a,b)=>String(b.imp.at).localeCompare(String(a.imp.at)));
-}
-function wasteImportsDialog(){
-  let d=document.getElementById('wasteImportsDlg');
+function itemLocImportDialog(){
+  let d=document.getElementById('iLocImportDlg');
   if(d) return d;
   d=document.createElement('dialog');
-  d.id='wasteImportsDlg';
+  d.id='iLocImportDlg';
   d.style.cssText='border:none;border-radius:16px;padding:18px;max-width:520px;width:calc(100% - 28px);font-family:inherit';
-  d.innerHTML='<h3 style="margin:0 0 6px 0;font-size:18px">ลบไฟล์ที่นำเข้า</h3><p style="margin:0 0 12px 0;font-size:13px;color:#667085">เลือกไฟล์ที่ต้องการลบ — บันทึกของเสียที่มาจากไฟล์นั้นจะถูกลบออก (ลบให้ทุกคนในทีม ต้องใส่รหัสพนักงาน) ส่วนบันทึกที่กรอกเองไม่ถูกลบ</p><div id="wasteImportsList"></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button type="button" class="waste-io-btn" style="flex:none" onclick="document.getElementById(\'wasteImportsDlg\').close()">ปิด</button></div>';
+  d.innerHTML='<h3 style="margin:0 0 6px 0;font-size:18px">ลบไฟล์ที่นำเข้า</h3><p style="margin:0 0 12px 0;font-size:13px;color:#667085">ไฟล์ที่นำเข้าเพื่ออัพเดทข้อมูล Item Location — ลบแล้วทุกคนในทีมจะกลับไปใช้ไฟล์ตั้งต้นของระบบ (ต้องใส่รหัสพนักงาน)</p><div id="iLocImportBody"></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button type="button" class="waste-io-btn" style="flex:none" onclick="document.getElementById(\'iLocImportDlg\').close()">ปิด</button></div>';
   document.body.appendChild(d);
   return d;
 }
-function renderWasteImportsList(){
-  const box=document.getElementById('wasteImportsList');
-  const groups=wasteImportGroups();
-  if(!groups.length){ box.innerHTML='<div style="padding:20px;text-align:center;color:#667085">ยังไม่มีไฟล์ที่นำเข้า</div>'; return; }
-  box.innerHTML='';
-  groups.forEach(gr=>{
-    const at=new Date(gr.imp.at);
-    const nRows=gr.logs.reduce((s,l)=>s+(l.rows||[]).length,0);
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;border:1px solid #e2e5ea;border-radius:10px;padding:10px 12px;margin-bottom:8px';
-    row.innerHTML='<span style="flex:1;min-width:150px;font-weight:700;overflow-wrap:anywhere">'+escapeHtml(gr.imp.name)+'</span><button type="button" class="waste-io-btn waste-io-del" style="flex:none;padding:6px 14px;font-size:13px">ลบ</button><span style="flex-basis:100%;font-size:12px;color:#667085">นำเข้าเมื่อ '+at.getDate()+'/'+(at.getMonth()+1)+'/'+at.getFullYear()+' '+String(at.getHours()).padStart(2,'0')+':'+String(at.getMinutes()).padStart(2,'0')+' น. · '+gr.logs.length+' วัน · '+nRows+' รายการ</span>';
-    row.querySelector('button').addEventListener('click',()=>deleteWasteImport(gr.imp.id));
-    box.appendChild(row);
-  });
-}
-async function openWasteImportsList(){
+async function openItemLocImportInfo(){
   if(!isEmployee()) return;
-  await loadAllWasteLogs();
-  const d=wasteImportsDialog();
-  renderWasteImportsList();
+  const d=itemLocImportDialog();
+  const box=document.getElementById('iLocImportBody');
+  box.innerHTML='<div style="padding:16px;text-align:center;color:#667085">กำลังตรวจสอบ…</div>';
   if(!d.open) d.showModal();
+  let meta=ITEM_LOC_IMPORT_META;
+  if(itemLocMetaDocRef){
+    try{ const x=await itemLocMetaDocRef.get(); meta=(x.exists&&x.data()&&x.data().type==='itemLocImportMeta')?x.data():null; }catch(e){}
+  }
+  if(!meta){ box.innerHTML='<div style="padding:20px;text-align:center;color:#667085">ยังไม่มีไฟล์ที่นำเข้า (ตอนนี้ใช้ไฟล์ตั้งต้นของระบบ)</div>'; return; }
+  const at=new Date(meta.at);
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;border:1px solid #e2e5ea;border-radius:10px;padding:10px 12px';
+  row.innerHTML='<span style="flex:1;min-width:150px;font-weight:700;overflow-wrap:anywhere">'+escapeHtml(meta.name||'')+'</span><button type="button" class="waste-io-btn waste-io-del" style="flex:none;padding:6px 14px;font-size:13px">ลบ</button><span style="flex-basis:100%;font-size:12px;color:#667085">นำเข้าเมื่อ '+at.getDate()+'/'+(at.getMonth()+1)+'/'+at.getFullYear()+' '+String(at.getHours()).padStart(2,'0')+':'+String(at.getMinutes()).padStart(2,'0')+' น.'+(meta.by?' โดย '+escapeHtml(meta.by):'')+' · '+(meta.items||0).toLocaleString()+' สินค้า · '+(meta.locs||0).toLocaleString()+' ตำแหน่ง</span>';
+  row.querySelector('button').addEventListener('click',()=>deleteItemLocImport(meta));
+  box.innerHTML='';
+  box.appendChild(row);
 }
-async function deleteWasteImport(id){
-  const gr=wasteImportGroups().find(x=>x.imp.id===id);
-  if(!gr) return;
-  const pin=prompt(t('wasteDeleteConfirmPrompt'));
+async function deleteItemLocImport(meta){
+  const pin=prompt('กรอกรหัสพนักงานเพื่อยืนยันการลบไฟล์ที่นำเข้า');
   if(pin===null) return;
   if(!STAFF_PINS.includes(pin.trim())){ alert(t('wasteWrongPinAlert')); return; }
-  const nRows=gr.logs.reduce((s,l)=>s+(l.rows||[]).length,0);
-  if(!confirm('ลบไฟล์ "'+gr.imp.name+'" และบันทึกของเสีย '+gr.logs.length+' วัน ('+nRows+' รายการ) ที่นำเข้าจากไฟล์นี้?\n(ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)')) return;
-  for(const l of gr.logs.slice()) await deleteWasteLog(l);
-  showWasteToast('ลบไฟล์ที่นำเข้าแล้ว');
-  renderWasteImportsList();
+  if(!confirm('ลบไฟล์ "'+(meta.name||'')+'" ที่นำเข้า?\nทุกคนในทีมจะกลับไปใช้ไฟล์ Item Location ตั้งต้นของระบบ (ตำแหน่งที่พนักงานเพิ่ม/แก้เองยังคงอยู่)')) return;
+  try{
+    if(itemLocMetaDocRef){
+      for(let k=0;k<(meta.chunks||0);k++){ try{ await itemLocMetaDocRef.collection('chunks').doc(String(k)).delete(); }catch(e){ console.error(e); } }
+      await itemLocMetaDocRef.delete();
+    }
+    await iLocKvDel('data');
+    ITEM_LOC_IMPORT_META=null;
+    showWasteToast('ลบไฟล์ที่นำเข้าแล้ว กำลังโหลดข้อมูลตั้งต้น…');
+    setTimeout(itemLocReload,900);
+  }catch(e){
+    console.error(e);
+    alert('ลบไม่สำเร็จ: '+e.message);
+  }
 }
 async function confirmDeleteWasteLog(){
   if(!currentWasteLog)return;
