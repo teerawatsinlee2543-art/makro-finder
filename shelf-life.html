@@ -79,6 +79,9 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .imp-file.sd-row>b{grid-column:2;grid-row:1;min-width:0;overflow-wrap:anywhere}
 .imp-file.sd-row>.btn{grid-column:3;grid-row:1/3;align-self:center}
 .imp-file.sd-row>.muted{grid-column:1/3;min-width:0;overflow-wrap:anywhere}
+.ra-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.ra-grid label{display:grid;gap:4px;font-size:13px;font-weight:600;color:var(--muted)}
+.ra-grid input,.ra-grid select{width:100%;min-width:0}
 .imp-file.il-row{display:grid;grid-template-columns:1fr auto;gap:6px 8px;align-items:center}
 .imp-file.il-row>.chip{justify-self:start}
 .imp-file.il-row>.btn{grid-column:2;grid-row:1}
@@ -832,7 +835,7 @@ label.has-scan>input{padding-right:50px!important}
   <div class="card oos-banner" id="nbsBanner" hidden><span id="nbsBannerTxt"></span><button type="button" class="btn sm" id="nbsBannerGo">ดูรายการ NBS</button></div>
   <div class="tiles" id="tiles"></div>
   <div class="card">
-    <div class="add-head no-print" style="margin-bottom:10px"><h2>ล็อตและสถานะวันนี้ <span class="muted small" style="font-weight:400">· ส่งออกตามตัวกรองที่เลือก</span></h2><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="dashCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="dashXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="dashPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
+    <div class="add-head no-print" style="margin-bottom:10px"><h2>ล็อตและสถานะวันนี้ <span class="muted small" style="font-weight:400">· ส่งออกตามตัวกรองที่เลือก</span></h2><span class="row w"><button type="button" class="btn pri" id="dashAdd">+ เพิ่มล็อต</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="dashCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="dashXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="dashPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
     <div class="fbar no-print">
       <label class="f-q">ค้นหา<input id="q" placeholder="สินค้า / SKU / Buyer UID / ที่ตั้ง เช่น บลูเบอรี่"></label>
       <label>สถานะ<select id="fSt"><option value="">ทั้งหมด</option></select></label>
@@ -948,7 +951,7 @@ label.has-scan>input{padding-right:50px!important}
   <div class="card">
     <div class="add-head">
       <h2>OOS+ <span class="muted small" style="font-weight:400">· สินค้าหมดชั้น / หมดสต็อก — เตือนให้เติม</span></h2>
-      <span class="row w"><button type="button" class="btn danger" id="oosDelFile" title="ลบรายการ OOS ที่มาจากไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="oosAdd">+ เพิ่มรายการ</button><button type="button" class="btn imp-btn" id="oosImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="oosCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="oosXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="oosPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div>
+      <span class="row w"><button type="button" class="btn danger" id="oosDelFile" title="ลบรายการ OOS ที่มาจากไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn imp-btn" id="oosImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button><button type="button" class="btn pri" id="oosAdd">+ เพิ่มรายการ</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="oosCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="oosXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="oosPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div>
     </div>
     <div class="tiles" id="oosDivTiles" style="margin:12px 0 0"></div>
     <div class="tiles" id="oosTiles" style="margin:12px 0"></div>
@@ -977,7 +980,7 @@ label.has-scan>input{padding-right:50px!important}
   <div class="card">
     <div class="add-head">
       <h2>%Shrink <span class="muted small" style="font-weight:400">· หยุดทิ้ง — ทิ้งไปเท่าไรแล้ว ตัวไหนทิ้งเยอะสุด</span></h2>
-      <span class="row w"><button type="button" class="btn danger" id="shrDelFile" title="ลบข้อมูลของไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn imp-btn" id="shrImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="shrCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="shrXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="shrPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div>
+      <span class="row w"><button type="button" class="btn danger" id="shrDelFile" title="ลบข้อมูลของไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn imp-btn" id="shrImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button><button type="button" class="btn pri" id="shrAdd">+ เพิ่มรายการทิ้ง</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="shrCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="shrXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="shrPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div>
     </div>
     <div class="tiles" id="shrDivTiles" style="margin:12px 0 0"></div>
     <div class="tiles" id="shrTiles" style="margin:12px 0"></div>
@@ -1252,7 +1255,11 @@ label.has-scan>input{padding-right:50px!important}
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="siCancel">ปิด</button><button type="button" class="btn pri save-btn" id="siGo" disabled>นำเข้า %Shrink</button></div>
 </div></dialog>
 
-<dialog id="dlgExp" class="nbs-dlg imp-dlg"><div><h2 id="expTitle">ส่งออก</h2>
+<dialog id="dlgRepAdd" class="nbs-dlg imp-dlg"><div><h2 id="raTitle">เพิ่มรายการ</h2>
+  <p class="muted small" id="raNote" style="margin:0 0 10px"></p>
+  <div id="raFields" class="ra-grid"></div>
+  <p class="err-text" id="raErr" style="margin:8px 0 0"></p>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="raCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="raSave">บันทึก</button></div></div></dialog><dialog id="dlgExp" class="nbs-dlg imp-dlg"><div><h2 id="expTitle">ส่งออก</h2>
   <p class="muted small" id="expDesc" style="margin:0 0 12px"></p>
   <div class="exp-pick"><button type="button" class="btn" id="expCsv"><b>CSV</b><span>เปิดหน้าต่างคัดลอก / ดาวน์โหลดไฟล์ .csv</span></button><button type="button" class="btn" id="expXlsx"><b>Excel</b><span>ดาวน์โหลดไฟล์ .xlsx เปิดใน Excel</span></button><button type="button" class="btn" id="expPdf"><b>PDF</b><span>พิมพ์ / ส่งต่อ — A4 แนวนอน (เลือก “บันทึกเป็น PDF”)</span></button></div>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="expClose">ปิด</button></div></div></dialog><dialog id="dlgShDel" class="nbs-dlg imp-dlg"><div>
@@ -4178,7 +4185,7 @@ function ilSectionHtml(p){
   const D=IL_DEFS[p];
   return`<section id="t-${p}" hidden><div class="card">
     <div class="add-head"><h2>${D.title} <span class="muted small" style="font-weight:400">${D.sub}</span></h2>
-      <span class="row w"><button type="button" class="btn danger" id="${p}DelFile" title="ลบข้อมูลที่นำเข้า (เฉพาะในเครื่องนี้)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn imp-btn" id="${p}Import"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="${p}Csv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="${p}Xlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="${p}Pdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
+      <span class="row w"><button type="button" class="btn danger" id="${p}DelFile" title="ลบข้อมูลที่นำเข้า (เฉพาะในเครื่องนี้)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn imp-btn" id="${p}Import"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button><button type="button" class="btn pri" id="${p}Add">+ เพิ่มสินค้า</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="${p}Csv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="${p}Xlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="${p}Pdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
     <div class="tiles" id="${p}DivTiles" style="margin:12px 0 0"></div><div class="tiles" id="${p}Tiles" style="margin:12px 0"></div><div class="oos-dchips" id="${p}DeptTiles"></div>
     <div class="fbar f6"><label class="f-q">ค้นหา<input id="${p}Q" placeholder="รหัส / ชื่อสินค้า / Class / แผนก / Buyer / Supplier"></label>
       <label>${D.fa}<select id="${p}FA"><option value="">ทั้งหมด</option></select></label><label>${D.fb}<select id="${p}FB"><option value="">ทั้งหมด</option></select></label>
@@ -4249,7 +4256,7 @@ function ilInit(){
       const bar=e.target.closest('.oc-r');if(bar){S.drill=true;$('#'+p+'Q').value=bar.dataset.no;re();$('#'+p+'List').scrollIntoView({block:'nearest',behavior:'smooth'})}});
     $('#'+p+'More').onclick=()=>{S.limit+=60;renderIlt(p)};
     $('#'+p+'Import').onclick=()=>openIlImport(p);$('#'+p+'Xlsx').onclick=()=>ilExport(p);$('#'+p+'Csv').onclick=()=>xlsToCsv(()=>ilExport(p),IL_DEFS[p].title.replace(/ /g,''),()=>ilPDF(p));$('#'+p+'Pdf').onclick=()=>ilPDF(p);
-    $('#'+p+'DelFile').onclick=()=>openIlDel(p);
+    $('#'+p+'DelFile').onclick=()=>openIlDel(p);$('#'+p+'Add').onclick=()=>openRepAdd(p);
     pinCompact($('#'+p+'DivTiles'));
   }
   $('#ilCancel').onclick=()=>$('#dlgIlImp').close();$('#idClose').onclick=()=>$('#dlgIlDel').close();$('#idList').onclick=ilDelClick;$('#ilGo').onclick=runIlImport;$('#ilPick').onclick=()=>$('#ilFile').click();$('#ilFile').onchange=e=>{const f=e.target.files[0];if(f)ilReadFile(f)};
@@ -4759,6 +4766,37 @@ function expOpen(k){
   for(const f of ['csv','xlsx','pdf'])$('#exp'+f[0].toUpperCase()+f.slice(1)).onclick=()=>{$('#dlgExp').close();s[f]()};
   $('#dlgExp').showModal()}
 $('#expClose').onclick=()=>$('#dlgExp').close();
+/* "+ เพิ่ม..." on every page: lots -> the Monitor item tab; %Shrink / Negative Stock / High Stock to DMS -> one small manual-entry window (kept only in this browser, like the imported report) */
+let RA=null;
+function openRepAdd(kind){
+  RA=kind;
+  const dept=`<label>แผนก<select name="dp"><option value="">ไม่ระบุ</option>${Object.entries(SHR_DEPT).map(([k,v])=>`<option value="${k}">${k} ${esc(v)}</option>`).join('')}</select></label>`;
+  const T={shr:['เพิ่มรายการทิ้ง · %Shrink','เพิ่มของที่ทิ้ง 1 รายการเอง — เข้าไปอยู่ในมุมมอง “ตามรหัสเหตุผล” และลบได้ที่ “ลบไฟล์ที่นำเข้า” (เก็บในเครื่องนี้เท่านั้น)'],
+    neg:['เพิ่มสินค้า · Negative Stock','เพิ่มสินค้าที่ Stock ติดลบ 1 รายการเอง (เก็บในเครื่องนี้) — จะหายถ้านำเข้าไฟล์ใหม่มาแทนที่'],
+    dms:['เพิ่มสินค้า · High Stock to DMS','เพิ่มสินค้าที่ Stock สูง 1 รายการเอง (เก็บในเครื่องนี้) — จะหายถ้านำเข้าไฟล์ใหม่มาแทนที่']}[kind];
+  const itemNo='<label>Item No.<input name="i" inputmode="numeric" autocomplete="off"></label><label>ชื่อสินค้า<input name="n" autocomplete="off"></label>'+dept;
+  const html={shr:itemNo+`<label>รหัสเหตุผล<input name="r" list="raRs" autocomplete="off"></label><datalist id="raRs">${[...new Set(SHR.code.map(r=>r.r))].map(x=>`<option value="${esc(x)}">`).join('')}</datalist><label>จำนวนที่ทิ้ง (ชิ้น)<input name="q" type="number" step="any" inputmode="decimal"></label><label>มูลค่าที่ทิ้ง (฿)<input name="c" type="number" step="any" min="0" inputmode="decimal"></label>`,
+    neg:itemNo+'<label>Stock (ASOH) ติดลบ<input name="a" type="number" step="any" inputmode="decimal" placeholder="เช่น -5"></label><label>ราคาขาย (฿)<input name="pr" type="number" step="any" min="0" inputmode="decimal"></label><label>ขายต่อวัน (28 วัน)<input name="a28" type="number" step="any" min="0" inputmode="decimal"></label><label>Buyer UID (ถ้ามี)<input name="by" autocomplete="off"></label>',
+    dms:itemNo+'<label>Stock (ASOH)<input name="a" type="number" step="any" min="0" inputmode="decimal"></label><label>ราคาขาย (฿)<input name="pr" type="number" step="any" min="0" inputmode="decimal"></label><label>ขายต่อวัน (28 วัน)<input name="a28" type="number" step="any" min="0" inputmode="decimal"></label><label>Buyer UID (ถ้ามี)<input name="by" autocomplete="off"></label>'}[kind];
+  $('#raTitle').textContent=T[0];$('#raNote').textContent=T[1];$('#raFields').innerHTML=html;$('#raErr').textContent='';
+  $('#dlgRepAdd').showModal();const first=$('#raFields input');if(first)first.focus()}
+async function saveRepAdd(){
+  const g=n=>{const e=$('#raFields [name='+n+']');return e?String(e.value).trim():''},num=n=>{const v=parseFloat(g(n));return isFinite(v)?v:null},no=g('i'),err=m=>{$('#raErr').textContent=m};
+  if(!/^\d+$/.test(no))return err('ใส่ Item No. (ตัวเลข)');
+  if(RA==='shr'){
+    const c=num('c');if(c==null||c<=0)return err('ใส่มูลค่าที่ทิ้ง (฿) เป็นตัวเลขมากกว่า 0');
+    let fl=SHR.files.find(x=>x.id==='manual');if(!fl){fl={id:'manual',name:'รายการที่เพิ่มเอง',kind:'code',at:new Date().toISOString(),n:0,info:{months:[]}};SHR.files.push(fl)}
+    SHR.code.push({i:no,n:g('n'),dp:g('dp'),cn:'',cl:'',r:g('r')||'ไม่ระบุ',q:num('q')||0,c:-Math.abs(c),m:'',f:'manual'});fl.n++;
+    SHR_REV++;shrBasis='';shrSave();$('#dlgRepAdd').close();renderShr();toast('เพิ่มรายการทิ้งแล้ว');return}
+  const a=num('a');
+  if(RA==='neg'&&!(a!=null&&a<=-0.1))return err('Stock ต้องติดลบตั้งแต่ −0.1 ลงไป');
+  if(RA==='dms'&&!(a!=null&&a>0))return err('Stock ต้องมากกว่า 0');
+  let d=ILT[RA];if(!d)d=ILT[RA]={name:'รายการที่เพิ่มเอง',at:new Date().toISOString(),asOf:Date.now(),store:'',info:{shared:0},rows:[]};
+  d.rows.push({i:no,n:g('n'),sp:'',by:g('by').toUpperCase(),dp:g('dp'),cn:'',ls:null,ld:null,pr:num('pr')||0,a,sh:false,u:0,oo:0,it:0,a28:num('a28')||0,lm:0,cm:0,ly:0,src:'manual',ro:'',sd:null,pk:1,st:'Active',ag:'',os:'',dd:''});
+  IL_REV[RA]++;const p=RA;$('#dlgRepAdd').close();renderIlt(p);toast('เพิ่มสินค้าแล้ว');
+  ilSave(p).then(ok=>{if(!ok)toast('เพิ่มแล้ว แต่เบราว์เซอร์ไม่ยอมให้จำข้อมูลไว้')})}
+$('#raCancel').onclick=()=>$('#dlgRepAdd').close();$('#raSave').onclick=saveRepAdd;
+$('#shrAdd').onclick=()=>openRepAdd('shr');$('#dashAdd').onclick=()=>document.querySelector('#tabs button[data-tab=add]').click();
 /* page buttons */
 $('#dashCsv').onclick=()=>exportBatchesCSV();$('#dashXlsx').onclick=()=>exportBatchesXlsx();$('#dashPdf').onclick=()=>batchesPDF();
 $('#oosXlsx').onclick=()=>oosXlsx();
