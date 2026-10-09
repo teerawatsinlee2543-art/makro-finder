@@ -799,6 +799,8 @@ label.has-scan>input{padding-right:50px!important}
   .oosc-h{flex-wrap:wrap}
   .oosc-h>.btn.sm{order:3;flex:1 0 100%;min-height:40px}
 }
+/* the red OOS+ / Item NBS alert bars on the dashboard are not shown (the tab badges carry the numbers) */
+#oosBanner,#nbsBanner{display:none!important}
 .add-card,.add-step{grid-template-columns:minmax(0,1fr)} /* the Monitor item form could be 15 px wider than a 320 px screen */
 /* a short phone screen (up to 640 px tall): the logo bar + Julian badge scroll away, only the tab bar (and the pinned tiles) stay - the list keeps about 100 px more */
 @media (max-width:700px) and (max-height:640px){header{position:static!important}}
