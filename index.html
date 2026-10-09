@@ -7859,6 +7859,7 @@ function openStockEditor(itemNo,loc,location){
   renderDetail(item);
 }
 let ITEM_LOC_IMPORT_META=null;
+let BUILTIN_ITEM_SIG=new Map(),BUILTIN_ITEM_DAY=new Map(); /* what the built-in file says per item (signature) and the newest update day in it: an import only replaces an item when the file has something newer */
 function loadProductData(){
   const overridesPromise=loadOverridesData();
   const customItemsPromise=loadCustomItems();
@@ -7885,7 +7886,8 @@ function loadProductData(){
         if(typeof dateSerial!=='number')return;
         const rowYear=new Date(Math.floor(dateSerial-25569)*86400*1000).getUTCFullYear();
         let bucket=rowsByItem.get(itemNo);
-        if(!bucket){ bucket={y2026:[],yOld:[]}; rowsByItem.set(itemNo,bucket); }
+        if(!bucket){ bucket={y2026:[],yOld:[],day:0}; rowsByItem.set(itemNo,bucket); }
+        bucket.day=Math.max(bucket.day,Math.floor(dateSerial));
         (rowYear===2026?bucket.y2026:bucket.yOld).push(r);
       });
       const map=new Map();
@@ -7914,16 +7916,14 @@ function loadProductData(){
         });
       });
       PRODUCTS_BY_KEY=Array.from(map.values());
-      PRODUCTS_BY_KEY.forEach(item=>{ item.baseLocations=item.locations.slice(); });
+      BUILTIN_ITEM_SIG=new Map();BUILTIN_ITEM_DAY=new Map();
+      PRODUCTS_BY_KEY.forEach(item=>{ item.baseLocations=item.locations.slice(); BUILTIN_ITEM_SIG.set(item.itemNo,iLocSig(item)); BUILTIN_ITEM_DAY.set(item.itemNo,(rowsByItem.get(item.itemNo)||{day:0}).day); });
     });
-  /* if a team import exists the built-in file is only the fallback: a failed download of it must not block the page */
-  return Promise.all([xlsxPromise.then(()=>null,e=>e),overridesPromise,customItemsPromise,itemLocImportPromise])
+  return Promise.all([xlsxPromise,overridesPromise,customItemsPromise,itemLocImportPromise])
     .then(res=>{
       const imp=res[3];
-      if(res[0]&&!(imp&&imp.items&&imp.items.length)) throw res[0];
       if(imp&&imp.items&&imp.items.length){
-        PRODUCTS_BY_KEY=imp.items;
-        PRODUCTS_BY_KEY.forEach(item=>{ item.baseLocations=item.locations.slice(); });
+        applyItemLocOverlay(imp.items); /* the team's imported updates go on top of the built-in file */
         ITEM_LOC_IMPORT_META=imp.meta||null;
       }else ITEM_LOC_IMPORT_META=null;
       applyLocationOverridesToProducts();
@@ -8594,8 +8594,9 @@ async function deleteWasteLog(log){
   }
 }
 // ==== นำเข้าไฟล์ Item Location (ItemLocation_....xlsx) เพื่ออัพเดทข้อมูล Item Location ของทุกคนในทีม ====
-// ไฟล์ใหม่ = ข้อมูลตำแหน่งตั้งต้นแทนไฟล์ ItemLocation_23_Aug_2026.xlsx ของระบบ (ตำแหน่งที่พนักงานเพิ่ม/แก้เองยังคงอยู่) · เก็บบน Firestore เป็นก้อนเล็กๆ ใต้ makroFinder/itemLocImport/chunks
-// ทุกเครื่องเก็บสำเนาไว้ใน IndexedDB และโหลดก้อนใหม่เฉพาะเมื่อมีการนำเข้าไฟล์ใหม่ · ลบไฟล์ที่นำเข้า = กลับไปใช้ไฟล์ตั้งต้นของระบบ
+// กติกา: สินค้า 1 รายการใช้ "ชุดล่าสุด" ชุดเดียว = แถวของวันที่อัพเดทล่าสุดของสินค้านั้น (ถ้าไม่มีปีนี้ก็ถอยไปปีก่อนๆ เอง) แถวที่เก่ากว่าไม่เอา
+// นำเข้าเฉพาะ: สินค้าที่ยังไม่มีในระบบ + สินค้าที่ไฟล์มีข้อมูลใหม่กว่าข้อมูลตั้งต้นและต่างจากเดิม · สินค้าที่ไม่มีในไฟล์หรือไม่มีข้อมูลใหม่ ไม่ถูกแตะต้อง
+// เก็บเฉพาะรายการที่เปลี่ยนไว้บน Firestore (makroFinder/itemLocImport + ก้อนข้อมูลใน chunks) ทุกเครื่องเอาไปซ้อนทับไฟล์ตั้งต้นตอนโหลดหน้า และเก็บสำเนาใน IndexedDB · ลบไฟล์ที่นำเข้า = กลับไปใช้ไฟล์ตั้งต้นล้วน
 function iLocIdb(){
   return new Promise((res,rej)=>{
     if(!window.indexedDB) return rej(new Error('no indexedDB'));
@@ -8625,43 +8626,74 @@ function iLocKvDel(k){
     catch(e){ return false; }
   })(),false);
 }
-const iLocPack=it=>[it.itemNo,it.barcode||'',it.desc||'',it.remark||'',(it.locations||[]).map(l=>[l.loc,l.location,l.facing===undefined?'':l.facing,l.maxQty===undefined?'':l.maxQty])];
-const iLocUnpack=a=>({itemNo:a[0],barcode:a[1],desc:a[2],remark:a[3],locations:a[4].map(x=>({loc:x[0],location:x[1],facing:x[2],maxQty:x[3]}))});
-// same reading rules as the built-in file: one year per item (2026 first, else the older rows), no duplicate Loc / Location
+function iLocPack(it){ return [it.itemNo,it.barcode||'',it.desc||'',it.remark||'',(it.locations||[]).map(l=>[l.loc,l.location,l.facing===undefined?'':l.facing,l.maxQty===undefined?'':l.maxQty])]; }
+function iLocUnpack(a){ return {itemNo:a[0],barcode:a[1],desc:a[2],remark:a[3],locations:a[4].map(x=>({loc:x[0],location:x[1],facing:x[2],maxQty:x[3]}))}; }
+function iLocSig(it){ return JSON.stringify(iLocPack(it)); }
+// ต่อสินค้าเก็บเฉพาะแถวของ "วันที่ล่าสุด" (ตัดเวลาทิ้ง) · item.day = วันนั้น (เลขวันแบบ Excel) ไว้เทียบกับไฟล์ตั้งต้น
 function parseItemLocationRows(rows){
-  const rowsByItem=new Map();
+  const byItem=new Map();
   rows.forEach(r=>{
     const itemNo=String(r['Item No']||'').trim();
     const desc=String(r['Item Desc']||'').trim();
     if(!itemNo||!desc)return;
-    const dateSerial=r['Date'];
-    if(typeof dateSerial!=='number')return;
-    const rowYear=new Date(Math.floor(dateSerial-25569)*86400*1000).getUTCFullYear();
-    let bucket=rowsByItem.get(itemNo);
-    if(!bucket){ bucket={y2026:[],yOld:[]}; rowsByItem.set(itemNo,bucket); }
-    (rowYear===2026?bucket.y2026:bucket.yOld).push(r);
+    const serial=r['Date'];
+    if(typeof serial!=='number')return;
+    const day=Math.floor(serial);
+    let b=byItem.get(itemNo);
+    if(!b){ b={day:0,rows:[],barcode:'',bcDay:-1}; byItem.set(itemNo,b); }
+    const barcode=String(r['Barcode']||'').trim();
+    if(barcode&&day>=b.bcDay){ b.barcode=barcode; b.bcDay=day; }
+    if(day>b.day){ b.day=day; b.rows=[r]; }
+    else if(day===b.day) b.rows.push(r);
   });
-  const map=new Map();
-  rowsByItem.forEach(bucket=>{
-    const chosenRows=bucket.y2026.length?bucket.y2026:bucket.yOld;
-    chosenRows.forEach(r=>{
-      const itemNo=String(r['Item No']||'').trim();
+  const out=[];
+  byItem.forEach((b,itemNo)=>{
+    const item={itemNo,barcode:b.barcode,desc:'',remark:'',locations:[],day:b.day};
+    b.rows.forEach(r=>{
       const desc=String(r['Item Desc']||'').trim();
-      const barcode=String(r['Barcode']||'').trim();
       const loc=String(r['Loc']||'').trim();
       const location=String(r['Location']||'').trim();
-      const facing=r['Facing'];
-      const maxQty=r['Max Qty'];
       const remark=String(r['Remark']||'').trim();
-      let item=map.get(itemNo);
-      if(!item){ item={itemNo,barcode,desc,remark,locations:[]}; map.set(itemNo,item); }
-      if(!item.barcode&&barcode)item.barcode=barcode;
+      if(!item.desc)item.desc=desc;
       if(!item.remark&&remark)item.remark=remark;
       const dupe=item.locations.some(l=>l.loc===loc&&l.location===location);
-      if(!dupe&&(loc||location)) item.locations.push({loc,location,facing,maxQty});
+      if(!dupe&&(loc||location)) item.locations.push({loc,location,facing:r['Facing'],maxQty:r['Max Qty']});
     });
+    out.push(item);
   });
-  return Array.from(map.values());
+  return out;
+}
+// เทียบกับไฟล์ตั้งต้น: added = ยังไม่มีในระบบ · updated = ไฟล์มีวันที่ใหม่กว่าและข้อมูลต่างจากเดิม · ที่เหลือไม่แตะต้อง (notNewer = ไม่มีข้อมูลใหม่กว่า, same = ใหม่กว่าแต่เหมือนเดิม, missing = ไม่มีในไฟล์)
+function itemLocDiff(parsed){
+  const d={added:[],updated:[],notNewer:0,same:0,missing:0};
+  const seen=new Set();
+  parsed.forEach(p=>{
+    seen.add(p.itemNo);
+    const sig=BUILTIN_ITEM_SIG.get(p.itemNo);
+    if(sig===undefined){ d.added.push(p); return; }
+    if(!(p.day>BUILTIN_ITEM_DAY.get(p.itemNo))){ d.notNewer++; return; }
+    if(iLocSig(p)===sig){ d.same++; return; }
+    d.updated.push(p);
+  });
+  BUILTIN_ITEM_SIG.forEach((s,k)=>{ if(!seen.has(k)) d.missing++; });
+  return d;
+}
+// ซ้อนรายการที่นำเข้าทับสินค้าตั้งต้น (ข้อมูลที่ไฟล์ไม่มี เช่น ไม่มีตำแหน่ง/บาร์โค้ด/หมายเหตุ ให้คงของเดิมไว้)
+function applyItemLocOverlay(list){
+  const idx=new Map(PRODUCTS_BY_KEY.map(i=>[i.itemNo,i]));
+  list.forEach(p=>{
+    const it=idx.get(p.itemNo);
+    if(it){
+      if(p.desc) it.desc=p.desc;
+      if(p.barcode) it.barcode=p.barcode;
+      if(p.remark) it.remark=p.remark;
+      if(p.locations&&p.locations.length){ it.locations=p.locations.map(l=>Object.assign({},l)); it.baseLocations=it.locations.slice(); }
+    }else{
+      const ni={itemNo:p.itemNo,barcode:p.barcode||'',desc:p.desc||'',remark:p.remark||'',locations:(p.locations||[]).map(l=>Object.assign({},l))};
+      ni.baseLocations=ni.locations.slice();
+      PRODUCTS_BY_KEY.push(ni); idx.set(ni.itemNo,ni);
+    }
+  });
 }
 function iLocChunks(items,maxBytes){
   const enc=new TextEncoder(),chunks=[];
@@ -8698,9 +8730,9 @@ async function loadItemLocImport(){
     return null;
   }
 }
-async function saveItemLocImport(name,items,locCount){
+async function saveItemLocImport(name,items,extra){
   const strs=iLocChunks(items,600000);
-  const meta={type:'itemLocImportMeta',name,at:Date.now(),items:items.length,locs:locCount,chunks:strs.length,by:(()=>{ const s=getSession(); return s&&s.name?(s.name+' · '+(s.dept||'')):''; })()};
+  const meta=Object.assign({type:'itemLocImportMeta',name,at:Date.now(),items:items.length,locs:items.reduce((s,i)=>s+i.locations.length,0),chunks:strs.length,by:(()=>{ const s=getSession(); return s&&s.name?(s.name+' · '+(s.dept||'')):''; })()},extra||{});
   if(itemLocMetaDocRef){
     let old=null;
     try{ const d=await itemLocMetaDocRef.get(); old=d.exists?d.data():null; }catch(e){}
@@ -8711,40 +8743,36 @@ async function saveItemLocImport(name,items,locCount){
   await iLocKvSet('data',{meta,items});
   return meta;
 }
-function applyItemLocImportInPlace(items,meta){
-  PRODUCTS_BY_KEY=items;
-  PRODUCTS_BY_KEY.forEach(item=>{ item.baseLocations=item.locations.slice(); });
-  ITEM_LOC_IMPORT_META=meta;
-  applyLocationOverridesToProducts();
-  applyStockOverridesToProducts();
-  PRODUCTS_INDEX={};
-  PRODUCTS_BY_KEY.forEach(item=>{ PRODUCTS_INDEX[item.itemNo]=item; });
-  mergeCustomItemsIntoProducts();
-  applyItemOverridesToProducts();
-  employeeOnlyItemsApplied=false; /* the employee-only items were dropped with the old list: add them again */
-  applyEmployeeOnlyVisibility();
-}
 function itemLocReload(){ location.reload(); }
 async function importItemLocFromExcel(inp){
   const file=inp&&inp.files&&inp.files[0];
   if(inp) inp.value='';
   if(!file||!isEmployee()) return;
-  const pin=prompt('กรอกรหัสพนักงานเพื่อยืนยันการนำเข้าข้อมูล Item Location (ข้อมูลของทุกคนในทีมจะเปลี่ยนตามไฟล์)');
+  const pin=prompt('กรอกรหัสพนักงานเพื่อยืนยันการนำเข้าข้อมูล Item Location (ข้อมูลของทุกคนในทีมจะอัพเดทเฉพาะรายการที่ไฟล์มีข้อมูลใหม่)');
   if(pin===null) return;
   if(!STAFF_PINS.includes(pin.trim())){ alert(t('wasteWrongPinAlert')); return; }
+  if(!BUILTIN_ITEM_SIG.size){ alert('ข้อมูล Item Location ยังโหลดไม่เสร็จ รอสักครู่แล้วลองใหม่อีกครั้ง'); return; }
   try{
     showWasteToast('กำลังอ่านไฟล์…');
     const buf=await file.arrayBuffer();
     const wb=XLSX.read(buf,{type:'array'});
     const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
-    const items=parseItemLocationRows(rows);
-    const locCount=items.reduce((s,i)=>s+i.locations.length,0);
-    if(!items.length){ alert('ไม่พบข้อมูลที่นำเข้าได้ในไฟล์นี้ — ต้องเป็นไฟล์ Item Location (คอลัมน์ Item No, Item Desc, Date, Barcode, Loc, Location, Facing, Max Qty, Remark)'); return; }
-    if(!confirm('นำเข้า '+items.length.toLocaleString()+' สินค้า · '+locCount.toLocaleString()+' ตำแหน่ง จากไฟล์ "'+file.name+'"?\nข้อมูล Item Location ของทุกคนในทีมจะเปลี่ยนตามไฟล์นี้ (ตำแหน่งที่พนักงานเพิ่ม/แก้เองยังคงอยู่)')) return;
+    const parsed=parseItemLocationRows(rows);
+    if(!parsed.length){ alert('ไม่พบข้อมูลที่นำเข้าได้ในไฟล์นี้ — ต้องเป็นไฟล์ Item Location (คอลัมน์ Item No, Item Desc, Date, Barcode, Loc, Location, Facing, Max Qty, Remark)'); return; }
+    const d=itemLocDiff(parsed);
+    const items=d.added.concat(d.updated);
+    if(!items.length){ alert('ไฟล์นี้ไม่มีข้อมูลที่ใหม่กว่าหรือต่างจากข้อมูลที่ใช้อยู่ ('+parsed.length.toLocaleString()+' สินค้าในไฟล์) — ไม่ได้อัพเดทอะไร'); return; }
+    const prev=ITEM_LOC_IMPORT_META;
+    if(!confirm('นำเข้าจากไฟล์ "'+file.name+'" ?\n'
+      +'• สินค้าใหม่ '+d.added.length.toLocaleString()+' รายการ\n'
+      +'• สินค้าที่มีข้อมูลใหม่กว่า (อัพเดทตำแหน่ง) '+d.updated.length.toLocaleString()+' รายการ\n'
+      +'• ไม่แตะต้อง: ไม่มีข้อมูลใหม่ '+(d.notNewer+d.same).toLocaleString()+' รายการ · ไม่มีในไฟล์ '+d.missing.toLocaleString()+' รายการ\n'
+      +'ทุกคนในทีมจะเห็นข้อมูลที่อัพเดทนี้ (ตำแหน่งที่พนักงานเพิ่ม/แก้เองยังคงอยู่)'
+      +(prev&&prev.name?'\nไฟล์ที่นำเข้าไว้ก่อนหน้า ("'+prev.name+'") จะถูกแทนที่ด้วยไฟล์นี้':''))) return;
     showWasteToast('กำลังบันทึก…');
-    const meta=await saveItemLocImport(file.name,items,locCount);
-    applyItemLocImportInPlace(items,meta);
-    showWasteToast('อัพเดทข้อมูล Item Location แล้ว ('+items.length.toLocaleString()+' สินค้า)');
+    await saveItemLocImport(file.name,items,{added:d.added.length,updated:d.updated.length});
+    showWasteToast('อัพเดทข้อมูล Item Location แล้ว ('+items.length.toLocaleString()+' รายการ) กำลังโหลดข้อมูลใหม่…');
+    setTimeout(itemLocReload,1200);
   }catch(e){
     console.error(e);
     alert('นำเข้าไฟล์ไม่สำเร็จ: '+e.message+'\n(ถ้าขึ้นว่าไม่มีสิทธิ์ ให้แจ้งผู้ดูแลระบบเพื่อเปิดสิทธิ์เขียนข้อมูลให้ makroFinder/itemLocImport)');
@@ -8772,9 +8800,10 @@ async function openItemLocImportInfo(){
   }
   if(!meta){ box.innerHTML='<div style="padding:20px;text-align:center;color:#667085">ยังไม่มีไฟล์ที่นำเข้า (ตอนนี้ใช้ไฟล์ตั้งต้นของระบบ)</div>'; return; }
   const at=new Date(meta.at);
+  const cnt=(meta.added!==undefined?'เพิ่มใหม่ '+(meta.added||0).toLocaleString()+' · อัพเดท '+(meta.updated||0).toLocaleString()+' สินค้า':(meta.items||0).toLocaleString()+' สินค้า')+' · '+(meta.locs||0).toLocaleString()+' ตำแหน่ง';
   const row=document.createElement('div');
   row.style.cssText='display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;border:1px solid #e2e5ea;border-radius:10px;padding:10px 12px';
-  row.innerHTML='<span style="flex:1;min-width:150px;font-weight:700;overflow-wrap:anywhere">'+escapeHtml(meta.name||'')+'</span><button type="button" class="waste-io-btn waste-io-del" style="flex:none;padding:6px 14px;font-size:13px">ลบ</button><span style="flex-basis:100%;font-size:12px;color:#667085">นำเข้าเมื่อ '+at.getDate()+'/'+(at.getMonth()+1)+'/'+at.getFullYear()+' '+String(at.getHours()).padStart(2,'0')+':'+String(at.getMinutes()).padStart(2,'0')+' น.'+(meta.by?' โดย '+escapeHtml(meta.by):'')+' · '+(meta.items||0).toLocaleString()+' สินค้า · '+(meta.locs||0).toLocaleString()+' ตำแหน่ง</span>';
+  row.innerHTML='<span style="flex:1;min-width:150px;font-weight:700;overflow-wrap:anywhere">'+escapeHtml(meta.name||'')+'</span><button type="button" class="waste-io-btn waste-io-del" style="flex:none;padding:6px 14px;font-size:13px">ลบ</button><span style="flex-basis:100%;font-size:12px;color:#667085">นำเข้าเมื่อ '+at.getDate()+'/'+(at.getMonth()+1)+'/'+at.getFullYear()+' '+String(at.getHours()).padStart(2,'0')+':'+String(at.getMinutes()).padStart(2,'0')+' น.'+(meta.by?' โดย '+escapeHtml(meta.by):'')+' · '+cnt+'</span>';
   row.querySelector('button').addEventListener('click',()=>deleteItemLocImport(meta));
   box.innerHTML='';
   box.appendChild(row);
