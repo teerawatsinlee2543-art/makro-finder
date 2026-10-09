@@ -4447,7 +4447,8 @@ function nbsAgingText(r){
 }
 /* Buyer shown for an Item NBS row: its own Buyer; otherwise the Buyer the same Item No has on the OOS+ page (buyer_uid) or in the ItemList_Layout loaded on High Stock to DMS / Negative Stock (Buyer column) — so every page shows the same Buyer for the same item. Nothing is written: change the other page's data and this follows. */
 var NBSB=null;
-function nbsBuyerMap(){
+function nbsBuyerMap(check){
+  if(!check&&NBSB)return NBSB.map; /* per-row lookups reuse the map; nbsFiltered() (every list, search, export and PDF starts there) re-checks whether the other pages' data changed */
   const oos=st.oos||[];let h=oos.length;
   oos.forEach(o=>{const u=String(o.itemNo||'')+'|'+String(o.buyerUid||'');for(let i=0;i<u.length;i++)h=(h*31+u.charCodeAt(i))|0});
   const key=h+':'+IL_REV.neg+':'+IL_REV.dms+':'+(ILT.neg?ILT.neg.rows.length:0)+':'+(ILT.dms?ILT.dms.rows.length:0);
@@ -4459,6 +4460,7 @@ function nbsBuyerMap(){
 function nbsBuyerUid(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))||''}
 /* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
 function nbsFiltered(whole){
+  nbsBuyerMap(true);
   const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value;
   return rows.filter(r=>whole===true||((!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
     &&(!q||[r.itemNo,r.desc,nbsBuyerUid(r),r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q))))

@@ -8692,8 +8692,9 @@ function iLocKvDel(k){
     catch(e){ return false; }
   })(),false);
 }
-function iLocPack(it){ return [it.itemNo,it.barcode||'',it.desc||'',it.remark||'',(it.locations||[]).map(l=>[l.loc,l.location,l.facing===undefined?'':l.facing,l.maxQty===undefined?'':l.maxQty])]; }
-function iLocUnpack(a){ return {itemNo:a[0],barcode:a[1],desc:a[2],remark:a[3],locations:a[4].map(x=>({loc:x[0],location:x[1],facing:x[2],maxQty:x[3]}))}; }
+/* the stored form also carries the item's update day (wd): an import never overrides a built-in file that is newer than the import for that item */
+function iLocPack(it,wd){ const a=[it.itemNo,it.barcode||'',it.desc||'',it.remark||'',(it.locations||[]).map(l=>[l.loc,l.location,l.facing===undefined?'':l.facing,l.maxQty===undefined?'':l.maxQty])]; if(wd&&it.day!=null)a.push(it.day); return a; }
+function iLocUnpack(a){ const o={itemNo:a[0],barcode:a[1],desc:a[2],remark:a[3],locations:a[4].map(x=>({loc:x[0],location:x[1],facing:x[2],maxQty:x[3]}))}; if(a.length>5)o.day=a[5]; return o; }
 function iLocSig(it){ return JSON.stringify(iLocPack(it)); }
 // ต่อสินค้าเก็บเฉพาะแถวของ "วันที่ล่าสุด" (ตัดเวลาทิ้ง) · item.day = วันนั้น (เลขวันแบบ Excel) ไว้เทียบกับไฟล์ตั้งต้น
 function parseItemLocationRows(rows){
@@ -8750,6 +8751,7 @@ function applyItemLocOverlay(list){
   list.forEach(p=>{
     const it=idx.get(p.itemNo);
     if(it){
+      if(p.day!=null&&BUILTIN_ITEM_DAY.has(p.itemNo)&&BUILTIN_ITEM_DAY.get(p.itemNo)>=p.day)return; /* the built-in file has since caught up with (or passed) this import for this item */
       if(p.desc) it.desc=p.desc;
       if(p.barcode) it.barcode=p.barcode;
       if(p.remark) it.remark=p.remark;
@@ -8765,7 +8767,7 @@ function iLocChunks(items,maxBytes){
   const enc=new TextEncoder(),chunks=[];
   let cur=[],size=2;
   items.forEach(it=>{
-    const packed=iLocPack(it),len=enc.encode(JSON.stringify(packed)).length+1;
+    const packed=iLocPack(it,true),len=enc.encode(JSON.stringify(packed)).length+1;
     if(cur.length&&size+len>maxBytes){ chunks.push(cur); cur=[]; size=2; }
     cur.push(packed); size+=len;
   });
@@ -8920,12 +8922,24 @@ function noLocFilter(all,o){
     return true;
   });
 }
+/* the count on the yellow-orange box: a plain loop (no list built, no sort) and run a moment later, so a phone is never held up while the page loads */
+var NOLOC_BADGE_T=null;
 function updateNoLocBadge(){
-  const el=document.getElementById('noLocCount');
-  if(!el)return;
-  if(!PRODUCTS_READY||!isEmployee()||!EMPLOYEE_ONLY_ITEMS_READY){ el.textContent=''; return; }
-  const n=noLocFilter(noLocBuild(),{hideDel:true,hideAdj:true}).length;
-  el.textContent=n.toLocaleString();
+  clearTimeout(NOLOC_BADGE_T);
+  NOLOC_BADGE_T=setTimeout(()=>{
+    const el=document.getElementById('noLocCount');
+    if(!el)return;
+    if(!PRODUCTS_READY||!isEmployee()||!EMPLOYEE_ONLY_ITEMS_READY){ el.textContent=''; return; }
+    let n=0;
+    for(let i=0;i<PRODUCTS_BY_KEY.length;i++){
+      const p=PRODUCTS_BY_KEY[i];
+      if(p.locations&&p.locations.length)continue;
+      const d=String(p.desc||'');
+      if(NOLOC_DEL_RE.test(d)||NOLOC_ADJ_RE.test(d))continue;
+      n++;
+    }
+    el.textContent=n.toLocaleString();
+  },300);
 }
 function noLocWaitMaster(){
   return new Promise(res=>{
@@ -9000,6 +9014,7 @@ async function exportNoLocExcel(){
   if(isLineBrowser()){ alert(t('wasteLineBrowserExportWarning')); return; }
   const rows=NOLOC_VIEW;
   if(!rows.length){ showWasteToast('ไม่มีรายการให้ส่งออก'); return; }
+  if(rows.length>50000&&!confirm('ไฟล์ Excel จะมี '+rows.length.toLocaleString()+' แถว — ใหญ่มาก อาจช้าหรือค้างบนมือถือ\nส่งออกทั้งหมดเลยไหม? (ถ้าไม่ ให้กดยกเลิก แล้วกรองให้เหลือน้อยลงก่อน)'))return;
   showWasteToast('กำลังสร้างไฟล์ Excel…');
   await new Promise(r=>setTimeout(r,60));
   const aoa=[['ลำดับ','Item No','Barcode','ชื่อสินค้า','ที่มา','Loc (เติม)','Location (เติม)']];
