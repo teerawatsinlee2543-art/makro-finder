@@ -808,6 +808,19 @@ label.has-scan{position:relative}
 /* the green "ข้อมูลทีม" chip is smaller on phones and tablets (a computer screen keeps its size) */
 @media (max-width:1023px){header>.row #mode{font-size:10px;padding:1px 7px;line-height:1.25;font-weight:600}}
 @media (max-width:359px){header>.row #mode{font-size:9px;padding:1px 6px}} /* at 320 the green text then fits the old 116 px limit on one line */
+/* department bar charts (OOS+, %Shrink, Negative Stock, High Stock to DMS): name · bar (orange to red) · amount and % of the total */
+.oos-dchips.dbars{display:grid;gap:4px;margin:12px 0;padding:12px 14px;border:1px solid #f1d29b;border-radius:14px;background:linear-gradient(180deg,#FFF9E8,#FFF0CC)}
+.dbar-h{font-weight:800;font-size:13px;color:#7a4a00;margin-bottom:4px}
+.dbar-h .muted{font-weight:500}
+.dbar{display:grid;grid-template-columns:minmax(130px,30%) minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-radius:9px;padding:4px 6px;cursor:pointer;font:inherit;color:#3d2a05}
+.dbar:hover{background:#ffeec2}
+.dbar.sel{background:#ffe3a1;box-shadow:inset 0 0 0 2px #f59e0b}
+.dbar .dn{font-size:13px;font-weight:700;overflow-wrap:anywhere;line-height:1.25}
+.dbar .dt{display:block;height:15px;border-radius:99px;background:#f8dfa6;overflow:hidden}
+.dbar .dt i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#FFC22E,#F97316 55%,#E5352B);background-size:calc(10000% / var(--p)) 100%;background-repeat:no-repeat}
+.dbar .dv{font-size:13px;font-weight:800;white-space:nowrap;text-align:right}
+.dbar .dv span{display:inline-block;min-width:44px;margin-left:6px;color:#b45309;font-weight:700}
+@media (max-width:700px){.dbar{grid-template-columns:minmax(0,1fr) auto;gap:2px 8px}.dbar .dn{grid-column:1/-1}.dbar .dt{grid-column:1}.dbar .dv{grid-column:2}}
 </style>
 </head>
 <body>
@@ -3323,7 +3336,7 @@ function renderOos(){
   const dsel=$('#oosFDept'),dcur=dsel.value,dnames=[...new Set(all.map(r=>r.assignDept).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   dsel.innerHTML='<option value="">ทั้งหมด</option>'+dnames.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
   const dcnt={};sActive.forEach(r=>{if(r.assignDept)dcnt[r.assignDept]=(dcnt[r.assignDept]||0)+1});
-  $('#oosDeptTiles').innerHTML=Object.entries(dcnt).sort((a,b)=>b[1]-a[1]).map(([d,n])=>`<button type="button" class="btn sm${dsel.value===d?' sel':''}" data-d="${esc(d)}">${esc(d)} <b>${n.toLocaleString()}</b></button>`).join('');
+  {const el=$('#oosDeptTiles'),ents=Object.entries(dcnt).sort((a,b)=>b[1]-a[1]);el.classList.toggle('dbars',ents.length>0);el.innerHTML=deptBars(ents,n=>n.toLocaleString()+' รายการ',dsel.value,'รายการที่ต้องเติม แยกตามแผนก')}
   const sel=$('#oosFWho'),cur=sel.value,names=[...new Set(all.map(r=>r.assignee).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   sel.innerHTML='<option value="">ทั้งหมด</option>'+names.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('');
   const rows=oosVisible(ctx),shown=rows.slice(0,oosLimit);
@@ -3873,7 +3886,7 @@ function renderShr(){
   const dsel=$('#shrFDept'),dcur=dsel.value;
   dsel.innerHTML='<option value="">ทั้งหมด</option>'+m.depts.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
   const dcnt={};sub.forEach(it=>{const l=lossOf(it);if(l>0&&it.dlbl)dcnt[it.dlbl]=(dcnt[it.dlbl]||0)+l});
-  $('#shrDeptTiles').innerHTML=Object.entries(dcnt).sort((a,c)=>c[1]-a[1]).map(([d,n])=>`<button type="button" class="btn sm${dsel.value===d?' sel':''}" data-d="${esc(d)}">${esc(d)} <b>${shrBk(n)}</b></button>`).join('');
+  {const el=$('#shrDeptTiles'),ents=Object.entries(dcnt).sort((a,c)=>c[1]-a[1]);el.classList.toggle('dbars',ents.length>0);el.innerHTML=deptBars(ents,n=>shrBk(n),dsel.value,'มูลค่าที่ทิ้ง แยกตามแผนก')}
   const rsel=$('#shrFRs'),rcur=rsel.value;rsel.innerHTML='<option value="">ทั้งหมด</option>'+m.reasons.map(rc=>`<option value="${esc(rc)}"${rc===rcur?' selected':''}>${esc(shrRs(rc))}</option>`).join('');
   const csel=$('#shrFCls'),ccur=csel.value;csel.innerHTML='<option value="">ทั้งหมด</option>'+m.classes.map(([n,l])=>`<option value="${esc(n)}"${n===ccur?' selected':''}>${esc(l)}</option>`).join('');
   const wsel=$('#shrFWho'),wcur=wsel.value;wsel.innerHTML='<option value="">ทั้งหมด</option>'+[...m.buyers.entries()].sort((a,c)=>a[0].localeCompare(c[0])).map(([u,n])=>`<option value="${esc(u)}"${u===wcur?' selected':''}>${esc(u)}${n?' · '+esc(n):''}</option>`).join('')+(m.coms.size?'<optgroup label="Commercial (Class ที่ยังไม่ระบุ Buyer)">'+[...m.coms.values()].map(c=>`<option value="c:${esc(c.uid)}"${'c:'+c.uid===wcur?' selected':''}>${esc(c.name)}</option>`).join('')+'</optgroup>':'');
@@ -4271,6 +4284,12 @@ function ilCard(p,it){
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}${status}${head}</div>${facts}
     ${it.by?`<div class="small">Buyer: <b>${esc(by||it.by)}</b>${by?` <span class="muted">(${esc(it.by)})</span>`:''}</div>`:'<div class="muted small">ไม่มี Buyer ในรายงาน</div>'}</div>`}
 function ilSrc(p){const d=ILT[p],nd=d?d.rows.filter(r=>p==='neg'?(r.a<=-0.1&&!/^active$/i.test(r.st)&&!r.sh):(/discontinu/i.test(r.st)&&!r.sh)).length:0;return d?`<span>ไฟล์: <b>${esc(d.name)}</b>${d.store?' · '+esc(d.store):''}${d.asOf?' · ข้อมูลเมื่อ '+ilD(d.asOf)+' '+String(new Date(d.asOf).getHours()).padStart(2,'0')+'.'+String(new Date(d.asOf).getMinutes()).padStart(2,'0')+' น.':''} · ${d.rows.length.toLocaleString()} รายการ${nd&&(p==='neg'||!$('#'+p+'Disc').checked)?` · ไม่นับ ${p==='neg'?'ที่ไม่ใช่ Active':'Discontinued'} ${nd.toLocaleString()}`:''}${d.info&&d.info.shared?` · สต็อกร่วม (~) ${d.info.shared.toLocaleString()}`:''}${p==='dms'?` · Stock สูง = เกิน ${IL_T} วันของยอดขายจริง`:''}</span>`:''}
+/* a horizontal bar chart instead of the row of department chips (OOS+, %Shrink, Negative Stock, High Stock to DMS): name · bar · amount and % of the total. A click on a row filters that department (the button keeps data-d) */
+function deptBars(ents,fmt,selected,title){
+  if(!ents.length)return'';
+  const tot=ents.reduce((s,e)=>s+e[1],0)||1,mx=Math.max(...ents.map(e=>e[1]))||1;
+  return`<div class="dbar-h">${esc(title)} <span class="muted small">· กดแถวเพื่อกรองแผนก</span></div>`+ents.map(([d,n])=>{const p=Math.max(2,Math.round(n/mx*100)),pc=n/tot*100;
+    return`<button type="button" class="dbar${selected===d?' sel':''}" data-d="${esc(d)}" title="${esc(d)}"><span class="dn">${esc(d)}</span><span class="dt"><i style="--p:${p};width:${p}%"></i></span><span class="dv">${fmt(n)}<span>${pc>=10?pc.toFixed(0):pc.toFixed(1)}%</span></span></button>`}).join('')}
 function renderIlt(p){
   const D=IL_DEFS[p],S=IL_ST[p],m=ilBuild(p),showDisc=$('#'+p+'Disc').checked;
   if(p==='dms')ilSetHi(m);
@@ -4295,7 +4314,7 @@ function renderIlt(p){
   /* chips + selects */
   const dsel=$('#'+p+'FDept'),dcur=dsel.value;dsel.innerHTML='<option value="">ทั้งหมด</option>'+m.depts.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
   const dcnt={};sub.forEach(it=>{if(!it.dlbl)return;const x=w(it);if(x>0)dcnt[it.dlbl]=(dcnt[it.dlbl]||0)+x});
-  $('#'+p+'DeptTiles').innerHTML=Object.entries(dcnt).sort((a,c)=>c[1]-a[1]).map(([d,n])=>`<button type="button" class="btn sm${dsel.value===d?' sel':''}" data-d="${esc(d)}">${esc(d)} <b>${ilMoney(p,n)}</b></button>`).join('');
+  {const el=$('#'+p+'DeptTiles'),ents=Object.entries(dcnt).sort((a,c)=>c[1]-a[1]);el.classList.toggle('dbars',ents.length>0);el.innerHTML=deptBars(ents,n=>ilMoney(p,n),dsel.value,p==='neg'?'มูลค่าที่ติดลบ แยกตามแผนก':'ส่วนเกินที่ควรลดราคา แยกตามแผนก')}
   const fa=$('#'+p+'FA'),fac=fa.value,fb=$('#'+p+'FB'),fbc=fb.value;
   if(p==='neg'){fa.innerHTML=[['','ทั้งหมด'],['frac','ไม่ถึง −1'],['one','−1 ถึงไม่ถึง −10'],['ten','−10 ลงไป']].map(([k,l])=>`<option value="${k}"${k===fac?' selected':''}>${l}</option>`).join('');fb.innerHTML='<option value="">ทั้งหมด</option>'+m.ags.map(s=>`<option${s===fbc?' selected':''}>${esc(s)}</option>`).join('')}
   else{fa.innerHTML='<option value="">ทั้งหมด</option>'+[['watch','เฝ้าระวัง'],['cut15','ควรลดราคา 15%'],['cut30','ควรลดราคา 30%'],['dead','ไม่มียอดขายเลย']].map(([k,l])=>`<option value="${k}"${k===fac?' selected':''}>${l}</option>`).join('');fb.innerHTML='<option value="">ทั้งหมด</option>'+m.sts.map(s=>`<option${s===fbc?' selected':''}>${esc(s)}</option>`).join('')}
