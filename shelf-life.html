@@ -776,14 +776,15 @@ label:has(>:is(#negQ,#dmsQ)){color:var(--accent);font-weight:800;font-size:14px}
   #oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles,.lvbar{position:static!important;box-shadow:none}
 }/* camera button inside the search boxes (same red as the scan buttons) */
 label.has-scan{position:relative}
-label.has-scan>input{padding-right:50px!important}
-.scan-mini{position:absolute;right:4px;bottom:3px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;padding:0;border-radius:10px;border:1px solid #e30613;background:#e30613;color:#fff;cursor:pointer;line-height:0}
+.scan-wrap{position:relative;display:block;width:100%}
+.scan-wrap>input{display:block;width:100%;box-sizing:border-box;min-height:42px;padding-right:50px!important}
+.scan-mini{position:absolute;top:4px;bottom:4px;right:4px;height:auto;aspect-ratio:1/1;min-width:0;min-height:0;display:inline-flex;align-items:center;justify-content:center;padding:0;border-radius:10px;border:1px solid #e30613;background:#e30613;color:#fff;cursor:pointer;line-height:0}
 .scan-mini:hover{background:#c00510}
 .scan-mini:focus-visible{outline:3px solid #ffd400;outline-offset:1px}@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
 /* phone fixes: placed last so they win over the earlier compact / pinned-tile rules */
 @media (max-width:700px){
   table.resp td.pact .btn.sm{min-height:40px;min-width:56px}
-  .scan-mini{min-width:40px;min-height:40px}
+  .scan-wrap>input{min-height:46px}
   #idList .imp-file .btn.sm{min-height:40px;min-width:56px}
   :is(#shrDelFile,#shrImport,#negDelFile,#negImport,#dmsDelFile,#dmsImport,#prDelFile,#prImport){min-height:40px}
 }
@@ -804,6 +805,9 @@ label.has-scan>input{padding-right:50px!important}
 .add-card,.add-step{grid-template-columns:minmax(0,1fr)} /* the Monitor item form could be 15 px wider than a 320 px screen */
 /* a short phone screen (up to 640 px tall): the logo bar + Julian badge scroll away, only the tab bar (and the pinned tiles) stay - the list keeps about 100 px more */
 @media (max-width:700px) and (max-height:640px){header{position:static!important}}
+/* the green "ข้อมูลทีม" chip is smaller on phones and tablets (a computer screen keeps its size) */
+@media (max-width:1023px){header>.row #mode{font-size:10px;padding:1px 7px;line-height:1.25;font-weight:600}}
+@media (max-width:359px){header>.row #mode{font-size:9px;padding:1px 6px}} /* at 320 the green text then fits the old 116 px limit on one line */
 </style>
 </head>
 <body>
@@ -5372,7 +5376,7 @@ function scanInit(){
   SCAN_FIELDS.forEach(sel=>{const inp=document.querySelector(sel);if(!inp||inp.dataset.scan)return;inp.dataset.scan='1';
     const lab=inp.closest('label')||inp.parentElement;lab.classList.add('has-scan');
     const b=document.createElement('button');b.type='button';b.className='scan-mini';b.title='สแกนบาร์โค้ดด้วยกล้อง';b.setAttribute('aria-label','สแกนบาร์โค้ดด้วยกล้อง');b.innerHTML=SCAN_SVG;
-    b.onclick=e=>{e.preventDefault();e.stopPropagation();openScan('field',inp)};lab.appendChild(b)})}
+    b.onclick=e=>{e.preventDefault();e.stopPropagation();openScan('field',inp)};const w=document.createElement('span');w.className='scan-wrap';inp.parentNode.insertBefore(w,inp);w.appendChild(inp);w.appendChild(b)})}
 scanInit();
 function resetAddForm(){
   ['#mfQ','#aJ','#aDate','#aLoc','#aRemarkOther'].forEach(s=>{const el=$(s);if(el)el.value=''});
