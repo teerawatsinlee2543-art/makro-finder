@@ -4013,10 +4013,12 @@ const IL_DEFS={
   neg:{p:'neg',tab:'Negative Stock',title:'Negative Stock',sub:'· สินค้า Active ที่ Stock ASOH ติด −0.1 ลงไป — เอาไปปรับให้เหลือ 0',tilesTxt:'ติดลบ',fa:'ช่วงติดลบ',fb:'Aging Status',hideTxt:'ซ่อนรายการลดราคา (~ สต็อกร่วม)',
     sorts:[['val','ติดลบมากสุด (มูลค่า ฿)'],['qty','ติดลบมากสุด (จำนวน)'],['sold','ขายเดือนนี้มากสุด'],['name','ชื่อสินค้า']],
     empty:'ยังไม่มีข้อมูล Negative Stock — กด “นำเข้ารายงาน” แล้วลากไฟล์ ItemList_Layout (ตัวกรอง Stock qty < 0) มาวาง',
+    none:'ไฟล์ที่นำเข้าไม่มีสินค้า Active ที่ Stock ASOH ติด −0.1 ลงไปเลย (หรือเป็นสต็อกร่วม / Discontinued) — ตรวจว่านำเข้าไฟล์ถูกหน้า: Negative Stock ใช้ไฟล์ที่กรอง Stock < 0',
     bases:[['val','มูลค่า ฿'],['qty','จำนวนติดลบ'],['sold','ขายเดือนนี้']]},
   dms:{p:'dms',tab:'High Stock to DMS',title:'High Stock to DMS',sub:'· Stock ASOH สูงเทียบยอดขาย (DMS) — เลือกตัวที่ควรลดราคาเพื่อระบาย Stock',tilesTxt:'ส่วนเกิน',fa:'ระดับ',fb:'สถานะสินค้า',hideTxt:'ซ่อนรายการลดราคา (~ สต็อกร่วม)',
     sorts:[['over','ส่วนเกินมากสุด (฿)'],['cover','Stock พอขายนานสุด (วัน)'],['stock','มูลค่า Stock มากสุด (฿)'],['name','ชื่อสินค้า']],
     empty:'ยังไม่มีข้อมูล High Stock to DMS — กด “นำเข้ารายงาน” แล้วลากไฟล์ ItemList_Layout (รายงานเต็ม ไม่ต้องกรอง Stock < 0) มาวาง',
+    none:'ไฟล์ที่นำเข้าไม่มีสินค้าที่ Stock สูงเทียบยอดขายเลย — ถ้าไฟล์นี้กรองเฉพาะ Stock < 0 (ไฟล์ของ Negative Stock) ให้ใช้รายงาน ItemList เต็ม ไม่ต้องกรอง Stock < 0',
     bases:[['over','ส่วนเกิน ฿'],['cover','พอขายกี่วัน'],['stock','มูลค่า Stock ฿']]}};
 const IL_TIER={watch:['เฝ้าระวัง Stock สูง','md1','ติดตาม / จัดโปรโมชันเบา ๆ'],cut15:['ควรลดราคา 15%','md2','ลดราคา 15% (Step 1)'],cut30:['ควรลดราคา 30%','pull','ลดราคา 30% (Step 2) / เคลียร์ Stock']};
 const IL_BK={neg:['ของหมด / ติดลบ แต่ยังขายอยู่','pull'],low:['ใกล้หมด (ไม่ถึง 3 วัน)','md2'],ok:['Stock พอดี','ok'],over:['Stock ล้น (เกิน 30 วัน)','md1'],dead:['ไม่เคลื่อนไหว (มีของ ไม่มียอดขาย)','soon'],none:['ไม่มี Stock ไม่มียอดขาย','ok']};
@@ -4176,7 +4178,7 @@ function renderIlt(p){
   $('#'+p+'Chart').innerHTML=ilChartHtml(p,rows);
   $('#'+p+'Main').classList.toggle('drill',S.drill&&!!$('#'+p+'Q').value.trim());
   $('#'+p+'List').innerHTML=shown.map(it=>ilCard(p,it)).join('');stkMark();
-  $('#'+p+'Empty').hidden=rows.length>0;$('#'+p+'Empty').textContent=m.items.length?'ไม่มีรายการที่ตรงกับตัวกรอง':D.empty;
+  $('#'+p+'Empty').hidden=rows.length>0;$('#'+p+'Empty').textContent=m.items.length?(m.items.some(it=>ilElig(it,p))?'ไม่มีรายการที่ตรงกับตัวกรอง':D.none):D.empty;
   $('#'+p+'MoreWrap').hidden=rows.length<=S.limit;$('#'+p+'MoreTxt').textContent=`แสดง ${shown.length.toLocaleString()} จาก ${rows.length.toLocaleString()} รายการ`;
   $('#'+p+'Csv').disabled=$('#'+p+'Xlsx').disabled=$('#'+p+'Pdf').disabled=!rows.length;
 }
@@ -4213,16 +4215,17 @@ async function ilReadFile(f){
     ilImp=r;ilPreview()}
   catch(e){ilImp=null;$('#ilBox').innerHTML='';$('#ilErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}}
 function ilPreview(){
-  const r=ilImp,i=r.info,rows=r.rows.filter(x=>!x.sh),neg=rows.filter(x=>x.a<=-0.1&&/^active$/i.test(x.st)),val=neg.reduce((s,x)=>s+(-x.a*x.pr),0),old=ILT[ilTabNow];
+  const r=ilImp,i=r.info,rows=r.rows.filter(x=>!x.sh),neg=rows.filter(x=>x.a<=-0.1&&/^active$/i.test(x.st)),val=neg.reduce((s,x)=>s+(-x.a*x.pr),0),pos=rows.filter(x=>x.a>0&&!/discontinu/i.test(x.st||'')),old=ILT[ilTabNow];
   $('#ilDrop').hidden=true;$('#ilGo').disabled=false;
   $('#ilBox').innerHTML=`<div class="imp-file"><b>${esc(r.name)}</b> <span class="muted small">· ${i.items.toLocaleString()} รายการ${i.store?' · '+esc(i.store):''}${i.asOf?' · ข้อมูลเมื่อ '+esc(ilD(i.asOf)):''}${i.skipped?` · ข้าม ${i.skipped} แถว`:''}</span> <button type="button" class="btn sm" id="ilChange">เลือกไฟล์อื่น</button></div>
-    <div class="imp-tiles"><div class="t-new"><b>${rows.length.toLocaleString()}</b><span>สินค้า</span></div><div class="t-new"><b>${neg.length.toLocaleString()}</b><span>Active ติด −0.1 ลงไป</span></div><div><b>${shrBk(val)}</b><span>มูลค่าที่ติดลบ</span></div><div><b>${i.shared.toLocaleString()}</b><span>สต็อกร่วม (~)</span></div></div>
+    <div class="imp-tiles"><div class="t-new"><b>${rows.length.toLocaleString()}</b><span>สินค้า</span></div>${ilTabNow==='dms'?`<div class="t-new"><b>${pos.length.toLocaleString()}</b><span>มี Stock มากกว่า 0</span></div><div><b>${pos.filter(x=>x.a28===0&&x.lm===0&&x.cm===0).length.toLocaleString()}</b><span>มี Stock แต่ไม่มียอดขาย</span></div>`:`<div class="t-new"><b>${neg.length.toLocaleString()}</b><span>Active ติด −0.1 ลงไป</span></div><div><b>${shrBk(val)}</b><span>มูลค่าที่ติดลบ</span></div>`}<div><b>${i.shared.toLocaleString()}</b><span>สต็อกร่วม (~)</span></div></div>
+    ${ilTabNow==='dms'&&!pos.length?`<p class="small err-text" style="margin:8px 0 0">ไฟล์นี้ไม่มีสินค้าที่มี Stock มากกว่า 0 เลย — น่าจะเป็นไฟล์ที่กรองเฉพาะ Stock ติดลบ (ใช้กับหน้า Negative Stock) หน้านี้ต้องใช้รายงาน ItemList เต็ม ไม่ต้องกรอง</p>`:''}${ilTabNow==='neg'&&!neg.length?`<p class="small err-text" style="margin:8px 0 0">ไฟล์นี้ไม่มีสินค้า Active ที่ Stock ติด −0.1 ลงไปเลย — ตรวจว่าเป็นไฟล์ที่กรอง Stock < 0 (ItemList_Layout)</p>`:''}
     ${old?`<p class="small err-text" style="margin:8px 0 0">จะแทนที่ไฟล์เดิมของหน้านี้: ${esc(old.name)}</p>`:''}`;
   $('#ilChange').onclick=()=>{$('#ilDrop').hidden=false;$('#ilBox').innerHTML='';$('#ilGo').disabled=true;ilImp=null;$('#ilFile').click()}}
 function openIlImport(p){ilTabNow=p;ilImp=null;$('#ilTitle').textContent='นำเข้ารายงาน '+IL_DEFS[p].title;$('#ilBox').innerHTML='';$('#ilDrop').hidden=false;$('#ilGo').disabled=true;$('#ilErr').textContent='';$('#ilFile').value='';$('#dlgIlImp').showModal()}
 function runIlImport(){
   if(!ilImp)return;const p=ilTabNow;ILT[p]={name:ilImp.name,at:new Date().toISOString(),asOf:ilImp.info.asOf,store:ilImp.info.store,info:ilImp.info,rows:ilImp.rows};
-  IL_REV[p]++;ilReset(p);const n=ilImp.rows.length;ilImp=null;$('#dlgIlImp').close();renderIlt(p);toast(`นำเข้า ${IL_DEFS[p].title} แล้ว ${n.toLocaleString()} รายการ`);
+  IL_REV[p]++;ilReset(p);const n=ilImp.rows.length;ilImp=null;$('#dlgIlImp').close();renderIlt(p);toast(`นำเข้า ${IL_DEFS[p].title} แล้ว ${n.toLocaleString()} รายการ`+(ilBuild(p).items.some(it=>ilElig(it,p))?'':' — แต่ยังไม่มีสินค้าที่เข้าเงื่อนไขของหน้านี้ (ดูข้อความใต้ตัวกรอง)'));
   ilSave(p).then(ok=>{if(!ok)toast('นำเข้าแล้ว แต่เบราว์เซอร์ไม่ยอมให้จำข้อมูลไว้ — ปิดหน้าแล้วต้องนำเข้าใหม่')})}
 async function ilExport(p){
   const m=ilBuild(p);if(p==='dms')ilSetHi(m);const rows=ilVisible(p,m);if(!rows.length)return;await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
