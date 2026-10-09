@@ -809,18 +809,31 @@ label.has-scan{position:relative}
 @media (max-width:1023px){header>.row #mode{font-size:10px;padding:1px 7px;line-height:1.25;font-weight:600}}
 @media (max-width:359px){header>.row #mode{font-size:9px;padding:1px 6px}} /* at 320 the green text then fits the old 116 px limit on one line */
 /* department bar charts (OOS+, %Shrink, Negative Stock, High Stock to DMS): name · bar (orange to red) · amount and % of the total */
-.oos-dchips.dbars{display:grid;gap:4px;margin:12px 0;padding:12px 14px;border:1px solid #f1d29b;border-radius:14px;background:linear-gradient(180deg,#FFF9E8,#FFF0CC)}
-.dbar-h{font-weight:800;font-size:13px;color:#7a4a00;margin-bottom:4px}
-.dbar-h .muted{font-weight:500}
-.dbar{display:grid;grid-template-columns:minmax(130px,30%) minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-radius:9px;padding:4px 6px;cursor:pointer;font:inherit;color:#3d2a05}
+/* compact: a small panel (not the full width), thin bars, the top 5 rows and a "show the rest" button */
+.oos-dchips.dbars{display:grid;gap:1px;margin:10px 0;padding:8px 12px 6px;max-width:760px;border:1px solid #f1d29b;border-radius:12px;background:linear-gradient(180deg,#FFF9E8,#FFF0CC)}
+.dbar-h{font-weight:800;font-size:12.5px;color:#7a4a00;margin-bottom:2px}
+.dbar-h .muted{font-weight:500;font-size:11.5px}
+.dbar{display:grid;grid-template-columns:minmax(120px,30%) minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;text-align:left;background:transparent;border:0;border-radius:8px;padding:2px 6px;min-height:24px;cursor:pointer;font:inherit;color:#3d2a05}
 .dbar:hover{background:#ffeec2}
 .dbar.sel{background:#ffe3a1;box-shadow:inset 0 0 0 2px #f59e0b}
-.dbar .dn{font-size:13px;font-weight:700;overflow-wrap:anywhere;line-height:1.25}
-.dbar .dt{display:block;height:15px;border-radius:99px;background:#f8dfa6;overflow:hidden}
+.dbar .dn{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dbar .dt{display:block;height:9px;border-radius:99px;background:#f8dfa6;overflow:hidden}
 .dbar .dt i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#FFC22E,#F97316 55%,#E5352B);background-size:calc(10000% / var(--p)) 100%;background-repeat:no-repeat}
-.dbar .dv{font-size:13px;font-weight:800;white-space:nowrap;text-align:right}
-.dbar .dv span{display:inline-block;min-width:44px;margin-left:6px;color:#b45309;font-weight:700}
-@media (max-width:700px){.dbar{grid-template-columns:minmax(0,1fr) auto;gap:2px 8px}.dbar .dn{grid-column:1/-1}.dbar .dt{grid-column:1}.dbar .dv{grid-column:2}}
+.dbar .dv{font-size:12.5px;font-weight:800;white-space:nowrap;text-align:right}
+.dbar .dv span{display:inline-block;min-width:38px;margin-left:5px;color:#b45309;font-weight:700}
+.dbar-more{display:none}
+.dbars.open .dbar-more{display:contents}
+.dbar-tog{justify-self:center;margin:2px 0 0;padding:3px 14px;border:0;background:transparent;color:#b45309;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border-radius:99px}
+.dbar-tog:hover{background:#ffeec2}
+.dbar-tog .t-less,.dbars.open .dbar-tog .t-more{display:none}
+.dbars.open .dbar-tog .t-less{display:inline}
+@media (max-width:700px){
+  .oos-dchips.dbars{padding:7px 10px 5px}
+  .dbar{grid-template-columns:minmax(0,1fr) auto;gap:1px 8px;padding:3px 2px 4px}
+  .dbar .dn{grid-column:1;grid-row:1}
+  .dbar .dv{grid-column:2;grid-row:1}
+  .dbar .dt{grid-column:1/-1;grid-row:2;height:7px}
+}
 </style>
 </head>
 <body>
@@ -3336,7 +3349,7 @@ function renderOos(){
   const dsel=$('#oosFDept'),dcur=dsel.value,dnames=[...new Set(all.map(r=>r.assignDept).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   dsel.innerHTML='<option value="">ทั้งหมด</option>'+dnames.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
   const dcnt={};sActive.forEach(r=>{if(r.assignDept)dcnt[r.assignDept]=(dcnt[r.assignDept]||0)+1});
-  {const el=$('#oosDeptTiles'),ents=Object.entries(dcnt).sort((a,b)=>b[1]-a[1]);el.classList.toggle('dbars',ents.length>0);el.innerHTML=deptBars(ents,n=>n.toLocaleString()+' รายการ',dsel.value,'รายการที่ต้องเติม แยกตามแผนก')}
+  deptBars($('#oosDeptTiles'),Object.entries(dcnt).sort((a,b)=>b[1]-a[1]),n=>n.toLocaleString()+' รายการ',dsel.value,'รายการที่ต้องเติม แยกตามแผนก');
   const sel=$('#oosFWho'),cur=sel.value,names=[...new Set(all.map(r=>r.assignee).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   sel.innerHTML='<option value="">ทั้งหมด</option>'+names.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('');
   const rows=oosVisible(ctx),shown=rows.slice(0,oosLimit);
@@ -3412,7 +3425,7 @@ $('#oosChart').onclick=e=>{
   const bk=e.target.closest('.oc-back');if(bk){oosDrill=false;$('#oosQ').value='';oosLimit=60;renderOos();$('#oosChart').scrollIntoView({block:'nearest',behavior:'smooth'});return}
   const sg=e.target.closest('.oc-seg button');if(sg){oosFreqP=sg.dataset.p;renderOos();return}
   const bar=e.target.closest('.oc-r');if(bar){oosDrill=true;$('#oosQ').value=bar.dataset.no;oosLimit=60;renderOos();$('#oosList').scrollIntoView({block:'nearest',behavior:'smooth'})}};
-$('#oosDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=$('#oosFDept');d.value=d.value===b.dataset.d?'':b.dataset.d;oosLimit=60;renderOos()};
+$('#oosDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b||!b.dataset.d)return;const d=$('#oosFDept');d.value=d.value===b.dataset.d?'':b.dataset.d;oosLimit=60;renderOos()};
 $('#oosBannerGo').onclick=()=>document.querySelector('#tabs button[data-tab="oos"]').click();
 $('#nbsBannerGo').onclick=()=>document.querySelector('#tabs button[data-tab="nbs"]').click();
 setInterval(()=>{if(!document.hidden)renderOos()},60000); /* the "ค้าง … ชม." counters and colours move on without a click */
@@ -3886,7 +3899,7 @@ function renderShr(){
   const dsel=$('#shrFDept'),dcur=dsel.value;
   dsel.innerHTML='<option value="">ทั้งหมด</option>'+m.depts.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
   const dcnt={};sub.forEach(it=>{const l=lossOf(it);if(l>0&&it.dlbl)dcnt[it.dlbl]=(dcnt[it.dlbl]||0)+l});
-  {const el=$('#shrDeptTiles'),ents=Object.entries(dcnt).sort((a,c)=>c[1]-a[1]);el.classList.toggle('dbars',ents.length>0);el.innerHTML=deptBars(ents,n=>shrBk(n),dsel.value,'มูลค่าที่ทิ้ง แยกตามแผนก')}
+  deptBars($('#shrDeptTiles'),Object.entries(dcnt).sort((a,c)=>c[1]-a[1]),n=>shrBk(n),dsel.value,'มูลค่าที่ทิ้ง แยกตามแผนก');
   const rsel=$('#shrFRs'),rcur=rsel.value;rsel.innerHTML='<option value="">ทั้งหมด</option>'+m.reasons.map(rc=>`<option value="${esc(rc)}"${rc===rcur?' selected':''}>${esc(shrRs(rc))}</option>`).join('');
   const csel=$('#shrFCls'),ccur=csel.value;csel.innerHTML='<option value="">ทั้งหมด</option>'+m.classes.map(([n,l])=>`<option value="${esc(n)}"${n===ccur?' selected':''}>${esc(l)}</option>`).join('');
   const wsel=$('#shrFWho'),wcur=wsel.value;wsel.innerHTML='<option value="">ทั้งหมด</option>'+[...m.buyers.entries()].sort((a,c)=>a[0].localeCompare(c[0])).map(([u,n])=>`<option value="${esc(u)}"${u===wcur?' selected':''}>${esc(u)}${n?' · '+esc(n):''}</option>`).join('')+(m.coms.size?'<optgroup label="Commercial (Class ที่ยังไม่ระบุ Buyer)">'+[...m.coms.values()].map(c=>`<option value="c:${esc(c.uid)}"${'c:'+c.uid===wcur?' selected':''}>${esc(c.name)}</option>`).join('')+'</optgroup>':'');
@@ -3905,7 +3918,7 @@ function renderShr(){
   ['#shrFRs','#shrFCls','#shrFDept','#shrFWho','#shrSort','#shrHide'].forEach(s=>$(s).onchange=re);
   $('#shrDivTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;shrDiv=shrDiv===t.dataset.div?'':t.dataset.div;re()};
   $('#shrTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;const k=t.dataset.t;shrTile=(k==='all'||k==='rate')?'':shrTile===k?'':k;re()};
-  $('#shrDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b)return;const s=$('#shrFDept');s.value=s.value===b.dataset.d?'':b.dataset.d;re()};
+  $('#shrDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b||!b.dataset.d)return;const s=$('#shrFDept');s.value=s.value===b.dataset.d?'':b.dataset.d;re()};
   $('#shrMain').addEventListener('click',e=>{
     const sg=e.target.closest('.oc-seg button');if(sg){shrBasis=sg.dataset.p;re();return}
     const bk=e.target.closest('.oc-back');if(bk){shrDrill=false;$('#shrQ').value='';re();$('#shrChart').scrollIntoView({block:'nearest',behavior:'smooth'});return}
@@ -4285,11 +4298,20 @@ function ilCard(p,it){
     ${it.by?`<div class="small">Buyer: <b>${esc(by||it.by)}</b>${by?` <span class="muted">(${esc(it.by)})</span>`:''}</div>`:'<div class="muted small">ไม่มี Buyer ในรายงาน</div>'}</div>`}
 function ilSrc(p){const d=ILT[p],nd=d?d.rows.filter(r=>p==='neg'?(r.a<=-0.1&&!/^active$/i.test(r.st)&&!r.sh):(/discontinu/i.test(r.st)&&!r.sh)).length:0;return d?`<span>ไฟล์: <b>${esc(d.name)}</b>${d.store?' · '+esc(d.store):''}${d.asOf?' · ข้อมูลเมื่อ '+ilD(d.asOf)+' '+String(new Date(d.asOf).getHours()).padStart(2,'0')+'.'+String(new Date(d.asOf).getMinutes()).padStart(2,'0')+' น.':''} · ${d.rows.length.toLocaleString()} รายการ${nd&&(p==='neg'||!$('#'+p+'Disc').checked)?` · ไม่นับ ${p==='neg'?'ที่ไม่ใช่ Active':'Discontinued'} ${nd.toLocaleString()}`:''}${d.info&&d.info.shared?` · สต็อกร่วม (~) ${d.info.shared.toLocaleString()}`:''}${p==='dms'?` · Stock สูง = เกิน ${IL_T} วันของยอดขายจริง`:''}</span>`:''}
 /* a horizontal bar chart instead of the row of department chips (OOS+, %Shrink, Negative Stock, High Stock to DMS): name · bar · amount and % of the total. A click on a row filters that department (the button keeps data-d) */
-function deptBars(ents,fmt,selected,title){
-  if(!ents.length)return'';
+/* compact: only the top 5 departments (plus the selected one) are shown, "ดูอีก N แผนก" opens the rest; the open / closed choice is remembered per chart */
+var DBAR_OPEN={};
+const DBAR_TOP=5;
+function dbarToggle(btn){const el=btn.closest('.dbars');if(!el)return;const k=el.dataset.k;DBAR_OPEN[k]=!DBAR_OPEN[k];el.classList.toggle('open',!!DBAR_OPEN[k])}
+function deptBars(el,ents,fmt,selected,title){
+  el.classList.toggle('dbars',ents.length>0);
+  if(!ents.length){el.innerHTML='';return}
   const tot=ents.reduce((s,e)=>s+e[1],0)||1,mx=Math.max(...ents.map(e=>e[1]))||1;
-  return`<div class="dbar-h">${esc(title)} <span class="muted small">· กดแถวเพื่อกรองแผนก</span></div>`+ents.map(([d,n])=>{const p=Math.max(2,Math.round(n/mx*100)),pc=n/tot*100;
-    return`<button type="button" class="dbar${selected===d?' sel':''}" data-d="${esc(d)}" title="${esc(d)}"><span class="dn">${esc(d)}</span><span class="dt"><i style="--p:${p};width:${p}%"></i></span><span class="dv">${fmt(n)}<span>${pc>=10?pc.toFixed(0):pc.toFixed(1)}%</span></span></button>`}).join('')}
+  const row=([d,n])=>{const p=Math.max(2,Math.round(n/mx*100)),pc=n/tot*100;
+    return`<button type="button" class="dbar${selected===d?' sel':''}" data-d="${esc(d)}" title="${esc(d)}"><span class="dn">${esc(d)}</span><span class="dt"><i style="--p:${p};width:${p}%"></i></span><span class="dv">${fmt(n)}<span>${pc>=10?pc.toFixed(0):pc.toFixed(1)}%</span></span></button>`};
+  const shown=ents.filter((e,i)=>i<DBAR_TOP||e[0]===selected),rest=ents.filter((e,i)=>!(i<DBAR_TOP||e[0]===selected));
+  el.dataset.k=title;el.classList.toggle('open',!!DBAR_OPEN[title]);
+  el.innerHTML=`<div class="dbar-h">${esc(title)} <span class="muted small">· กดแถวเพื่อกรองแผนก</span></div>`+shown.map(row).join('')
+    +(rest.length?`<div class="dbar-more">${rest.map(row).join('')}</div><button type="button" class="dbar-tog" onclick="dbarToggle(this)"><span class="t-more">ดูอีก ${rest.length} แผนก ▾</span><span class="t-less">ย่อ ▴</span></button>`:'')}
 function renderIlt(p){
   const D=IL_DEFS[p],S=IL_ST[p],m=ilBuild(p),showDisc=$('#'+p+'Disc').checked;
   if(p==='dms')ilSetHi(m);
@@ -4314,7 +4336,7 @@ function renderIlt(p){
   /* chips + selects */
   const dsel=$('#'+p+'FDept'),dcur=dsel.value;dsel.innerHTML='<option value="">ทั้งหมด</option>'+m.depts.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
   const dcnt={};sub.forEach(it=>{if(!it.dlbl)return;const x=w(it);if(x>0)dcnt[it.dlbl]=(dcnt[it.dlbl]||0)+x});
-  {const el=$('#'+p+'DeptTiles'),ents=Object.entries(dcnt).sort((a,c)=>c[1]-a[1]);el.classList.toggle('dbars',ents.length>0);el.innerHTML=deptBars(ents,n=>ilMoney(p,n),dsel.value,p==='neg'?'มูลค่าที่ติดลบ แยกตามแผนก':'ส่วนเกินที่ควรลดราคา แยกตามแผนก')}
+  deptBars($('#'+p+'DeptTiles'),Object.entries(dcnt).sort((a,c)=>c[1]-a[1]),n=>ilMoney(p,n),dsel.value,p==='neg'?'มูลค่าที่ติดลบ แยกตามแผนก':'ส่วนเกินที่ควรลดราคา แยกตามแผนก');
   const fa=$('#'+p+'FA'),fac=fa.value,fb=$('#'+p+'FB'),fbc=fb.value;
   if(p==='neg'){fa.innerHTML=[['','ทั้งหมด'],['frac','ไม่ถึง −1'],['one','−1 ถึงไม่ถึง −10'],['ten','−10 ลงไป']].map(([k,l])=>`<option value="${k}"${k===fac?' selected':''}>${l}</option>`).join('');fb.innerHTML='<option value="">ทั้งหมด</option>'+m.ags.map(s=>`<option${s===fbc?' selected':''}>${esc(s)}</option>`).join('')}
   else{fa.innerHTML='<option value="">ทั้งหมด</option>'+[['watch','เฝ้าระวัง'],['cut15','ควรลดราคา 15%'],['cut30','ควรลดราคา 30%'],['dead','ไม่มียอดขายเลย']].map(([k,l])=>`<option value="${k}"${k===fac?' selected':''}>${l}</option>`).join('');fb.innerHTML='<option value="">ทั้งหมด</option>'+m.sts.map(s=>`<option${s===fbc?' selected':''}>${esc(s)}</option>`).join('')}
@@ -4402,7 +4424,7 @@ function ilInit(){
     ['FA','FB','FDept','FWho','Sort','Hide','Disc'].forEach(s=>$('#'+p+s).onchange=re);if(p==='dms')$('#dmsT').onchange=()=>{IL_T=+$('#dmsT').value||30;try{localStorage.setItem('shelfLifeMonitor.dmsT',IL_T)}catch(e){}re()};
     $('#'+p+'DivTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;S.div=S.div===t.dataset.div?'':t.dataset.div;re()};
     $('#'+p+'Tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;const k=t.dataset.t;S.tile=(k==='all')?'':S.tile===k?'':k;re()};
-    $('#'+p+'DeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b)return;const s=$('#'+p+'FDept');s.value=s.value===b.dataset.d?'':b.dataset.d;re()};
+    $('#'+p+'DeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b||!b.dataset.d)return;const s=$('#'+p+'FDept');s.value=s.value===b.dataset.d?'':b.dataset.d;re()};
     $('#'+p+'Main').addEventListener('click',e=>{
       const sg=e.target.closest('.oc-seg button');if(sg){S.basis=sg.dataset.p;const so=$('#'+p+'Sort');so.value=[...so.options].some(o=>o.value===sg.dataset.p)?sg.dataset.p:so.options[0].value;re();return}
       const bk=e.target.closest('.oc-back');if(bk){S.drill=false;$('#'+p+'Q').value='';re();$('#'+p+'Chart').scrollIntoView({block:'nearest',behavior:'smooth'});return}
