@@ -4048,6 +4048,33 @@ function ilParse(wb,fname){
       if(!rows.length)continue;
       return{name:fname,rows,info:{asOf,store,skipped,shared,neg:rows.filter(r=>r.a<=-0.1&&/^active$/i.test(r.st)&&!r.sh).length,items:rows.length}}}}
   return null}
+/* the team's "Negative Stock Monitor" sheet — Division · Dept no · Art Grp Sub No · Art No · Descr · Last Delday · Last Saleday · Dms · Stock (also what this page's Excel button exports) — is read by the Negative Stock page too.
+   It has no price / status / buyer, so for an item that is in an ItemList_Layout already loaded here (the other page, or this page's previous file) those come from there; otherwise price 0 and status Active */
+const IL_MON_COLS=[['item',/^(artnoitemno|artno|itemno|itemnumber)$/],['name',/^(descr|description|itemdesc|itemname)$/],['a',/^(stock|asoh)$/],['a28',/^(dms|avgsale28days)$/],['ld',/^lastdelday$/],['ls',/^(lastsaleday|lastsalesday)$/],['dp',/^(deptno|dept|department)$/]];
+function ilAnyDate(v){
+  if(v==null||v==='')return null;
+  if(typeof v==='number'){if(v>20000&&v<80000){const u=new Date(Math.round((v-25569)*864e5));return new Date(u.getUTCFullYear(),u.getUTCMonth(),u.getUTCDate()).getTime()}return null}
+  if(v instanceof Date&&!isNaN(v))return new Date(v.getFullYear(),v.getMonth(),v.getDate()).getTime();
+  const s=String(v).trim();let m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]).getTime();
+  m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);return m?new Date(+m[1],+m[2]-1,+m[3]).getTime():null}
+function ilParseMonitor(wb,fname){
+  for(const sn of wb.SheetNames){
+    const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:''});
+    for(let i=0;i<Math.min(raw.length,40);i++){
+      const m=shrMapHeader(raw[i],IL_MON_COLS);if(m.item==null||m.a==null||m.name==null||(m.ld==null&&m.ls==null))continue;
+      const rows=[];let skipped=0;
+      for(let j=i+1;j<raw.length;j++){const r=raw[j],no=shrNo(r[m.item]);
+        if(!/^\d+$/.test(no)){if(r.some(x=>String(x).trim()!==''))skipped++;continue}
+        const a=shrN(r[m.a]);if(a==null){skipped++;continue}
+        const g=k=>m[k]!=null?r[m[k]]:'';
+        rows.push({i:no,n:String(g('name')).trim(),sp:'',by:'',dp:shrNo(g('dp')).padStart(2,'0'),cn:'',ls:ilAnyDate(g('ls')),ld:ilAnyDate(g('ld')),pr:0,a,sh:false,u:null,oo:0,it:0,a28:shrN(g('a28'))||0,lm:0,cm:0,ly:0,src:'',ro:'',sd:null,pk:null,st:'Active',ag:'',os:'',dd:''})}
+      if(!rows.length)continue;
+      const ref=new Map();[ILT.dms,ILT.neg].forEach(d=>{if(d&&d.rows&&!(d.info&&d.info.mon))d.rows.forEach(x=>{if(!ref.has(x.i))ref.set(x.i,x)})});
+      let priced=0;
+      rows.forEach(r=>{const x=ref.get(r.i);if(!x)return;priced++;
+        ['pr','st','by','sp','cn','sh','u','oo','it','lm','cm','ly','src','ro','sd','pk','ag','os','dd'].forEach(k=>{r[k]=x[k]});if(!r.dp&&x.dp)r.dp=x.dp;if(!r.n&&x.n)r.n=x.n});
+      return{name:fname,rows,info:{asOf:null,store:'',skipped,shared:rows.filter(r=>r.sh).length,neg:rows.filter(r=>r.a<=-0.1&&/^active$/i.test(r.st)&&!r.sh).length,items:rows.length,mon:true,priced,noPrice:rows.length-priced}}}}
+  return null}
 /* ----- per item numbers ----- */
 function ilBuild(p){
   const key=IL_REV[p]+':'+ctSig();if(IL_MEMO[p]&&IL_MEMO[p].key===key)return IL_MEMO[p];
@@ -4081,7 +4108,8 @@ function ilSetHi(m){const T=IL_T;m.items.forEach(it=>{const a=it.a,dead=!(it.dms
   it.hi={dead,ex,exVal:ex*it.price,stockVal:a*it.price,tier,req,up:dead?null:req/it.dms}})}
 const ilElig=(it,p)=>p==='neg'?(it.a<=-0.1&&/^active$/i.test(it.r.st)):!!it.hi; /* Negative Stock: only Active items whose ASOH is -0.1 or lower */
 const ilDisc=it=>/discontinu/i.test(it.r.st); /* Discontinued items are not monitored (hidden unless the page's box is ticked) */
-const ilMoney=(p,n)=>p==='neg'?(n<.5?'฿0':n>=1e4?'฿-'+(n/1e3).toFixed(1)+'k':'฿-'+Math.round(n).toLocaleString()):shrBk(n); /* Negative Stock shows the money lost with its minus sign: ฿-4,340 */
+const ilNoPrice=p=>{const d=ILT[p];return!!(d&&d.info&&d.info.mon&&!d.info.priced)}; /* a Negative Stock Monitor file with no price at all (nothing found in an ItemList): no money to show, quantities only */
+const ilMoney=(p,n)=>p==='neg'&&ilNoPrice('neg')?'—':p==='neg'?(n<.5?'฿0':n>=1e4?'฿-'+(n/1e3).toFixed(1)+'k':'฿-'+Math.round(n).toLocaleString()):shrBk(n); /* Negative Stock shows the money lost with its minus sign: ฿-4,340 */
 const ilN=(v,d)=>v==null?'':(Math.abs(v)>=100||Number.isInteger(v)?Math.round(v):Math.round(v*(d||10))/(d||10)).toLocaleString();
 const ilYmd=ms=>{if(ms==null)return'';const d=new Date(ms);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 function ilLevel(it,p){
@@ -4202,6 +4230,7 @@ function ilSectionHtml(p){
     <div id="${p}MoreWrap" class="row" style="justify-content:center;margin-top:12px;align-items:center" hidden><span class="muted small" id="${p}MoreTxt"></span><button class="btn" id="${p}More">แสดงเพิ่ม</button></div>
     <p class="muted" id="${p}Empty" hidden></p></div></section>`}
 const ilDlgHtml=`<dialog id="dlgIlImp" class="nbs-dlg imp-dlg"><div><h2 id="ilTitle">นำเข้ารายงาน</h2>
+  <p class="muted small" id="ilMonNote" style="margin:0 0 10px" hidden>หน้านี้อ่านไฟล์ <b>Negative Stock Monitor</b> (Division · Dept no · Art Grp Sub No · Art No · Descr · Last Delday · Last Saleday · Dms · Stock) ได้ด้วย — ไฟล์นี้ไม่มีราคา ระบบเติมราคา/สถานะ/Buyer ให้จาก ItemList_Layout ที่นำเข้าไว้ (ถ้ามี)</p>
   <p class="muted small" style="margin:0 0 10px">ลากไฟล์ <b>ItemList_Layout</b> (Excel .xlsx / .xls หรือ CSV) มาวาง ระบบอ่านคอลัมน์ Item No · ASOH · Avg Sale 28 Days · Last Month Sold Qty · Curr Month Sold Qty · Stock Day · Buyer · Dept No. · Class ฯลฯ — <b>ASOH คือ Stock</b> (ค่าที่มี ~ นำหน้า = สินค้าลดราคาที่ใช้สต็อกร่วมกับสินค้าปกติ ไม่นับซ้ำ) · ไฟล์ใหม่แทนที่ไฟล์เดิมของหน้านี้ · ข้อมูลเก็บในเครื่องนี้ ไม่ส่งขึ้นฐานข้อมูลทีม</p>
   <div id="ilDrop" class="imp-drop" tabindex="0"><svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span><button type="button" class="btn pri" id="ilPick">เลือกไฟล์จากเครื่อง</button><input type="file" id="ilFile" accept=".xlsx,.xls,.xlsm,.csv" hidden></div>
   <div id="ilBox"></div><p class="err-text" id="ilErr" style="margin:8px 0 0"></p>
@@ -4214,8 +4243,9 @@ let ilImp=null,ilTabNow='neg';
 async function ilReadFile(f){
   $('#ilErr').textContent='';$('#ilBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
   try{await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-    const wb=await readAnyFile(f,()=>false,sayTo('#ilBox')),r=ilParse(wb,f.name);
-    if(!r)throw Error('ไม่รู้จักรายงานนี้ — ต้องมีคอลัมน์ Item No และ ASOH (ItemList_Layout)');
+    const wb=await readAnyFile(f,()=>false,sayTo('#ilBox')),r=ilParse(wb,f.name)||ilParseMonitor(wb,f.name);
+    if(!r)throw Error(ilTabNow==='neg'?'ไม่รู้จักรายงานนี้ — ต้องเป็นไฟล์ ItemList_Layout (คอลัมน์ Item No และ ASOH) หรือไฟล์ Negative Stock Monitor (คอลัมน์ Art No, Descr, Stock, Dms, Last Delday, Last Saleday)':'ไม่รู้จักรายงานนี้ — ต้องมีคอลัมน์ Item No และ ASOH (ItemList_Layout)');
+    if(r.info.mon&&ilTabNow!=='neg')throw Error('ไฟล์นี้เป็น Negative Stock Monitor (มีเฉพาะสินค้าที่ Stock ติดลบ) ใช้ได้กับหน้า Negative Stock — หน้านี้ต้องใช้ ItemList_Layout เต็ม ไม่ต้องกรอง');
     ilImp=r;ilPreview()}
   catch(e){ilImp=null;$('#ilBox').innerHTML='';$('#ilErr').textContent='อ่านไฟล์ไม่สำเร็จ: '+e.message}}
 function ilPreview(){
@@ -4224,12 +4254,13 @@ function ilPreview(){
   $('#ilBox').innerHTML=`<div class="imp-file"><b>${esc(r.name)}</b> <span class="muted small">· ${i.items.toLocaleString()} รายการ${i.store?' · '+esc(i.store):''}${i.asOf?' · ข้อมูลเมื่อ '+esc(ilD(i.asOf)):''}${i.skipped?` · ข้าม ${i.skipped} แถว`:''}</span> <button type="button" class="btn sm" id="ilChange">เลือกไฟล์อื่น</button></div>
     <div class="imp-tiles"><div class="t-new"><b>${rows.length.toLocaleString()}</b><span>สินค้า</span></div>${ilTabNow==='dms'?`<div class="t-new"><b>${pos.length.toLocaleString()}</b><span>มี Stock มากกว่า 0</span></div><div><b>${pos.filter(x=>x.a28===0&&x.lm===0&&x.cm===0).length.toLocaleString()}</b><span>มี Stock แต่ไม่มียอดขาย</span></div>`:`<div class="t-new"><b>${neg.length.toLocaleString()}</b><span>Active ติด −0.1 ลงไป</span></div><div><b>${shrBk(val)}</b><span>มูลค่าที่ติดลบ</span></div>`}<div><b>${i.shared.toLocaleString()}</b><span>สต็อกร่วม (~)</span></div></div>
     ${ilTabNow==='dms'&&!pos.length?`<p class="small err-text" style="margin:8px 0 0">ไฟล์นี้ไม่มีสินค้าที่มี Stock มากกว่า 0 เลย — น่าจะเป็นไฟล์ที่กรองเฉพาะ Stock ติดลบ (ใช้กับหน้า Negative Stock) หน้านี้ต้องใช้รายงาน ItemList เต็ม ไม่ต้องกรอง</p>`:''}${ilTabNow==='neg'&&!neg.length?`<p class="small err-text" style="margin:8px 0 0">ไฟล์นี้ไม่มีสินค้า Active ที่ Stock ติด −0.1 ลงไปเลย — ตรวจว่าเป็นไฟล์ที่กรอง Stock < 0 (ItemList_Layout)</p>`:''}
+    ${i.mon?`<p class="small" style="margin:8px 0 0">ไฟล์ Negative Stock Monitor — ${i.priced.toLocaleString()} จาก ${i.items.toLocaleString()} รายการหาราคา/สถานะ/Buyer ได้จาก ItemList_Layout ที่นำเข้าไว้${i.noPrice?` · <span class="err-text">${i.noPrice.toLocaleString()} รายการไม่มีราคา → มูลค่า ฿ เป็น 0${i.priced?'':` และหน้านี้เรียงตามจำนวนติดลบ — ถ้าอยากเห็นมูลค่า ให้นำเข้า ItemList_Layout ที่หน้า High Stock to DMS ก่อน แล้วนำเข้าไฟล์นี้อีกครั้ง`}</span>`:''}</p>`:''}
     ${old?`<p class="small err-text" style="margin:8px 0 0">จะแทนที่ไฟล์เดิมของหน้านี้: ${esc(old.name)}</p>`:''}`;
   $('#ilChange').onclick=()=>{$('#ilDrop').hidden=false;$('#ilBox').innerHTML='';$('#ilGo').disabled=true;ilImp=null;$('#ilFile').click()}}
-function openIlImport(p){ilTabNow=p;ilImp=null;$('#ilTitle').textContent='นำเข้ารายงาน '+IL_DEFS[p].title;$('#ilBox').innerHTML='';$('#ilDrop').hidden=false;$('#ilGo').disabled=true;$('#ilErr').textContent='';$('#ilFile').value='';$('#dlgIlImp').showModal()}
+function openIlImport(p){ilTabNow=p;ilImp=null;$('#ilMonNote').hidden=p!=='neg';$('#ilTitle').textContent='นำเข้ารายงาน '+IL_DEFS[p].title;$('#ilBox').innerHTML='';$('#ilDrop').hidden=false;$('#ilGo').disabled=true;$('#ilErr').textContent='';$('#ilFile').value='';$('#dlgIlImp').showModal()}
 function runIlImport(){
   if(!ilImp)return;const p=ilTabNow;ILT[p]={name:ilImp.name,at:new Date().toISOString(),asOf:ilImp.info.asOf,store:ilImp.info.store,info:ilImp.info,rows:ilImp.rows};
-  IL_REV[p]++;ilReset(p);const n=ilImp.rows.length;ilImp=null;$('#dlgIlImp').close();renderIlt(p);toast(`นำเข้า ${IL_DEFS[p].title} แล้ว ${n.toLocaleString()} รายการ`+(ilBuild(p).items.some(it=>ilElig(it,p))?'':' — แต่ยังไม่มีสินค้าที่เข้าเงื่อนไขของหน้านี้ (ดูข้อความใต้ตัวกรอง)'));
+  IL_REV[p]++;ilReset(p);if(ilImp.info.mon&&!ilImp.info.priced){IL_ST[p].basis='qty';IL_ST[p].autoQty=true;$('#'+p+'Sort').value='qty'}else if(IL_ST[p].autoQty){IL_ST[p].basis='val';IL_ST[p].autoQty=false;$('#'+p+'Sort').value='val'}const n=ilImp.rows.length;ilImp=null;$('#dlgIlImp').close();renderIlt(p);toast(`นำเข้า ${IL_DEFS[p].title} แล้ว ${n.toLocaleString()} รายการ`+(ilBuild(p).items.some(it=>ilElig(it,p))?'':' — แต่ยังไม่มีสินค้าที่เข้าเงื่อนไขของหน้านี้ (ดูข้อความใต้ตัวกรอง)'));
   ilSave(p).then(ok=>{if(!ok)toast('นำเข้าแล้ว แต่เบราว์เซอร์ไม่ยอมให้จำข้อมูลไว้ — ปิดหน้าแล้วต้องนำเข้าใหม่')})}
 async function ilExport(p){
   const m=ilBuild(p);if(p==='dms')ilSetHi(m);const rows=ilVisible(p,m);if(!rows.length)return;await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
