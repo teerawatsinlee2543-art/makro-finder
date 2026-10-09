@@ -1248,7 +1248,7 @@ label.has-scan{position:relative}
 
 <dialog id="dlgShImp" class="nbs-dlg imp-dlg"><div>
   <h2>นำเข้ารายงาน %Shrink</h2>
-  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV มาวางได้ <b>ทั้ง 2 ไฟล์พร้อมกัน</b> ระบบดูจากคอลัมน์ว่าเป็นไฟล์ไหน: <b>(1) By Code</b> — Department Number · Class Number · Item Number · Reasn Code Id · Shrinkage Qty · Shrinkage Cost Amt · Month (แยกว่าทิ้งเพราะเหตุผลอะไร ไฟล์ต่างช่วงวันที่นำเข้าต่อกันแล้วบวกรวม) และ <b>(2) ยอดขาย + Actual Shrinkage</b> — Division · Department · Class · Item No · Sales · %Actual Shrinkage · Actual Shrinkage (ไฟล์ใหม่แทนที่ไฟล์เดิม) ค่า<b>ติดลบ = เงินที่เสียไป (ทิ้ง)</b> · ข้อมูลเก็บในเครื่องนี้ ไม่ส่งขึ้นฐานข้อมูลทีม</p>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ Excel (.xlsx / .xls) หรือ CSV มาวางได้ <b>ทั้ง 2 ไฟล์พร้อมกัน</b> ระบบดูจากคอลัมน์ว่าเป็นไฟล์ไหน: <b>(1) By Code</b> — Department Number · Class Number · Item Number · Reasn Code Id · Shrinkage Qty · Shrinkage Cost Amt · Month (แยกว่าทิ้งเพราะเหตุผลอะไร ไฟล์ต่างช่วงวันที่นำเข้าต่อกันแล้วบวกรวม) และ <b>(2) ยอดขาย + Actual Shrinkage</b> — Division · Department · Class · Item No · Sales · %Actual Shrinkage · Actual Shrinkage (ไฟล์ใหม่แทนที่ไฟล์เดิม) ค่า<b>ติดลบ = เงินที่เสียไป (ทิ้ง)</b> · ข้อมูลนี้ใช้ร่วมกันทั้งทีม — นำเข้าแล้วทุกเครื่องเห็นเหมือนกันทันที (ส่งขึ้นทีมเฉพาะแถวที่หน้านี้ใช้)</p>
   <div id="siDrop" class="imp-drop" tabindex="0">
     <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <b>ลากไฟล์มาวางที่นี่ (ทีละหลายไฟล์ได้)</b><span class="muted small">หรือ</span>
@@ -1272,14 +1272,14 @@ label.has-scan{position:relative}
   <div class="exp-pick"><button type="button" class="btn" id="expCsv"><b>CSV</b><span>เปิดหน้าต่างคัดลอก / ดาวน์โหลดไฟล์ .csv</span></button><button type="button" class="btn" id="expXlsx"><b>Excel</b><span>ดาวน์โหลดไฟล์ .xlsx เปิดใน Excel</span></button><button type="button" class="btn" id="expPdf"><b>PDF</b><span>พิมพ์ / ส่งต่อ — A4 แนวนอน (เลือก “บันทึกเป็น PDF”)</span></button></div>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="expClose">ปิด</button></div></div></dialog><dialog id="dlgShDel" class="nbs-dlg imp-dlg"><div>
   <h2>ลบไฟล์ %Shrink ที่นำเข้า</h2>
-  <p class="muted small" style="margin:0 0 10px">ลบข้อมูลของไฟล์ที่นำเข้าผิด หรือผิดช่วงวัน (ลบเฉพาะในเครื่องนี้ ไม่กระทบทีม)</p>
+  <p class="muted small" style="margin:0 0 10px">ลบข้อมูลของไฟล์ที่นำเข้าผิด หรือผิดช่วงวัน (ลบแล้วทุกเครื่องของทีมหายตาม)</p>
   <div id="sdList" style="display:grid;gap:8px"></div>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="sdClose">ปิด</button></div>
 </div></dialog>
 
 <dialog id="dlgShNm" class="nbs-dlg imp-dlg"><div>
   <h2>ตั้งชื่อรหัสเหตุผล</h2>
-  <p class="muted small" style="margin:0 0 10px">รหัสในไฟล์ By Code ยังไม่มีชื่อ (รู้แน่ชัดแค่ 52 = Code 52 ตามกฎ Shelf life) ตั้งชื่อให้ทีมอ่านง่าย เช่น “ของเสีย” “หมดอายุ” “นับสต็อก” — เก็บในเครื่องนี้</p>
+  <p class="muted small" style="margin:0 0 10px">รหัสในไฟล์ By Code ยังไม่มีชื่อ (รู้แน่ชัดแค่ 52 = Code 52 ตามกฎ Shelf life) ตั้งชื่อให้ทีมอ่านง่าย เช่น “ของเสีย” “หมดอายุ” “นับสต็อก” — ใช้ร่วมกันทั้งทีม</p>
   <div id="snList" style="display:grid;gap:8px"></div>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="snCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="snSave">บันทึก</button></div>
 </div></dialog>
@@ -1719,7 +1719,7 @@ async function connect(){
   if(!db&&!c?.use&&REMOTE&&location.protocol!=='file:'){
     mode='sheet';try{myId=localStorage.getItem('shelfLifeMonitor.name')||null}catch(e){}
     $('#whoName').value=myId||'';applyRole();renderAll();
-    if(REMOTE==='firebase'){try{await fbInit();fbSubscribe()}catch(e){toast('เชื่อมต่อฐานข้อมูล Makro Finder ไม่ได้ — ตรวจสอบอินเทอร์เน็ตแล้วโหลดหน้าใหม่')}return}
+    if(REMOTE==='firebase'){try{await fbInit();fbSubscribe();rsStart()}catch(e){toast('เชื่อมต่อฐานข้อมูล Makro Finder ไม่ได้ — ตรวจสอบอินเทอร์เน็ตแล้วโหลดหน้าใหม่')}return}
     await pull();
     setInterval(()=>{if(!document.hidden&&Date.now()-lastPull>(REMOTE==='supabase'?9000:25000))pull()},3000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastPull>10000)pull()});
@@ -3720,7 +3720,8 @@ const SHR_RS0={'52':'ทิ้ง / ถอดสินค้า (Code 52)'}; /* 
 const SHR_BIG=1000,SHR_HI=5000,SHR_P1=.01,SHR_P5=.05; /* ฿ / share of sales that make a "heavy" thrower */
 let SHR={files:[],code:[],sales:null,names:{}},SHR_REV=0,SHR_MEMO=null;
 const shrOpen=()=>new Promise(res=>{try{const rq=indexedDB.open('slm-shrink',1);rq.onupgradeneeded=()=>rq.result.createObjectStore('kv');rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);rq.onblocked=()=>res(null)}catch(e){res(null)}});
-async function shrSave(){const db=await shrOpen();if(!db)return false;return new Promise(res=>{try{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(SHR,'v1');tx.oncomplete=()=>res(true);tx.onerror=()=>res(false);tx.onabort=()=>res(false)}catch(e){res(false)}})}
+async function shrSave(noSync){if(!noSync&&SHR)SHR.upd=Date.now();const ok=await shrSaveLocal();if(!noSync)rsSchedule('shr');return ok}
+async function shrSaveLocal(){const db=await shrOpen();if(!db)return false;return new Promise(res=>{try{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(SHR,'v1');tx.oncomplete=()=>res(true);tx.onerror=()=>res(false);tx.onabort=()=>res(false)}catch(e){res(false)}})}
 async function shrLoad(){const db=await shrOpen();if(!db)return;const rec=await new Promise(res=>{try{const g=db.transaction('kv').objectStore('kv').get('v1');g.onsuccess=()=>res(g.result||null);g.onerror=()=>res(null)}catch(e){res(null)}});
   if(rec&&rec.files){SHR={files:rec.files||[],code:rec.code||[],sales:rec.sales||null,names:rec.names||{}};SHR_REV++}}
 const shrN=v=>{if(v===''||v==null)return null;const n=parseFloat(String(v).replace(/,/g,''));return isNaN(n)?null:n};
@@ -3984,7 +3985,7 @@ function renderShrDel(){
 $('#shrDelFile').onclick=()=>{renderShrDel();$('#dlgShDel').showModal();$('#sdClose').focus()};
 $('#sdClose').onclick=()=>$('#dlgShDel').close();
 $('#sdList').onclick=async e=>{const b=e.target.closest('button[data-id]');if(!b)return;const f=SHR.files.find(x=>x.id===b.dataset.id);if(!f)return;
-  if(!await ask(`ลบข้อมูลของไฟล์ “${f.name}” (${f.n.toLocaleString()} บรรทัด)?  ลบเฉพาะในเครื่องนี้`))return;
+  if(!await ask(`ลบข้อมูลของไฟล์ “${f.name}” (${f.n.toLocaleString()} บรรทัด)?  (ลบให้ทุกเครื่องของทีม)`))return;
   SHR.files=SHR.files.filter(x=>x.id!==f.id);if(f.kind==='code')SHR.code=SHR.code.filter(r=>r.f!==f.id);else if(SHR.sales&&SHR.sales.f===f.id)SHR.sales=null;
   SHR_REV++;shrBasis='';shrReset();shrSave();renderShrDel();renderShr();toast('ลบข้อมูลของไฟล์นั้นแล้ว')};
 function openShrNames(){
@@ -4007,7 +4008,7 @@ function pinCompact(el){
   window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',upd);$('#tabs').addEventListener('click',()=>setTimeout(upd,0));
 }
 pinCompact($('#oosDivTiles'));pinCompact($('#shrDivTiles'));
-shrLoad().then(()=>{if(SHR.files.length)(window.requestIdleCallback?requestIdleCallback(()=>renderShr(),{timeout:3000}):setTimeout(renderShr,800))}); /* the tab badge is worked out when the browser is idle, not while the page is starting */
+SHR_LOADED=shrLoad().then(()=>{if(SHR.files.length)(window.requestIdleCallback?requestIdleCallback(()=>renderShr(),{timeout:3000}):setTimeout(renderShr,800))}); /* the tab badge is worked out when the browser is idle, not while the page is starting */
 
 /* ---------- Negative Stock · High Stock to DMS: two views of the same "Item List" report ----------
    Report = ItemList_Layout (Supplier · Buyer · Dept No. · Class · Item No · Description · Last Sales Day · Last Del Day · Selling Price · ASOH · USOH · On Order · In Transit ·
@@ -4033,8 +4034,97 @@ const IL_BK={neg:['ของหมด / ติดลบ แต่ยังขา
 const IL_LOW=3,IL_OVER=30;
 const ILT={neg:null,dms:null},IL_REV={neg:0,dms:0},IL_MEMO={neg:null,dms:null},IL_ST={neg:{div:'',tile:'',basis:'val',limit:60,drill:false},dms:{div:'',tile:'',basis:'over',limit:60,drill:false}};
 const ilOpen=()=>new Promise(res=>{try{const rq=indexedDB.open('slm-itemlist',1);rq.onupgradeneeded=()=>rq.result.createObjectStore('kv');rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);rq.onblocked=()=>res(null)}catch(e){res(null)}});
-async function ilSave(p){const db=await ilOpen();if(!db)return false;return new Promise(res=>{try{const tx=db.transaction('kv','readwrite');if(ILT[p])tx.objectStore('kv').put(ILT[p],p);else tx.objectStore('kv').delete(p);tx.oncomplete=()=>res(true);tx.onerror=()=>res(false);tx.onabort=()=>res(false)}catch(e){res(false)}})}
+async function ilSave(p,noSync){if(!noSync&&ILT[p])ILT[p].upd=Date.now();const ok=await ilSaveLocal(p);if(!noSync)rsSchedule(p);return ok}
+async function ilSaveLocal(p){const db=await ilOpen();if(!db)return false;return new Promise(res=>{try{const tx=db.transaction('kv','readwrite');if(ILT[p])tx.objectStore('kv').put(ILT[p],p);else tx.objectStore('kv').delete(p);tx.oncomplete=()=>res(true);tx.onerror=()=>res(false);tx.onabort=()=>res(false)}catch(e){res(false)}})}
 async function ilLoad(){const db=await ilOpen();if(!db)return;for(const p of ['neg','dms']){const rec=await new Promise(res=>{try{const g=db.transaction('kv').objectStore('kv').get(p);g.onsuccess=()=>res(g.result||null);g.onerror=()=>res(null)}catch(e){res(null)}});if(rec&&rec.rows){ILT[p]=rec;IL_REV[p]++}}}
+/* ===== %Shrink / Negative Stock / High Stock to DMS: shared by the whole team (the same database as OOS+ and Item NBS) =====
+   Before, each device kept its own copy (browser storage) so a phone showed nothing unless the file was imported on it too.
+   makroFinder/shelfLife_reports (a small document) = {reports:{shr|neg|dms:{at,chunks,name,rows}|{at,removed}}}; the data itself is in the sub-collection
+   makroFinder/shelfLife_reports/chunks/<kind>_<at>_<k> = {json} (about 570 KB at most each; a sub-collection, so Makro Finder's whole-collection reads never download them).
+   Negative Stock sends only the rows with Stock < 0 and High Stock to DMS only the rows that are "high" at the lowest threshold (30 days, so 45 / 60 / 90 are covered); %Shrink sends everything it holds.
+   The device that imports (or adds / deletes a row) pushes; every other device is told by a live listener and pulls. The newest change wins. */
+var RS={q:Promise.resolve(),timers:{},on:false,warned:false};
+var SHR_LOADED=null,IL_LOADED=null;
+const RS_NAME={shr:'%Shrink',neg:'Negative Stock',dms:'High Stock to DMS'};
+const rsDoc=()=>fdb.collection('makroFinder').doc('shelfLife_reports');
+function rsReady(){return typeof fdb!=='undefined'&&!!fdb&&mode==='sheet'&&REMOTE==='firebase'}
+function rsStamp(kind){
+  if(kind==='shr'){
+    const has=SHR&&((SHR.files&&SHR.files.length)||Object.keys(SHR.names||{}).length);if(!has)return 0;
+    return SHR.upd||Math.max(1,...(SHR.files||[]).map(f=>Date.parse(f.at)||0));
+  }
+  const d=ILT[kind];if(!d)return 0;
+  return d.upd||Date.parse(d.at)||1;
+}
+function rsPayload(kind){
+  if(kind==='shr'){ if(!rsStamp('shr'))return null; return {k:'shr',files:SHR.files,code:SHR.code,sales:SHR.sales,names:SHR.names}; }
+  const d=ILT[kind];if(!d)return null;
+  let rows;
+  if(kind==='neg')rows=d.rows.filter(r=>r.a<0);
+  else{ const m=ilBuild('dms'),T0=IL_T;IL_T=30;try{ilSetHi(m);rows=m.items.filter(it=>it.hi).map(it=>it.r)}finally{IL_T=T0;ilSetHi(m)} }
+  return {k:kind,name:d.name,at:d.at,asOf:d.asOf,store:d.store,info:d.info,rows};
+}
+/* split a JSON string into pieces of at most n characters, never cutting a surrogate pair in two */
+function rsSplit(s,n){
+  const out=[];let i=0;
+  while(i<s.length){let e=Math.min(s.length,i+n);if(e<s.length){const c=s.charCodeAt(e-1);if(c>=0xD800&&c<=0xDBFF)e--}out.push(s.slice(i,e));i=e}
+  return out.length?out:[''];
+}
+function rsWhy(e){const c=e&&e.code;return c==='permission-denied'?'ฐานข้อมูลไม่อนุญาตให้เขียน — ต้องเปิดสิทธิ์เขียนใน Firestore Rules':c==='resource-exhausted'?'บันทึกถี่เกินไป':(e&&e.message)||'ตรวจอินเทอร์เน็ต'}
+function rsEnqueue(fn){RS.q=RS.q.then(fn).catch(e=>{console.error(e);if(!RS.warned){RS.warned=true;toast('ซิงก์ข้อมูลรายงานกับทีมไม่สำเร็จ — '+rsWhy(e))}})}
+function rsSchedule(kind){
+  if(!rsReady())return;
+  clearTimeout(RS.timers[kind]);
+  RS.timers[kind]=setTimeout(()=>rsEnqueue(()=>rsPush(kind)),1200);
+}
+async function rsPush(kind){
+  if(!rsReady())return false;
+  const now=Date.now(),ref=rsDoc();
+  let prev=null;try{const s=await ref.get();prev=s.exists?((s.data().reports||{})[kind]||null):null}catch(e){}
+  const pl=rsPayload(kind);
+  if(pl){ if(kind==='shr')SHR.upd=now;else ILT[kind].upd=now; } /* local stamp first: our own write coming back is then a no-op */
+  try{
+    if(!pl){ await ref.set({type:'shelfLifeReportsMeta',reports:{[kind]:{at:now,removed:true}},updatedAt:now},{merge:true}); }
+    else{
+      const strs=rsSplit(JSON.stringify(pl),240000); /* 240,000 characters = at most ~720 KB even if every character is Thai (3 bytes): under the 1 MiB document limit */
+      for(let k=0;k<strs.length;k++)await ref.collection('chunks').doc(kind+'_'+now+'_'+k).set({json:strs[k],k,at:now});
+      await ref.set({type:'shelfLifeReportsMeta',reports:{[kind]:{at:now,chunks:strs.length,name:pl.name||'',rows:(pl.rows||pl.code||[]).length}},updatedAt:now},{merge:true}); /* the small document last: readers never see a half-written upload */
+    }
+  }catch(e){ toast('ส่ง '+RS_NAME[kind]+' ขึ้นทีมไม่สำเร็จ ('+rsWhy(e)+') — ยังเก็บในเครื่องนี้ไว้ จะลองส่งใหม่เมื่อเปิดหน้าครั้งหน้า'); return false; }
+  if(prev&&prev.chunks&&prev.at){ for(let k=0;k<prev.chunks;k++){ try{await ref.collection('chunks').doc(kind+'_'+prev.at+'_'+k).delete()}catch(e){} } }
+  if(pl){ if(kind==='shr')shrSave(true);else ilSave(kind,true); }
+  toast('ส่ง '+RS_NAME[kind]+' ให้ทีมแล้ว');
+  return true;
+}
+async function rsApply(kind,r){
+  if(r.removed){
+    if(kind==='shr'){SHR={files:[],code:[],sales:null,names:{}};SHR.upd=r.at;SHR_REV++;shrBasis='';shrReset();await shrSave(true);renderShr()}
+    else{ILT[kind]=null;IL_REV[kind]++;ilReset(kind);await ilSave(kind,true);renderIlt(kind)}
+    toast(RS_NAME[kind]+': ทีมลบข้อมูลแล้ว');return;
+  }
+  toast('กำลังโหลด '+RS_NAME[kind]+' จากทีม…');
+  const ref=rsDoc();
+  const snaps=await Promise.all(Array.from({length:r.chunks},(_,k)=>ref.collection('chunks').doc(kind+'_'+r.at+'_'+k).get())); /* all pieces at once */
+  snaps.forEach(s=>{if(!s.exists)throw new Error('ข้อมูลที่ทีมส่งมายังไม่ครบ ลองรีเฟรชอีกครั้ง')});
+  const pl=JSON.parse(snaps.map(s=>s.data().json).join(''));
+  if(kind==='shr'){SHR={files:pl.files||[],code:pl.code||[],sales:pl.sales||null,names:pl.names||{}};SHR.upd=r.at;SHR_REV++;SHR_MEMO=null;shrBasis='';shrReset();await shrSave(true);renderShr()}
+  else{ILT[kind]={name:pl.name,at:pl.at||new Date(r.at).toISOString(),asOf:pl.asOf,store:pl.store,info:pl.info||{shared:0},rows:pl.rows||[],upd:r.at};IL_REV[kind]++;ilReset(kind);await ilSave(kind,true);renderIlt(kind)}
+  toast('อัพเดท '+RS_NAME[kind]+' จากทีมแล้ว');
+}
+async function rsReconcile(meta){
+  for(let i=0;i<60&&!(SHR_LOADED&&IL_LOADED);i++)await new Promise(r=>setTimeout(r,100)); /* this device's own saved copy is read first, so it is compared (and not overwritten by mistake) */
+  await Promise.all([SHR_LOADED,IL_LOADED].filter(Boolean));
+  const rep=(meta&&meta.reports)||{};
+  for(const kind of ['neg','dms','shr']){
+    const r=rep[kind],l=rsStamp(kind);
+    if(r&&r.at>l)await rsApply(kind,r);
+    else if(l>(r?r.at:0))await rsPush(kind);
+  }
+}
+function rsStart(){
+  if(!rsReady()||RS.on)return;RS.on=true;
+  try{rsDoc().onSnapshot(s=>rsEnqueue(()=>rsReconcile(s.exists?s.data():null)),e=>{if(!RS.warned){RS.warned=true;toast('อ่านข้อมูลรายงานของทีมไม่ได้ — '+rsWhy(e))}})}catch(e){}
+}
 const ilDate=s=>{const m=String(s||'').match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);return m?new Date(+m[3],+m[2]-1,+m[1]).getTime():null};
 const ilD=ms=>ms==null?'':new Date(ms).toLocaleDateString('th-TH-u-ca-gregory',{day:'numeric',month:'short',year:'2-digit'});
 function ilParse(wb,fname){
@@ -4223,7 +4313,7 @@ function ilSectionHtml(p){
   const D=IL_DEFS[p];
   return`<section id="t-${p}" hidden><div class="card">
     <div class="add-head"><h2>${D.title} <span class="muted small" style="font-weight:400">${D.sub}</span></h2>
-      <span class="row w"><button type="button" class="btn danger" id="${p}DelFile" title="ลบข้อมูลที่นำเข้า (เฉพาะในเครื่องนี้)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn imp-btn" id="${p}Import"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button><button type="button" class="btn pri" id="${p}Add">+ เพิ่มสินค้า</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="${p}Csv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="${p}Xlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="${p}Pdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
+      <span class="row w"><button type="button" class="btn danger" id="${p}DelFile" title="ลบข้อมูลที่นำเข้า (ลบให้ทั้งทีม)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn imp-btn" id="${p}Import"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button><button type="button" class="btn pri" id="${p}Add">+ เพิ่มสินค้า</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="${p}Csv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="${p}Xlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="${p}Pdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
     <div class="tiles" id="${p}DivTiles" style="margin:12px 0 0"></div><div class="tiles" id="${p}Tiles" style="margin:12px 0"></div><div class="oos-dchips" id="${p}DeptTiles"></div>
     <div class="fbar f6"><label class="f-q">ค้นหา<input id="${p}Q" placeholder="รหัส / ชื่อสินค้า / Class / แผนก / Buyer / Supplier"></label>
       <label>${D.fa}<select id="${p}FA"><option value="">ทั้งหมด</option></select></label><label>${D.fb}<select id="${p}FB"><option value="">ทั้งหมด</option></select></label>
@@ -4235,12 +4325,12 @@ function ilSectionHtml(p){
     <p class="muted" id="${p}Empty" hidden></p></div></section>`}
 const ilDlgHtml=`<dialog id="dlgIlImp" class="nbs-dlg imp-dlg"><div><h2 id="ilTitle">นำเข้ารายงาน</h2>
   <p class="muted small" id="ilMonNote" style="margin:0 0 10px" hidden>หน้านี้อ่านไฟล์ <b>Negative Stock Monitor</b> (Division · Dept no · Art Grp Sub No · Art No · Descr · Last Delday · Last Saleday · Dms · Stock) ได้ด้วย — ไฟล์นี้ไม่มีราคา ระบบเติมราคา/สถานะ/Buyer ให้จาก ItemList_Layout ที่นำเข้าไว้ (ถ้ามี)</p>
-  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ <b>ItemList_Layout</b> (Excel .xlsx / .xls หรือ CSV) มาวาง ระบบอ่านคอลัมน์ Item No · ASOH · Avg Sale 28 Days · Last Month Sold Qty · Curr Month Sold Qty · Stock Day · Buyer · Dept No. · Class ฯลฯ — <b>ASOH คือ Stock</b> (ค่าที่มี ~ นำหน้า = สินค้าลดราคาที่ใช้สต็อกร่วมกับสินค้าปกติ ไม่นับซ้ำ) · ไฟล์ใหม่แทนที่ไฟล์เดิมของหน้านี้ · ข้อมูลเก็บในเครื่องนี้ ไม่ส่งขึ้นฐานข้อมูลทีม</p>
+  <p class="muted small" style="margin:0 0 10px">ลากไฟล์ <b>ItemList_Layout</b> (Excel .xlsx / .xls หรือ CSV) มาวาง ระบบอ่านคอลัมน์ Item No · ASOH · Avg Sale 28 Days · Last Month Sold Qty · Curr Month Sold Qty · Stock Day · Buyer · Dept No. · Class ฯลฯ — <b>ASOH คือ Stock</b> (ค่าที่มี ~ นำหน้า = สินค้าลดราคาที่ใช้สต็อกร่วมกับสินค้าปกติ ไม่นับซ้ำ) · ไฟล์ใหม่แทนที่ไฟล์เดิมของหน้านี้ · ข้อมูลนี้ใช้ร่วมกันทั้งทีม — นำเข้าแล้วทุกเครื่องเห็นเหมือนกันทันที (ส่งขึ้นทีมเฉพาะแถวที่หน้านี้ใช้)</p>
   <div id="ilDrop" class="imp-drop" tabindex="0"><svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span><button type="button" class="btn pri" id="ilPick">เลือกไฟล์จากเครื่อง</button><input type="file" id="ilFile" accept=".xlsx,.xls,.xlsm,.csv" hidden></div>
   <div id="ilBox"></div><p class="err-text" id="ilErr" style="margin:8px 0 0"></p>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="ilCancel">ปิด</button><button type="button" class="btn pri save-btn" id="ilGo" disabled>นำเข้า</button></div></div></dialog>
 <dialog id="dlgIlDel" class="nbs-dlg imp-dlg"><div><h2 id="idTitle">ลบไฟล์ที่นำเข้า</h2>
-  <p class="muted small" style="margin:0 0 10px">ลบข้อมูลของไฟล์ที่นำเข้าผิด หรือผิดช่วงวัน (ลบเฉพาะในเครื่องนี้ ไม่กระทบทีม)</p>
+  <p class="muted small" style="margin:0 0 10px">ลบข้อมูลของไฟล์ที่นำเข้าผิด หรือผิดช่วงวัน (ลบแล้วทุกเครื่องของทีมหายตาม)</p>
   <div id="idList" style="display:grid;gap:8px"></div>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="idClose">ปิด</button></div></div></dialog>`;
 let ilImp=null,ilTabNow='neg';
@@ -4306,7 +4396,7 @@ function ilInit(){
   $('#ilCancel').onclick=()=>$('#dlgIlImp').close();$('#idClose').onclick=()=>$('#dlgIlDel').close();$('#idList').onclick=ilDelClick;$('#ilGo').onclick=runIlImport;$('#ilPick').onclick=()=>$('#ilFile').click();$('#ilFile').onchange=e=>{const f=e.target.files[0];if(f)ilReadFile(f)};
   const d=$('#ilDrop');['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
   $('#dlgIlImp').addEventListener('dragover',e=>e.preventDefault());$('#dlgIlImp').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)ilReadFile(f)});
-  ilLoad().then(()=>{['neg','dms'].forEach(p=>{if(ILT[p])(window.requestIdleCallback?requestIdleCallback(()=>renderIlt(p),{timeout:3000}):setTimeout(()=>renderIlt(p),900))})});
+  IL_LOADED=ilLoad().then(()=>{['neg','dms'].forEach(p=>{if(ILT[p])(window.requestIdleCallback?requestIdleCallback(()=>renderIlt(p),{timeout:3000}):setTimeout(()=>renderIlt(p),900))})});
 }
 ilInit();
 
@@ -4829,9 +4919,9 @@ let RA=null;
 function openRepAdd(kind){
   RA=kind;
   const dept=`<label>แผนก<select name="dp"><option value="">ไม่ระบุ</option>${Object.entries(SHR_DEPT).map(([k,v])=>`<option value="${k}">${k} ${esc(v)}</option>`).join('')}</select></label>`;
-  const T={shr:['เพิ่มรายการทิ้ง · %Shrink','เพิ่มของที่ทิ้ง 1 รายการเอง — เข้าไปอยู่ในมุมมอง “ตามรหัสเหตุผล” และลบได้ที่ “ลบไฟล์ที่นำเข้า” (เก็บในเครื่องนี้เท่านั้น)'],
-    neg:['เพิ่มสินค้า · Negative Stock','เพิ่มสินค้าที่ Stock ติดลบ 1 รายการเอง (เก็บในเครื่องนี้) — จะหายถ้านำเข้าไฟล์ใหม่มาแทนที่'],
-    dms:['เพิ่มสินค้า · High Stock to DMS','เพิ่มสินค้าที่ Stock สูง 1 รายการเอง (เก็บในเครื่องนี้) — จะหายถ้านำเข้าไฟล์ใหม่มาแทนที่']}[kind];
+  const T={shr:['เพิ่มรายการทิ้ง · %Shrink','เพิ่มของที่ทิ้ง 1 รายการเอง — เข้าไปอยู่ในมุมมอง “ตามรหัสเหตุผล” และลบได้ที่ “ลบไฟล์ที่นำเข้า” (ส่งให้ทั้งทีมเห็นด้วย)'],
+    neg:['เพิ่มสินค้า · Negative Stock','เพิ่มสินค้าที่ Stock ติดลบ 1 รายการเอง (ส่งให้ทั้งทีมเห็นด้วย) — จะหายถ้านำเข้าไฟล์ใหม่มาแทนที่'],
+    dms:['เพิ่มสินค้า · High Stock to DMS','เพิ่มสินค้าที่ Stock สูง 1 รายการเอง (ส่งให้ทั้งทีมเห็นด้วย) — จะหายถ้านำเข้าไฟล์ใหม่มาแทนที่']}[kind];
   const itemNo='<label>Item No.<input name="i" inputmode="numeric" autocomplete="off"></label><label>ชื่อสินค้า<input name="n" autocomplete="off"></label>'+dept;
   const html={shr:itemNo+`<label>รหัสเหตุผล<input name="r" list="raRs" autocomplete="off"></label><datalist id="raRs">${[...new Set(SHR.code.map(r=>r.r))].map(x=>`<option value="${esc(x)}">`).join('')}</datalist><label>จำนวนที่ทิ้ง (ชิ้น)<input name="q" type="number" step="any" inputmode="decimal"></label><label>มูลค่าที่ทิ้ง (฿)<input name="c" type="number" step="any" min="0" inputmode="decimal"></label>`,
     neg:itemNo+'<label>Stock (ASOH) ติดลบ<input name="a" type="number" step="any" inputmode="decimal" placeholder="เช่น -5"></label><label>ราคาขาย (฿)<input name="pr" type="number" step="any" min="0" inputmode="decimal"></label><label>ขายต่อวัน (28 วัน)<input name="a28" type="number" step="any" min="0" inputmode="decimal"></label><label>Buyer UID (ถ้ามี)<input name="by" autocomplete="off"></label>',
@@ -4869,7 +4959,7 @@ function openIlDel(p){
   $('#dlgIlDel').showModal();$('#idClose').focus()}
 async function ilDelClick(e){
   const b=e.target.closest('button[data-p]');if(!b)return;const p=b.dataset.p;if(!ILT[p])return;
-  if(!await ask(`ลบข้อมูลของไฟล์ “${ILT[p].name}” ออกจาก ${IL_DEFS[p].title}?  ลบเฉพาะในเครื่องนี้`))return;
+  if(!await ask(`ลบข้อมูลของไฟล์ “${ILT[p].name}” ออกจาก ${IL_DEFS[p].title}?  (ลบให้ทุกเครื่องของทีม)`))return;
   ILT[p]=null;IL_REV[p]++;ilReset(p);ilSave(p);renderIlt(p);$('#dlgIlDel').close();toast('ลบข้อมูลแล้ว')};
 function shrFileDetail(f){const i=f.info||{};return f.kind==='sales'?[i.store,i.period].filter(Boolean).map(esc).join(' · '):((i.months||[]).map(esc).join(', '))};
 
