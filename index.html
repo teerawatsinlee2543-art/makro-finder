@@ -541,6 +541,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .fb-thanks{margin-top:8px;font-size:12.5px;color:var(--color-text-success)}
 .fb-admin-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .fb-admin-count{font-size:12.5px;color:var(--color-text-tertiary)}
+.waste-io-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.waste-io-btn{flex:1 1 150px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--color-background-primary,#fff);border-radius:12px;padding:12px 14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;border:1.5px solid var(--color-border-tertiary)}
+.waste-io-del{color:#a85a00}
+.waste-io-imp{color:#0b5cad;border-color:#0b5cad}
+.waste-io-btn:active{opacity:.7}
 .fb-export-btn{display:flex;align-items:center;gap:6px;background:#1D9E75;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .fb-export-btn:hover{background:#167a5b}
 .fb-export-btn i{font-size:15px}
@@ -885,6 +890,11 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
         <div class="feedback-card" style="border:1.5px solid var(--brand-red);background:#FFF5F5;margin-top:12px;cursor:pointer" onclick="openWasteLog()">
           <div class="feedback-card-title" style="color:var(--brand-red);justify-content:center;text-align:center;font-size:20px;margin-bottom:0"><i class="ti ti-sparkles" aria-hidden="true"></i> Weight Loss and Waste O2O</div>
+        </div>
+        <div class="waste-io-row">
+          <button type="button" class="waste-io-btn waste-io-del" id="wasteImportDelBtn" onclick="openWasteImportsList()">ลบไฟล์ที่นำเข้า</button>
+          <button type="button" class="waste-io-btn waste-io-imp" id="wasteImportBtn" onclick="document.getElementById('wasteImportFile').click()"><i class="ti ti-download" aria-hidden="true"></i> นำเข้าข้อมูล</button>
+          <input type="file" id="wasteImportFile" accept=".xlsx,.xls" hidden onchange="importWasteFromExcel(this)">
         </div>
       </div>
     </div>
@@ -8568,6 +8578,114 @@ async function deleteWasteLog(log){
     try{ await wasteLogCollectionRef.doc(wasteLogDocId(log.startDate,log.endDate)).delete(); }
     catch(e){ console.error('ลบข้อมูลของเสียจาก Firestore ไม่สำเร็จ',e); }
   }
+}
+// ==== Weight Loss and Waste O2O: นำเข้าข้อมูลจากไฟล์ Excel (ไฟล์ที่ส่งออกจากหน้านี้) + ลบไฟล์ที่นำเข้า (เฉพาะพนักงาน) ====
+// ไฟล์ Excel: แถว 1 = วันที่/เวลา (dd/mm/yyyy), แถว 2 = หัวตาราง, แถวถัดไป = No · Item · Description · Piece · Weight · Qty/MU · Total Amount, แถวสุดท้าย = รวม
+function wasteIsoFromSlash(s){
+  const m=String(s||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  return m?(m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')):'';
+}
+function wasteImportDates(fileName,firstCellText){
+  const f=String(fileName||'').match(/(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})/);
+  if(f) return [f[1],f[2]];
+  const all=String(firstCellText||'').match(/\d{1,2}\/\d{1,2}\/\d{4}/g)||[];
+  if(all.length) return [wasteIsoFromSlash(all[0]),wasteIsoFromSlash(all[all.length>1?1:0])];
+  return null;
+}
+function wasteImportRows(aoa){
+  const rows=[];
+  for(let i=2;i<aoa.length;i++){
+    const r=aoa[i]||[];
+    const first=r[0];
+    if(typeof first==='string'&&first.trim()!==''&&isNaN(first)) continue; /* แถวรวม */
+    if([1,2,3,4,5,6].every(k=>r[k]===''||r[k]==null)) continue; /* แถวว่าง */
+    const s=v=>v==null?'':String(v);
+    rows.push({no:rows.length+1,itemNo:s(r[1]),desc:s(r[2]),image:null,piece:s(r[3]),weight:r[4]===''||r[4]==null?'0':s(r[4]),qtyMU:r[5]===''||r[5]==null?'1':s(r[5]),totalAmount:s(r[6])});
+  }
+  return rows;
+}
+async function importWasteFromExcel(inp){
+  const file=inp&&inp.files&&inp.files[0];
+  if(inp) inp.value='';
+  if(!file||!isEmployee()) return;
+  try{
+    const buf=await file.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
+    const rows=wasteImportRows(aoa);
+    if(!rows.length){ alert('ไม่พบรายการที่นำเข้าได้ในไฟล์นี้ (ต้องเป็นไฟล์ Excel ที่ส่งออกจากหน้า Weight Loss and Waste O2O)'); return; }
+    let dates=wasteImportDates(file.name,aoa[0]&&aoa[0][0]);
+    if(!dates){
+      const v=prompt('ไม่พบวันที่ในไฟล์ — ใส่วันที่ของข้อมูลนี้ (ปี-เดือน-วัน เช่น '+todayDateStr()+')',todayDateStr());
+      if(v===null) return;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(v.trim())){ alert('รูปแบบวันที่ไม่ถูกต้อง'); return; }
+      dates=[v.trim(),v.trim()];
+    }
+    await loadAllWasteLogs();
+    const old=WASTE_LOGS_CACHE.find(l=>l.startDate===dates[0]&&l.endDate===dates[1]);
+    if(old){
+      const hasImg=(old.rows||[]).some(r=>r.image);
+      if(!confirm('มีบันทึกของวันที่ '+formatWasteRangeDMY({startDate:dates[0],endDate:dates[1]})+' อยู่แล้ว ('+(old.rows||[]).length+' รายการ) — แทนที่ด้วยข้อมูลจากไฟล์นี้ ('+rows.length+' รายการ)?'+(hasImg?'\nรูปภาพในบันทึกเดิมจะหายไป':''))) return;
+    }else if(!confirm('นำเข้า '+rows.length+' รายการ ของวันที่ '+formatWasteRangeDMY({startDate:dates[0],endDate:dates[1]})+' จากไฟล์ "'+file.name+'"?')) return;
+    const log=newWasteLog(dates[0],dates[1]);
+    log.rows=rows;
+    log.imp={id:'imp'+Date.now().toString(36),name:file.name,at:new Date().toISOString()};
+    await saveWasteLog(log);
+    showWasteToast('นำเข้าข้อมูลแล้ว '+rows.length+' รายการ');
+  }catch(e){
+    console.error(e);
+    alert('นำเข้าไฟล์ไม่สำเร็จ: '+e.message);
+  }
+}
+function wasteImportGroups(){
+  const g={};
+  WASTE_LOGS_CACHE.forEach(l=>{ if(!l||!l.imp)return; (g[l.imp.id]=g[l.imp.id]||{imp:l.imp,logs:[]}).logs.push(l); });
+  return Object.values(g).sort((a,b)=>String(b.imp.at).localeCompare(String(a.imp.at)));
+}
+function wasteImportsDialog(){
+  let d=document.getElementById('wasteImportsDlg');
+  if(d) return d;
+  d=document.createElement('dialog');
+  d.id='wasteImportsDlg';
+  d.style.cssText='border:none;border-radius:16px;padding:18px;max-width:520px;width:calc(100% - 28px);font-family:inherit';
+  d.innerHTML='<h3 style="margin:0 0 6px 0;font-size:18px">ลบไฟล์ที่นำเข้า</h3><p style="margin:0 0 12px 0;font-size:13px;color:#667085">เลือกไฟล์ที่ต้องการลบ — บันทึกของเสียที่มาจากไฟล์นั้นจะถูกลบออก (ลบให้ทุกคนในทีม ต้องใส่รหัสพนักงาน) ส่วนบันทึกที่กรอกเองไม่ถูกลบ</p><div id="wasteImportsList"></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button type="button" class="waste-io-btn" style="flex:none" onclick="document.getElementById(\'wasteImportsDlg\').close()">ปิด</button></div>';
+  document.body.appendChild(d);
+  return d;
+}
+function renderWasteImportsList(){
+  const box=document.getElementById('wasteImportsList');
+  const groups=wasteImportGroups();
+  if(!groups.length){ box.innerHTML='<div style="padding:20px;text-align:center;color:#667085">ยังไม่มีไฟล์ที่นำเข้า</div>'; return; }
+  box.innerHTML='';
+  groups.forEach(gr=>{
+    const at=new Date(gr.imp.at);
+    const nRows=gr.logs.reduce((s,l)=>s+(l.rows||[]).length,0);
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;border:1px solid #e2e5ea;border-radius:10px;padding:10px 12px;margin-bottom:8px';
+    row.innerHTML='<span style="flex:1;min-width:150px;font-weight:700;overflow-wrap:anywhere">'+escapeHtml(gr.imp.name)+'</span><button type="button" class="waste-io-btn waste-io-del" style="flex:none;padding:6px 14px;font-size:13px">ลบ</button><span style="flex-basis:100%;font-size:12px;color:#667085">นำเข้าเมื่อ '+at.getDate()+'/'+(at.getMonth()+1)+'/'+at.getFullYear()+' '+String(at.getHours()).padStart(2,'0')+':'+String(at.getMinutes()).padStart(2,'0')+' น. · '+gr.logs.length+' วัน · '+nRows+' รายการ</span>';
+    row.querySelector('button').addEventListener('click',()=>deleteWasteImport(gr.imp.id));
+    box.appendChild(row);
+  });
+}
+async function openWasteImportsList(){
+  if(!isEmployee()) return;
+  await loadAllWasteLogs();
+  const d=wasteImportsDialog();
+  renderWasteImportsList();
+  if(!d.open) d.showModal();
+}
+async function deleteWasteImport(id){
+  const gr=wasteImportGroups().find(x=>x.imp.id===id);
+  if(!gr) return;
+  const pin=prompt(t('wasteDeleteConfirmPrompt'));
+  if(pin===null) return;
+  if(!STAFF_PINS.includes(pin.trim())){ alert(t('wasteWrongPinAlert')); return; }
+  const nRows=gr.logs.reduce((s,l)=>s+(l.rows||[]).length,0);
+  if(!confirm('ลบไฟล์ "'+gr.imp.name+'" และบันทึกของเสีย '+gr.logs.length+' วัน ('+nRows+' รายการ) ที่นำเข้าจากไฟล์นี้?\n(ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)')) return;
+  for(const l of gr.logs.slice()) await deleteWasteLog(l);
+  showWasteToast('ลบไฟล์ที่นำเข้าแล้ว');
+  renderWasteImportsList();
 }
 async function confirmDeleteWasteLog(){
   if(!currentWasteLog)return;
