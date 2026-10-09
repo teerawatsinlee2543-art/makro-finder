@@ -695,6 +695,7 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
 .shr-src{display:flex;flex-wrap:wrap;gap:2px 16px;margin:6px 0 0}
 .shr-src:empty{display:none}
 .shr-big{font-size:20px;font-weight:800;color:#c62828;font-variant-numeric:tabular-nums}
+.neg-adj{font-size:20px;font-weight:800;color:#c62828;font-variant-numeric:tabular-nums;line-height:1.2}
 .shr-rs{display:grid;gap:5px}
 .shr-r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"e b q" "i i i";gap:1px 10px;align-items:baseline;font-size:12.5px}
 .shr-r em{grid-area:e;font-style:normal;overflow-wrap:anywhere}
@@ -4114,8 +4115,8 @@ function ilCard(p,it){
   let head,facts;
   if(p==='neg'){
     const LV={late:['ติดลบหนัก','pull'],warn:['ติดลบปานกลาง','md2'],ok:['ติดลบเล็กน้อย','ok'],done:['สต็อกร่วม (~)','ok']}[lv];
-    head=`<span class="chip s-${LV[1]}">${LV[0]}</span><span class="shr-big">ปรับ +${ilN(-it.a,100)}</span><span class="muted small">${it.val>0?'ที่เสีย '+ilMoney('neg',it.val):''}</span>`;
-    facts=`<div class="oosc-f small"><span>ASOH (Stock) <b class="c-md2">${ilN(it.a,100)}</b> → 0</span><span>USOH <b>${ilN(r.u)}</b></span><span>สั่งแล้ว <b>${ilN(r.oo)}</b></span><span>ระหว่างส่ง <b>${ilN(r.it)}</b></span></div>
+    head=`<span class="chip s-${LV[1]}">${LV[0]}</span><span class="muted small">${it.val>0?'ที่เสีย '+ilMoney('neg',it.val):''}</span>`;
+    facts=`<div class="oosc-f small"><span class="neg-adj">ปรับ ${ilN(it.a,100)} → 0</span><span>USOH <b>${ilN(r.u)}</b></span><span>สั่งแล้ว <b>${ilN(r.oo)}</b></span><span>ระหว่างส่ง <b>${ilN(r.it)}</b></span></div>
       <div class="oosc-f small"><span>ขาย 28 วัน <b>${ilN(r.a28,100)}</b>/วัน</span><span>เดือนที่แล้ว <b>${ilN(r.lm)}</b></span><span>เดือนนี้ <b>${ilN(r.cm)}</b></span>${r.ly?`<span class="muted">ปีก่อน ${ilN(r.ly)}</span>`:''}</div>
       <div class="oosc-f small muted">${dates}${r.sd!=null&&r.sd<999?`<span>Stock Day ${ilN(r.sd)}</span>`:''}</div>
       <div class="small"><b>ต้องทำ:</b> ${it.shared?'ใช้สต็อกร่วมกับสินค้าปกติ — ปรับที่สินค้าปกติ':'นับสต็อกจริง แล้วปรับ ASOH <b>+'+ilN(-it.a,100)+'</b> ให้เหลือ 0'}${r.cm>0&&!it.shared?' · <b class="c-md2">ยังมียอดขายเดือนนี้ — ระวังขายของที่ไม่มีจริง</b>':''}</div>`}
