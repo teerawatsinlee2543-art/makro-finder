@@ -152,6 +152,7 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .plan{border-collapse:separate;border-spacing:0 6px;width:auto;margin:-6px 0}
 .plan td{border:0;padding:0 16px 0 0;vertical-align:middle;white-space:nowrap}
 .plan td.pw{white-space:normal;color:var(--muted)}
+.plan td:last-child{padding-right:0}
 .plan tr.cur td:first-child .chip{box-shadow:0 0 0 3px var(--today)}
 .plan tr.cur b{color:var(--ink)}
 .nowtag{display:inline-block;background:var(--today);color:#fff;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700}
@@ -798,6 +799,7 @@ label.has-scan>input{padding-right:50px!important}
   .oosc-h{flex-wrap:wrap}
   .oosc-h>.btn.sm{order:3;flex:1 0 100%;min-height:40px}
 }
+.add-card,.add-step{grid-template-columns:minmax(0,1fr)} /* the Monitor item form could be 15 px wider than a 320 px screen */
 /* a short phone screen (up to 640 px tall): the logo bar + Julian badge scroll away, only the tab bar (and the pinned tiles) stay - the list keeps about 100 px more */
 @media (max-width:700px) and (max-height:640px){header{position:static!important}}
 </style>
