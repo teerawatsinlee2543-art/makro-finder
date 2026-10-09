@@ -4445,11 +4445,23 @@ function nbsAgingText(r){
   return`<span class="chip s-${k}">${lb}</span>${pv?`<div class="small" style="margin-top:2px"><b>Provision ${pv}%</b></div>`:''}<div class="muted small">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`
     +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> → <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">≈ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>');
 }
+/* Buyer shown for an Item NBS row: its own Buyer; otherwise the Buyer the same Item No has on the OOS+ page (buyer_uid) or in the ItemList_Layout loaded on High Stock to DMS / Negative Stock (Buyer column) — so every page shows the same Buyer for the same item. Nothing is written: change the other page's data and this follows. */
+var NBSB=null;
+function nbsBuyerMap(){
+  const oos=st.oos||[];let h=oos.length;
+  oos.forEach(o=>{const u=String(o.itemNo||'')+'|'+String(o.buyerUid||'');for(let i=0;i<u.length;i++)h=(h*31+u.charCodeAt(i))|0});
+  const key=h+':'+IL_REV.neg+':'+IL_REV.dms+':'+(ILT.neg?ILT.neg.rows.length:0)+':'+(ILT.dms?ILT.dms.rows.length:0);
+  if(NBSB&&NBSB.key===key)return NBSB.map;
+  const m=new Map(),put=(no,u)=>{u=String(u||'').trim();const k=amNum(no);if(u&&k&&!m.has(k))m.set(k,u)};
+  oos.forEach(o=>put(o.itemNo,o.buyerUid));
+  ['dms','neg'].forEach(p=>{const d=ILT[p];if(d&&d.rows)d.rows.forEach(x=>put(x.i,x.by))});
+  NBSB={key,map:m};return m}
+function nbsBuyerUid(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))||''}
 /* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
 function nbsFiltered(whole){
   const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value;
   return rows.filter(r=>whole===true||((!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
-    &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q))))
+    &&(!q||[r.itemNo,r.desc,nbsBuyerUid(r),r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q))))
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
 const PDF_CHIP={ok:['#e4f3ea','#1f7a45'],md1:['#fff3a6','#6b5800'],md2:['#ffdcb8','#9a4300'],pull:['#c62828','#fff'],obs:['#7f1d1d','#fff'],full:['#111','#fff']};
@@ -4465,7 +4477,7 @@ function nbsPDFHtml(photos=true,whole=false){
     L=(k,val)=>val?`<div class="m">${k}: <b>${esc(val)}</b></div>`:'',desc=v.arts.length?v.arts.map(a=>a[0]+' '+a[1]).join(', '):v.desc;
     return`<b>${esc(b.uid)}</b>${L('Merchandise Mgr.',clean+(ph?' · '+ph:''))}${L('Area',v.area)}${L('Description',desc)}${L('Assistant',v.asst.join(', '))}${L('Junior Buyer',v.jr.join(', '))}`};
   const body=all.map(r=>{
-    const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),b=st.contacts.find(x=>x.uid===r.buyerUid),c=r.createdAt?new Date(r.createdAt):null;
+    const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),bu=nbsBuyerUid(r),b=st.contacts.find(x=>x.uid===bu),c=r.createdAt?new Date(r.createdAt):null;
     const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${esc(a.next[0])}</div>`:'<div class="m">ถึงสถานะสูงสุดแล้ว</div>'):(String(r.aging||'').trim()?chip(String(r.aging).trim(),'err')+'<div class="m">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>':'-');
     const img=photos?(r.img||(MF.images&&MF.images[r.itemNo])||''):'';
     return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(img)}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div>${r.artGrp?`<div class="m">Art Grp ${esc(r.artGrp)}</div>`:''}</div></div></td>
@@ -4473,7 +4485,7 @@ function nbsPDFHtml(photos=true,whole=false){
 <td class="num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td class="num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
 <td class="num">${n==null?'<span class="m">ไม่ระบุ / ไม่เคยขาย</span>':`<b class="${over?'ov':'okd'}">${n.toLocaleString()} วัน</b><div class="m ${over?'ov':''}">${over?'เกินเกณฑ์':'ไม่ถึงเกณฑ์'} ≥${lim}</div>`}</td><td>${ag}</td>
 <td>${chip(s[1],s[2].replace(/^s-/,''))}${r.autoNote?`<div class="m">${esc(r.autoNote)}</div>`:''}</td>
-<td>${r.buyerUid?(b?buyerPdf(b):`<b>${esc(r.buyerUid)}</b><div class="m">ไม่พบในรายชื่อ Buyer / Commercial</div>`):'-'}${r.remark?`<div class="rm">${esc(r.remark)}</div>`:''}</td>
+<td>${bu?(b?buyerPdf(b):`<b>${esc(bu)}</b><div class="m">ไม่พบในรายชื่อ Buyer / Commercial</div>`):'-'}${r.remark?`<div class="rm">${esc(r.remark)}</div>`:''}</td>
 <td>${c&&!isNaN(c)?`${fmt(c)}<div class="m">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}</td></tr>`}).join('');
   return`<!doctype html><html lang="th"><head><meta charset="utf-8"><title>Item NBS ${iso(today())}</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -4879,7 +4891,7 @@ function renderNbs(){
   const list=all.slice(0,nbsLimit);
   $('#nbsEmpty').hidden=all.length>0||mode==='init';
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
-  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,b=st.contacts.find(x=>x.uid===r.buyerUid),img=r.img||(MF.images&&MF.images[r.itemNo])||'';
+  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,bu=nbsBuyerUid(r),b=st.contacts.find(x=>x.uid===bu),img=r.img||(MF.images&&MF.images[r.itemNo])||'';
     return`<tr class="${r.status==='done'?'acted':''}">
     <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div>${r.artGrp?`<div><dt>Art Grp :</dt><dd>${esc(r.artGrp)}</dd></div>`:''}</dl></div></td>
     <td data-l="Division"><div class="cbox"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></div></td>
@@ -4890,7 +4902,7 @@ function renderNbs(){
     <td data-l="ไม่มียอดขาย (NBS)" class="num">${nbsDaysText(r)}</td>
     <td data-l="Aging Status"><div class="cbox">${nbsAgingText(r)}</div></td>
     <td data-l="สถานะ"><div class="cbox"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</div></td>
-    <td data-l="Buyer" class="small">${r.buyerUid?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(r.buyerUid)}"><b>${esc(String(r.buyerUid).slice(0,14))}${String(r.buyerUid).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}</td>
+    <td data-l="Buyer" class="small">${bu?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(bu)}"><b>${esc(String(bu).slice(0,14))}${String(bu).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}${!r.buyerUid&&bu?`<div class="muted small bsrc">ตามข้อมูล OOS+ / ItemList</div>`:''}</td>
     <td data-l="Remark" class="small">${r.remark?`<div class="redbox">${esc(r.remark)}</div>`:'<span class="muted">-</span>'}</td>
     <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}<div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
@@ -4899,7 +4911,7 @@ function bulkBuyerOpen(){
   const rows=nbsFiltered();if(!rows.length){toast('ไม่มีรายการในตารางที่จะกำหนด Buyer');return}
   const bs=st.contacts.filter(c=>c.role==='Buyer').sort((a,b)=>String(a.group).localeCompare(String(b.group))||String(a.uid).localeCompare(String(b.uid)));
   $('#bbBuyer').innerHTML='<option value="">— เลือก Buyer —</option>'+bs.map(c=>`<option value="${esc(c.uid)}">${esc(c.uid)} · ${esc(c.name)} · ${esc(c.group||'')}</option>`).join('')+'<option value="__clear">ล้าง Buyer (ไม่ระบุ)</option>';
-  const noBuyer=rows.filter(r=>!r.buyerUid).length;
+  const noBuyer=rows.filter(r=>!nbsBuyerUid(r)).length;
   const stale=(st.nbs||[]).filter(r=>r.buyerUid&&!st.contacts.some(c=>c.uid===r.buyerUid));
   $('#bbStale').hidden=!stale.length;$('#bbStaleTxt').textContent=`มี ${stale.length.toLocaleString()} รายการที่ Buyer ในรายการไม่พบในรายชื่อ Buyer / Commercial แล้ว`;
   $('#bbInfo').innerHTML=`ตารางตอนนี้แสดง <b>${rows.length.toLocaleString()}</b> รายการ (ยังไม่มี Buyer ${noBuyer.toLocaleString()} รายการ)`;
@@ -4913,7 +4925,7 @@ function bulkBuyerOpen(){
 }
 async function bulkBuyerGo(){
   const v=$('#bbBuyer').value;if(!v){toast('เลือก Buyer ก่อน');return}
-  const uid=v==='__clear'?'':v,rows=nbsFiltered().filter(r=>!$('#bbEmpty').checked||!r.buyerUid||uid==='');
+  const uid=v==='__clear'?'':v,rows=nbsFiltered().filter(r=>!$('#bbEmpty').checked||!nbsBuyerUid(r)||uid==='');
   if(!rows.length){toast('ไม่มีรายการที่ต้องกำหนด');return}
   const who=uid?`${uid} ${st.contacts.find(c=>c.uid===uid)?.name||''}`:'ไม่ระบุ';
   if(!await ask(`กำหนด Buyer “${who}” ให้ ${rows.length.toLocaleString()} รายการ?  (ทุกคนในทีมเห็นการเปลี่ยนนี้)`))return;
@@ -5011,7 +5023,7 @@ async function nbsSave(){
 }
 function nbsTable(whole){
   const rows=[['division','department','item_no','description','barcode','stock','location','last_recv_date','last_sold_date','nbs_days','nbs_threshold','aging_status','aging_type','days_to_next_status','next_status','status','buyer_uid','remark','created_at']];
-  nbsFiltered(whole===true).forEach(r=>rows.push([r.division,r.dept||'',r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',nbsOver(r)?'เกินเกณฑ์':'ยังไม่ถึงเกณฑ์',(()=>{const a=agingInfo(r);return a.level!=null?AGING_LV[a.level][0]:r.aging||''})(),agingInfo(r).name,agingInfo(r).left??'',agingInfo(r).next?agingInfo(r).next[0]:'',nStat(r.status)[1],r.buyerUid||'',r.remark||'',r.createdAt||'']));
+  nbsFiltered(whole===true).forEach(r=>rows.push([r.division,r.dept||'',r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',nbsOver(r)?'เกินเกณฑ์':'ยังไม่ถึงเกณฑ์',(()=>{const a=agingInfo(r);return a.level!=null?AGING_LV[a.level][0]:r.aging||''})(),agingInfo(r).name,agingInfo(r).left??'',agingInfo(r).next?agingInfo(r).next[0]:'',nStat(r.status)[1],nbsBuyerUid(r),r.remark||'',r.createdAt||'']));
   return rows}
 function nbsCSV(whole){const w=whole===true;if(!nbsFiltered(w).length){toast('ไม่มีรายการให้ส่งออก');return}dl(`item-nbs_${iso(today())}.csv`,toCSV(nbsTable(w)),'text/csv;charset=utf-8',()=>nbsPDF(w))}
 $('#nbsAdd').onclick=()=>nbsOpen(null);
