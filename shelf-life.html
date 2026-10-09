@@ -4233,13 +4233,15 @@ function runIlImport(){
   ilSave(p).then(ok=>{if(!ok)toast('นำเข้าแล้ว แต่เบราว์เซอร์ไม่ยอมให้จำข้อมูลไว้ — ปิดหน้าแล้วต้องนำเข้าใหม่')})}
 async function ilExport(p){
   const m=ilBuild(p);if(p==='dms')ilSetHi(m);const rows=ilVisible(p,m);if(!rows.length)return;await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
-  if(p==='neg'){ /* the team's Negative Stock sheet: Division · Dept no · Art Grp Sub No · Art No · Descr · Last Delday · Last Saleday · Dms · Stock (Stock in red) */
-    const head=['Division','Dept no','Art Grp Sub No','Art No','Descr','Last Delday','Last Saleday','Dms','Stock'],dt=ms=>ms==null?'':new Date(ms);
+  if(p==='neg'){ /* laid out like the team's source report: Art Grp Sub No · Division · Dept no · Art No / Item No. · Descr · Stock (negatives in red, 2 decimals) · Dms · Last Delday · Last Saleday; header in row 1, rows in the order of the imported file (the page's filters still apply) */
+    const head=['Art Grp Sub No','Division','Dept no','Art No / Item No.','Descr','Stock','Dms','Last Delday','Last Saleday'],dt=ms=>ms==null?'':new Date(ms);
+    const at=new Map(((ILT.neg&&ILT.neg.rows)||[]).map((r,i)=>[r,i])),ix=it=>at.has(it.r)?at.get(it.r):1e9;
+    rows.sort((a,c)=>ix(a)-ix(c));
     const out=rows.map(it=>{const r=it.r,mm=ITEMCLS?ITEMCLS.get(amNum(it.itemNo)):null;
-      return[SHR_DEPT[it.dp]||it.dlbl||'',it.dp?+it.dp:'',mm&&mm.s!=null&&mm.s!==''?+mm.s:'',/^\d+$/.test(it.itemNo)?+it.itemNo:it.itemNo,it.desc,dt(r.ld),dt(r.ls),Math.round(r.a28*100)/100,it.a]});
+      return[mm&&mm.s!=null&&mm.s!==''?+mm.s:'',SHR_DEPT[it.dp]||it.dlbl||'',it.dp?+it.dp:'',/^\d+$/.test(it.itemNo)?+it.itemNo:it.itemNo,it.desc,it.a,Math.round(r.a28*100)/100,dt(r.ld),dt(r.ls)]});
     const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out],{cellDates:true,dateNF:'d/m/yyyy'});
-    ws['!cols']=[22,9,15,10,46,13,13,8,10].map(w=>({wch:w}));
-    for(let i=2;i<=out.length+1;i++){['F','G'].forEach(c=>{const x=ws[c+i];if(x&&x.t==='d')x.z='d/m/yyyy'});if(ws['H'+i])ws['H'+i].z='0.00';if(ws['I'+i])ws['I'+i].z='0.00;[Red]-0.00'}
+    ws['!cols']=[13,18.5,7.5,15.7,40,8.4,7.5,11.2,11.2].map(w=>({wch:w}));
+    for(let i=2;i<=out.length+1;i++){if(ws['F'+i])ws['F'+i].z='0.00;[Red]-0.00';if(ws['G'+i])ws['G'+i].z='0.00';['H','I'].forEach(c=>{const x=ws[c+i];if(x&&x.t==='d')x.z='d/m/yyyy'})}
     XLSX.utils.book_append_sheet(wb,ws,'Negative Stock');XLSX.writeFile(wb,'NegativeStock-'+iso(today())+'.xlsx');toast('ดาวน์โหลดรายการแล้ว');return}  const T=IL_T,base=['กลุ่ม','Item No','ชื่อสินค้า','ASOH (Stock)','Dept','Class','Buyer','Supplier','Item Status','Selling Price','USOH','On Order','In Transit','Avg Sale 28 Days','Last Month Sold','Curr Month Sold','Stock Day (ระบบ)'];
   const extra=p==='neg'?['มูลค่าติดลบ ฿','ต้องปรับ Stock (+ หน่วย)','ขายล่าสุด','รับล่าสุด','สต็อกร่วม (~)']
     :['DMS จริง (ต่อวัน)','Stock พอขาย (วัน)','ระดับแนะนำ','ส่วนเกินเกิน '+T+' วัน (หน่วย)','ส่วนเกิน ฿','มูลค่า Stock ฿','ต้องขายให้ได้/วัน (ระบาย '+T+' วัน)','ต้องเพิ่มกี่เท่าของ DMS','DMS ระบบ (จาก Stock Day)','DMS ต่างจากระบบ %','ขายล่าสุด','รับล่าสุด','สต็อกร่วม (~)'];
