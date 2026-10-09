@@ -68,6 +68,32 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn.sm{padding:4px 9px;font-size:13px}
 .btn.danger{color:var(--md2)}
+/* the same export set (CSV · Excel · PDF) on every page: one joined button group */
+.exp{display:inline-flex;align-items:stretch;flex:none;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.exp-l{display:flex;align-items:center;padding:0 12px;font-size:13px;font-weight:700;color:var(--muted);background:color-mix(in srgb,var(--line) 40%,var(--card));white-space:nowrap}
+.exp .btn{border:0;border-left:1px solid var(--line);border-radius:0;padding:8px 16px;min-height:38px;line-height:1.2}
+.exp .btn:disabled{opacity:.45;cursor:not-allowed}
+.exp .btn:focus-visible{outline-offset:-3px}
+.imp-file.sd-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 8px;align-items:center}
+.imp-file.sd-row>.chip{grid-column:1;grid-row:1}
+.imp-file.sd-row>b{grid-column:2;grid-row:1;min-width:0;overflow-wrap:anywhere}
+.imp-file.sd-row>.btn{grid-column:3;grid-row:1/3;align-self:center}
+.imp-file.sd-row>.muted{grid-column:1/3;min-width:0;overflow-wrap:anywhere}
+.imp-file.il-row{display:grid;grid-template-columns:1fr auto;gap:6px 8px;align-items:center}
+.imp-file.il-row>.chip{justify-self:start}
+.imp-file.il-row>.btn{grid-column:2;grid-row:1}
+.imp-file.il-row>span:not(.chip){grid-column:1/3;min-width:0;overflow-wrap:anywhere}
+.di-row .btn{flex:none;white-space:nowrap}
+@media (max-width:480px){.di-row{flex-wrap:wrap}.di-row>div{flex:1 1 100%}.di-row .btn{margin-left:auto}}
+.add-head>.exp{margin-left:auto}
+.exp-pick{display:grid;gap:8px}
+.exp-pick .btn{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;padding:10px 14px;border-radius:10px}
+.exp-pick .btn span{font-weight:400;font-size:12.5px;color:var(--muted)}
+@media (max-width:700px){
+  .exp{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));width:100%;margin-left:0}
+  .exp-l{padding:0 11px}
+  .exp .btn{padding:8px 4px;min-height:40px;font-size:14px;white-space:nowrap;text-align:center}
+}
 /* filter bars: one tidy grid on every screen — short labels, fields the same height and lined up on the bottom edge, a wider search box, buttons on their own row; one column on phones */
 .fbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 12px;align-items:end;margin:0 0 12px}
 .fbar>label{min-width:0}
@@ -552,8 +578,8 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   .brandbox .app-logo{width:70px;height:70px;left:-36px}
   .brandbox h1{font-size:16px}
   /* OOS+: the three top buttons on one line */
-  :is(#t-oos,#t-nbs) .add-head>.row{width:100%;flex-wrap:wrap;gap:6px}
-  :is(#t-oos,#t-nbs) .add-head>.row>.btn{flex:1 1 calc(50% - 6px);min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
+  :is(#t-oos,#t-nbs,#t-ct,#t-prod) .add-head>.row{width:100%;flex-wrap:wrap;gap:6px}
+  :is(#t-oos,#t-nbs,#t-ct,#t-prod) .add-head>.row>.btn{flex:1 1 calc(50% - 6px);min-width:0;padding:8px 6px;font-size:13px;white-space:nowrap;text-align:center;justify-content:center}
   /* Item NBS FF / DF / NF: one row */
   #nbsTiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
   #nbsTiles .tile{padding:8px 8px 8px 9px;min-width:0}
@@ -749,6 +775,25 @@ label.has-scan>input{padding-right:50px!important}
 .scan-mini{position:absolute;right:4px;bottom:3px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;padding:0;border-radius:10px;border:1px solid #e30613;background:#e30613;color:#fff;cursor:pointer;line-height:0}
 .scan-mini:hover{background:#c00510}
 .scan-mini:focus-visible{outline:3px solid #ffd400;outline-offset:1px}@media print{nav,header .btn,.no-print{display:none!important}body{background:#fff}.card{border:0}}
+/* phone fixes: placed last so they win over the earlier compact / pinned-tile rules */
+@media (max-width:700px){
+  table.resp td.pact .btn.sm{min-height:40px;min-width:56px}
+  .scan-mini{min-width:40px;min-height:40px}
+  #idList .imp-file .btn.sm{min-height:40px;min-width:56px}
+  :is(#shrDelFile,#shrImport,#negDelFile,#negImport,#dmsDelFile,#dmsImport,#prDelFile,#prImport){min-height:40px}
+}
+@media (max-width:389px){
+  :is(#oosDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile{flex-wrap:wrap;gap:0 6px;padding:3px 6px 3px 8px;align-content:center}
+  :is(#oosDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile b{order:3;width:100%;font-size:15px;line-height:1.25}
+}
+@media (max-width:359px){
+  header>.row #mode{font-size:10px;padding:1px 6px;white-space:normal;line-height:1.15;max-width:116px}
+  .brandbox h1{font-size:14px}
+  .brandbox{padding-right:10px}
+  #shrDivTiles:not(.stuck) .dvpct{position:static;display:flex;width:max-content;margin:0 0 3px}
+  .oosc-h{flex-wrap:wrap}
+  .oosc-h>.btn.sm{order:3;flex:1 0 100%;min-height:40px}
+}
 </style>
 </head>
 <body>
@@ -784,6 +829,7 @@ label.has-scan>input{padding-right:50px!important}
   <div class="card oos-banner" id="nbsBanner" hidden><span id="nbsBannerTxt"></span><button type="button" class="btn sm" id="nbsBannerGo">ดูรายการ NBS</button></div>
   <div class="tiles" id="tiles"></div>
   <div class="card">
+    <div class="add-head no-print" style="margin-bottom:10px"><h2>ล็อตและสถานะวันนี้ <span class="muted small" style="font-weight:400">· ส่งออกตามตัวกรองที่เลือก</span></h2><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="dashCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="dashXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="dashPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
     <div class="fbar no-print">
       <label class="f-q">ค้นหา<input id="q" placeholder="สินค้า / SKU / Buyer UID / ที่ตั้ง เช่น บลูเบอรี่"></label>
       <label>สถานะ<select id="fSt"><option value="">ทั้งหมด</option></select></label>
@@ -873,7 +919,7 @@ label.has-scan>input{padding-right:50px!important}
   <div class="card">
     <div class="add-head">
       <h2>Item NBS <span class="muted small" style="font-weight:400">· สินค้าที่ไม่มียอดขายเลย (FF / DF / NF)</span></h2>
-      <span class="row w"><button class="btn" id="nbsExport">ส่งออก CSV</button><button class="btn imp-btn" id="nbsImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" id="nbsAdd">+ เพิ่ม Item NBS</button></span>
+      <span class="row w"><button class="btn imp-btn" id="nbsImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" id="nbsAdd">+ เพิ่ม Item NBS</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="nbsCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="nbsXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="nbsPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div>
     </div>
     <div class="tiles" id="nbsTiles" style="margin:12px 0"></div>
     <div class="row" id="nbsSummary" style="gap:8px;margin:0 0 8px;align-items:center"></div>
@@ -900,7 +946,7 @@ label.has-scan>input{padding-right:50px!important}
   <div class="card">
     <div class="add-head">
       <h2>OOS+ <span class="muted small" style="font-weight:400">· สินค้าหมดชั้น / หมดสต็อก — เตือนให้เติม</span></h2>
-      <span class="row w"><button type="button" class="btn" id="oosCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV">ส่งออก CSV</button><button type="button" class="btn danger" id="oosDelFile" title="ลบรายการ OOS ที่มาจากไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="oosAdd">+ เพิ่มรายการ</button><button type="button" class="btn imp-btn" id="oosImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span>
+      <span class="row w"><button type="button" class="btn danger" id="oosDelFile" title="ลบรายการ OOS ที่มาจากไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="oosAdd">+ เพิ่มรายการ</button><button type="button" class="btn imp-btn" id="oosImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="oosCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="oosXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="oosPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div>
     </div>
     <div class="tiles" id="oosDivTiles" style="margin:12px 0 0"></div>
     <div class="tiles" id="oosTiles" style="margin:12px 0"></div>
@@ -929,9 +975,8 @@ label.has-scan>input{padding-right:50px!important}
   <div class="card">
     <div class="add-head">
       <h2>%Shrink <span class="muted small" style="font-weight:400">· หยุดทิ้ง — ทิ้งไปเท่าไรแล้ว ตัวไหนทิ้งเยอะสุด</span></h2>
-      <span class="row w"><button type="button" class="btn danger" id="shrDelFile" title="ลบข้อมูลของไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="shrCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV">ส่งออก CSV</button><button type="button" class="btn" id="shrXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">ดาวน์โหลด Excel</button><button type="button" class="btn imp-btn" id="shrImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span>
+      <span class="row w"><button type="button" class="btn danger" id="shrDelFile" title="ลบข้อมูลของไฟล์ที่นำเข้า (เช่น นำเข้าผิดไฟล์หรือผิดช่วงวัน)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn imp-btn" id="shrImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="shrCsv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="shrXlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="shrPdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div>
     </div>
-    <p class="muted small shr-src" id="shrSrc"></p>
     <div class="tiles" id="shrDivTiles" style="margin:12px 0 0"></div>
     <div class="tiles" id="shrTiles" style="margin:12px 0"></div>
     <div class="oos-dchips" id="shrDeptTiles"></div>
@@ -957,8 +1002,8 @@ label.has-scan>input{padding-right:50px!important}
 <!-- PRODUCTS -->
 <section id="t-prod" hidden>
   <div class="card">
-    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">สินค้า & กฎ Shelf life</h2>
-      <span class="row w"><button type="button" class="btn danger" id="prDelFile" title="ลบไฟล์ที่นำเข้า พร้อมสินค้าที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="prImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span></div>
+    <div class="add-head" style="margin-bottom:10px"><h2 style="margin:0">สินค้า & กฎ Shelf life</h2>
+      <span class="row w"><button type="button" class="btn danger" id="prDelFile" title="ลบไฟล์ที่นำเข้า พร้อมสินค้าที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button class="btn imp-btn" id="prImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editProduct()">+ เพิ่มสินค้า</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="prCsv" title="ส่งออกรายการสินค้าที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="prXlsx" title="ดาวน์โหลดรายการสินค้าที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="prPdf" title="ส่งออกรายการสินค้าที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
     <p class="muted small">กฎตาม “คู่มือ อายุและการจัดการสินค้าผักและผลไม้” (ผ่านการตรวจสอบจากทีมจัดซื้อและ QA) · นับวันที่ 1 = วันรับสินค้า · ขายราคาเต็มครบ Shelf life → ลด 15% (Step 1) → ลด 30% (Step 2) → Code 52 · สินค้า Shelf life 1 วันข้าม Step 1 · อายุสินค้ากำหนดตามการจัดเรียงในตู้แช่ 0–4°C (ผักสลัด 6–8°C) หรือให้พิจารณาตามสภาพสินค้า</p>
     <div class="fbar"><label class="f-q">ค้นหาสินค้า<input id="pQ" type="search" placeholder="ชื่อ / รหัส / หมวด / Buyer UID / Commercial เช่น บลูเบอร์รี่ หรือ FF3" autocomplete="off"></label><label>เรียงตาม<select id="pSort"><option value="shelf-asc">Shelf life สั้น → ยาว</option><option value="shelf-desc">Shelf life ยาว → สั้น</option><option value="origin">กลุ่มที่มา (นำเข้า / ในประเทศ) แล้ว Shelf life</option><option value="name">ชื่อสินค้า ก → ฮ</option></select></label><span class="muted small f-info" id="pQn"></span></div>
     <table class="resp"><thead><tr><th>สินค้า</th><th id="thShelf" class="sortable" title="กดเพื่อเรียงตาม Shelf life (สั้น → ยาว / ยาว → สั้น)">Shelf life <span id="shelfArrow"></span></th><th><span class="hchip h-ok">ขายราคาเต็ม</span></th><th><span class="hchip h-md1">ลด 15%</span></th><th><span class="hchip h-md2">ลด 30%</span></th><th><span class="hchip h-pull">Code 52</span></th><th>Buyer UID</th><th>Commercial</th><th></th></tr></thead><tbody id="prodBody"></tbody></table>
@@ -969,7 +1014,7 @@ label.has-scan>input{padding-right:50px!important}
 <!-- CONTACTS -->
 <section id="t-ct" hidden>
   <div class="card">
-    <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn" onclick="exportContactsXlsx()" title="ส่งออกรายชื่อเป็น Excel ตามหัวตารางผังทีม">ส่งออก Excel</button><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="ctRules" title="นำเข้าตาราง Class → Buyer เพื่อเขียนกฎ “สินค้าที่ดูแล” ให้ Buyer ทุกคน แล้วช่อง Buyer ใน Item NBS จะเติมเองตามเลข Class / Art Grp">นำเข้ากฎ Buyer</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span></div>
+    <div class="add-head" style="margin-bottom:10px"><h2 style="margin:0">Buyer / Commercial</h2><span class="row w"><button type="button" class="btn danger" id="ctDelFile" title="ลบไฟล์ที่นำเข้า พร้อมรายชื่อที่ไฟล์นั้นเพิ่มเข้ามา">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="ctRules" title="นำเข้าตาราง Class → Buyer เพื่อเขียนกฎ “สินค้าที่ดูแล” ให้ Buyer ทุกคน แล้วช่อง Buyer ใน Item NBS จะเติมเองตามเลข Class / Art Grp">นำเข้ากฎ Buyer</button><button class="btn imp-btn" id="ctImport"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้าข้อมูล</button><button class="btn pri" onclick="editContact()">+ เพิ่มผู้ติดต่อ</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="ctCsv" title="ส่งออกรายชื่อทั้งหมดเป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="ctXlsx" title="ดาวน์โหลดรายชื่อทั้งหมดเป็น Excel">Excel</button><button type="button" class="btn" id="ctPdf" title="ส่งออกรายชื่อทั้งหมดเป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
     <div class="fbar"><label class="f-q">ค้นหา<input id="ctQ" placeholder="UID / ชื่อ / หมวดสินค้า / เบอร์ เช่น FF2B, Cooking oil, ผักสลัด"></label><label>กลุ่ม<select id="ctG"></select></label><span class="muted small f-info" id="ctCount"></span></div>
     <table class="resp ct-tbl"><colgroup><col style="width:6%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:5%"><col style="width:10%"><col style="width:4%"><col style="width:11%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:6%"></colgroup><thead><tr><th>Area</th><th>Senior Director</th><th>Associate Director</th><th>Area / Department</th><th>Senior Manager</th><th>Product Group Manager</th><th>Buyer UID</th><th>Merchandise Mgr. Name</th><th>Art Grp No.</th><th>Description</th><th>Junior Mer Manager</th><th>Assistant Buyer</th><th>Junior Buyer / New Gen</th><th></th></tr></thead><tbody id="ctBody"></tbody></table>
   </div>
@@ -995,13 +1040,15 @@ label.has-scan>input{padding-right:50px!important}
 <!-- DATA -->
 <section id="t-data" hidden>
   <div class="card dcard">
-    <div class="dhead"><span class="dico dico-out"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h2>ส่งออกข้อมูล</h2><p class="muted small">ดาวน์โหลดข้อมูลไปเปิดใน Excel หรือเก็บไว้เป็นไฟล์สำรอง</p></div></div>
+    <div class="dhead"><span class="dico dico-out"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h2>ส่งออกข้อมูล</h2><p class="muted small">เลือกข้อมูลที่ต้องการ แล้วเลือกรูปแบบ CSV / Excel / PDF (ข้อมูลทั้งหมด ไม่กรอง) · หรือสำรองข้อมูลทั้งหมดเป็นไฟล์ JSON</p></div></div>
     <div class="dgrid">
-      <button type="button" class="dtile" onclick="exportBatchesCSV()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 4h14v16H5zM5 9h14M5 14h14M10 4v16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>ล็อต + สถานะวันนี้</b><span class="muted small">ตารางล็อตทั้งหมดพร้อมสถานะ (CSV / Excel)</span></button>
-      <button type="button" class="dtile" onclick="nbsCSV()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>Item NBS</b><span class="muted small">รายการสินค้าไม่มียอดขาย (CSV / PDF)</span></button>
-      <button type="button" class="dtile" onclick="exportContactsXlsx()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2 .7 3.2 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>รายชื่อ Buyer / Commercial</b><span class="muted small">Excel จัดหัวตารางแบบผังทีม — นำเข้ากลับได้ทันที</span></button>
-      <button type="button" class="dtile" onclick="exportContactsXlsx(true)"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>แม่แบบรายชื่อ Buyer</b><span class="muted small">ไฟล์ Excel เปล่าพร้อมตัวอย่าง 1 แถว สำหรับกรอกแล้วนำเข้า</span></button>
-      <button type="button" class="dtile" onclick="downloadTemplate()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>แม่แบบสินค้า</b><span class="muted small">ไฟล์ CSV ตัวอย่างสำหรับนำเข้าสินค้า</span></button>
+      <button type="button" class="dtile" onclick="expOpen('lots')"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 4h14v16H5zM5 9h14M5 14h14M10 4v16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>ล็อต + สถานะวันนี้</b><span class="muted small">ตารางล็อตทั้งหมดพร้อมสถานะ (CSV / Excel / PDF)</span></button>
+      <button type="button" class="dtile" onclick="expOpen('nbs')"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>Item NBS</b><span class="muted small">รายการสินค้าไม่มียอดขาย (CSV / Excel / PDF)</span></button>
+      <button type="button" class="dtile" onclick="expOpen('oos')"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 4h14v16H5zM5 9h14M5 14h14M10 4v16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>OOS+</b><span class="muted small">สินค้าหมดชั้น / หมดสต็อก (CSV / Excel / PDF)</span></button>
+      <button type="button" class="dtile" onclick="expOpen('contacts')"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2 .7 3.2 2.3 3.5 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><b>รายชื่อ Buyer / Commercial</b><span class="muted small">จัดหัวตารางแบบผังทีม นำเข้ากลับได้ทันที (CSV / Excel / PDF)</span></button>
+      <button type="button" class="dtile" onclick="expOpen('contactsTpl')"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>แม่แบบรายชื่อ Buyer</b><span class="muted small">แบบฟอร์มเปล่าพร้อมตัวอย่าง 1 แถว (CSV / Excel / PDF)</span></button>
+      <button type="button" class="dtile" onclick="expOpen('products')"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>สินค้า &amp; กฎ Shelf life</b><span class="muted small">สินค้าและวันลดราคาทั้งหมด นำเข้ากลับได้ (CSV / Excel / PDF)</span></button>
+      <button type="button" class="dtile" onclick="expOpen('prodTpl')"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>แม่แบบสินค้า</b><span class="muted small">ไฟล์ตัวอย่างสำหรับนำเข้าสินค้า (CSV / Excel / PDF)</span></button>
       <button type="button" class="dtile" onclick="exportJSON()"><span class="dti"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2.2 2.2L15.5 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>สำรองข้อมูลทั้งหมด</b><span class="muted small">ทุกอย่างในระบบ รวมรูปที่ถ่าย/แนบ (JSON)</span></button>
     </div>
   </div>
@@ -1203,7 +1250,10 @@ label.has-scan>input{padding-right:50px!important}
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="siCancel">ปิด</button><button type="button" class="btn pri save-btn" id="siGo" disabled>นำเข้า %Shrink</button></div>
 </div></dialog>
 
-<dialog id="dlgShDel" class="nbs-dlg imp-dlg"><div>
+<dialog id="dlgExp" class="nbs-dlg imp-dlg"><div><h2 id="expTitle">ส่งออก</h2>
+  <p class="muted small" id="expDesc" style="margin:0 0 12px"></p>
+  <div class="exp-pick"><button type="button" class="btn" id="expCsv"><b>CSV</b><span>เปิดหน้าต่างคัดลอก / ดาวน์โหลดไฟล์ .csv</span></button><button type="button" class="btn" id="expXlsx"><b>Excel</b><span>ดาวน์โหลดไฟล์ .xlsx เปิดใน Excel</span></button><button type="button" class="btn" id="expPdf"><b>PDF</b><span>พิมพ์ / ส่งต่อ — A4 แนวนอน (เลือก “บันทึกเป็น PDF”)</span></button></div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="expClose">ปิด</button></div></div></dialog><dialog id="dlgShDel" class="nbs-dlg imp-dlg"><div>
   <h2>ลบไฟล์ %Shrink ที่นำเข้า</h2>
   <p class="muted small" style="margin:0 0 10px">ลบข้อมูลของไฟล์ที่นำเข้าผิด หรือผิดช่วงวัน (ลบเฉพาะในเครื่องนี้ ไม่กระทบทีม)</p>
   <div id="sdList" style="display:grid;gap:8px"></div>
@@ -1490,7 +1540,8 @@ const SUPABASE_URL='',SUPABASE_KEY='';
    whole-collection reads only gain three small documents. */
 const FIREBASE_CONFIG={apiKey:"AIzaSyCOGD2xdLUODa705sQBu_slLJmQng_tLCA",authDomain:"makro-finder.firebaseapp.com",projectId:"makro-finder",storageBucket:"makro-finder.firebasestorage.app",messagingSenderId:"39825032351",appId:"1:39825032351:web:cdfcf244f920959ffaceaa"};
 let fdb=null;
-const loadScript=src=>new Promise((ok,no)=>{if([...document.scripts].some(s=>s.src===src))return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.append(s)});
+const LS_P={};
+const loadScript=src=>LS_P[src]||(LS_P[src]=[...document.scripts].some(s=>s.src===src)?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>{s.remove();delete LS_P[src];if(/xlsx/i.test(src))toast('โหลดตัวสร้างไฟล์ Excel ไม่ได้ — ตรวจอินเทอร์เน็ตแล้วลองใหม่');no(new Error('load '+src))};document.head.append(s)}));
 async function fbInit(){
   await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
   await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js');
@@ -1696,20 +1747,25 @@ const byId=(col,id)=>st[col].find(x=>x._id===id);
 
 /* ---------- dashboard ---------- */
 let tileFilter='';
+function dashRows(){return st.batches.map(b=>({b,e:evalBatch(b)}))}
+function dashList(rows,whole){
+  const q=$('#q').value.trim().toLowerCase(),fs=$('#fSt').value||tileFilter,hide=$('#fHide').checked;
+  return rows.filter(({b,e})=>{
+    if(whole===true)return true;
+    if(fs==='done'){if(b.ack!==e.st)return false}else{if(fs&&e.st!==fs)return false;if(hide&&b.ack===e.st)return false}
+    if(q){const h=[b.itemNo,b.itemDesc,b.barcode,b.sku,e.p?.desc,e.p?.sku,e.p?.cat,e.p?.buyerUid,e.p?.comUid,e.buyer?.name,b.loc,b.note].join(' ').toLowerCase();if(!h.includes(q))return false}
+    return true}).sort((a,b)=>(a.b.ack===a.e.st)-(b.b.ack===b.e.st)||a.e.rank-b.e.rank||(a.e.left??0)-(b.e.left??0));
+}
 function renderDash(){
   const allEmpty=COLS.every(c=>!st[c].length);
   $('#onboard').hidden=!((mode==='db'||mode==='sheet')&&COLS.every(c=>loaded[c])&&allEmpty);
   const lc=mode==='db'||mode==='sheet'?loadLocal():null,ln=lc?lc.batches.length+lc.contacts.length:0;
   $('#obMigrate').hidden=!ln;$('#obMigrate').textContent=`ย้ายข้อมูลจากเบราว์เซอร์นี้ (${lc?lc.products.length:0} สินค้า, ${lc?lc.batches.length:0} ล็อต)`;
-  const rows=st.batches.map(b=>({b,e:evalBatch(b)}));
+  const rows=dashRows();
   const cnt={};rows.forEach(r=>{if(r.b.ack!==r.e.st)cnt[r.e.st]=(cnt[r.e.st]||0)+1;else if(r.e.p)cnt.done=(cnt.done||0)+1});
   $('#tiles').innerHTML=ST.filter(([k])=>k!=='err'||cnt.err).map(([k,l])=>`<button type="button" class="tile${tileFilter===k?' sel':''}" data-k="${k}"><span class="chip s-${k}">${l}</span><b>${cnt[k]||0}</b><span class="muted small">ล็อตที่ยังไม่ดำเนินการ</span></button>`).join('')
     +`<button type="button" class="tile${tileFilter==='done'?' sel':''}" data-k="done"><span class="chip s-done">✓ ปิดงานเรียบร้อย</span><b>${cnt.done||0}</b><span class="muted small">ล็อตที่ดำเนินการแล้ว</span></button>`;
-  const q=$('#q').value.trim().toLowerCase(),fs=$('#fSt').value||tileFilter,hide=$('#fHide').checked;
-  const list=rows.filter(({b,e})=>{
-    if(fs==='done'){if(b.ack!==e.st)return false}else{if(fs&&e.st!==fs)return false;if(hide&&b.ack===e.st)return false}
-    if(q){const h=[b.itemNo,b.itemDesc,b.barcode,b.sku,e.p?.desc,e.p?.sku,e.p?.cat,e.p?.buyerUid,e.p?.comUid,e.buyer?.name,b.loc,b.note].join(' ').toLowerCase();if(!h.includes(q))return false}
-    return true}).sort((a,b)=>(a.b.ack===a.e.st)-(b.b.ack===b.e.st)||a.e.rank-b.e.rank||(a.e.left??0)-(b.e.left??0));
+  const list=dashList(rows);
   $('#dashEmpty').hidden=list.length>0||mode==='init';
   $('#dashLoading').hidden=mode!=='init'&&(mode!=='db'||COLS.every(c=>loaded[c]));
   $('#dashBody').innerHTML=list.map(({b,e})=>{
@@ -1888,9 +1944,7 @@ $('#aSave').onclick=async()=>{
 
 /* ---------- products ---------- */
 function renderProd(){
-  const pq=($('#pQ')?.value||'').trim().toLowerCase(),all=bySku(),filtered=pq?all.filter(p=>[p.desc,p.sku,p.cat,p.buyerUid,p.comUid,ORIGINS[p.origin],p.temp].join(' ').toLowerCase().includes(pq)):all;
-  const mode=$('#pSort')?$('#pSort').value:'shelf-asc',nm=(a,b)=>String(a.desc).localeCompare(String(b.desc),'th');
-  const shown=mode==='origin'?filtered:[...filtered].sort(mode==='shelf-desc'?(a,b)=>b.shelf-a.shelf||nm(a,b):mode==='name'?nm:(a,b)=>a.shelf-b.shelf||nm(a,b));
+  const{pq,all,shown,mode}=prodVisible();
   if($('#shelfArrow'))$('#shelfArrow').textContent=mode==='shelf-asc'?'▲':mode==='shelf-desc'?'▼':'';
   if($('#pQn'))$('#pQn').textContent=pq?`พบ ${shown.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`:`${all.length.toLocaleString()} รายการ`;
   if(pq&&!shown.length){$('#prodBody').innerHTML='<tr><td colspan="9" class="muted">ไม่พบสินค้าที่ตรงกับคำค้นหา</td></tr>';return}
@@ -2564,8 +2618,8 @@ const ctInitials=g=>String(g||'').split(/\s+/).filter(Boolean).map(w=>w[0]).join
 const ctNm=p=>p.id&&!/\(#\s*\d{3,5}\)/.test(p.name)?`${p.name} (#${p.id})`:p.name;
 /* export the contact list as an Excel file in the org-chart layout (one row per Buyer), which the import reads straight back */
 const CT_XL_HDR=['Area','Senior Director','Associate Director','Area / Department','Senior Manager','Product Group Manager','Buyer UID','Merchandise Mgr. Name','Art Grp No.','Art Grp Sub No','Description','Junior Mer Manager','Assistant Buyer','Junior Buyer / New Gen'];
-async function exportContactsXlsx(template){
-  await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+const CT_XL_EX=['Dry Grocery Food','Hyesung Baik','Warisara K. (#8663)\n081-966-5421','Commodity','Nichapa B.\n096-659-3663\nSenior Manager','','F6','Janjira S. (#8608)\n083-237-3813','22','','Cooking Oil','','Mananchaya S. #8769','Supisara R.'];
+function contactsRows(template){
   const P=(n,ph,x)=>[n,ph,x].filter(Boolean).join('\n'),rows=[CT_XL_HDR],used=new Set();
   const buyers=(template?[]:st.contacts).filter(c=>c.role==='Buyer').sort((a,b)=>String(a.group||'').localeCompare(String(b.group||''))||String(ctView(a).area).localeCompare(String(ctView(b).area))||String(a.uid).localeCompare(String(b.uid)));
   buyers.forEach(b=>{const v=ctView(b),X=v.x,cm=v.sm;if(cm)used.add(cm.name);
@@ -2579,7 +2633,12 @@ async function exportContactsXlsx(template){
   (template?[]:st.contacts).filter(c=>c.role!=='Buyer'&&!used.has(c.name)).forEach(c=>{const v=ctView(c),cell=P(c.name,c.phone,v.title),pg=/^Product Group/i.test(v.title);
     rows.push([c.group||'',/^Senior Director/i.test(v.title)?cell:'',/^Associate Director/i.test(v.title)?cell:'',v.area&&!/^(Senior|Associate) /i.test(v.title)?v.area:'',
       (!/^(Senior Director|Associate Director)/i.test(v.title)&&!pg)?cell:'',pg?cell:'','','','','','','','',''])});
-  if(template||rows.length===1)rows.push(['Dry Grocery Food','Hyesung Baik','Warisara K. (#8663)\n081-966-5421','Commodity','Nichapa B.\n096-659-3663\nSenior Manager','','F6','Janjira S. (#8608)\n083-237-3813','22','','Cooking Oil','','Mananchaya S. #8769','Supisara R.']);
+  if(template||rows.length===1)rows.push(CT_XL_EX);
+  return rows}
+async function exportContactsXlsx(template){
+  if(!template&&!(st.contacts||[]).length){toast('ยังไม่มีรายชื่อให้ส่งออก');return}
+  await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+  const rows=contactsRows(template);
   const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[16,16,22,20,24,24,10,26,10,14,28,22,26,22].map(w=>({wch:w}));
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Buyer-Commercial');
   XLSX.writeFile(wb,template?'buyer-commercial_template.xlsx':`buyer-commercial_${iso(today())}.xlsx`);
@@ -3542,14 +3601,14 @@ function showOosPreview(){
     o2oHtml=`<p class="small" style="margin:8px 0 0"><b>ช่วงวันส่งมอบในไฟล์:</b> ${oosDayTxt(info.minDay)} – ${oosDayTxt(info.maxDay)} (${info.span} วัน) · ${oosImp.lines.length.toLocaleString()} บรรทัด · ${an.items.length.toLocaleString()} สินค้า${info.nonPos?` · ตัดบรรทัดที่ไม่ได้ขาด ${info.nonPos}`:''}${info.stale?` · ตัดออเดอร์ที่ยังไม่จบ ${info.stale}`:''}</p>
     <div class="imp-tiles"><div class="t-new"><b>${bk.A.toLocaleString()}</b><span>${esc(OOS_BK.A[0])}</span></div><div class="t-new"><b>${bk.B.toLocaleString()}</b><span>${esc(OOS_BK.B[0])}</span></div><div class="t-new"><b>${bk.C.toLocaleString()}</b><span>${esc(OOS_BK.C[0])}</span></div><div><b>${bk.X.toLocaleString()}</b><span>${esc(OOS_BK.X[0])}</span></div></div>
     <p class="small" style="margin:8px 0 0"><b>แผนกที่ต้องเติม:</b> ${Object.entries(ds).sort((a,b)=>b[1]-a[1]).map(([d,n])=>`${esc(d)} ${n.toLocaleString()}`).join(' · ')||'—'}${plan.dropD?` · ไม่นับ ${plan.dropD.toLocaleString()} สินค้าที่ไม่ใช่ปัญหาสต็อก (ขนาด/น้ำหนัก, คุณภาพ, ลดราคา ฯลฯ)`:''}</p>
-    <p class="small" style="margin:6px 0 0"><b>DMS ใหม่ (คำนวณจากทั้งไฟล์):</b> ${up.length.toLocaleString()} สินค้าที่มี DMS ใช้ได้ เฉลี่ยเปลี่ยน ${avg>=0?'+':''}${(avg*100).toFixed(1)}% · ${invAll.toLocaleString()} สินค้าที่ DMS เดิมใช้ไม่ได้ (ว่าง / 0 / ติดลบ) ได้ค่าชั่วคราว <button type="button" class="btn sm" id="oiDmsXlsx">ดาวน์โหลดตาราง DMS ใหม่ (Excel)</button></p>`;
+    <p class="small" style="margin:6px 0 0"><b>DMS ใหม่ (คำนวณจากทั้งไฟล์):</b> ${up.length.toLocaleString()} สินค้าที่มี DMS ใช้ได้ เฉลี่ยเปลี่ยน ${avg>=0?'+':''}${(avg*100).toFixed(1)}% · ${invAll.toLocaleString()} สินค้าที่ DMS เดิมใช้ไม่ได้ (ว่าง / 0 / ติดลบ) ได้ค่าชั่วคราว <button type="button" class="btn sm" id="oiDmsXlsx">ดาวน์โหลดตาราง DMS ใหม่ (Excel)</button> <button type="button" class="btn sm" id="oiDmsPdf">ตาราง DMS ใหม่ (PDF)</button></p>`;
   }
   $('#oiBox').innerHTML=`<div class="imp-file"><b>${esc(file)}</b> <span class="muted small">· ${o2o?`${plan.rows.length.toLocaleString()} สินค้าในช่วงที่เลือก`:`${rows.length.toLocaleString()} รายการ`}${info.headerless?' · ไม่มีหัวคอลัมน์ (คอลัมน์ 1 = Item No, 2 = ชื่อ)':''}${info.skipped?` · ข้าม ${info.skipped.toLocaleString()} แถวที่ไม่มี Item No / วันที่`:''}</span> <button type="button" class="btn sm" id="oiChange">เลือกไฟล์อื่น</button></div>
   <div class="imp-tiles"><div class="t-new"><b>${plan.add.length.toLocaleString()}</b><span>รายการใหม่</span></div><div><b>${plan.reopen.length.toLocaleString()}</b><span>เปิดซ้ำ (เคยเติมแล้ว)</span></div><div><b>${plan.upd.length.toLocaleString()}</b><span>อยู่ในรายการเดิมแล้ว</span></div><div><b>${plan.close.length.toLocaleString()}</b><span>ปิดอัตโนมัติ</span></div></div>
   <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>OOS_COL_LBL[k]||k).join(' · ')}</p>${o2oHtml}
   ${sample?`<div class="imp-sample"><table><thead><tr><th>Item No</th><th>ชื่อสินค้า</th><th>${o2o?'แผนก':'ตำแหน่ง'}</th><th>${o2o?'ประเภท':''}</th></tr></thead><tbody>${sample}</tbody></table></div>`:''}`;
   $('#oiChange').onclick=()=>{$('#oiDrop').hidden=false;$('#oiBox').innerHTML='';$('#oiGo').disabled=true;oosImp=null;$('#oiFile').value='';$('#oiFile').click()};
-  const bx=$('#oiDmsXlsx');if(bx)bx.onclick=()=>oosExportDms(oosImp);
+  const bx=$('#oiDmsXlsx');if(bx)bx.onclick=()=>oosExportDms(oosImp);const bp=$('#oiDmsPdf');if(bp)bp.onclick=()=>oosDmsPDF(oosImp);
 }
 /* what the import writes onto a record */
 const oosExtra=x=>{
@@ -3582,8 +3641,7 @@ async function runOosImport(){
 }
 function openOosImport(){oosImp=null;$('#oiBox').innerHTML='';$('#oiDrop').hidden=false;$('#oiGo').disabled=true;$('#oiGo').textContent='นำเข้า OOS';$('#oiOpts').hidden=true;$('#oiWin').hidden=true;$('#oiErr').textContent='';$('#oiFile').value='';$('#oiClose').checked=false;if(onMakroSite())loadMakroData();$('#dlgOosImp').showModal()}
 /* the full "new DMS" table for every item of the report (not only the ones in the OOS list) → Excel for the Buyers */
-function oosExportDms(imp){
-  if(!imp||!imp.info.o2o){toast('ต้องนำเข้ารายงานสินค้าขาด (O2O) ก่อน');return}
+function oosDmsData(imp){
   const an=oosAnalyze(imp),all=oosWindowRows(imp,0).rows,bkOf=new Map(all.map(r=>[amNum(r.itemNo),r.bucket])),n1=v=>v==null||v===''?'':Math.round(v*10)/10;
   const head=['Item No','ชื่อสินค้า','แผนกที่เติม','Dept','Division','Buyer UID','Buyer','Order Way','repl_method','สินค้าชั่งน้ำหนัก','DMS เดิม (ล่าสุด)','DMS ใหม่','เปลี่ยน %','ส่วนฐาน B','ส่วนยอดที่ขาด L','ส่วนกันขาดซ้ำ H','Stock Day (ล่าสุด)','จำนวนวันที่ขาด','จำนวนบรรทัดที่ขาด','จำนวนที่ขาดรวม','หน่วย','Sale Loss (บาท)','ประเภทปัญหา','สิ่งที่ควรทำ','หมายเหตุ'];
   const rows=an.items.map(it=>{
@@ -3611,6 +3669,10 @@ function oosExportDms(imp){
     ['3) ค่า 0.25 ใน H เป็นค่าตั้งต้นแบบระมัดระวัง ควรปรับให้เหมาะกับร้านเมื่อมียอดขายรายวันมาเทียบ'],
     ['4) หน่วย DMS ของสินค้าชั่งน้ำหนักยังไม่ยืนยัน (กก. หรือ กรัม) โปรดตรวจกับเจ้าของข้อมูลก่อนนำไปใช้'],
     ['5) Sale Loss ในไฟล์ต้นทางเป็นสตางค์ ตารางนี้แปลงเป็นบาทแล้ว']];
+  return{head,rows,sumRows,how}}
+function oosExportDms(imp){
+  if(!imp||!imp.info.o2o){toast('ต้องนำเข้ารายงานสินค้าขาด (O2O) ก่อน');return}
+  const{head,rows,sumRows,how}=oosDmsData(imp);
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([head,...rows]),'DMS ใหม่');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['แผนกที่เติม','จำนวนสินค้า','จำนวนบรรทัดที่ขาด','Sale Loss (บาท)',OOS_BK.A[0],OOS_BK.B[0],OOS_BK.C[0],OOS_BK.X[0]],...sumRows]),'สรุปแผนก');
@@ -3675,8 +3737,11 @@ function shrParse(wb,fname){
         return{name:fname,kind:'sales',rows,info:{skipped,store:meta.store,period:meta.period,items:rows.length}}}}}
   return null}
 /* ----- one record per item, joining the two reports ----- */
+function shrReset(){$('#shrQ').value='';['#shrFRs','#shrFCls','#shrFDept','#shrFWho'].forEach(s=>{$(s).value=''});shrDrill=false;shrTile='';shrDiv=''}
+function ilReset(p){$('#'+p+'Q').value='';['FA','FB','FDept','FWho'].forEach(s=>{$('#'+p+s).value=''});Object.assign(IL_ST[p],{div:'',tile:'',drill:false,limit:60})}
+function ctSig(){return(st.contacts||[]).map(c=>[c._id,c.uid,c.role,c.name,c.group,c.dept,c.artKeys,c.backup].join('\u0001')).join('\u0002')}
 function shrBuild(){
-  const key=SHR_REV+':'+(st.contacts||[]).length+':'+(ITEMCLS?ITEMCLS.size:0);
+  const key=SHR_REV+':'+ctSig()+':'+(ITEMCLS?ITEMCLS.size:0);
   if(SHR_MEMO&&SHR_MEMO.key===key)return SHR_MEMO;
   const by=new Map(),get=no=>{const k=amNum(no);let it=by.get(k);if(!it)by.set(k,it={_id:'sh'+k,itemNo:no,desc:'',div:'',dp:'',dn:'',cn:'',cl:'',sales:null,pct:null,amt:null,rs:new Map(),cc:0,cq:0,hasCode:false,hasSales:false,buyer:''});return it};
   if(SHR.sales)SHR.sales.rows.forEach(r=>{const it=get(r.i);it.hasSales=true;it.itemNo=r.i;it.desc=r.n||it.desc;it.div=r.dv;it.dp=r.dp;it.dn=r.dn;it.cn=r.cn;it.cl=r.cl;it.sales=r.s;it.pct=r.p;it.amt=r.a});
@@ -3766,7 +3831,6 @@ function renderShr(){
   const b=shrBasis,bd=$('#shrBadge'),defB=av.includes('mtd')?'mtd':av[0]||'mtd',heavy=m.items.filter(it=>{const v=shrVal(it,defB);return v!=null&&v>=SHR_BIG}).length;
   bd.hidden=!heavy;bd.textContent=heavy.toLocaleString();bd.classList.toggle('late',heavy>0);
   if($('#t-shr').hidden)return;
-  $('#shrSrc').innerHTML=shrSrcHtml();
   const elig=m.items.filter(it=>shrEligible(it,b)),lossOf=it=>{const v=shrVal(it,b==='pct'?'mtd':b);return v!=null&&v>0?v:0};
   /* FF / DF / NF tiles: money thrown away per group; click = show only that group */
   const byDiv={},nDiv={},gainDiv={};
@@ -3801,7 +3865,7 @@ function renderShr(){
   $('#shrList').innerHTML=shown.map(it=>shrCard(it,b)).join('');stkMark();
   $('#shrEmpty').hidden=rows.length>0;$('#shrEmpty').textContent=m.items.length?'ไม่มีรายการที่ตรงกับตัวกรอง':'ยังไม่มีข้อมูล %Shrink — กด “นำเข้ารายงาน” แล้วลากไฟล์ By Code และไฟล์ยอดขาย + Actual Shrinkage (data (N).xlsx) มาวาง ได้ทั้ง 2 ไฟล์พร้อมกัน';
   $('#shrMoreWrap').hidden=rows.length<=shrLimit;$('#shrMoreTxt').textContent=`แสดง ${shown.length.toLocaleString()} จาก ${rows.length.toLocaleString()} รายการ`;
-  $('#shrXlsx').disabled=!rows.length;
+  $('#shrCsv').disabled=$('#shrXlsx').disabled=$('#shrPdf').disabled=!rows.length;
 }
 /* ----- the page's own controls ----- */
 (()=>{
@@ -3824,23 +3888,27 @@ async function shrExport(){
   const rcs=m.reasons,head=['กลุ่ม','Item No','ชื่อสินค้า','Department','Class','Buyer UID','Buyer','Commercial (ถ้าไม่มี Buyer)','ยอดขาย MTD','Actual Shrinkage MTD','%Actual Shrinkage','ทิ้งตาม By Code (฿)','จำนวนตาม By Code',...rcs.map(rc=>shrRs(rc)+' (฿)')];
   const out=rows.map(it=>{const by=(SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||'';return[it.div,it.itemNo,it.desc,it.dlbl,(it.cn+' '+it.cl).trim(),it.buyer,by,it.coms.map(c=>c.name).join(' / '),it.sales==null?'':it.sales,it.amt==null?'':it.amt,it.pct==null?'':it.pct,it.hasCode?Math.round(it.cc*100)/100:'',it.hasCode?it.cq:'',...rcs.map(rc=>it.rs.has(rc)?Math.round(it.rs.get(rc).c*100)/100:'')]});
   const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([head,...out]);ws['!cols']=[6,10,36,22,26,9,22,26,12,12,10,12,10,...rcs.map(()=>14)].map(w=>({wch:w}));
+  for(let i=2;i<=out.length+1;i++){const c=ws['K'+i];if(c&&c.t==='n')c.z='0.00%'} /* %Actual Shrinkage is a fraction in the report: show it as a percent like the page */
   XLSX.utils.book_append_sheet(wb,ws,'%Shrink');XLSX.writeFile(wb,'Shrink-'+iso(today())+'.xlsx');toast('ดาวน์โหลดรายการ %Shrink แล้ว');
 }
 $('#shrXlsx').onclick=shrExport;
 /* "ส่งออก CSV" on every list page: the same rows as the Excel button (or the OOS+ list), as CSV in the same copy / download window the Item NBS CSV uses */
-async function xlsToCsv(fn,name){
+async function xlsToCsv(fn,name,pdf){
   await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
   const ow=XLSX.writeFile,ot=toast;let cap=null;XLSX.writeFile=w=>{cap=w};toast=()=>{};
   try{await fn()}finally{XLSX.writeFile=ow;toast=ot}
   if(!cap){ot('ไม่มีรายการให้ส่งออก');return}
-  dl(`${name}_${iso(today())}.csv`,'\ufeff'+XLSX.utils.sheet_to_csv(cap.Sheets[cap.SheetNames[0]]),'text/csv;charset=utf-8')}
-$('#shrCsv').onclick=()=>xlsToCsv(shrExport,'shrink');
-function oosCSV(){
-  const rows=oosVisible(oosDivCtx());if(!rows.length){toast('ไม่มีรายการให้ส่งออก');return}
-  const ctx=oosDivCtx(),head=['division','item_no','description','location','stock','status','assignee','buyer_uid','buyer_name','refill_dept','found_at','done_at','short_3d_times','short_3d_days','short_7d_times','short_7d_days','short_all_times','short_all_days','problem_type','dms','stock_day','dms_new','short_qty','loss_baht','reason','note'];
+  dl(`${name}_${iso(today())}.csv`,'\ufeff'+XLSX.utils.sheet_to_csv(cap.Sheets[cap.SheetNames[0]]),'text/csv;charset=utf-8',pdf)}
+$('#shrCsv').onclick=()=>xlsToCsv(shrExport,'shrink',shrPDF);
+$('#shrPdf').onclick=shrPDF;
+function oosSorted(){return oosAll().slice().sort((a,b)=>(a.status==='done')-(b.status==='done')||(a.status==='done'?oosDoneMs(b)-oosDoneMs(a):oosMs(a)-oosMs(b)))}
+function oosTable(whole){
+  const ctx=oosDivCtx(),rows=whole===true?oosSorted():oosVisible(ctx);if(!rows.length)return null;
+  const head=['division','item_no','description','location','stock','status','assignee','buyer_uid','buyer_name','refill_dept','found_at','done_at','short_3d_times','short_3d_days','short_7d_times','short_7d_days','short_all_times','short_all_days','problem_type','dms','stock_day','dms_new','short_qty','loss_baht','reason','note'];
   const out=rows.map(r=>[oosDiv(r,ctx)||'',r.itemNo,r.desc||'',r.loc||'',r.stock??'',(OOS_ST[r.status]||OOS_ST.need)[0],r.assignee||'',r.buyerUid||'',oosBuyerName(r),r.assignDept||'',r.foundAt||'',r.doneAt||'',r.freq3??'',r.days3??'',r.freq7??'',r.days7??'',r.freqAll??'',r.daysAll??'',r.bucket&&OOS_BK[r.bucket]?OOS_BK[r.bucket][0]:'',r.dms??'',r.stockDay??'',r.dmsNew??'',r.shortQty??'',r.lossBaht??'',r.reason||'',r.note||'']);
-  dl(`oos_${iso(today())}.csv`,toCSV([head,...out]),'text/csv;charset=utf-8')}
-$('#oosCsv').onclick=oosCSV;
+  return[head,...out]}
+function oosCSV(whole){const w=whole===true,t=oosTable(w);if(!t){toast('ไม่มีรายการให้ส่งออก');return}dl(`oos_${iso(today())}.csv`,toCSV(t),'text/csv;charset=utf-8',()=>oosPDF(w))}
+$('#oosCsv').onclick=oosCSV;$('#oosPdf').onclick=oosPDF;
 /* ----- import: both files at once or one by one ----- */
 let shrImp=null;
 const SHR_KIND={code:'By Code · แยกตามรหัสเหตุผล',sales:'ยอดขาย + Actual Shrinkage'};
@@ -3880,7 +3948,7 @@ async function runShrImport(){
       SHR.files=SHR.files.filter(f=>!old.includes(f.id));SHR.code=SHR.code.filter(r=>!old.includes(r.f));
       p.rows.forEach(r=>SHR.code.push({...r,f:id}));SHR.files.push({id,name:p.name,kind:'code',at:now,n:p.rows.length,info:p.info})}
     else{SHR.files=SHR.files.filter(f=>f.kind!=='sales');SHR.sales={f:id,rows:p.rows,meta:p.info};SHR.files.push({id,name:p.name,kind:'sales',at:now,n:p.rows.length,info:p.info})}}
-  SHR_REV++;shrTile='';shrDiv='';shrBasis='';
+  SHR_REV++;shrReset();shrBasis='';
   const cnt=shrImp.items.length;shrImp=null;$('#dlgShImp').close();renderShr();toast(`นำเข้า %Shrink แล้ว ${cnt} ไฟล์`);
   shrSave().then(ok=>{if(!ok)toast('นำเข้าแล้ว แต่เบราว์เซอร์ไม่ยอมให้จำข้อมูลไว้ — ปิดหน้าแล้วต้องนำเข้าใหม่')}); /* saved in the background: the page never waits for the disk */
 }
@@ -3895,13 +3963,13 @@ $('#siPick').onclick=()=>$('#siFile').click();$('#siFile').onchange=e=>{const fs
 /* ----- delete an imported file / name the reason codes ----- */
 function renderShrDel(){
   const l=SHR.files;
-  $('#sdList').innerHTML=l.length?l.map(f=>`<div class="imp-file" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="chip ${f.kind==='code'?'s-md2':'s-md1'}">${f.kind==='code'?'By Code':'ยอดขาย'}</span><b style="flex:1;min-width:140px;overflow-wrap:anywhere">${esc(f.name)}</b><span class="muted small">${f.n.toLocaleString()} บรรทัด · ${oosFmt(new Date(f.at).getTime())}</span><button type="button" class="btn sm danger" data-id="${esc(f.id)}">ลบ</button></div>`).join(''):'<p class="muted">ยังไม่มีไฟล์ที่นำเข้า</p>'}
-$('#shrDelFile').onclick=()=>{renderShrDel();$('#dlgShDel').showModal()};
+  $('#sdList').innerHTML=l.length?l.map(f=>`<div class="imp-file sd-row"><span class="chip ${f.kind==='code'?'s-md2':'s-md1'}">${f.kind==='code'?'By Code':'ยอดขาย'}</span><b style="flex:1;min-width:140px;overflow-wrap:anywhere">${esc(f.name)}</b><span class="muted small">${f.n.toLocaleString()} บรรทัด · ${oosFmt(new Date(f.at).getTime())}</span><button type="button" class="btn sm danger" data-id="${esc(f.id)}">ลบ</button>${shrFileDetail(f)?`<span class="muted small" style="flex-basis:100%">${shrFileDetail(f)}</span>`:''}</div>`).join(''):'<p class="muted">ยังไม่มีไฟล์ที่นำเข้า</p>'}
+$('#shrDelFile').onclick=()=>{renderShrDel();$('#dlgShDel').showModal();$('#sdClose').focus()};
 $('#sdClose').onclick=()=>$('#dlgShDel').close();
 $('#sdList').onclick=async e=>{const b=e.target.closest('button[data-id]');if(!b)return;const f=SHR.files.find(x=>x.id===b.dataset.id);if(!f)return;
   if(!await ask(`ลบข้อมูลของไฟล์ “${f.name}” (${f.n.toLocaleString()} บรรทัด)?  ลบเฉพาะในเครื่องนี้`))return;
   SHR.files=SHR.files.filter(x=>x.id!==f.id);if(f.kind==='code')SHR.code=SHR.code.filter(r=>r.f!==f.id);else if(SHR.sales&&SHR.sales.f===f.id)SHR.sales=null;
-  SHR_REV++;shrBasis='';shrSave();renderShrDel();renderShr();toast('ลบข้อมูลของไฟล์นั้นแล้ว')};
+  SHR_REV++;shrBasis='';shrReset();shrSave();renderShrDel();renderShr();toast('ลบข้อมูลของไฟล์นั้นแล้ว')};
 function openShrNames(){
   const m=shrBuild();
   $('#snList').innerHTML=m.reasons.length?m.reasons.map(rc=>{const x=SHR.code.filter(r=>r.r===rc),c=x.reduce((s,r)=>s+r.c,0);return`<label class="sn-row"><span><b>รหัส ${esc(rc)}</b><span class="muted small"> · ${x.length.toLocaleString()} บรรทัด · ${shrBaht(c)}</span></span><input data-rc="${esc(rc)}" value="${esc(SHR.names[rc]!=null?SHR.names[rc]:(SHR_RS0[rc]||''))}" placeholder="ชื่อเหตุผล เช่น ของเสีย / หมดอายุ / นับสต็อก"></label>`}).join(''):'<p class="muted">ยังไม่มีข้อมูล By Code — นำเข้าไฟล์ By Code ก่อน</p>';
@@ -3967,7 +4035,7 @@ function ilParse(wb,fname){
   return null}
 /* ----- per item numbers ----- */
 function ilBuild(p){
-  const key=IL_REV[p]+':'+(st.contacts||[]).length;if(IL_MEMO[p]&&IL_MEMO[p].key===key)return IL_MEMO[p];
+  const key=IL_REV[p]+':'+ctSig();if(IL_MEMO[p]&&IL_MEMO[p].key===key)return IL_MEMO[p];
   const d=ILT[p],buyers=new Map(),items=[];
   if(d){
     const asOf=d.asOf||Date.now(),ad=new Date(asOf),elapsed=Math.max(1,ad.getDate()-1),lmDays=new Date(ad.getFullYear(),ad.getMonth(),0).getDate();
@@ -4072,9 +4140,8 @@ function renderIlt(p){
   const all=m.items.filter(it=>!it.shared&&(showDisc||!ilDisc(it))&&ilElig(it,p));
   const bd=$('#'+p+'Badge');bd.hidden=!all.length;bd.textContent=all.length.toLocaleString();bd.classList.toggle('late',all.length>0);
   if($('#t-'+p).hidden)return;
-  $('#'+p+'Src').innerHTML=ilSrc(p);
   const hide=$('#'+p+'Hide').checked,pool=m.items.filter(it=>ilElig(it,p)&&!(hide&&it.shared)&&(showDisc||!ilDisc(it))),sub=pool.filter(it=>!S.div||it.div===S.div);
-  const w=it=>p==='neg'?it.val:it.hi.exVal;
+  const w=it=>it.shared?0:(p==='neg'?it.val:it.hi.exVal);
   /* FF / DF / NF */
   const byDiv={},nDiv={};
   pool.forEach(it=>{const d=it.div||'-';byDiv[d]=(byDiv[d]||0)+w(it);nDiv[d]=(nDiv[d]||0)+1});
@@ -4083,9 +4150,9 @@ function renderIlt(p){
   $('#'+p+'DivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(nDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
   /* summary tiles */
   let tl;
-  if(p==='neg'){const tot=sub.reduce((s,it)=>s+it.val,0),units=sub.reduce((s,it)=>s-it.a,0),sold=sub.filter(it=>it.r.cm>0).length,big=sub.filter(it=>it.val>=SHR_BIG).length,idle=sub.filter(it=>it.r.a28===0&&it.r.cm===0).length;
+  if(p==='neg'){const tot=sub.reduce((s,it)=>s+w(it),0),units=sub.reduce((s,it)=>s-(it.shared?0:it.a),0),sold=sub.filter(it=>it.r.cm>0).length,big=sub.filter(it=>!it.shared&&it.val>=SHR_BIG).length,idle=sub.filter(it=>it.r.a28===0&&it.r.cm===0).length;
     tl=[['all','ยอดรวมที่เสียเงิน','pull',ilMoney('neg',tot),`${sub.length.toLocaleString()} รายการ · ปรับ +${ilN(units,100)} หน่วย`],['sold','ยังขายอยู่เดือนนี้','md2',sold.toLocaleString(),'รายการ'],['big','ติดลบเกิน '+shrBaht(SHR_BIG),'soon',big.toLocaleString(),'รายการ'],['idle','ติดลบแต่ไม่มียอดขาย','md1',idle.toLocaleString(),'มักเป็นสต็อกผิด — นับแล้วปรับ']]}
-  else{const tot=sub.reduce((s,it)=>s+it.hi.exVal,0),dead=sub.filter(it=>it.hi.dead),cut=sub.filter(it=>it.hi.tier!=='watch').length,ord=sub.filter(it=>it.r.oo>0||it.r.it>0).length;
+  else{const tot=sub.reduce((s,it)=>s+w(it),0),dead=sub.filter(it=>it.hi.dead&&!it.shared),cut=sub.filter(it=>it.hi.tier!=='watch').length,ord=sub.filter(it=>it.r.oo>0||it.r.it>0).length;
     tl=[['all','Stock ส่วนเกินรวม','pull',shrBk(tot),`${sub.length.toLocaleString()} รายการ · เกิน ${IL_T} วัน`],['dead','ไม่มียอดขายเลย','md2',dead.length.toLocaleString(),'มูลค่า Stock '+shrBk(dead.reduce((s,it)=>s+it.hi.stockVal,0))],['cut','ควรลดราคา (15% / 30%)','md1',cut.toLocaleString(),`พอขายเกิน ${2*IL_T} วัน`],['ord','มีของสั่ง / ระหว่างส่งอยู่','soon',ord.toLocaleString(),'ควรชะลอสั่ง']]}
   $('#'+p+'Tiles').innerHTML=tl.map(([k,l,c,n,s])=>`<button type="button" class="tile${S.tile===k?' sel':''}" data-t="${k}"><span class="chip s-${c}">${l}</span><b>${n}</b><span class="muted small">${s}</span></button>`).join('');
   /* chips + selects */
@@ -4102,15 +4169,14 @@ function renderIlt(p){
   $('#'+p+'List').innerHTML=shown.map(it=>ilCard(p,it)).join('');stkMark();
   $('#'+p+'Empty').hidden=rows.length>0;$('#'+p+'Empty').textContent=m.items.length?'ไม่มีรายการที่ตรงกับตัวกรอง':D.empty;
   $('#'+p+'MoreWrap').hidden=rows.length<=S.limit;$('#'+p+'MoreTxt').textContent=`แสดง ${shown.length.toLocaleString()} จาก ${rows.length.toLocaleString()} รายการ`;
-  $('#'+p+'Xlsx').disabled=!rows.length;
+  $('#'+p+'Csv').disabled=$('#'+p+'Xlsx').disabled=$('#'+p+'Pdf').disabled=!rows.length;
 }
 /* ----- the two pages are built here (same markup as OOS+), so both stay identical ----- */
 function ilSectionHtml(p){
   const D=IL_DEFS[p];
   return`<section id="t-${p}" hidden><div class="card">
     <div class="add-head"><h2>${D.title} <span class="muted small" style="font-weight:400">${D.sub}</span></h2>
-      <span class="row w"><button type="button" class="btn danger" id="${p}DelFile" title="ลบข้อมูลที่นำเข้า (เฉพาะในเครื่องนี้)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn" id="${p}Csv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV">ส่งออก CSV</button><button type="button" class="btn" id="${p}Xlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">ดาวน์โหลด Excel</button><button type="button" class="btn imp-btn" id="${p}Import"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span></div>
-    <p class="muted small shr-src" id="${p}Src"></p>
+      <span class="row w"><button type="button" class="btn danger" id="${p}DelFile" title="ลบข้อมูลที่นำเข้า (เฉพาะในเครื่องนี้)">ลบไฟล์ที่นำเข้า</button><button type="button" class="btn imp-btn" id="${p}Import"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>นำเข้ารายงาน</button></span><div class="exp no-print" role="group" aria-label="ส่งออก"><span class="exp-l">ส่งออก</span><button type="button" class="btn" id="${p}Csv" title="ส่งออกรายการที่แสดงอยู่เป็น CSV (คัดลอก / ดาวน์โหลด)">CSV</button><button type="button" class="btn" id="${p}Xlsx" title="ดาวน์โหลดรายการที่แสดงอยู่เป็น Excel">Excel</button><button type="button" class="btn" id="${p}Pdf" title="ส่งออกรายการที่แสดงอยู่เป็น PDF (พิมพ์ / ส่งต่อ)">PDF</button></div></div>
     <div class="tiles" id="${p}DivTiles" style="margin:12px 0 0"></div><div class="tiles" id="${p}Tiles" style="margin:12px 0"></div><div class="oos-dchips" id="${p}DeptTiles"></div>
     <div class="fbar f6"><label class="f-q">ค้นหา<input id="${p}Q" placeholder="รหัส / ชื่อสินค้า / Class / แผนก / Buyer / Supplier"></label>
       <label>${D.fa}<select id="${p}FA"><option value="">ทั้งหมด</option></select></label><label>${D.fb}<select id="${p}FB"><option value="">ทั้งหมด</option></select></label>
@@ -4124,7 +4190,11 @@ const ilDlgHtml=`<dialog id="dlgIlImp" class="nbs-dlg imp-dlg"><div><h2 id="ilTi
   <p class="muted small" style="margin:0 0 10px">ลากไฟล์ <b>ItemList_Layout</b> (Excel .xlsx / .xls หรือ CSV) มาวาง ระบบอ่านคอลัมน์ Item No · ASOH · Avg Sale 28 Days · Last Month Sold Qty · Curr Month Sold Qty · Stock Day · Buyer · Dept No. · Class ฯลฯ — <b>ASOH คือ Stock</b> (ค่าที่มี ~ นำหน้า = สินค้าลดราคาที่ใช้สต็อกร่วมกับสินค้าปกติ ไม่นับซ้ำ) · ไฟล์ใหม่แทนที่ไฟล์เดิมของหน้านี้ · ข้อมูลเก็บในเครื่องนี้ ไม่ส่งขึ้นฐานข้อมูลทีม</p>
   <div id="ilDrop" class="imp-drop" tabindex="0"><svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><b>ลากไฟล์มาวางที่นี่</b><span class="muted small">หรือ</span><button type="button" class="btn pri" id="ilPick">เลือกไฟล์จากเครื่อง</button><input type="file" id="ilFile" accept=".xlsx,.xls,.xlsm,.csv" hidden></div>
   <div id="ilBox"></div><p class="err-text" id="ilErr" style="margin:8px 0 0"></p>
-  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="ilCancel">ปิด</button><button type="button" class="btn pri save-btn" id="ilGo" disabled>นำเข้า</button></div></div></dialog>`;
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="ilCancel">ปิด</button><button type="button" class="btn pri save-btn" id="ilGo" disabled>นำเข้า</button></div></div></dialog>
+<dialog id="dlgIlDel" class="nbs-dlg imp-dlg"><div><h2 id="idTitle">ลบไฟล์ที่นำเข้า</h2>
+  <p class="muted small" style="margin:0 0 10px">ลบข้อมูลของไฟล์ที่นำเข้าผิด หรือผิดช่วงวัน (ลบเฉพาะในเครื่องนี้ ไม่กระทบทีม)</p>
+  <div id="idList" style="display:grid;gap:8px"></div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="idClose">ปิด</button></div></div></dialog>`;
 let ilImp=null,ilTabNow='neg';
 async function ilReadFile(f){
   $('#ilErr').textContent='';$('#ilBox').innerHTML='<p class="muted">กำลังอ่านไฟล์…</p>';
@@ -4143,7 +4213,7 @@ function ilPreview(){
 function openIlImport(p){ilTabNow=p;ilImp=null;$('#ilTitle').textContent='นำเข้ารายงาน '+IL_DEFS[p].title;$('#ilBox').innerHTML='';$('#ilDrop').hidden=false;$('#ilGo').disabled=true;$('#ilErr').textContent='';$('#ilFile').value='';$('#dlgIlImp').showModal()}
 function runIlImport(){
   if(!ilImp)return;const p=ilTabNow;ILT[p]={name:ilImp.name,at:new Date().toISOString(),asOf:ilImp.info.asOf,store:ilImp.info.store,info:ilImp.info,rows:ilImp.rows};
-  IL_REV[p]++;Object.assign(IL_ST[p],{div:'',tile:'',limit:60});const n=ilImp.rows.length;ilImp=null;$('#dlgIlImp').close();renderIlt(p);toast(`นำเข้า ${IL_DEFS[p].title} แล้ว ${n.toLocaleString()} รายการ`);
+  IL_REV[p]++;ilReset(p);const n=ilImp.rows.length;ilImp=null;$('#dlgIlImp').close();renderIlt(p);toast(`นำเข้า ${IL_DEFS[p].title} แล้ว ${n.toLocaleString()} รายการ`);
   ilSave(p).then(ok=>{if(!ok)toast('นำเข้าแล้ว แต่เบราว์เซอร์ไม่ยอมให้จำข้อมูลไว้ — ปิดหน้าแล้วต้องนำเข้าใหม่')})}
 async function ilExport(p){
   const m=ilBuild(p);if(p==='dms')ilSetHi(m);const rows=ilVisible(p,m);if(!rows.length)return;await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
@@ -4176,11 +4246,11 @@ function ilInit(){
       const bk=e.target.closest('.oc-back');if(bk){S.drill=false;$('#'+p+'Q').value='';re();$('#'+p+'Chart').scrollIntoView({block:'nearest',behavior:'smooth'});return}
       const bar=e.target.closest('.oc-r');if(bar){S.drill=true;$('#'+p+'Q').value=bar.dataset.no;re();$('#'+p+'List').scrollIntoView({block:'nearest',behavior:'smooth'})}});
     $('#'+p+'More').onclick=()=>{S.limit+=60;renderIlt(p)};
-    $('#'+p+'Import').onclick=()=>openIlImport(p);$('#'+p+'Xlsx').onclick=()=>ilExport(p);$('#'+p+'Csv').onclick=()=>xlsToCsv(()=>ilExport(p),IL_DEFS[p].title.replace(/ /g,''));
-    $('#'+p+'DelFile').onclick=async()=>{if(!ILT[p]){toast('ยังไม่มีไฟล์ที่นำเข้า');return}if(!await ask(`ลบข้อมูลของไฟล์ “${ILT[p].name}” ออกจาก ${IL_DEFS[p].title}?  ลบเฉพาะในเครื่องนี้`))return;ILT[p]=null;IL_REV[p]++;ilSave(p);renderIlt(p);toast('ลบข้อมูลแล้ว')};
+    $('#'+p+'Import').onclick=()=>openIlImport(p);$('#'+p+'Xlsx').onclick=()=>ilExport(p);$('#'+p+'Csv').onclick=()=>xlsToCsv(()=>ilExport(p),IL_DEFS[p].title.replace(/ /g,''),()=>ilPDF(p));$('#'+p+'Pdf').onclick=()=>ilPDF(p);
+    $('#'+p+'DelFile').onclick=()=>openIlDel(p);
     pinCompact($('#'+p+'DivTiles'));
   }
-  $('#ilCancel').onclick=()=>$('#dlgIlImp').close();$('#ilGo').onclick=runIlImport;$('#ilPick').onclick=()=>$('#ilFile').click();$('#ilFile').onchange=e=>{const f=e.target.files[0];if(f)ilReadFile(f)};
+  $('#ilCancel').onclick=()=>$('#dlgIlImp').close();$('#idClose').onclick=()=>$('#dlgIlDel').close();$('#idList').onclick=ilDelClick;$('#ilGo').onclick=runIlImport;$('#ilPick').onclick=()=>$('#ilFile').click();$('#ilFile').onchange=e=>{const f=e.target.files[0];if(f)ilReadFile(f)};
   const d=$('#ilDrop');['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
   $('#dlgIlImp').addEventListener('dragover',e=>e.preventDefault());$('#dlgIlImp').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)ilReadFile(f)});
   ilLoad().then(()=>{['neg','dms'].forEach(p=>{if(ILT[p])(window.requestIdleCallback?requestIdleCallback(()=>renderIlt(p),{timeout:3000}):setTimeout(()=>renderIlt(p),900))})});
@@ -4209,7 +4279,7 @@ function dl(name,text,type,pdf){
   $('#outDl').onclick=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.append(a);a.click();a.remove()}catch(e){toast('ดาวน์โหลดไม่ได้ — ใช้ปุ่มคัดลอกแทน')}};
   $('#dlgOut').showModal();
 }
-const csvCell=v=>{v=String(v??'');return/[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
+const csvCell=v=>{const num=typeof v==='number';v=String(v??'');if(!num&&/^[=@\t\r]|^[+\-][A-Za-z(@=]/.test(v))v="'"+v;return/[",\r\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v}; /* a leading = + - @ would be read as a formula by Excel: prefix ' */
 const toCSV=rows=>'﻿'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');
 function parseCSV(t){t=t.replace(/^﻿/,'');const rows=[];let r=[],c='',q=false;
   for(let i=0;i<t.length;i++){const ch=t[i];
@@ -4217,11 +4287,13 @@ function parseCSV(t){t=t.replace(/^﻿/,'');const rows=[];let r=[],c='',q=false;
     else if(ch==='"')q=true;else if(ch===','){r.push(c);c=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);rows.push(r);r=[];c=''}else c+=ch}
   if(c||r.length){r.push(c);rows.push(r)}
   const h=rows.shift()?.map(x=>x.trim().toLowerCase())||[];return rows.filter(r=>r.some(x=>x.trim())).map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]??'').trim()])))}
-function exportBatchesCSV(){
+function lotsTable(whole){
   const rows=[['status','sku','description','origin','julian_receive','receive_date','day_on_shelf','shelf_life','code52_day','code52_date','days_to_code52','action','qty','location','buyer_uid','buyer_name','commercial_uid','commercial_name','done','note','remark']];
-  st.batches.forEach(b=>{const e=evalBatch(b),p=e.p||{};rows.push([e.label,p.sku||'',p.desc||b.sku,ORIGINS[p.origin]||'',e.prod?jul(e.prod).ddd:'',b.prod,e.day,p.shelf,p.pullDay,e.c52?iso(e.c52):'',e.left,e.action,b.qty,b.loc,p.buyerUid,e.buyer?.name,p.comUid,e.com?.name,b.ack===e.st?'Y':'',b.note,b.remark||''])});
-  dl(`shelf-life_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8',batchesPDF)}
-function downloadTemplate(){dl('products_template.csv',toCSV([['sku','description','origin','temp','shelf_life','step1_day','step1_pct','step2_day','step2_pct','code52_day','buyer_uid','commercial_uid'],['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']]),'text/csv;charset=utf-8',templatePDF)}
+  dashList(dashRows(),whole===true).forEach(({b,e})=>{const p=e.p||{};rows.push([e.label,p.sku||'',p.desc||b.sku,ORIGINS[p.origin]||'',e.prod?jul(e.prod).ddd:'',b.prod,e.day,p.shelf,p.pullDay,e.c52?iso(e.c52):'',e.left,e.action,b.qty,b.loc,p.buyerUid,e.buyer?.name,p.comUid,e.com?.name,b.ack===e.st?'Y':'',b.note,b.remark||''])});
+  return rows}
+function exportBatchesCSV(arg){const w=arg===true;if(!dashList(dashRows(),w).length){toast('ไม่มีรายการให้ส่งออก');return}dl(`shelf-life_${iso(today())}.csv`,toCSV(lotsTable(w)),'text/csv;charset=utf-8',()=>batchesPDF(w))}
+const PROD_TPL_ROWS=[['sku','description','origin','temp','shelf_life','step1_day','step1_pct','step2_day','step2_pct','code52_day','buyer_uid','commercial_uid'],['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']];
+function downloadTemplate(){dl('products_template.csv',toCSV(PROD_TPL_ROWS),'text/csv;charset=utf-8',templatePDF)}
 const ORIG_IN=v=>{v=String(v||'').trim().toLowerCase();return/import|นำเข้า/.test(v)?'import':/local|ท้องถิ่น|ไทย/.test(v)?'local':'other'};
 const plain=()=>{const o={};COLS.forEach(c=>o[c]=st[c].map(body));return o};
 function exportJSON(){dl(`shelf-life-backup_${iso(today())}.json`,JSON.stringify(plain(),null,1),'application/json')}
@@ -4325,18 +4397,18 @@ function nbsAgingText(r){
     +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> → <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">≈ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>');
 }
 /* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
-function nbsFiltered(){
+function nbsFiltered(whole){
   const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value;
-  return rows.filter(r=>(!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
-    &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q)))
+  return rows.filter(r=>whole===true||((!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
+    &&(!q||[r.itemNo,r.desc,r.buyerUid,r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q))))
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
 const PDF_CHIP={ok:['#e4f3ea','#1f7a45'],md1:['#fff3a6','#6b5800'],md2:['#ffdcb8','#9a4300'],pull:['#c62828','#fff'],obs:['#7f1d1d','#fff'],full:['#111','#fff']};
 /* Division colours: FF green, DF blue, NF purple (same as the on-screen chips; printed with hard colours because the PDF page has no CSS variables) */
 const PDF_DIV={FF:['#e4f3ea','#1f7a45'],DF:['#e2ecf7','#0b5cad'],NF:['#efe7fd','#6d28d9']};
 const pdfDivChip=(d,t)=>{const c=PDF_DIV[d]||['#eef0f3','#475467'];return`<span class="dv" style="background:${c[0]};color:${c[1]}">${esc(t||d)}</span>`};
-function nbsPDFHtml(photos=true){
-  const all=nbsFiltered(),total=(st.nbs||[]).length,now=new Date(),cnt={},lvc=[0,0,0,0,0,0];all.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1;const l=agingInfo(r).level;if(l!=null)lvc[l]++});
+function nbsPDFHtml(photos=true,whole=false){
+  const all=nbsFiltered(whole),total=(st.nbs||[]).length,now=new Date(),cnt={},lvc=[0,0,0,0,0,0];all.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1;const l=agingInfo(r).level;if(l!=null)lvc[l]++});
   const P2={...PDF_CHIP,soon:['#fff2d6','#8a5a00'],err:['#ece6fb','#5b3fa8']};
   const chip=(t,k)=>{const c=P2[k]||P2.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
   /* the same fields the on-screen Buyer card shows */
@@ -4384,33 +4456,33 @@ function printDoc(html){
   f.srcdoc=html;setTimeout(()=>f.remove(),180000);
   toast('เลือก “บันทึกเป็น PDF” (Save as PDF) ที่ปลายทางในหน้าต่างพิมพ์');
 }
-async function nbsPDF(){
-  const n=nbsFiltered().length;
+async function nbsPDF(arg){
+  const whole=arg===true,n=nbsFiltered(whole).length;
   if(!n){toast('ไม่มีรายการให้ส่งออก');return}
   /* the photos come from Makro Finder's image list: make sure it is loaded before building the page */
   if(MF.state==='idle'&&onMakroSite()){toast('กำลังโหลดรูปสินค้า…');await loadMakroData();for(let i=0;i<120&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250))}
   /* every photo is 30-110 KB inside the PDF: up to 300 rows go in automatically, more is the user's call */
   const photos=n<=300||await ask(`ส่งออก ${n.toLocaleString()} รายการ — ใส่รูปสินค้าไหม? รูปทำให้ไฟล์ PDF ใหญ่และโหลดนาน (แนะนำกรองให้เหลือไม่เกิน 300 รายการ) · ตกลง = ใส่รูป · ยกเลิก = ไม่ใส่รูป`);
-  printDoc(nbsPDFHtml(photos));
+  printDoc(nbsPDFHtml(photos,whole));
 }
 /* one A4 page layout for the other PDFs (same look as the Item NBS one) */
 const PDF_CHIP2={...PDF_CHIP,soon:['#fff2d6','#8a5a00'],err:['#ece6fb','#5b3fa8']};
-function pdfPage({title,sub,sum,cols,rows,foot,landscape=true}){
+function pdfPage({title,sub,sum,cols,rows,foot,landscape=true,fs=9.5}){
   return`<!doctype html><html lang="th"><head><meta charset="utf-8"><title>${esc(title)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>@page{size:A4 ${landscape?'landscape':'portrait'};margin:9mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-body{margin:0;font:9.5px/1.35 Sarabun,"Segoe UI",Tahoma,sans-serif;color:#1d2433}
+body{margin:0;font:${fs}px/1.35 Sarabun,"Segoe UI",Tahoma,sans-serif;color:#1d2433}
 h1{font-size:18px;margin:0 0 2px;color:#9f1d1d}.sub{color:#667085;font-size:10px;margin:0 0 6px}
 .sum{display:flex;gap:6px;margin:0 0 8px;flex-wrap:wrap}.sum span{border:1px solid #f5c2c0;background:#fdecec;color:#7a1d1d;border-radius:99px;padding:1px 9px;font-weight:700}
-table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#fdecec;color:#7a1d1d;text-align:left;padding:5px 5px;border-bottom:2px solid #e8a3a0;font-size:9.5px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#fdecec;color:#7a1d1d;text-align:left;padding:5px 5px;border-bottom:2px solid #e8a3a0;font-size:${fs}px}
 td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-wrap:anywhere}thead{display:table-header-group}tr{page-break-inside:avoid}tbody tr:nth-child(even) td{background:#fdf8f8}
-.m{color:#667085;font-size:8.5px}.num{white-space:nowrap}.ctr{text-align:center}.ov{color:#b42318}.c{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px}
-.blank td{height:22px}.note{margin:10px 0 0;color:#475467;font-size:9.5px;line-height:1.6}.note b{color:#7a1d1d}</style></head><body>
+.m{color:#667085;font-size:${Math.max(6.5,fs-1)}px}.num{white-space:nowrap}.ctr{text-align:center}.ov{color:#b42318}.c{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px}
+.dv{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px;white-space:nowrap}.blank td{height:22px}.note{margin:10px 0 0;color:#475467;font-size:9.5px;line-height:1.6}.note b{color:#7a1d1d}</style></head><body>
 <h1>${esc(title)}</h1><p class="sub">${sub}</p>${sum?`<div class="sum">${sum}</div>`:''}
 <table><colgroup>${cols.map(c=>`<col style="width:${c[1]}%">`).join('')}</colgroup><thead><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>${foot||''}</body></html>`;
 }
-function batchesPDFHtml(){
-  const now=new Date(),list=st.batches.map(b=>({b,e:evalBatch(b)})).sort((a,b)=>(a.b.ack===a.e.st)-(b.b.ack===b.e.st)||a.e.rank-b.e.rank||(a.e.left??0)-(b.e.left??0));
+function batchesPDFHtml(whole){
+  const now=new Date(),list=dashList(dashRows(),whole===true);
   const cnt={},chip=(t,k)=>{const c=PDF_CHIP2[k]||PDF_CHIP2.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
   list.forEach(({b,e})=>{if(b.ack!==e.st)cnt[e.label]=(cnt[e.label]||0)+1});
   const rows=list.map(({b,e})=>{const p=e.p,done=b.ack===e.st,ii=itemInfo(b);
@@ -4424,11 +4496,11 @@ function batchesPDFHtml(){
 <td><div class="m">Buyer</div>${esc(p.buyerUid||'-')}${e.buyer?' '+esc(e.buyer.name):''}<div class="m">Commercial</div>${esc(p.comUid||'-')}${e.com?' '+esc(e.com.name):''}</td>
 <td class="num">${esc(b.qty??'')}</td><td>${esc(b.loc||'-')}</td><td>${esc(b.remark||'')}</td></tr>`}).join('');
   return pdfPage({title:'Shelf-Life Monitor · ล็อตและสถานะวันนี้',
-    sub:`Julian วันนี้ ${jul(today()).ddd} (YYDDD ${jul(today()).y2}) · พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · ทั้งหมด ${list.length.toLocaleString()} ล็อต`,
+    sub:`Julian วันนี้ ${jul(today()).ddd} (YYDDD ${jul(today()).y2}) · พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · ${whole===true?'ทั้งหมด':'ที่แสดง'} ${list.length.toLocaleString()} ล็อต`,
     sum:Object.entries(cnt).map(([k,v])=>`<span>${esc(k)} ${v.toLocaleString()}</span>`).join(''),
     cols:[['สถานะ',8],['สินค้า',20],['Julian รับ',8],['วางขาย',8],['Code 52',10],['ต้องทำ',17],['ติดต่อ',13],['จำนวน',5],['ที่ตั้ง',6],['Remark',5]],rows});
 }
-function batchesPDF(){if(!st.batches.length){toast('ยังไม่มีล็อตให้ส่งออก');return}printDoc(batchesPDFHtml())}
+function batchesPDF(arg){const w=arg===true;if(!st.batches.length){toast('ยังไม่มีล็อตให้ส่งออก');return}if(!dashList(dashRows(),w).length){toast('ไม่มีรายการให้ส่งออก');return}printDoc(batchesPDFHtml(w))}
 const TPL_COLS=[['sku','รหัสสินค้า (ถ้ามี)'],['description','ชื่อสินค้า'],['origin','ประเภท: import / local / other'],['temp','อุณหภูมิจัดเรียง'],['shelf_life','Shelf life (วัน)'],['step1_day','ลด Step 1 เริ่มวันที่'],['step1_pct','Step 1 ลด %'],['step2_day','ลด Step 2 เริ่มวันที่'],['step2_pct','Step 2 ลด %'],['code52_day','Code 52 วันที่'],['buyer_uid','Buyer UID'],['commercial_uid','Commercial UID']];
 function templatePDFHtml(){
   const ex=[['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']];
@@ -4438,6 +4510,271 @@ function templatePDFHtml(){
     foot:`<p class="note"><b>วิธีกรอก:</b> ถ้าเว้นวันลดราคาและ Code 52 ว่าง ระบบคำนวณให้ตามคู่มือ Makro จาก Shelf life และประเภท · วันที่ 1 = วันรับสินค้า · ถ้า SKU หรือชื่อสินค้าซ้ำกับที่มีอยู่ ระบบอัปเดตรายการเดิม · ช่องที่เว้นว่างจะไม่ทับข้อมูลเดิม</p>`});
 }
 function templatePDF(){printDoc(templatePDFHtml())}
+/* ---- shared bits of every PDF export (each list page builds its rows with pdfPage + printDoc, same look as the Item NBS PDF) ---- */
+const PDF_MAX=1500;
+const pdfStamp=()=>{const n=new Date();return`พิมพ์เมื่อ ${fmt(n)} ${String(n.getHours()).padStart(2,'0')}.${String(n.getMinutes()).padStart(2,'0')} น.`};
+/* how many rows go into a PDF: everything up to PDF_MAX; above that the user chooses (all = slow, big file) */
+async function pdfLimit(n){return n<=PDF_MAX?n:(await ask(`ส่งออก ${n.toLocaleString()} รายการเป็น PDF — ไฟล์ใหญ่และใช้เวลานาน · ตกลง = ทั้งหมด · ยกเลิก = ${PDF_MAX.toLocaleString()} อันดับแรก (เรียงตามที่เห็นบนจอ)`))?n:PDF_MAX}
+const pdfChip=(t,k)=>{const c=PDF_CHIP2[k]||PDF_CHIP2.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
+/* ---------- a PDF for every list / export of the app: OOS+, %Shrink, Negative Stock, High Stock to DMS, Buyer / Commercial, the DMS table of an OOS import, products & rules ---------- */
+const pdfDmy=ms=>{if(ms==null||isNaN(ms))return'';const d=new Date(ms);return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()};
+const pdfSel=id=>{const e=$(id);return e&&e.value&&e.selectedOptions[0]?e.selectedOptions[0].textContent.trim():''};
+const pdfFlt=a=>{const t=a.filter(x=>x[1]!==''&&x[1]!=null&&x[1]!==false).map(x=>esc(x[0])+' '+esc(x[1]));return t.length?'ตัวกรอง: '+t.join(' · '):'ทุกรายการ (ไม่ได้กรอง)'};
+const pdfPct=v=>v==null||v===''||!isFinite(v)?'-':shrPct(v);
+const pdfBaht=v=>v==null||v===''||!isFinite(v)?'-':shrBaht(v);
+const pdfNum=(v,d)=>v==null||v===''||isNaN(v)?'':(+v).toLocaleString(undefined,{maximumFractionDigits:d==null?2:d});
+/* ----- OOS+ ----- */
+function oosPDFHtml(rows,total,whole){
+  const ctx=oosDivCtx(),cnt={need:0,doing:0,done:0,late:0},dv={FF:0,DF:0,NF:0};
+  rows.forEach(r=>{cnt[r.status]=(cnt[r.status]||0)+1;if(oosLevel(r)==='late')cnt.late++;const d=oosDiv(r,ctx);if(d in dv)dv[d]++});
+  const tileTxt={need:'ต้องเติม',doing:'กำลังเติม',late:'ค้างเกิน '+OOS_LATE_H+' ชม.',done:'เติมแล้ววันนี้'};
+  const body=rows.map(r=>{
+    const d=oosDiv(r,ctx),s=OOS_ST[r.status]||OOS_ST.need,lv=oosLevel(r),bk=r.bucket&&OOS_BK[r.bucket]||null,by=oosBuyerName(r),
+      age=r.status==='done'?'ใช้เวลา '+oosDur(((r.doneAt?new Date(r.doneAt).getTime():Date.now())-oosMs(r))/36e5):'ค้าง '+oosDur(oosHours(r)),
+      dms=oosNum(r.dms),dn=oosNum(r.dmsNew),sd=oosNum(r.stockDay),sq=oosNum(r.shortQty),ls=oosNum(r.lossBaht),
+      fq=r.freqAll==null?'':OOS_PERIODS.map(([,l,tk,dk])=>`<div class="m">${l} <b>${(oosNum(r[tk])||0).toLocaleString()}</b> ครั้ง · ${(oosNum(r[dk])||0).toLocaleString()} วัน</div>`).join(''),
+      dmsTxt=dms!=null&&dms>0?oosFmtN(dms)+(dn!=null&&dn!==dms?` → <b>${oosFmtN(dn)}</b>`:''):dn!=null?`ชั่วคราว <b>${oosFmtN(dn)}</b>`:dms!=null?oosFmtN(dms)+' <span class="m">(ใช้ไม่ได้)</span>':'-',
+      extra=[sq!=null?`ขาด ${oosFmtN(sq)} ${esc(r.shortUnit||'หน่วย')}`:'',ls?'฿'+ls.toLocaleString():'',r.chronicDays>=3?`ขาดซ้ำ ${r.chronicDays} วันในเดือน`:''].filter(Boolean).join(' · ');
+    return`<tr><td>${d?pdfDivChip(d):''}<div style="margin-top:3px">${pdfChip(s[0],s[1])}</div></td>
+<td><b>${esc(r.desc||'—')}</b><div class="m">Item ${esc(r.itemNo||'-')}${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''} · ${esc(r.loc||'ไม่ระบุตำแหน่ง')}</div>${extra?`<div class="m">${extra}</div>`:''}${r.reason?`<div class="m">สาเหตุ: ${esc(r.reason)}</div>`:''}${r.note?`<div class="m">${esc(r.note)}</div>`:''}</td>
+<td>${bk?pdfChip(bk[0],bk[2])+`<div class="m">${esc(bk[1])}</div>`:'<span class="m">—</span>'}</td>
+<td>${pdfChip(age,r.status==='done'?'ok':lv==='late'?'pull':lv==='warn'?'md2':'ok')}<div class="m">ตรวจพบ ${esc(oosFmt(oosMs(r)))}</div></td>
+<td>${esc(r.assignee||'ยังไม่มีผู้เติม')}${r.assignDept?`<div class="m">${esc(r.assignDept)}</div>`:''}</td>
+<td>${by||r.buyerUid?esc(by||r.buyerUid):'-'}${by&&r.buyerUid?`<div class="m">${esc(r.buyerUid)}</div>`:''}</td>
+<td>${fq||'<span class="m">—</span>'}</td>
+<td class="num">${dmsTxt}${sd!=null?`<div class="m">Stock Day ${oosFmtN(sd)}</div>`:''}</td></tr>`}).join('');
+  const flt=whole===true?'ทุกรายการ (ไม่ได้กรอง)':pdfFlt([['กลุ่ม',oosDivFilter==='-'?'ไม่ระบุกลุ่ม':oosDivFilter],['กล่องสรุป',tileTxt[oosTile]||''],['สถานะ',pdfSel('#oosFSt')],['ประเภทปัญหา',pdfSel('#oosFBk')],['แผนกที่เติม',pdfSel('#oosFDept')],['ผู้เติม',pdfSel('#oosFWho')],['ค้นหา',$('#oosQ').value.trim()]]);
+  return pdfPage({title:'OOS+ · สินค้าหมดชั้น / หมดสต็อก',
+    sub:`${flt}${whole!==true&&!$('#oosHide').checked&&!oosTile&&!$('#oosFSt').value?' · รวมที่เติมแล้ว':''} · ${pdfStamp()} · ${rows.length.toLocaleString()}${rows.length<total?' จาก '+total.toLocaleString():''} รายการ`,
+    sum:`<span>ต้องเติม ${(cnt.need||0).toLocaleString()}</span><span>กำลังเติม ${(cnt.doing||0).toLocaleString()}</span><span>เติมแล้ว ${(cnt.done||0).toLocaleString()}</span><span>ค้างเกิน ${OOS_LATE_H} ชม. ${cnt.late.toLocaleString()}</span>`+Object.entries(dv).map(([k,v])=>`<span>${k} ${v.toLocaleString()}</span>`).join(''),
+    cols:[['กลุ่ม / สถานะ',8],['สินค้า',25],['ประเภทปัญหา / ต้องทำ',17],['ค้างนาน',10],['ผู้เติม / แผนก',12],['Buyer',11],['ความถี่ที่ขาด',11],['DMS',6]],rows:body});
+}
+async function oosPDF(arg){
+  const whole=arg===true,rows=whole?oosSorted():oosVisible(oosDivCtx());
+  if(!rows.length){toast('ไม่มีรายการให้ส่งออก');return}
+  const n=await pdfLimit(rows.length);
+  printDoc(oosPDFHtml(rows.slice(0,n),rows.length,whole));
+}
+/* ----- %Shrink ----- */
+function shrPDFHtml(rows,total,b){
+  const m=shrBuild(),lossOf=it=>{const v=shrVal(it,b==='pct'?'mtd':b);return v!=null&&v>0?v:0},dvT={FF:0,DF:0,NF:0},buyers=(SHR_MEMO&&SHR_MEMO.buyers)||new Map();let gross=0,nLoss=0;
+  rows.forEach(it=>{const l=lossOf(it);gross+=l;if(l>0)nLoss++;if(it.div in dvT)dvT[it.div]+=l});
+  const dvA={},dvS={};m.items.forEach(it=>{if(!it.hasSales)return;const d=it.div||'-';if(it.sales!=null)dvS[d]=(dvS[d]||0)+it.sales;if(it.amt!=null)dvA[d]=(dvA[d]||0)+it.amt});
+  const LV={late:['ทิ้งหนัก','pull'],warn:['ทิ้งปานกลาง','md2'],ok:['ทิ้งเล็กน้อย','ok'],done:['ไม่ได้ทิ้ง','ok']};
+  const body=rows.map(it=>{
+    const L=LV[shrLevel(it,b)]||LV.ok,r=shrRate(it),by=it.buyer?(buyers.get(it.buyer)||''):'',rs=[...it.rs.entries()].sort((a,c)=>a[1].c-c[1].c),
+      who=it.buyer?esc(by||it.buyer)+(by?`<div class="m">${esc(it.buyer)}</div>`:''):(it.coms&&it.coms.length?'<div class="m">Commercial</div>'+it.coms.map(c=>esc(c.name)).join('<br>'):'-');
+    return`<tr><td>${it.div?pdfDivChip(it.div):''}<div style="margin-top:3px">${pdfChip(L[0],L[1])}</div></td>
+<td><b>${esc(it.desc||'—')}</b><div class="m">Item ${esc(it.itemNo)}${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div></td>
+<td>${esc(it.dlbl||'-')}</td>
+<td class="num">${it.amt==null?'-':`<b class="${it.amt<0?'ov':''}">${pdfBaht(Math.abs(it.amt))}</b><div class="m">${it.amt<0?'ทิ้ง':'ได้คืน'}</div>`}</td>
+<td class="num">${it.sales==null?'-':pdfBaht(it.sales)}</td>
+<td class="num">${r==null?'-':`<b class="${r>=SHR_P1?'ov':''}">${pdfPct(r)}</b>`}</td>
+<td>${rs.length?rs.map(([rc,x])=>`<div class="m">${esc(shrRs(rc))}: <b>${x.c<0?'':'+'}${pdfBaht(x.c)}</b> · ${pdfNum(x.q,1)} ชิ้น</div>`).join('')+`<div class="m">รวมตามรหัส <b>${it.cc<0?'':'+'}${pdfBaht(it.cc)}</b></div>`:'<span class="m">—</span>'}</td>
+<td>${who}</td></tr>`}).join('');
+  const rate=SHR.sales?['FF','DF','NF'].filter(k=>dvS[k]>0).map(k=>`<span>%Actual Shrink ${k} ${pdfPct((dvA[k]||0)/dvS[k])}</span>`).join(''):'';
+  const tileTxt={big:'ทิ้งเกิน '+pdfBaht(SHR_BIG),hi:'ทิ้งเกิน 1% ของยอดขาย'};
+  const flt=pdfFlt([['กลุ่ม',shrDiv==='-'?'ไม่ระบุกลุ่ม':shrDiv],['กล่องสรุป',tileTxt[shrTile]||''],['รหัสเหตุผล',pdfSel('#shrFRs')],['Class',pdfSel('#shrFCls')],['แผนก',pdfSel('#shrFDept')],['Buyer / Commercial',pdfSel('#shrFWho')],['ค้นหา',$('#shrQ').value.trim()]]);
+  return pdfPage({title:'%Shrink · หยุดทิ้ง',
+    sub:`มุมมอง ${esc((SHR_BASES.find(x=>x[0]===b)||['',''])[1])} · ${flt}${!$('#shrHide').checked?' · รวมที่ไม่ได้ทิ้ง':''} · ${pdfStamp()} · ${rows.length.toLocaleString()}${rows.length<total?' จาก '+total.toLocaleString():''} รายการ`,
+    sum:`<span>ทิ้งรวม ${pdfBaht(gross)} (${nLoss.toLocaleString()} รายการ)</span>`+['FF','DF','NF'].map(k=>`<span>${k} ${pdfBaht(dvT[k])}</span>`).join('')+rate,
+    cols:[['กลุ่ม / ระดับ',9],['สินค้า',24],['แผนก',10],['ทิ้ง MTD ฿',9],['ยอดขาย ฿',9],['%Shrink',7],['ตามรหัสเหตุผล (By Code)',24],['Buyer / Commercial',8]],rows:body});
+}
+async function shrPDF(){
+  const rows=shrVisible(shrBuild(),shrBasis);
+  if(!rows.length){toast('ไม่มีรายการให้ส่งออก');return}
+  const n=await pdfLimit(rows.length);
+  printDoc(shrPDFHtml(rows.slice(0,n),rows.length,shrBasis));
+}
+/* ----- Negative Stock / High Stock to DMS (one builder for both pages) ----- */
+function ilPDFHtml(p,rows,total){
+  const D=IL_DEFS[p],S=IL_ST[p],m=IL_MEMO[p]||ilBuild(p),T=IL_T,sel=id=>pdfSel('#'+p+id),w=it=>it.shared?0:(p==='neg'?it.val:it.hi.exVal),dvT={FF:0,DF:0,NF:0},d2=v=>v==null||isNaN(v)?'':(+v).toFixed(2);
+  let tot=0,units=0;rows.forEach(it=>{const x=w(it);tot+=x;if(it.div in dvT)dvT[it.div]+=x;if(p==='neg'&&!it.shared)units+=-it.a});
+  const tileTxt=p==='neg'?{sold:'ยังขายอยู่เดือนนี้',big:'ติดลบเกิน '+pdfBaht(SHR_BIG),idle:'ติดลบแต่ไม่มียอดขาย'}:{dead:'ไม่มียอดขายเลย',cut:'ควรลดราคา (15% / 30%)',ord:'มีของสั่ง / ระหว่างส่งอยู่'};
+  const flt=pdfFlt([['กลุ่ม',S.div==='-'?'ไม่ระบุกลุ่ม':S.div],['กล่องสรุป',tileTxt[S.tile]||''],[D.fa,sel('FA')],[D.fb,sel('FB')],['แผนก',sel('FDept')],['Buyer',sel('FWho')],['ค้นหา',$('#'+p+'Q').value.trim()]]);
+  const src=ILT[p],srcTxt=src?esc(src.name)+(src.asOf?' · ข้อมูลเมื่อ '+esc(ilD(src.asOf)):''):'';
+  let body,cols,sum;
+  if(p==='neg'){
+    body=rows.map(it=>{const r=it.r,mm=ITEMCLS?ITEMCLS.get(amNum(it.itemNo)):null;
+      return`<tr><td>${esc(SHR_DEPT[it.dp]||it.dlbl||'')}</td><td class="ctr">${it.dp?+it.dp:''}</td><td class="ctr">${mm&&mm.s!=null&&mm.s!==''?esc(mm.s):''}</td><td class="ctr num"><b>${esc(it.itemNo)}</b></td>
+<td><b>${esc(it.desc||'—')}</b>${it.shared?'<div class="m">สต็อกร่วม (~) — ปรับที่สินค้าปกติ</div>':''}</td><td class="num">${pdfDmy(r.ld)}</td><td class="num">${pdfDmy(r.ls)}</td><td class="num">${d2(r.a28)}</td>
+<td class="num ov"><b>${d2(it.a)}</b></td><td class="num">+${pdfNum(-it.a,2)}</td><td class="ctr" style="font-size:13px">☐</td></tr>`}).join('');
+    cols=[['Division',13],['Dept no',5],['Art Grp Sub No',6],['Art No',8],['Descr',28],['Last Delday',9],['Last Saleday',9],['Dms',6],['Stock',7],['ต้องปรับ (+)',6],['✓',3]];
+    sum=`<span>ยอดรวมที่เสียเงิน ${ilMoney('neg',tot)}</span><span>${rows.length.toLocaleString()} รายการ · ปรับ +${pdfNum(units,2)} หน่วย</span>`+['FF','DF','NF'].map(k=>`<span>${k} ${ilMoney('neg',dvT[k])}</span>`).join('');
+  }else{
+    body=rows.map(it=>{const h=it.hi,r=it.r,TR=IL_TIER[h.tier],by=m.buyers.get(it.by)||'';
+      return`<tr><td>${it.div?pdfDivChip(it.div):''}<div style="margin-top:3px">${pdfChip(TR[0],TR[1])}</div></td>
+<td><b>${esc(it.desc||'—')}</b><div class="m">Item ${esc(it.itemNo)}${it.cn?' · Class '+esc(it.cn):''} · ${esc(it.dlbl||'')}</div></td>
+<td class="num">${pdfNum(r.a,2)}</td><td class="num">${pdfBaht(h.stockVal)}</td>
+<td class="num"><div class="m">28 วัน <b>${pdfNum(r.a28,2)}</b></div><div class="m">เดือนก่อน <b>${pdfNum(it.dLM,2)}</b></div><div class="m">เดือนนี้ <b>${pdfNum(it.dCM,2)}</b></div></td>
+<td class="num">${h.dead?'ไม่มียอดขาย':pdfNum(it.cover,1)+' วัน'}${r.sd!=null&&r.sd<999?`<div class="m">Stock Day ${pdfNum(r.sd,0)}</div>`:''}</td>
+<td class="num"><b class="ov">${pdfBaht(h.exVal)}</b><div class="m">${pdfNum(h.ex,1)} หน่วย</div></td>
+<td class="num">${h.dead?'—':pdfNum(h.req,2)+'/วัน<div class="m">ต้องเพิ่ม '+h.up.toFixed(1)+' เท่า</div>'}</td>
+<td>${esc(TR[2])}${r.oo>0||r.it>0?`<div class="m ov">มีของสั่ง/ส่ง ${pdfNum((r.oo||0)+(r.it||0),0)} หน่วย → ชะลอ</div>`:''}</td><td>${esc(by||it.by||'-')}${by&&it.by?`<div class="m">${esc(it.by)}</div>`:''}</td></tr>`}).join('');
+    cols=[['กลุ่ม / ระดับ',9],['สินค้า',22],['ASOH',6],['มูลค่า Stock ฿',8],['ยอดขาย/วัน (DMS)',12],['พอขาย',7],['ส่วนเกินเกิน '+T+' วัน',11],['ต้องขาย/วัน',8],['แนะนำ',10],['Buyer',7]];
+    const dead=rows.filter(it=>it.hi.dead).length,cut=rows.filter(it=>it.hi.tier!=='watch').length;
+    sum=`<span>ส่วนเกินรวม ${pdfBaht(tot)}</span><span>${rows.length.toLocaleString()} รายการ · เกิน ${T} วัน</span><span>ไม่มียอดขาย ${dead.toLocaleString()}</span><span>ควรลดราคา ${cut.toLocaleString()}</span>`+['FF','DF','NF'].map(k=>`<span>${k} ${pdfBaht(dvT[k])}</span>`).join('');
+  }
+  return pdfPage({title:D.title,sub:`${p==='neg'?'สินค้า Active ที่ ASOH ติด −0.1 ลงไป — ปรับให้เหลือ 0':'Stock ASOH สูงเทียบยอดขาย (DMS) — ลดราคาเพื่อระบาย'} · ${srcTxt?srcTxt+' · ':''}${flt}${p==='dms'&&$('#dmsDisc').checked?' · รวม Discontinued':''}${!$('#'+p+'Hide').checked?' · รวมสินค้าลดราคา (~)':''} · ${pdfStamp()} · ${rows.length.toLocaleString()}${rows.length<total?' จาก '+total.toLocaleString():''} รายการ`,
+    sum,cols,rows:body,fs:p==='neg'?9.5:9,
+    foot:p==='dms'?`<p class="note"><b>วิธีอ่าน:</b> Stock สูง = ASOH เกิน ${T} วันของยอดขายจริง (Avg Sale 28 วัน ถ้าไม่มีใช้ค่าเฉลี่ยเดือนที่แล้ว / เดือนนี้) หรือมี Stock แต่ไม่มียอดขายเลย · ส่วนเกิน = ASOH − ${T} วัน × DMS · แนะนำ: เกิน ${2*T} วันลด 15% (Step 1) · เกิน ${3*T} วันหรือไม่มียอดขายลด 30% (Step 2)</p>`:`<p class="note"><b>วิธีใช้:</b> นับสต็อกจริง แล้วปรับ ASOH ตามช่อง “ต้องปรับ (+)” ให้เหลือ 0 · ช่อง ☐ ไว้ติ๊กเมื่อปรับแล้ว · Stock ติดลบแสดงเป็นสีแดง</p>`});
+}
+async function ilPDF(p){
+  const m=ilBuild(p);if(p==='dms')ilSetHi(m);
+  const rows=ilVisible(p,m);
+  if(!rows.length){toast('ไม่มีรายการให้ส่งออก');return}
+  const n=await pdfLimit(rows.length);
+  printDoc(ilPDFHtml(p,rows.slice(0,n),rows.length));
+}
+/* ----- Buyer / Commercial (same rows as the Excel) ----- */
+const CT_PDF_W=[7,7,8,7,9,8,5,9,5,6,8,7,7,7]; /* widths in %, same order as CT_XL_HDR */
+function contactsPDFHtml(data,total){
+  const cell=v=>esc(v).split('\n').join('<br>'),nB=data.filter(r=>r[6]).length,groups={};
+  data.forEach(r=>{if(r[0])groups[r[0]]=(groups[r[0]]||0)+1});
+  const body=data.map(r=>`<tr>${r.map((v,i)=>`<td>${i===6?'<b>'+cell(v)+'</b>':cell(v)}</td>`).join('')}</tr>`).join('');
+  return pdfPage({title:'รายชื่อ Buyer / Commercial',
+    sub:`ผังทีมตามหัวตาราง Makro · ทุกรายชื่อ (ไม่กรอง) · ${pdfStamp()} · ${data.length.toLocaleString()}${data.length<total?' จาก '+total.toLocaleString():''} แถว`,
+    sum:`<span>Buyer ${nB.toLocaleString()}</span><span>แถวอื่น (ผู้บริหาร / Commercial) ${(data.length-nB).toLocaleString()}</span>`+Object.entries(groups).map(([k,v])=>`<span>${esc(k)} ${v.toLocaleString()}</span>`).join(''),
+    cols:CT_XL_HDR.map((h,i)=>[esc(h),CT_PDF_W[i]]),rows:body,fs:7.5});
+}
+async function contactsPDF(){
+  if(!(st.contacts||[]).length){toast('ยังไม่มีรายชื่อให้ส่งออก');return}
+  const data=contactsRows(false).slice(1),n=await pdfLimit(data.length);
+  printDoc(contactsPDFHtml(data.slice(0,n),data.length));
+}
+/* blank Buyer / Commercial import form: twin of the Excel template (same 14 headers + the same example row) */
+function contactsTemplatePDFHtml(blank=14){
+  const cell=v=>esc(v).split('\n').join('<br>'),n=CT_XL_HDR.length,
+    rows=`<tr>${CT_XL_EX.map(v=>`<td>${cell(v)}</td>`).join('')}</tr>`+Array.from({length:blank},()=>`<tr class="blank" style="height:28px">${CT_XL_HDR.map(()=>'<td></td>').join('')}</tr>`).join(''),
+    how=['<b>วิธีกรอก:</b> 1 แถว = Buyer 1 คน · ต้องใส่ Buyer UID ทุกแถว (แถวที่ไม่มี UID จะถูกข้าม ยกเว้นแถวที่มีเฉพาะ Senior Manager / Associate Director / Senior Director ระบบจะเก็บเป็นรายชื่อ Commercial)',
+      'ในช่องเดียวใส่ได้หลายบรรทัด: ชื่อ (#รหัสพนักงาน) → เบอร์โทร → ตำแหน่ง เช่น “Warisara K. (#8663)” ขึ้นบรรทัดใหม่ “081-966-5421”',
+      'Art Grp No. กับ Description ใส่ทีละบรรทัดให้ตรงกัน · Art Grp Sub No ใส่ทีละบรรทัดตาม Art Grp (เว้นว่างหรือ * = ทั้ง Class, หลาย Sub คั่นด้วยจุลภาค) · ช่อง Area เว้นว่างได้ = ใช้ค่าจากแถวก่อนหน้า',
+      'กรอกด้วยมือหรือพิมพ์ใน Excel ตามหัวตารางนี้ (อย่าเปลี่ยนชื่อหัวตาราง) แล้วนำเข้าที่แท็บ นำเข้า/ส่งออก → นำเข้าข้อมูล → Buyer / Commercial · Buyer UID ซ้ำกับที่มีอยู่ ระบบอัปเดตรายการเดิม ช่องที่เว้นว่างไม่ทับข้อมูลเดิม'].join('<br>');
+  return pdfPage({title:'แบบฟอร์มรายชื่อ Buyer / Commercial',
+    sub:`แท็บ นำเข้า/ส่งออก → แม่แบบรายชื่อ Buyer · แบบฟอร์มเปล่า ${n} คอลัมน์ · ตัวอย่าง 1 แถว + ช่องกรอก ${blank.toLocaleString()} แถว · ${pdfStamp()}`,
+    sum:`<span>${n} คอลัมน์</span><span>ตัวอย่าง 1 แถว</span><span>ช่องกรอก ${blank.toLocaleString()} แถว</span>`,
+    cols:CT_XL_HDR.map((h,i)=>[esc(h),CT_PDF_W[i]]),rows,fs:8,foot:`<p class="note">${how}</p>`});
+}
+function contactsTemplatePDF(){printDoc(contactsTemplatePDFHtml())}
+/* ----- the "new DMS" table of an OOS import (same rows as its Excel) ----- */
+function oosDmsPDFHtml(imp,d,rows,total){
+  const sumTbl=`<table style="margin-top:10px"><thead><tr>${['แผนกที่เติม','จำนวนสินค้า','จำนวนบรรทัดที่ขาด','Sale Loss (บาท)',OOS_BK.A[0],OOS_BK.B[0],OOS_BK.C[0],OOS_BK.X[0]].map(t=>`<th>${esc(t)}</th>`).join('')}</tr></thead><tbody>${d.sumRows.map(r=>`<tr>${r.map((v,i)=>`<td${i?' class="num"':''}>${i===3?pdfBaht(v):typeof v==='number'?v.toLocaleString():esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  const body=rows.map(r=>`<tr><td class="num"><b>${esc(r[0])}</b></td><td><b>${esc(r[1]||'—')}</b>${r[24]?`<div class="m">${esc(r[24])}</div>`:''}${r[9]?'<div class="m">สินค้าชั่งน้ำหนัก</div>':''}</td>
+<td>${esc(r[2]||'')}<div class="m">${esc(r[6]||r[5]||'-')}</div></td><td class="num">${r[10]===''?'-':pdfNum(r[10],2)}</td><td class="num"><b>${r[11]===''?'-':pdfNum(r[11],2)}</b></td>
+<td class="num">${r[12]===''?'':`<b class="${r[12]>=10?'ov':''}">${r[12]>0?'+':''}${r[12]}%</b>`}</td><td class="num">${pdfNum(r[17],0)} วัน<div class="m">${pdfNum(r[18],0)} บรรทัด · ${pdfNum(r[19],1)} ${esc(r[20])}</div></td>
+<td class="num">${pdfBaht(r[21])}</td><td>${r[22]?pdfChip(r[22],'md2'):''}</td><td>${esc(r[23]||'')}</td></tr>`).join('');
+  return pdfPage({title:'DMS ใหม่ · จากรายงานสินค้าขาด (O2O)',
+    sub:`ไฟล์ ${esc(imp.file||'')} · ช่วงวันส่งมอบ ${esc(oosDayTxt(imp.info.minDay))} – ${esc(oosDayTxt(imp.info.maxDay))} (${imp.info.span} วัน) · เรียงตาม Sale Loss · ${pdfStamp()} · ${rows.length.toLocaleString()}${rows.length<total?' จาก '+total.toLocaleString():''} สินค้า`,
+    sum:`<span>${total.toLocaleString()} สินค้า</span><span>Sale Loss รวม ${pdfBaht(d.rows.reduce((s,r)=>s+(+r[21]||0),0))}</span>`,
+    cols:[['Item No',7],['ชื่อสินค้า',22],['แผนกที่เติม / Buyer',13],['DMS เดิม',6],['DMS ใหม่',6],['เปลี่ยน',6],['วันที่ขาด',9],['Sale Loss ฿',7],['ประเภทปัญหา',9],['สิ่งที่ควรทำ',15]],rows:body,
+    foot:sumTbl+`<p class="note"><b>วิธีคำนวณ DMS ใหม่:</b><br>${d.how.slice(2,8).map(x=>esc(x[0])).join('<br>')}<br><br><b>ข้อควรระวัง:</b><br>${d.how.slice(10).map(x=>esc(x[0])).join('<br>')}</p>`});
+}
+async function oosDmsPDF(imp){
+  if(!imp||!imp.info.o2o){toast('ต้องนำเข้ารายงานสินค้าขาด (O2O) ก่อน');return}
+  const d=oosDmsData(imp);
+  if(!d.rows.length){toast('ไม่มีรายการให้ส่งออก');return}
+  const n=await pdfLimit(d.rows.length);
+  printDoc(oosDmsPDFHtml(imp,d,d.rows.slice(0,n),d.rows.length));
+}
+/* ----- products & rules (same rows / filter / sort as the table; from the Data tab = every product) ----- */
+function prodVisible(noFilter){
+  const pq=noFilter?'':($('#pQ')?.value||'').trim().toLowerCase(),all=bySku(),filtered=pq?all.filter(p=>[p.desc,p.sku,p.cat,p.buyerUid,p.comUid,ORIGINS[p.origin],p.temp].join(' ').toLowerCase().includes(pq)):all;
+  const mode=$('#pSort')?$('#pSort').value:'shelf-asc',nm=(a,b)=>String(a.desc).localeCompare(String(b.desc),'th');
+  const shown=mode==='origin'?filtered:[...filtered].sort(mode==='shelf-desc'?(a,b)=>b.shelf-a.shelf||nm(a,b):mode==='name'?nm:(a,b)=>a.shelf-b.shelf||nm(a,b));
+  return{pq,all,shown,mode};
+}
+function prodPDFHtml(rows,total,pq,sortTxt){
+  const cnt={};let nOff=0;
+  const rng=x=>x?`${String(x.label||'').replace('ลดราคา ','').replace(/ \(Step \d\)/,'')} · วันที่ ${x.from}${x.to!=null&&x.to>x.from?'–'+x.to:''}`:'';
+  const body=rows.map(p=>{
+    const s=stages(p),f=k=>s.find(x=>x.k===k),ok=f('ok'),m1=f('md1'),m2=f('md2'),man=manualRule(p.shelf,p.origin),off=!!man&&['md1Day','md2Day','pullDay'].some(x=>man[x]!==p[x]),ol=ORIGINS[p.origin]||ORIGINS.other;
+    cnt[ol]=(cnt[ol]||0)+1;if(off)nOff++;
+    return`<tr><td><b>${esc(p.desc||'—')}</b><div class="m">${p.sku?esc(p.sku)+' · ':''}${esc(ol)}${p.temp?' · '+esc(p.temp):''}${p.cat?' · '+esc(p.cat):''}${off?' · <span class="ov">ต่างจากคู่มือ</span>':''}</div></td>
+<td class="num">${p.shelf!=null&&!isNaN(p.shelf)?(+p.shelf).toLocaleString()+' วัน':'-'}</td>
+<td>${ok?pdfChip(`วันที่ 1${ok.to>1?'–'+ok.to:''}`,'ok'):'-'}</td>
+<td>${m1?pdfChip(rng(m1),'md1'):'<span class="m">—</span>'}</td>
+<td>${m2?pdfChip(rng(m2),'md2'):'<span class="m">—</span>'}</td>
+<td>${p.pullDay?pdfChip(`วันที่ ${p.pullDay}${amPm(p)?' (บ่าย)':''}`,'pull'):'-'}</td>
+<td>${esc(p.buyerUid||'-')}</td><td>${esc(p.comUid||'-')}</td></tr>`}).join('');
+  const n=rows.length,sum=`<span>สินค้า ${n.toLocaleString()}${n<total?' จาก '+total.toLocaleString():''} รายการ</span>`+Object.entries(cnt).map(([k,v])=>`<span>${esc(k)} ${v.toLocaleString()}</span>`).join('')+(nOff?`<span>ต่างจากคู่มือ ${nOff.toLocaleString()}</span>`:'');
+  return pdfPage({title:'สินค้า & กฎ Shelf life',
+    sub:`กฎลดราคาของแต่ละสินค้า · ${pq?`ค้นหา “${esc(pq)}”`:'ทุกรายการ'} · เรียง ${esc(sortTxt||'Shelf life สั้น → ยาว')} · ${pdfStamp()} · ${n.toLocaleString()}${n<total?' จาก '+total.toLocaleString():''} รายการ · นับวันที่ 1 = วันรับสินค้า`,
+    sum,cols:[['สินค้า',26],['Shelf life',7],['ขายราคาเต็ม',10],['ลด 15%',13],['ลด 30%',14],['Code 52',9],['Buyer UID',10.5],['Commercial',10.5]],rows:body});
+}
+async function prodPDF(noFilter){
+  const{pq,shown}=prodVisible(noFilter===true);
+  if(!shown.length){toast('ไม่มีรายการให้ส่งออก');return}
+  const n=await pdfLimit(shown.length);
+  printDoc(prodPDFHtml(shown.slice(0,n),shown.length,pq,noFilter===true?'':$('#pSort')?.selectedOptions[0]?.textContent));
+}
+
+/* ---------- the same export set on every page: CSV (copy / download window) · Excel · PDF ----------
+   page buttons export what the page shows (its filters); the Data tab exports everything (whole = true) */
+async function xlsxOut(rows,sheet,file){
+  await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+  const ws=XLSX.utils.aoa_to_sheet(rows),wc=(rows[0]||[]).map((h,i)=>{let w=String(h==null?'':h).length;for(let r=1;r<Math.min(rows.length,60);r++){const v=rows[r][i];w=Math.max(w,String(v==null?'':v).split('\n').reduce((m,s)=>Math.max(m,s.length),0))}return{wch:Math.min(48,Math.max(8,w+2))}});
+  ws['!cols']=wc;const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,String(sheet).replace(/[\[\]:*?\/\\]/g,' ').slice(0,31));XLSX.writeFile(wb,file);toast('ดาวน์โหลดแล้ว')}
+/* contacts */
+function contactsCSV(){
+  if(!(st.contacts||[]).length){toast('ยังไม่มีรายชื่อให้ส่งออก');return}
+  dl(`buyer-commercial_${iso(today())}.csv`,toCSV(contactsRows(false)),'text/csv;charset=utf-8',contactsPDF)}
+function contactsTemplateCSV(){dl('buyer-commercial_template.csv',toCSV(contactsRows(true)),'text/csv;charset=utf-8',contactsTemplatePDF)}
+/* products & rules: the CSV / Excel use the import template's columns, so an export can be edited and imported back */
+const PROD_HEAD=['sku','description','origin','temp','shelf_life','step1_day','step1_pct','step2_day','step2_pct','code52_day','buyer_uid','commercial_uid'];
+function prodTable(whole){
+  return[PROD_HEAD,...prodVisible(whole===true).shown.map(p=>[p.sku||'',p.desc||'',p.origin||'other',p.temp||'',p.shelf==null?'':p.shelf,p.md1Day||'',p.md1Day?p.md1Pct:'',p.md2Day||'',p.md2Day?p.md2Pct:'',p.pullDay||'',p.buyerUid||'',p.comUid||''])]}
+function prodCSV(whole){
+  const t=prodTable(whole);if(t.length<2){toast('ไม่มีรายการให้ส่งออก');return}
+  dl(`products_${iso(today())}.csv`,toCSV(t),'text/csv;charset=utf-8',()=>prodPDF(whole===true))}
+async function prodXlsx(whole){
+  const t=prodTable(whole);if(t.length<2){toast('ไม่มีรายการให้ส่งออก');return}
+  await xlsxOut(t,'สินค้า',`products-${iso(today())}.xlsx`)}
+const productTemplateXlsx=()=>xlsxOut(PROD_TPL_ROWS,'แม่แบบสินค้า','products_template.xlsx');
+/* lots */
+async function exportBatchesXlsx(arg){
+  const w=arg===true;if(!dashList(dashRows(),w).length){toast('ไม่มีรายการให้ส่งออก');return}
+  await xlsxOut(lotsTable(w),'ล็อต',`shelf-life-${iso(today())}.xlsx`)}
+/* Item NBS */
+async function nbsXlsx(arg){
+  const w=arg===true;if(!nbsFiltered(w).length){toast('ไม่มีรายการให้ส่งออก');return}
+  await xlsxOut(nbsTable(w),'Item NBS',`item-nbs-${iso(today())}.xlsx`)}
+/* OOS+ */
+async function oosXlsx(arg){
+  const t=oosTable(arg===true);if(!t){toast('ไม่มีรายการให้ส่งออก');return}
+  await xlsxOut(t,'OOS+',`OOS-${iso(today())}.xlsx`)}
+/* Data tab: one tile per data set → pick the format */
+const EXP_SETS={
+  lots:{t:'ล็อต + สถานะวันนี้',d:'ตารางล็อตทั้งหมด (ไม่กรอง) พร้อมสถานะและสิ่งที่ต้องทำ',csv:()=>exportBatchesCSV(true),xlsx:()=>exportBatchesXlsx(true),pdf:()=>batchesPDF(true)},
+  nbs:{t:'Item NBS',d:'รายการสินค้าไม่มียอดขายทั้งหมด (ไม่กรอง)',csv:()=>nbsCSV(true),xlsx:()=>nbsXlsx(true),pdf:()=>nbsPDF(true)},
+  oos:{t:'OOS+',d:'รายการสินค้าหมดชั้น / หมดสต็อกทั้งหมด (ไม่กรอง)',csv:()=>oosCSV(true),xlsx:()=>oosXlsx(true),pdf:()=>oosPDF(true)},
+  contacts:{t:'รายชื่อ Buyer / Commercial',d:'จัดหัวตารางแบบผังทีม — นำเข้ากลับได้ทันที',csv:()=>contactsCSV(),xlsx:()=>exportContactsXlsx(),pdf:()=>contactsPDF()},
+  contactsTpl:{t:'แม่แบบรายชื่อ Buyer',d:'แบบฟอร์มเปล่าพร้อมตัวอย่าง 1 แถว สำหรับกรอกแล้วนำเข้า',csv:()=>contactsTemplateCSV(),xlsx:()=>exportContactsXlsx(true),pdf:()=>contactsTemplatePDF()},
+  products:{t:'สินค้า & กฎ Shelf life',d:'สินค้าและวันลดราคาทั้งหมด (ไม่กรอง) — CSV / Excel ใช้หัวคอลัมน์เดียวกับแม่แบบ นำเข้ากลับได้',csv:()=>prodCSV(true),xlsx:()=>prodXlsx(true),pdf:()=>prodPDF(true)},
+  prodTpl:{t:'แม่แบบสินค้า',d:'ตัวอย่างสำหรับกรอกแล้วนำเข้าสินค้า',csv:()=>downloadTemplate(),xlsx:()=>productTemplateXlsx(),pdf:()=>templatePDF()}};
+function expOpen(k){
+  const s=EXP_SETS[k];if(!s)return;
+  $('#expTitle').textContent='ส่งออก · '+s.t;$('#expDesc').textContent=s.d;
+  for(const f of ['csv','xlsx','pdf'])$('#exp'+f[0].toUpperCase()+f.slice(1)).onclick=()=>{$('#dlgExp').close();s[f]()};
+  $('#dlgExp').showModal()}
+$('#expClose').onclick=()=>$('#dlgExp').close();
+/* page buttons */
+$('#dashCsv').onclick=()=>exportBatchesCSV();$('#dashXlsx').onclick=()=>exportBatchesXlsx();$('#dashPdf').onclick=()=>batchesPDF();
+$('#oosXlsx').onclick=()=>oosXlsx();
+$('#nbsCsv').onclick=()=>nbsCSV();$('#nbsXlsx').onclick=()=>nbsXlsx();$('#nbsPdf').onclick=()=>nbsPDF();
+$('#ctCsv').onclick=()=>contactsCSV();$('#ctXlsx').onclick=()=>exportContactsXlsx();$('#ctPdf').onclick=()=>contactsPDF();
+$('#prCsv').onclick=()=>prodCSV();$('#prXlsx').onclick=()=>prodXlsx();$('#prPdf').onclick=()=>prodPDF();
+/* the imported file (name, shop, date, size) is shown only where it can be removed: the "ลบไฟล์ที่นำเข้า" windows */
+function openIlDel(p){
+  const d=ILT[p];
+  $('#idTitle').textContent='ลบไฟล์ที่นำเข้า · '+IL_DEFS[p].title;
+  $('#idList').innerHTML=d?`<div class="imp-file il-row"><span class="chip s-md1">ItemList</span><span style="flex:1;min-width:160px;overflow-wrap:anywhere">${ilSrc(p)}</span><button type="button" class="btn sm danger" data-p="${p}">ลบ</button></div>`:'<p class="muted">ยังไม่มีไฟล์ที่นำเข้า</p>';
+  $('#dlgIlDel').showModal();$('#idClose').focus()}
+async function ilDelClick(e){
+  const b=e.target.closest('button[data-p]');if(!b)return;const p=b.dataset.p;if(!ILT[p])return;
+  if(!await ask(`ลบข้อมูลของไฟล์ “${ILT[p].name}” ออกจาก ${IL_DEFS[p].title}?  ลบเฉพาะในเครื่องนี้`))return;
+  ILT[p]=null;IL_REV[p]++;ilReset(p);ilSave(p);renderIlt(p);$('#dlgIlDel').close();toast('ลบข้อมูลแล้ว')};
+function shrFileDetail(f){const i=f.info||{};return f.kind==='sales'?[i.store,i.period].filter(Boolean).map(esc).join(' · '):((i.months||[]).map(esc).join(', '))};
+
 function nbsBannerUpdate(open,nOver){
   const bd=$('#nbsBadge');if(bd){bd.hidden=!open.length;bd.textContent=open.length.toLocaleString();bd.classList.toggle('late',nOver>0)} /* same badge as OOS+: all open items, red when some are over the NBS limit */
   const bn=$('#nbsBanner');if(!bn)return;
@@ -4592,12 +4929,12 @@ async function nbsSave(){
   $('#dlgNbs').close();
   await act(()=>putItem('nbs',o),prev?'บันทึกการแก้ไขแล้ว':'เพิ่มรายการแล้ว');
 }
-function nbsCSV(){
+function nbsTable(whole){
   const rows=[['division','department','item_no','description','barcode','stock','location','last_recv_date','last_sold_date','nbs_days','nbs_threshold','aging_status','aging_type','days_to_next_status','next_status','status','buyer_uid','remark','created_at']];
-  (st.nbs||[]).forEach(r=>rows.push([r.division,r.dept||'',r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',nbsOver(r)?'เกินเกณฑ์':'ยังไม่ถึงเกณฑ์',(()=>{const a=agingInfo(r);return a.level!=null?AGING_LV[a.level][0]:r.aging||''})(),agingInfo(r).name,agingInfo(r).left??'',agingInfo(r).next?agingInfo(r).next[0]:'',nStat(r.status)[1],r.buyerUid||'',r.remark||'',r.createdAt||'']));
-  dl(`item-nbs_${iso(today())}.csv`,toCSV(rows),'text/csv;charset=utf-8',nbsPDF);
-}
-$('#nbsAdd').onclick=()=>nbsOpen(null);$('#nbsExport').onclick=nbsCSV;
+  nbsFiltered(whole===true).forEach(r=>rows.push([r.division,r.dept||'',r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',nbsOver(r)?'เกินเกณฑ์':'ยังไม่ถึงเกณฑ์',(()=>{const a=agingInfo(r);return a.level!=null?AGING_LV[a.level][0]:r.aging||''})(),agingInfo(r).name,agingInfo(r).left??'',agingInfo(r).next?agingInfo(r).next[0]:'',nStat(r.status)[1],r.buyerUid||'',r.remark||'',r.createdAt||'']));
+  return rows}
+function nbsCSV(whole){const w=whole===true;if(!nbsFiltered(w).length){toast('ไม่มีรายการให้ส่งออก');return}dl(`item-nbs_${iso(today())}.csv`,toCSV(nbsTable(w)),'text/csv;charset=utf-8',()=>nbsPDF(w))}
+$('#nbsAdd').onclick=()=>nbsOpen(null);
 $('#nCancel').onclick=()=>$('#dlgNbs').close();$('#nSave').onclick=nbsSave;
 $('#nDiv').onchange=()=>nbsBuyerOptions($('#nBuyer').value);
 let nbsT;$('#nQ').oninput=()=>{clearTimeout(nbsT);nbsT=setTimeout(nbsSearch,150)};
@@ -4759,7 +5096,7 @@ async function delImpFile(g){
   let warn='';
   if(delCol==='nbs'){const ed=g.rows.filter(impEdited).length;if(ed)warn=`\nรวมรายการที่ทีมบันทึกสถานะ/Remark ไว้แล้ว ${ed.toLocaleString()} รายการ`}
   else if(delCol==='oos'){const ed=g.rows.filter(oosEdited).length;if(ed)warn=`\nรวมรายการที่ทีมเริ่มเติม/มอบหมาย/จดหมายเหตุ/ถ่ายรูปไว้แล้ว ${ed.toLocaleString()} รายการ`}
-  else{const used=impUsage(g);if(used)warn=delCol==='products'?`\nมีล็อตที่ใช้สินค้าเหล่านี้ ${used.toLocaleString()} ล็อต — ล็อตจะแสดงเป็น “ไม่พบสินค้า”`:`\nสินค้า ${used.toLocaleString()} รายการที่ผูกกับรายชื่อเหล่านี้จะถูกล้าง Buyer/Commercial`}
+  else{const used=impUsage(g);if(used)warn=delCol==='products'?`\nมีล็อตที่ใช้สินค้าเหล่านี้ ${used.toLocaleString()} ล็อต — ล็อตจะแสดงเป็น “ไม่พบสินค้า”`:`\nสินค้า ${used.toLocaleString()} รายการที่ผูกกับรายชื่อเหล่านี้จะถูกล้าง Buyer/Commercial${(()=>{const u=new Set(g.rows.map(c=>c.uid)),nb=(st.nbs||[]).filter(r=>u.has(r.buyerUid)).length;return nb?`\nและรายการ Item NBS ${nb.toLocaleString()} รายการจะถูกล้าง Buyer`:''})()}`}
   if(!await ask(`ลบไฟล์ “${name}” และ${cfg.noun}ที่ไฟล์นี้เพิ่มเข้ามา ${n} รายการ ออกจากระบบ?${warn}\n(ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)`))return;
   const ok=await act(async()=>{
     if(delCol==='contacts'){const u=new Set(g.rows.map(c=>c.uid));
