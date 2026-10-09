@@ -546,6 +546,47 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .waste-io-del{color:#a85a00}
 .waste-io-imp{color:#0b5cad;border-color:#0b5cad}
 .waste-io-btn:active{opacity:.7}
+.noloc-btn{width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;background:#FFE3A3;border:1.5px solid #F59E0B;color:#7A4A00;border-radius:12px;padding:12px 14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.noloc-btn:active{opacity:.7}
+.noloc-count{background:#F59E0B;color:#fff;border-radius:10px;padding:1px 9px;font-size:13px;font-weight:700}
+.noloc-count:empty{display:none}
+.noloc-dlg{border:none;border-radius:16px;padding:0;width:min(920px,calc(100% - 20px));max-height:92vh;font-family:inherit;color:var(--color-text-primary,#1d2433)}
+.noloc-dlg[open]{display:flex;flex-direction:column}
+.noloc-dlg .nl-head{padding:16px 18px 6px;flex:0 0 auto}
+.noloc-dlg h3{margin:0 0 4px 0;font-size:18px}
+.nl-sub{margin:0 0 10px 0;font-size:13px;color:#667085}
+.nl-filters{display:flex;flex-wrap:wrap;gap:8px}
+.nl-filters input{flex:1 1 220px;min-width:0;padding:9px 12px;border:1.5px solid #d0d5dd;border-radius:10px;font-size:15px;font-family:inherit}
+.nl-filters select{flex:0 1 240px;min-width:0;padding:9px 10px;border:1.5px solid #d0d5dd;border-radius:10px;font-size:14px;font-family:inherit;background:#fff}
+.nl-checks{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 4px 0;font-size:13px}
+.nl-checks label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.noloc-dlg .nl-body{flex:1 1 auto;min-height:160px;overflow:auto;padding:4px 12px;border-top:1px solid #eef0f3;border-bottom:1px solid #eef0f3}
+.nl-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid #f0f2f5;padding:9px 6px;cursor:pointer;font-family:inherit;font-size:14px;color:inherit}
+.nl-row:hover{background:#fff8e6}
+.nl-n{flex:0 0 36px;text-align:right;color:#98a2b3;font-size:12px}
+.nl-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.nl-main b{font-size:14px}
+.nl-bc{color:#667085;font-size:12px;font-weight:400}
+.nl-d{overflow-wrap:anywhere}
+.nl-src{flex:0 0 auto;font-size:11px;font-weight:700;color:#7A4A00;background:#FFF1CC;border-radius:8px;padding:2px 8px;white-space:nowrap}
+.nl-more{display:block;width:calc(100% - 12px);margin:10px 6px;padding:10px;background:#fff;border:1.5px solid #d0d5dd;border-radius:10px;font-size:14px;font-weight:700;color:#0b5cad;cursor:pointer;font-family:inherit}
+.nl-empty{padding:34px 12px;text-align:center;color:#667085}
+.nl-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;flex:0 0 auto}
+.nl-count{font-size:13px;color:#667085}
+.nl-btns{display:flex;gap:8px;margin-left:auto}
+.noloc-dlg .nl-x{flex:none;padding:8px 16px;font-size:14px}
+@media print{
+  .noloc-print-page,.noloc-print-page *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .noloc-print-page{width:100%;font-family:'Sarabun','Leelawadee UI',Tahoma,sans-serif;color:#000}
+  .noloc-print-title{text-align:center;font-weight:800;font-size:22px;margin-bottom:8px}
+  .noloc-print-meta{font-size:12px;line-height:1.7;margin-bottom:8px}
+  .noloc-print-table{width:100%;table-layout:fixed;border-collapse:collapse;border:1px solid #000}
+  .noloc-print-table thead{display:table-header-group}
+  .noloc-print-table tr{page-break-inside:avoid}
+  .noloc-print-table th{background:#f2f2f2;padding:6px 5px;font-size:12px;font-weight:700;border:1px solid #000}
+  .noloc-print-table td{border:1px solid #000;padding:5px;font-size:12px;height:22px;overflow-wrap:anywhere;text-align:left}
+  .noloc-print-table td.c{text-align:center}
+}
 .waste-io-note{margin:6px 2px 0;font-size:13px;color:var(--color-text-secondary,#667085);text-align:center}
 .fb-export-btn{display:flex;align-items:center;gap:6px;background:#1D9E75;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .fb-export-btn:hover{background:#167a5b}
@@ -898,6 +939,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <input type="file" id="iLocImportFile" accept=".xlsx,.xls" hidden onchange="importItemLocFromExcel(this)">
         </div>
         <p class="waste-io-note">ใส่ไฟล์เพื่ออัพเดทข้อมูล Item Location</p>
+        <button type="button" class="noloc-btn" id="noLocBtn" onclick="openNoLocList()"><i class="ti ti-map-pin-off" aria-hidden="true"></i> Item ที่ยังไม่มี Location <span class="noloc-count" id="noLocCount"></span></button>
+        <p class="waste-io-note">ดึงรายชื่อ Item ที่ยังไม่มีตำแหน่ง เพื่อดูและส่งออกเป็น Excel / PDF</p>
       </div>
     </div>
 
@@ -7580,6 +7623,7 @@ function applyEmployeeOnlyVisibility(){
     PRODUCTS_BY_KEY.forEach(item=>{ PRODUCTS_INDEX[item.itemNo]=item; });
   }
   employeeOnlyItemsApplied=shouldShow;
+  try{ updateNoLocBadge(); }catch(e){}
 }
 
 // (ทางเลือกเสริม) ถ้าอยาก auto-เติมรูปสำหรับไอเทมใหม่ที่ยังไม่มีใน item_images.json แบบ real-time
@@ -8826,6 +8870,157 @@ async function deleteItemLocImport(meta){
     console.error(e);
     alert('ลบไม่สำเร็จ: '+e.message);
   }
+}
+// ==== Item ที่ยังไม่มี Location (เห็นเฉพาะพนักงาน): ดูรายชื่อ + ส่งออก Excel / PDF ====
+// ที่มา: สินค้าใน Item Master ที่ไม่อยู่ในไฟล์ตำแหน่ง (employee_only_items.json) · สินค้าที่พนักงานเพิ่มเองโดยยังไม่ใส่ตำแหน่ง · สินค้าที่ตำแหน่งถูกลบหมดแล้ว
+const NOLOC_PDF_MAX=3000;
+let NOLOC_ALL=[],NOLOC_VIEW=[],NOLOC_SHOWN=100,NOLOC_TIMER=null;
+const NOLOC_DEL_RE=/^\s*(del|dele|delete|deleted|detele|detete|ยกเลิก)(?![a-z])/i;
+const NOLOC_ADJ_RE=/^\s*(ส่วนลด|ส่วนเพิ่ม|เงินมัดจำ|คืนมัดจำ|มัดจำ|ค่าบริการ|ค่าธรรมเนียม|คูปอง)/;
+function noLocBuild(){
+  const out=[];
+  PRODUCTS_BY_KEY.forEach(i=>{
+    if(i.locations&&i.locations.length)return;
+    const desc=String(i.desc||'').trim();
+    out.push({no:String(i.itemNo),bc:String(i.barcode||''),desc,src:i.isCustom?'เพิ่มเอง':i.employeeOnly?'Item Master':'ตำแหน่งถูกลบหมด',del:NOLOC_DEL_RE.test(desc),adj:NOLOC_ADJ_RE.test(desc),q:null});
+  });
+  out.sort((a,b)=>{ const x=+a.no,y=+b.no; return (isNaN(x)||isNaN(y))?a.no.localeCompare(b.no):(x-y||a.no.localeCompare(b.no)); });
+  return out;
+}
+function noLocFilter(all,o){
+  const q=(o.q||'').trim().toLowerCase();
+  return all.filter(r=>{
+    if(o.hideDel&&r.del)return false;
+    if(o.hideAdj&&r.adj)return false;
+    if(o.src&&r.src!==o.src)return false;
+    if(o.bcOnly&&!(r.bc&&r.bc!==r.no))return false;
+    if(q){ if(r.q===null)r.q=(r.no+' '+r.bc+' '+r.desc).toLowerCase(); if(!r.q.includes(q))return false; }
+    return true;
+  });
+}
+function updateNoLocBadge(){
+  const el=document.getElementById('noLocCount');
+  if(!el)return;
+  if(!PRODUCTS_READY||!isEmployee()||!EMPLOYEE_ONLY_ITEMS_READY){ el.textContent=''; return; }
+  const n=noLocFilter(noLocBuild(),{hideDel:true,hideAdj:true}).length;
+  el.textContent=n.toLocaleString();
+}
+function noLocWaitMaster(){
+  return new Promise(res=>{
+    const done=()=>PRODUCTS_READY&&EMPLOYEE_ONLY_ITEMS_READY;
+    if(done())return res(true);
+    if(PRODUCTS_READY&&!employeeOnlyItemsLoadStarted)applyEmployeeOnlyVisibility();
+    let n=0;
+    const iv=setInterval(()=>{ if(done()||++n>200){ clearInterval(iv); res(done()); } },300);
+  });
+}
+function noLocEnsureDlg(){
+  let d=document.getElementById('noLocDlg');
+  if(d)return d;
+  d=document.createElement('dialog');
+  d.id='noLocDlg';
+  d.className='noloc-dlg';
+  d.innerHTML='<div class="nl-head"><h3>Item ที่ยังไม่มี Location</h3><p class="nl-sub">รายการสินค้าที่ยังไม่มีตำแหน่งจัดเก็บ — กดที่รายการเพื่อเปิดดูสินค้า · ส่งออกเป็น Excel / PDF ได้ (ตามตัวกรองที่เลือก)</p>'
+    +'<div class="nl-filters"><input id="nlQ" type="search" placeholder="ค้นหา Item No / บาร์โค้ด / ชื่อสินค้า" autocomplete="off"><select id="nlSrc"><option value="">ที่มา: ทั้งหมด</option><option value="Item Master">Item Master (ไม่อยู่ในไฟล์ตำแหน่ง)</option><option value="เพิ่มเอง">พนักงานเพิ่มเอง</option><option value="ตำแหน่งถูกลบหมด">ตำแหน่งถูกลบหมด</option></select></div>'
+    +'<div class="nl-checks"><label><input type="checkbox" id="nlDel" checked> ซ่อนรายการ DEL / ยกเลิก</label><label><input type="checkbox" id="nlAdj" checked> ซ่อนรายการส่วนลด / มัดจำ / ค่าบริการ</label><label><input type="checkbox" id="nlBc"> เฉพาะที่มีบาร์โค้ด</label></div></div>'
+    +'<div class="nl-body" id="nlBody"></div>'
+    +'<div class="nl-foot"><span class="nl-count" id="nlCount"></span><span class="nl-btns"><button type="button" class="waste-io-btn nl-x" id="nlXlsx"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> Excel</button><button type="button" class="waste-io-btn nl-x" id="nlPdf"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> PDF</button><button type="button" class="waste-io-btn nl-x" id="nlClose">ปิด</button></span></div>';
+  document.body.appendChild(d);
+  const re=()=>{ NOLOC_SHOWN=100; noLocRefresh(); };
+  d.querySelector('#nlQ').addEventListener('input',()=>{ clearTimeout(NOLOC_TIMER); NOLOC_TIMER=setTimeout(re,200); });
+  ['nlSrc','nlDel','nlAdj','nlBc'].forEach(id=>d.querySelector('#'+id).addEventListener('change',re));
+  d.querySelector('#nlClose').addEventListener('click',()=>d.close());
+  d.querySelector('#nlXlsx').addEventListener('click',exportNoLocExcel);
+  d.querySelector('#nlPdf').addEventListener('click',exportNoLocPdf);
+  d.querySelector('#nlBody').addEventListener('click',e=>{
+    if(e.target.closest('#nlMore')){ NOLOC_SHOWN+=100; noLocRefresh(true); return; }
+    const row=e.target.closest('.nl-row');
+    if(!row)return;
+    d.close();
+    search(row.dataset.no);
+    window.scrollTo(0,0);
+  });
+  return d;
+}
+function noLocOpts(){
+  return {q:document.getElementById('nlQ').value,src:document.getElementById('nlSrc').value,hideDel:document.getElementById('nlDel').checked,hideAdj:document.getElementById('nlAdj').checked,bcOnly:document.getElementById('nlBc').checked};
+}
+function noLocRefresh(keepScroll){
+  const body=document.getElementById('nlBody');
+  NOLOC_VIEW=noLocFilter(NOLOC_ALL,noLocOpts());
+  const shown=NOLOC_VIEW.slice(0,NOLOC_SHOWN);
+  if(!NOLOC_VIEW.length){ body.innerHTML='<div class="nl-empty">ไม่มีรายการที่ตรงกับตัวกรอง</div>'; }
+  else{
+    body.innerHTML=shown.map((r,i)=>'<button type="button" class="nl-row" data-no="'+escapeHtml(r.no)+'"><span class="nl-n">'+(i+1)+'</span><span class="nl-main"><b>'+escapeHtml(r.no)+'</b>'+(r.bc&&r.bc!==r.no?' <span class="nl-bc">'+escapeHtml(r.bc)+'</span>':'')+'<span class="nl-d">'+escapeHtml(r.desc)+'</span></span><span class="nl-src">'+escapeHtml(r.src)+'</span></button>').join('')
+      +(NOLOC_VIEW.length>shown.length?'<button type="button" class="nl-more" id="nlMore">แสดงเพิ่มอีก 100 (เหลือ '+(NOLOC_VIEW.length-shown.length).toLocaleString()+')</button>':'');
+    if(!keepScroll)body.scrollTop=0;
+  }
+  document.getElementById('nlCount').textContent=NOLOC_VIEW.length.toLocaleString()+' รายการที่ตรงตัวกรอง (ทั้งหมด '+NOLOC_ALL.length.toLocaleString()+')';
+}
+async function openNoLocList(){
+  if(!isEmployee())return;
+  const d=noLocEnsureDlg();
+  const body=document.getElementById('nlBody');
+  body.innerHTML='<div class="nl-empty">กำลังโหลดข้อมูล Item Master…</div>';
+  document.getElementById('nlCount').textContent='';
+  if(!d.open)d.showModal();
+  await noLocWaitMaster();
+  NOLOC_ALL=noLocBuild();
+  NOLOC_SHOWN=100;
+  noLocRefresh();
+  updateNoLocBadge();
+}
+function noLocStamp(){
+  const n=new Date(),p=v=>String(v).padStart(2,'0');
+  return p(n.getDate())+'/'+p(n.getMonth()+1)+'/'+n.getFullYear()+' '+p(n.getHours())+':'+p(n.getMinutes());
+}
+async function exportNoLocExcel(){
+  if(isLineBrowser()){ alert(t('wasteLineBrowserExportWarning')); return; }
+  const rows=NOLOC_VIEW;
+  if(!rows.length){ showWasteToast('ไม่มีรายการให้ส่งออก'); return; }
+  showWasteToast('กำลังสร้างไฟล์ Excel…');
+  await new Promise(r=>setTimeout(r,60));
+  const aoa=[['ลำดับ','Item No','Barcode','ชื่อสินค้า','ที่มา','Loc (เติม)','Location (เติม)']];
+  rows.forEach((r,i)=>aoa.push([i+1,/^[1-9]\d{0,14}$/.test(r.no)?+r.no:r.no,r.bc,r.desc,r.src,'','']));
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:8},{wch:12},{wch:20},{wch:46},{wch:16},{wch:12},{wch:16}];
+  ws['!autofilter']={ref:'A1:G'+aoa.length};
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Item ไม่มี Location');
+  XLSX.writeFile(wb,'items_no_location_'+todayDateStr()+'.xlsx',{compression:true}); /* compressed: without it 160,000 rows are a ~50 MB file */
+}
+// พิมพ์/บันทึก PDF ผ่านหน้าต่างพิมพ์ของเบราว์เซอร์ เหมือน exportWastePdf() (ใช้ #palletPrintArea + @media print)
+function exportNoLocPdf(){
+  if(isLineBrowser()){ alert(t('wasteLineBrowserPdfWarning')); return; }
+  let rows=NOLOC_VIEW;
+  if(!rows.length){ showWasteToast('ไม่มีรายการให้ส่งออก'); return; }
+  const total=rows.length;
+  if(total>NOLOC_PDF_MAX){
+    if(!confirm('มี '+total.toLocaleString()+' รายการ — PDF พิมพ์ได้ครั้งละไม่เกิน '+NOLOC_PDF_MAX.toLocaleString()+' รายการ\nพิมพ์ '+NOLOC_PDF_MAX.toLocaleString()+' รายการแรกของที่กรองอยู่ไหม? (ถ้าต้องการทั้งหมดให้ใช้ Excel หรือกรองให้เหลือน้อยลงก่อน)'))return;
+    rows=rows.slice(0,NOLOC_PDF_MAX);
+  }
+  const o=noLocOpts(),notes=[];
+  if(o.q.trim())notes.push('ค้นหา "'+o.q.trim()+'"');
+  if(o.src)notes.push('ที่มา: '+o.src);
+  if(o.hideDel)notes.push('ซ่อนรายการ DEL');
+  if(o.hideAdj)notes.push('ซ่อนรายการส่วนลด/มัดจำ');
+  if(o.bcOnly)notes.push('เฉพาะที่มีบาร์โค้ด');
+  const area=document.getElementById('palletPrintArea');
+  let html='<div class="noloc-print-page"><div class="noloc-print-title">Item ที่ยังไม่มี Location</div>'
+    +'<div class="noloc-print-meta"><div>Store : 042 MAKRO ST0042 &nbsp;&nbsp; พิมพ์เมื่อ : '+escapeHtml(noLocStamp())+'</div><div>จำนวน : '+rows.length.toLocaleString()+' รายการ'+(rows.length<total?' (จาก '+total.toLocaleString()+')':'')+(notes.length?' &nbsp;·&nbsp; '+escapeHtml(notes.join(' · ')):'')+'</div></div>'
+    +'<table class="noloc-print-table"><colgroup><col style="width:6%"><col style="width:11%"><col style="width:17%"><col style="width:36%"><col style="width:10%"><col style="width:20%"></colgroup>'
+    +'<thead><tr><th>ลำดับ</th><th>Item No</th><th>Barcode</th><th>ชื่อสินค้า</th><th>ที่มา</th><th>Loc / Location (เติม)</th></tr></thead><tbody>';
+  rows.forEach((r,i)=>{ html+='<tr><td class="c">'+(i+1)+'</td><td class="c">'+escapeHtml(r.no)+'</td><td class="c">'+escapeHtml(r.bc)+'</td><td>'+escapeHtml(r.desc)+'</td><td class="c">'+escapeHtml(r.src)+'</td><td></td></tr>'; });
+  html+='</tbody></table></div>';
+  area.innerHTML=html;
+  const pageStyleTag=document.createElement('style');
+  pageStyleTag.textContent='@page{size:A4 portrait;margin:10mm}';
+  document.head.appendChild(pageStyleTag);
+  const locLabelArea=document.getElementById('palletLocLabelPrintArea');
+  locLabelArea.style.setProperty('display','none','important');
+  const cleanup=()=>{ pageStyleTag.remove(); locLabelArea.style.removeProperty('display'); area.innerHTML=''; window.removeEventListener('afterprint',cleanup); };
+  window.addEventListener('afterprint',cleanup);
+  window.print();
 }
 async function confirmDeleteWasteLog(){
   if(!currentWasteLog)return;
