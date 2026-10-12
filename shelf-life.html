@@ -4058,7 +4058,7 @@ function bcLine(no,own){
 }
 function loadMakroImages(){
   if(!onMakroSite()||MF.state!=='idle'||MF.imgOnly)return;MF.imgOnly=true;
-  fetch('item_images.json').then(r=>r.ok?r.json():{}).then(j=>{if(MF.state!=='ready'){MF.images=j||{};refreshCardPages()}}).catch(()=>{});
+  fetch('item_images.json').then(r=>r.ok?r.json():{}).then(j=>{if(MF.state!=='ready'){MF.images=j||{};MF.imgOk=true;refreshCardPages()}}).catch(()=>{});
 }
 function pinCompact(el){
   if(!el)return;const sp=document.createElement('div');sp.style.cssText='height:0;margin:0;padding:0;pointer-events:none';el.parentNode.insertBefore(sp,el);
@@ -4606,9 +4606,12 @@ function agingFromFile(r){ /* the first type (in the order above) whose table gi
   const lv=+m[1],ib=/^\d{4}-\d{2}-\d{2}/.test(String(r.importRun||r.createdAt||''))?fromIso(String(r.importRun||r.createdAt).slice(0,10)):today(),a0=diffD(ib,fromIso(r.lastRecv));
   return agingOrder(r).find(t=>{for(let lag=0;lag<=4;lag++){const age=a0-lag;if(age>=0&&AGING_TYPES[t].t.filter(x=>age>=x).length===lv)return true}return false})||0;
 }
+const AGT=new WeakMap(); /* per row: the type found from the file's status, kept until the row's own fields change (the Item NBS page asks for it several times per row, thousands of rows) */
 function agingTypeFor(r){
   if(AGING_TYPES[+r.agingType])return+r.agingType;
-  return agingFromFile(r)||agingDefaultType(r);
+  const k=r.aging+'|'+r.lastRecv+'|'+r.importRun+'|'+r.createdAt+'|'+r.dept+'|'+r.division,c=AGT.get(r);
+  if(c&&c.k===k)return c.t;
+  const t=agingFromFile(r)||agingDefaultType(r);AGT.set(r,{k,t});return t;
 }
 function agingInfo(r){
   const type=agingTypeFor(r),T=AGING_TYPES[type].t;
@@ -4671,6 +4674,8 @@ function nbsRuleInfo(r){
   const o={u,src,warn};if(memo)memo.set(key,o);return o;
 }
 function nbsBuyerUid(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))||nbsRuleInfo(r).u||''}
+/* the Buyer card of a UID: the exact contact, else the contact that holds this code among several ("FS2, FS3") or spells it DSF/DFS - the same matching the import uses */
+function nbsContact(uid){return uid?(st.contacts.find(x=>x.uid===uid)||ctFindBuyer(uid)):null}
 function nbsBuyerNote(r){return r.buyerUid?'':nbsBuyerMap().get(amNum(r.itemNo))?'ตามข้อมูล OOS+ / ItemList':nbsRuleInfo(r).src}
 function nbsBuyerWarn(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))?'':nbsRuleInfo(r).warn||''}
 /* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
@@ -4694,7 +4699,7 @@ function nbsPDFHtml(photos=true,whole=false){
     L=(k,val)=>val?`<div class="m">${k}: <b>${esc(val)}</b></div>`:'',desc=v.arts.length?v.arts.map(a=>a[0]+' '+a[1]).join(', '):v.desc;
     return`<b>${esc(b.uid)}</b>${L('Merchandise Mgr.',clean+(ph?' · '+ph:''))}${L('Area',v.area)}${L('Description',desc)}${L('Assistant',v.asst.join(', '))}${L('Junior Buyer',v.jr.join(', '))}`};
   const body=all.map(r=>{
-    const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),bu=nbsBuyerUid(r),b=st.contacts.find(x=>x.uid===bu),c=r.createdAt?new Date(r.createdAt):null;
+    const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),bu=nbsBuyerUid(r),b=nbsContact(bu),c=r.createdAt?new Date(r.createdAt):null;
     const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${chip(a.next[0],a.next[1])}</div><div class="m">ถึงวันที่ <b>${fmt(addD(today(),a.left))}</b></div>`:'<div class="m">ถึงสถานะสูงสุดแล้ว</div>'):(String(r.aging||'').trim()?chip(String(r.aging).trim(),'err')+'<div class="m">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>':'-');
     const img=photos?(r.img||imageOf(r.itemNo)):'';
     return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(pdfThumbUrl(img))}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div>${r.artGrp?`<div class="m">Art Grp ${esc(r.artGrp)}</div>`:''}</div></div></td>
@@ -4794,15 +4799,17 @@ const pdfStamp=()=>{const n=new Date();return`พิมพ์เมื่อ ${f
 async function pdfLimit(n){return n<=PDF_MAX?n:(await ask(`ส่งออก ${n.toLocaleString()} รายการเป็น PDF — ไฟล์ใหญ่และใช้เวลานาน · ตกลง = ทั้งหมด · ยกเลิก = ${PDF_MAX.toLocaleString()} อันดับแรก (เรียงตามที่เห็นบนจอ)`))?n:PDF_MAX}
 const pdfChip=(t,k)=>{const c=PDF_CHIP2[k]||PDF_CHIP2.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
 /* product pictures in every item PDF. The Makro image server resizes on request: a 120 px thumbnail is ~6 KB instead of a 800 px original (the PDF stays small and prints fast). */
-const pdfThumbUrl=u=>/^https:\/\/images\.mango-prod\.siammakro\.cloud\/[^?]*$/.test(String(u||''))?u+'?eo-img.resize=w%2F120&eo-img.format=webp':u;
+const pdfThumbUrl=u=>{u=String(u||'');if(!/^https:\/\/images\.mango-prod\.siammakro\.cloud\//.test(u))return u;
+  return u.indexOf('?')<0?u+'?eo-img.resize=w%2F120&eo-img.format=webp':u.replace(/eo-img\.resize=w%2F\d+/,'eo-img.resize=w%2F120')}; /* a URL that already asks for a resize (the product pictures ask for 600 px) is cut down to 120 px */
 const pdfPic=(u,on)=>on===false?'':(u?`<img class="th" src="${esc(pdfThumbUrl(u))}" alt="">`:'<span class="th ph"></span>');
 const pdfNm=(pic,inner)=>pic?`<div class="nm">${pic}<div class="nt">${inner}</div></div>`:inner; /* picture left of the item text; no picture column when the PDF is exported without pictures */
 const PDF_PHOTO_MAX=300;
 /* the pictures come from item_images.json (+ item_images_extra.json): make sure they are loaded before the page is built (small files, not the whole item-location workbook) */
-async function pdfEnsureImages(){
-  if(!onMakroSite())return;
-  loadImagesExtra();
-  if(!MF.images){try{const r=await fetch('item_images.json');if(r.ok&&!MF.images)MF.images=await r.json()}catch(e){}}
+async function pdfEnsureImages(force){ /* force: tests only (a file:// page never fetches) */
+  if(!force&&!onMakroSite())return;
+  if(force)IMX=IMX||new Map();else loadImagesExtra();
+  /* MF.images starts as {} (not null): "loaded" is MF.imgOk / the full load, so a PDF exported from a tab that never loaded the pictures (Dashboard, Products) fetches them here */
+  if(MF.state!=='ready'&&!MF.imgOk){try{const r=await fetch('item_images.json');if(r.ok){const j=await r.json();if(MF.state!=='ready'){MF.images=j||{};IMGN_SRC=null}MF.imgOk=true}}catch(e){}}
   for(let i=0;i<24&&IMX_STATE==='loading';i++)await new Promise(r=>setTimeout(r,250));
 }
 /* every picture is ~6 KB in the PDF: up to PDF_PHOTO_MAX rows go in automatically, more is the user's call */
@@ -5125,7 +5132,7 @@ function renderNbs(){
   const list=all.slice(0,nbsLimit);
   $('#nbsEmpty').hidden=all.length>0||mode==='init';
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
-  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,bu=nbsBuyerUid(r),b=st.contacts.find(x=>x.uid===bu),img=r.img||imageOf(r.itemNo);
+  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,bu=nbsBuyerUid(r),b=nbsContact(bu),img=r.img||imageOf(r.itemNo);
     return`<tr class="${r.status==='done'?'acted':''}">
     <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div>${r.artGrp?`<div><dt>Art Grp :</dt><dd>${esc(r.artGrp)}</dd></div>`:''}</dl></div></td>
     <td data-l="Division"><div class="cbox"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></div></td>
@@ -5136,7 +5143,7 @@ function renderNbs(){
     <td data-l="ไม่มียอดขาย (NBS)" class="num">${nbsDaysText(r)}</td>
     <td data-l="Aging Status"><div class="cbox">${nbsAgingText(r)}</div></td>
     <td data-l="สถานะ"><div class="cbox"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</div></td>
-    <td data-l="Buyer" class="small">${bu?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(bu)}"><b>${esc(String(bu).slice(0,14))}${String(bu).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}${!r.buyerUid&&bu?`<div class="muted small bsrc">${esc(nbsBuyerNote(r))}</div>`:''}${nbsBuyerWarn(r)?`<div class="small err-text bwarn">${esc(nbsBuyerWarn(r))}</div>`:''}</td>
+    <td data-l="Buyer" class="small"><div class="cbox">${bu?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(bu)}"><b>${esc(String(bu).slice(0,14))}${String(bu).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}${!r.buyerUid&&bu?`<div class="muted small bsrc">${esc(nbsBuyerNote(r))}</div>`:''}${nbsBuyerWarn(r)?`<div class="small err-text bwarn">${esc(nbsBuyerWarn(r))}</div>`:''}</div></td>
     <td data-l="Remark" class="small">${r.remark?`<div class="redbox">${esc(r.remark)}</div>`:'<span class="muted">-</span>'}</td>
     <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}<div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
@@ -5359,7 +5366,7 @@ function parseWorkbook(wb,fileName,defDiv){
       if(sub&&artGrp)info.artSubRows=(info.artSubRows||0)+1;
       info.bsrc[bsrc||'none']++;
       /* an Aging Stock report has one row per receipt of an item: keep the row with the latest Last Recv. Date (its status and quantity go with that date) */
-      const pvRec=recs.get(div+'|'+no);if(pvRec&&pvRec.lastRecv&&recv&&pvRec.lastRecv>recv){info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;continue}
+      const pvRec=recs.get(div+'|'+no);if(pvRec&&pvRec.lastRecv&&(!recv||pvRec.lastRecv>recv)){info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;continue}
       recs.set(div+'|'+no,{artSub:sub,division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
