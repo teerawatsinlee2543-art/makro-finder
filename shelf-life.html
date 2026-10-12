@@ -4629,7 +4629,7 @@ function nbsAgingText(r){
   if(a.level==null)return t?`<span class="chip s-err">${esc(t)}</span><div class="muted small">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>`:'<span class="muted">-</span>';
   const [lb,k]=AGING_LV[a.level],pv=AGING_PROV[a.level],fm=/^\s*([1-5])\s*-/.exec(t),fnote=fm&&+fm[1]!==a.level?`<div class="muted small" title="สถานะในไฟล์ที่นำเข้า (นับถึงวันที่ออกรายงาน)">ไฟล์: ${esc(t)}</div>`:'';
   return`<span class="chip s-${k}">${lb}</span>${pv?`<div class="small" style="margin-top:2px"><b>Provision ${pv}%</b></div>`:''}<div class="muted small">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`
-    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> → <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">≈ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>')+fnote;
+    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> → <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">ถึงวันที่ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>')+fnote;
 }
 /* Buyer shown for an Item NBS row: its own Buyer; otherwise the Buyer the same Item No has on the OOS+ page (buyer_uid) or in the ItemList_Layout loaded on High Stock to DMS / Negative Stock (Buyer column) — so every page shows the same Buyer for the same item. Nothing is written: change the other page's data and this follows. */
 var NBSB=null;
@@ -4666,10 +4666,10 @@ function nbsPDFHtml(photos=true,whole=false){
     return`<b>${esc(b.uid)}</b>${L('Merchandise Mgr.',clean+(ph?' · '+ph:''))}${L('Area',v.area)}${L('Description',desc)}${L('Assistant',v.asst.join(', '))}${L('Junior Buyer',v.jr.join(', '))}`};
   const body=all.map(r=>{
     const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),bu=nbsBuyerUid(r),b=st.contacts.find(x=>x.uid===bu),c=r.createdAt?new Date(r.createdAt):null;
-    const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${esc(a.next[0])}</div>`:'<div class="m">ถึงสถานะสูงสุดแล้ว</div>'):(String(r.aging||'').trim()?chip(String(r.aging).trim(),'err')+'<div class="m">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>':'-');
+    const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${chip(a.next[0],a.next[1])}</div><div class="m">ถึงวันที่ <b>${fmt(addD(today(),a.left))}</b></div>`:'<div class="m">ถึงสถานะสูงสุดแล้ว</div>'):(String(r.aging||'').trim()?chip(String(r.aging).trim(),'err')+'<div class="m">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>':'-');
     const img=photos?(r.img||imageOf(r.itemNo)):'';
     return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(img)}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div>${r.artGrp?`<div class="m">Art Grp ${esc(r.artGrp)}</div>`:''}</div></div></td>
-<td class="ctr">${pdfDivChip(r.division)}</td><td class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td><td>${esc(r.loc||'-')}</td>
+<td class="ctr">${pdfDivChip(r.division)}</td><td class="num">${r.stock!==''&&r.stock!=null?esc(qty2(r.stock)):'-'}</td><td>${esc(r.loc||'-')}</td>
 <td class="num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td class="num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
 <td class="num">${n==null?'<span class="m">ไม่ระบุ / ไม่เคยขาย</span>':`<b class="${over?'ov':'okd'}">${n.toLocaleString()} วัน</b><div class="m ${over?'ov':''}">${over?'เกินเกณฑ์':'ไม่ถึงเกณฑ์'} ≥${lim}</div>`}</td><td>${ag}</td>
 <td>${chip(s[1],s[2].replace(/^s-/,''))}${r.autoNote?`<div class="m">${esc(r.autoNote)}</div>`:''}</td>
@@ -5083,7 +5083,7 @@ function renderNbs(){
     return`<tr class="${r.status==='done'?'acted':''}">
     <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div>${r.artGrp?`<div><dt>Art Grp :</dt><dd>${esc(r.artGrp)}</dd></div>`:''}</dl></div></td>
     <td data-l="Division"><div class="cbox"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></div></td>
-    <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td>
+    <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(qty2(r.stock)):'-'}</td>
     <td data-l="Location" class="small">${esc(r.loc||'-')}</td>
     <td data-l="Last Recv. Date" class="small num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td>
     <td data-l="Last Sold Date" class="small num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
@@ -5210,8 +5210,8 @@ async function nbsSave(){
   await act(()=>putItem('nbs',o),prev?'บันทึกการแก้ไขแล้ว':'เพิ่มรายการแล้ว');
 }
 function nbsTable(whole){
-  const rows=[['division','department','item_no','description','barcode','stock','location','last_recv_date','last_sold_date','nbs_days','nbs_threshold','aging_status','aging_type','days_to_next_status','next_status','status','buyer_uid','remark','created_at']];
-  nbsFiltered(whole===true).forEach(r=>rows.push([r.division,r.dept||'',r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',nbsOver(r)?'เกินเกณฑ์':'ยังไม่ถึงเกณฑ์',(()=>{const a=agingInfo(r);return a.level!=null?AGING_LV[a.level][0]:r.aging||''})(),agingInfo(r).name,agingInfo(r).left??'',agingInfo(r).next?agingInfo(r).next[0]:'',nStat(r.status)[1],nbsBuyerUid(r),r.remark||'',r.createdAt||'']));
+  const rows=[['division','department','item_no','description','barcode','stock','location','last_recv_date','last_sold_date','nbs_days','nbs_threshold','aging_status','aging_type','days_to_next_status','next_status','status','buyer_uid','remark','created_at','next_status_date']];
+  nbsFiltered(whole===true).forEach(r=>rows.push([r.division,r.dept||'',r.itemNo,r.desc,r.barcode||'',r.stock??'',r.loc||'',r.lastRecv||'',r.lastSale&&!r.lastSaleDerived?r.lastSale:'',r.lastSale?diffD(today(),fromIso(r.lastSale)):'',nbsOver(r)?'เกินเกณฑ์':'ยังไม่ถึงเกณฑ์',(()=>{const a=agingInfo(r);return a.level!=null?AGING_LV[a.level][0]:r.aging||''})(),agingInfo(r).name,agingInfo(r).left??'',agingInfo(r).next?agingInfo(r).next[0]:'',nStat(r.status)[1],nbsBuyerUid(r),r.remark||'',r.createdAt||'',agingInfo(r).next?iso(addD(today(),agingInfo(r).left)):'']));
   return rows}
 function nbsCSV(whole){const w=whole===true;if(!nbsFiltered(w).length){toast('ไม่มีรายการให้ส่งออก');return}dl(`item-nbs_${iso(today())}.csv`,toCSV(nbsTable(w)),'text/csv;charset=utf-8',()=>nbsPDF(w))}
 $('#nbsAdd').onclick=()=>nbsOpen(null);
@@ -5267,6 +5267,7 @@ function toIsoDate(v){
   return''}
 const cleanNo=v=>{let s=String(v??'').trim();if(/^\d+\.0+$/.test(s))s=s.replace(/\.0+$/,'');return s};
 const numOr=v=>{const n=parseFloat(String(v??'').replace(/,/g,''));return isNaN(n)?'':n};
+function qty2(v){return typeof v==='number'?String(Math.round(v*100)/100):v} /* a quantity at most 2 decimals (Aging Qty 426.348999023438 -> 426.35) */
 function divFromName(s){const m=String(s||'').match(/(^|[^a-z])(ff|df|nf)([^a-z]|$)/i);return m?m[2].toUpperCase():divFrom(s)}
 function parseWorkbook(wb,fileName,defDiv){
   const recs=new Map(),info={sheets:[],skipped:0,cols:{},byDivSource:{},divVals:{},badDiv:0,bsrc:{file:0,rule:0,unknown:0,none:0},buyerUnknown:{}};
