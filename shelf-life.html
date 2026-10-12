@@ -4637,13 +4637,37 @@ function nbsBuyerMap(check){
   if(!check&&NBSB)return NBSB.map; /* per-row lookups reuse the map; nbsFiltered() (every list, search, export and PDF starts there) re-checks whether the other pages' data changed */
   const oos=st.oos||[];let h=oos.length;
   oos.forEach(o=>{const u=String(o.itemNo||'')+'|'+String(o.buyerUid||'');for(let i=0;i<u.length;i++)h=(h*31+u.charCodeAt(i))|0});
-  const key=h+':'+IL_REV.neg+':'+IL_REV.dms+':'+(ILT.neg?ILT.neg.rows.length:0)+':'+(ILT.dms?ILT.dms.rows.length:0);
+  const cs=ctSig();let ch=cs.length;for(let i=0;i<cs.length;i++)ch=(ch*31+cs.charCodeAt(i))|0; /* the Buyer / Commercial list: a changed contact or rule re-decides the Buyers found by Art Grp */
+  const key=h+':'+IL_REV.neg+':'+IL_REV.dms+':'+(ILT.neg?ILT.neg.rows.length:0)+':'+(ILT.dms?ILT.dms.rows.length:0)+':'+ch+':'+(ICS?ICS.size:0)+':'+(ITEMCLS?ITEMCLS.size:0);
   if(NBSB&&NBSB.key===key)return NBSB.map;
   const m=new Map(),put=(no,u)=>{u=String(u||'').trim();const k=amNum(no);if(u&&k&&!m.has(k))m.set(k,u)};
   oos.forEach(o=>put(o.itemNo,o.buyerUid));
   ['dms','neg'].forEach(p=>{const d=ILT[p];if(d&&d.rows)d.rows.forEach(x=>put(x.i,x.by))});
-  NBSB={key,map:m};return m}
-function nbsBuyerUid(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))||''}
+  NBSB={key,map:m,rule:new Map()};return m}
+/* item_class.json: item -> Dept / Art Grp (Class) / Art Grp Sub No / Buyer UID (Fresh Food) for the items the store holds stock of, built from the item master (Barcode.csv) and the ItemList_Layout. It is what lets every Item NBS row find its Art Grp,
+   and the Art Grp finds the Buyer in Buyer / Commercial. A Barcode.csv imported in this browser (ITEMCLS) is used first. */
+var ICS=null;
+function icsFromJson(j){const m=new Map(),u=j.u||[];for(const k in j.i){const e=j.i[k];m.set(amNum(k),{d:String(e[0]),g:String(e[1]),s:e[2]?String(e[2]):'',u:e.length>3?(u[e[3]]||''):''})}return m}
+function loadItemClassSnap(){
+  if(ICS!==null||!onMakroSite())return;ICS=new Map();
+  fetch('item_class.json').then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.i)return;ICS=icsFromJson(j);try{if(!$('#t-nbs').hidden)renderNbs()}catch(e){}}).catch(()=>{});
+}
+/* Buyer of a row that has none of its own and none from the OOS+ / ItemList pages: the Art Grp of the item -> the Buyer who holds that Art Grp in Buyer / Commercial ("Art Grp No." / สินค้าที่ดูแล rules, the Sub No when several Buyers share an Art Grp);
+   when the rules cannot decide, the Buyer the ItemList gave the item. Nothing is written: change Buyer / Commercial and this follows. */
+function nbsRuleInfo(r){
+  const k=amNum(r.itemNo);if(!k)return{u:'',src:''};
+  nbsBuyerMap();const memo=NBSB&&NBSB.rule,key=(r.division||'')+'|'+k+'|'+(r.artGrp||'')+'|'+(r.dept||'')+'|'+(r.artSub?1:0);
+  if(memo&&memo.has(key))return memo.get(key);
+  const m=(ITEMCLS&&ITEMCLS.get(k))||(ICS&&ICS.get(k))||null,own=!r.artSub?String(r.artGrp||'').trim():'',cls=own||(m?m.g:''),sub=m?m.s:'';
+  let u='',src='';
+  const rec={...r,artGrp:cls,artSub:false,subNo:sub};
+  u=buyerFor(rec)||buyerFor({...rec,division:''})||(cls?buyerBySub(r.itemNo,cls):'');
+  if(u)src=cls?'ตาม Art Grp '+cls+' ใน Buyer / Commercial':'ตามกฎใน Buyer / Commercial';
+  else if(m&&m.u){u=m.u;src='ตามข้อมูล ItemList'+(cls?' (Art Grp '+cls+')':'')}
+  const o={u,src};if(memo)memo.set(key,o);return o;
+}
+function nbsBuyerUid(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))||nbsRuleInfo(r).u||''}
+function nbsBuyerNote(r){return r.buyerUid?'':nbsBuyerMap().get(amNum(r.itemNo))?'ตามข้อมูล OOS+ / ItemList':nbsRuleInfo(r).src}
 /* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
 function nbsFiltered(whole){
   nbsBuyerMap(true);
@@ -5063,6 +5087,7 @@ function nbsBannerUpdate(open,nOver){
 }
 function renderNbs(){
   if(!$('#nbsBody'))return;
+  loadItemClassSnap();
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',!!nbsColF[b.dataset.f]));
   const rows=st.nbs||[],cnt={FF:0,DF:0,NF:0},open=rows.filter(r=>r.status!=='done');open.forEach(r=>{cnt[r.division]=(cnt[r.division]||0)+1});const ov={};open.forEach(r=>{if(nbsOver(r))ov[r.division]=(ov[r.division]||0)+1});
   $('#nbsTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>`<button type="button" class="tile dv dv-${k.toLowerCase()}${nbsFilterDiv===k?' sel':''}" data-div="${k}"><span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span><b>${(cnt[k]||0).toLocaleString()}</b><span class="muted small"><span class="tl">รายการที่ยังไม่ปิดงาน</span><span class="ts">ยังไม่ปิดงาน</span>${ov[k]?`<span class="tl"> · </span><span class="err-text">เกินเกณฑ์ NBS ${ov[k].toLocaleString()}</span>`:''}</span></button>`).join('');
@@ -5090,7 +5115,7 @@ function renderNbs(){
     <td data-l="ไม่มียอดขาย (NBS)" class="num">${nbsDaysText(r)}</td>
     <td data-l="Aging Status"><div class="cbox">${nbsAgingText(r)}</div></td>
     <td data-l="สถานะ"><div class="cbox"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</div></td>
-    <td data-l="Buyer" class="small">${bu?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(bu)}"><b>${esc(String(bu).slice(0,14))}${String(bu).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}${!r.buyerUid&&bu?`<div class="muted small bsrc">ตามข้อมูล OOS+ / ItemList</div>`:''}</td>
+    <td data-l="Buyer" class="small">${bu?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(bu)}"><b>${esc(String(bu).slice(0,14))}${String(bu).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}${!r.buyerUid&&bu?`<div class="muted small bsrc">${esc(nbsBuyerNote(r))}</div>`:''}</td>
     <td data-l="Remark" class="small">${r.remark?`<div class="redbox">${esc(r.remark)}</div>`:'<span class="muted">-</span>'}</td>
     <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}<div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
