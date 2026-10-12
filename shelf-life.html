@@ -968,7 +968,7 @@ label.has-scan{position:relative}
       <label class="f-q">ค้นหา<input id="nbsQ" placeholder="รหัส / ชื่อ / Buyer UID / ที่ตั้ง / Remark"></label>
       <label>สถานะ<select id="nbsFSt"><option value="">ทั้งหมด</option></select></label>
       <label>ระดับ Aging<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="nbs">เกินเกณฑ์ NBS</option><option value="l1">Alert ขึ้นไป</option><option value="l2">Attention ขึ้นไป</option><option value="l3">Critical ขึ้นไป</option><option value="l4">Obsolete ขึ้นไป</option><option value="l5">Full Provision</option><option value="e1">เฉพาะ Alert</option><option value="e2">เฉพาะ Attention</option><option value="e3">เฉพาะ Critical</option><option value="e4">เฉพาะ Obsolete</option><option value="e5">เฉพาะ Full Provision</option></select></label>
-      <label>นับอายุ Aging จาก<select id="nbsBasis"><option value="sold">วันที่ไม่มียอดขาย (Last Sold)</option><option value="recv">วันที่รับสินค้าล่าสุด (Last Recv.)</option></select></label>
+      <label>นับอายุ Aging จาก<select id="nbsBasis"><option value="recv">วันที่รับสินค้าล่าสุด (Last Recv.) — ตามกฎ Makro</option><option value="sold">วันที่ไม่มียอดขาย (Last Sold)</option></select></label>
       <div class="f-act">
         <label class="f-chk"><input type="checkbox" id="nbsHide"> ซ่อนที่แก้ไขแล้ว</label>
         <button type="button" class="btn w" id="nbsArtImport" title="นำเข้าตาราง Item → Art Grp แล้วกำหนด Buyer ให้ตามเลข Art Grp" onclick="openImportArt()">นำเข้า Item → Art Grp</button>
@@ -4582,16 +4582,33 @@ const AGING_TYPES={1:{n:'Dry Food',t:[45,90,120,150,180]},2:{n:'Nonfood',t:[90,1
   7:{n:'Nonfood Professional',t:[150,180,240,270,360]},8:{n:'Bakery',t:[45,90,120,150,180]},9:{n:'DRY (FS Professional)',t:[90,120,180,210,240]}};
 const AGING_LV=[['ปกติ','ok'],['Alert','md1'],['Attention','md2'],['Critical','pull'],['Obsolete','obs'],['Full Provision','full']],AGING_PROV=[0,0,0,25,50,100];
 const AGING_DEF={FF:4,DF:1,NF:2},NBS_LIMIT={FF:5,DF:7,NF:10};
-let agingBasis='sold';try{agingBasis=localStorage.getItem('shelfLifeMonitor.agingBasis')==='recv'?'recv':'sold'}catch(e){}
+/* Makro's rule: the Aging status counts the days since the Last Recv. Date (default; "sold" stays as an option). The key is new so an old "sold" choice saved by this browser does not override the rule. */
+let agingBasis='recv';try{agingBasis=localStorage.getItem('shelfLifeMonitor.agingBasis2')==='sold'?'sold':'recv'}catch(e){}
 function parseAgingType(v){
   const s=String(v??'').trim().toLowerCase();if(!s)return'';if(/^[1-9]$/.test(s))return+s;
   if(/bakery/.test(s))return 8;if(/fresh|egg/.test(s))return 4;if(/chilled|spice/.test(s))return 6;if(/frozen/.test(s))return 3;
   if(/non.?food/.test(s))return /pro/.test(s)?7:2;if(/dry/.test(s))return /fr.*pro/.test(s)?5:/fs.*pro/.test(s)?9:1;return'';
 }
-/* default Aging Type follows the group only (FF=Fresh & Egg, DF=Dry Food, NF=Nonfood); a type set on the item itself always wins */
+/* Aging Type of an item, in this order:
+   1. its own (typed on the item, or an Aging Type column of the file);
+   2. read back from the file's Aging Status ("2-AT" = level 2) and its Last Recv. Date: Makro's Aging Stock report gives every receipt its status as the age since "Last received" against the table above
+      (checked on the 82,556 rows of a real report: 99.99% fit), so the level pins down which row of the table the item is on. The report is a few days old when imported, so the age is tried at 0-4 days earlier than the import day;
+   3. the default of its group / department (FF: Bakery 8, Frozen & Dairy 3, Fruit & Veg 6, else Fresh & Egg 4; DF Dry Food 1; NF Nonfood 2). */
+function agingOrder(r){ /* the types to try, most likely first, for the item's group / department */
+  const d=String(r.dept||''),f=r.division;let o;
+  if(f==='FF')o=/bakery/i.test(d)?[8,1]:/frozen|dairy/i.test(d)?[3,6,4]:/fruit|veg/i.test(d)?[6,4,3]:[4,6,3];
+  else if(f==='NF')o=[2,7,3];else o=[1,5,9,2];
+  return o.concat([1,2,3,4,5,6,7,8,9].filter(t=>o.indexOf(t)<0));
+}
+function agingDefaultType(r){return agingOrder(r)[0]}
+function agingFromFile(r){ /* the first type (in the order above) whose table gives the file's level at the item's age */
+  const m=/^\s*([1-5])\s*-/.exec(String(r.aging||''));if(!m||!/^\d{4}-\d{2}-\d{2}$/.test(String(r.lastRecv||'')))return 0;
+  const lv=+m[1],ib=/^\d{4}-\d{2}-\d{2}/.test(String(r.importRun||r.createdAt||''))?fromIso(String(r.importRun||r.createdAt).slice(0,10)):today(),a0=diffD(ib,fromIso(r.lastRecv));
+  return agingOrder(r).find(t=>{for(let lag=0;lag<=4;lag++){const age=a0-lag;if(age>=0&&AGING_TYPES[t].t.filter(x=>age>=x).length===lv)return true}return false})||0;
+}
 function agingTypeFor(r){
   if(AGING_TYPES[+r.agingType])return+r.agingType;
-  return AGING_DEF[r.division]||1;
+  return agingFromFile(r)||agingDefaultType(r);
 }
 function agingInfo(r){
   const type=agingTypeFor(r),T=AGING_TYPES[type].t;
@@ -4610,9 +4627,9 @@ function nbsDaysText(r){
 function nbsAgingText(r){
   const a=agingInfo(r),t=String(r.aging||'').trim();
   if(a.level==null)return t?`<span class="chip s-err">${esc(t)}</span><div class="muted small">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>`:'<span class="muted">-</span>';
-  const [lb,k]=AGING_LV[a.level],pv=AGING_PROV[a.level];
+  const [lb,k]=AGING_LV[a.level],pv=AGING_PROV[a.level],fm=/^\s*([1-5])\s*-/.exec(t),fnote=fm&&+fm[1]!==a.level?`<div class="muted small" title="สถานะในไฟล์ที่นำเข้า (นับถึงวันที่ออกรายงาน)">ไฟล์: ${esc(t)}</div>`:'';
   return`<span class="chip s-${k}">${lb}</span>${pv?`<div class="small" style="margin-top:2px"><b>Provision ${pv}%</b></div>`:''}<div class="muted small">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`
-    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> → <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">≈ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>');
+    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> → <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">≈ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>')+fnote;
 }
 /* Buyer shown for an Item NBS row: its own Buyer; otherwise the Buyer the same Item No has on the OOS+ page (buyer_uid) or in the ItemList_Layout loaded on High Stock to DMS / Negative Stock (Buyer column) — so every page shows the same Buyer for the same item. Nothing is written: change the other page's data and this follows. */
 var NBSB=null;
@@ -5204,7 +5221,7 @@ let nbsT;$('#nQ').oninput=()=>{clearTimeout(nbsT);nbsT=setTimeout(nbsSearch,150)
 $('#nResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)nbsPick(b.dataset.no)};
 const nbsRe=()=>{nbsLimit=200;renderNbs()};
 $('#nbsLevels').onclick=e=>{const b=e.target.closest('.lvb');if(!b)return;const v='e'+b.dataset.lv,sel=$('#nbsFAl');sel.value=sel.value===v?'':v;nbsRe();
-  if(sel.value){const t=document.querySelector('table.nbs-tbl');if(t)t.scrollIntoView({block:'start',behavior:'smooth'})}}; /* jump to the list of that level */$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsBasis').value=agingBasis;$('#nbsBasis').onchange=()=>{agingBasis=$('#nbsBasis').value;try{localStorage.setItem('shelfLifeMonitor.agingBasis',agingBasis)}catch(e){}nbsRe()};$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
+  if(sel.value){const t=document.querySelector('table.nbs-tbl');if(t)t.scrollIntoView({block:'start',behavior:'smooth'})}}; /* jump to the list of that level */$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsBasis').value=agingBasis;$('#nbsBasis').onchange=()=>{agingBasis=$('#nbsBasis').value;try{localStorage.setItem('shelfLifeMonitor.agingBasis2',agingBasis)}catch(e){}nbsRe()};$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
 $('#nbsFSt').innerHTML+=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
 $('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;nbsColF.div=null;nbsLimit=200;renderNbs()};
 $('#t-nbs thead').onclick=e=>{const b=e.target.closest('.fbtn');if(b)openFMenu(b)};
@@ -5294,6 +5311,8 @@ function parseWorkbook(wb,fileName,defDiv){
       if(!buyer){const ru=buyerFor({division:div,artGrp,artSub:sub,subNo,dept,desc,itemNo:no})||(!sub&&artGrp?buyerBySub(no,artGrp):'');if(ru){buyer=ru;bsrc='rule'}}
       if(sub&&artGrp)info.artSubRows=(info.artSubRows||0)+1;
       info.bsrc[bsrc||'none']++;
+      /* an Aging Stock report has one row per receipt of an item: keep the row with the latest Last Recv. Date (its status and quantity go with that date) */
+      const pvRec=recs.get(div+'|'+no);if(pvRec&&pvRec.lastRecv&&recv&&pvRec.lastRecv>recv){info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;continue}
       recs.set(div+'|'+no,{artSub:sub,division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
