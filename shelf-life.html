@@ -4659,15 +4659,20 @@ function nbsRuleInfo(r){
   nbsBuyerMap();const memo=NBSB&&NBSB.rule,key=(r.division||'')+'|'+k+'|'+(r.artGrp||'')+'|'+(r.dept||'')+'|'+(r.artSub?1:0);
   if(memo&&memo.has(key))return memo.get(key);
   const m=(ITEMCLS&&ITEMCLS.get(k))||(ICS&&ICS.get(k))||null,own=!r.artSub?String(r.artGrp||'').trim():'',cls=own||(m?m.g:''),sub=m?m.s:'';
-  let u='',src='';
-  const rec={...r,artGrp:cls,artSub:false,subNo:sub};
-  u=buyerFor(rec)||buyerFor({...rec,division:''})||(cls?buyerBySub(r.itemNo,cls):'');
-  if(u)src=cls?'ตาม Art Grp '+cls+' ใน Buyer / Commercial':'ตามกฎใน Buyer / Commercial';
-  else if(m&&m.u){u=m.u;src='ตามข้อมูล ItemList'+(cls?' (Art Grp '+cls+')':'')}
-  const o={u,src};if(memo)memo.set(key,o);return o;
+  const rec={...r,artGrp:cls,artSub:false,subNo:sub},ru=buyerFor(rec)||buyerFor({...rec,division:''})||(cls?buyerBySub(r.itemNo,cls):''),su=m&&m.u?m.u:'';
+  const rsrc=cls?'ตาม Art Grp '+cls+' ใน Buyer / Commercial':'ตามกฎใน Buyer / Commercial',ssrc='ตามข้อมูล ItemList'+(cls?' (Art Grp '+cls+')':'');
+  const same=(a,b)=>{if(a===b)return true;const ca=ctFindBuyer(a),cb=ctFindBuyer(b);return !!(ca&&cb&&ca.uid===cb.uid)};
+  let u='',src='',warn='';
+  /* item = Art Grp = Buyer must tell the same story. Both known and equal: fine. Both known and different: show the one that is a Buyer in Buyer / Commercial (the ItemList's, which is per item, when both are) and say so in red */
+  if(ru&&su){
+    if(same(ru,su)){u=ru;src=rsrc}
+    else{if(ctFindBuyer(su)){u=su;src=ssrc}else{u=ru;src=rsrc}warn='ไม่ตรงกัน: ItemList ระบุ '+su+' แต่ Buyer / Commercial จัด Art Grp '+cls+' ให้ '+ru}
+  }else if(ru){u=ru;src=rsrc}else if(su){u=su;src=ssrc}
+  const o={u,src,warn};if(memo)memo.set(key,o);return o;
 }
 function nbsBuyerUid(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))||nbsRuleInfo(r).u||''}
 function nbsBuyerNote(r){return r.buyerUid?'':nbsBuyerMap().get(amNum(r.itemNo))?'ตามข้อมูล OOS+ / ItemList':nbsRuleInfo(r).src}
+function nbsBuyerWarn(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))?'':nbsRuleInfo(r).warn||''}
 /* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
 function nbsFiltered(whole){
   nbsBuyerMap(true);
@@ -5115,7 +5120,7 @@ function renderNbs(){
     <td data-l="ไม่มียอดขาย (NBS)" class="num">${nbsDaysText(r)}</td>
     <td data-l="Aging Status"><div class="cbox">${nbsAgingText(r)}</div></td>
     <td data-l="สถานะ"><div class="cbox"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</div></td>
-    <td data-l="Buyer" class="small">${bu?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(bu)}"><b>${esc(String(bu).slice(0,14))}${String(bu).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}${!r.buyerUid&&bu?`<div class="muted small bsrc">${esc(nbsBuyerNote(r))}</div>`:''}</td>
+    <td data-l="Buyer" class="small">${bu?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(bu)}"><b>${esc(String(bu).slice(0,14))}${String(bu).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}${!r.buyerUid&&bu?`<div class="muted small bsrc">${esc(nbsBuyerNote(r))}</div>`:''}${nbsBuyerWarn(r)?`<div class="small err-text bwarn">${esc(nbsBuyerWarn(r))}</div>`:''}</td>
     <td data-l="Remark" class="small">${r.remark?`<div class="redbox">${esc(r.remark)}</div>`:'<span class="muted">-</span>'}</td>
     <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}<div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
