@@ -5108,7 +5108,7 @@ async function ilDelClick(e){
 function shrFileDetail(f){const i=f.info||{};return f.kind==='sales'?[i.store,i.period].filter(Boolean).map(esc).join(' · '):((i.months||[]).map(esc).join(', '))};
 
 function nbsBannerUpdate(open,nOver){
-  const bd=$('#nbsBadge');if(bd){bd.hidden=!open.length;bd.textContent=open.length.toLocaleString();bd.classList.toggle('late',nOver>0)} /* same badge as OOS+: all open items, red when some are over the NBS limit */
+  const bd=$('#nbsBadge');if(bd){bd.hidden=!open.length;bd.textContent=open.length.toLocaleString();bd.classList.toggle('late',open.length>0)} /* same badge as OOS+ / Negative Stock / High Stock to DMS: all open items, red whenever there are any (it was red only when some were over the NBS limit, so a list of Aging items showed blue next to a red OOS+) */
   const bn=$('#nbsBanner');if(!bn)return;
   bn.hidden=!open.length;bn.classList.toggle('late',nOver>0);
   $('#nbsBannerTxt').textContent=`Item NBS มีสินค้าไม่มียอดขาย ${open.length.toLocaleString()} รายการ${nOver?` · เกินเกณฑ์ NBS ${nOver.toLocaleString()} รายการ`:''}`;
