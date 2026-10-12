@@ -1894,9 +1894,9 @@ async function loadMakroData(){
       if(it.barcode)MF.bar.set(it.barcode,it.itemNo);it.n=normTh(it.desc)});
     Object.entries(alt||{}).forEach(([bc,no])=>{if(!MF.bar.has(bc))MF.bar.set(bc,String(no))});
     MF.images=imgs||{};MF.list=[...MF.items.values()];MF.state='ready';
-    loadMakroExtra();
+    loadMakroExtra();loadImagesExtra();
   }catch(e){MF.state='error';console.warn('Makro Finder data',e)}
-  renderMfStatus();renderDash();renderNbs();
+  renderMfStatus();renderDash();renderNbs();refreshCardPages();
 }
 /* Item Master items that have no shelf location yet (many fresh items live only here) — large file, loaded after the main list */
 async function loadMakroExtra(){
@@ -3220,7 +3220,7 @@ function oosFactsHtml(r){
   if(r.dmsNote)out.push(`<div class="muted small">${esc(r.dmsNote)}</div>`);
   return out.join('')}
 function oosCard(r,ctx){
-  const dv=oosDiv(r,ctx),lv=oosLevel(r),k=esc(r._id),s=OOS_ST[r.status]||OOS_ST.need,th=(MF.images&&MF.images[r.itemNo])||'',ph=String(r.img||'').startsWith('img:')?imgData(String(r.img).slice(4)):'';
+  const dv=oosDiv(r,ctx),lv=oosLevel(r),k=esc(r._id),s=OOS_ST[r.status]||OOS_ST.need,th=imageOf(r.itemNo),ph=String(r.img||'').startsWith('img:')?imgData(String(r.img).slice(4)):'';
   const age=r.status==='done'?`<span class="muted small">ใช้เวลา ${oosDur(((r.doneAt?new Date(r.doneAt).getTime():Date.now())-oosMs(r))/36e5)}${r.doneAt?' · เติมเมื่อ '+oosFmt(oosDoneMs(r)):''}</span>`
     :`<span class="chip s-${lv==='late'?'pull':lv==='warn'?'md2':'ok'}">ค้าง ${oosDur(oosHours(r))}</span>`;
   const acts=r.status==='need'?`<button type="button" class="btn pri sm" onclick="oosStart('${k}')">เริ่มเติม</button><button type="button" class="btn sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button>`
@@ -3849,7 +3849,7 @@ function shrChartHtml(rows,b){
   return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · รวม ${shrBaht(tot)} จาก ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
 const shrComHtml=it=>{if(!it.coms.length)return'<div class="muted small">ยังไม่ทราบ Buyer / Commercial</div>';const t=c=>String(c.dept||'').split(' · ')[0];return`<div class="small">Commercial: ${it.coms.map(c=>`<b>${esc(c.name)}</b>${t(c)?` <span class="muted">(${esc(t(c))})</span>`:''}`).join('  /  ')}<div class="muted small">ไม่มี Buyer คนเดียวที่ดูแล Class นี้ — แสดง Commercial ของ Buyer ที่ดูแลร่วมกัน</div></div>`};
 function shrCard(it,b){
-  const lv=shrLevel(it,b),th=(MF.images&&MF.images[it.itemNo])||'',k=esc(it._id),v=shrVal(it,b),r=shrRate(it);
+  const lv=shrLevel(it,b),th=imageOf(it.itemNo),k=esc(it._id),v=shrVal(it,b),r=shrRate(it);
   const LV={late:['ทิ้งหนัก','pull'],warn:['ทิ้งปานกลาง','md2'],ok:['ทิ้งเล็กน้อย','ok'],done:['ไม่ได้ทิ้ง','ok']}[lv];
   const bits=[];
   if(it.amt!=null){bits.push(`<span>${it.amt<0?'ทิ้ง':'ได้คืน'} MTD <b class="${it.amt<0?'c-md2':''}">${shrBaht(Math.abs(it.amt))}</b></span>`)}
@@ -4024,12 +4024,28 @@ $('#snSave').onclick=async()=>{$('#snList').querySelectorAll('input[data-rc]').f
 /* %Shrink only needs the product pictures: fetch that small file instead of the whole item-location workbook (seconds of parsing) that the other tabs load */
 /* Barcode under the Item No on every card (OOS+, %Shrink, Negative Stock, High Stock to DMS; Item NBS already shows it): the record's own barcode (OOS+ report), else Makro Finder's item data when it is loaded,
    else item_barcodes.json (item -> barcode, built from the item-location file + Item Master + alternate barcodes; a small file fetched once, not the big workbook). Unknown = a muted dash, shown once the data is in. */
+/* picture of an item: found by Item No with or without leading zeros. The card pages are drawn again when the pictures / barcodes arrive (before, a card drawn first kept its grey placeholder until something else redrew the page) */
+var IMGN=null,IMGN_SRC=null,IMX=null,IM0={};
+/* IMX = item_images_extra.json: pictures taken from the makro.pro web shop (by Item No, else by Barcode) for items item_images.json does not have; it only fills the gaps */
+function imageOf(no){
+  const im=MF.images||IM0;
+  const n=String(no==null?'':no).trim();
+  if(im[n])return im[n];
+  if(IMGN_SRC!==im){IMGN_SRC=im;IMGN=new Map();for(const k in im)IMGN.set(amNum(k),im[k])}
+  return IMGN.get(amNum(n))||(IMX&&IMX.get(amNum(n)))||'';
+}
+function loadImagesExtra(){
+  if(IMX!==null||!onMakroSite())return;IMX=new Map();
+  fetch('item_images_extra.json').then(r=>r.ok?r.json():{}).then(j=>{const m=new Map();for(const k in (j||{}))if(j[k])m.set(amNum(k),j[k]);IMX=m;refreshCardPages();try{renderNbs()}catch(e){}}).catch(()=>{});
+}
+function refreshCardPages(){
+  try{if(!$('#t-oos').hidden)renderOos();if(!$('#t-shr').hidden)renderShr();['neg','dms'].forEach(p=>{if(!$('#t-'+p).hidden)renderIlt(p)})}catch(e){}
+}
 var IBC=null,IBC_STATE='';
-function loadItemBarcodes(){if(IBC===null&&onMakroSite())fetchItemBarcodes()}
+function loadItemBarcodes(){loadImagesExtra();if(IBC===null&&onMakroSite())fetchItemBarcodes()}
 function fetchItemBarcodes(){
   IBC={};IBC_STATE='loading';
-  fetch('item_barcodes.json').then(r=>r.ok?r.json():{}).then(j=>{IBC=j||{};IBC_STATE='ready';
-    try{if(!$('#t-oos').hidden)renderOos();if(!$('#t-shr').hidden)renderShr();['neg','dms'].forEach(p=>{if(!$('#t-'+p).hidden)renderIlt(p)})}catch(e){}}).catch(()=>{IBC_STATE='error'});
+  fetch('item_barcodes.json').then(r=>r.ok?r.json():{}).then(j=>{IBC=j||{};IBC_STATE='ready';refreshCardPages()}).catch(()=>{IBC_STATE='error'});
 }
 function barcodeOf(no,own){
   const o=String(own==null?'':own).trim();if(o)return o;
@@ -4042,7 +4058,7 @@ function bcLine(no,own){
 }
 function loadMakroImages(){
   if(!onMakroSite()||MF.state!=='idle'||MF.imgOnly)return;MF.imgOnly=true;
-  fetch('item_images.json').then(r=>r.ok?r.json():{}).then(j=>{if(MF.state!=='ready'){MF.images=j||{};if(!$('#t-shr').hidden)renderShr()}}).catch(()=>{});
+  fetch('item_images.json').then(r=>r.ok?r.json():{}).then(j=>{if(MF.state!=='ready'){MF.images=j||{};refreshCardPages()}}).catch(()=>{});
 }
 function pinCompact(el){
   if(!el)return;const sp=document.createElement('div');sp.style.cssText='height:0;margin:0;padding:0;pointer-events:none';el.parentNode.insertBefore(sp,el);
@@ -4287,7 +4303,7 @@ function ilChartHtml(p,rows){
   const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(Math.min(m,cap)/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${val(it)}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการในมุมมองนี้</p>';
   return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
 function ilCard(p,it){
-  const r=it.r,lv=ilLevel(it,p),th=(MF.images&&MF.images[it.itemNo])||'',k=esc(it._id),by=it.by?((IL_MEMO[p]&&IL_MEMO[p].buyers.get(it.by))||''):'';
+  const r=it.r,lv=ilLevel(it,p),th=imageOf(it.itemNo),k=esc(it._id),by=it.by?((IL_MEMO[p]&&IL_MEMO[p].buyers.get(it.by))||''):'';
   const status=r.st?`<span class="chip ${/discontinu/i.test(r.st)?'s-md1':'s-ok'}">${esc(r.st)}</span>`:'';
   const dates=`<span>ขายล่าสุด ${ilD(r.ls)||'-'}</span><span>รับล่าสุด ${ilD(r.ld)||'-'}</span>${r.pr?`<span>ราคา ${shrBaht(r.pr)}</span>`:''}`;
   let head,facts;
@@ -4634,7 +4650,7 @@ function nbsPDFHtml(photos=true,whole=false){
   const body=all.map(r=>{
     const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),bu=nbsBuyerUid(r),b=st.contacts.find(x=>x.uid===bu),c=r.createdAt?new Date(r.createdAt):null;
     const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${esc(a.next[0])}</div>`:'<div class="m">ถึงสถานะสูงสุดแล้ว</div>'):(String(r.aging||'').trim()?chip(String(r.aging).trim(),'err')+'<div class="m">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>':'-');
-    const img=photos?(r.img||(MF.images&&MF.images[r.itemNo])||''):'';
+    const img=photos?(r.img||imageOf(r.itemNo)):'';
     return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(img)}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div>${r.artGrp?`<div class="m">Art Grp ${esc(r.artGrp)}</div>`:''}</div></div></td>
 <td class="ctr">${pdfDivChip(r.division)}</td><td class="num">${r.stock!==''&&r.stock!=null?esc(r.stock):'-'}</td><td>${esc(r.loc||'-')}</td>
 <td class="num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td class="num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
@@ -5046,7 +5062,7 @@ function renderNbs(){
   const list=all.slice(0,nbsLimit);
   $('#nbsEmpty').hidden=all.length>0||mode==='init';
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
-  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,bu=nbsBuyerUid(r),b=st.contacts.find(x=>x.uid===bu),img=r.img||(MF.images&&MF.images[r.itemNo])||'';
+  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,bu=nbsBuyerUid(r),b=st.contacts.find(x=>x.uid===bu),img=r.img||imageOf(r.itemNo);
     return`<tr class="${r.status==='done'?'acted':''}">
     <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div>${r.artGrp?`<div><dt>Art Grp :</dt><dd>${esc(r.artGrp)}</dd></div>`:''}</dl></div></td>
     <td data-l="Division"><div class="cbox"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></div></td>
