@@ -3226,7 +3226,7 @@ function oosCard(r,ctx){
   const acts=r.status==='need'?`<button type="button" class="btn pri sm" onclick="oosStart('${k}')">เริ่มเติม</button><button type="button" class="btn sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button>`
     :r.status==='doing'?`<button type="button" class="btn pri sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button><button type="button" class="btn sm" onclick="oosBack('${k}')">กลับเป็นต้องเติม</button>`
     :`<button type="button" class="btn sm" onclick="oosBack('${k}')">เปิดใหม่ (ต้องเติม)</button>`;
-  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div><div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}',this)">ดู Stock</button></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div>${bcLine(r.itemNo,r.barcode)}<div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}',this)">ดู Stock</button></div>
     <div class="oosc-m">${dv?`<span class="chip div-${dv.toLowerCase()}">${dv}</span>`:''}${r.bucket&&OOS_BK[r.bucket]?`<span class="chip s-${OOS_BK[r.bucket][2]}">${esc(OOS_BK[r.bucket][0])}</span>`:''}<span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
     ${oosFactsHtml(r)}
     <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
@@ -3858,7 +3858,7 @@ function shrCard(it,b){
   const rsl=[...it.rs.entries()].sort((a,c)=>a[1].c-c[1].c),mx=Math.max(1,...rsl.map(([,x])=>Math.abs(x.c)));
   const rsHtml=rsl.length?`<div class="shr-rs" title="แยกตามรหัสเหตุผล (By Code)">`+rsl.map(([rc,x])=>`<span class="shr-r"><em>${esc(shrRs(rc))}</em><i style="--w:${Math.max(4,Math.round(Math.abs(x.c)/mx*100))}%;--c:${x.c<0?'#d6453d':'#2e8b57'}"></i><b class="${x.c<0?'c-md2':''}">${x.c<0?'':'+'}${shrBaht(x.c)}</b><small>${x.q.toLocaleString(undefined,{maximumFractionDigits:1})} ชิ้น</small></span>`).join('')+`<span class="muted small">รวมตามรหัส <b>${it.cc<0?'':'+'}${shrBaht(it.cc)}</b> · ${it.cq.toLocaleString(undefined,{maximumFractionDigits:1})} ชิ้น</span></div>`:'';
   const by=it.buyer?((SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||''):'';
-  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div><div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}',this)">ดู Stock</button></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}',this)">ดู Stock</button></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
     ${bits.length?`<div class="oosc-f small">${bits.join('')}</div>`:''}${rsHtml}
     ${it.buyer?`<div class="small">Buyer: <b>${esc(by||it.buyer)}</b>${by?` <span class="muted">(${esc(it.buyer)})</span>`:''}</div>`:shrComHtml(it)}</div>`}
@@ -4022,6 +4022,24 @@ $('#shrNames').onclick=openShrNames;$('#snCancel').onclick=()=>$('#dlgShNm').clo
 $('#snSave').onclick=async()=>{$('#snList').querySelectorAll('input[data-rc]').forEach(i=>{const v=i.value.trim(),rc=i.dataset.rc;if(v===(SHR_RS0[rc]||''))delete SHR.names[rc];else SHR.names[rc]=v});SHR_REV++;shrSave();$('#dlgShNm').close();renderShr();toast('บันทึกชื่อรหัสเหตุผลแล้ว')};
 /* FF / DF / NF tiles stay under the tab bar while the list scrolls; once pinned they shrink to one thin line (group · number · what it is) so they hide as little as possible */
 /* %Shrink only needs the product pictures: fetch that small file instead of the whole item-location workbook (seconds of parsing) that the other tabs load */
+/* Barcode under the Item No on every card (OOS+, %Shrink, Negative Stock, High Stock to DMS; Item NBS already shows it): the record's own barcode (OOS+ report), else Makro Finder's item data when it is loaded,
+   else item_barcodes.json (item -> barcode, built from the item-location file + Item Master + alternate barcodes; a small file fetched once, not the big workbook). Unknown = a muted dash, shown once the data is in. */
+var IBC=null,IBC_STATE='';
+function loadItemBarcodes(){if(IBC===null&&onMakroSite())fetchItemBarcodes()}
+function fetchItemBarcodes(){
+  IBC={};IBC_STATE='loading';
+  fetch('item_barcodes.json').then(r=>r.ok?r.json():{}).then(j=>{IBC=j||{};IBC_STATE='ready';
+    try{if(!$('#t-oos').hidden)renderOos();if(!$('#t-shr').hidden)renderShr();['neg','dms'].forEach(p=>{if(!$('#t-'+p).hidden)renderIlt(p)})}catch(e){}}).catch(()=>{IBC_STATE='error'});
+}
+function barcodeOf(no,own){
+  const o=String(own==null?'':own).trim();if(o)return o;
+  const n=String(no==null?'':no).trim(),m=MF.items.get(n)||MF.items.get(amNum(n));if(m&&m.barcode&&amNum(m.barcode)!==amNum(n))return m.barcode;
+  return(IBC&&IBC[amNum(n)])||'';
+}
+function bcLine(no,own){
+  const b=barcodeOf(no,own);
+  return b?`<div class="muted small bc-line">Barcode <b>${esc(b)}</b></div>`:(IBC_STATE==='ready'||MF.state==='ready'?'<div class="muted small bc-line">Barcode <b>-</b></div>':'');
+}
 function loadMakroImages(){
   if(!onMakroSite()||MF.state!=='idle'||MF.imgOnly)return;MF.imgOnly=true;
   fetch('item_images.json').then(r=>r.ok?r.json():{}).then(j=>{if(MF.state!=='ready'){MF.images=j||{};if(!$('#t-shr').hidden)renderShr()}}).catch(()=>{});
@@ -4293,7 +4311,7 @@ function ilCard(p,it){
       ${rate}${it.trend&&(it.trend>=1.3||it.trend<=.7)?`<div class="small">${it.trend>=1.3?'<b class="c-md2">ขายเร่งขึ้น</b>':'<b>ขายชะลอลง</b>'} เดือนนี้ ${Math.round(it.trend*100)}% ของ DMS เฉลี่ย</div>`:''}${gapTxt}${ord}
       <div class="oosc-f small muted">${dates}</div>
       <div class="small"><b>แนะนำ:</b> ${TR[2]}</div>`}
-  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn):''}</div><div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}',this)">ดู Stock</button></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><button type="button" class="btn sm stk" onclick="oosStock('${k}',this)">ดู Stock</button></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}${status}${head}</div>${facts}
     ${it.by?`<div class="small">Buyer: <b>${esc(by||it.by)}</b>${by?` <span class="muted">(${esc(it.by)})</span>`:''}</div>`:'<div class="muted small">ไม่มี Buyer ในรายงาน</div>'}</div>`}
 function ilSrc(p){const d=ILT[p],nd=d?d.rows.filter(r=>p==='neg'?(r.a<=-0.1&&!/^active$/i.test(r.st)&&!r.sh):(/discontinu/i.test(r.st)&&!r.sh)).length:0;return d?`<span>ไฟล์: <b>${esc(d.name)}</b>${d.store?' · '+esc(d.store):''}${d.asOf?' · ข้อมูลเมื่อ '+ilD(d.asOf)+' '+String(new Date(d.asOf).getHours()).padStart(2,'0')+'.'+String(new Date(d.asOf).getMinutes()).padStart(2,'0')+' น.':''} · ${d.rows.length.toLocaleString()} รายการ${nd&&(p==='neg'||!$('#'+p+'Disc').checked)?` · ไม่นับ ${p==='neg'?'ที่ไม่ใช่ Active':'Discontinued'} ${nd.toLocaleString()}`:''}${d.info&&d.info.shared?` · สต็อกร่วม (~) ${d.info.shared.toLocaleString()}`:''}${p==='dms'?` · Stock สูง = เกิน ${IL_T} วันของยอดขายจริง`:''}</span>`:''}
@@ -5424,7 +5442,7 @@ $('#q').oninput=renderDash;$('#pQ').oninput=renderProd;try{const sv=localStorage
 $('#pSort').onchange=()=>{try{localStorage.setItem('slm.pSort',$('#pSort').value)}catch(e){}renderProd()};
 $('#thShelf').onclick=()=>{const s=$('#pSort');s.value=s.value==='shelf-asc'?'shelf-desc':'shelf-asc';s.onchange()};$('#fSt').onchange=()=>{tileFilter='';renderDash()};$('#fHide').onchange=renderDash;
 $('#tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;tileFilter=tileFilter===t.dataset.k?'':t.dataset.k;$('#fSt').value='';renderDash()};
-$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;try{b.scrollIntoView({block:'nearest',inline:'nearest'})}catch(_){}document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs'||b.dataset.tab==='oos')loadMakroData();if(b.dataset.tab==='shr'||b.dataset.tab==='neg'||b.dataset.tab==='dms')loadMakroImages();if(b.dataset.tab==='nbs')renderNbs();if(b.dataset.tab==='oos')renderOos();if(b.dataset.tab==='shr')renderShr();if(b.dataset.tab==='neg'||b.dataset.tab==='dms')renderIlt(b.dataset.tab)};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;try{b.scrollIntoView({block:'nearest',inline:'nearest'})}catch(_){}document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='t-'+b.dataset.tab);if(b.dataset.tab==='dash')renderDash();if(b.dataset.tab==='add'||b.dataset.tab==='nbs'||b.dataset.tab==='oos')loadMakroData();if(b.dataset.tab==='shr'||b.dataset.tab==='neg'||b.dataset.tab==='dms')loadMakroImages();if(['oos','shr','neg','dms'].includes(b.dataset.tab))loadItemBarcodes();if(b.dataset.tab==='nbs')renderNbs();if(b.dataset.tab==='oos')renderOos();if(b.dataset.tab==='shr')renderShr();if(b.dataset.tab==='neg'||b.dataset.tab==='dms')renderIlt(b.dataset.tab)};
 if(onMakroSite()){$('#appLogo').hidden=false;$('#backMf').hidden=false;$('#mfBox').hidden=false;renderMfStatus()}
 /* came from Makro Finder in this tab → go back in history so its page/search state is kept */
 $('#backMf').onclick=e=>{try{const r=new URL(document.referrer);if(r.origin===location.origin&&r.pathname.replace(/index\.html$/,'')===new URL('./',location.href).pathname&&history.length>1){e.preventDefault();history.back()}}catch(x){}};
