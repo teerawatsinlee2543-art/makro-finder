@@ -4025,7 +4025,7 @@ $('#snSave').onclick=async()=>{$('#snList').querySelectorAll('input[data-rc]').f
 /* Barcode under the Item No on every card (OOS+, %Shrink, Negative Stock, High Stock to DMS; Item NBS already shows it): the record's own barcode (OOS+ report), else Makro Finder's item data when it is loaded,
    else item_barcodes.json (item -> barcode, built from the item-location file + Item Master + alternate barcodes; a small file fetched once, not the big workbook). Unknown = a muted dash, shown once the data is in. */
 /* picture of an item: found by Item No with or without leading zeros. The card pages are drawn again when the pictures / barcodes arrive (before, a card drawn first kept its grey placeholder until something else redrew the page) */
-var IMGN=null,IMGN_SRC=null,IMX=null,IM0={};
+var IMGN=null,IMGN_SRC=null,IMX=null,IM0={},IMX_STATE='';
 /* IMX = item_images_extra.json: pictures taken from the makro.pro web shop (by Item No, else by Barcode) for items item_images.json does not have; it only fills the gaps */
 function imageOf(no){
   const im=MF.images||IM0;
@@ -4035,8 +4035,8 @@ function imageOf(no){
   return IMGN.get(amNum(n))||(IMX&&IMX.get(amNum(n)))||'';
 }
 function loadImagesExtra(){
-  if(IMX!==null||!onMakroSite())return;IMX=new Map();
-  fetch('item_images_extra.json').then(r=>r.ok?r.json():{}).then(j=>{const m=new Map();for(const k in (j||{}))if(j[k])m.set(amNum(k),j[k]);IMX=m;refreshCardPages();try{renderNbs()}catch(e){}}).catch(()=>{});
+  if(IMX!==null||!onMakroSite())return;IMX=new Map();IMX_STATE='loading';
+  fetch('item_images_extra.json').then(r=>r.ok?r.json():{}).then(j=>{const m=new Map();for(const k in (j||{}))if(j[k])m.set(amNum(k),j[k]);IMX=m;IMX_STATE='ready';refreshCardPages();try{renderNbs()}catch(e){}}).catch(()=>{IMX_STATE='error'});
 }
 function refreshCardPages(){
   try{if(!$('#t-oos').hidden)renderOos();if(!$('#t-shr').hidden)renderShr();['neg','dms'].forEach(p=>{if(!$('#t-'+p).hidden)renderIlt(p)})}catch(e){}
@@ -4697,7 +4697,7 @@ function nbsPDFHtml(photos=true,whole=false){
     const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),bu=nbsBuyerUid(r),b=st.contacts.find(x=>x.uid===bu),c=r.createdAt?new Date(r.createdAt):null;
     const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${chip(a.next[0],a.next[1])}</div><div class="m">ถึงวันที่ <b>${fmt(addD(today(),a.left))}</b></div>`:'<div class="m">ถึงสถานะสูงสุดแล้ว</div>'):(String(r.aging||'').trim()?chip(String(r.aging).trim(),'err')+'<div class="m">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>':'-');
     const img=photos?(r.img||imageOf(r.itemNo)):'';
-    return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(img)}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div>${r.artGrp?`<div class="m">Art Grp ${esc(r.artGrp)}</div>`:''}</div></div></td>
+    return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(pdfThumbUrl(img))}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div>${r.artGrp?`<div class="m">Art Grp ${esc(r.artGrp)}</div>`:''}</div></div></td>
 <td class="ctr">${pdfDivChip(r.division)}</td><td class="num">${r.stock!==''&&r.stock!=null?esc(qty2(r.stock)):'-'}</td><td>${esc(r.loc||'-')}</td>
 <td class="num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td class="num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
 <td class="num">${n==null?'<span class="m">ไม่ระบุ / ไม่เคยขาย</span>':`<b class="${over?'ov':'okd'}">${n.toLocaleString()} วัน</b><div class="m ${over?'ov':''}">${over?'เกินเกณฑ์':'ไม่ถึงเกณฑ์'} ≥${lim}</div>`}</td><td>${ag}</td>
@@ -4737,10 +4737,8 @@ function printDoc(html){
 async function nbsPDF(arg){
   const whole=arg===true,n=nbsFiltered(whole).length;
   if(!n){toast('ไม่มีรายการให้ส่งออก');return}
-  /* the photos come from Makro Finder's image list: make sure it is loaded before building the page */
-  if(MF.state==='idle'&&onMakroSite()){toast('กำลังโหลดรูปสินค้า…');await loadMakroData();for(let i=0;i<120&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250))}
-  /* every photo is 30-110 KB inside the PDF: up to 300 rows go in automatically, more is the user's call */
-  const photos=n<=300||await ask(`ส่งออก ${n.toLocaleString()} รายการ — ใส่รูปสินค้าไหม? รูปทำให้ไฟล์ PDF ใหญ่และโหลดนาน (แนะนำกรองให้เหลือไม่เกิน 300 รายการ) · ตกลง = ใส่รูป · ยกเลิก = ไม่ใส่รูป`);
+  /* the photos come from Makro Finder's image list (+ the makro.pro extras): pdfPhotos loads them before the page is built; up to PDF_PHOTO_MAX rows go in automatically, more is the user's call */
+  const photos=await pdfPhotos(n);
   printDoc(nbsPDFHtml(photos,whole));
 }
 /* one A4 page layout for the other PDFs (same look as the Item NBS one) */
@@ -4755,18 +4753,19 @@ h1{font-size:18px;margin:0 0 2px;color:#9f1d1d}.sub{color:#667085;font-size:10px
 table{width:100%;border-collapse:collapse;table-layout:fixed}th{background:#fdecec;color:#7a1d1d;text-align:left;padding:5px 5px;border-bottom:2px solid #e8a3a0;font-size:${fs}px}
 td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-wrap:anywhere}thead{display:table-header-group}tr{page-break-inside:avoid}tbody tr:nth-child(even) td{background:#fdf8f8}
 .m{color:#667085;font-size:${Math.max(6.5,fs-1)}px}.num{white-space:nowrap}.ctr{text-align:center}.ov{color:#b42318}.c{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px}
-.dv{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px;white-space:nowrap}.blank td{height:22px}.note{margin:10px 0 0;color:#475467;font-size:9.5px;line-height:1.6}.note b{color:#7a1d1d}</style></head><body>
+.dv{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px;white-space:nowrap}.blank td{height:22px}.note{margin:10px 0 0;color:#475467;font-size:9.5px;line-height:1.6}.note b{color:#7a1d1d}
+.nm{display:flex;gap:6px;align-items:flex-start}.nt{min-width:0;flex:1}.th{flex:none;width:38px;height:38px;object-fit:contain;border:1px solid #eadada;border-radius:5px;background:#fff}.th.ph{background:#f4eeee}</style></head><body>
 <h1>${esc(title)}</h1><p class="sub">${sub}</p>${sum?`<div class="sum">${sum}</div>`:''}
 <table><colgroup>${cols.map(c=>`<col style="width:${c[1]}%">`).join('')}</colgroup><thead><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>${foot||''}</body></html>`;
 }
-function batchesPDFHtml(whole){
+function batchesPDFHtml(whole,photos=true){
   const now=new Date(),list=dashList(dashRows(),whole===true);
   const cnt={},chip=(t,k)=>{const c=PDF_CHIP2[k]||PDF_CHIP2.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
   list.forEach(({b,e})=>{if(b.ack!==e.st)cnt[e.label]=(cnt[e.label]||0)+1});
   const rows=list.map(({b,e})=>{const p=e.p,done=b.ack===e.st,ii=itemInfo(b);
     if(!p)return`<tr><td>${chip(e.label,'err')}</td><td colspan="9">${esc(e.action)}</td></tr>`;
     return`<tr><td>${chip(e.label,e.st)}${done?'<div class="m">✓ ทำแล้ว</div>':''}</td>
-<td><b>${esc(ii?.desc||p.desc)}</b><div class="m">${ii?esc(ii.no)+' · ':p.sku?esc(p.sku)+' · ':''}${esc(p.cat||'')} · Shelf life ${p.shelf} วัน</div></td>
+<td>${pdfNm(pdfPic(prodImg(p)||(ii?imageOf(ii.no):p.sku?imageOf(p.sku):''),photos),`<b>${esc(ii?.desc||p.desc)}</b><div class="m">${ii?esc(ii.no)+' · ':p.sku?esc(p.sku)+' · ':''}${esc(p.cat||'')} · Shelf life ${p.shelf} วัน</div>`)}</td>
 <td class="num"><b>${jul(e.prod).ddd}</b><div class="m">${fmt(e.prod)}</div></td>
 <td class="num">วันที่ ${e.day} / ${p.pullDay}</td>
 <td class="num">${fmt(e.c52)}<div class="m ${e.left<=1?'ov':''}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></td>
@@ -4778,7 +4777,7 @@ function batchesPDFHtml(whole){
     sum:Object.entries(cnt).map(([k,v])=>`<span>${esc(k)} ${v.toLocaleString()}</span>`).join(''),
     cols:[['สถานะ',8],['สินค้า',20],['Julian รับ',8],['วางขาย',8],['Code 52',10],['ต้องทำ',17],['ติดต่อ',13],['จำนวน',5],['ที่ตั้ง',6],['Remark',5]],rows});
 }
-function batchesPDF(arg){const w=arg===true;if(!st.batches.length){toast('ยังไม่มีล็อตให้ส่งออก');return}if(!dashList(dashRows(),w).length){toast('ไม่มีรายการให้ส่งออก');return}printDoc(batchesPDFHtml(w))}
+async function batchesPDF(arg){const w=arg===true;if(!st.batches.length){toast('ยังไม่มีล็อตให้ส่งออก');return}const n=dashList(dashRows(),w).length;if(!n){toast('ไม่มีรายการให้ส่งออก');return}printDoc(batchesPDFHtml(w,await pdfPhotos(n)))}
 const TPL_COLS=[['sku','รหัสสินค้า (ถ้ามี)'],['description','ชื่อสินค้า'],['origin','ประเภท: import / local / other'],['temp','อุณหภูมิจัดเรียง'],['shelf_life','Shelf life (วัน)'],['step1_day','ลด Step 1 เริ่มวันที่'],['step1_pct','Step 1 ลด %'],['step2_day','ลด Step 2 เริ่มวันที่'],['step2_pct','Step 2 ลด %'],['code52_day','Code 52 วันที่'],['buyer_uid','Buyer UID'],['commercial_uid','Commercial UID']];
 function templatePDFHtml(){
   const ex=[['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']];
@@ -4794,6 +4793,23 @@ const pdfStamp=()=>{const n=new Date();return`พิมพ์เมื่อ ${f
 /* how many rows go into a PDF: everything up to PDF_MAX; above that the user chooses (all = slow, big file) */
 async function pdfLimit(n){return n<=PDF_MAX?n:(await ask(`ส่งออก ${n.toLocaleString()} รายการเป็น PDF — ไฟล์ใหญ่และใช้เวลานาน · ตกลง = ทั้งหมด · ยกเลิก = ${PDF_MAX.toLocaleString()} อันดับแรก (เรียงตามที่เห็นบนจอ)`))?n:PDF_MAX}
 const pdfChip=(t,k)=>{const c=PDF_CHIP2[k]||PDF_CHIP2.ok;return`<span class="c" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`};
+/* product pictures in every item PDF. The Makro image server resizes on request: a 120 px thumbnail is ~6 KB instead of a 800 px original (the PDF stays small and prints fast). */
+const pdfThumbUrl=u=>/^https:\/\/images\.mango-prod\.siammakro\.cloud\/[^?]*$/.test(String(u||''))?u+'?eo-img.resize=w%2F120&eo-img.format=webp':u;
+const pdfPic=(u,on)=>on===false?'':(u?`<img class="th" src="${esc(pdfThumbUrl(u))}" alt="">`:'<span class="th ph"></span>');
+const pdfNm=(pic,inner)=>pic?`<div class="nm">${pic}<div class="nt">${inner}</div></div>`:inner; /* picture left of the item text; no picture column when the PDF is exported without pictures */
+const PDF_PHOTO_MAX=300;
+/* the pictures come from item_images.json (+ item_images_extra.json): make sure they are loaded before the page is built (small files, not the whole item-location workbook) */
+async function pdfEnsureImages(){
+  if(!onMakroSite())return;
+  loadImagesExtra();
+  if(!MF.images){try{const r=await fetch('item_images.json');if(r.ok&&!MF.images)MF.images=await r.json()}catch(e){}}
+  for(let i=0;i<24&&IMX_STATE==='loading';i++)await new Promise(r=>setTimeout(r,250));
+}
+/* every picture is ~6 KB in the PDF: up to PDF_PHOTO_MAX rows go in automatically, more is the user's call */
+async function pdfPhotos(n){
+  await pdfEnsureImages();
+  return n<=PDF_PHOTO_MAX||await ask(`ส่งออก ${n.toLocaleString()} รายการ — ใส่รูปสินค้าไหม? รูปทำให้ไฟล์ PDF ใหญ่และโหลดนานขึ้น (แนะนำกรองให้เหลือไม่เกิน ${PDF_PHOTO_MAX} รายการ) · ตกลง = ใส่รูป · ยกเลิก = ไม่ใส่รูป`);
+}
 /* ---------- a PDF for every list / export of the app: OOS+, %Shrink, Negative Stock, High Stock to DMS, Buyer / Commercial, the DMS table of an OOS import, products & rules ---------- */
 const pdfDmy=ms=>{if(ms==null||isNaN(ms))return'';const d=new Date(ms);return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()};
 const pdfSel=id=>{const e=$(id);return e&&e.value&&e.selectedOptions[0]?e.selectedOptions[0].textContent.trim():''};
@@ -4802,7 +4818,7 @@ const pdfPct=v=>v==null||v===''||!isFinite(v)?'-':shrPct(v);
 const pdfBaht=v=>v==null||v===''||!isFinite(v)?'-':shrBaht(v);
 const pdfNum=(v,d)=>v==null||v===''||isNaN(v)?'':(+v).toLocaleString(undefined,{maximumFractionDigits:d==null?2:d});
 /* ----- OOS+ ----- */
-function oosPDFHtml(rows,total,whole){
+function oosPDFHtml(rows,total,whole,photos=true){
   const ctx=oosDivCtx(),cnt={need:0,doing:0,done:0,late:0},dv={FF:0,DF:0,NF:0};
   rows.forEach(r=>{cnt[r.status]=(cnt[r.status]||0)+1;if(oosLevel(r)==='late')cnt.late++;const d=oosDiv(r,ctx);if(d in dv)dv[d]++});
   const tileTxt={need:'ต้องเติม',doing:'กำลังเติม',late:'ค้างเกิน '+OOS_LATE_H+' ชม.',done:'เติมแล้ววันนี้'};
@@ -4814,7 +4830,7 @@ function oosPDFHtml(rows,total,whole){
       dmsTxt=dms!=null&&dms>0?oosFmtN(dms)+(dn!=null&&dn!==dms?` → <b>${oosFmtN(dn)}</b>`:''):dn!=null?`ชั่วคราว <b>${oosFmtN(dn)}</b>`:dms!=null?oosFmtN(dms)+' <span class="m">(ใช้ไม่ได้)</span>':'-',
       extra=[sq!=null?`ขาด ${oosFmtN(sq)} ${esc(r.shortUnit||'หน่วย')}`:'',ls?'฿'+ls.toLocaleString():'',r.chronicDays>=3?`ขาดซ้ำ ${r.chronicDays} วันในเดือน`:''].filter(Boolean).join(' · ');
     return`<tr><td>${d?pdfDivChip(d):''}<div style="margin-top:3px">${pdfChip(s[0],s[1])}</div></td>
-<td><b>${esc(r.desc||'—')}</b><div class="m">Item ${esc(r.itemNo||'-')}${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''} · ${esc(r.loc||'ไม่ระบุตำแหน่ง')}</div>${extra?`<div class="m">${extra}</div>`:''}${r.reason?`<div class="m">สาเหตุ: ${esc(r.reason)}</div>`:''}${r.note?`<div class="m">${esc(r.note)}</div>`:''}</td>
+<td>${pdfNm(pdfPic(imageOf(r.itemNo)||(String(r.img||'').startsWith('img:')?imgData(String(r.img).slice(4)):''),photos),`<b>${esc(r.desc||'—')}</b><div class="m">Item ${esc(r.itemNo||'-')}${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''} · ${esc(r.loc||'ไม่ระบุตำแหน่ง')}</div>${extra?`<div class="m">${extra}</div>`:''}${r.reason?`<div class="m">สาเหตุ: ${esc(r.reason)}</div>`:''}${r.note?`<div class="m">${esc(r.note)}</div>`:''}`)}</td>
 <td>${bk?pdfChip(bk[0],bk[2])+`<div class="m">${esc(bk[1])}</div>`:'<span class="m">—</span>'}</td>
 <td>${pdfChip(age,r.status==='done'?'ok':lv==='late'?'pull':lv==='warn'?'md2':'ok')}<div class="m">ตรวจพบ ${esc(oosFmt(oosMs(r)))}</div></td>
 <td>${esc(r.assignee||'ยังไม่มีผู้เติม')}${r.assignDept?`<div class="m">${esc(r.assignDept)}</div>`:''}</td>
@@ -4830,11 +4846,11 @@ function oosPDFHtml(rows,total,whole){
 async function oosPDF(arg){
   const whole=arg===true,rows=whole?oosSorted():oosVisible(oosDivCtx());
   if(!rows.length){toast('ไม่มีรายการให้ส่งออก');return}
-  const n=await pdfLimit(rows.length);
-  printDoc(oosPDFHtml(rows.slice(0,n),rows.length,whole));
+  const n=await pdfLimit(rows.length),photos=await pdfPhotos(n);
+  printDoc(oosPDFHtml(rows.slice(0,n),rows.length,whole,photos));
 }
 /* ----- %Shrink ----- */
-function shrPDFHtml(rows,total,b){
+function shrPDFHtml(rows,total,b,photos=true){
   const m=shrBuild(),lossOf=it=>{const v=shrVal(it,b==='pct'?'mtd':b);return v!=null&&v>0?v:0},dvT={FF:0,DF:0,NF:0},buyers=(SHR_MEMO&&SHR_MEMO.buyers)||new Map();let gross=0,nLoss=0;
   rows.forEach(it=>{const l=lossOf(it);gross+=l;if(l>0)nLoss++;if(it.div in dvT)dvT[it.div]+=l});
   const dvA={},dvS={};m.items.forEach(it=>{if(!it.hasSales)return;const d=it.div||'-';if(it.sales!=null)dvS[d]=(dvS[d]||0)+it.sales;if(it.amt!=null)dvA[d]=(dvA[d]||0)+it.amt});
@@ -4843,7 +4859,7 @@ function shrPDFHtml(rows,total,b){
     const L=LV[shrLevel(it,b)]||LV.ok,r=shrRate(it),by=it.buyer?(buyers.get(it.buyer)||''):'',rs=[...it.rs.entries()].sort((a,c)=>a[1].c-c[1].c),
       who=it.buyer?esc(by||it.buyer)+(by?`<div class="m">${esc(it.buyer)}</div>`:''):(it.coms&&it.coms.length?'<div class="m">Commercial</div>'+it.coms.map(c=>esc(c.name)).join('<br>'):'-');
     return`<tr><td>${it.div?pdfDivChip(it.div):''}<div style="margin-top:3px">${pdfChip(L[0],L[1])}</div></td>
-<td><b>${esc(it.desc||'—')}</b><div class="m">Item ${esc(it.itemNo)}${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div></td>
+<td>${pdfNm(pdfPic(imageOf(it.itemNo),photos),`<b>${esc(it.desc||'—')}</b><div class="m">Item ${esc(it.itemNo)}${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>`)}</td>
 <td>${esc(it.dlbl||'-')}</td>
 <td class="num">${it.amt==null?'-':`<b class="${it.amt<0?'ov':''}">${pdfBaht(Math.abs(it.amt))}</b><div class="m">${it.amt<0?'ทิ้ง':'ได้คืน'}</div>`}</td>
 <td class="num">${it.sales==null?'-':pdfBaht(it.sales)}</td>
@@ -4861,11 +4877,11 @@ function shrPDFHtml(rows,total,b){
 async function shrPDF(){
   const rows=shrVisible(shrBuild(),shrBasis);
   if(!rows.length){toast('ไม่มีรายการให้ส่งออก');return}
-  const n=await pdfLimit(rows.length);
-  printDoc(shrPDFHtml(rows.slice(0,n),rows.length,shrBasis));
+  const n=await pdfLimit(rows.length),photos=await pdfPhotos(n);
+  printDoc(shrPDFHtml(rows.slice(0,n),rows.length,shrBasis,photos));
 }
 /* ----- Negative Stock / High Stock to DMS (one builder for both pages) ----- */
-function ilPDFHtml(p,rows,total){
+function ilPDFHtml(p,rows,total,photos=true){
   const D=IL_DEFS[p],S=IL_ST[p],m=IL_MEMO[p]||ilBuild(p),T=IL_T,sel=id=>pdfSel('#'+p+id),w=it=>it.shared?0:(p==='neg'?it.val:it.hi.exVal),dvT={FF:0,DF:0,NF:0},d2=v=>v==null||isNaN(v)?'':(+v).toFixed(2);
   let tot=0,units=0;rows.forEach(it=>{const x=w(it);tot+=x;if(it.div in dvT)dvT[it.div]+=x;if(p==='neg'&&!it.shared)units+=-it.a});
   const tileTxt=p==='neg'?{sold:'ยังขายอยู่เดือนนี้',big:'ติดลบเกิน '+pdfBaht(SHR_BIG),idle:'ติดลบแต่ไม่มียอดขาย'}:{dead:'ไม่มียอดขายเลย',cut:'ควรลดราคา (15% / 30%)',ord:'มีของสั่ง / ระหว่างส่งอยู่'};
@@ -4875,14 +4891,14 @@ function ilPDFHtml(p,rows,total){
   if(p==='neg'){
     body=rows.map(it=>{const r=it.r,mm=ITEMCLS?ITEMCLS.get(amNum(it.itemNo)):null;
       return`<tr><td>${esc(SHR_DEPT[it.dp]||it.dlbl||'')}</td><td class="ctr">${it.dp?+it.dp:''}</td><td class="ctr">${mm&&mm.s!=null&&mm.s!==''?esc(mm.s):''}</td><td class="ctr num"><b>${esc(it.itemNo)}</b></td>
-<td><b>${esc(it.desc||'—')}</b>${it.shared?'<div class="m">สต็อกร่วม (~) — ปรับที่สินค้าปกติ</div>':''}</td><td class="num">${pdfDmy(r.ld)}</td><td class="num">${pdfDmy(r.ls)}</td><td class="num">${d2(r.a28)}</td>
+<td>${pdfNm(pdfPic(imageOf(it.itemNo),photos),`<b>${esc(it.desc||'—')}</b>${it.shared?'<div class="m">สต็อกร่วม (~) — ปรับที่สินค้าปกติ</div>':''}`)}</td><td class="num">${pdfDmy(r.ld)}</td><td class="num">${pdfDmy(r.ls)}</td><td class="num">${d2(r.a28)}</td>
 <td class="num ov"><b>${d2(it.a)}</b></td><td class="num">+${pdfNum(-it.a,2)}</td><td class="ctr" style="font-size:13px">☐</td></tr>`}).join('');
     cols=[['Division',13],['Dept no',5],['Art Grp Sub No',6],['Art No',8],['Descr',28],['Last Delday',9],['Last Saleday',9],['Dms',6],['Stock',7],['ต้องปรับ (+)',6],['✓',3]];
     sum=`<span>ยอดรวมที่เสียเงิน ${ilMoney('neg',tot)}</span><span>${rows.length.toLocaleString()} รายการ · ปรับ +${pdfNum(units,2)} หน่วย</span>`+['FF','DF','NF'].map(k=>`<span>${k} ${ilMoney('neg',dvT[k])}</span>`).join('');
   }else{
     body=rows.map(it=>{const h=it.hi,r=it.r,TR=IL_TIER[h.tier],by=m.buyers.get(it.by)||'';
       return`<tr><td>${it.div?pdfDivChip(it.div):''}<div style="margin-top:3px">${pdfChip(TR[0],TR[1])}</div></td>
-<td><b>${esc(it.desc||'—')}</b><div class="m">Item ${esc(it.itemNo)}${it.cn?' · Class '+esc(it.cn):''} · ${esc(it.dlbl||'')}</div></td>
+<td>${pdfNm(pdfPic(imageOf(it.itemNo),photos),`<b>${esc(it.desc||'—')}</b><div class="m">Item ${esc(it.itemNo)}${it.cn?' · Class '+esc(it.cn):''} · ${esc(it.dlbl||'')}</div>`)}</td>
 <td class="num">${pdfNum(r.a,2)}</td><td class="num">${pdfBaht(h.stockVal)}</td>
 <td class="num"><div class="m">28 วัน <b>${pdfNum(r.a28,2)}</b></div><div class="m">เดือนก่อน <b>${pdfNum(it.dLM,2)}</b></div><div class="m">เดือนนี้ <b>${pdfNum(it.dCM,2)}</b></div></td>
 <td class="num">${h.dead?'ไม่มียอดขาย':pdfNum(it.cover,1)+' วัน'}${r.sd!=null&&r.sd<999?`<div class="m">Stock Day ${pdfNum(r.sd,0)}</div>`:''}</td>
@@ -4901,8 +4917,8 @@ async function ilPDF(p){
   const m=ilBuild(p);if(p==='dms')ilSetHi(m);
   const rows=ilVisible(p,m);
   if(!rows.length){toast('ไม่มีรายการให้ส่งออก');return}
-  const n=await pdfLimit(rows.length);
-  printDoc(ilPDFHtml(p,rows.slice(0,n),rows.length));
+  const n=await pdfLimit(rows.length),photos=await pdfPhotos(n);
+  printDoc(ilPDFHtml(p,rows.slice(0,n),rows.length,photos));
 }
 /* ----- Buyer / Commercial (same rows as the Excel) ----- */
 const CT_PDF_W=[7,7,8,7,9,8,5,9,5,6,8,7,7,7]; /* widths in %, same order as CT_XL_HDR */
@@ -4935,9 +4951,9 @@ function contactsTemplatePDFHtml(blank=14){
 }
 function contactsTemplatePDF(){printDoc(contactsTemplatePDFHtml())}
 /* ----- the "new DMS" table of an OOS import (same rows as its Excel) ----- */
-function oosDmsPDFHtml(imp,d,rows,total){
+function oosDmsPDFHtml(imp,d,rows,total,photos=true){
   const sumTbl=`<table style="margin-top:10px"><thead><tr>${['แผนกที่เติม','จำนวนสินค้า','จำนวนบรรทัดที่ขาด','Sale Loss (บาท)',OOS_BK.A[0],OOS_BK.B[0],OOS_BK.C[0],OOS_BK.X[0]].map(t=>`<th>${esc(t)}</th>`).join('')}</tr></thead><tbody>${d.sumRows.map(r=>`<tr>${r.map((v,i)=>`<td${i?' class="num"':''}>${i===3?pdfBaht(v):typeof v==='number'?v.toLocaleString():esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-  const body=rows.map(r=>`<tr><td class="num"><b>${esc(r[0])}</b></td><td><b>${esc(r[1]||'—')}</b>${r[24]?`<div class="m">${esc(r[24])}</div>`:''}${r[9]?'<div class="m">สินค้าชั่งน้ำหนัก</div>':''}</td>
+  const body=rows.map(r=>`<tr><td class="num"><b>${esc(r[0])}</b></td><td>${pdfNm(pdfPic(imageOf(r[0]),photos),`<b>${esc(r[1]||'—')}</b>${r[24]?`<div class="m">${esc(r[24])}</div>`:''}${r[9]?'<div class="m">สินค้าชั่งน้ำหนัก</div>':''}`)}</td>
 <td>${esc(r[2]||'')}<div class="m">${esc(r[6]||r[5]||'-')}</div></td><td class="num">${r[10]===''?'-':pdfNum(r[10],2)}</td><td class="num"><b>${r[11]===''?'-':pdfNum(r[11],2)}</b></td>
 <td class="num">${r[12]===''?'':`<b class="${r[12]>=10?'ov':''}">${r[12]>0?'+':''}${r[12]}%</b>`}</td><td class="num">${pdfNum(r[17],0)} วัน<div class="m">${pdfNum(r[18],0)} บรรทัด · ${pdfNum(r[19],1)} ${esc(r[20])}</div></td>
 <td class="num">${pdfBaht(r[21])}</td><td>${r[22]?pdfChip(r[22],'md2'):''}</td><td>${esc(r[23]||'')}</td></tr>`).join('');
@@ -4951,8 +4967,8 @@ async function oosDmsPDF(imp){
   if(!imp||!imp.info.o2o){toast('ต้องนำเข้ารายงานสินค้าขาด (O2O) ก่อน');return}
   const d=oosDmsData(imp);
   if(!d.rows.length){toast('ไม่มีรายการให้ส่งออก');return}
-  const n=await pdfLimit(d.rows.length);
-  printDoc(oosDmsPDFHtml(imp,d,d.rows.slice(0,n),d.rows.length));
+  const n=await pdfLimit(d.rows.length),photos=await pdfPhotos(n);
+  printDoc(oosDmsPDFHtml(imp,d,d.rows.slice(0,n),d.rows.length,photos));
 }
 /* ----- products & rules (same rows / filter / sort as the table; from the Data tab = every product) ----- */
 function prodVisible(noFilter){
@@ -4961,13 +4977,13 @@ function prodVisible(noFilter){
   const shown=mode==='origin'?filtered:[...filtered].sort(mode==='shelf-desc'?(a,b)=>b.shelf-a.shelf||nm(a,b):mode==='name'?nm:(a,b)=>a.shelf-b.shelf||nm(a,b));
   return{pq,all,shown,mode};
 }
-function prodPDFHtml(rows,total,pq,sortTxt){
+function prodPDFHtml(rows,total,pq,sortTxt,photos=true){
   const cnt={};let nOff=0;
   const rng=x=>x?`${String(x.label||'').replace('ลดราคา ','').replace(/ \(Step \d\)/,'')} · วันที่ ${x.from}${x.to!=null&&x.to>x.from?'–'+x.to:''}`:'';
   const body=rows.map(p=>{
     const s=stages(p),f=k=>s.find(x=>x.k===k),ok=f('ok'),m1=f('md1'),m2=f('md2'),man=manualRule(p.shelf,p.origin),off=!!man&&['md1Day','md2Day','pullDay'].some(x=>man[x]!==p[x]),ol=ORIGINS[p.origin]||ORIGINS.other;
     cnt[ol]=(cnt[ol]||0)+1;if(off)nOff++;
-    return`<tr><td><b>${esc(p.desc||'—')}</b><div class="m">${p.sku?esc(p.sku)+' · ':''}${esc(ol)}${p.temp?' · '+esc(p.temp):''}${p.cat?' · '+esc(p.cat):''}${off?' · <span class="ov">ต่างจากคู่มือ</span>':''}</div></td>
+    return`<tr><td>${pdfNm(pdfPic(prodImg(p)||(p.sku?imageOf(p.sku):''),photos),`<b>${esc(p.desc||'—')}</b><div class="m">${p.sku?esc(p.sku)+' · ':''}${esc(ol)}${p.temp?' · '+esc(p.temp):''}${p.cat?' · '+esc(p.cat):''}${off?' · <span class="ov">ต่างจากคู่มือ</span>':''}</div>`)}</td>
 <td class="num">${p.shelf!=null&&!isNaN(p.shelf)?(+p.shelf).toLocaleString()+' วัน':'-'}</td>
 <td>${ok?pdfChip(`วันที่ 1${ok.to>1?'–'+ok.to:''}`,'ok'):'-'}</td>
 <td>${m1?pdfChip(rng(m1),'md1'):'<span class="m">—</span>'}</td>
@@ -4982,8 +4998,8 @@ function prodPDFHtml(rows,total,pq,sortTxt){
 async function prodPDF(noFilter){
   const{pq,shown}=prodVisible(noFilter===true);
   if(!shown.length){toast('ไม่มีรายการให้ส่งออก');return}
-  const n=await pdfLimit(shown.length);
-  printDoc(prodPDFHtml(shown.slice(0,n),shown.length,pq,noFilter===true?'':$('#pSort')?.selectedOptions[0]?.textContent));
+  const n=await pdfLimit(shown.length),photos=await pdfPhotos(n);
+  printDoc(prodPDFHtml(shown.slice(0,n),shown.length,pq,noFilter===true?'':$('#pSort')?.selectedOptions[0]?.textContent,photos));
 }
 
 /* ---------- the same export set on every page: CSV (copy / download window) · Excel · PDF ----------
