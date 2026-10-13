@@ -5421,8 +5421,22 @@ const impEdited=r=>!!r.remark||!['check','done'].includes(r.status)||(r.status==
 function openDelImp(col){delCol=col||'nbs';$('#delImpTitle').textContent=DEL_CFG[delCol].title;$('#delImpDesc').textContent=DEL_CFG[delCol].desc;renderDelImp();$('#dlgDelImp').showModal()}
 function impUsage(g){ /* what else points at the rows of this file */
   if(delCol==='products'){const keys=new Set(g.rows.map(pkey));return st.batches.filter(b=>keys.has(b.sku)).length}
-  if(delCol==='contacts'){const u=new Set(g.rows.map(c=>c.uid));return st.products.filter(p=>u.has(p.buyerUid)||u.has(p.comUid)).length}
+  if(delCol==='contacts')return contactLinks(g).total;
   return 0}
+/* what is tied to the contacts of an imported Buyer / Commercial file - the same for every file (Fresh Food, Dry Food, Non Food...):
+   · Shelf-Life products whose Buyer / Commercial UID is one of them,
+   · Item NBS rows whose Buyer (own, OOS+ / ItemList, or found through the Art Grp in Buyer / Commercial) is one of them,
+   · OOS+ records whose report buyer_uid is one of them.
+   Before, only the products were counted, so a Dry Food / Non Food file (no products of its own) always read "nothing linked". */
+function contactLinks(g){
+  const u=new Set(g.rows.map(c=>c.uid)),memo=new Map();
+  const inFile=raw=>{raw=String(raw||'').trim();if(!raw)return false;if(u.has(raw))return true;let v=memo.get(raw);if(v===undefined){const c=ctFindBuyer(raw);v=!!(c&&u.has(c.uid));memo.set(raw,v)}return v};
+  nbsBuyerMap(true);
+  const prod=st.products.filter(p=>u.has(p.buyerUid)||u.has(p.comUid)).length,
+    nbs=(st.nbs||[]).filter(r=>inFile(nbsBuyerUid(r))).length,
+    oos=(st.oos||[]).filter(r=>inFile(r.buyerUid)).length;
+  return{prod,nbs,oos,total:prod+nbs+oos}
+}
 function renderDelImp(){
   const gs=impGroups(),cfg=DEL_CFG[delCol];
   $('#delImpList').innerHTML=gs.length?gs.map((g,i)=>{
@@ -5431,6 +5445,8 @@ function renderDelImp(){
       extra=` (ยังไม่ปิดงาน ${open.toLocaleString()}) · ${Object.entries(cnt).map(([k,v])=>k+' '+v.toLocaleString()).join(' / ')}${ed?` · <span class="err-text">มีที่ทีมบันทึกแล้ว ${ed.toLocaleString()}</span>`:''}`}
     else if(delCol==='oos'){const ed=g.rows.filter(oosEdited).length,open=g.rows.filter(r=>r.status!=='done').length;
       extra=` (ยังไม่เติม ${open.toLocaleString()})${ed?` · <span class="err-text">มีที่ทีมบันทึกแล้ว ${ed.toLocaleString()}</span>`:''}`}
+    else if(delCol==='contacts'){const L=contactLinks(g),bits=[L.prod&&'สินค้า Shelf-Life '+L.prod.toLocaleString(),L.nbs&&'Item NBS '+L.nbs.toLocaleString(),L.oos&&'OOS+ '+L.oos.toLocaleString()].filter(Boolean);
+      extra=L.total?` · <span class="err-text">ผูกกับสินค้า ${L.total.toLocaleString()} รายการ</span>${bits.length>1||!L.prod?` <span class="muted">(${bits.join(' · ')})</span>`:''}`:` · <span class="muted">ผูกกับสินค้า 0 รายการ</span>`}
     else{const used=impUsage(g);if(used)extra=delCol==='products'?` · <span class="err-text">มีล็อตที่ใช้สินค้านี้ ${used.toLocaleString()} ล็อต</span>`:` · <span class="err-text">ผูกกับสินค้า ${used.toLocaleString()} รายการ</span>`}
     return`<div class="di-row"><div><b>${esc(name)}</b><div class="muted small">${d&&!isNaN(d)?`นำเข้า ${fmt(d)} ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')} น. · `:''}เพิ่มเข้ามา ${g.rows.length.toLocaleString()} ${cfg.noun}${extra}</div></div><button type="button" class="btn sm danger" data-i="${i}">ลบไฟล์นี้</button></div>`}).join(''):`<p class="muted">ยังไม่มีไฟล์ที่นำเข้า${delCol==='nbs'?'':' (แสดงเฉพาะไฟล์ที่นำเข้าหลังจากเพิ่มปุ่มนี้)'}</p>`;
   $('#delImpList').querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>delImpFile(gs[+b.dataset.i]));
@@ -5440,7 +5456,7 @@ async function delImpFile(g){
   let warn='';
   if(delCol==='nbs'){const ed=g.rows.filter(impEdited).length;if(ed)warn=`\nรวมรายการที่ทีมบันทึกสถานะ/Remark ไว้แล้ว ${ed.toLocaleString()} รายการ`}
   else if(delCol==='oos'){const ed=g.rows.filter(oosEdited).length;if(ed)warn=`\nรวมรายการที่ทีมเริ่มเติม/มอบหมาย/จดหมายเหตุ/ถ่ายรูปไว้แล้ว ${ed.toLocaleString()} รายการ`}
-  else{const used=impUsage(g);if(used)warn=delCol==='products'?`\nมีล็อตที่ใช้สินค้าเหล่านี้ ${used.toLocaleString()} ล็อต — ล็อตจะแสดงเป็น “ไม่พบสินค้า”`:`\nสินค้า ${used.toLocaleString()} รายการที่ผูกกับรายชื่อเหล่านี้จะถูกล้าง Buyer/Commercial${(()=>{const u=new Set(g.rows.map(c=>c.uid)),nb=(st.nbs||[]).filter(r=>u.has(r.buyerUid)).length;return nb?`\nและรายการ Item NBS ${nb.toLocaleString()} รายการจะถูกล้าง Buyer`:''})()}`}
+  else{const used=impUsage(g);if(used)warn=delCol==='products'?`\nมีล็อตที่ใช้สินค้าเหล่านี้ ${used.toLocaleString()} ล็อต — ล็อตจะแสดงเป็น “ไม่พบสินค้า”`:(()=>{const L=contactLinks(g);return(L.prod?`\nสินค้า Shelf-Life ${L.prod.toLocaleString()} รายการที่ผูกกับรายชื่อเหล่านี้จะถูกล้าง Buyer/Commercial`:'')+(L.nbs?`\nItem NBS ${L.nbs.toLocaleString()} รายการที่ใช้รายชื่อเหล่านี้เป็น Buyer จะไม่มี Buyer แสดงอีก`:'')+(L.oos?`\nOOS+ ${L.oos.toLocaleString()} รายการที่อ้าง buyer_uid ของรายชื่อเหล่านี้จะแสดงเป็น “ไม่พบในรายชื่อ”`:'')})()}
   if(!await ask(`ลบไฟล์ “${name}” และ${cfg.noun}ที่ไฟล์นี้เพิ่มเข้ามา ${n} รายการ ออกจากระบบ?${warn}\n(ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)`))return;
   const ok=await act(async()=>{
     if(delCol==='contacts'){const u=new Set(g.rows.map(c=>c.uid));
