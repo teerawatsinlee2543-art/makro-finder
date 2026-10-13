@@ -1667,7 +1667,11 @@ function seed(demo){
 }
 function withIds(s){const o={};COLS.forEach(c=>o[c]=(s[c]||[]).map(x=>({...x,_id:x._id||rid()})));return o}
 function loadLocal(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.products){s.products=s.products.map(normProduct).map(p=>p.buyerUid||p.comUid||!BUYER_OF[p.desc]?p:{...p,buyerUid:BUYER_OF[p.desc],comUid:comOf(p.origin,BUYER_OF[p.desc])});return withIds(s)}}catch(e){}return null}
-function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){toast('บันทึกในเบราว์เซอร์ไม่ได้ — โปรดสำรองเป็น JSON')}}
+/* this-browser-only mode writes the WHOLE data set to localStorage on every change. An import / bulk action changes thousands of rows: it holds the writes (saveHold) and writes once at the end —
+   one write per row made a 2,500-row NBS import freeze the page ("Page Unresponsive": 2,500 x stringify of the whole list) */
+let saveHold=0,saveDirty=false;
+function saveLocal(){if(saveHold){saveDirty=true;return}try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){toast('บันทึกในเบราว์เซอร์ไม่ได้ — โปรดสำรองเป็น JSON')}}
+function saveRelease(){saveHold--;if(!saveHold&&saveDirty){saveDirty=false;saveLocal()}}
 const body=o=>{const{_id,id,...r}=o;return JSON.parse(JSON.stringify(r))};
 function dbErr(e){const c=e?.code;
   if(c==='invalid_argument'||c==='not_granted'){canWrite=false;applyRole();return'คุณยังไม่มีสิทธิ์แก้ไขข้อมูลทีม — ขอให้เจ้าของแชร์สิทธิ์ระดับ Contributor ขึ้นไป'}
@@ -1715,7 +1719,7 @@ async function act(fn,okMsg){
   busy=true;BBI=null;document.body.classList.add('busy');
   try{
     if(mode==='sheet'){queue=[];await fn();const ws=queue;queue=null;renderAll();if(ws.length)await retry(()=>sheetCall({op:'bulk',writes:ws}))}
-    else{await fn();if(mode==='local')renderAll()}
+    else{saveHold++;try{await fn()}finally{saveRelease()}if(mode==='local')renderAll()}
     if(okMsg)toast(okMsg);return true}
   catch(e){queue=null;notice(dbErr(e));if(mode==='sheet'){busy=false;pull()}return false}
   finally{busy=false;BBI=null;document.body.classList.remove('busy')}
@@ -1724,8 +1728,10 @@ async function replaceAll(s){
   if(mode==='sheet'){const data={};COLS.forEach(c=>data[c]=(s[c]||[]).map(x=>({...body(x),_id:x._id||rid()})));
     COLS.forEach(c=>st[c]=data[c].map(x=>c==='products'?normProduct(x):x));
     queue=null;await retry(()=>sheetCall({op:'replace',data}));return}
-  for(const c of COLS)for(const x of [...st[c]])await rmItem(c,x);
-  for(const c of COLS)for(const x of s[c]||[])await putItem(c,{...x,_id:undefined});
+  saveHold++;try{
+    for(const c of COLS)for(const x of [...st[c]])await rmItem(c,x);
+    for(const c of COLS)for(const x of s[c]||[])await putItem(c,{...x,_id:undefined});
+  }finally{saveRelease()}
 }
 function applyRole(){
   document.body.classList.toggle('ro',!canWrite);
