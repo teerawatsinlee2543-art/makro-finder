@@ -4235,8 +4235,10 @@ function ilBuild(p){
   const d=ILT[p],buyers=new Map(),items=[];
   if(d){
     const asOf=d.asOf||Date.now(),ad=new Date(asOf),elapsed=Math.max(1,ad.getDate()-1),lmDays=new Date(ad.getFullYear(),ad.getMonth(),0).getDate();
+    /* the Negative Stock Monitor sheet has no sold-this-month / last-month quantities (cm / lm stay 0): "sold this month" then comes from its Last Saleday */
+    const mon=!!(d.info&&d.info.mon),ms0=new Date(ad.getFullYear(),ad.getMonth(),1).getTime();
     d.rows.forEach(r=>{
-      const it={_id:p+amNum(r.i),itemNo:r.i,desc:r.n,r,shared:r.sh,a:r.a,price:r.pr,div:shrDivOfDept(r.dp),dp:r.dp,dlbl:r.dp?(r.dp+' '+(SHR_DEPT[r.dp]||'')).trim():'',cn:r.cn,by:r.by};
+      const it={_id:p+amNum(r.i),itemNo:r.i,desc:r.n,r,shared:r.sh,a:r.a,price:r.pr,div:shrDivOfDept(r.dp),dp:r.dp,dlbl:r.dp?(r.dp+' '+(SHR_DEPT[r.dp]||'')).trim():'',cn:r.cn,by:r.by,mon,soldCM:r.cm>0||(mon&&r.ls!=null&&r.ls>=ms0)};
       if(r.by&&!buyers.has(r.by)){const c=ctFindBuyer(r.by);buyers.set(r.by,c&&c.name||'')}
       it.val=r.a<0?-r.a*r.pr:0;                                    /* ฿ of the negative stock */
       const dLM=r.lm/lmDays,dCM=r.cm/elapsed,pos=[dLM,dCM].filter(x=>x>0);
@@ -4279,9 +4281,9 @@ function ilVisible(p,m){
     if(hide&&it.shared)return false;
     if(!showDisc&&ilDisc(it))return false;
     if(p==='neg'){
-      if(S.tile==='sold'&&!(it.r.cm>0))return false;
+      if(S.tile==='sold'&&!it.soldCM)return false;
       if(S.tile==='big'&&!(it.val>=SHR_BIG))return false;
-      if(S.tile==='idle'&&!(it.r.a28===0&&it.r.cm===0))return false;
+      if(S.tile==='idle'&&!(it.r.a28===0&&!it.soldCM))return false;
       if(fa&&!(fa==='frac'?it.a>-1:fa==='one'?(it.a<=-1&&it.a>-10):it.a<=-10))return false;if(fb&&it.r.ag!==fb)return false}
     else{
       const h=it.hi;
@@ -4311,7 +4313,7 @@ function ilCard(p,it){
     const LV={late:['ติดลบหนัก','pull'],warn:['ติดลบปานกลาง','md2'],ok:['ติดลบเล็กน้อย','ok'],done:['สต็อกร่วม (~)','ok']}[lv];
     head=`<span class="chip s-${LV[1]}">${LV[0]}</span><span class="muted small">${it.val>0?'ที่เสีย '+ilMoney('neg',it.val):''}</span>`;
     facts=`<div class="oosc-f small"><span class="neg-adj">ปรับ ${ilN(it.a,100)} → 0</span><span>USOH <b>${ilN(r.u)}</b></span><span>สั่งแล้ว <b>${ilN(r.oo)}</b></span><span>ระหว่างส่ง <b>${ilN(r.it)}</b></span></div>
-      <div class="oosc-f small"><span>ขาย 28 วัน <b>${ilN(r.a28,100)}</b>/วัน</span><span>เดือนที่แล้ว <b>${ilN(r.lm)}</b></span><span>เดือนนี้ <b>${ilN(r.cm)}</b></span>${r.ly?`<span class="muted">ปีก่อน ${ilN(r.ly)}</span>`:''}</div>
+      <div class="oosc-f small"><span>ขาย 28 วัน <b>${ilN(r.a28,100)}</b>/วัน</span><span>เดือนที่แล้ว <b>${it.mon?'-':ilN(r.lm)}</b></span><span>เดือนนี้ <b>${it.mon&&!(r.cm>0)?(it.soldCM?'ขายแล้ว':'-'):ilN(r.cm)}</b></span>${r.ly?`<span class="muted">ปีก่อน ${ilN(r.ly)}</span>`:''}</div>
       <div class="oosc-f small muted">${dates}${r.sd!=null&&r.sd<999?`<span>Stock Day ${ilN(r.sd)}</span>`:''}</div>
       <div class="small"><b>ต้องทำ:</b> ${it.shared?'ใช้สต็อกร่วมกับสินค้าปกติ — ปรับที่สินค้าปกติ':'นับสต็อกจริง แล้วปรับ ASOH <b>+'+ilN(-it.a,100)+'</b> ให้เหลือ 0'}${r.cm>0&&!it.shared?' · <b class="c-md2">ยังมียอดขายเดือนนี้ — ระวังขายของที่ไม่มีจริง</b>':''}</div>`}
   else{
@@ -4362,7 +4364,7 @@ function renderIlt(p){
   $('#'+p+'DivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(nDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
   /* summary tiles */
   let tl;
-  if(p==='neg'){const tot=sub.reduce((s,it)=>s+w(it),0),units=sub.reduce((s,it)=>s-(it.shared?0:it.a),0),sold=sub.filter(it=>it.r.cm>0).length,big=sub.filter(it=>!it.shared&&it.val>=SHR_BIG).length,idle=sub.filter(it=>it.r.a28===0&&it.r.cm===0).length;
+  if(p==='neg'){const tot=sub.reduce((s,it)=>s+w(it),0),units=sub.reduce((s,it)=>s-(it.shared?0:it.a),0),sold=sub.filter(it=>it.soldCM).length,big=sub.filter(it=>!it.shared&&it.val>=SHR_BIG).length,idle=sub.filter(it=>it.r.a28===0&&!it.soldCM).length;
     tl=[['all','ยอดรวมที่เสียเงิน','pull',ilMoney('neg',tot),`${sub.length.toLocaleString()} รายการ · ปรับ +${ilN(units,100)} หน่วย`],['sold','ยังขายอยู่เดือนนี้','md2',sold.toLocaleString(),'รายการ'],['big','ติดลบเกิน '+shrBaht(SHR_BIG),'soon',big.toLocaleString(),'รายการ'],['idle','ติดลบแต่ไม่มียอดขาย','md1',idle.toLocaleString(),'มักเป็นสต็อกผิด — นับแล้วปรับ']]}
   else{const tot=sub.reduce((s,it)=>s+w(it),0),dead=sub.filter(it=>it.hi.dead&&!it.shared),cut=sub.filter(it=>it.hi.tier!=='watch').length,ord=sub.filter(it=>it.r.oo>0||it.r.it>0).length;
     tl=[['all','Stock ส่วนเกินรวม','pull',shrBk(tot),`${sub.length.toLocaleString()} รายการ · เกิน ${IL_T} วัน`],['dead','ไม่มียอดขายเลย','md2',dead.length.toLocaleString(),'มูลค่า Stock '+shrBk(dead.reduce((s,it)=>s+it.hi.stockVal,0))],['cut','ควรลดราคา (15% / 30%)','md1',cut.toLocaleString(),`พอขายเกิน ${2*IL_T} วัน`],['ord','มีของสั่ง / ระหว่างส่งอยู่','soon',ord.toLocaleString(),'ควรชะลอสั่ง']]}
