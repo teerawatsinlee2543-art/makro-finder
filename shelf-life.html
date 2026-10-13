@@ -5291,9 +5291,9 @@ const normH=s=>String(s??'').toLowerCase().replace(/[\s._\-\/()\[\]:]/g,'');
 /* header → field, first match wins; order matters (days before stock, so "จำนวนวัน…" is not read as stock) */
 const NBS_COLS=[
   ['artGrp',/(artgrp|artgroup|articlegroup|กลุ่มสินค้าart|artกลุ่ม|^class$|^classno$|^classcode$)/],
-  ['agingType',/(agingtype|agetype|ประเภทaging|ประเภทการaging)/],
+  ['agingType',/(agingtype|agetype|ประเภทaging|ประเภทการaging|^aginggroup$)/], /* "Aging Group" of the Aging NBS Item Layout = the Aging Type 1-9 */
   ['aging',/(agingstatus|agestatus|agingcategory|agingbucket|agingband|สถานะอายุ|^aging$)/],
-  ['lastRecv',/(lastrecv|lastreceiv|lastrcv|lastgr|วันที่รับล่าสุด|รับล่าสุด|วันที่รับสินค้าล่าสุด|วันรับล่าสุด)/],
+  ['lastRecv',/(lastrecv|lastreceiv|lastrcv|lastgr|lastdelivery|lastdelday|วันที่รับล่าสุด|รับล่าสุด|วันที่รับสินค้าล่าสุด|วันรับล่าสุด)/],
   ['lastSale',/(lastsale|lastsold|วันที่ขายล่าสุด|ขายล่าสุด|วันที่ขายครั้งล่าสุด)/],
   ['days',/^(nbs|nbsdays|nbsday)$|(daysnosale|nosaledays|daywithoutsale|daysnosales|noofdays|วันที่ไม่มียอดขาย|จำนวนวัน|ไม่มียอดขาย|วันไม่มียอดขาย|agingdays|ไม่มีการขาย)/],
   ['barcode',/(barcode|บาร์โค้ด|^ean$|^upc$)/],
@@ -5307,11 +5307,15 @@ const NBS_COLS=[
 function mapHeader(row){const m={},used=new Set();
   (row||[]).forEach((h,i)=>{const n=normH(h);if(!n)return;for(const [f,re] of NBS_COLS){if(!m[f]&&!used.has(i)&&re.test(n)){m[f]=i;used.add(i);break}}});
   /* a column named "Division" always wins over generic group/dept/category columns, and is then followed strictly */
-  const j=(row||[]).findIndex(h=>/division|^div$|ดิวิชั่น|ดิวิชัน/.test(normH(h)));
+  /* several division-like columns (Aging NBS Item Layout: "Account Division" = numeric codes 21, 43 ...; "Division Desc" = DRY FOOD / FRESH FOOD / NON FOOD): the one that holds the text wins */
+  let j=-1,bs=-1;(row||[]).forEach((h,i)=>{const n=normH(h);if(!/division|^div$|ดิวิชั่น|ดิวิชัน/.test(n))return;const s=/^(division|div|ดิวิชั่น|ดิวิชัน)$/.test(n)?4:/^divisiondesc/.test(n)?3:/^accountdivision/.test(n)?1:2;if(s>bs){bs=s;j=i}});
   if(j>=0){Object.keys(m).forEach(k=>{if(m[k]===j)delete m[k]});m.division=j;m.divStrict=true}
   /* a "Department" column next to Division picks the Aging Type (e.g. BAKERY, FROZEN & DAIRY, PROLINE) */
-  const jd=(row||[]).findIndex(h=>/^(department|dept|แผนก)$/.test(normH(h)));
+  let jd=(row||[]).findIndex(h=>/^(department|dept|แผนก)$/.test(normH(h)));if(jd<0)jd=(row||[]).findIndex(h=>/^department(desc|description|name)$/.test(normH(h)));
   if(jd>=0&&jd!==m.division){Object.keys(m).forEach(k=>{if(m[k]===jd)delete m[k]});m.dept=jd}
+  /* "No of NBS Days" is the days without a sale; the generic days pattern would take "No of Aging Days" (the column before it) instead */
+  const jn=(row||[]).findIndex(h=>/^(noofnbsdays|nbsdays)$/.test(normH(h)));
+  if(jn>=0){Object.keys(m).forEach(k=>{if(m[k]===jn)delete m[k]});m.days=jn;m.nbsLayout=true}
   return m}
 function divFrom(t){t=String(t??'').trim();if(!t)return'';const u=t.toUpperCase();
   if(/(^|[^A-Z])NF([^A-Z]|$)|NON.?FOOD|ไม่ใช่อาหาร|นอน.?ฟู/.test(u))return'NF';
@@ -5363,8 +5367,11 @@ function parseWorkbook(wb,fileName,defDiv){
       let agRaw=m.artGrp!=null?r[m.artGrp]:'',agm=String(agRaw??'').trim().match(/^(\d{1,4})\s+\S/),artGrp=agm?agm[1]:cleanNo(agRaw),dept=m.dept!=null?String(r[m.dept]??'').trim():'',aging=m.aging!=null?String(r[m.aging]??'').trim():'',agingType=m.agingType!=null?parseAgingType(r[m.agingType]):'';
       /* the item master (Barcode.csv), when this browser has it: the real Class replaces an empty value or a Sub No */
       let sub=artSub,subNo='';if(ITEMCLS){const mm=ITEMCLS.get(amNum(no));if(mm){subNo=mm.s;if(!artGrp||sub){artGrp=String(mm.g);sub=false;info.clsMaster=(info.clsMaster||0)+1}}}
+      const agc=/^(AL|AT|CR|OB|FP)$/i.exec(aging);if(agc)aging={AL:1,AT:2,CR:3,OB:4,FP:5}[agc[1].toUpperCase()]+'-'+agc[1].toUpperCase(); /* the Aging NBS Item Layout writes the status as AL / AT / CR / OB / FP: same as the Aging Stock report's "2-AT" */
       let dv=m.days!=null?numOr(r[m.days]):'';
       if(dv===''&&/^\d+$/.test(aging))dv=+aging;
+      /* Aging NBS Item Layout = every item of the store (12,997 rows, 90% "normal"): keep what belongs on the Item NBS list - an Aging status (Alert and above), or no sale for at least the NBS limit (FF 5 / DF 7 / NF 10 days), with stock on hand */
+      if(m.nbsLayout){const stk=m.stock!=null?numOr(r[m.stock]):'';if(!(stk!==''&&stk>0)||!(aging||(dv!==''&&dv>=(NBS_LIMIT[div]||10)))){info.notIssue=(info.notIssue||0)+1;continue}}
       if(!last&&dv!==''&&dv>=0){last=iso(addD(today(),-Math.round(dv)));derived=true}
       /* Buyer: the file's buyer_uid is the source of truth (matched to the contact list, also when a contact holds several codes); a code that is not in the list is kept as written;
          without one, the "สินค้าที่ดูแล" rules decide from the Art Grp / Class */
@@ -5378,7 +5385,7 @@ function parseWorkbook(wb,fileName,defDiv){
       recs.set(div+'|'+no,{artSub:sub,division:div,itemNo:no,desc,barcode:m.barcode!=null?cleanNo(r[m.barcode]):'',loc:m.loc!=null?String(r[m.loc]??'').trim():'',lastSale:last,lastSaleDerived:derived,lastRecv:recv,aging,agingType,dept,artGrp,stock:m.stock!=null?numOr(r[m.stock]):'',buyerUid:buyer});
       info.byDivSource[src]=(info.byDivSource[src]||0)+1;n++;
     }
-    info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict")info.cols[k]=true});
+    info.sheets.push({name:sn,rows:n,map:m});Object.keys(m).forEach(k=>{if(k!=="divStrict"&&k!=="nbsLayout")info.cols[k]=true});
   }
   return{recs:[...recs.values()],info};
 }
@@ -5482,7 +5489,7 @@ function showImportPreview(){
   const days=r=>r.lastSale?diffD(today(),fromIso(r.lastSale)):null,hasDays=recs.some(r=>r.lastSale);
   const al=[30,60,90].map(n=>recs.filter(r=>days(r)!=null&&days(r)>=n).length);
   $('#impOpts').hidden=false;$('#impGo').disabled=false;$('#impDrop').hidden=true;
-  $('#impBox').innerHTML=`<div class="imp-file"><b>${esc(impState.file)}</b> <span class="muted small">· ${recs.length.toLocaleString()} รายการ${info.skipped?` · ข้าม ${info.skipped} แถวที่ไม่ใช่สินค้า`:''}</span> <button type="button" class="btn sm" id="impChange">เลือกไฟล์อื่น</button></div>
+  $('#impBox').innerHTML=`<div class="imp-file"><b>${esc(impState.file)}</b> <span class="muted small">· ${recs.length.toLocaleString()} รายการ${info.skipped?` · ข้าม ${info.skipped} แถวที่ไม่ใช่สินค้า`:''}${info.notIssue?` · <b>ไม่นำเข้า ${info.notIssue.toLocaleString()} รายการที่ไม่เข้าเกณฑ์</b> (ไม่มีสถานะ Aging และจำนวนวันที่ไม่มียอดขายยังไม่ถึงเกณฑ์ NBS — FF 5 / DF 7 / NF 10 วัน — หรือไม่มี Stock)`:''}</span> <button type="button" class="btn sm" id="impChange">เลือกไฟล์อื่น</button></div>
   <div class="imp-tiles"><div><b>${cnt.FF.toLocaleString()}</b><span>FF</span></div><div><b>${cnt.DF.toLocaleString()}</b><span>DF</span></div><div><b>${cnt.NF.toLocaleString()}</b><span>NF</span></div>
   <div class="t-new"><b>${plan.add.toLocaleString()}</b><span>รายการใหม่</span></div><div><b>${plan.upd.toLocaleString()}</b><span>อัปเดตของเดิม</span></div>${plan.moves.length?`<div class="t-close"><b>${plan.moves.length.toLocaleString()}</b><span>ย้ายกลุ่มให้ถูก</span></div>`:""}<div class="${plan.close.length?'t-close':''}"><b>${plan.close.length.toLocaleString()}</b><span>ปิดงานอัตโนมัติ</span></div></div>
   <p class="small" style="margin:8px 0 0"><b>คอลัมน์ที่ระบบอ่านได้:</b> ${Object.keys(info.cols).map(k=>COL_LBL[k]||k).join(' · ')}</p>
