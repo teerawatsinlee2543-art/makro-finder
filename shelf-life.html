@@ -3337,7 +3337,7 @@ function renderOos(){
   const all=oosAll(),active=all.filter(r=>r.status!=='done'),late=active.filter(r=>oosLevel(r)==='late'),need=all.filter(r=>r.status==='need'),doing=all.filter(r=>r.status==='doing');
   const t0=new Date();t0.setHours(0,0,0,0);const doneToday=all.filter(r=>r.status==='done'&&oosDoneMs(r)>=t0.getTime());
   /* always: tab badge + dashboard banner */
-  const bd=$('#oosBadge');bd.hidden=!active.length;bd.textContent=active.length.toLocaleString();bd.classList.toggle('late',late.length>0);
+  const bd=$('#oosBadge');bd.hidden=!active.length;bd.textContent=active.length.toLocaleString();bd.classList.toggle('late',active.length>0); /* red whenever there are open items, like Item NBS / %Shrink / Negative Stock / High Stock to DMS (it was blue until something was overdue) */
   const bn=$('#oosBanner');bn.hidden=!active.length;bn.classList.toggle('late',late.length>0);
   $('#oosBannerTxt').textContent=`OOS+ มีสินค้าต้องเติม ${need.length.toLocaleString()} รายการ${doing.length?` · กำลังเติม ${doing.length.toLocaleString()}`:''}${late.length?` · ค้างเกิน ${OOS_LATE_H} ชม. ${late.length.toLocaleString()} รายการ`:''}`;
   if($('#t-oos').hidden)return;
