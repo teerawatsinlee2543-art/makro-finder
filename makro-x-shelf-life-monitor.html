@@ -1,0 +1,593 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><style>html,body{margin:0}</style>
+<title>Makro × Shelf-Life Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: Apple-style product story. Big centered type, real iPhone / Mac mockups, glass widgets,
+   sticky scroll scenes whose screens swap as you scroll. Every pinned scene is auto-fitted so no text is clipped. */
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","SF Pro Thai",Inter,"Noto Sans Thai","Sukhumvit Set",system-ui,"Segoe UI",sans-serif;
+  --bg:#ffffff; --bg2:#f5f5f7; --ink:#1d1d1f; --muted:#6e6e73; --line:#d2d2d7; --empty:#e8e8ed;
+  --blue:#0071e3; --link:#0066cc; --red:#ff3b30; --orange:#ff9500; --yellow:#ffcc00; --green:#34c759; --teal:#30b0c7; --purple:#af52de;
+  --glass:rgba(255,255,255,.78); --glass-line:rgba(255,255,255,.85); --pill:#ececf0;
+  --shadow:0 30px 60px -24px rgba(0,0,0,.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --bg2:#161618; --ink:#f5f5f7; --muted:#a1a1a6; --line:#38383a; --empty:#2c2c2e;
+    --blue:#0a84ff; --link:#2997ff; --red:#ff453a; --orange:#ff9f0a; --yellow:#ffd60a; --green:#30d158; --teal:#40c8e0; --purple:#bf5af2;
+    --glass:rgba(44,44,48,.78); --glass-line:rgba(255,255,255,.14); --pill:#2c2c2e; --shadow:0 30px 60px -24px rgba(0,0,0,.8); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --bg2:#161618; --ink:#f5f5f7; --muted:#a1a1a6; --line:#38383a; --empty:#2c2c2e;
+  --blue:#0a84ff; --link:#2997ff; --red:#ff453a; --orange:#ff9f0a; --yellow:#ffd60a; --green:#30d158; --teal:#40c8e0; --purple:#bf5af2;
+  --glass:rgba(44,44,48,.78); --glass-line:rgba(255,255,255,.14); --pill:#2c2c2e; --shadow:0 30px 60px -24px rgba(0,0,0,.8); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--font);overflow-x:clip;-webkit-font-smoothing:antialiased}
+img{display:block}
+a{color:inherit}
+h1,h2,h3,h4{font-family:var(--font);font-weight:700;line-height:1.22;text-wrap:balance;margin:0;letter-spacing:-.01em}
+p{margin:0;text-wrap:pretty}
+.wrap{width:min(1180px,100%);margin-inline:auto;padding-inline:max(16px,4vw)}
+.eyebrow{display:flex;align-items:center;gap:10px;font:600 clamp(15px,1.6vw,19px)/1.3 var(--font);color:var(--ink);flex-wrap:wrap}
+.center .eyebrow{justify-content:center}
+.pgno{font:600 12px/1 var(--font);font-variant-numeric:tabular-nums;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:4px 9px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:8px}
+.band{--bg:#000;--bg2:#161618;--ink:#f5f5f7;--muted:#a1a1a6;--line:#38383a;--empty:#2c2c2e;--blue:#0a84ff;--link:#2997ff;--red:#ff453a;--orange:#ff9f0a;--yellow:#ffd60a;--green:#30d158;--teal:#40c8e0;--purple:#bf5af2;--glass:rgba(44,44,48,.78);--glass-line:rgba(255,255,255,.14);--pill:#2c2c2e;background:var(--bg);color:var(--ink)}
+.alt{background:var(--bg2)}
+
+.progress{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);height:3px;z-index:60}
+.progress i{display:block;height:100%;background:var(--blue);transform:scaleX(0);transform-origin:left}
+.pager{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:70;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(18px) saturate(1.7);backdrop-filter:blur(18px) saturate(1.7);box-shadow:0 8px 24px -10px rgba(0,0,0,.4);font:600 13px/1 var(--font);font-variant-numeric:tabular-nums;color:var(--ink)}
+.pager span{color:var(--muted);font-weight:500;max-width:11em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rail{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:55;display:none;flex-direction:column;gap:7px}
+.rail a{display:flex;align-items:center;justify-content:flex-end;gap:8px;text-decoration:none;font:600 11px/1 var(--font);color:var(--ink)}
+.rail a span{background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:99px;padding:6px 10px;opacity:0;transform:translateX(6px);transition:.25s;white-space:nowrap}
+.rail a i{width:9px;height:9px;border-radius:50%;background:var(--line);flex:none;transition:.25s}
+.rail a:hover span,.rail a:focus-visible span{opacity:1;transform:none}
+.rail a.cur i{background:var(--blue);transform:scale(1.35)}
+@media (min-width:1240px){.rail{display:flex}}
+
+.cta-pill{display:inline-flex;align-items:center;gap:18px;padding:8px 8px 8px 26px;border-radius:99px;background:var(--pill);font:500 clamp(15px,1.7vw,18px)/1.3 var(--font);max-width:100%;flex-wrap:wrap;justify-content:center}
+.btn-blue{display:inline-block;padding:12px 24px;border-radius:99px;background:var(--blue);color:#fff;font:600 16px/1 var(--font);text-decoration:none;transition:filter .2s,transform .2s}
+.btn-blue:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.lnk{color:var(--link);text-decoration:none;font:500 17px/1.4 var(--font)}
+.lnk:hover{text-decoration:underline}
+
+.hero{padding-block:clamp(40px,7vw,96px) clamp(24px,4vw,56px);text-align:center;overflow-x:clip}
+.hero h1{font-size:clamp(38px,8.4vw,100px);font-weight:700;line-height:1.2;letter-spacing:-.02em;margin:18px auto 20px;max-width:12em}
+.hero .lead{font-size:clamp(16px,1.8vw,21px);line-height:1.6;color:var(--muted);max-width:40em;margin-inline:auto}
+.hero .lead b{color:var(--ink);font-weight:600}
+.hero .actions{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:30px}
+.hero-art{position:relative;width:min(1040px,100%);margin:clamp(34px,6vw,70px) auto 0;aspect-ratio:1.86;--py:0}
+.hero-art .browser{position:absolute;left:0;top:6%;width:78%;transform:translateY(calc(var(--py) * -.06px));text-align:left}
+.hero-art .dev{position:absolute;right:4%;bottom:0;width:24%;transform:translateY(calc(var(--py) * -.16px))}
+.hero-art .w.a{left:2%;bottom:6%;transform:translateY(calc(var(--py) * -.1px))}
+.hero-art .w.b{right:1%;top:2%;transform:translateY(calc(var(--py) * -.2px))}
+@media (max-width:699px){.hero-art{aspect-ratio:1.1}.hero-art .browser{width:96%}.hero-art .dev{width:36%;right:0}.hero-art .w{display:none}}
+
+.browser{border-radius:12px;overflow:hidden;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow)}
+.browser .bar{display:flex;align-items:center;gap:6px;padding:9px 12px;background:var(--bg2);border-bottom:1px solid var(--line)}
+.browser .bar i{width:10px;height:10px;border-radius:50%;flex:none}
+.browser .bar i:nth-child(1){background:#ff5f57}.browser .bar i:nth-child(2){background:#febc2e}.browser .bar i:nth-child(3){background:#28c840}
+.browser .bar u{margin-left:10px;flex:1;min-width:0;text-decoration:none;font:500 11px/1 var(--font);color:var(--muted);background:var(--bg);border-radius:6px;padding:6px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.vp{position:relative;aspect-ratio:1.3;background:var(--empty);overflow:hidden}
+.cr{position:absolute;inset:0;overflow:hidden}
+.cr img{position:absolute;left:0;top:0;max-width:none;width:calc(100% * var(--w) / var(--cw));margin-left:calc(-100% * var(--x) / var(--cw));margin-top:calc(-100% * var(--y) / var(--cw))}
+.screen{position:absolute;inset:0;opacity:0;transform:scale(1.03);transition:opacity .55s ease,transform .7s ease}
+.screen.on{opacity:1;transform:none}
+
+.dev{container-type:inline-size;width:100%}
+.iphone{position:relative;aspect-ratio:1 / 2.05;border-radius:15.5cqw;padding:2.4cqw;background:linear-gradient(135deg,#e6e6eb 0%,#9a9aa1 16%,#dcdce1 34%,#74747a 58%,#d0d0d5 80%,#a2a2a8 100%);box-shadow:var(--shadow),inset 0 0 0 .5cqw rgba(255,255,255,.55)}
+.iphone::before{content:"";position:absolute;left:-.9cqw;top:17cqw;width:1.2cqw;height:34cqw;border-radius:.6cqw 0 0 .6cqw;background:linear-gradient(#8e8e94,#8e8e94) 0 0/100% 4.5cqw no-repeat,linear-gradient(#8e8e94,#8e8e94) 0 10cqw/100% 7.5cqw no-repeat,linear-gradient(#8e8e94,#8e8e94) 0 19.5cqw/100% 7.5cqw no-repeat}
+.iphone::after{content:"";position:absolute;right:-.9cqw;top:30cqw;width:1.2cqw;height:12cqw;border-radius:0 .6cqw .6cqw 0;background:#8e8e94}
+.bezel{height:100%;background:#000;border-radius:13.2cqw;padding:1.5cqw}
+.scr{position:relative;height:100%;border-radius:11.8cqw;overflow:hidden;background:#fff}
+.island{position:absolute;left:50%;top:2.6cqw;width:26cqw;height:7.6cqw;border-radius:99px;background:#000;transform:translateX(-50%);z-index:4}
+.homebar{position:absolute;left:50%;bottom:1.8cqw;width:31cqw;height:1.2cqw;border-radius:99px;background:rgba(0,0,0,.82);transform:translateX(-50%);z-index:4}
+.sbar{position:absolute;left:0;right:0;top:0;height:11cqw;display:flex;justify-content:space-between;align-items:center;padding:2.4cqw 8cqw 0 9.5cqw;font:600 4.3cqw/1 var(--font);color:#fff;z-index:3}
+.sbar.dk{color:#000}
+.sbar span{display:flex;gap:1.3cqw;align-items:center}
+.sbar svg{height:3.1cqw;width:auto;fill:currentColor}
+.iphone .screen{background:var(--sb,#fff)}
+.iphone .cr{inset:var(--top,9.5cqw) 0 0 0}
+
+.w{position:absolute;z-index:4;padding:12px 16px;border-radius:22px;background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(20px) saturate(1.7);backdrop-filter:blur(20px) saturate(1.7);box-shadow:0 16px 36px -14px rgba(0,0,0,.4);min-width:0;pointer-events:none}
+.w small{display:block;font:600 11.5px/1.3 var(--font);color:var(--muted)}
+.w b{display:block;font:700 clamp(24px,3vw,38px)/1.15 var(--font);color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.w em{display:block;font-style:normal;font-size:12px;line-height:1.3;color:var(--muted)}
+.scene .w{opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .5s ease}
+.scene .w.on{opacity:1;transform:none}
+
+.scene{position:relative;height:calc(var(--n,3) * 88svh + 100svh)}
+.scene.wafflescene{height:260svh}
+.scene-in{position:sticky;top:env(safe-area-inset-top,0px);height:calc(100svh - env(safe-area-inset-top,0px));display:flex;align-items:center}
+.fit{width:100%;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:clamp(20px,5vw,72px);align-items:center;transform-origin:center center}
+.fit.flip{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}
+.fit.flip .copy{order:2}
+.copy h2{font-size:clamp(28px,4.6vw,56px);margin:14px 0 14px}
+.copy .tagline{font-size:clamp(15px,1.6vw,19px);color:var(--muted);margin-bottom:20px;max-width:30em}
+.texts{display:grid}
+.texts>*{grid-area:1 / 1;opacity:0;transform:translateY(18px);transition:opacity .45s ease,transform .5s ease;pointer-events:none}
+.texts>.on{opacity:1;transform:none;pointer-events:auto}
+.texts h3{font-size:clamp(20px,2.4vw,30px);margin-bottom:6px}
+.texts p{color:var(--muted);max-width:30em}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{font:600 13px/1.2 var(--font);padding:7px 12px;border-radius:99px;background:var(--pill);color:var(--ink)}
+.dots{list-style:none;display:flex;gap:8px;padding:0;margin:22px 0 0;align-items:center}
+.dots li{height:8px;width:8px;border-radius:99px;background:var(--line);transition:width .35s,background .35s}
+.dots li.on{width:34px;background:var(--blue)}
+.dots li.lab{width:auto;height:auto;background:none;margin-left:8px;font:600 12px/1 var(--font);color:var(--muted)}
+.visual{position:relative;display:grid;place-items:center;min-width:0}
+.visual .dev{width:min(300px,100%,36svh)}
+.visual .browser{width:100%;max-width:640px}
+.visual .w.f1{left:2%;top:12%}.visual .w.f2{right:0;top:38%}.visual .w.f3{left:4%;bottom:10%}
+.visual.pv .w.f1{left:0;top:16%}.visual.pv .w.f2{right:0;top:42%}.visual.pv .w.f3{left:0;bottom:12%}
+@media (max-width:899px){
+  .fit,.fit.flip{grid-template-columns:minmax(0,1fr);gap:14px}
+  .fit .visual{order:1}.fit .copy,.fit.flip .copy{order:2}
+  .copy h2{font-size:clamp(24px,7vw,34px);margin:8px 0 8px}
+  .copy .tagline{display:none}
+  .visual .dev{width:min(300px,100%,30svh)}
+  .dots{margin-top:12px}
+  .scene .w{display:none}
+}
+
+.wafflescene .fit{grid-template-columns:minmax(0,1fr);gap:clamp(14px,2.4svh,28px)}
+.wafflescene h2{font-size:clamp(26px,4.6vw,56px);max-width:16em;margin:12px 0 0}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,4vw,56px);align-items:start}
+.panel h3{font-size:clamp(15px,2vw,24px);margin-bottom:6px}
+.panel .read{font:700 clamp(40px,min(8vw,11svh),90px)/1.1 var(--font);font-variant-numeric:tabular-nums;color:var(--c);letter-spacing:-.02em;margin-bottom:10px}
+.panel .read small{font-size:.4em;margin-left:2px}
+.panel p{font-size:clamp(12.5px,1.5vw,16px);color:var(--muted);margin-top:10px;max-width:26em}
+.wf{display:grid;grid-template-columns:repeat(10,1fr);gap:clamp(2px,.5vw,5px);width:min(420px,100%,30svh)}
+.wf i{aspect-ratio:1;border-radius:3px;background:var(--empty);display:block}
+.wf i.on{background:var(--c)}
+.wf i.half{background:linear-gradient(90deg,var(--c) 50%,var(--empty) 50%)}
+.punch{font:700 clamp(18px,2.8vw,32px)/1.3 var(--font);opacity:0;transform:translateY(14px);transition:.6s}
+.wafflescene.done .punch{opacity:1;transform:none}
+.punch mark{background:none;color:var(--yellow)}
+
+.sec{padding-block:clamp(56px,9vw,120px)}
+.sec .head{text-align:center}
+.sec h2{font-size:clamp(30px,5vw,60px);margin:14px auto 12px;max-width:16em}
+.sec .sub{color:var(--muted);max-width:34em;margin-inline:auto;font-size:clamp(16px,1.8vw,21px)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:40px}
+.stat{background:var(--bg);border-radius:28px;padding:24px 24px 26px;min-width:0}
+.stat small{display:block;font:600 13px/1.3 var(--font);color:var(--c)}
+.stat b{display:block;font:700 clamp(32px,4vw,52px)/1.15 var(--font);font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin:6px 0 4px}
+.stat em{display:block;font-style:normal;font-size:14px;line-height:1.4;color:var(--muted)}
+.chart2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.chartcard{background:var(--bg);border-radius:28px;padding:26px;min-width:0}
+.chartcard h3{font-size:clamp(18px,2vw,24px);margin-bottom:4px}
+.chartcard .sub2{font-size:14px;color:var(--muted);margin-bottom:14px}
+.bar{display:grid;grid-template-columns:minmax(96px,34%) minmax(0,1fr) auto;gap:10px;align-items:center;margin:10px 0;font-size:14px}
+.bar span{font-weight:500;min-width:0}
+.bar em{font-style:normal;height:16px;border-radius:99px;background:var(--empty);overflow:hidden;display:block}
+.bar em i{display:block;height:100%;width:var(--w);background:var(--c);border-radius:99px;transform-origin:left;transition:transform 1.1s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0) * 90ms)}
+.bar b{font:600 13px/1 var(--font);min-width:3.4em;text-align:right;font-variant-numeric:tabular-nums}
+.pre .bar em i{transform:scaleX(0)}
+.note{margin-top:14px;font-size:14px;color:var(--ink);background:var(--bg2);border-radius:14px;padding:10px 14px}
+@media (max-width:899px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.chart2{grid-template-columns:minmax(0,1fr)}}
+
+.who{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:40px;text-align:left;background:var(--bg2);border-radius:36px;padding:14px}
+.who article{background:var(--bg);border-radius:26px;padding:28px}
+.who .tagc{display:inline-flex;align-items:center;gap:8px;font:600 13px/1 var(--font);color:var(--c);margin-bottom:14px}
+.who .tagc::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c)}
+.who .big{font:700 clamp(18px,2vw,24px)/1.4 var(--font);margin-bottom:10px}
+.who p{color:var(--muted);font-size:15px}
+.who small{display:block;margin-top:14px;font:500 12px/1.3 var(--font);color:var(--muted)}
+@media (max-width:899px){.who{grid-template-columns:minmax(0,1fr)}}
+
+.proofs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,3vw,34px);margin-top:44px;text-align:left}
+.proofs>div{border-top:1px solid var(--line);padding-top:16px}
+.proofs .n{font:700 clamp(38px,6vw,72px)/1.1 var(--font);font-variant-numeric:tabular-nums;letter-spacing:-.02em;background:linear-gradient(90deg,var(--yellow),var(--orange));-webkit-background-clip:text;background-clip:text;color:transparent}
+.proofs .n small{font-size:.42em;margin-left:3px}
+.proofs h3{font-size:19px;margin:10px 0 6px}
+.proofs p{font-size:14.5px;color:var(--muted)}
+@media (max-width:899px){.proofs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.try{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:36px;text-align:left}
+.tcard{display:flex;flex-direction:column;gap:14px;padding:22px;border-radius:28px;background:var(--bg2);text-decoration:none;transition:transform .2s}
+.tcard:hover{transform:translateY(-3px)}
+.tcard .qr{width:104px;height:104px;display:flex;background:#fff;padding:7px;border-radius:14px}
+.tcard .qr svg{width:100%;height:100%}
+.tcard h3{font-size:clamp(20px,2.2vw,26px)}
+.tcard p{font-size:14.5px;color:var(--muted);margin-top:4px}
+.tcard code{display:block;font:500 12px/1.4 var(--font);color:var(--link);margin-top:8px;word-break:break-all}
+.asks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;text-align:left}
+.ask{background:var(--bg2);border-radius:28px;padding:24px}
+.ask .no{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;font:700 15px/1 var(--font);margin-bottom:12px}
+.ask h3{font-size:20px;margin-bottom:6px}
+.ask p{font-size:15px;color:var(--muted)}
+.base{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px;border-radius:28px;overflow:hidden;background:var(--bg2);text-align:left}
+.base div{padding:clamp(20px,3vw,32px) clamp(20px,3vw,36px);border-right:1px solid var(--line)}
+.base div:nth-child(even){border-right:0}
+.base div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+.base .now{display:block;font:600 clamp(14px,1.5vw,17px)/1.3 var(--font);color:var(--muted)}
+.base b{display:block;font:700 clamp(44px,6.5vw,76px)/1.1 var(--font);font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin:2px 0}
+.base .lbl{display:block;font:600 clamp(18px,2.2vw,26px)/1.3 var(--font);color:var(--ink)}
+.base .goal{display:block;margin-top:12px;font:700 clamp(18px,2.2vw,26px)/1.35 var(--font);color:var(--orange);font-style:normal}
+@media (max-width:899px){.try,.asks{grid-template-columns:minmax(0,1fr)}.base{grid-template-columns:minmax(0,1fr)}.base div{border-right:0!important;border-bottom:1px solid var(--line)}.base div:last-child{border-bottom:0}}
+.exportbox{display:flex;align-items:center;justify-content:space-between;gap:16px 24px;flex-wrap:wrap;padding:22px 26px;border-radius:26px;background:var(--bg2);margin-bottom:8px}
+.exportbox b{display:block;font:700 clamp(20px,2.4vw,28px)/1.2 var(--font)}
+.exportbox span{display:block;color:var(--muted);font-size:15px;margin-top:4px}
+.lockup{display:flex;align-items:center;justify-content:center;gap:clamp(12px,2.4vw,24px);flex-wrap:wrap;margin:clamp(32px,5vw,56px) 0 clamp(24px,4vw,40px)}
+.lockup .lf{display:block;position:relative;overflow:hidden;background:#fff;border-radius:18px;height:clamp(70px,9vw,110px);aspect-ratio:222 / 211}
+.lockup .lf img{position:absolute;max-width:none;width:calc(100% * 272 / 222);left:calc(-100% * 46 / 222);top:calc(-100% * 6 / 222)}
+.lockup .lsl{height:clamp(46px,6.4vw,72px);width:auto}
+.lockup .x{font:300 clamp(28px,4vw,46px)/1 var(--font);color:var(--muted)}
+.foot{padding-block:28px 80px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)}
+.foot p+p{margin-top:6px}
+
+.reveal{transition:opacity .7s ease,transform .7s ease;transition-delay:calc(var(--i,0) * 90ms)}
+.reveal.pre{opacity:0;transform:translateY(26px)}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .reveal,.screen,.texts>*,.scene .w,.punch,.bar em i,.dots li,.rail a span,.btn-blue,.tcard{transition:none!important}
+  .reveal.pre{opacity:1;transform:none}
+  .pre .bar em i{transform:none}
+}
+</style>
+
+</head><body><div class="progress" aria-hidden="true"><i></i></div>
+<div class="pager" aria-live="polite"><b id="pgNow">1</b> / 9 <span id="pgTitle">หน้าแรก</span></div>
+<nav class="rail" aria-label="สารบัญหน้า">
+  <a href="#p1"><span>1 · หน้าแรก</span><i></i></a>
+  <a href="#p2"><span>2 · ปัญหา</span><i></i></a>
+  <a href="#p3"><span>3 · Makro Finder</span><i></i></a>
+  <a href="#p4"><span>4 · จัดการพาเลท</span><i></i></a>
+  <a href="#p5"><span>5 · Shelf-Life Monitor</span><i></i></a>
+  <a href="#p6"><span>6 · ตัวเลขจริง</span><i></i></a>
+  <a href="#p7"><span>7 · ใครได้อะไร</span><i></i></a>
+  <a href="#p8"><span>8 · ตรวจสอบแล้ว</span><i></i></a>
+  <a href="#p9"><span>9 · เริ่มใช้งาน</span><i></i></a>
+</nav>
+
+<header class="hero center" id="p1" data-page="1" data-title="หน้าแรก">
+  <div class="wrap">
+    <p class="eyebrow"><span class="pgno">1 / 9</span>Makro Store 42 · รามอินทรา</p>
+    <h1>ให้ทั้งร้านหาของเจอ<br>และรู้ก่อนของเสีย</h1>
+    <p class="lead">Makro Finder ตัวช่วยในการหาสินค้า, สื่อโปรโมชั่น + Complain, การบันทึกของเสีย O2O, ดู Stock จริงได้ผ่าน Link, จัดการพาเลท และ Shelf-Life Monitor ใช้ได้ทันทีบนมือถือและคอมพิวเตอร์ <b>ไม่ต้องติดตั้ง</b> ใช้ <b>ข้อมูลจริงของร้านเรา</b> และให้ <b>ทั้งทีมเห็นภาพเดียวกัน</b></p>
+    <div class="actions">
+      <div class="cta-pill"><span>เปิดใช้ได้ทันที ไม่ต้องติดตั้ง</span><a class="btn-blue" href="#p9">ลองใช้งาน</a></div>
+      <a class="lnk" href="#p2">ดูเรื่องราวทั้งหมด ›</a>
+    </div>
+    <div class="hero-art" id="heroArt">
+      <div class="browser">
+        <div class="bar"><i></i><i></i><i></i><u>teerawatsinlee2543-art.github.io/makro-finder/shelf-life.html</u></div>
+        <div class="vp"><div class="cr" style="--w:2800;--cw:2800;--ch:2154;--x:0;--y:0"><img src="pitch-shots/sl-nbs.png" alt="หน้าจอ Item NBS ของ Shelf-Life Monitor แสดงจำนวนสินค้าแยกแผนกและระดับความเสี่ยง"></div></div>
+      </div>
+      <div class="dev"><div class="iphone"><div class="bezel"><div class="scr">
+        <div class="screen on" style="--sb:#e8192c"><div class="sbar"></div><div class="cr" style="--w:1000;--cw:860;--ch:1843;--x:0;--y:0"><img src="pitch-shots/mf-item.png" alt="หน้าจอมือถือของ Makro Finder แสดงสินค้า ตำแหน่ง Loc 142"></div></div>
+        <i class="island"></i><i class="homebar"></i>
+      </div></div></div></div>
+      <div class="w a"><small>ตำแหน่งสินค้า</small><b>044-142</b></div>
+      <div class="w b"><small>ต้องลงมือวันนี้</small><b>2,772</b></div>
+    </div>
+  </div>
+</header>
+
+<section class="band" id="p2" data-page="2" data-title="ปัญหา">
+  <div class="scene wafflescene" data-scene="waffle">
+    <div class="scene-in"><div class="fit wrap">
+      <div>
+        <p class="eyebrow"><span class="pgno">2 / 9</span>ปัญหา</p>
+        <h2>ทุกวัน ทีมเสียเวลากับสองเรื่องนี้</h2>
+      </div>
+      <div class="panels">
+        <div class="panel" style="--c:var(--teal)">
+          <h3>หาของบนชั้นไม่เจอ</h3>
+          <div class="read"><span class="num" data-dec="1">0.0</span><small>%</small></div>
+          <div class="wf" data-target="9.53" data-dec="1"></div>
+          <p>ของสินค้า 180,102 รายการ มีตำแหน่งในระบบ ลูกค้าและพนักงานใหม่ต้องถามคน</p>
+        </div>
+        <div class="panel" style="--c:var(--orange)">
+          <h3>หาของเสี่ยงไม่เจอ</h3>
+          <div class="read"><span class="num" data-dec="0">0</span><small>%</small></div>
+          <div class="wf" data-target="21.35" data-dec="0"></div>
+          <p>ของ 12,985 แถวในไฟล์ Aging NBS ที่ต้องลงมือจริง (2,772 รายการ) ทีมต้องไล่เปิดทีละแถว</p>
+        </div>
+      </div>
+      <p class="punch">ยิ่งรู้ช้า ยิ่งเหลือเวลาลงมือน้อย <mark>เราจึงสร้างระบบที่หาเจอเร็ว และบอกให้รู้ก่อน</mark></p>
+    </div></div>
+  </div>
+</section>
+
+<section id="p3" data-page="3" data-title="Makro Finder">
+  <div class="scene" data-scene="steps" data-n="3" style="--n:3">
+    <div class="scene-in"><div class="fit wrap">
+      <div class="copy">
+        <p class="eyebrow"><span class="pgno">3 / 9</span>Makro Finder</p>
+        <h2>พิมพ์ชื่อ แล้วไปหยิบได้เลย</h2>
+        <p class="tagline">สำหรับลูกค้าและพนักงาน ค้นหาสินค้าได้ทั้งร้านจากมือถือ</p>
+        <div class="texts">
+          <div data-i="0" class="on"><h3>ค้นหา</h3><p>พิมพ์ชื่อ เลข Item หรือสแกนบาร์โค้ด เช่น “มรกต น้ำมันปาล์ม” ระบบพบสินค้าพร้อมรูปให้เลือก</p><div class="chips"><span class="chip">พบ 11 รายการ</span><span class="chip">ชื่อ · Item No · บาร์โค้ด</span></div></div>
+          <div data-i="1"><h3>เห็นตำแหน่งทันที</h3><p>บอกบล็อกที่วางและชั้นที่ ให้เดินไปหยิบได้เลย พร้อมคำแนะนำการเดินตามป้ายโซนในสาขา</p><div class="chips"><span class="chip">Loc 142</span><span class="chip">Location 044-142</span><span class="chip">ชั้นที่ 2</span></div></div>
+          <div data-i="2"><h3>เปิดแผนที่ร้าน</h3><p>แผนที่ 3 มิติ แสดงโซนแผนก ทางเข้า-ออก และแคชเชียร์ กด “แสดงตำแหน่งฉัน” เพื่อดูว่าอยู่ตรงไหน</p><div class="chips"><span class="chip">แผนที่ 3 มิติ</span><span class="chip">แสดงตำแหน่งฉัน</span></div></div>
+        </div>
+        <ul class="dots" aria-hidden="true"><li data-i="0" class="on"></li><li data-i="1"></li><li data-i="2"></li><li class="lab"><b class="cur">1</b> / 3</li></ul>
+      </div>
+      <div class="visual pv">
+        <div class="dev"><div class="iphone"><div class="bezel"><div class="scr">
+          <div class="screen on" data-i="0" style="--sb:#e8192c"><div class="sbar"></div><div class="cr" style="--w:1000;--cw:860;--ch:1843;--x:0;--y:0"><img src="pitch-shots/mf-results.png" alt="ผลค้นหา มรกต น้ำมันปาล์ม พบ 11 รายการ"></div></div>
+          <div class="screen" data-i="1" style="--sb:#e8192c"><div class="sbar"></div><div class="cr" style="--w:1000;--cw:860;--ch:1843;--x:0;--y:0"><img src="pitch-shots/mf-item.png" alt="รายละเอียดสินค้า Loc 142 Location 044-142"></div></div>
+          <div class="screen" data-i="2" style="--sb:#fff"><div class="sbar dk"></div><div class="cr" style="--w:1000;--cw:860;--ch:1843;--x:0;--y:1157"><img src="pitch-shots/mf-item.png" alt="แผนที่ร้าน 3 มิติ"></div></div>
+          <i class="island"></i><i class="homebar"></i>
+        </div></div></div></div>
+        <div class="w f1" data-i="0"><small>ผลค้นหา</small><b>11</b><em>รายการ</em></div>
+        <div class="w f2" data-i="1"><small>Loc / Location</small><b>142</b><em>044-142</em></div>
+        <div class="w f3" data-i="2"><small>แผนที่</small><b>3D</b><em>แสดงตำแหน่งฉัน</em></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<section class="band" id="p4" data-page="4" data-title="จัดการพาเลท">
+  <div class="scene" data-scene="steps" data-n="3" style="--n:3">
+    <div class="scene-in"><div class="fit flip wrap">
+      <div class="visual pv">
+        <div class="dev"><div class="iphone"><div class="bezel"><div class="scr">
+          <div class="screen on" data-i="0" style="--sb:#e8192c"><div class="sbar"></div><div class="cr" style="--w:1000;--cw:860;--ch:1843;--x:0;--y:0"><img src="pitch-shots/pallet-list.png" alt="รายการพาเลททั้งหมด พร้อมปุ่มสร้างพาเลทใหม่"></div></div>
+          <div class="screen" data-i="1" style="--sb:#e8192c"><div class="sbar"></div><div class="cr" style="--w:1000;--cw:860;--ch:1843;--x:0;--y:0"><img src="pitch-shots/pallet-detail.png" alt="รายละเอียดพาเลท สินค้าในพาเลทพร้อมปุ่มปรับจำนวน"></div></div>
+          <div class="screen" data-i="2" style="--sb:#e8192c"><div class="sbar"></div><div class="cr" style="--w:1000;--cw:860;--ch:1843;--x:0;--y:0"><img src="pitch-shots/pallet-find.png" alt="หาสินค้าตามพาเลท แสดงพาเลทที่มีสินค้านั้น"></div></div>
+          <i class="island"></i><i class="homebar"></i>
+        </div></div></div></div>
+        <div class="w f1" data-i="0"><small>ตัวอย่างพาเลท</small><b>PLT-003</b><em>6 รายการ · 170 MU</em></div>
+        <div class="w f2" data-i="1"><small>รวมในพาเลท</small><b>170</b><em>MU จาก 6 รายการ</em></div>
+        <div class="w f3" data-i="2"><small>Item 860060</small><b>2 พาเลท</b><em>PLT-003 · PLT-001</em></div>
+      </div>
+      <div class="copy">
+        <p class="eyebrow"><span class="pgno">4 / 9</span>จัดการพาเลท</p>
+        <h2>รู้ว่าสินค้าอยู่พาเลทไหน และพาเลทวางอยู่ตรงไหน</h2>
+        <p class="tagline">สำหรับพนักงานฝ่ายรับสินค้า (GR) และทีมคลัง ข้อมูลใช้ร่วมกับ Makro Finder ทั้งทีมเห็นพาเลทชุดเดียวกัน</p>
+        <div class="texts">
+          <div data-i="0" class="on"><h3>สร้างและดูพาเลททั้งหมด</h3><p>เห็นรายการพาเลท จำนวนรายการ จำนวน MU และตำแหน่งที่วาง ค้นหาจากชื่อ Loc หรือ Location หรือสแกนป้ายตำแหน่ง</p><div class="chips"><span class="chip">สร้างพาเลทใหม่ (GR)</span><span class="chip">ค้นหาชื่อ · Loc · Location</span><span class="chip">สแกนป้ายตำแหน่ง</span></div></div>
+          <div data-i="1"><h3>ใส่สินค้าและปรับจำนวน</h3><p>เพิ่มสินค้าด้วยการค้นหาหรือสแกนบาร์โค้ด เพิ่มลดจำนวน ย้ายไปพาเลทอื่น หรือลบออก มีรูปสินค้าให้เช็กทุกแถว แล้วส่งออกเป็น PDF รายการสินค้าหรือพิมพ์เลขพาเลทได้</p><div class="chips"><span class="chip">ค้นหา / สแกนบาร์โค้ด</span><span class="chip">ปรับจำนวน · ย้ายพาเลท</span><span class="chip">PDF · พิมพ์เลขพาเลท</span></div></div>
+          <div data-i="2"><h3>หาสินค้าตามพาเลท</h3><p>พิมพ์ชื่อสินค้า ระบบบอกว่าอยู่ในพาเลทไหน จำนวนเท่าไร และพาเลทนั้นวางอยู่ที่ Loc / Location ใด</p><div class="chips"><span class="chip">สินค้า → พาเลท → ตำแหน่ง</span></div></div>
+        </div>
+        <ul class="dots" aria-hidden="true"><li data-i="0" class="on"></li><li data-i="1"></li><li data-i="2"></li><li class="lab"><b class="cur">1</b> / 3</li></ul>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<section id="p5" data-page="5" data-title="Shelf-Life Monitor">
+  <div class="scene" data-scene="steps" data-n="3" style="--n:3">
+    <div class="scene-in"><div class="fit wrap">
+      <div class="copy">
+        <p class="eyebrow"><span class="pgno">5 / 9</span>Shelf-Life Monitor</p>
+        <h2>รู้ก่อนว่าต้องทำอะไร</h2>
+        <p class="tagline">สำหรับหัวหน้าแผนกและ Buyer จัดลำดับสินค้าเสี่ยงก่อนจะเสียมูลค่า</p>
+        <div class="texts">
+          <div data-i="0" class="on"><h3>นำเข้ารายงานเดิม</h3><p>ลากไฟล์ Excel, CSV, PDF หรือรูปถ่ายตารางลงไป ระบบอ่านคอลัมน์ แยก FF / DF / NF และผูก Buyer ให้เอง</p><div class="chips"><span class="chip">12,985 แถว → 2,772 รายการ</span></div></div>
+          <div data-i="1"><h3>จัดลำดับความเร่งด่วน</h3><p>สีบอกระดับตามกฎ Makro จาก Alert, Attention, Critical, Obsolete จนถึง Full Provision เห็นทันทีว่าแผนกไหนมีเท่าไร</p><div class="chips"><span class="chip">Alert 517</span><span class="chip">Critical 138</span><span class="chip">Full Provision 131</span></div></div>
+          <div data-i="2"><h3>ลงมือและส่งต่อ</h3><p>กรอง ดู Buyer ที่รับผิดชอบ อัปเดตสถานะ แล้วกด PDF พร้อมรูปสินค้า ส่งให้ทีมหน้าร้านได้ทันที</p><div class="chips"><span class="chip">PDF พร้อมรูป</span><span class="chip">Excel</span><span class="chip">ทุกโหมด</span></div></div>
+        </div>
+        <ul class="dots" aria-hidden="true"><li data-i="0" class="on"></li><li data-i="1"></li><li data-i="2"></li><li class="lab"><b class="cur">1</b> / 3</li></ul>
+      </div>
+      <div class="visual">
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i><u>teerawatsinlee2543-art.github.io/makro-finder/shelf-life.html</u></div>
+          <div class="vp">
+            <div class="screen on" data-i="0"><div class="cr" style="--w:1100;--cw:1100;--ch:846;--x:0;--y:0"><img src="pitch-shots/sl-import.png" alt="หน้าต่างนำเข้าไฟล์ Aging NBS แสดง 2,772 รายการ"></div></div>
+            <div class="screen" data-i="1"><div class="cr" style="--w:2800;--cw:2800;--ch:2154;--x:0;--y:0"><img src="pitch-shots/sl-nbs.png" alt="หน้า Item NBS แยกแผนกและระดับ Aging"></div></div>
+            <div class="screen" data-i="2"><div class="cr" style="--w:1685;--cw:1548;--ch:1191;--x:0;--y:0"><img src="pitch-shots/sl-pdf.png" alt="PDF Item NBS พร้อมรูปสินค้า"></div></div>
+          </div>
+        </div>
+        <div class="w f1" data-i="0"><small>นำเข้า</small><b>2,772</b><em>จาก 12,985 แถว</em></div>
+        <div class="w f2" data-i="1"><small>Full Provision</small><b>131</b><em>Alert 517 · Obsolete 117</em></div>
+        <div class="w f3" data-i="2"><small>ส่งออก</small><b>PDF</b><em>พร้อมรูปสินค้า</em></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<section class="sec alt" id="p6" data-page="6" data-title="ตัวเลขจริง">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow" style="justify-content:center"><span class="pgno">6 / 9</span>ข้อมูลจริง ณ 14 ต.ค. 2026</p>
+      <h2>ตัวเลขจริงของร้านเรา ไม่ใช่ตัวอย่าง</h2>
+      <p class="sub">คำนวณจากไฟล์รายงานของ Makro Store 42 ที่นำเข้าเข้าระบบ ตัวเลข Aging คำนวณตามวันที่เปิดแอป</p>
+    </div>
+    <div class="stats">
+      <div class="stat reveal" style="--i:0;--c:var(--orange)"><small>ต้องลงมือ · NBS</small><b data-count="2772">2,772</b><em>จาก 12,985 แถวในไฟล์ (21%)</em></div>
+      <div class="stat reveal" style="--i:1;--c:var(--red)"><small>ตัดสินใจก่อน</small><b data-count="248">248</b><em>Obsolete 117 + Full Provision 131</em></div>
+      <div class="stat reveal" style="--i:2;--c:var(--blue)"><small>ของทิ้งเดือนนี้</small><b><span data-count="383.7" data-dec="1" data-prefix="฿" data-suffix="k">฿383.7k</span></b><em>0.95% ของยอดขาย ฿40.22M</em></div>
+      <div class="stat reveal" style="--i:3;--c:var(--purple)"><small>สต็อกติดลบ</small><b data-count="156">156</b><em>ต้องปรับ +2,874 หน่วย</em></div>
+    </div>
+    <div class="chart2">
+      <div class="chartcard reveal">
+        <h3>ระดับ Aging ของสินค้า NBS</h3>
+        <p class="sub2">รวม 1,223 รายการ · ตามกฎ Makro</p>
+        <div class="bar" style="--i:0"><span>Alert</span><em><i style="--w:100%;--c:var(--yellow)"></i></em><b>517</b></div>
+        <div class="bar" style="--i:1"><span>Attention</span><em><i style="--w:61.9%;--c:var(--orange)"></i></em><b>320</b></div>
+        <div class="bar" style="--i:2"><span>Critical · 25%</span><em><i style="--w:26.7%;--c:var(--red)"></i></em><b>138</b></div>
+        <div class="bar" style="--i:3"><span>Obsolete · 50%</span><em><i style="--w:22.6%;--c:#a52a22"></i></em><b>117</b></div>
+        <div class="bar" style="--i:4"><span>Full Provision · 100%</span><em><i style="--w:25.3%;--c:var(--ink)"></i></em><b>131</b></div>
+        <p class="note">248 รายการอยู่ระดับ Obsolete ขึ้นไป ต้องตัดสินใจก่อน</p>
+      </div>
+      <div class="chartcard reveal" style="--i:1">
+        <h3>ของทิ้งเดือนนี้ แยกแผนก</h3>
+        <p class="sub2">฿383.7k จาก 765 รายการ · 5 แผนกแรก</p>
+        <div class="bar" style="--i:0"><span>03 FISH</span><em><i style="--w:100%;--c:var(--orange)"></i></em><b>฿81.1k</b></div>
+        <div class="bar" style="--i:1"><span>01 FRUIT &amp; VEG</span><em><i style="--w:86.8%;--c:var(--orange)"></i></em><b>฿70.4k</b></div>
+        <div class="bar" style="--i:2"><span>05 FROZEN &amp; DAIRY</span><em><i style="--w:76.6%;--c:var(--orange)"></i></em><b>฿62.1k</b></div>
+        <div class="bar" style="--i:3"><span>08 DRY GROCERY</span><em><i style="--w:72.8%;--c:var(--orange)"></i></em><b>฿59.0k</b></div>
+        <div class="bar" style="--i:4"><span>02 BUTCHERY</span><em><i style="--w:56.1%;--c:var(--orange)"></i></em><b>฿45.5k</b></div>
+        <p class="note">Fresh Food คิดเป็นราว 70% ของมูลค่าทิ้ง</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="p7" data-page="7" data-title="ใครได้อะไร">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow" style="justify-content:center"><span class="pgno">7 / 9</span>ใครได้อะไร</p>
+      <h2>ทุกคนในร้านเห็นภาพเดียวกัน</h2>
+    </div>
+    <div class="who">
+      <article class="reveal" style="--i:0;--c:var(--teal)"><span class="tagc">ลูกค้า</span><div class="big">หาสินค้าและดูแผนที่เองจากมือถือ</div><p>ลดการเดินวนและการรอถามพนักงาน</p><small>สิ่งที่คาดหวัง</small></article>
+      <article class="reveal" style="--i:1;--c:var(--orange)"><span class="tagc">พนักงานและหัวหน้าแผนก</span><div class="big">รู้ตั้งแต่เช้าว่าต้องทำอะไรก่อน</div><p>ค้นหา สแกน จัดการพาเลท ดู Buyer และส่ง PDF ได้ในที่เดียว พนักงานใหม่ทำงานได้เร็วขึ้น</p><small>สิ่งที่คาดหวัง</small></article>
+      <article class="reveal" style="--i:2;--c:var(--blue)"><span class="tagc">ผู้บริหาร</span><div class="big">เห็นความเสี่ยงและตำแหน่งสินค้าในภาพเดียว</div><p>ตัวเลขชุดเดียวกันทั้งทีม ตั้ง KPI และติดตามเป็นรายสัปดาห์ได้</p><small>สิ่งที่คาดหวัง</small></article>
+    </div>
+  </div>
+</section>
+
+<section class="band sec" id="p8" data-page="8" data-title="ตรวจสอบแล้ว">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow" style="justify-content:center"><span class="pgno">8 / 9</span>ตรวจสอบแล้ว</p>
+      <h2>ทดสอบกับข้อมูลจริงมาแล้ว</h2>
+    </div>
+    <div class="proofs">
+      <div class="reveal" style="--i:0"><div class="n"><span data-count="79">79</span><small>%</small></div><h3>ไม่ต้องเปิดดู</h3><p>ของแถวในไฟล์ Aging NBS ไม่ต้องลงมือ ระบบคัดเหลือ 2,772 จาก 12,985</p></div>
+      <div class="reveal" style="--i:1"><div class="n">≈<span data-count="95">95</span><small>%</small></div><h3>ตรงกับรายงาน Makro</h3><p>Aging ที่ระบบคำนวณเทียบรายงานจริง 82,556 แถว ส่วนที่ต่างส่วนใหญ่ไม่เกิน 1 ระดับ</p></div>
+      <div class="reveal" style="--i:2"><div class="n" style="font-size:clamp(34px,5vw,60px)">วินาที</div><h3>จากค้างเกิน 9 นาที</h3><p>นำเข้า 2,532 รายการ เดิมหน้าเว็บค้างเกิน 9 นาที ตอนนี้เสร็จในไม่กี่วินาที</p></div>
+      <div class="reveal" style="--i:3"><div class="n">PDF</div><h3>พร้อมรูปสินค้า</h3><p>ส่งออกได้ทุกโหมด และ Buyer ผูกจาก Item → Art Grp ให้อัตโนมัติ</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="p9" data-page="9" data-title="เริ่มใช้งาน">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow" style="justify-content:center"><span class="pgno">9 / 9</span>เริ่มต้น</p>
+      <h2>ลองใช้ได้เลยวันนี้ แล้วช่วยตัดสินใจ 3 เรื่อง</h2>
+      <p class="sub">สแกนหรือกดลิงก์เพื่อเปิดระบบจริง ไม่ต้องติดตั้งโปรแกรม</p>
+    </div>
+    <div class="try">
+      <a class="tcard reveal" style="--i:0" href="https://teerawatsinlee2543-art.github.io/makro-finder/" target="_blank" rel="noopener"><div class="qr" data-qr="https://teerawatsinlee2543-art.github.io/makro-finder/"></div><div><h3>Makro Finder</h3><p>ค้นหาสินค้า ตำแหน่ง และแผนที่ · สื่อโปรโมชั่น + Complain · การบันทึกของเสีย O2O · ดู Stock จริงได้ผ่าน Link</p><code>teerawatsinlee2543-art.github.io/makro-finder/</code></div></a>
+      <a class="tcard reveal" style="--i:1" href="https://teerawatsinlee2543-art.github.io/makro-finder/pallet.html" target="_blank" rel="noopener"><div class="qr" data-qr="https://teerawatsinlee2543-art.github.io/makro-finder/pallet.html"></div><div><h3>จัดการพาเลท</h3><p>สร้างพาเลท ใส่สินค้า หาสินค้าตามพาเลท</p><code>teerawatsinlee2543-art.github.io/makro-finder/pallet.html</code></div></a>
+      <a class="tcard reveal" style="--i:2" href="https://teerawatsinlee2543-art.github.io/makro-finder/shelf-life.html" target="_blank" rel="noopener"><div class="qr" data-qr="https://teerawatsinlee2543-art.github.io/makro-finder/shelf-life.html"></div><div><h3>Shelf-Life Monitor</h3><p>Aging · NBS · OOS+ · %Shrink · Negative Stock</p><code>teerawatsinlee2543-art.github.io/makro-finder/shelf-life.html</code></div></a>
+    </div>
+    <div class="asks">
+      <div class="ask reveal" style="--i:0"><span class="no">1</span><h3>ตั้งเจ้าของข้อมูลและรอบนำเข้า</h3><p>กำหนดคนนำเข้าไฟล์ของแต่ละแผนก (FF · DF · NF) และรอบ เช่น ทุกเช้า เพื่อให้ตัวเลขทันสมัย</p></div>
+      <div class="ask reveal" style="--i:1"><span class="no">2</span><h3>แคมเปญเติม Location</h3><p>ใช้รายการ “ยังไม่มี Location” ทยอยเติมทีละแผนก ตอนนี้รออีก 158,660 รายการ</p></div>
+      <div class="ask reveal" style="--i:2"><span class="no">3</span><h3>ตั้ง KPI และทบทวนรายสัปดาห์</h3><p>ใช้ตัวเลขในระบบเป็นวาระประชุมประจำสัปดาห์ วัดผลเทียบกับเป้าหมายด้านล่าง</p></div>
+    </div>
+    <div class="base reveal">
+      <div><span class="now">วันนี้</span><b>9.5%</b><span class="lbl">สินค้ามีตำแหน่ง</span><i class="goal">เป้าหมาย: 40% Location ของสินค้าที่มีขายจริง</i></div>
+      <div><span class="now">วันนี้</span><b>131</b><span class="lbl">Full Provision</span><i class="goal">เป้าหมาย: 5 รายการ ในแต่ละแผนก</i></div>
+      <div><span class="now">วันนี้</span><b>156</b><span class="lbl">สต็อกติดลบ</span><i class="goal">เป้าหมาย: น้อยกว่าหรือเท่ากับ 5 รายการ</i></div>
+      <div><span class="now">วันนี้</span><b>0.95%</b><span class="lbl">%Shrink รวม (MTD)</span><i class="goal">เป้าหมาย: น้อยกว่าหรือเท่ากับ 0.50% ในแต่ละแผนก</i></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="exportbox">
+      <div><b>Export PDF</b><span>กดปุ่มนี้เพื่อเปิดไฟล์ PDF ของหน้านำเสนอทั้งชุด แล้วบันทึกหรือพิมพ์ได้เลย</span></div>
+      <a class="btn-blue" href="https://teerawatsinlee2543-art.github.io/makro-finder/makro-x-shelf-life-monitor.pdf" target="_blank" rel="noopener">Export PDF</a>
+    </div>
+    <div class="lockup" role="img" aria-label="Makro Finder × Shelf-Life Monitor">
+      <span class="lf"><img src="pitch-shots/logo-finder.png" alt="makro Finder"></span>
+      <span class="x">×</span>
+      <img class="lsl" src="pitch-shots/logo-shelflife.png" alt="Shelf-Life Monitor">
+    </div>
+    <p>ที่มา: ไฟล์รายงานจริงของ Makro Store 42 (Aging NBS, Negative Stock Monitor, %Shrink By Code / data) และข้อมูลสินค้า Makro Finder 180,102 รายการ ณ 14 ต.ค. 2026</p>
+    <p>ตัวเลข Aging คำนวณตามวันที่เปิดแอป จึงต่างจากสถานะในไฟล์ต้นทางเล็กน้อย · ภาพหน้าจอจริง ตัดเบอร์โทร Buyer ออกแล้ว · ภาพหน้าจอพาเลทเป็นพาเลทตัวอย่างที่สร้างจากสินค้าจริง ไม่ใช่ข้อมูลพาเลทจริงของร้าน · หัวข้อ “สิ่งที่คาดหวัง” เป็นข้อเสนอ ยังไม่ใช่ผลที่วัดได้ · เป้าหมาย 40% คิดจากสินค้าที่มีขายจริง ส่วน 9.5% ในหน้านี้คิดจากสินค้าทั้งหมด 180,102 รายการ</p>
+  </div>
+</footer>
+
+<script>
+var qrcode=function(){function i(t,r){function a(t,r){g=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(l=4*u+17),e(0,0),e(l-7,0),e(0,l-7),i(),o(),v(t,r),7<=u&&h(t),null==n&&(n=w(u,f,c)),d(n,r)}var u=t,f=y[r],g=null,l=0,n=null,c=[],s={},e=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||l<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||l<=r+n||(g[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},o=function(){for(var t=8;t<l-8;t+=1)null==g[t][6]&&(g[t][6]=t%2==0);for(var r=8;r<l-8;r+=1)null==g[6][r]&&(g[6][r]=r%2==0)},i=function(){for(var t=B.getPatternPosition(u),r=0;r<t.length;r+=1)for(var e=0;e<t.length;e+=1){var n=t[r],o=t[e];if(null==g[n][o])for(var i=-2;i<=2;i+=1)for(var a=-2;a<=2;a+=1)g[n+i][o+a]=-2==i||2==i||-2==a||2==a||0==i&&0==a}},h=function(t){for(var r=B.getBCHTypeNumber(u),e=0;e<18;e+=1){var n=!t&&1==(r>>e&1);g[Math.floor(e/3)][e%3+l-8-3]=n}for(e=0;e<18;e+=1){n=!t&&1==(r>>e&1);g[e%3+l-8-3][Math.floor(e/3)]=n}},v=function(t,r){for(var e=f<<3|r,n=B.getBCHTypeInfo(e),o=0;o<15;o+=1){var i=!t&&1==(n>>o&1);o<6?g[o][8]=i:o<8?g[o+1][8]=i:g[l-15+o][8]=i}for(o=0;o<15;o+=1){i=!t&&1==(n>>o&1);o<8?g[8][l-o-1]=i:o<9?g[8][15-o-1+1]=i:g[8][15-o-1]=i}g[l-8][8]=!t},d=function(t,r){for(var e=-1,n=l-1,o=7,i=0,a=B.getMaskFunction(r),u=l-1;0<u;u-=2)for(6==u&&(u-=1);;){for(var f=0;f<2;f+=1)if(null==g[n][u-f]){var c=!1;i<t.length&&(c=1==(t[i]>>>o&1)),a(n,u-f)&&(c=!c),g[n][u-f]=c,-1==(o-=1)&&(i+=1,o=7)}if((n+=e)<0||l<=n){n-=e,e=-e;break}}},w=function(t,r,e){for(var n=b.getRSBlocks(t,r),o=M(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=C(i[u],l.getLength()-1).mod(l);a[u]=new Array(l.getLength()-1);for(g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=0<=s?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};s.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=x(t);break;case"Alphanumeric":e=m(t);break;case"Byte":e=L(t);break;case"Kanji":e=D(t);break;default:throw"mode:"+r}c.push(e),n=null},s.isDark=function(t,r){if(t<0||l<=t||r<0||l<=r)throw t+","+r;return g[t][r]},s.getModuleCount=function(){return l},s.make=function(){if(u<1){for(var t=1;t<40;t++){for(var r=b.getRSBlocks(t,f),e=M(),n=0;n<c.length;n++){var o=c[n];e.put(o.getMode(),4),e.put(o.getLength(),B.getLengthInBits(o.getMode(),t)),o.write(e)}var i=0;for(n=0;n<r.length;n++)i+=r[n].dataCount;if(e.getLengthInBits()<=8*i)break}u=t}a(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){a(!0,e);var n=B.getLostPoint(s);(0==e||n<t)&&(t=n,r=e)}return r}())},s.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<s.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<s.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=s.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},s.createSvgTag=function(t,r,e,n){var o={};"object"==typeof t&&(t=(o=t).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,f,c=s.getModuleCount()*t+2*r,g="";for(f="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",g+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',g+=o.scalable?"":' width="'+c+'px" height="'+c+'px"',g+=' viewBox="0 0 '+c+" "+c+'" ',g+=' preserveAspectRatio="xMinYMin meet"',g+=n.text||e.text?' role="img" aria-labelledby="'+p([n.id,e.id].join(" ").trim())+'"':"",g+=">",g+=n.text?'<title id="'+p(n.id)+'">'+p(n.text)+"</title>":"",g+=e.text?'<description id="'+p(e.id)+'">'+p(e.text)+"</description>":"",g+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',g+='<path d="',a=0;a<s.getModuleCount();a+=1)for(u=a*t+r,i=0;i<s.getModuleCount();i+=1)s.isDark(a,i)&&(g+="M"+(i*t+r)+","+u+f);return g+='" stroke="transparent" fill="black"/>',g+="</svg>"},s.createDataURL=function(o,t){o=o||2,t=void 0===t?4*o:t;var r=s.getModuleCount()*o+2*t,i=t,a=r-t;return I(r,r,function(t,r){if(i<=t&&t<a&&i<=r&&r<a){var e=Math.floor((t-i)/o),n=Math.floor((r-i)/o);return s.isDark(n,e)?0:1}return 1})},s.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=s.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=s.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=p(e),o+='"'),o+="/>"};var p=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return s.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*s.getModuleCount()+2*t,u=t,f=a-t,c={"██":"█","█ ":"▀"," █":"▄","  ":" "},g={"██":"▀","█ ":"▀"," █":" ","  ":" "},l="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<f&&u<=r&&r<f&&s.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<f&&u<=r+1&&r+1<f&&s.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",l+=t<1&&f<=r+1?g[i]:c[i];l+="\n"}return a%2&&0<t?l.substring(0,l.length-a-1)+Array(1+a).join("▀"):l.substring(0,l.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=s.getModuleCount()*t+2*r,u=r,f=a-r,c=Array(t+1).join("██"),g=Array(t+1).join("  "),l="",h="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),h="",n=0;n<a;n+=1)i=1,u<=n&&n<f&&u<=e&&e<f&&s.isDark(o,Math.floor((n-u)/t))&&(i=0),h+=i?c:g;for(o=0;o<t;o+=1)l+=h+"\n"}return l.substring(0,l.length-1)},s.renderTo2dContext=function(t,r){r=r||2;for(var e=s.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=s.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},s}i.stringToBytes=(i.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,i.createStringToBytes=function(u,f){var i=function(){function t(){var t=r.read();if(-1==t)throw"eof";return t}for(var r=S(u),e=0,n={};;){var o=r.read();if(-1==o)break;var i=t(),a=t()<<8|t();n[String.fromCharCode(o<<8|i)]=a,e+=1}if(e!=f)throw e+" != "+f;return n}(),a="?".charCodeAt(0);return function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);if(n<128)r.push(n);else{var o=i[t.charAt(e)];"number"==typeof o?(255&o)==o?r.push(o):(r.push(o>>>8),r.push(255&o)):r.push(a)}}return r}};var r,t,a=1,u=2,o=4,f=8,y={L:1,M:0,Q:3,H:2},e=0,n=1,c=2,g=3,l=4,h=5,s=6,v=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],(t={}).getBCHTypeInfo=function(t){for(var r=t<<10;0<=d(r)-d(1335);)r^=1335<<d(r)-d(1335);return 21522^(t<<10|r)},t.getBCHTypeNumber=function(t){for(var r=t<<12;0<=d(r)-d(7973);)r^=7973<<d(r)-d(7973);return t<<12|r},t.getPatternPosition=function(t){return r[t-1]},t.getMaskFunction=function(t){switch(t){case e:return function(t,r){return(t+r)%2==0};case n:return function(t,r){return t%2==0};case c:return function(t,r){return r%3==0};case g:return function(t,r){return(t+r)%3==0};case l:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case h:return function(t,r){return t*r%2+t*r%3==0};case s:return function(t,r){return(t*r%2+t*r%3)%2==0};case v:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},t.getErrorCorrectPolynomial=function(t){for(var r=C([1],0),e=0;e<t;e+=1)r=r.multiply(C([1,w.gexp(e)],0));return r},t.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case o:case f:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case o:return 16;case f:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case o:return 16;case f:return 12;default:throw"mode:"+t}}},t.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);5<i&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},t);function d(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r}var w=function(){for(var r=new Array(256),e=new Array(256),t=0;t<8;t+=1)r[t]=1<<t;for(t=8;t<256;t+=1)r[t]=r[t-4]^r[t-5]^r[t-6]^r[t-8];for(t=0;t<255;t+=1)e[r[t]]=t;var n={glog:function(t){if(t<1)throw"glog("+t+")";return e[t]},gexp:function(t){for(;t<0;)t+=255;for(;256<=t;)t-=255;return r[t]}};return n}();function C(n,o){if(void 0===n.length)throw n.length+"/"+o;var r=function(){for(var t=0;t<n.length&&0==n[t];)t+=1;for(var r=new Array(n.length-t+o),e=0;e<n.length-t;e+=1)r[e]=n[e+t];return r}(),i={getAt:function(t){return r[t]},getLength:function(){return r.length},multiply:function(t){for(var r=new Array(i.getLength()+t.getLength()-1),e=0;e<i.getLength();e+=1)for(var n=0;n<t.getLength();n+=1)r[e+n]^=w.gexp(w.glog(i.getAt(e))+w.glog(t.getAt(n)));return C(r,0)},mod:function(t){if(i.getLength()-t.getLength()<0)return i;for(var r=w.glog(i.getAt(0))-w.glog(t.getAt(0)),e=new Array(i.getLength()),n=0;n<i.getLength();n+=1)e[n]=i.getAt(n);for(n=0;n<t.getLength();n+=1)e[n]^=w.gexp(w.glog(t.getAt(n))+r);return C(e,0).mod(t)}};return i}function p(){var e=[],o={writeByte:function(t){e.push(255&t)},writeShort:function(t){o.writeByte(t),o.writeByte(t>>>8)},writeBytes:function(t,r,e){r=r||0,e=e||t.length;for(var n=0;n<e;n+=1)o.writeByte(t[n+r])},writeString:function(t){for(var r=0;r<t.length;r+=1)o.writeByte(t.charCodeAt(r))},toByteArray:function(){return e},toString:function(){var t="";t+="[";for(var r=0;r<e.length;r+=1)0<r&&(t+=","),t+=e[r];return t+="]"}};return o}var k,A,b=(k=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],(A={}).getRSBlocks=function(t,r){var e=function(t,r){switch(r){case y.L:return k[4*(t-1)+0];case y.M:return k[4*(t-1)+1];case y.Q:return k[4*(t-1)+2];case y.H:return k[4*(t-1)+3];default:return}}(t,r);if(void 0===e)throw"bad rs block @ typeNumber:"+t+"/errorCorrectionLevel:"+r;for(var n,o,i=e.length/3,a=[],u=0;u<i;u+=1)for(var f=e[3*u+0],c=e[3*u+1],g=e[3*u+2],l=0;l<f;l+=1)a.push((n=g,o=void 0,(o={}).totalCount=c,o.dataCount=n,o));return a},A),M=function(){var e=[],n=0,o={getBuffer:function(){return e},getAt:function(t){var r=Math.floor(t/8);return 1==(e[r]>>>7-t%8&1)},put:function(t,r){for(var e=0;e<r;e+=1)o.putBit(1==(t>>>r-e-1&1))},getLengthInBits:function(){return n},putBit:function(t){var r=Math.floor(n/8);e.length<=r&&e.push(0),t&&(e[r]|=128>>>n%8),n+=1}};return o},x=function(t){var r=a,n=t,e={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+2<r.length;)t.put(o(r.substring(e,e+3)),10),e+=3;e<r.length&&(r.length-e==1?t.put(o(r.substring(e,e+1)),4):r.length-e==2&&t.put(o(r.substring(e,e+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return e},m=function(t){var r=u,n=t,e={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+1<r.length;)t.put(45*o(r.charAt(e))+o(r.charAt(e+1)),11),e+=2;e<r.length&&t.put(o(r.charAt(e)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return e},L=function(t){var r=o,e=i.stringToBytes(t),n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=0;r<e.length;r+=1)t.put(e[r],8)}};return n},D=function(t){var r=f,e=i.stringToBytesFuncs.SJIS;if(!e)throw"sjis not supported.";!function(){var t=e("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=e(t),n={getMode:function(){return r},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return n},S=function(t){var e=t,n=0,o=0,i=0,r={read:function(){for(;i<8;){if(n>=e.length){if(0==i)return-1;throw"unexpected end of file./"+i}var t=e.charAt(n);if(n+=1,"="==t)return i=0,-1;t.match(/^\s$/)||(o=o<<6|a(t.charCodeAt(0)),i+=6)}var r=o>>>i-8&255;return i-=8,r}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return r},I=function(t,r,e){for(var n=function(t,r){var n=t,o=r,l=new Array(t*r),e={setPixel:function(t,r,e){l[r*n+t]=e},write:function(t){t.writeString("GIF87a"),t.writeShort(n),t.writeShort(o),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(n),t.writeShort(o),t.writeByte(0);var r=i(2);t.writeByte(2);for(var e=0;255<r.length-e;)t.writeByte(255),t.writeBytes(r,e,255),e+=255;t.writeByte(r.length-e),t.writeBytes(r,e,r.length-e),t.writeByte(0),t.writeString(";")}},i=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,o=h(),i=0;i<r;i+=1)o.add(String.fromCharCode(i));o.add(String.fromCharCode(r)),o.add(String.fromCharCode(e));var a=p(),u=function(t){var e=t,n=0,o=0,r={write:function(t,r){if(t>>>r!=0)throw"length over";for(;8<=n+r;)e.writeByte(255&(t<<n|o)),r-=8-n,t>>>=8-n,n=o=0;o|=t<<n,n+=r},flush:function(){0<n&&e.writeByte(o)}};return r}(a);u.write(r,n);var f=0,c=String.fromCharCode(l[f]);for(f+=1;f<l.length;){var g=String.fromCharCode(l[f]);f+=1,o.contains(c+g)?c+=g:(u.write(o.indexOf(c),n),o.size()<4095&&(o.size()==1<<n&&(n+=1),o.add(c+g)),c=g)}return u.write(o.indexOf(c),n),u.write(e,n),u.flush(),a.toByteArray()},h=function(){var r={},e=0,n={add:function(t){if(n.contains(t))throw"dup key:"+t;r[t]=e,e+=1},size:function(){return e},indexOf:function(t){return r[t]},contains:function(t){return void 0!==r[t]}};return n};return e}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=p();n.write(a);for(var u=function(){function e(t){a+=String.fromCharCode(r(63&t))}var n=0,o=0,i=0,a="",t={},r=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return t.writeByte=function(t){for(n=n<<8|255&t,o+=8,i+=1;6<=o;)e(n>>>o-6),o-=6},t.flush=function(){if(0<o&&(e(n<<6-o),o=n=0),i%3!=0)for(var t=3-i%3,r=0;r<t;r+=1)a+="="},t.toString=function(){return a},t}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return i}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||57344<=n?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});
+</script>
+<script>
+(function(){
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function clamp(x,a,b){return x<a?a:(x>b?b:x)}
+  function fmt(v,d){return Number(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+  function $all(sel,root){return [].slice.call((root||document).querySelectorAll(sel))}
+
+  try{$all('[data-qr]').forEach(function(el){var q=qrcode(0,'M');q.addData(el.getAttribute('data-qr'));q.make();el.innerHTML=q.createSvgTag({cellSize:4,margin:0,scalable:true})})}catch(e){}
+
+  var SB='<b>9:41</b><span><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 17 12"><path d="M8.5 2.3c2.3 0 4.4.9 6 2.4l1-1.1C13.7 1.9 11.2.8 8.5.8S3.3 1.9 1.5 3.6l1 1.1c1.6-1.5 3.7-2.4 6-2.4zm0 3.4c1.4 0 2.6.5 3.6 1.4l1-1.1c-1.3-1.2-3-1.9-4.6-1.9s-3.3.7-4.6 1.9l1 1.1c1-.9 2.2-1.4 3.6-1.4zm0 3.3c.7 0 1.3.3 1.8.7l-1.8 1.8-1.8-1.8c.5-.4 1.1-.7 1.8-.7z"/></svg><svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="19" height="8" rx="2"/><path d="M24 4v4c.8-.3 1.5-1.1 1.5-2S24.8 4.3 24 4z" opacity=".5"/></svg></span>';
+  $all('.sbar').forEach(function(el){el.innerHTML=SB});
+
+  $all('.wf').forEach(function(w){var h='';for(var i=0;i<100;i++)h+='<i></i>';w.innerHTML=h;w._c=w.children;w._k=-1});
+
+  function setWaffle(scene,p){
+    var q=clamp((p-.08)/.6,0,1);
+    $all('.panel',scene).forEach(function(pn){
+      var wf=pn.querySelector('.wf'),t=parseFloat(wf.getAttribute('data-target')),d=parseInt(wf.getAttribute('data-dec'),10)||0;
+      var v=t*q,full=Math.floor(v),part=v-full,key=Math.round(v*10);
+      if(wf._k===key)return; wf._k=key;
+      for(var i=0;i<100;i++){wf._c[i].className=i<full?'on':(i===full&&part>=.25?'half':'')}
+      pn.querySelector('.num').textContent=fmt(v,d);
+    });
+    scene.classList.toggle('done',p>.8||reduce);
+  }
+  function setSteps(scene,p){
+    var n=parseInt(scene.getAttribute('data-n'),10)||3,idx=clamp(Math.floor(p*n),0,n-1);
+    if(scene._i===idx)return; scene._i=idx;
+    $all('[data-i]',scene).forEach(function(el){el.classList.toggle('on',parseInt(el.getAttribute('data-i'),10)===idx)});
+    var cur=scene.querySelector('.dots .cur'); if(cur)cur.textContent=idx+1;
+  }
+
+  // keep every pinned scene fully inside the viewport: shrink its content if it is taller than the window
+  function fitAll(){
+    $all('.scene-in').forEach(function(si){
+      var f=si.querySelector('.fit'); if(!f)return;
+      f.style.transform='none';
+      var avail=si.clientHeight-28,need=f.offsetHeight;
+      f.style.transform=need>avail?'scale('+Math.max(.45,avail/need).toFixed(3)+')':'none';
+    });
+  }
+
+  var scenes=$all('[data-scene]'),pages=$all('[data-page]'),rail=$all('.rail a'),bar=document.querySelector('.progress i'),art=document.getElementById('heroArt'),pgNow=document.getElementById('pgNow'),pgTitle=document.getElementById('pgTitle'),ticking=false,pend=[];
+  function offscreen(el){return el.getBoundingClientRect().top>window.innerHeight*.92}
+  function checkPend(){
+    for(var i=pend.length-1;i>=0;i--){
+      var el=pend[i],r=el.getBoundingClientRect();
+      if(r.top<window.innerHeight*.88&&r.bottom>0){pend.splice(i,1);el.classList.remove('pre');if(el.hasAttribute('data-count'))runCounter(el)}
+    }
+  }
+  function frame(){
+    ticking=false;
+    var sy=window.pageYOffset||0,max=Math.max(1,document.documentElement.scrollHeight-window.innerHeight);
+    bar.style.transform='scaleX('+clamp(sy/max,0,1)+')';
+    scenes.forEach(function(sc){
+      var r=sc.getBoundingClientRect(),h=sc.offsetHeight-window.innerHeight,p=h>0?clamp(-r.top/h,0,1):0;
+      if(sc.getAttribute('data-scene')==='waffle')setWaffle(sc,p);else setSteps(sc,p);
+    });
+    if(art&&!reduce)art.style.setProperty('--py',Math.min(sy,800));
+    var mid=window.innerHeight*.4,cur=0;
+    pages.forEach(function(c,i){if(c.getBoundingClientRect().top<=mid)cur=i});
+    rail.forEach(function(a,i){a.classList.toggle('cur',i===cur)});
+    pgNow.textContent=pages[cur].getAttribute('data-page');pgTitle.textContent=pages[cur].getAttribute('data-title');
+    checkPend();
+  }
+  function onScroll(){if(!ticking){ticking=true;requestAnimationFrame(frame)}}
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',function(){fitAll();onScroll()});
+
+  function runCounter(el){
+    var end=parseFloat(el.getAttribute('data-count')),d=parseInt(el.getAttribute('data-dec'),10)||0,pre=el.getAttribute('data-prefix')||'',suf=el.getAttribute('data-suffix')||'';
+    function show(v){el.textContent=pre+fmt(v,d)+suf}
+    if(reduce){show(end);return}
+    var t0=null,dur=1200;
+    setTimeout(function(){show(end)},dur+250);
+    function step(t){if(t0===null)t0=t;var k=clamp((t-t0)/dur,0,1),e=1-Math.pow(1-k,3);show(end*e);if(k<1)requestAnimationFrame(step)}
+    requestAnimationFrame(step);
+  }
+  if(!reduce){
+    $all('.reveal').forEach(function(el){if(offscreen(el)){el.classList.add('pre');pend.push(el)}});
+    $all('[data-count]').forEach(function(el){
+      if(offscreen(el)){
+        var d=parseInt(el.getAttribute('data-dec'),10)||0;
+        el.textContent=(el.getAttribute('data-prefix')||'')+fmt(0,d)+(el.getAttribute('data-suffix')||'');
+        pend.push(el);
+      }else runCounter(el);
+    });
+  }
+  fitAll();frame();
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fitAll();frame()});
+  window.addEventListener('load',function(){fitAll();frame()});
+})();
+</script>
+</body></html>
