@@ -3247,8 +3247,8 @@ function oosCard(r,ctx){
 /* "ดู Stock": the Makro stock web. {item} in a link is replaced by the Item No. The Makro web needs its own login (never stored here).
    Every screen (computer, tablet, phone) from the card button: a green speech bubble under / over the button with the page inside it (two pages = two tabs in the bubble); a link opens it in a normal tab when the web refuses to be embedded.
    Set the stock-page links below when they are known. */
-const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','https://ssmobile.siammakro.co.th/login.html'];
-const STOCK_LABELS=['หน้า Stock 1','หน้า Stock 2'];
+const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','http://bip-app.siammakro.co.th:9714/xmlpserver/Guest/Reports/ItemEnquiry/ItemEnquiryReport.xdo?STORE_ID=42&_xpt=&_xl=en_US&STOREID=42&_xpf=&Store_Timezone=Asia%2FBangkok&ITEMID={item}&_xf=html'];
+const STOCK_LABELS=['Item lookup','Item Enquiry (BIP)'];
 let stkBubble=null,stkSelfBack=0;
 function stkClose(viaPop){
   if(!stkBubble)return;const b=stkBubble;stkBubble=null;document.querySelectorAll('.oosc.stk-blink').forEach(c=>c.classList.remove('stk-blink'));
@@ -3331,15 +3331,12 @@ function oosStock(id,btn){
   const no=String(r.itemNo||''),urls=STOCK_URLS.map(u=>u.replace(/\{item\}/g,encodeURIComponent(no))),uniq=[...new Set(urls)];
   const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||window.innerWidth<700;
   if(btn){
-    /* the button opens the REAL Makro stock page in its own small window (a phone opens it as a new tab). It used to be framed inside a bubble on this page, but the Makro web shows an empty box when it is framed after login */
+    /* the button opens the REAL Makro pages as browser tabs, side by side like Chrome's own tab strip: tab 1 = Item lookup (login), tab 2 = the BIP Item Enquiry report with this card's Item No already filled in. They cannot be framed inside this page (the Makro web needs its own cookies, and the BIP page is plain http), and the names below make a second tap reuse the same two tabs instead of piling up new ones */
     try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
     stkClose();
-    let w=null;
-    if(phone) w=window.open(uniq[0],'_blank');
-    else{const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,ww=Math.min(480,W),hh=Math.min(820,H);
-      w=window.open(uniq[0],'mkStock',`popup=yes,width=${ww},height=${hh},left=${L+W-ww},top=${T}`)}
-    if(w){try{w.focus()}catch(e){}toast(`เปิดหน้า Stock แล้ว · คัดลอก Item No ${no} ไว้ให้วางค้นหา`)}
-    else oosStockPick(no,uniq);
+    const ws=uniq.map((u,i)=>window.open(u,'mkStock'+i));
+    if(ws.every(Boolean)){ws.forEach(w=>{try{w.focus()}catch(e){}});toast(`เปิดหน้า Stock ${ws.length} แท็บแล้ว · Item ${no}`)}
+    else oosStockPick(no,uniq); /* the browser blocked a tab: let the user open each one from the list */
     return}
   try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   if(phone){if(uniq.length>1){oosStockPick(no,uniq);return}
