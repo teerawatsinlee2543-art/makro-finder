@@ -396,14 +396,9 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .stkb-tab.on{background:#fff;color:#111;font-weight:700;box-shadow:0 -2px 0 #e30613 inset}
 .stkb-ico{flex:none;width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;font-style:normal}
 .stkb-ico.m{background:#e30613}.stkb-ico.b{background:#0b57a8}
-.stkb-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;background:#fff;color:#222}
-.stkb-card[hidden]{display:none}
+.stkb-card{display:flex;flex-direction:column;align-items:center;gap:12px;padding:22px 16px;text-align:center;background:#fff;color:#222;border-radius:0 12px 12px 12px;position:relative}
 .stkb-card .btn{text-decoration:none}
 .stkb-card p{margin:0;font-size:.85rem;color:#555;max-width:34ch}
-.stkb-w{border-top-left-radius:0}
-.stkb-o{color:#0b57a8;text-decoration:underline;white-space:nowrap}
-.stkb-w{flex:1;min-height:0;position:relative;overflow:hidden;border-radius:12px;background:var(--stkbg)}
-.stkb iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:var(--stkbg)}
 .stkb-n{color:#555;font-size:.7rem;line-height:1.25}
 .btn.stk{flex:none;margin-left:auto;background:#1f7a45;border-color:#1f7a45;color:#fff;font-weight:600;white-space:nowrap}.btn.stk:hover{background:#18633a;border-color:#18633a}
 .oosc-m{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
@@ -3246,9 +3241,9 @@ function oosCard(r,ctx){
     ${oosFactsHtml(r)}
     <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
     <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
-/* "ดู Stock": the Makro stock web in a small box on this page. {item} in a link is replaced by the Item No. The Makro web needs its own login (never stored here).
-   Two Chrome-style tabs in the box: Item lookup (shown inside the box) and Item Enquiry (BIP, Item No already filled in; it is plain http so it opens as a browser tab). Tap the button again, the X button, Esc or any page tab to close it.
-   If the box stays empty the web refused to be framed: the link "เปิดแท็บใหม่" opens it in a normal tab. Set the stock-page links below when they change. */
+/* "ดู Stock": the Makro stock pages. {item} in a link is replaced by the Item No. The Makro web needs its own login (never stored here).
+   A small box with two Chrome-style tabs: Item lookup and Item Enquiry (BIP, Item No already filled in). Neither page can be framed in this page (the Makro web refuses cookies when framed, and BIP is plain http on a private network), so every tab opens the REAL page in its own window on the right side of the screen (a phone opens a normal tab); the same name reuses that window.
+   Tap the button again, the X button, Esc or any page tab to close the box. Set the stock-page links below when they change. */
 const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','http://bip-app.siammakro.co.th:9714/xmlpserver/Guest/Reports/ItemEnquiry/ItemEnquiryReport.xdo?STORE_ID=42&_xpt=&_xl=en_US&STOREID=42&_xpf=&Store_Timezone=Asia%2FBangkok&ITEMID={item}&_xf=html'];
 const STOCK_LABELS=['Item lookup','Item Enquiry (BIP)'];
 let stkBubble=null;
@@ -3257,17 +3252,10 @@ function stkClose(){
   window.removeEventListener('resize',b.place);document.removeEventListener('keydown',b.key);b.el.remove();
 }
 $('#tabs').addEventListener('click',()=>stkClose()); /* switching tab closes it */
-/* show the WHOLE page: it is laid out at a phone-like width and scaled down to the box, so nothing is cut off at the sides or bottom */
-function stkFit(){
-  if(!stkBubble)return;const wr=stkBubble.el.querySelector('.stkb-w'),fr=wr&&wr.querySelector('iframe');if(!fr)return;
-  const W=wr.clientWidth,H=wr.clientHeight,s=Math.min(1,W/420);
-  fr.style.width=Math.round(W/s)+'px';fr.style.height=Math.round(H/s)+'px';fr.style.transform=s<1?`scale(${s})`:'none';
-}
 function stkPlace(){
-  if(!stkBubble)return;const vw=window.innerWidth,vh=window.innerHeight,w=Math.min(vw-16,720),h=Math.max(260,Math.min(Math.round(vh*.8),760));
-  stkBubble.el.style.cssText=`left:${Math.round((vw-w)/2)}px;top:8px;width:${w}px;height:${h}px`;stkFit();
+  if(!stkBubble)return;const w=Math.min(window.innerWidth-16,380);
+  stkBubble.el.style.cssText=`left:8px;top:8px;width:${w}px`; /* top left, so the window opened on the right never hides it */
 }
-/* a page that cannot be framed here opens in its own window on the right side of the screen (a phone opens a normal tab); the same name reuses that window */
 function stkWin(url,i){
   try{
     const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||window.innerWidth<700;
@@ -3279,24 +3267,27 @@ function stkWin(url,i){
 function stkOpen(id,no,urls){
   const same=stkBubble&&stkBubble.id===id;stkClose();if(same)return; /* a second tap on the same button closes it */
   const el=document.createElement('div');el.className='stkb';
-  const tabs=urls.map((u,i)=>`<button type="button" class="stkb-tab${i?'':' on'}" data-i="${i}"><span class="stkb-ico ${i?'b':'m'}">${i?'BI':'m'}</span>${esc(STOCK_LABELS[i]||'หน้า '+(i+1))}</button>`).join('');
-  el.innerHTML=`<div class="stkb-h"><b>Stock · Item ${esc(no)}</b><a class="stkb-o" target="_blank" rel="noopener" href="${esc(urls[0])}">เปิดแท็บใหม่ ↗</a><button type="button" class="stkb-x" aria-label="ปิด">✕</button></div>
-    <div class="stkb-tabs">${tabs}</div>
-    <div class="stkb-w"><iframe src="${esc(urls[0])}" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads"></iframe>
-      <div class="stkb-card" hidden><b>${esc(STOCK_LABELS[1]||'')}</b><p>หน้านี้อยู่ในเครือข่ายภายใน Makro (http) ฝังในกล่องนี้ไม่ได้ — ระบบเปิดเป็นหน้าต่างแยกชิดขวาของจอให้แล้ว (Item ${esc(no)} ใส่ให้แล้ว) บนมือถือจะเปิดเป็นแท็บใหม่</p><a class="btn pri" target="_blank" rel="noopener" href="${esc(urls[1]||'')}">เปิด ${esc(STOCK_LABELS[1]||'')} ↗</a></div></div>
-    <div class="stkb-n">ว่างเปล่า = เว็บไม่ให้ฝัง → กด “เปิดแท็บใหม่” · คัดลอก Item No แล้ว</div>`;
+  const tabs=urls.map((u,i)=>`<button type="button" class="stkb-tab" data-i="${i}"><span class="stkb-ico ${i?'b':'m'}">${i?'BI':'m'}</span>${esc(STOCK_LABELS[i]||'หน้า '+(i+1))}</button>`).join('');
+  el.innerHTML=`<div class="stkb-h"><b>Stock · Item ${esc(no)}</b><button type="button" class="stkb-x" aria-label="ปิด">✕</button></div><div class="stkb-tabs">${tabs}</div><div class="stkb-card"><b></b><p></p><button type="button" class="btn pri stkb-go"></button></div><div class="stkb-n">คัดลอก Item No แล้ว · ถ้าหน้าต่างไม่เด้ง ให้อนุญาตป๊อปอัปของเว็บนี้ หรือกดปุ่มสีน้ำเงิน</div>`;
+  let cur=0;
+  const show=i=>{
+    cur=i;el.querySelectorAll('.stkb-tab').forEach(x=>x.classList.toggle('on',+x.dataset.i===i));
+    const lab=STOCK_LABELS[i]||'หน้า '+(i+1);
+    el.querySelector('.stkb-card b').textContent=lab;
+    el.querySelector('.stkb-card p').textContent=i===0?'เว็บ Makro ล็อกอินในกล่องนี้ไม่ได้ (เบราว์เซอร์ไม่ให้ใช้คุกกี้เมื่อถูกฝัง) — ระบบเปิดเป็นหน้าต่างแยกชิดขวาของจอให้แล้ว บนมือถือจะเปิดเป็นแท็บใหม่'
+      :'หน้านี้อยู่ในเครือข่ายภายใน Makro (http) ฝังในกล่องนี้ไม่ได้ — ระบบเปิดเป็นหน้าต่างแยกชิดขวาของจอให้แล้ว (Item '+no+' ใส่ให้แล้ว) บนมือถือจะเปิดเป็นแท็บใหม่';
+    el.querySelector('.stkb-go').textContent='เปิด '+lab+' อีกครั้ง ↗';
+    if(urls[i]){const w=stkWin(urls[i],i);if(w){try{w.focus()}catch(e){}}} /* the tap that got us here is the click that lets the browser open it */
+  };
   el.onclick=e=>{
     if(e.target.closest('.stkb-x')){stkClose();return}
-    const t=e.target.closest('.stkb-tab');if(!t)return;
-    const i=+t.dataset.i;el.querySelectorAll('.stkb-tab').forEach(x=>x.classList.toggle('on',x===t));
-    el.querySelector('iframe').hidden=i!==0;el.querySelector('.stkb-card').hidden=i===0;el.querySelector('.stkb-n').hidden=i!==0;
-    el.querySelector('.stkb-h .stkb-o').href=urls[i]||urls[0];
-    if(i>0&&urls[i])stkWin(urls[i],i); /* the tap on the tab is the click that lets the browser open it */
-    if(i===0)stkFit();
+    const t=e.target.closest('.stkb-tab');if(t){show(+t.dataset.i);return}
+    if(e.target.closest('.stkb-go'))show(cur);
   };
   document.body.appendChild(el);
   const key=e=>{if(e.key==='Escape')stkClose()};
   stkBubble={el,id,place:stkPlace,key};window.addEventListener('resize',stkPlace);document.addEventListener('keydown',key);stkPlace();
+  show(0);
 }
 function oosStockPick(no,urls){
   const d=document.createElement('dialog');
