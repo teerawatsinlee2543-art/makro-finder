@@ -3859,12 +3859,12 @@ function renderShr(){
   /* FF / DF / NF tiles: money thrown away per group; click = show only that group */
   const byDiv={},nDiv={},gainDiv={};
   elig.forEach(it=>{const d=it.div||'-',l=lossOf(it);byDiv[d]=(byDiv[d]||0)+l;if(l>0)nDiv[d]=(nDiv[d]||0)+1;const v=shrVal(it,b==='pct'?'mtd':b);if(v!=null&&v<0)gainDiv[d]=(gainDiv[d]||0)-v});
-  if(shrDiv==='-'&&!(byDiv['-']))shrDiv='';
+  if(shrDiv==='-')shrDiv=''; /* the no-group tile was removed: never keep it as the active filter */
   /* %Actual Shrinkage of each group, as in the Power BI report: the group's Actual Shrinkage (net, gains included) ÷ the group's Sales (always from the sales + shrink report, whatever view is chosen) */
   const dvA={},dvS={};m.items.forEach(it=>{if(!it.hasSales)return;const d=it.div||'-';if(it.sales!=null)dvS[d]=(dvS[d]||0)+it.sales;if(it.amt!=null)dvA[d]=(dvA[d]||0)+it.amt});
   const dvPct=k=>dvS[k]>0&&SHR.sales?`<span class="dvpct ${dvA[k]<0?'neg':dvA[k]>0?'pos':''}" title="%Actual Shrinkage = Actual Shrinkage รวมของกลุ่ม ÷ ยอดขายรวมของกลุ่ม (ติดลบ = ของหาย / ทิ้งมากกว่าที่ได้คืน)"><span class="dpl">%Actual Shrink </span><b>${shrPct((dvA[k]||0)/dvS[k])}</b></span>`:'';
   const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${shrDiv===k?' sel':''}" data-div="${k}">${dvPct(k)}${chip}<b>${shrBk(byDiv[k]||0)}</b><span class="mini">ทิ้ง</span><span class="muted small"><span class="tl">ทิ้ง </span>${(nDiv[k]||0).toLocaleString()} รายการ${gainDiv[k]?`<span class="tl"> · ได้คืน ${shrBk(gainDiv[k])}</span>`:''}</span></button>`;
-  $('#shrDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
+  $('#shrDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('');
   /* summary tiles follow the group */
   const sub=elig.filter(it=>!shrDiv||it.div===shrDiv),gross=sub.reduce((s,it)=>s+lossOf(it),0),nLoss=sub.filter(it=>lossOf(it)>0).length;
   const salesSum=m.items.filter(it=>it.hasSales&&it.sales!=null&&(!shrDiv||it.div===shrDiv)).reduce((s,it)=>s+it.sales,0);
