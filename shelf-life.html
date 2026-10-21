@@ -283,6 +283,12 @@ table.ct-tbl thead th{background:#ffc85c;color:#2b1d00;border:0;text-transform:n
 table.ct-tbl thead th:first-child{border-radius:10px 0 0 10px}table.ct-tbl thead th:last-child{border-radius:0 10px 10px 0}
 table.ct-tbl td{padding:8px 6px;overflow-wrap:anywhere;font-size:13px}
 table.ct-tbl .cn{font-weight:700}
+.bid-block{display:grid;gap:6px;min-width:0}
+.bid-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-weight:700}
+.bid{color:#e30613;font-weight:800;font-size:1.15em;letter-spacing:.02em}
+:root[data-theme="dark"] .bid{color:#ff4b57}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid{color:#ff4b57}}
+.bid-edit{margin-left:auto}
 .bc-miss{display:flex;flex-direction:column;gap:2px}.bc-miss span{font-size:11.5px;color:var(--md2);font-weight:600}
 .bcard{display:flex;flex-direction:column;gap:2px;font-size:12.5px;line-height:1.35}
 .bc-uid{display:inline-block;align-self:flex-start;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 8px;font-weight:800;letter-spacing:.02em}
@@ -967,6 +973,12 @@ label.has-scan{position:relative}
   </div>
 </section>
 
+<dialog id="dlgBid" class="nbs-dlg imp-dlg"><div><h2>Buyer ID จากหน้า BIP</h2>
+  <p class="muted small" id="bidItem" style="margin:0 0 8px"></p>
+  <label>Buyer ID (ดูในหน้า BIP · Item Enquiry ช่อง “Buyer ID”)<input id="bidIn" maxlength="12" autocomplete="off" placeholder="เช่น F1D"></label>
+  <div id="bidPrev" class="small" style="margin:10px 0"></div>
+  <p class="muted small" style="margin:0 0 10px">ค่าที่ใส่ใช้แทน Buyer ที่ระบบคำนวณเอง และทุกคนในทีมเห็นเหมือนกัน (เก็บต่อสินค้า 1 รายการ)</p>
+  <div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="bidClear">ล้างค่าที่ใส่ไว้</button><button type="button" class="btn cancel-btn" id="bidCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="bidSave">บันทึก</button></div></div></dialog>
 <dialog id="dlgScan" class="scan-dlg"><form method="dialog">
   <div class="scan-head"><b>สแกน Barcode สินค้า</b><button class="scan-x" value="close" aria-label="ปิด"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></button></div>
   <div class="scan-view"><video id="scanVideo" playsinline muted autoplay></video><div class="scan-frame"></div></div>
@@ -1684,8 +1696,8 @@ async function supaCall(req){
     else for(const c of COLS){const ids=grp.filter(w=>w.col===c).map(w=>w.id);if(ids.length)await sbDelete(c,ids)}
     i=j}
   return{ok:true}}
-const KEY='shelfLifeMonitor.v2',COLS=['products','contacts','batches','nbs','imgs','oos'];
-let noTeam='';let st={products:[],contacts:[],batches:[],nbs:[],imgs:[],oos:[]},mode='init',db=null,usr=null,myId=null,canWrite=true;
+const KEY='shelfLifeMonitor.v2',COLS=['products','contacts','batches','nbs','imgs','oos','ibuy'];
+let noTeam='';let st={products:[],contacts:[],batches:[],nbs:[],imgs:[],oos:[],ibuy:[]},mode='init',db=null,usr=null,myId=null,canWrite=true;
 const loaded={};
 const rid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
 function seed(demo){
@@ -1822,6 +1834,49 @@ function contactCard(label,c,uid){
   return`<div class="ccard">${head}<div class="cname">${esc(c.name)}</div>${c.phone?`<div class="cphone">โทร <a href="tel:${esc(c.phone.replace(/[^\d+]/g,''))}">${esc(c.phone)}</a></div>`:''}${c.email?`<div class="small">${esc(c.email)}</div>`:''}${c.backup?`<div class="cbackup">สำรอง: ${esc(c.backup)}</div>`:''}</div>`;
 }
 const byId=(col,id)=>st[col].find(x=>x._id===id);
+/* ---------- Buyer ID per item: the same block on every tab, and a way to put in the Buyer ID that the BIP Item Enquiry page shows ----------
+   The BIP page cannot be read by this page (plain http on a private network), so the person reads "Buyer ID" there and types it once per item:
+   it is kept in the shared `ibuy` collection (everyone in the team sees it) and wins over the Buyer the app worked out itself. */
+let IBM=null,IBM_A=null;
+function ibuyMap(){
+  const a=st.ibuy||[];
+  if(!IBM||IBM_A!==a||IBM.size>a.length){IBM=new Map();IBM_A=a;a.forEach(x=>{const k=amNum(x.itemNo);if(k&&x.uid)IBM.set(k,x)})}
+  return IBM;
+}
+const ibuyOf=no=>ibuyMap().get(amNum(no))||null;
+const ibuyUid=no=>{const x=ibuyOf(no);return x?x.uid:''};
+/* "Buyer ID : F1D" (red, bold) + the Buyer's details (Merchandise Mgr. · Area · Description · Assistant …), the same on every card / row.
+   uid = the Buyer the app worked out; a Buyer ID typed from BIP replaces it. */
+function bidBlock(no,uid,note,warn){
+  const ib=ibuyOf(no),u=ib?ib.uid:String(uid||''),c=u?nbsContact(u):null;
+  const src=ib?`<div class="muted small">ตามหน้า BIP${ib.by?' · ใส่โดย '+esc(ib.by):''}</div>`:(note?`<div class="muted small bsrc">${esc(note)}</div>`:'');
+  const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
+  const detail=u?(c?buyerCardHtml(c):`<div class="bc-miss"><span>ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial</span></div>`):'';
+  return`<div class="bid-block"><div class="bid-line">Buyer ID : ${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}<button type="button" class="btn sm bid-edit" onclick="bidEdit('${esc(String(no))}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>${src}${detail}${wr}</div>`;
+}
+let bidNo=null;
+function bidEdit(no){
+  bidNo=String(no);const ib=ibuyOf(no),it=MF.items&&MF.items.get(bidNo);
+  $('#bidItem').textContent='Item '+bidNo+(it&&it.desc?' · '+it.desc:'');
+  $('#bidIn').value=ib?ib.uid:'';$('#bidClear').hidden=!ib;bidPrev();
+  $('#dlgBid').showModal();setTimeout(()=>$('#bidIn').focus(),60);
+}
+function bidPrev(){
+  const u=$('#bidIn').value.trim().toUpperCase().replace(/\s+/g,''),c=u?nbsContact(u):null;
+  $('#bidPrev').innerHTML=!u?'':c?buyerCardHtml(c):`<span class="err-text">ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial — บันทึกได้ แต่จะไม่มีรายละเอียดผู้ดูแลจนกว่าจะเพิ่มชื่อนี้ในแท็บ Buyer / Commercial</span>`;
+}
+$('#bidIn').addEventListener('input',bidPrev);
+$('#bidIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#bidSave').click()}});
+$('#bidCancel').onclick=()=>$('#dlgBid').close();
+$('#bidSave').onclick=async()=>{
+  const u=$('#bidIn').value.trim().toUpperCase().replace(/\s+/g,''),k=amNum(bidNo);
+  if(!k||!u){toast('กรอก Buyer ID ก่อน');return}
+  if(await act(()=>putItem('ibuy',{_id:'i'+k,itemNo:String(bidNo),uid:u,by:myId||'',at:new Date().toISOString()}),'บันทึก Buyer ID แล้ว')){IBM=null;$('#dlgBid').close();renderAll()}
+};
+$('#bidClear').onclick=async()=>{
+  const ib=ibuyOf(bidNo);if(!ib)return;
+  if(await act(()=>rmItem('ibuy',ib),'ล้าง Buyer ID ที่ใส่ไว้แล้ว')){IBM=null;$('#dlgBid').close();renderAll()}
+};
 
 /* ---------- dashboard ---------- */
 let tileFilter='';
@@ -3267,12 +3322,12 @@ function oosChartHtml(rows){
 function oosFactsHtml(r){
   const dms=oosNum(r.dms),sd=oosNum(r.stockDay),dn=oosNum(r.dmsNew),by=oosBuyerName(r),bits=[],out=[];
   if(r.assignDept)bits.push(`<span>แผนกที่เติม: <b>${esc(r.assignDept)}</b></span>`);
-  if(by||r.buyerUid)bits.push(`<span>Buyer: <b>${esc(by||r.buyerUid)}</b>${by&&r.buyerUid?` <span class="muted">(${esc(r.buyerUid)})</span>`:''}</span>`);
   if(dms!=null&&dms>0)bits.push(`<span>DMS <b>${oosFmtN(dms)}</b>${dn!=null&&dn!==dms?` → ใหม่ <b>${oosFmtN(dn)}</b> <span class="${dn>dms?'c-md2':'muted'}">(${dn>=dms?'+':''}${Math.round((dn/dms-1)*100)}%)</span>`:''}</span>`);
   else if(dn!=null)bits.push(`<span>DMS เดิมใช้ไม่ได้ → ค่าชั่วคราว <b>${oosFmtN(dn)}</b></span>`);
   else if(dms!=null)bits.push(`<span>DMS <b>${oosFmtN(dms)}</b> <span class="muted">(ใช้ไม่ได้)</span></span>`);
   if(sd!=null)bits.push(`<span>Stock Day <b>${oosFmtN(sd)}</b> วัน</span>`);
   if(bits.length)out.push(`<div class="oosc-f small">${bits.join('')}</div>`);
+  out.push(bidBlock(r.itemNo,r.buyerUid||'',by&&!r.buyerUid?'Buyer: '+by:''));
   const sq=oosNum(r.shortQty),ls=oosNum(r.lossBaht),b2=[];
   if(sq!=null)b2.push(`ขาด ${oosFmtN(sq)} ${esc(r.shortUnit||'หน่วย')}`);
   if(ls)b2.push(`฿${ls.toLocaleString()}`);
@@ -3896,7 +3951,7 @@ function shrCard(it,b){
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
     ${bits.length?`<div class="oosc-f small">${bits.join('')}</div>`:''}${rsHtml}
-    ${it.buyer?`<div class="small">Buyer: <b>${esc(by||it.buyer)}</b>${by?` <span class="muted">(${esc(it.buyer)})</span>`:''}</div>`:shrComHtml(it)}</div>`}
+    ${bidBlock(it.itemNo,it.buyer,'')}${!(ibuyUid(it.itemNo)||it.buyer)?shrComHtml(it):''}</div>`}
 function shrSrcHtml(){
   const f=SHR.files,sa=f.find(x=>x.kind==='sales'),co=f.filter(x=>x.kind==='code');
   if(!f.length)return'';
@@ -4367,7 +4422,7 @@ function ilCard(p,it){
       <div class="small"><b>แนะนำ:</b> ${TR[2]}</div>`}
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}${status}${head}</div>${facts}
-    ${it.by?`<div class="small">Buyer: <b>${esc(by||it.by)}</b>${by?` <span class="muted">(${esc(it.by)})</span>`:''}</div>`:'<div class="muted small">ไม่มี Buyer ในรายงาน</div>'}</div>`}
+    ${bidBlock(it.itemNo,it.by,'')}</div>`}
 function ilSrc(p){const d=ILT[p],nd=d?d.rows.filter(r=>p==='neg'?(r.a<=-0.1&&!/^active$/i.test(r.st)&&!r.sh):(/discontinu/i.test(r.st)&&!r.sh)).length:0;return d?`<span>ไฟล์: <b>${esc(d.name)}</b>${d.store?' · '+esc(d.store):''}${d.asOf?' · ข้อมูลเมื่อ '+ilD(d.asOf)+' '+String(new Date(d.asOf).getHours()).padStart(2,'0')+'.'+String(new Date(d.asOf).getMinutes()).padStart(2,'0')+' น.':''} · ${d.rows.length.toLocaleString()} รายการ${nd&&(p==='neg'||!$('#'+p+'Disc').checked)?` · ไม่นับ ${p==='neg'?'ที่ไม่ใช่ Active':'Discontinued'} ${nd.toLocaleString()}`:''}${d.info&&d.info.shared?` · สต็อกร่วม (~) ${d.info.shared.toLocaleString()}`:''}${p==='dms'?` · Stock สูง = เกิน ${IL_T} วันของยอดขายจริง`:''}</span>`:''}
 /* a horizontal bar chart instead of the row of department chips (OOS+, %Shrink, Negative Stock, High Stock to DMS): name · bar · amount and % of the total. A click on a row filters that department (the button keeps data-d) */
 /* compact: only the top 5 departments (plus the selected one) are shown, "ดูอีก N แผนก" opens the rest; the open / closed choice is remembered per chart */
@@ -4765,7 +4820,7 @@ function nbsRuleInfo(r){
   }else if(ru){u=ru;src=rsrc}else if(su){u=su;src=ssrc}
   const o={u,src,warn};if(memo)memo.set(key,o);return o;
 }
-function nbsBuyerUid(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))||nbsRuleInfo(r).u||''}
+function nbsBuyerUid(r){return ibuyUid(r.itemNo)||r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))||nbsRuleInfo(r).u||''}
 /* the Buyer card of a UID: the exact contact, else the contact that holds this code among several ("FS2, FS3") or spells it DSF/DFS - the same matching the import uses */
 function nbsContact(uid){return uid?(st.contacts.find(x=>x.uid===uid)||ctFindBuyer(uid)):null}
 function nbsBuyerNote(r){return r.buyerUid?'':nbsBuyerMap().get(amNum(r.itemNo))?'ตามข้อมูล OOS+ / ItemList':nbsRuleInfo(r).src}
@@ -5235,7 +5290,7 @@ function renderNbs(){
     <td data-l="ไม่มียอดขาย (NBS)" class="num">${nbsDaysText(r)}</td>
     <td data-l="Aging Status"><div class="cbox">${nbsAgingText(r)}</div></td>
     <td data-l="สถานะ"><div class="cbox"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</div></td>
-    <td data-l="Buyer" class="small"><div class="cbox">${bu?(b?buyerCardHtml(b):`<div class="bc-miss" title="${esc(bu)}"><b>${esc(String(bu).slice(0,14))}${String(bu).length>14?'…':''}</b><span>ไม่พบในรายชื่อ Buyer / Commercial</span></div>`):'<span class="muted">-</span>'}${!r.buyerUid&&bu?`<div class="muted small bsrc">${esc(nbsBuyerNote(r))}</div>`:''}${nbsBuyerWarn(r)?`<div class="small err-text bwarn">${esc(nbsBuyerWarn(r))}</div>`:''}</div></td>
+    <td data-l="Buyer" class="small"><div class="cbox">${bidBlock(r.itemNo,bu,!r.buyerUid&&bu?nbsBuyerNote(r):'',nbsBuyerWarn(r))}</div></td>
     <td data-l="Remark" class="small">${r.remark?`<div class="redbox">${esc(r.remark)}</div>`:'<span class="muted">-</span>'}</td>
     <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}<div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
