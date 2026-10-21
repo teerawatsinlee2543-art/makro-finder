@@ -196,6 +196,14 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 @media (max-width:720px){.lot-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:420px){.lot-grid{grid-template-columns:1fr}}
 .preview-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.step-no.done{background:#1f7a45;color:#fff}
+.pv-empty{display:flex;gap:12px;align-items:flex-start;color:var(--muted)}
+.pv-empty b{display:block;color:var(--ink);font-size:15px}
+.pv-empty p{margin:3px 0 0;font-size:13px;line-height:1.45}
+.pv-empty-ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;border:1.5px dashed var(--line);background:var(--card);font-weight:800;color:var(--accent)}
+select.need{outline:2px solid #e0892b;outline-offset:1px}
+.add-hint{margin:0;font-size:13px;color:var(--muted)}
+.add-hint.ok{color:#1f7a45;font-weight:700}
 .save-row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
 .cancel-btn{min-width:140px;padding:12px 22px;font-size:16px;font-weight:700;color:var(--md2);border-color:var(--line)}
 .cancel-btn:hover{border-color:var(--md2);background:var(--redbox)}
@@ -945,6 +953,7 @@ label.has-scan{position:relative}
     <div class="add-step">
       <div class="step-title"><span class="step-no" id="stepNo3">3</span>ตรวจกำหนดการ แล้วบันทึก</div>
       <div id="aPreview" class="preview-box"></div>
+      <p class="add-hint" id="aHint"></p>
       <div class="save-row"><button type="button" class="btn cancel-btn" id="aCancel">ยกเลิก</button><button class="btn pri w save-btn" id="aSave">บันทึกล็อต</button></div>
     </div>
   </div>
@@ -1957,10 +1966,10 @@ function renderMfResults(){
 }
 function pickMf(no){
   const it=MF.items.get(no);if(!it)return;mfPick=it;$('#mfResults').innerHTML='';$('#mfQ').value='';
-  const p=guessRule(it);if(p)$('#aSku').value=pkey(p);
+  const p=guessRule(it);$('#aSku').value=p?pkey(p):'';aSkuAuto=true; /* no matching rule = the rule box is emptied, never left on the previous product's rule */
   $('#mfPicked').hidden=false;
   $('#mfPicked').innerHTML=`${MF.images[it.itemNo]?`<img src="${esc(MF.images[it.itemNo])}" alt="">`:''}<div><b>${esc(it.desc)}</b><div class="muted small">${esc(it.itemNo)}${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div>${it.locs.length?`<div class="small">ตำแหน่งในร้าน: <b>${esc(locText(it.locs))}</b></div>`:''}<div class="small ${p?'muted':'err-text'}">${p?`ใช้กฎ Shelf life: ${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} ${p.shelf} วัน) — เปลี่ยนได้ที่ช่อง “กฎ Shelf life” ด้านล่าง`:'ไม่พบกฎที่ตรงกับสินค้านี้ — เลือกกฎ Shelf life ด้านล่างเอง'}</div></div><button type="button" class="btn sm" id="mfClear">ไม่ใช้</button>`;
-  $('#mfClear').onclick=()=>{mfPick=null;$('#mfPicked').hidden=true};
+  $('#mfClear').onclick=()=>{mfPick=null;$('#mfPicked').hidden=true;if(aSkuAuto){$('#aSku').value='';aSkuAuto=false}addPreview()};
   if(!$('#aLoc').value&&it.locs.length)$('#aLoc').value=locText(it.locs.slice(0,1));
   addPreview();
 }
@@ -1969,29 +1978,58 @@ function itemInfo(b){/* live Makro Finder data when loaded, else what was saved 
   return b.itemNo?{no:b.itemNo,desc:it?.desc||b.itemDesc||'',img:MF.images[b.itemNo]||b.img||'',locs:it?it.locs:(b.locs||[])}:null}
 /* ---------- add batch ---------- */
 const findProd=k=>st.products.find(x=>pkey(x)===k);
+/* step 3 only ever shows what belongs to the chosen product: nothing until a product (step 1, on the Makro site) and its Shelf life rule are chosen, then the product's own name / picture / Item No with the rule's schedule and the rule's Buyer / Commercial. A rule is never pre-selected, and a rule that was picked automatically for one product is cleared when that product is dropped or the next product has no rule */
+let aSkuAuto=false; /* the rule in step 2 was filled in by the product search, not by the user */
+function pvEmpty(icon,title,text){return`<div class="pv-empty"><span class="pv-empty-ic" aria-hidden="true">${icon}</span><div><b>${title}</b><p>${text}</p></div></div>`}
+function addMissing(p,prod,j){ /* what is still missing before the lot can be saved */
+  const m=[];
+  if(!p)m.push(onMakroSite()&&!mfPick?'เลือกสินค้า (ข้อ 1) หรือกฎ Shelf life':'เลือกกฎ Shelf life');
+  if(!prod||j?.error)m.push('ใส่ Julian code หรือวันรับสินค้า');
+  return m;
+}
+function addSteps(p,prod,j){ /* tick the step numbers that are complete and say what is missing */
+  const mk=onMakroSite(),s1=$('#mfBox .step-no'),s2=$('#stepNo2'),s3=$('#stepNo3'),miss=addMissing(p,prod,j);
+  const mark=(el,ok,n)=>{if(!el)return;el.classList.toggle('done',!!ok);el.textContent=ok?'✓':n};
+  if(mk)mark(s1,!!mfPick,'1');
+  mark(s2,!!p&&!!prod&&!j?.error,mk?'2':'1');
+  mark(s3,!miss.length,mk?'3':'2');
+  const h=$('#aHint');if(h){h.textContent=miss.length?'ยังขาด: '+miss.join(' · '):'ข้อมูลครบแล้ว — กด “บันทึกล็อต”';h.classList.toggle('ok',!miss.length)}
+  $('#aSku').classList.toggle('need',!p&&(!mk||!!mfPick)); /* a product is chosen but has no rule: point at the rule box */
+}
 function addPreview(){
-  const p=findProd($('#aSku').value),j=parseJulian($('#aJ').value);
+  const p=findProd($('#aSku').value),j=parseJulian($('#aJ').value),it=onMakroSite()?mfPick:null;
   let prod=null,msg='';
   if(j?.error)msg=`<p class="err-text">${j.error}</p>`;
   else if(j){prod=j.date;$('#aDate').value=iso(prod)}
   else if($('#aDate').value)prod=fromIso($('#aDate').value);
-  if(!p){$('#aPreview').innerHTML='<p class="muted">ยังไม่มีสินค้า — เพิ่มที่แท็บ “สินค้า & กฎลดราคา”</p>';return null}
+  addSteps(p,prod,j);
+  if(!st.products.length){$('#aPreview').innerHTML='<p class="muted">ยังไม่มีสินค้า — เพิ่มที่แท็บ “สินค้า & กฎลดราคา”</p>';return null}
+  if(!p){
+    $('#aPreview').innerHTML=msg+(onMakroSite()&&!it
+      ?pvEmpty('①','ยังไม่มีสินค้าให้ตรวจกำหนดการ','เลือกสินค้าในข้อ 1 ก่อน (ค้นหา หรือสแกนบาร์โค้ด) ระบบจะหากฎ Shelf life ที่ตรงกับสินค้านั้นให้เอง แล้วแสดงกำหนดการและผู้ที่ต้องแจ้งที่นี่ — หรือเลือกกฎ Shelf life เองในข้อ 2')
+      :it?pvEmpty('!',`ยังไม่พบกฎ Shelf life ของ “${esc(it.desc)}”`,'เลือกกฎที่ตรงกับสินค้านี้ในข้อ 2 (ช่อง “กฎ Shelf life”) ระบบถึงจะแสดงกำหนดการและผู้ที่ต้องแจ้ง')
+      :pvEmpty('②','เลือกกฎ Shelf life ก่อน','เลือกกฎในข้อ 2 แล้วกำหนดการจะขึ้นที่นี่'));
+    return null;
+  }
   if(prod&&prod>today())msg+='<p class="err-text">วันรับสินค้าอยู่ในอนาคต — ตรวจสอบ Julian code</p>';
   const fd=firstMd(p)-1;
-  $('#aPreview').innerHTML=msg+`<div class="pv-head">${pimg(p,"lg")}<b class="pv-name">${esc(p.desc)}</b><span class="pill">Shelf life ${p.shelf} วัน</span><span class="pill pill-green">ขายราคาเต็ม ${fd>1?`วันที่ 1–${fd}`:'วันที่ 1'}</span>${p.temp?`<span class="pill">ตู้แช่ ${esc(p.temp)}</span>`:''}</div>${prod?'':'<p class="muted small" style="margin:6px 0 0">ใส่ Julian code หรือวันที่รับสินค้า เพื่อดูวันที่จริงของแต่ละขั้น</p>'}<div class="pv-body"><div class="pv-plan">${planHTML(p,prod)}</div><div class="pv-strip"><div class="clabel">Shelf life · แถบสี${prod?` · วันนี้ = วันที่ ${diffD(today(),prod)+1}`:""}</div>${strip(p,prod?diffD(today(),prod)+1:undefined).replace("class=\"strip\"","class=\"strip big\"")}<div class="legend sm"><span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลด 15%</span><span style="--c:var(--seg-md2)">ลด 30%</span><span style="--c:var(--seg-pull)">Code 52</span>${prod?`<span class="today-key">วันนี้</span>`:""}</div></div></div>
+  const pic=it?(MF.images[it.itemNo]?`<span class="pimg lg"><img src="${esc(MF.images[it.itemNo])}" alt="" loading="lazy" onerror="this.parentNode.classList.add('none');this.remove()"></span>`:'<span class="pimg none lg"></span>'):pimg(p,'lg');
+  const title=it?esc(it.desc):esc(p.desc);
+  const who=it?`<span class="pill">Item ${esc(it.itemNo)}</span><span class="pill">กฎ: ${esc(p.desc)} · ${ORIGINS[p.origin]||'อื่นๆ'}</span>`:'';
+  $('#aPreview').innerHTML=msg+`<div class="pv-head">${pic}<b class="pv-name">${title}</b>${who}<span class="pill">Shelf life ${p.shelf} วัน</span><span class="pill pill-green">ขายราคาเต็ม ${fd>1?`วันที่ 1–${fd}`:'วันที่ 1'}</span>${p.temp?`<span class="pill">ตู้แช่ ${esc(p.temp)}</span>`:''}</div>${prod?'':'<p class="muted small" style="margin:6px 0 0">ใส่ Julian code หรือวันที่รับสินค้า เพื่อดูวันที่จริงของแต่ละขั้น</p>'}<div class="pv-body"><div class="pv-plan">${planHTML(p,prod)}</div><div class="pv-strip"><div class="clabel">Shelf life · แถบสี${prod?` · วันนี้ = วันที่ ${diffD(today(),prod)+1}`:""}</div>${strip(p,prod?diffD(today(),prod)+1:undefined).replace("class=\"strip\"","class=\"strip big\"")}<div class="legend sm"><span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลด 15%</span><span style="--c:var(--seg-md2)">ลด 30%</span><span style="--c:var(--seg-pull)">Code 52</span>${prod?`<span class="today-key">วันนี้</span>`:""}</div></div></div>
   <div class="ccards">${contactCard('Buyer',st.contacts.find(c=>c.uid===p.buyerUid),p.buyerUid)}${contactCard('Commercial',st.contacts.find(c=>c.uid===p.comUid),p.comUid)}</div>`;
   return prod&&!(j?.error)?prod:null;
 }
-$('#aSku').onchange=addPreview;$('#aJ').oninput=addPreview;
+$('#aSku').onchange=()=>{aSkuAuto=false;addPreview()};$('#aJ').oninput=addPreview;
 $('#aDate').oninput=()=>{const v=$('#aDate').value;$('#aJ').value=v?jul(fromIso(v)).ddd:'';addPreview()};
 const remarkValue=()=>$('#aRemark').value==='__other'?$('#aRemarkOther').value.trim():$('#aRemark').value;
 $('#aRemark').onchange=()=>{const o=$('#aRemark').value==='__other';$('#aRemarkOtherWrap').hidden=!o;if(o)$('#aRemarkOther').focus()};
 $('#aSave').onclick=async()=>{
-  const prod=addPreview();if(!prod)return toast('กรุณาใส่ Julian code หรือวันรับสินค้าที่ถูกต้อง');
+  const prod=addPreview();{const miss=addMissing(findProd($('#aSku').value),prod,parseJulian($('#aJ').value));if(miss.length)return toast('ยังขาด: '+miss.join(' · '))}
   if($('#aRemark').value==='__other'&&!remarkValue()){toast('กรุณาระบุ Remark ในช่อง “อื่นๆ”');$('#aRemarkOther').focus();return}
   const o={sku:$('#aSku').value,prod:iso(prod),qty:+$('#aQty').value||0,loc:$('#aLoc').value.trim(),remark:remarkValue(),addedBy:myId||null,addedAt:new Date().toISOString()};
   if(mfPick)Object.assign(o,{itemNo:mfPick.itemNo,itemDesc:mfPick.desc,barcode:mfPick.barcode||'',img:MF.images[mfPick.itemNo]||'',locs:mfPick.locs.slice(0,3)});
-  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aRemark').value='';$('#aRemarkOther').value='';$('#aRemarkOtherWrap').hidden=true;mfPick=null;$('#mfPicked').hidden=true;addPreview()}
+  if(await act(()=>putItem('batches',o),'บันทึกล็อตแล้ว')){$('#aJ').value='';$('#aDate').value='';$('#aRemark').value='';$('#aRemarkOther').value='';$('#aRemarkOtherWrap').hidden=true;mfPick=null;$('#mfPicked').hidden=true;if(aSkuAuto){$('#aSku').value='';aSkuAuto=false}addPreview()}
 };
 
 /* ---------- products ---------- */
@@ -5526,7 +5564,7 @@ function renderAll(){
   BBI=null; /* the item -> Buyer table is rebuilt from the latest OOS+ records */
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent="YYDDD "+jul(t).y2;$("#jmDate").textContent=$("#todayTxt").textContent;
-  const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML=prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
+  const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
   renderDash();renderProd();renderCt();renderNbs();renderOos();addPreview();julTab();
   /* the report pages keep their numbers fresh when contacts / OOS records arrive while they are open */
   try{if(!$('#t-shr').hidden||SHR.files.length)renderShr();['neg','dms'].forEach(p=>{if(ILT[p])renderIlt(p)})}catch(e){}
@@ -5702,7 +5740,7 @@ scanInit();
 function resetAddForm(){
   ['#mfQ','#aJ','#aDate','#aLoc','#aRemarkOther'].forEach(s=>{const el=$(s);if(el)el.value=''});
   $('#aQty').value=1;$('#aRemark').value='';$('#aRemarkOtherWrap').hidden=true;
-  mfPick=null;$('#mfPicked').hidden=true;$('#mfResults').innerHTML='';addPreview();
+  mfPick=null;$('#mfPicked').hidden=true;$('#mfResults').innerHTML='';$('#aSku').value='';aSkuAuto=false;addPreview();
 }
 $('#aCancel').onclick=()=>{resetAddForm();toast('ล้างข้อมูลในฟอร์มแล้ว');window.scrollTo({top:0,behavior:'smooth'})};
 $('#dlgScan').addEventListener('close',stopScan);
