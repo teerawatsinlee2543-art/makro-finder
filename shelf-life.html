@@ -3428,9 +3428,9 @@ function renderOos(){
   /* group tiles (FF / DF / NF): count of OOS+ items still to refill per group; click = show only that group */
   const ctx=oosDivCtx(),byDiv={},lateDiv={};
   active.forEach(r=>{const d=oosDiv(r,ctx)||'-';byDiv[d]=(byDiv[d]||0)+1;if(oosLevel(r)==='late')lateDiv[d]=(lateDiv[d]||0)+1});
-  if(oosDivFilter==='-'&&!byDiv['-'])oosDivFilter=''; /* the "ไม่ระบุกลุ่ม" tile disappears once nothing is left in it */
+  if(oosDivFilter==='-')oosDivFilter=''; /* the "ไม่ระบุกลุ่ม" tile disappears once nothing is left in it */
   const divTile=(k,chipHtml)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${oosDivFilter===k?' sel':''}" data-div="${k}">${chipHtml}<b>${(byDiv[k]||0).toLocaleString()}</b><span class="mini">ต้องเติม</span><span class="muted small"><span class="tl">รายการที่ต้องเติม</span>${lateDiv[k]?`<span class="tl"> · </span><span class="err-text">ค้างเกิน ${OOS_LATE_H} ชม. ${lateDiv[k].toLocaleString()}</span>`:''}</span></button>`;
-  $('#oosDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(byDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
+  $('#oosDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('');
   /* status tiles follow the selected group */
   const sub=all.filter(r=>oosInDiv(r,ctx)),sActive=sub.filter(r=>r.status!=='done'),sLate=sActive.filter(r=>oosLevel(r)==='late'),sDoneToday=sub.filter(r=>r.status==='done'&&oosDoneMs(r)>=t0.getTime());
   $('#oosTiles').innerHTML=[['need','ต้องเติม','md1',sub.filter(r=>r.status==='need').length],['doing','กำลังเติม','soon',sub.filter(r=>r.status==='doing').length],['late','ค้างเกิน '+OOS_LATE_H+' ชม.','pull',sLate.length],['done','เติมแล้ววันนี้','ok',sDoneToday.length]]
@@ -4454,9 +4454,9 @@ function renderIlt(p){
   /* FF / DF / NF */
   const byDiv={},nDiv={};
   pool.forEach(it=>{const d=it.div||'-';byDiv[d]=(byDiv[d]||0)+w(it);nDiv[d]=(nDiv[d]||0)+1});
-  if(S.div==='-'&&!nDiv['-'])S.div='';
+  if(S.div==='-')S.div='';
   const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${S.div===k?' sel':''}" data-div="${k}">${chip}<b>${fm(byDiv[k]||0)}</b><span class="mini">${p==='neg'?(noPrice?'ต้องปรับ':'ติดลบ'):'ส่วนเกิน'}</span><span class="muted small"><span class="tl">${p==='neg'?'ติดลบ ':'Stock เกิน '+IL_T+' วัน '}</span>${(nDiv[k]||0).toLocaleString()} รายการ</span></button>`;
-  $('#'+p+'DivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(nDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
+  $('#'+p+'DivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('');
   /* summary tiles */
   let tl;
   if(p==='neg'){const tot=sub.reduce((s,it)=>s+w(it),0),units=sub.reduce((s,it)=>s-(it.shared?0:it.a),0),sold=sub.filter(it=>it.soldCM).length,big=sub.filter(it=>!it.shared&&it.val>=SHR_BIG).length,idle=sub.filter(it=>it.r.a28===0&&!it.soldCM).length;
