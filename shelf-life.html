@@ -387,6 +387,7 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .oosc.lv-done{border-left-color:var(--line);opacity:.78}
 .oosc-h{display:flex;gap:10px;align-items:flex-start}
 .oosc-t{min-width:0;flex:1;overflow-wrap:anywhere}
+.stk-one{margin-top:6px}
 .stk-pair{flex:none;margin-left:auto;display:flex;flex-direction:column;gap:6px}
 .btn.stk{flex:none;background:#1f7a45;border-color:#1f7a45;color:#fff;font-weight:600;white-space:nowrap}.btn.stk:hover{background:#18633a;border-color:#18633a}
 .oosc-m{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
@@ -3250,7 +3251,7 @@ function oosStockPick(no,urls,labs){
   d.onclose=()=>d.remove();document.body.appendChild(d);d.showModal();
 }
 function oosStock(id,which){
-  const r=oosAll().find(x=>x._id===id)||shrFind(id)||ilFind(id);if(!r)return;
+  const r=oosAll().find(x=>x._id===id)||shrFind(id)||ilFind(id)||byId('nbs',id);if(!r)return;
   const i=which===1?1:0,no=String(r.itemNo||''),url=(STOCK_URLS[i]||STOCK_URLS[0]).replace(/\{item\}/g,encodeURIComponent(no));
   try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   const w=stkWin(url,i);
@@ -5068,7 +5069,7 @@ function renderNbs(){
     return`<tr class="${r.status==='done'?'acted':''}">
     <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div>${r.artGrp?`<div><dt>Art Grp :</dt><dd>${esc(r.artGrp)}</dd></div>`:''}</dl></div></td>
     <td data-l="Division"><div class="cbox"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></div></td>
-    <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(qty2(r.stock)):'-'}</td>
+    <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(qty2(r.stock)):'-'}<div class="stk-one"><button type="button" class="btn sm stk" onclick="oosStock('${k}',1)">Item Enquiry</button></div></td>
     <td data-l="Location" class="small">${esc(r.loc||'-')}</td>
     <td data-l="Last Recv. Date" class="small num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td>
     <td data-l="Last Sold Date" class="small num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
