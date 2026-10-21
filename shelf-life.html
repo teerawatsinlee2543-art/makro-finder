@@ -973,11 +973,20 @@ label.has-scan{position:relative}
   </div>
 </section>
 
+<dialog id="dlgBidAuto" class="nbs-dlg imp-dlg"><div><h2>ดึง Buyer ID จากหน้า BIP อัตโนมัติ</h2>
+  <p class="muted small" style="margin:0 0 10px">หน้านี้อ่านหน้า BIP โดยตรงไม่ได้ (เป็นเว็บ http ในเครือข่ายภายใน) จึงใช้สคริปต์เล็ก ๆ ที่ทำงานอยู่ <b>ในหน้า BIP</b> อ่านค่า “Buyer ID” แล้วส่งกลับมาหน้านี้ที่เปิดมันขึ้นมา — ไม่ส่งข้อมูลไปที่อื่น และเลือกใช้ทางใดทางหนึ่ง</p>
+  <p style="margin:0 0 4px"><b>ทาง A · อัตโนมัติทุกครั้ง</b> (แนะนำ)</p>
+  <ol class="small" style="margin:0 0 12px;padding-left:20px;line-height:1.7"><li>ติดตั้งส่วนขยาย Chrome ชื่อ <b>Tampermonkey</b> (ครั้งเดียว)</li><li>กด <a id="bidUs" href="#" target="_blank" rel="noopener"><b>ติดตั้งสคริปต์ดึง Buyer ID</b></a> แล้วกด “ติดตั้ง” ที่ Tampermonkey</li><li>จากนั้นกด <b>Item Enquiry</b> ที่การ์ดใด Buyer ID จะเข้ามาใส่ให้เอง เมื่อรายงานโหลดเสร็จ</li></ol>
+  <p style="margin:0 0 4px"><b>ทาง B · ไม่ต้องติดตั้งส่วนขยาย</b> (กด 1 ครั้งต่อสินค้า)</p>
+  <ol class="small" style="margin:0 0 12px;padding-left:20px;line-height:1.7"><li>ลากปุ่มนี้ไปวางที่แถบบุ๊กมาร์กของ Chrome: <a id="bidBm" href="#" class="btn sm pri" draggable="true" onclick="return false" title="ลากไปวางที่แถบบุ๊กมาร์ก">ดึง Buyer ID → Shelf-Life</a></li><li>กด <b>Item Enquiry</b> ที่การ์ด รอให้รายงานในหน้าต่าง BIP โหลดเสร็จ แล้วกดบุ๊กมาร์กนี้ 1 ครั้ง</li></ol>
+  <p class="muted small" style="margin:0 0 10px">ค่าที่ได้จาก BIP ใช้แทน Buyer ที่ระบบคำนวณเอง และทุกคนในทีมเห็นเหมือนกัน · ใช้ได้เฉพาะหน้าต่าง BIP ที่เปิดจากปุ่ม Item Enquiry ในหน้านี้</p>
+  <div class="row" style="justify-content:flex-end"><button type="button" class="btn cancel-btn" id="bidAutoClose">ปิด</button></div></div></dialog>
 <dialog id="dlgBid" class="nbs-dlg imp-dlg"><div><h2>Buyer ID จากหน้า BIP</h2>
   <p class="muted small" id="bidItem" style="margin:0 0 8px"></p>
   <label>Buyer ID (ดูในหน้า BIP · Item Enquiry ช่อง “Buyer ID”)<input id="bidIn" maxlength="12" autocomplete="off" placeholder="เช่น F1D"></label>
   <div id="bidPrev" class="small" style="margin:10px 0"></div>
   <p class="muted small" style="margin:0 0 10px">ค่าที่ใส่ใช้แทน Buyer ที่ระบบคำนวณเอง และทุกคนในทีมเห็นเหมือนกัน (เก็บต่อสินค้า 1 รายการ)</p>
+  <p class="small" style="margin:0 0 10px"><a href="#" id="bidAutoLink">ดึง Buyer ID จากหน้า BIP อัตโนมัติ — วิธีตั้งค่า</a></p>
   <div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="bidClear">ล้างค่าที่ใส่ไว้</button><button type="button" class="btn cancel-btn" id="bidCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="bidSave">บันทึก</button></div></div></dialog>
 <dialog id="dlgScan" class="scan-dlg"><form method="dialog">
   <div class="scan-head"><b>สแกน Barcode สินค้า</b><button class="scan-x" value="close" aria-label="ปิด"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></button></div>
@@ -1650,7 +1659,7 @@ function fbSubscribe(){
       if(!s.exists&&!s.metadata.fromCache)fbDoc(k).set({items:{},updatedAt:Date.now()},{merge:true}).catch(()=>{});
       parts[i]=fbItems(s);
       st[c]=[].concat(...parts.map(p=>p||[])).map(x=>c==='products'?normProduct(x):x);
-      loaded[c]=parts.every(Boolean);lastPull=Date.now();renderAll();applyRole();
+      loaded[c]=parts.every(Boolean);lastPull=Date.now();if(c==='ibuy'&&loaded.ibuy&&stkFoc){bidRefresh();return}renderAll();applyRole();
     },()=>toast('การเชื่อมต่อฐานข้อมูลหยุด — โหลดหน้าใหม่')));
   });
 }
@@ -1849,10 +1858,52 @@ const ibuyUid=no=>{const x=ibuyOf(no);return x?x.uid:''};
    uid = the Buyer the app worked out; a Buyer ID typed from BIP replaces it. */
 function bidBlock(no,uid,note,warn){
   const ib=ibuyOf(no),u=ib?ib.uid:String(uid||''),c=u?nbsContact(u):null;
-  const src=ib?`<div class="muted small">ตามหน้า BIP${ib.by?' · ใส่โดย '+esc(ib.by):''}</div>`:(note?`<div class="muted small bsrc">${esc(note)}</div>`:'');
+  const src=ib?`<div class="muted small">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</div>`:(note?`<div class="muted small bsrc">${esc(note)}</div>`:'');
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
   const detail=u?(c?buyerCardHtml(c):`<div class="bc-miss"><span>ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial</span></div>`):'';
-  return`<div class="bid-block"><div class="bid-line">Buyer ID : ${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}<button type="button" class="btn sm bid-edit" onclick="bidEdit('${esc(String(no))}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>${src}${detail}${wr}</div>`;
+  return`<div class="bid-block" data-no="${esc(String(no))}" data-uid="${esc(String(uid||''))}"><div class="bid-line">Buyer ID : ${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}<button type="button" class="btn sm bid-edit" onclick="bidEdit('${esc(String(no))}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>${src}${detail}${wr}</div>`;
+}
+/* AUTO: a small script that runs inside the BIP window (the Tampermonkey script bip-buyer.user.js, or the bookmarklet from the help box) reads "Buyer ID" off the report
+   and posts it back to this page, which opened that window. This page cannot read BIP itself (plain http on a private network), but the BIP page can talk back to its opener. */
+const BIP_ORIGIN='http://bip-app.siammakro.co.th:9714';
+window.addEventListener('message',e=>{
+  if(e.origin!==BIP_ORIGIN)return;
+  const d=e.data;if(!d||d.type!=='slm-bip-buyer')return;
+  if(!Object.values(stkOpened).some(w=>w===e.source))return; /* only from a BIP window opened by this page */
+  const no=String(d.item||'').trim(),uid=String(d.buyerId||'').trim().toUpperCase().replace(/\s+/g,'');
+  if(!/^\d{3,9}$/.test(no)||!/^[A-Z0-9]{2,12}$/.test(uid))return;
+  bidAuto(no,uid);
+});
+async function bidAuto(no,uid){
+  const k=amNum(no);if(!k||!canWrite)return;
+  const ib=ibuyOf(no);if(ib&&ib.uid===uid)return;
+  try{
+    await putItem('ibuy',{_id:'i'+k,itemNo:no,uid,by:myId||'',auto:true,at:new Date().toISOString()});
+    IBM=null;bidRefresh();toast(`ได้ Buyer ID ${uid} จากหน้า BIP · Item ${no} แล้ว`);
+  }catch(e){toast('บันทึก Buyer ID จากหน้า BIP ไม่สำเร็จ')}
+}
+/* refresh the Buyer blocks in place (a full redraw would close the card that is lifted to the left) */
+function bidRefresh(){
+  document.querySelectorAll('.bid-block[data-no]').forEach(el=>{const t=document.createElement('div');t.innerHTML=bidBlock(el.dataset.no,el.dataset.uid||'','','');el.replaceWith(t.firstElementChild)});
+}
+/* the code that runs in the BIP window: it is also written out as the bookmarklet (once=true) */
+function slmBipSender(origin,once){
+  var seen='';
+  function note(m){var d=document.createElement('div');d.textContent=m;d.style.cssText='position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:99999;background:#1f7a45;color:#fff;padding:6px 14px;border-radius:8px;font:14px sans-serif';document.body.appendChild(d);setTimeout(function(){d.remove()},2600)}
+  function texts(){var o=[document.body?document.body.innerText:''],f=document.querySelectorAll('iframe'),i,d;for(i=0;i<f.length;i++){try{d=f[i].contentDocument;if(d&&d.body)o.push(d.body.innerText)}catch(e){}}return o.join('\n')}
+  function read(){var t=texts(),b=t.match(/Buyer ID:?\s*([A-Za-z0-9]{2,12})\b/),m=t.match(/(?:^|\n)\s*Item:\s*(\d{3,9})\b/);if(!b||!m)return null;var u=b[1].toUpperCase();if(u==='BUYER'||u==='NAME')return null;return{item:m[1],buyerId:u}}
+  function send(){var r=read();if(!r)return false;var k=r.item+':'+r.buyerId;if(k!==seen){seen=k;if(window.opener){try{window.opener.postMessage({type:'slm-bip-buyer',v:1,item:r.item,buyerId:r.buyerId},origin);note('Buyer ID '+r.buyerId+' → Shelf-Life Monitor')}catch(e){}}}return true}
+  if(once){
+    if(!window.opener){alert('หน้านี้ไม่ได้ถูกเปิดจากปุ่ม Item Enquiry ในหน้า Shelf-Life Monitor');return}
+    if(!send())alert('ยังไม่พบ Buyer ID ในหน้านี้ — รอให้รายงานโหลดเสร็จแล้วกดอีกครั้ง');
+    return;
+  }
+  var n=0,iv=setInterval(function(){send();if(++n>400)clearInterval(iv)},1500);
+}
+function bidAutoHelp(){
+  $('#bidBm').href='javascript:'+encodeURIComponent('('+slmBipSender.toString()+')('+JSON.stringify(location.origin)+',true)');
+  $('#bidUs').href=new URL('bip-buyer.user.js',location.href).href;
+  $('#dlgBidAuto').showModal();
 }
 let bidNo=null;
 function bidEdit(no){
@@ -1868,6 +1919,7 @@ function bidPrev(){
 $('#bidIn').addEventListener('input',bidPrev);
 $('#bidIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#bidSave').click()}});
 $('#bidCancel').onclick=()=>$('#dlgBid').close();
+$('#bidAutoLink').onclick=e=>{e.preventDefault();bidAutoHelp()};$('#bidAutoClose').onclick=()=>$('#dlgBidAuto').close();
 $('#bidSave').onclick=async()=>{
   const u=$('#bidIn').value.trim().toUpperCase().replace(/\s+/g,''),k=amNum(bidNo);
   if(!k||!u){toast('กรอก Buyer ID ก่อน');return}
