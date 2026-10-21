@@ -566,16 +566,24 @@ select,input,textarea{max-width:100%}
 }
 /* ===== computer screens ===== */
 /* product search field and the red scan button: same height, same line */
-.search-row #mfQ,.search-row #nQ,.search-row .scan-btn{height:54px;box-sizing:border-box}
+.search-row #mfQ,.search-row #nQ,.search-row #jQ,.search-row .scan-btn{height:54px;box-sizing:border-box}
 .search-row .scan-btn{border-radius:12px;padding-top:0;padding-bottom:0}
 #t-jul .grid2>.card{border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:14px;background:var(--card);box-shadow:0 2px 10px #0000000d}
 #t-jul .grid2>.card h2{margin-top:0}
+.jconv{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:520px){.jconv{grid-template-columns:1fr}}
+.jbox{min-width:0}
+.jout{font-size:18px;margin:8px 0 0}
+#jCout b{font-size:24px;font-weight:800}
+.jlot{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;background:var(--bg)}
+.jlot-h{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-bottom:6px}
+.jplan summary{cursor:pointer;color:var(--accent);font-weight:700;margin:10px 0 4px}
 label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
 #aQty{background:var(--card);border:2px solid var(--accent);border-radius:12px;padding:10px 14px;font-size:16px;font-weight:700;box-shadow:0 2px 10px #0b5cad26}
 #aQty:focus{outline:0;box-shadow:0 0 0 4px #0b5cad33,0 2px 10px #0b5cad26}
 #aJ,#aDate,#aQty{height:54px;box-sizing:border-box;width:100%}
 @media (min-width:701px){
-  #t-jul>.grid2{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+  #t-jul>.grid2{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);align-items:stretch}
   #jD,#jC,#jC2{height:54px;box-sizing:border-box;width:100%}
   .dgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .lot-grid{align-items:end}
@@ -1074,15 +1082,24 @@ label.has-scan{position:relative}
 <!-- JULIAN -->
 <section id="t-jul" hidden>
   <div class="grid2">
-    <div class="card"><h2>วันที่ → Julian</h2>
-      <label>วันที่<input type="date" id="jD"></label>
-      <p id="jDout" style="font-size:18px"></p></div>
-    <div class="card"><h2>Julian → วันที่</h2>
-      <label>Julian code<input id="jC" inputmode="numeric" maxlength="5" placeholder="277 หรือ 26277"></label>
-      <p id="jCout" style="font-size:18px"></p></div>
-    <div class="card"><h2>กำหนดการจาก Julian วันรับ</h2>
-      <label>สินค้า<select id="jSku"></select></label>
-      <label style="margin-top:8px">Julian วันรับสินค้า<input id="jC2" inputmode="numeric"></label>
+    <div class="card"><h2>แปลง Julian ↔ วันที่</h2>
+      <div class="jconv">
+        <div class="jbox"><label>Julian code → วันที่<input id="jC" inputmode="numeric" maxlength="5" placeholder="277 หรือ 26277"></label>
+          <p id="jCout" class="jout"></p></div>
+        <div class="jbox"><label>วันที่ → Julian<input type="date" id="jD"></label>
+          <p id="jDout" class="jout"></p></div>
+      </div></div>
+    <div class="card"><h2>สแกนสินค้า → ต้องทำอย่างไรต่อ</h2>
+      <div id="jScanBox">
+        <div class="search-row">
+          <label class="grow">รหัสสินค้า บาร์โค้ด หรือชื่อ<input id="jQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
+          <button type="button" class="btn scan-btn" id="jScanBtn" title="สแกนบาร์โค้ดด้วยกล้อง"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M7 8v8M10 8v8M13 8v8M16 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>สแกน Barcode</button>
+        </div>
+        <div id="jResults" class="mf-results"></div>
+        <div id="jPicked" class="mf-picked" hidden></div>
+      </div>
+      <label style="margin-top:8px">กฎ Shelf life<select id="jSku"></select></label>
+      <label style="margin-top:8px">Julian ที่ป้าย (ถ้ายังไม่มีล็อตที่บันทึกไว้ หรืออยากเช็กล็อตอื่น)<input id="jC2" inputmode="numeric" maxlength="5" placeholder="277 หรือ 26277"></label>
       <div id="jPlan" style="margin-top:10px"></div></div>
   </div>
   <div class="card small muted"><b>Julian Calendar:</b> เลขวันของปี 001–365 (ปี 2026 ไม่มี 29 ก.พ.) เช่น 1 ม.ค. = 001, 1 ต.ค. = 274, 31 ธ.ค. = 365 · <b>รูปแบบที่รองรับ:</b> DDD เช่น 277 (ถ้าเป็นวันในอนาคตจะถือเป็นปีก่อน) · YYDDD เช่น 26277 = ปี 2026 วันที่ 277</div>
@@ -4496,13 +4513,63 @@ function ilInit(){
 ilInit();
 
 /* ---------- julian tab ---------- */
-function julTab(){
-  const v=$('#jD').value;if(v){const d=fromIso(v),j=jul(d);$('#jDout').innerHTML=`<b>${j.ddd}</b> <span class="muted small">DDD</span> · <b>${j.y2}</b> <span class="muted small">YYDDD</span>`}
-  const r=parseJulian($('#jC').value);$('#jCout').innerHTML=!r?'':r.error?`<span class="err-text">${r.error}</span>`:`<b>${fmt(r.date)}</b> <span class="muted small">ถ้าเป็นวันรับสินค้า วันนี้คือวางขายวันที่ ${diffD(today(),r.date)+1}</span>`;
-  const p=findProd($("#jSku").value),r2=parseJulian($('#jC2').value);
-  $('#jPlan').innerHTML=!p?'':r2?.error?`<span class="err-text">${r2.error}</span>`:planHTML(p,r2?.date||null);
+/* card 1: Julian <-> date, both ways in one box. card 2: scan (or type) a product -> what to do with it today:
+   its saved lots (found by Item No) are each checked against its Shelf life rule; a Julian code read off the label can be typed instead / as well. */
+let julPickIt=null,julRuleAuto=false;
+function julVirtual(p,date){return{sku:pkey(p),prod:iso(date)}} /* a lot that is not saved: just a rule + a receive date */
+function julLotHTML(b,head){
+  const e=evalBatch(b),p=e.p;
+  const contacts=p?`<div class="ccards">${contactCard('Buyer',e.buyer,p.buyerUid)}${contactCard('Commercial',e.com,p.comUid)}</div>`:'';
+  const day=e.day>=1?`วันนี้ = วันที่ ${e.day} ของ Shelf life ${p?p.shelf+' วัน':''}`:'';
+  return`<div class="jlot"><div class="jlot-h">${head}${chip(e.st,e.label)}</div>${day?`<div class="muted small">${esc(day)}</div>`:''}${todoHTML(e)}${p&&e.day>=1?`<div class="pv-strip" style="margin-top:8px">${strip(p,e.day).replace('class="strip"','class="strip big"')}</div>`:''}${contacts}</div>`;
 }
-['#jD','#jC','#jC2','#jSku'].forEach(s=>$(s).addEventListener('input',julTab));
+function julScan(){
+  const it=julPickIt,p=findProd($('#jSku').value),r2=parseJulian($('#jC2').value);
+  let h='';
+  if(r2?.error)h+=`<p class="err-text">${r2.error}</p>`;
+  if(r2&&!r2.error){
+    if(!p)h+=pvEmpty('!','ยังไม่มีกฎ Shelf life สำหรับคำนวณ',it?`ยังไม่พบกฎที่ตรงกับ “${esc(it.desc)}” — เลือกกฎในช่อง “กฎ Shelf life” ด้านบน`:'เลือกกฎ Shelf life ด้านบนก่อน');
+    else h+=julLotHTML(julVirtual(p,r2.date),`<b>Julian ${esc(jul(r2.date).ddd)}</b> <span class="muted small">รับ ${esc(fmt(r2.date))} (ที่คุณกรอก)</span>`)+`<details class="jplan"><summary>ตารางกำหนดการทั้งหมด</summary>${planHTML(p,r2.date)}</details>`;
+  }else if(it){
+    const lots=st.batches.filter(b=>b.itemNo===it.itemNo).sort((a,b)=>String(b.prod).localeCompare(String(a.prod)));
+    if(lots.length)h+=`<p class="muted small" style="margin:0 0 6px">พบ ${lots.length} ล็อตของสินค้านี้ที่บันทึกไว้</p>`+lots.map(b=>julLotHTML(b,`<b>Julian ${esc(jul(fromIso(b.prod)).ddd)}</b> <span class="muted small">รับ ${esc(fmt(fromIso(b.prod)))}${b.qty?` · จำนวน ${esc(b.qty)}`:''}${b.loc?` · ${esc(b.loc)}`:''}${b.ack===evalBatch(b).st?' · รับทราบแล้ว':''}</span>`)).join('');
+    else h+=pvEmpty('?','ยังไม่มีล็อตของสินค้านี้ที่บันทึกไว้','ดู Julian code ที่ป้ายหรือกล่องของล็อตนี้ แล้วใส่ในช่อง “Julian ที่ป้าย” ด้านบน ระบบจะบอกว่าวันนี้ต้องทำอะไร'+(p?'':' (และเลือกกฎ Shelf life ให้ตรงกับสินค้า)'));
+  }else if(onMakroSite())h+=pvEmpty('①','สแกนหรือค้นหาสินค้าก่อน','สแกนบาร์โค้ด หรือพิมพ์รหัส/ชื่อสินค้า ระบบจะหาล็อตที่บันทึกไว้ของสินค้านั้นแล้วบอกว่าวันนี้ต้องทำอย่างไรต่อ');
+  else h+=pvEmpty('②','เลือกกฎ Shelf life และใส่ Julian','ใส่ Julian code ที่ป้ายของล็อตนั้น ระบบจะบอกว่าวันนี้ต้องทำอย่างไรต่อ');
+  $('#jPlan').innerHTML=h;
+}
+function julResults(){
+  const q=$('#jQ').value.trim(),list=MF.state==='ready'?mfSearch(q):[];
+  $('#jResults').innerHTML=list.map(it=>{const img=MF.images[it.itemNo];
+    return`<button type="button" class="mf-hit" data-no="${esc(it.itemNo)}">${img?`<img src="${esc(img)}" alt="" loading="lazy">`:'<span class="mf-noimg"></span>'}<span><b>${esc(it.desc)}</b><span class="muted small">${esc(it.itemNo)}${it.barcode?' · '+esc(it.barcode):''}</span></span></button>`}).join('')
+    +(q&&MF.state==='ready'&&!list.length?'<p class="muted small" style="margin:6px 0">ไม่พบสินค้าใน Makro Finder</p>':'')
+    +(q&&MF.state!=='ready'?'<p class="muted small" style="margin:6px 0">กำลังโหลดข้อมูลสินค้า…</p>':'');
+}
+function julPick(no){
+  const it=MF.items.get(no);if(!it)return;julPickIt=it;$('#jResults').innerHTML='';$('#jQ').value='';
+  const p=guessRule(it);$('#jSku').value=p?pkey(p):'';julRuleAuto=true;
+  $('#jPicked').hidden=false;
+  $('#jPicked').innerHTML=`${MF.images[it.itemNo]?`<img src="${esc(MF.images[it.itemNo])}" alt="">`:''}<div><b>${esc(it.desc)}</b><div class="muted small">${esc(it.itemNo)}${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div><div class="small ${p?'muted':'err-text'}">${p?`ใช้กฎ Shelf life: ${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} ${p.shelf} วัน) — เปลี่ยนได้ที่ช่อง “กฎ Shelf life”`:'ไม่พบกฎที่ตรงกับสินค้านี้ — เลือกกฎ Shelf life เอง'}</div></div><button type="button" class="btn sm" id="jClear">ไม่ใช้</button>`;
+  $('#jClear').onclick=()=>{julPickIt=null;$('#jPicked').hidden=true;if(julRuleAuto){$('#jSku').value='';julRuleAuto=false}julScan()};
+  julScan();
+}
+async function useScannedJul(code){
+  $('#jQ').value=code;await scanWaitMf();
+  const it=mfFindByCode(code);
+  if(it){julPick(it.itemNo);toast('พบสินค้า: '+it.desc)}
+  else{julResults();toast('ไม่พบบาร์โค้ด '+code+' ใน Makro Finder')}
+}
+function julTab(){
+  const v=$('#jD').value;$('#jDout').innerHTML=v?(()=>{const j=jul(fromIso(v));return`<b>${j.ddd}</b> <span class="muted small">DDD</span> · <b>${j.y2}</b> <span class="muted small">YYDDD</span>`})():'';
+  const r=parseJulian($('#jC').value);$('#jCout').innerHTML=!r?'':r.error?`<span class="err-text">${r.error}</span>`:`<b>${fmt(r.date)}</b> <span class="muted small">ถ้าเป็นวันรับสินค้า วันนี้คือวางขายวันที่ ${diffD(today(),r.date)+1}</span>`;
+  julScan();
+}
+['#jD','#jC','#jC2'].forEach(s=>$(s).addEventListener('input',julTab));
+$('#jSku').addEventListener('change',()=>{julRuleAuto=false;julScan()});
+$('#jQ').addEventListener('input',()=>{if(MF.state==='idle')loadMakroData();julResults()});
+$('#jResults').addEventListener('click',e=>{const b=e.target.closest('.mf-hit');if(b)julPick(b.dataset.no)});
+$('#jScanBtn').onclick=()=>openScan('jul');
+if(!onMakroSite())$('#jScanBox').hidden=true;
 
 /* ---------- import / export ---------- */
 function copyText(txt,okMsg){
@@ -5564,7 +5631,7 @@ function renderAll(){
   BBI=null; /* the item -> Buyer table is rebuilt from the latest OOS+ records */
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent="YYDDD "+jul(t).y2;$("#jmDate").textContent=$("#todayTxt").textContent;
-  const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(sel);$('#jSku').innerHTML=prodOptions(js);
+  const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(sel);$('#jSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(js);
   renderDash();renderProd();renderCt();renderNbs();renderOos();addPreview();julTab();
   /* the report pages keep their numbers fresh when contacts / OOS records arrive while they are open */
   try{if(!$('#t-shr').hidden||SHR.files.length)renderShr();['neg','dms'].forEach(p=>{if(ILT[p])renderIlt(p)})}catch(e){}
@@ -5631,7 +5698,7 @@ function scanNote(msg){
   clearTimeout(scanNoteT);scanNoteT=setTimeout(()=>{h.textContent=keep;h.classList.remove('warn')},3000);
 }
 async function openScan(target,inputEl){
-  scanFor=target==='nbs'?'nbs':target==='field'?'field':'mf';scanInput=target==='field'?inputEl:null;
+  scanFor=target==='nbs'?'nbs':target==='field'?'field':target==='jul'?'jul':'mf';scanInput=target==='field'?inputEl:null;
   const d=$('#dlgScan'),video=$('#scanVideo'),hint=$('#scanMsg'),err=$('#scanErr');
   stopScan();
   const run=camScan.run={};camScan.code=null;camScan.count=0;camScan.locked=false;camScan.video=video;
@@ -5722,6 +5789,7 @@ async function useScannedField(code){
 async function useScanned(code){
   if(scanFor==='nbs')return useScannedNbs(code);
   if(scanFor==='field')return useScannedField(code);
+  if(scanFor==='jul')return useScannedJul(code);
   $('#mfQ').value=code;await scanWaitMf();
   const it=mfFindByCode(code);
   if(it){pickMf(it.itemNo);toast('พบสินค้า: '+it.desc)}
