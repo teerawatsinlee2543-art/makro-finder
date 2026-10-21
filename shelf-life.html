@@ -288,7 +288,7 @@ table.ct-tbl .cn{font-weight:700}
 .bid{color:#e30613;font-weight:800;font-size:1.15em;letter-spacing:.02em}
 :root[data-theme="dark"] .bid{color:#ff4b57}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid{color:#ff4b57}}
-.bid-edit{margin-left:auto}
+.bid-paste{margin-left:auto}
 .bc-miss{display:flex;flex-direction:column;gap:2px}.bc-miss span{font-size:11.5px;color:var(--md2);font-weight:600}
 .bcard{display:flex;flex-direction:column;gap:2px;font-size:12.5px;line-height:1.35}
 .bc-uid{display:inline-block;align-self:flex-start;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 8px;font-weight:800;letter-spacing:.02em}
@@ -985,6 +985,7 @@ label.has-scan{position:relative}
 <dialog id="dlgBid" class="nbs-dlg imp-dlg"><div><h2>Buyer ID จากหน้า BIP</h2>
   <p class="muted small" id="bidItem" style="margin:0 0 8px"></p>
   <label>Buyer ID (ดูในหน้า BIP · Item Enquiry ช่อง “Buyer ID”)<input id="bidIn" maxlength="12" autocomplete="off" placeholder="เช่น F1D"></label>
+  <button type="button" class="btn sm" id="bidPasteDlg" style="margin-top:8px">วางจากคลิปบอร์ด</button>
   <div id="bidPrev" class="small" style="margin:10px 0"></div>
   <p class="muted small" style="margin:0 0 10px">ค่าที่ใส่ใช้แทน Buyer ที่ระบบคำนวณเอง และทุกคนในทีมเห็นเหมือนกัน (เก็บต่อสินค้า 1 รายการ)</p>
   <p class="small" style="margin:0 0 10px"><a href="#" id="bidAutoLink">ดึง Buyer ID จากหน้า BIP อัตโนมัติ — วิธีตั้งค่า</a></p>
@@ -1862,7 +1863,7 @@ function bidBlock(no,uid,note,warn){
   const src=ib?`<div class="muted small">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</div>`:(note?`<div class="muted small bsrc">${esc(note)}</div>`:'');
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
   const detail=u?(c?buyerCardHtml(c):`<div class="bc-miss"><span>ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial</span></div>`):'';
-  return`<div class="bid-block" data-no="${esc(String(no))}" data-uid="${esc(String(uid||''))}"><div class="bid-line">Buyer ID : ${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}<button type="button" class="btn sm bid-edit" onclick="bidEdit('${esc(String(no))}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>${src}${detail}${wr}</div>`;
+  return`<div class="bid-block" data-no="${esc(String(no))}" data-uid="${esc(String(uid||''))}"><div class="bid-line">Buyer ID : ${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}<button type="button" class="btn sm bid-paste" onclick="bidPaste('${esc(String(no))}')" title="ในหน้า BIP ดับเบิลคลิกค่า Buyer ID → Ctrl+C → กดปุ่มนี้">วางจากคลิปบอร์ด</button><button type="button" class="btn sm bid-edit" onclick="bidEdit('${esc(String(no))}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>${src}${detail}${wr}</div>`;
 }
 /* AUTO: a small script that runs inside the BIP window (the Tampermonkey script bip-buyer.user.js, or the bookmarklet from the help box) reads "Buyer ID" off the report
    and posts it back to this page, which opened that window. This page cannot read BIP itself (plain http on a private network), but the BIP page can talk back to its opener. */
@@ -1874,12 +1875,12 @@ window.addEventListener('message',e=>{
   if(!/^\d{3,9}$/.test(no)||!/^[A-Z0-9]{2,12}$/.test(uid))return;
   bidAuto(no,uid);
 });
-async function bidAuto(no,uid){
+async function bidAuto(no,uid,src){
   const k=amNum(no);if(!k||!canWrite)return;
   const ib=ibuyOf(no);if(ib&&ib.uid===uid){toast(`Buyer ID ${uid} จากหน้า BIP ตรงกับที่มีอยู่แล้ว · Item ${no}`);return}
   try{
-    await putItem('ibuy',{_id:'i'+k,itemNo:no,uid,by:myId||'',auto:true,at:new Date().toISOString()});
-    IBM=null;bidRefresh();toast(`ได้ Buyer ID ${uid} จากหน้า BIP · Item ${no} แล้ว`);
+    await putItem('ibuy',{_id:'i'+k,itemNo:no,uid,by:myId||'',auto:src!=='clip',at:new Date().toISOString()});
+    IBM=null;bidRefresh();toast(src==='clip'?`วาง Buyer ID ${uid} ให้ Item ${no} แล้ว`:`ได้ Buyer ID ${uid} จากหน้า BIP · Item ${no} แล้ว`);
   }catch(e){toast('บันทึก Buyer ID จากหน้า BIP ไม่สำเร็จ')}
 }
 /* refresh the Buyer blocks in place (a full redraw would close the card that is lifted to the left) */
@@ -1912,6 +1913,19 @@ function bidAutoHelp(){
   $('#bidUs').href=new URL('bip-buyer.user.js',location.href).href;
   $('#dlgBidAuto').showModal();
 }
+/* PASTE: no script needed. In the BIP page double-click the Buyer ID value (e.g. BFS1), Ctrl+C, then press "วางจากคลิปบอร์ด" on the card: the copied text is read and saved as the Buyer ID of that item */
+async function bidClip(){
+  let t='';
+  try{t=await navigator.clipboard.readText()}
+  catch(e){toast('อ่านคลิปบอร์ดไม่ได้ — กดอนุญาตให้เว็บนี้ดูคลิปบอร์ด หรือกด “แก้ Buyer ID” แล้ววางที่ช่อง (Ctrl+V)');return''}
+  t=String(t||'').trim();
+  const m=t.length<=60&&t.indexOf('\n')<0?t.match(/^([A-Za-z0-9]{2,12})(?![A-Za-z0-9])/):null;
+  if(!m||!/[A-Za-z]/.test(m[1])){toast(`สิ่งที่คัดลอกไว้${t?` (“${t.slice(0,24)}”)`:'ว่างอยู่'} ไม่ใช่ Buyer ID — ในหน้า BIP ดับเบิลคลิกค่าที่ช่อง Buyer ID (เช่น BFS1) แล้วกด Ctrl+C`);return''}
+  return m[1].toUpperCase();
+}
+async function bidPaste(no){
+  const u=await bidClip();if(u)await bidAuto(String(no),u,'clip');
+}
 let bidNo=null;
 function bidEdit(no){
   bidNo=String(no);const ib=ibuyOf(no),it=MF.items&&MF.items.get(bidNo);
@@ -1926,7 +1940,7 @@ function bidPrev(){
 $('#bidIn').addEventListener('input',bidPrev);
 $('#bidIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#bidSave').click()}});
 $('#bidCancel').onclick=()=>$('#dlgBid').close();
-$('#bidAutoLink').onclick=e=>{e.preventDefault();bidAutoHelp()};$('#bidAutoClose').onclick=()=>$('#dlgBidAuto').close();
+$('#bidAutoLink').onclick=e=>{e.preventDefault();bidAutoHelp()};$('#bidPasteDlg').onclick=async()=>{const u=await bidClip();if(u){$('#bidIn').value=u;bidPrev()}};$('#bidAutoClose').onclick=()=>$('#dlgBidAuto').close();
 $('#bidSave').onclick=async()=>{
   const u=$('#bidIn').value.trim().toUpperCase().replace(/\s+/g,''),k=amNum(bidNo);
   if(!k||!u){toast('กรอก Buyer ID ก่อน');return}
