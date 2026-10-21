@@ -389,7 +389,18 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .oosc-t{min-width:0;flex:1;overflow-wrap:anywhere}
 .stkb{--stkbg:#dcdcdc;position:fixed;z-index:90;display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:18px;background:var(--stkbg);border:1px solid #c2c2c2;box-shadow:0 12px 32px #0006}
 .stkb-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;color:#222;font-size:.85rem}.stkb-h b{margin-right:auto}
-.stkb-t,.stkb-x{border:1px solid #00000044;background:transparent;color:#222;border-radius:999px;padding:3px 10px;font:inherit;cursor:pointer}.stkb-t.on{background:#222;color:#fff;font-weight:700}.stkb-x{padding:3px 9px}
+.stkb-x{border:1px solid #00000044;background:transparent;color:#222;border-radius:999px;padding:3px 9px;font:inherit;cursor:pointer}
+.stkb-tabs{display:flex;gap:3px;align-items:flex-end;padding:0 6px;margin-bottom:-6px;position:relative;z-index:1}
+.stkb-tab{display:flex;align-items:center;gap:7px;min-width:0;max-width:50%;padding:8px 14px 9px;border:0;border-radius:11px 11px 0 0;background:#c3c3c3;color:#444;font:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stkb-tab:hover{background:#cfcfcf}
+.stkb-tab.on{background:#fff;color:#111;font-weight:700;box-shadow:0 -2px 0 #e30613 inset}
+.stkb-ico{flex:none;width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;font-style:normal}
+.stkb-ico.m{background:#e30613}.stkb-ico.b{background:#0b57a8}
+.stkb-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;background:#fff;color:#222}
+.stkb-card[hidden]{display:none}
+.stkb-card .btn{text-decoration:none}
+.stkb-card p{margin:0;font-size:.85rem;color:#555;max-width:34ch}
+.stkb-w{border-top-left-radius:0}
 .stkb-o{color:#0b57a8;text-decoration:underline;white-space:nowrap}
 .stkb-w{flex:1;min-height:0;position:relative;overflow:hidden;border-radius:12px;background:var(--stkbg)}
 .stkb iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:var(--stkbg)}
@@ -3236,7 +3247,7 @@ function oosCard(r,ctx){
     <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
     <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
 /* "ดู Stock": the Makro stock web in a small box on this page. {item} in a link is replaced by the Item No. The Makro web needs its own login (never stored here).
-   The box shows the first page (Item lookup); the second page (BIP Item Enquiry, Item No already filled in) is a link under it. Tap the button again, the ✕, Esc or any tab to close it.
+   Two Chrome-style tabs in the box: Item lookup (shown inside the box) and Item Enquiry (BIP, Item No already filled in; it is plain http so it opens as a browser tab). Tap the button again, the X button, Esc or any page tab to close it.
    If the box stays empty the web refused to be framed: the link "เปิดแท็บใหม่" opens it in a normal tab. Set the stock-page links below when they change. */
 const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','http://bip-app.siammakro.co.th:9714/xmlpserver/Guest/Reports/ItemEnquiry/ItemEnquiryReport.xdo?STORE_ID=42&_xpt=&_xl=en_US&STOREID=42&_xpf=&Store_Timezone=Asia%2FBangkok&ITEMID={item}&_xf=html'];
 const STOCK_LABELS=['Item lookup','Item Enquiry (BIP)'];
@@ -3259,8 +3270,21 @@ function stkPlace(){
 function stkOpen(id,no,urls){
   const same=stkBubble&&stkBubble.id===id;stkClose();if(same)return; /* a second tap on the same button closes it */
   const el=document.createElement('div');el.className='stkb';
-  el.innerHTML=`<div class="stkb-h"><b>Stock · Item ${esc(no)}</b><a class="stkb-o" target="_blank" rel="noopener" href="${esc(urls[0])}">เปิดแท็บใหม่ ↗</a><button type="button" class="stkb-x" aria-label="ปิด">✕</button></div><div class="stkb-w"><iframe src="${esc(urls[0])}" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads"></iframe></div><div class="stkb-n">ว่างเปล่า = เว็บไม่ให้ฝัง → กด “เปิดแท็บใหม่” · คัดลอก Item No แล้ว${urls[1]?` · <a class="stkb-o" target="_blank" rel="noopener" href="${esc(urls[1])}">${esc(STOCK_LABELS[1])} ↗</a>`:''}</div>`;
-  el.onclick=e=>{if(e.target.closest('.stkb-x'))stkClose()};
+  const tabs=urls.map((u,i)=>`<button type="button" class="stkb-tab${i?'':' on'}" data-i="${i}"><span class="stkb-ico ${i?'b':'m'}">${i?'BI':'m'}</span>${esc(STOCK_LABELS[i]||'หน้า '+(i+1))}</button>`).join('');
+  el.innerHTML=`<div class="stkb-h"><b>Stock · Item ${esc(no)}</b><a class="stkb-o" target="_blank" rel="noopener" href="${esc(urls[0])}">เปิดแท็บใหม่ ↗</a><button type="button" class="stkb-x" aria-label="ปิด">✕</button></div>
+    <div class="stkb-tabs">${tabs}</div>
+    <div class="stkb-w"><iframe src="${esc(urls[0])}" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads"></iframe>
+      <div class="stkb-card" hidden><b>${esc(STOCK_LABELS[1]||'')}</b><p>หน้านี้เป็น http — ฝังในหน้านี้ไม่ได้ ระบบเปิดเป็นแท็บใหม่ให้แล้ว (Item ${esc(no)} ใส่ในลิงก์ให้แล้ว)</p><a class="btn pri" target="_blank" rel="noopener" href="${esc(urls[1]||'')}">เปิด ${esc(STOCK_LABELS[1]||'')} ↗</a></div></div>
+    <div class="stkb-n">ว่างเปล่า = เว็บไม่ให้ฝัง → กด “เปิดแท็บใหม่” · คัดลอก Item No แล้ว</div>`;
+  el.onclick=e=>{
+    if(e.target.closest('.stkb-x')){stkClose();return}
+    const t=e.target.closest('.stkb-tab');if(!t)return;
+    const i=+t.dataset.i;el.querySelectorAll('.stkb-tab').forEach(x=>x.classList.toggle('on',x===t));
+    el.querySelector('iframe').hidden=i!==0;el.querySelector('.stkb-card').hidden=i===0;el.querySelector('.stkb-n').hidden=i!==0;
+    el.querySelector('.stkb-h .stkb-o').href=urls[i]||urls[0];
+    if(i>0&&urls[i])try{window.open(urls[i],'mkStock'+i)}catch(x){} /* the tap on the tab is the click that lets the browser open it */
+    if(i===0)stkFit();
+  };
   document.body.appendChild(el);
   const key=e=>{if(e.key==='Escape')stkClose()};
   stkBubble={el,id,place:stkPlace,key};window.addEventListener('resize',stkPlace);document.addEventListener('keydown',key);stkPlace();
