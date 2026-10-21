@@ -4334,9 +4334,10 @@ function ilChartHtml(p,rows){
   const S=IL_ST[p],b=S.basis,qs=$('#'+p+'Q').value.trim();if(!rows.length&&!qs)return'';
   const ranked=rows.map(it=>({it,m:ilMetric(it,p,b)})).filter(x=>x.m>0).sort((a,c)=>c.m-a.m).slice(0,10),cap=b==='cover'?365:Infinity,mx=ranked.length?Math.min(ranked[0].m,cap):1;
   const lab={val:'ติดลบมากสุด · มูลค่า ฿',qty:'ติดลบมากสุด · จำนวนที่ต้องปรับ',sold:'ติดลบแต่ขายมากสุดเดือนนี้',over:'Stock ส่วนเกินมากสุด · ฿ ที่เกิน '+IL_T+' วัน',cover:'Stock พอขายนานสุด · วัน (ไม่มียอดขาย = อันดับแรก)',stock:'มูลค่า Stock สูงสุด · ฿'}[b];
-  const seg=IL_DEFS[p].bases.map(([k,l])=>`<button type="button" class="${b===k?'on':''}" data-p="${k}">${l}</button>`).join('');
+  const noPrice=p==='neg'&&ilNoPrice('neg');
+  const seg=IL_DEFS[p].bases.filter(([k])=>!(noPrice&&k==='val')).map(([k,l])=>`<button type="button" class="${b===k?'on':''}" data-p="${k}">${l}</button>`).join('');
   const cv=it=>it.hi.dead?'ไม่มียอดขาย':ilN(it.cover,10)+' วัน';
-  const val=it=>b==='val'?`<b>${ilMoney('neg',it.val)}</b> · ปรับ +${ilN(-it.a,100)}`:b==='qty'?`<b>-${ilN(-it.a,100)}</b> หน่วย · ${ilMoney('neg',it.val)}`:b==='sold'?`<b>${ilN(it.r.cm)}</b> ขายเดือนนี้ · ติดลบ ${ilN(it.a,100)}`:b==='over'?`<b>${shrBaht(it.hi.exVal)}</b> · ${cv(it)}`:b==='cover'?`<b>${cv(it)}</b> · เกิน ${shrBaht(it.hi.exVal)}`:`<b>${shrBaht(it.hi.stockVal)}</b> · ${cv(it)}`;
+  const val=it=>b==='val'?`<b>${ilMoney('neg',it.val)}</b> · ปรับ +${ilN(-it.a,100)}`:b==='qty'?`<b>-${ilN(-it.a,100)}</b> หน่วย${noPrice?'':' · '+ilMoney('neg',it.val)}`:b==='sold'?`<b>${ilN(it.r.cm)}</b> ขายเดือนนี้ · ติดลบ ${ilN(it.a,100)}`:b==='over'?`<b>${shrBaht(it.hi.exVal)}</b> · ${cv(it)}`:b==='cover'?`<b>${cv(it)}</b> · เกิน ${shrBaht(it.hi.exVal)}`:`<b>${shrBaht(it.hi.stockVal)}</b> · ${cv(it)}`;
   const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(Math.min(m,cap)/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${val(it)}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการในมุมมองนี้</p>';
   return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
 function ilCard(p,it){
@@ -4389,25 +4390,29 @@ function renderIlt(p){
   const all=m.items.filter(it=>!it.shared&&(showDisc||!ilDisc(it))&&ilElig(it,p));
   const bd=$('#'+p+'Badge');bd.hidden=!all.length;bd.textContent=all.length.toLocaleString();bd.classList.toggle('late',all.length>0);
   if($('#t-'+p).hidden)return;
+  /* a Negative Stock file with no price at all has no money to show: use the quantities (units to adjust) in the group tiles, the department bars, the chart and the sort, never an empty "—" */
+  const noPrice=p==='neg'&&ilNoPrice('neg');
+  if(noPrice&&S.basis==='val'){S.basis='qty';$('#negSort').value='qty'}
+  const fm=n=>noPrice?ilN(n,100)+' หน่วย':ilMoney(p,n);
   const hide=$('#'+p+'Hide').checked,pool=m.items.filter(it=>ilElig(it,p)&&!(hide&&it.shared)&&(showDisc||!ilDisc(it))),sub=pool.filter(it=>!S.div||it.div===S.div);
-  const w=it=>it.shared?0:(p==='neg'?it.val:it.hi.exVal);
+  const w=it=>it.shared?0:p==='neg'?(noPrice?-it.a:it.val):it.hi.exVal;
   /* FF / DF / NF */
   const byDiv={},nDiv={};
   pool.forEach(it=>{const d=it.div||'-';byDiv[d]=(byDiv[d]||0)+w(it);nDiv[d]=(nDiv[d]||0)+1});
   if(S.div==='-'&&!nDiv['-'])S.div='';
-  const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${S.div===k?' sel':''}" data-div="${k}">${chip}<b>${ilMoney(p,byDiv[k]||0)}</b><span class="mini">${p==='neg'?'ติดลบ':'ส่วนเกิน'}</span><span class="muted small"><span class="tl">${p==='neg'?'ติดลบ ':'Stock เกิน '+IL_T+' วัน '}</span>${(nDiv[k]||0).toLocaleString()} รายการ</span></button>`;
+  const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${S.div===k?' sel':''}" data-div="${k}">${chip}<b>${fm(byDiv[k]||0)}</b><span class="mini">${p==='neg'?(noPrice?'ต้องปรับ':'ติดลบ'):'ส่วนเกิน'}</span><span class="muted small"><span class="tl">${p==='neg'?'ติดลบ ':'Stock เกิน '+IL_T+' วัน '}</span>${(nDiv[k]||0).toLocaleString()} รายการ</span></button>`;
   $('#'+p+'DivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('')+(nDiv['-']?divTile('-','<span class="chip s-md1">ไม่ระบุกลุ่ม</span>'):'');
   /* summary tiles */
   let tl;
   if(p==='neg'){const tot=sub.reduce((s,it)=>s+w(it),0),units=sub.reduce((s,it)=>s-(it.shared?0:it.a),0),sold=sub.filter(it=>it.soldCM).length,big=sub.filter(it=>!it.shared&&it.val>=SHR_BIG).length,idle=sub.filter(it=>it.r.a28===0&&!it.soldCM).length;
-    tl=[['all','ยอดรวมที่เสียเงิน','pull',ilMoney('neg',tot),`${sub.length.toLocaleString()} รายการ · ปรับ +${ilN(units,100)} หน่วย`],['sold','ยังขายอยู่เดือนนี้','md2',sold.toLocaleString(),'รายการ'],['big','ติดลบเกิน '+shrBaht(SHR_BIG),'soon',big.toLocaleString(),'รายการ'],['idle','ติดลบแต่ไม่มียอดขาย','md1',idle.toLocaleString(),'มักเป็นสต็อกผิด — นับแล้วปรับ']]}
+    tl=[['all',noPrice?'ยอดรวมที่ต้องปรับ':'ยอดรวมที่เสียเงิน','pull',noPrice?ilN(units,100)+' หน่วย':ilMoney('neg',tot),`${sub.length.toLocaleString()} รายการ · ปรับ +${ilN(units,100)} หน่วย`],['sold','ยังขายอยู่เดือนนี้','md2',sold.toLocaleString(),'รายการ'],['big','ติดลบเกิน '+shrBaht(SHR_BIG),'soon',big.toLocaleString(),'รายการ'],['idle','ติดลบแต่ไม่มียอดขาย','md1',idle.toLocaleString(),'มักเป็นสต็อกผิด — นับแล้วปรับ']]}
   else{const tot=sub.reduce((s,it)=>s+w(it),0),dead=sub.filter(it=>it.hi.dead&&!it.shared),cut=sub.filter(it=>it.hi.tier!=='watch').length,ord=sub.filter(it=>it.r.oo>0||it.r.it>0).length;
     tl=[['all','Stock ส่วนเกินรวม','pull',shrBk(tot),`${sub.length.toLocaleString()} รายการ · เกิน ${IL_T} วัน`],['dead','ไม่มียอดขายเลย','md2',dead.length.toLocaleString(),'มูลค่า Stock '+shrBk(dead.reduce((s,it)=>s+it.hi.stockVal,0))],['cut','ควรลดราคา (15% / 30%)','md1',cut.toLocaleString(),`พอขายเกิน ${2*IL_T} วัน`],['ord','มีของสั่ง / ระหว่างส่งอยู่','soon',ord.toLocaleString(),'ควรชะลอสั่ง']]}
   $('#'+p+'Tiles').innerHTML=tl.map(([k,l,c,n,s])=>`<button type="button" class="tile${S.tile===k?' sel':''}" data-t="${k}"><span class="chip s-${c}">${l}</span><b>${n}</b><span class="muted small">${s}</span></button>`).join('');
   /* chips + selects */
   const dsel=$('#'+p+'FDept'),dcur=dsel.value;dsel.innerHTML='<option value="">ทั้งหมด</option>'+m.depts.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
   const dcnt={};sub.forEach(it=>{if(!it.dlbl)return;const x=w(it);if(x>0)dcnt[it.dlbl]=(dcnt[it.dlbl]||0)+x});
-  deptBars($('#'+p+'DeptTiles'),Object.entries(dcnt).sort((a,c)=>c[1]-a[1]),n=>ilMoney(p,n),dsel.value,p==='neg'?'มูลค่าที่ติดลบ แยกตามแผนก':'ส่วนเกินที่ควรลดราคา แยกตามแผนก');
+  deptBars($('#'+p+'DeptTiles'),Object.entries(dcnt).sort((a,c)=>c[1]-a[1]),fm,dsel.value,p==='neg'?(noPrice?'จำนวนที่ติดลบ (หน่วย) แยกตามแผนก':'มูลค่าที่ติดลบ แยกตามแผนก'):'ส่วนเกินที่ควรลดราคา แยกตามแผนก');
   const fa=$('#'+p+'FA'),fac=fa.value,fb=$('#'+p+'FB'),fbc=fb.value;
   if(p==='neg'){fa.innerHTML=[['','ทั้งหมด'],['frac','ไม่ถึง −1'],['one','−1 ถึงไม่ถึง −10'],['ten','−10 ลงไป']].map(([k,l])=>`<option value="${k}"${k===fac?' selected':''}>${l}</option>`).join('');fb.innerHTML='<option value="">ทั้งหมด</option>'+m.ags.map(s=>`<option${s===fbc?' selected':''}>${esc(s)}</option>`).join('')}
   else{fa.innerHTML='<option value="">ทั้งหมด</option>'+[['watch','เฝ้าระวัง'],['cut15','ควรลดราคา 15%'],['cut30','ควรลดราคา 30%'],['dead','ไม่มียอดขายเลย']].map(([k,l])=>`<option value="${k}"${k===fac?' selected':''}>${l}</option>`).join('');fb.innerHTML='<option value="">ทั้งหมด</option>'+m.sts.map(s=>`<option${s===fbc?' selected':''}>${esc(s)}</option>`).join('')}
