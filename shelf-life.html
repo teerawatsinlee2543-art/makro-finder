@@ -293,25 +293,25 @@ table.ct-tbl .cn{font-weight:700}
 /* the two buttons: side by side when there is room, else one under the other, always the same width and flush with the box edges */
 .bid-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));grid-auto-rows:1fr;gap:6px}
 .bid-foot{grid-template-columns:1fr}
-.bid-tools .bid-edit{background:#fde3e3;border-color:#f3b4b4;color:#b3261e;font-weight:700}
-.bid-tools .bid-edit:hover{background:#fbd2d2;border-color:#ec9a9a}
-:root[data-theme="dark"] .bid-tools .bid-edit{background:#4a2227;border-color:#703238;color:#ffc9c9}
-:root[data-theme="dark"] .bid-tools .bid-edit:hover{background:#592a30;border-color:#86414a}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid-tools .bid-edit{background:#4a2227;border-color:#703238;color:#ffc9c9}:root:not([data-theme="light"]) .bid-tools .bid-edit:hover{background:#592a30;border-color:#86414a}}
+.bid-tools .bid-edit{background:#f9c4c4;border:1.5px solid #e0605a;color:#9b1710;font-weight:700}
+.bid-tools .bid-edit:hover{background:#f5b0b0;border-color:#d4473f}
+:root[data-theme="dark"] .bid-tools .bid-edit{background:#72292f;border-color:#b5535b;color:#ffdada}
+:root[data-theme="dark"] .bid-tools .bid-edit:hover{background:#823239;border-color:#cb6a72}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid-tools .bid-edit{background:#72292f;border-color:#b5535b;color:#ffdada}:root:not([data-theme="light"]) .bid-tools .bid-edit:hover{background:#823239;border-color:#cb6a72}}
 /* pastel: soft fill, a slightly deeper border and text of the same hue */
-.bid-tools .bid-move{background:#dbeafe;border-color:#b6d0f5;color:#1e4f9c;font-weight:700}
-.bid-tools .bid-move:hover{background:#c8dcfb;border-color:#9fc0f0}
-.bid-tools .bid-names{background:#ece4fa;border-color:#d2c4f0;color:#5a38a0;font-weight:700}
-.bid-tools .bid-names:hover{background:#e0d4f6;border-color:#c0aee9}
-:root[data-theme="dark"] .bid-tools .bid-move{background:#243a5c;border-color:#35527f;color:#bcd5fb}
-:root[data-theme="dark"] .bid-tools .bid-move:hover{background:#2c4670;border-color:#43639a}
-:root[data-theme="dark"] .bid-tools .bid-names{background:#35295a;border-color:#4d3f7b;color:#d8cdf6}
-:root[data-theme="dark"] .bid-tools .bid-names:hover{background:#40326b;border-color:#5d4d92}
+.bid-tools .bid-move{background:#bcd6fb;border:1.5px solid #5b94e6;color:#0d3b8c;font-weight:700}
+.bid-tools .bid-move:hover{background:#a9cbf9;border-color:#3f7fd9}
+.bid-tools .bid-names{background:#dccdf7;border:1.5px solid #9a79dc;color:#45238c;font-weight:700}
+.bid-tools .bid-names:hover{background:#cfbdf3;border-color:#8662d2}
+:root[data-theme="dark"] .bid-tools .bid-move{background:#2b4c80;border-color:#5b8ad0;color:#d6e6ff}
+:root[data-theme="dark"] .bid-tools .bid-move:hover{background:#345c9a;border-color:#74a0e6}
+:root[data-theme="dark"] .bid-tools .bid-names{background:#47357a;border-color:#8268c4;color:#e8defc}
+:root[data-theme="dark"] .bid-tools .bid-names:hover{background:#54418f;border-color:#9a82d8}
 @media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]) .bid-tools .bid-move{background:#243a5c;border-color:#35527f;color:#bcd5fb}
-  :root:not([data-theme="light"]) .bid-tools .bid-move:hover{background:#2c4670;border-color:#43639a}
-  :root:not([data-theme="light"]) .bid-tools .bid-names{background:#35295a;border-color:#4d3f7b;color:#d8cdf6}
-  :root:not([data-theme="light"]) .bid-tools .bid-names:hover{background:#40326b;border-color:#5d4d92}
+  :root:not([data-theme="light"]) .bid-tools .bid-move{background:#2b4c80;border-color:#5b8ad0;color:#d6e6ff}
+  :root:not([data-theme="light"]) .bid-tools .bid-move:hover{background:#345c9a;border-color:#74a0e6}
+  :root:not([data-theme="light"]) .bid-tools .bid-names{background:#47357a;border-color:#8268c4;color:#e8defc}
+  :root:not([data-theme="light"]) .bid-tools .bid-names:hover{background:#54418f;border-color:#9a82d8}
 }
 .bid-tools .btn{white-space:normal;min-width:0;max-width:100%;box-sizing:border-box;text-align:center;line-height:1.25;padding:6px 8px;overflow-wrap:anywhere} /* long labels wrap inside the button instead of running past the box edge */
 /* Full Name Buyer: a panel that is not a dialog, so it stays until its own ✕ is pressed and sits above everything on the page (also the lifted card). It keeps to the left part of the screen (the Makro windows open on the right). Drag the title to move it. */
