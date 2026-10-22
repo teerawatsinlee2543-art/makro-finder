@@ -432,6 +432,18 @@ table.nbs-tbl tr.stk-focus .nthumb{width:84px;height:84px}
 table.nbs-tbl tr.stk-focus .nname{font-size:17px;font-weight:800;line-height:1.3}
 table.nbs-tbl tr.stk-focus .nmeta{display:grid;grid-template-columns:1fr 1fr;gap:3px 14px}
 table.nbs-tbl tr.stk-focus .stk-one .btn{width:auto}
+table.nbs-tbl tr.stk-focus td[data-l="Buyer"]{order:1}
+table.nbs-tbl tr.stk-focus td[data-l="สถานะ"],table.nbs-tbl tr.stk-focus td[data-l="Remark"]{order:2}
+table.nbs-tbl tr.stk-focus td[data-l="บันทึกเมื่อ"]{order:3}
+table.nbs-tbl tr.stk-focus td[data-l="Division"] .chip,table.nbs-tbl td[data-l="Division"] .chip{font-size:20px;font-weight:800;line-height:1.2;padding:4px 18px}
+.tile.dv .chip{font-size:20px;font-weight:800;padding:5px 16px}
+.tile.dv .chip .dvl{font-size:13px;font-weight:700}
+@media (max-width:1180px){
+  table.nbs-tbl tr:not(.stk-focus){display:flex;flex-direction:column}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"]{order:1}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="สถานะ"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Remark"]{order:2}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]{order:3}
+}
 .stk-pair{flex:none;margin-left:auto;display:flex;flex-direction:column;gap:6px}
 .btn.stk{flex:none;background:#1f7a45;border-color:#1f7a45;color:#fff;font-weight:600;white-space:nowrap}.btn.stk:hover{background:#18633a;border-color:#18633a}
 .oosc-m{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
