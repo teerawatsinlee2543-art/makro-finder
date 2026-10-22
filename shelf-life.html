@@ -935,8 +935,8 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
 /* tabs on a computer: eleven tabs always in ONE row. A script (fitTabs) shrinks the tab text a little when the screen is narrow, so they fit whatever the font; the Julian chip sits at the right end */
 @media (min-width:701px){
   nav{gap:2px;padding:6px 14px;align-items:center;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
-  nav button{flex:none;padding:8px calc(10px*var(--tf,1));font-size:calc(14.5px*var(--tf,1));border-radius:9px}
-  .tabcnt{margin-left:4px;padding:0 5px;font-size:calc(12px*var(--tf,1));line-height:calc(18px*var(--tf,1));min-width:calc(18px*var(--tf,1))}
+  nav button{flex:none;padding:9px calc(11px*var(--tf,1));font-size:calc(17px*var(--tf,1));border-radius:9px}
+  .tabcnt{margin-left:5px;padding:0 6px;font-size:calc(13.5px*var(--tf,1));line-height:calc(20px*var(--tf,1));min-width:calc(20px*var(--tf,1))}
   /* thin dividers between the groups of tabs: today · reports · master data */
   nav button[data-tab=nbs],nav button[data-tab=prod]{margin-left:9px;position:relative}
   nav button[data-tab=nbs]::before,nav button[data-tab=prod]::before{content:'';position:absolute;left:-6px;top:24%;height:52%;width:1px;background:var(--line)}
@@ -6080,7 +6080,7 @@ function fitTabs(){
   const n=$('#tabs');if(!n)return;
   if(innerWidth<=700){n.style.removeProperty('--tf');return}
   let tf=1;n.style.setProperty('--tf','1');
-  for(let k=0;k<4;k++){const sw=n.scrollWidth,cw=n.clientWidth;if(sw<=cw+.5)break;tf=Math.max(.72,tf*(cw/sw)*.985);n.style.setProperty('--tf',tf.toFixed(3))}
+  for(let k=0;k<4;k++){const sw=n.scrollWidth,cw=n.clientWidth;if(sw<=cw+.5)break;tf=Math.max(.615,tf*(cw/sw)*.985);n.style.setProperty('--tf',tf.toFixed(3))}
 }
 try{let raf=0;const go=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(fitTabs)};
   window.addEventListener('resize',go);window.addEventListener('load',go);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(go);
