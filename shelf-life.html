@@ -283,12 +283,17 @@ table.ct-tbl thead th{background:#ffc85c;color:#2b1d00;border:0;text-transform:n
 table.ct-tbl thead th:first-child{border-radius:10px 0 0 10px}table.ct-tbl thead th:last-child{border-radius:0 10px 10px 0}
 table.ct-tbl td{padding:8px 6px;overflow-wrap:anywhere;font-size:13px}
 table.ct-tbl .cn{font-weight:700}
-.bid-block{display:grid;gap:6px;min-width:0}
-.bid-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-weight:700}
-.bid{color:#e30613;font-weight:800;font-size:1.15em;letter-spacing:.02em}
+.bid-block{display:grid;gap:8px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.bid-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.bid-lbl{font-size:12px;font-weight:700;color:var(--muted)}
+.bid{color:#e30613;font-weight:800;font-size:1.6em;line-height:1.1;letter-spacing:.02em}
 :root[data-theme="dark"] .bid{color:#ff4b57}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid{color:#ff4b57}}
-.bid-paste{margin-left:auto}
+.bid-src{font-size:12px}
+.bid-warn{padding:6px 10px;border-radius:8px;font-size:12.5px;line-height:1.4;font-weight:600;background:#fff4e5;border:1px solid #f5d59b;color:#8a4b00}
+:root[data-theme="dark"] .bid-warn{background:#3a2a12;border-color:#6b4a14;color:#ffcc80}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid-warn{background:#3a2a12;border-color:#6b4a14;color:#ffcc80}}
+.bid-acts{display:flex;flex-wrap:wrap;gap:6px}
 .bc-miss{display:flex;flex-direction:column;gap:2px}.bc-miss span{font-size:11.5px;color:var(--md2);font-weight:600}
 .bcard{display:flex;flex-direction:column;gap:2px;font-size:12.5px;line-height:1.35}
 .bc-uid{display:inline-block;align-self:flex-start;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 8px;font-weight:800;letter-spacing:.02em}
@@ -405,11 +410,27 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .stk-dim{position:fixed;inset:0;z-index:94;background:rgba(6,10,18,.74);transition:opacity .22s}
 .stk-ph{visibility:hidden}
 .oosc.stk-focus{position:fixed;left:12px;top:12px;width:min(36vw,460px);max-height:calc(100vh - 24px);overflow:auto;z-index:95;margin:0;box-shadow:0 18px 50px #000b;outline:3px solid #1f7a45;outline-offset:0}
-.stk-back{display:block;margin:0 0 8px auto;position:sticky;top:0;z-index:2}
-table.nbs-tbl tr.stk-focus{display:block;position:fixed;left:12px;top:12px;width:min(36vw,460px);max-height:calc(100vh - 24px);overflow:auto;z-index:95;margin:0;padding:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 50px #000b;outline:3px solid #1f7a45}
-table.nbs-tbl tr.stk-focus td{display:flex;gap:10px;width:auto;border:0;padding:4px 2px;white-space:normal;font-size:13px;overflow-wrap:anywhere;background:transparent}
-table.nbs-tbl tr.stk-focus td::before{content:attr(data-l);min-width:92px;max-width:40%;color:var(--muted);font-size:12px;font-weight:600}
-table.nbs-tbl tr.stk-focus td>*{flex:1;min-width:0;overflow-wrap:anywhere}
+.stk-back{display:block;margin:0 0 8px auto;position:sticky;top:0;z-index:2;background:var(--card)}
+table.nbs-tbl tr.stk-focus{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-content:start;position:fixed;left:12px;top:12px;width:min(36vw,460px);max-height:calc(100vh - 24px);overflow:auto;z-index:95;margin:0;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px #000b;outline:3px solid #1f7a45}
+table.nbs-tbl tr.stk-focus>.stk-back{grid-column:1/-1;justify-self:end;margin:0}
+table.nbs-tbl tr.stk-focus td{display:block;grid-column:span 2;width:auto;min-width:0;border:0;padding:8px 10px;white-space:normal;font-size:14px;font-weight:600;overflow-wrap:anywhere;background:var(--bg);border-radius:10px}
+table.nbs-tbl tr.stk-focus td::before{content:attr(data-l);display:block;min-width:0;max-width:none;margin:0 0 3px;color:var(--muted);font-size:11.5px;font-weight:700}
+table.nbs-tbl tr.stk-focus td>*{min-width:0}
+table.nbs-tbl tr.stk-focus td[data-l="ชื่อสินค้า"],table.nbs-tbl tr.stk-focus td[data-l="Aging Status"],table.nbs-tbl tr.stk-focus td[data-l="Buyer"],table.nbs-tbl tr.stk-focus td[data-l="บันทึกเมื่อ"]{grid-column:1/-1}
+table.nbs-tbl tr.stk-focus td[data-l="สถานะ"],table.nbs-tbl tr.stk-focus td[data-l="Remark"]{grid-column:span 3}
+table.nbs-tbl tr.stk-focus td[data-l="ชื่อสินค้า"]{background:transparent;padding:2px}
+table.nbs-tbl tr.stk-focus td[data-l="ชื่อสินค้า"]::before{display:none}
+table.nbs-tbl tr.stk-focus td[data-l="Buyer"]{background:transparent;padding:0}
+table.nbs-tbl tr.stk-focus td[data-l="Buyer"]::before{margin:0 0 3px 2px}
+table.nbs-tbl tr.stk-focus td[data-l="Stock"]{font-size:22px;font-weight:800;line-height:1.1}
+table.nbs-tbl tr.stk-focus td[data-l="Stock"] .stk-one{margin-top:6px}
+table.nbs-tbl tr.stk-focus td[data-l="บันทึกเมื่อ"]{background:transparent;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;padding:6px 2px 0;font-size:13px}
+table.nbs-tbl tr.stk-focus td[data-l="บันทึกเมื่อ"]::before{flex:0 0 100%;margin:0}
+table.nbs-tbl tr.stk-focus td[data-l="บันทึกเมื่อ"] .actbtns{margin:0;flex-direction:row;gap:6px}
+table.nbs-tbl tr.stk-focus .nhead{gap:12px;align-items:center}
+table.nbs-tbl tr.stk-focus .nthumb{width:84px;height:84px}
+table.nbs-tbl tr.stk-focus .nname{font-size:17px;font-weight:800;line-height:1.3}
+table.nbs-tbl tr.stk-focus .nmeta{display:grid;grid-template-columns:1fr 1fr;gap:3px 14px}
 table.nbs-tbl tr.stk-focus .stk-one .btn{width:auto}
 .stk-pair{flex:none;margin-left:auto;display:flex;flex-direction:column;gap:6px}
 .btn.stk{flex:none;background:#1f7a45;border-color:#1f7a45;color:#fff;font-weight:600;white-space:nowrap}.btn.stk:hover{background:#18633a;border-color:#18633a}
@@ -1859,11 +1880,12 @@ const ibuyUid=no=>{const x=ibuyOf(no);return x?x.uid:''};
 /* "Buyer ID : F1D" (red, bold) + the Buyer's details (Merchandise Mgr. · Area · Description · Assistant …), the same on every card / row.
    uid = the Buyer the app worked out; a Buyer ID typed from BIP replaces it. */
 function bidBlock(no,uid,note,warn){
-  const ib=ibuyOf(no),u=ib?ib.uid:String(uid||''),c=u?nbsContact(u):null;
-  const src=ib?`<div class="muted small">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</div>`:(note?`<div class="muted small bsrc">${esc(note)}</div>`:'');
+  const ib=ibuyOf(no),u=ib?ib.uid:String(uid||''),c=u?nbsContact(u):null,k=esc(String(no));
+  const src=ib?`<span class="muted bid-src">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</span>`:(note?`<span class="muted bid-src bsrc">${esc(note)}</span>`:'');
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
-  const detail=u?(c?buyerCardHtml(c):`<div class="bc-miss"><span>ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial</span></div>`):'';
-  return`<div class="bid-block" data-no="${esc(String(no))}" data-uid="${esc(String(uid||''))}"><div class="bid-line">Buyer ID : ${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}<button type="button" class="btn sm bid-paste" onclick="bidPaste('${esc(String(no))}')" title="ในหน้า BIP ดับเบิลคลิกค่า Buyer ID → Ctrl+C → กดปุ่มนี้">วางจากคลิปบอร์ด</button><button type="button" class="btn sm bid-edit" onclick="bidEdit('${esc(String(no))}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>${src}${detail}${wr}</div>`;
+  const detail=u?(c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial — เพิ่มชื่อ Buyer นี้ที่แท็บ Buyer / Commercial เพื่อให้เห็นรายละเอียดผู้ดูแล</div>`):'';
+  const acts=`<div class="bid-acts"><button type="button" class="btn sm bid-paste" onclick="bidPaste('${k}')" title="ในหน้า BIP ดับเบิลคลิกค่า Buyer ID → Ctrl+C → กดปุ่มนี้">วางจากคลิปบอร์ด</button><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
+  return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}</div>${detail}${wr}${acts}</div>`;
 }
 /* AUTO: a small script that runs inside the BIP window (the Tampermonkey script bip-buyer.user.js, or the bookmarklet from the help box) reads "Buyer ID" off the report
    and posts it back to this page, which opened that window. This page cannot read BIP itself (plain http on a private network), but the BIP page can talk back to its opener. */
