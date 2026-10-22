@@ -786,6 +786,13 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   table.resp.ct-tbl tr.grp td{display:block;padding:8px 10px;font-weight:800;text-align:left}
   table.resp.ct-tbl tr.grp td::before{display:none}
 }
+/* phone: the pinned FF / DF / NF tiles are all laid out the same way (the name on top, the number under it, both centred), so they are equal whatever the number */
+@media (max-width:700px){
+  :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile{flex-wrap:wrap!important;justify-content:center;align-content:center;align-items:center;text-align:center;gap:0 6px!important;padding:3px 6px!important;min-height:54px}
+  :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile .chip{order:1}
+  :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile b{order:3;width:100%;text-align:center;line-height:1.15;font-size:clamp(11px,3.8vw,19px)!important;white-space:nowrap}
+}
+
 /* ===== data page (computer): two boxes side by side, one long row per item ===== */
 @media (min-width:1000px){
   #t-data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
