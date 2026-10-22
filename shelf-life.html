@@ -436,7 +436,9 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .oos-banner.late{border-color:#c62828;background:var(--redbox);color:var(--redbox-ink)}
 .oos-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:12px;align-items:start}
 .oosc{display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px;border:1px solid var(--line);border-left:6px solid var(--seg-ok);border-radius:12px;background:var(--card)}
-.oosc.lv-warn{border-left-color:var(--seg-md2);background:var(--soonbg)}
+.oosc.lv-warn{border-left-color:var(--seg-md2);background:#fffbe3} /* a pale yellow (it was a stronger orange-cream) */
+:root[data-theme="dark"] .oosc.lv-warn{background:var(--soonbg)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .oosc.lv-warn{background:var(--soonbg)}}
 .oosc.lv-late{border-left-color:#c62828;background:var(--redbox)}
 .oosc.lv-done{border-left-color:var(--line);opacity:.78}
 .oosc-h{display:flex;gap:10px;align-items:flex-start}
