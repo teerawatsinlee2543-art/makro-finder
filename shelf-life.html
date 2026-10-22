@@ -3535,8 +3535,10 @@ function stkWin(url,i){
     const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||window.innerWidth<700;
     let w;
     if(phone)w=window.open(url,'mkStock'+i);
-    else{const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,ww=Math.min(1000,Math.round(W*.62));
-      w=window.open(url,'mkStock'+i,`popup=yes,width=${ww},height=${H},left=${L+W-ww},top=${T}`)}
+    else{const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,ww=Math.min(1000,Math.round(W*.62)),fresh=!(stkOpened[i]&&stkOpened[i].closed!==true);
+      /* width / height in the features are the INSIDE of the window (the title bar and address bar come on top and would push the bottom off the screen): ask for less, then set the real outer size */
+      w=window.open(url,'mkStock'+i,`popup=yes,width=${ww},height=${Math.max(400,H-100)},left=${L+W-ww},top=${T}`);
+      if(w&&fresh){try{w.moveTo(L+W-ww,T);w.resizeTo(ww,H)}catch(e){}} /* a window that is already open keeps the size the person gave it */}
     if(w)stkOpened[i]=w;
     return w;
   }catch(e){return null}
