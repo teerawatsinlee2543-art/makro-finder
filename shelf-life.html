@@ -793,6 +793,18 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile b{order:3;width:100%;text-align:center;line-height:1.15;font-size:clamp(11px,3.8vw,19px)!important;white-space:nowrap}
 }
 
+/* Julian page on a phone (also a phone shown as "desktop site", which is wide but touch): one box under the other, the shortcuts in an even grid */
+@media (max-width:700px),(pointer:coarse){
+  #t-jul>.grid2{grid-template-columns:minmax(0,1fr)!important}
+}
+@media (max-width:700px){
+  .jqk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .jqk>span{grid-column:1/-1}
+  .jqk .btn{padding:10px 4px;font-size:14px;text-align:center}
+  #jRefGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #jC,#jD,#jC2{height:50px}
+}
+
 /* ===== data page (computer): two boxes side by side, one long row per item ===== */
 @media (min-width:1000px){
   #t-data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
