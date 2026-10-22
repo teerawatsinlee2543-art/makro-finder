@@ -666,8 +666,9 @@ select,input,textarea{max-width:100%}
 @media (max-width:520px){.jconv{grid-template-columns:1fr}}
 .jbox{min-width:0;container-type:inline-size}
 /* the result "296 DDD · 26296 YYDDD" stays on ONE line: the numbers shrink with the width of their box instead of the last label dropping to a second line */
-#jDout{white-space:nowrap}
-#jDout b{font-size:clamp(20px,8.3cqw,32px)}
+#jDout{display:flex;justify-content:space-between;align-items:baseline;gap:8px;white-space:nowrap}
+.jo{display:inline-flex;align-items:baseline;gap:6px}
+#jDout b{font-size:clamp(20px,calc((100cqw - 120px) / 4.6),40px)} /* the two numbers spread over the whole width of their box (DDD at the left edge, YYDDD at the right edge) */
 .jqk{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px}
 .jqk>span{flex:0 0 100%}
 .jref{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
@@ -4919,7 +4920,7 @@ $('#jQk').onclick=e=>{const b=e.target.closest('button[data-d]');if(!b)return;co
 $('#jRef').open=window.innerWidth>700;
 function julTab(){
   julRef();
-  const v=$('#jD').value;$('#jDout').innerHTML=v?(()=>{const j=jul(fromIso(v));return`<b>${j.ddd}</b> <span class="muted small">DDD</span> · <b>${j.y2}</b> <span class="muted small">YYDDD</span>`})():'';
+  const v=$('#jD').value;$('#jDout').innerHTML=v?(()=>{const j=jul(fromIso(v));return`<span class="jo"><b>${j.ddd}</b><span class="muted small">DDD</span></span><span class="jo"><b>${j.y2}</b><span class="muted small">YYDDD</span></span>`})():'';
   const r=parseJulian($('#jC').value);$('#jCout').innerHTML=!r?'':r.error?`<span class="err-text">${r.error}</span>`:`<b>${fmt(r.date)}</b> <span class="muted small">ถ้าเป็นวันรับสินค้า วันนี้คือวางขายวันที่ ${diffD(today(),r.date)+1}</span>`;
   julScan();
 }
