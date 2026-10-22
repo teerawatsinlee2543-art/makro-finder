@@ -365,7 +365,7 @@ table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-in
 .nmeta{margin:2px 0 0;display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.4}
 .nmeta>div{display:flex;gap:5px;align-items:baseline}
 .nmeta dt{color:var(--muted);white-space:nowrap}
-.nmeta dd{margin:0;flex:1;min-width:0;overflow-wrap:normal;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.nmeta dd{margin:0;flex:1;min-width:0;overflow-wrap:anywhere;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 .nmeta dd b{font-weight:800}
 .ndept{font-size:11.5px;font-weight:700;letter-spacing:.02em;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 7px;line-height:1.5}
 .dcard{padding:18px}
@@ -546,12 +546,13 @@ table.nbs-tbl tr.stk-focus td[data-l="Division"] .chip,table.nbs-tbl td[data-l="
 @media (min-width:1181px){
   main:has(#t-nbs:not([hidden])){max-width:1560px}
   table.nbs-tbl{table-layout:fixed}
-  table.nbs-tbl th{white-space:normal;text-transform:none;letter-spacing:0;font-size:13px;line-height:1.25;vertical-align:bottom;padding:9px 6px}
+  table.nbs-tbl th{white-space:normal;text-transform:none;letter-spacing:0;font-size:13px;line-height:1.25;vertical-align:bottom;padding:9px 4px}
   table.nbs-tbl td{padding:10px 6px;overflow-wrap:anywhere}
   table.nbs-tbl td.num{white-space:normal}
   table.nbs-tbl .chip{white-space:normal;padding:2px 8px;font-size:12.5px;line-height:1.35}
-  table.nbs-tbl td.nsave{font-size:12.5px;white-space:nowrap}
-  table.nbs-tbl .agnext .nw{white-space:nowrap}
+  table.nbs-tbl td.nsave{font-size:12.5px;white-space:normal;overflow-wrap:anywhere}
+  table.nbs-tbl .agnext .nw{white-space:normal;overflow-wrap:anywhere} /* wraps inside a narrow Aging column instead of running out of it */
+  table.nbs-tbl .agnext .chip{white-space:nowrap}
   table.nbs-tbl .actbtns .btn{padding:4px 6px}
   table.nbs-tbl .stk-one .btn{width:100%;padding:5px 3px}
 }
@@ -590,6 +591,8 @@ select,input,textarea{max-width:100%}
   table.nbs-tbl td>*,table.ct-tbl td>*{flex:1;min-width:0;overflow-wrap:anywhere}
   table.ct-tbl tr.grp{grid-column:1/-1}
   table.nbs-tbl td.nsave .actbtns{margin-top:0}
+  table.nbs-tbl td.nsave{flex-wrap:wrap} /* on a narrow card the Edit / Delete buttons go under the date instead of running out of the card */
+  table.nbs-tbl td.nsave .actbtns{flex:1 1 100%}
 }
 @media (max-width:820px){
   body{overflow-x:hidden}
