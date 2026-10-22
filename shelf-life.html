@@ -5973,10 +5973,10 @@ async function runImport(){
     for(const r of recs){
       const it=ready?MF.items.get(r.itemNo):null,old=ex.get(nbsKey(r)),alt=old?null:mvBy.get(nbsKey(r));
       if(alt){ /* wrong group before: recreate under the right group, keeping the team's status/remark/buyer */
-        const keep=body(alt);
+        const keep=body(alt),am=f=>!!(alt.manual&&alt.manual.includes(f)); /* fields typed over by hand keep their value when the row moves group */
         await rmItem('nbs',alt);
-        await putItem('nbs',{...keep,_id:nbsId(r),division:r.division,desc:r.desc||it?.desc||alt.desc||'',barcode:r.barcode||it?.barcode||alt.barcode||'',loc:r.loc||alt.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),
-          importFile:impState.file,importRun:nowIso,lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',agingType:r.agingType||alt.agingType||'',dept:r.dept||alt.dept||'',artGrp:r.artGrp||alt.artGrp||'',artSub:r.artGrp?!!r.artSub:!!alt.artSub,stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
+        await putItem('nbs',{...keep,_id:nbsId(r),division:r.division,desc:am('desc')?alt.desc:(r.desc||it?.desc||alt.desc||''),barcode:am('barcode')?alt.barcode:(r.barcode||it?.barcode||alt.barcode||''),loc:r.loc||alt.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),
+          importFile:impState.file,importRun:nowIso,lastSale:r.lastSale||alt.lastSale||'',lastSaleDerived:r.lastSale?r.lastSaleDerived:!!alt.lastSaleDerived,lastRecv:r.lastRecv||alt.lastRecv||'',aging:r.aging||alt.aging||'',agingType:r.agingType||alt.agingType||'',dept:am('dept')?alt.dept:(r.dept||alt.dept||''),artGrp:am('artGrp')?alt.artGrp:(r.artGrp||alt.artGrp||''),artSub:am('artGrp')?!!alt.artSub:(r.artGrp?!!r.artSub:!!alt.artSub),stock:r.stock!==''?r.stock:alt.stock??'',buyerUid:alt.buyerUid||r.buyerUid||'',lastSeenAt:nowIso,updatedAt:nowIso,autoNote:'ย้ายกลุ่ม '+alt.division+' → '+r.division+' ตามคอลัมน์ Division'});
         continue}
       const man=f=>!!(old&&old.manual&&old.manual.includes(f)); /* typed over by hand in the edit window: the file never replaces it */
       const desc=man('desc')?old.desc:(r.desc||it?.desc||old?.desc||''),barcode=man('barcode')?old.barcode:(r.barcode||it?.barcode||old?.barcode||''),loc=r.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):'')||old?.loc||'';
