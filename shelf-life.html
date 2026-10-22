@@ -290,7 +290,8 @@ table.ct-tbl .cn{font-weight:700}
 :root[data-theme="dark"] .bid{color:#ff4b57}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid{color:#ff4b57}}
 .bid-src{font-size:12px}
-.bid-names{margin-left:auto;align-self:center;white-space:nowrap}
+.bid-tools{margin-left:auto;align-self:center;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.bid-tools .btn{white-space:nowrap}
 .bn-row{display:grid;grid-template-columns:1fr auto;gap:0 10px;padding:8px 0;border-bottom:1px solid var(--line)}
 .bn-row:last-child{border-bottom:0}
 .bn-row>span{grid-column:1/-1;font-size:11.5px;font-weight:700;color:var(--muted)}
@@ -1915,7 +1916,7 @@ function bidBlock(no,uid,note,warn){
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
   const detail=u?(c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial — เพิ่มชื่อ Buyer นี้ที่แท็บ Buyer / Commercial เพื่อให้เห็นรายละเอียดผู้ดูแล</div>`):'';
   const acts=`<div class="bid-acts"><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
-  return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}${c?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</div>${detail}${wr}${acts}</div>`;
+  return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}<span class="bid-tools"><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>${c?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</span></div>${detail}${wr}${acts}</div>`;
 }
 /* "Full Name Buyer": everybody listed for this Buyer (from the Buyer / Commercial tab) with full name + phone, in a small box */
 function bidPeople(c){
@@ -3502,7 +3503,18 @@ function oosCard(r,ctx){
    Every card has two buttons, Item lookup and Item Enquiry (BIP, Item No already filled in). Neither page can be framed in this page (the Makro web refuses cookies when framed, and BIP is plain http on a private network), so a button opens the REAL page in its own window on the right side of the screen (a phone opens a normal tab); the same window is reused. The Item No is copied for pasting.
    Set the stock-page links below when they change. */
 const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','http://bip-app.siammakro.co.th:9714/xmlpserver/Guest/Reports/ItemEnquiry/ItemEnquiryReport.xdo?STORE_ID=42&_xpt=&_xl=en_US&STOREID=42&_xpf=&Store_Timezone=Asia%2FBangkok&ITEMID={item}&_xf=html'];
-const STOCK_LABELS=['Item lookup','Item Enquiry (BIP)'];
+/* Daily_StockMovement_Store_14_Days (BIP report on the RA server): opened by the "Stock Movement 14 วัน" button of the Buyer ID block, in its own popup window like the two above, with this Item No and store 42 passed as the report's parameters so it runs by itself.
+   If the report asks for the item again, its parameter names differ: run it once by hand, copy the address from the window and replace the {item} part here. */
+STOCK_URLS[2]='http://raadw-app.siammakro.co.th:7777/xmlpserver/Makro_RA_Report/StoreOperationManagement/DailyStockMovementStore14Days/Daily_StockMovement_Store_14_Days.xdo?STORE_ID=42&STOREID=42&ITEMID={item}&ITEM_ID={item}&_xpt=&_xl=en_US&_xpf=&_xf=html';
+const STOCK_LABELS=['Item lookup','Item Enquiry (BIP)','Stock Movement 14 วัน'];
+function stkMove(no,btn){
+  no=String(no||'');const url=STOCK_URLS[2].replace(/\{item\}/g,encodeURIComponent(no));
+  try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
+  const w=stkWin(url,2);
+  if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[2]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
+    const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr'));if(card)stkFocus(card)}
+  else oosStockPick(no,[url],[STOCK_LABELS[2]]);
+}
 let stkOpened={};
 function stkWin(url,i){
   try{
