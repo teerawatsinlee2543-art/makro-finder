@@ -3512,7 +3512,7 @@ function stkMove(no,btn){
   try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   const w=stkWin(url,2);
   if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[2]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
-    const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr'));if(card)stkFocus(card)}
+    const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr'));if(card)stkFocus(card,`[onclick^="stkMove('${no.replace(/["'\\]/g,'')}'"]`)}
   else oosStockPick(no,[url],[STOCK_LABELS[2]]);
 }
 let stkOpened={};
@@ -3528,10 +3528,14 @@ function stkWin(url,i){
   }catch(e){return null}
 }
 /* the card whose Stock button was tapped is lifted to the left side of the screen, alone (the rest is dimmed), while the Makro window is open on the right.
-   It flies back to its place when that window is closed, with the "ย่อกลับ" button, Esc, a tap on the dimmed area or a tab. Not on phones / narrow screens (no room beside the window). */
+   It stays there until the "✕ ย่อกลับ" button is pressed (closing the Makro window, Esc or a tap on the dimmed area no longer send it back; only a tab change does, as the card's tab is hidden then).
+   When the data is drawn again (a team member's change arrives) the same card is lifted again at once, found by `sel` = the selector of the button that was pressed. Not on phones / narrow screens (no room beside the window). */
 let stkFoc=null;
 const stkReduce=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
-function stkFocus(card){
+function stkRefocus(sel){
+  const b=[...document.querySelectorAll(sel)].find(x=>x.offsetParent!==null),card=b&&(b.closest('.oosc')||b.closest('table.nbs-tbl tr'));
+  if(card)stkFocus(card,sel,true)}
+function stkFocus(card,sel,quiet){
   if(window.innerWidth<900||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return;
   if(stkFoc){if(stkFoc.card===card)return;stkUnfocus(true)}
   const first=card.getBoundingClientRect();
@@ -3543,16 +3547,14 @@ function stkFocus(card){
   const back=document.createElement('button');back.type='button';back.className='btn sm stk-back';back.textContent='✕ ย่อกลับ';card.prepend(back);
   card.classList.add('stk-focus');
   const last=card.getBoundingClientRect();
-  if(!stkReduce())card.animate([{transformOrigin:'0 0',transform:`translate(${first.left-last.left}px,${first.top-last.top}px) scale(${first.width/last.width},${first.height/last.height})`},{transformOrigin:'0 0',transform:'none'}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'});
-  const key=e=>{if(e.key==='Escape')stkUnfocus()};
-  /* the Makro window was closed (or the card was re-drawn): go back */
-  const timer=setInterval(()=>{if(!card.isConnected||!Object.values(stkOpened).some(w=>w&&w.closed!==true))stkUnfocus()},800);
-  dim.onclick=back.onclick=()=>stkUnfocus();
-  document.addEventListener('keydown',key);
-  stkFoc={card,ph,dim,back,key,timer};
+  if(!quiet&&!stkReduce())card.animate([{transformOrigin:'0 0',transform:`translate(${first.left-last.left}px,${first.top-last.top}px) scale(${first.width/last.width},${first.height/last.height})`},{transformOrigin:'0 0',transform:'none'}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'});
+  /* the card was drawn again by something else (not through renderAll): lift the fresh copy; go back only when it is gone */
+  const timer=setInterval(()=>{if(!card.isConnected){const s=stkFoc&&stkFoc.sel;stkUnfocus(true);if(s)stkRefocus(s)}},800);
+  back.onclick=()=>stkUnfocus();
+  stkFoc={card,ph,dim,back,timer,sel};
 }
 function stkUnfocus(instant){
-  const f=stkFoc;if(!f)return;stkFoc=null;clearInterval(f.timer);document.removeEventListener('keydown',f.key);
+  const f=stkFoc;if(!f)return;stkFoc=null;clearInterval(f.timer);
   const done=()=>{f.card.classList.remove('stk-focus');f.back.remove();f.ph.remove();f.dim.remove()};
   if(instant||stkReduce()||!f.card.isConnected||!f.ph.isConnected){done();return}
   const a=f.card.getBoundingClientRect(),b=f.ph.getBoundingClientRect();
@@ -3574,7 +3576,7 @@ function oosStock(id,which,btn){
   try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   const w=stkWin(url,i);
   if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[i]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
-    const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr'));if(card)stkFocus(card)}
+    const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr'));if(card)stkFocus(card,`[onclick^="oosStock('${String(id).replace(/["'\\]/g,'')}',${i}"]`)}
   else oosStockPick(no,[url],[STOCK_LABELS[i]]); /* the browser blocked the window: open it from the list */
 }
 function renderOos(){
@@ -5869,7 +5871,11 @@ drop.addEventListener('drop',e=>{const f=e.dataTransfer?.files?.[0];if(f)readImp
 $('#dlgImp').addEventListener('dragover',e=>e.preventDefault());
 $('#dlgImp').addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer?.files?.[0];if(f)readImportFile(f)});
 /* ---------- boot ---------- */
+/* a lifted card (see stkFocus) survives a redraw: put it back for the draw, lift the same card again afterwards */
 function renderAll(){
+  const sf=stkFoc&&stkFoc.sel;if(sf)stkUnfocus(true);
+  try{renderAll0()}finally{if(sf)stkRefocus(sf)}}
+function renderAll0(){
   BBI=null; /* the item -> Buyer table is rebuilt from the latest OOS+ records */
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent="YYDDD "+jul(t).y2;$("#jmDate").textContent=$("#todayTxt").textContent;
