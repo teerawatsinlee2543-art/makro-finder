@@ -3551,10 +3551,14 @@ function stkFocus(card,sel,quiet){
   /* the card was drawn again by something else (not through renderAll): lift the fresh copy; go back only when it is gone */
   const timer=setInterval(()=>{if(!card.isConnected){const s=stkFoc&&stkFoc.sel;stkUnfocus(true);if(s)stkRefocus(s)}},800);
   back.onclick=()=>stkUnfocus();
-  stkFoc={card,ph,dim,back,timer,sel};
+  /* a click on this page brings this page's window to the front and hides the Makro windows behind it: after every click the open Makro windows are raised again (a browser has no "always on top" for a window).
+     Only after the click is finished (pointerup), never on focus: raising a window in the middle of a click would swallow the click. */
+  const raise=e=>{if(e&&e.target&&e.target.closest&&e.target.closest('.stk-back'))return;Object.values(stkOpened).forEach(w=>{try{if(w&&w.closed!==true)w.focus()}catch(x){}})};
+  document.addEventListener('pointerup',raise,true);
+  stkFoc={card,ph,dim,back,timer,sel,raise};
 }
 function stkUnfocus(instant){
-  const f=stkFoc;if(!f)return;stkFoc=null;clearInterval(f.timer);
+  const f=stkFoc;if(!f)return;stkFoc=null;clearInterval(f.timer);document.removeEventListener('pointerup',f.raise,true);
   const done=()=>{f.card.classList.remove('stk-focus');f.back.remove();f.ph.remove();f.dim.remove()};
   if(instant||stkReduce()||!f.card.isConnected||!f.ph.isConnected){done();return}
   const a=f.card.getBoundingClientRect(),b=f.ph.getBoundingClientRect();
