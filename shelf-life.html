@@ -761,6 +761,9 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   .search-row .sr-t{grid-column:1/-1;font-size:13px;line-height:1.35}
   .search-row .scan-btn{grid-column:2;font-size:13px;gap:5px;padding-left:10px;padding-right:10px}
   .search-row .grow input{grid-column:1}
+  /* Negative Stock / High Stock FF · DF · NF tiles: the number and its unit stay on one line (a big number was split in two) */
+  #negDivTiles .tile b,#dmsDivTiles .tile b,:is(#negDivTiles,#dmsDivTiles).stuck .tile b{font-size:clamp(11px,3.7vw,17px)!important;white-space:nowrap}
+  :is(#negDivTiles,#dmsDivTiles).stuck .tile{flex-wrap:wrap!important;row-gap:0!important} /* a very long number drops under the chip instead of being cut */
   /* the name in the red pill may wrap instead of being cut with "…" */
   .brandbox h1{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15;font-size:15px}
   /* Buyer ID block: two buttons per line */
