@@ -422,6 +422,7 @@ table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 @media (max-width:1500px){.fbtn svg+svg{display:none}}
 .agnext{display:flex;flex-direction:column;gap:1px;margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.4}
 .agnext b{font-variant-numeric:tabular-nums}
+.ag-l{font-size:11px;font-weight:700;color:var(--muted);margin:0 0 2px;letter-spacing:.02em}
 /* a table cell holding a chip + notes goes in one block, so the card layout (td>* {flex:1}) can't stretch the chip into a tall oval or clip its text */
 .cbox{min-width:0}
 .cbox>.chip,.cbox>.chip+*{max-width:100%}
@@ -5018,8 +5019,9 @@ function nbsAgingText(r){
   const a=agingInfo(r),t=String(r.aging||'').trim();
   if(a.level==null)return t?`<span class="chip s-err">${esc(t)}</span><div class="muted small">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>`:'<span class="muted">-</span>';
   const [lb,k]=AGING_LV[a.level],pv=AGING_PROV[a.level],fm=/^\s*([1-5])\s*-/.exec(t),fnote=fm&&+fm[1]!==a.level?`<div class="muted small" title="สถานะในไฟล์ที่นำเข้า (นับถึงวันที่ออกรายงาน)">ไฟล์: ${esc(t)}</div>`:'';
-  return`<span class="chip s-${k}">${lb}</span>${pv?`<div class="small" style="margin-top:2px"><b>Provision ${pv}%</b></div>`:''}<div class="muted small">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`
-    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน"><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> → <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">ถึงวันที่ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="muted">ถึงสถานะสูงสุดแล้ว</span></div>')+fnote;
+  /* plain Thai: where the item is now, how old it is, and what comes next and when */
+  return`<div class="ag-l">สถานะตอนนี้</div><span class="chip s-${k}">${lb}</span>${pv?`<div class="small" style="margin-top:2px" title="สัดส่วนที่ต้องตั้งสำรองสำหรับสถานะนี้"><b>ตั้งสำรอง (Provision) ${pv}%</b></div>`:''}<div class="muted small" title="นับอายุตามกลุ่ม ${esc(a.name)}">อายุ <b>${a.age.toLocaleString()} วัน</b> · เกณฑ์กลุ่ม ${esc(a.name)}</div>`
+    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน จะเปลี่ยนสถานะ"><span class="ag-l">สถานะถัดไป</span><span class="nw">อีก <b>${a.left.toLocaleString()} วัน</b> จะเป็น <span class="chip s-${a.next[1]} mini">${a.next[0]}</span></span><span class="muted nw">ตรงกับวันที่ ${fmt(addD(today(),a.left))}</span></div>`:'<div class="agnext"><span class="ag-l">สถานะถัดไป</span><span class="muted">ไม่มีแล้ว — อยู่สถานะสูงสุดแล้ว</span></div>')+fnote;
 }
 /* Buyer shown for an Item NBS row: its own Buyer; otherwise the Buyer the same Item No has on the OOS+ page (buyer_uid) or in the ItemList_Layout loaded on High Stock to DMS / Negative Stock (Buyer column) — so every page shows the same Buyer for the same item. Nothing is written: change the other page's data and this follows. */
 var NBSB=null;
