@@ -417,13 +417,14 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .stk-dim{position:fixed;inset:0;z-index:94;background:rgba(6,10,18,.74);transition:opacity .22s}
 .stk-ph{visibility:hidden}
 .oosc.stk-focus{position:fixed;left:12px;top:12px;width:min(36vw,460px);max-height:calc(100vh - 24px);overflow:auto;z-index:95;margin:0;box-shadow:0 18px 50px #000b;outline:3px solid #1f7a45;outline-offset:0}
-/* the close button sits in a bar as wide as the card that stays at the top while the card scrolls, so nothing shows beside or above the button */
-.stk-bar{position:sticky;top:0;z-index:5;display:flex;justify-content:flex-end;margin:-12px -12px 0;padding:12px 12px 8px;background:inherit;border-radius:12px 12px 0 0}
+/* only the red close button is seen: it floats at the top right of the card while the card scrolls (the bar around it has no height and no background, it just keeps a free line above the content when the card is at the top) */
+.stk-bar{position:sticky;top:-4px;z-index:5;display:flex;align-items:flex-start;justify-content:flex-end;height:0;margin:0 0 38px;padding:0;background:none;pointer-events:none;overflow:visible}
+.stk-bar .stk-back{pointer-events:auto;flex:none;box-shadow:0 3px 10px #0006}
 .stk-back{display:block;margin:0}
 .stk-bar .stk-back{background:#e5484d;border-color:#e5484d;color:#fff;font-weight:700}
 .stk-bar .stk-back:hover{background:#d93a3f;border-color:#d93a3f}
 table.nbs-tbl tr.stk-focus{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-content:start;position:fixed;left:12px;top:12px;width:min(36vw,460px);max-height:calc(100vh - 24px);overflow:auto;z-index:95;margin:0;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px #000b;outline:3px solid #1f7a45}
-table.nbs-tbl tr.stk-focus>.stk-bar{grid-column:1/-1;border-radius:13px 13px 0 0}
+table.nbs-tbl tr.stk-focus>.stk-bar{grid-column:1/-1}
 table.nbs-tbl tr.stk-focus td{display:block;grid-column:span 2;width:auto;min-width:0;border:0;padding:8px 10px;white-space:normal;font-size:14px;font-weight:600;overflow-wrap:anywhere;background:var(--bg);border-radius:10px}
 table.nbs-tbl tr.stk-focus td::before{content:attr(data-l);display:block;min-width:0;max-width:none;margin:0 0 3px;color:var(--muted);font-size:11.5px;font-weight:700}
 table.nbs-tbl tr.stk-focus td>*{min-width:0}
