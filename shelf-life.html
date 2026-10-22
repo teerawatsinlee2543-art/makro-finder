@@ -292,6 +292,10 @@ table.ct-tbl .cn{font-weight:700}
 .bid-src{font-size:12px}
 /* the two buttons: side by side when there is room, else one under the other, always the same width and flush with the box edges */
 .bid-tools{flex:1 1 240px;align-self:center;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:6px}
+.bid-tools .bid-move{background:#1d6fd6;border-color:#1d6fd6;color:#fff;font-weight:700}
+.bid-tools .bid-move:hover{background:#1858ac;border-color:#1858ac}
+.bid-tools .bid-names{background:#7c4dcc;border-color:#7c4dcc;color:#fff;font-weight:700}
+.bid-tools .bid-names:hover{background:#653bb0;border-color:#653bb0}
 .bid-tools .btn{white-space:normal;min-width:0;max-width:100%;box-sizing:border-box;text-align:center;line-height:1.25;padding:6px 8px;overflow-wrap:anywhere} /* long labels wrap inside the button instead of running past the box edge */
 /* Full Name Buyer: a panel that is not a dialog, so it stays until its own ✕ is pressed and sits above everything on the page (also the lifted card). It keeps to the left part of the screen (the Makro windows open on the right). Drag the title to move it. */
 #bnPanel{position:fixed;left:12px;top:12px;z-index:200;width:min(36vw,460px);min-width:min(320px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;box-sizing:border-box;padding:12px 16px 8px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px #000b;outline:3px solid #1f7a45}
