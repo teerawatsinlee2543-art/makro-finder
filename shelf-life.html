@@ -501,11 +501,21 @@ table.nbs-tbl tr.stk-focus td[data-l="Division"] .chip,table.nbs-tbl td[data-l="
 .oc-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
 .oc-b{display:block;height:12px;border-radius:6px;background:color-mix(in srgb,var(--muted) 18%,transparent);overflow:hidden}
 .oc-b i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,color-mix(in srgb,var(--c,#7a4fd6) 50%,#fff),var(--c,#7a4fd6))} /* rank colour: top = red, then orange, down to yellow */
-.oc-v{font-size:12.5px;white-space:nowrap;min-width:92px;text-align:right}
+.oc-v{font-size:12.5px;white-space:nowrap;text-align:right}
+/* the ranking rows share the same columns (name | bar | amount | "· quantity"), so the numbers line up under each other */
+.oc-list{display:grid;grid-template-columns:minmax(110px,32%) minmax(60px,1fr) max-content max-content;column-gap:10px;row-gap:2px}
+.oc-list>.oc-r{display:grid;grid-template-columns:subgrid;grid-column:1/-1;gap:0 10px}
+.oc-list .oc-v{display:contents}
+.oc-a{text-align:right;font-variant-numeric:tabular-nums}
+.oc-s{text-align:left;color:var(--muted);font-variant-numeric:tabular-nums}
 .oc-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .oc-back{font:inherit;font-weight:700;padding:5px 12px;border:1px solid #7a4fd6;border-radius:8px;background:#fff;color:#7a4fd6;cursor:pointer}
 .oc-back:hover{background:#7a4fd6;color:#fff}
-@media (max-width:560px){.oc-r{grid-template-columns:1fr auto;grid-template-areas:"n v" "b b"}.oc-n{grid-area:n}.oc-v{grid-area:v}.oc-b{grid-area:b}}
+@media (max-width:560px){ /* phone: name and numbers on the first line, the bar under them; the numbers still line up in columns */
+  .oc-list{grid-template-columns:minmax(0,1fr) max-content max-content;column-gap:6px}
+  .oc-list>.oc-r{grid-template-areas:none;gap:2px 6px}
+  .oc-list .oc-n{grid-area:1/1/2/2}.oc-list .oc-a{grid-area:1/2/2/3}.oc-list .oc-s{grid-area:1/3/2/4}.oc-list .oc-b{grid-area:2/1/3/4}
+}
 .oos-dchips .btn.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .oosc-note{padding:6px 8px;border:1px dashed var(--line);border-radius:8px;background:var(--bg);font-size:13px;overflow-wrap:anywhere}
 .oosc-photo{width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
@@ -3509,8 +3519,8 @@ function oosChartHtml(rows){
   const ranked=withF.map(r=>({r,t:oosNum(r[tk])||0,d:oosNum(r[dk])||0})).filter(x=>x.t>0).sort((a,b)=>b.t-a.t||b.d-a.d||(oosNum(b.r.freqAll)||0)-(oosNum(a.r.freqAll)||0)).slice(0,10);
   const mx=ranked.length?ranked[0].t:1,rep=withF.filter(r=>(oosNum(r[tk])||0)>=2).length;
   const seg=OOS_PERIODS.map(([k,l])=>`<button type="button" class="${oosFreqP===k?'on':''}" data-p="${k}">${l}</button>`).join('');
-  const bars=ranked.length?ranked.map(({r,t,d},ix)=>`<button type="button" class="oc-r" data-no="${esc(r.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(r.desc||r.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(t/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v"><b>${t.toLocaleString()}</b> ครั้ง · ${d.toLocaleString()} วัน</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ขาดในช่วงนี้</p>';
-  return`<div class="oos-chart"><div class="oc-h"><div><b>ความถี่ที่ขาด · ${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ขาดซ้ำตั้งแต่ 2 ครั้ง ${rep.toLocaleString()} จาก ${withF.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
+  const bars=ranked.length?ranked.map(({r,t,d},ix)=>`<button type="button" class="oc-r" data-no="${esc(r.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(r.desc||r.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(t/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${ocV(`<b>${t.toLocaleString()}</b> ครั้ง · ${d.toLocaleString()} วัน`)}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ขาดในช่วงนี้</p>';
+  return`<div class="oos-chart"><div class="oc-h"><div><b>ความถี่ที่ขาด · ${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ขาดซ้ำตั้งแต่ 2 ครั้ง ${rep.toLocaleString()} จาก ${withF.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div><div class="oc-list">${bars}</div></div>`}
 function oosFactsHtml(r){
   const dms=oosNum(r.dms),sd=oosNum(r.stockDay),dn=oosNum(r.dmsNew),by=oosBuyerName(r),bits=[],out=[];
   if(r.assignDept)bits.push(`<span>แผนกที่เติม: <b>${esc(r.assignDept)}</b></span>`);
@@ -3545,6 +3555,8 @@ function oosCard(r,ctx){
 /* "ดู Stock": the Makro stock pages. {item} in a link is replaced by the Item No. The Makro web needs its own login (never stored here).
    Every card has two buttons, Item lookup and Item Enquiry (BIP, Item No already filled in). Neither page can be framed in this page (the Makro web refuses cookies when framed, and BIP is plain http on a private network), so a button opens the REAL page in its own window on the right side of the screen (a phone opens a normal tab); the same window is reused. The Item No is copied for pasting.
    Set the stock-page links below when they change. */
+/* splits "<b>฿14,133</b> · 232 ชิ้น" into the amount and the "· quantity" part so the ranking rows can line them up in columns */
+const ocV=h=>{const i=String(h).indexOf(' · ');return i<0?`<span class="oc-a">${h}</span><span class="oc-s"></span>`:`<span class="oc-a">${h.slice(0,i)}</span><span class="oc-s">${h.slice(i+1)}</span>`};
 const STOCK_URLS=['https://ssmobile.siammakro.co.th/login.html','http://bip-app.siammakro.co.th:9714/xmlpserver/Guest/Reports/ItemEnquiry/ItemEnquiryReport.xdo?STORE_ID=42&_xpt=&_xl=en_US&STOREID=42&_xpf=&Store_Timezone=Asia%2FBangkok&ITEMID={item}&_xf=html'];
 /* Daily_StockMovement_Store_14_Days (BIP report on the RA server): opened by the "Stock Movement 14 วัน" button of the Buyer ID block, in its own popup window like the two above, with this Item No and store 42 passed as the report's parameters so it runs by itself.
    The report does not take the Item from its address (it showed the Item box empty), so the Item No. also goes after the # ("#slm=146408"): the Tampermonkey script bip-buyer.user.js (v1.2, also matches this server) reads it there, picks Store 42, types the Item No. and presses Apply. Without that script the window opens empty and the Item No. is on the clipboard. */
@@ -4146,9 +4158,9 @@ function shrChartHtml(rows,b){
   const lab=b==='pct'?'%Shrink สูงสุด':b==='code'?'ทิ้งมากสุด · ตามรหัสเหตุผล':'ทิ้งมากสุด · MTD';
   const seg=SHR_BASES.filter(([k])=>shrHas(k)).map(([k,l])=>`<button type="button" class="${b===k?'on':''}" data-p="${k}">${l}</button>`).join('');
   const val=(it)=>{const v=shrVal(it,b),r=shrRate(it);return b==='pct'?`<b>${shrPct(r)}</b> · ${v!=null?shrBaht(v):''}`:b==='code'?`<b>${shrBaht(v)}</b> · ${Math.abs(it.cq).toLocaleString(undefined,{maximumFractionDigits:1})} ชิ้น`:`<b>${shrBaht(v)}</b>${r!=null?' · '+shrPct(r):''}`};
-  const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(m/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${val(it)}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ทิ้งในช่วงนี้</p>';
+  const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(m/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${ocV(val(it))}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ทิ้งในช่วงนี้</p>';
   const tot=rows.reduce((s,it)=>{const v=shrVal(it,b==='pct'?'mtd':b);return s+(v!=null&&v>0?v:0)},0);
-  return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · รวม ${shrBaht(tot)} จาก ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
+  return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · รวม ${shrBaht(tot)} จาก ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div><div class="oc-list">${bars}</div></div>`}
 const shrComHtml=it=>{if(!it.coms.length)return'<div class="muted small">ยังไม่ทราบ Buyer / Commercial</div>';const t=c=>String(c.dept||'').split(' · ')[0];return`<div class="small">Commercial: ${it.coms.map(c=>`<b>${esc(c.name)}</b>${t(c)?` <span class="muted">(${esc(t(c))})</span>`:''}`).join('  /  ')}<div class="muted small">ไม่มี Buyer คนเดียวที่ดูแล Class นี้ — แสดง Commercial ของ Buyer ที่ดูแลร่วมกัน</div></div>`};
 function shrCard(it,b){
   const lv=shrLevel(it,b),th=imageOf(it.itemNo),k=esc(it._id),v=shrVal(it,b),r=shrRate(it);
@@ -4605,8 +4617,8 @@ function ilChartHtml(p,rows){
   const seg=IL_DEFS[p].bases.filter(([k])=>!(noPrice&&k==='val')).map(([k,l])=>`<button type="button" class="${b===k?'on':''}" data-p="${k}">${l}</button>`).join('');
   const cv=it=>it.hi.dead?'ไม่มียอดขาย':ilN(it.cover,10)+' วัน';
   const val=it=>b==='val'?`<b>${ilMoney('neg',it.val)}</b> · ปรับ +${ilN(-it.a,100)}`:b==='qty'?`<b>-${ilN(-it.a,100)}</b> หน่วย${noPrice?'':' · '+ilMoney('neg',it.val)}`:b==='sold'?`<b>${ilN(it.r.cm)}</b> ขายเดือนนี้ · ติดลบ ${ilN(it.a,100)}`:b==='over'?`<b>${shrBaht(it.hi.exVal)}</b> · ${cv(it)}`:b==='cover'?`<b>${cv(it)}</b> · เกิน ${shrBaht(it.hi.exVal)}`:`<b>${shrBaht(it.hi.stockVal)}</b> · ${cv(it)}`;
-  const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(Math.min(m,cap)/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${val(it)}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการในมุมมองนี้</p>';
-  return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div>${bars}</div>`}
+  const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(Math.min(m,cap)/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${ocV(val(it))}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการในมุมมองนี้</p>';
+  return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div><div class="oc-list">${bars}</div></div>`}
 function ilCard(p,it){
   const r=it.r,lv=ilLevel(it,p),th=imageOf(it.itemNo),k=esc(it._id),by=it.by?((IL_MEMO[p]&&IL_MEMO[p].buyers.get(it.by))||''):'';
   const status=r.st?`<span class="chip ${/discontinu/i.test(r.st)?'s-md1':'s-ok'}">${esc(r.st)}</span>`:'';
