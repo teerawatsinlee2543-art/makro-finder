@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         Shelf-Life Monitor: send the BIP Buyer ID back
 // @namespace    https://teerawatsinlee2543-art.github.io/makro-finder/
-// @version      1.1
-// @description  Reads "Buyer ID" off the BIP Item Enquiry report and sends it back to the Shelf-Life Monitor page that opened this window (nothing is sent anywhere else).
+// @version      1.2
+// @description  (1) Reads "Buyer ID" off the BIP Item Enquiry report and sends it back to the Shelf-Life Monitor page that opened this window (nothing is sent anywhere else). (2) On the Daily_StockMovement_Store_14_Days report opened from the "Stock Movement 14 วัน" button, fills in Store 42 and the Item No. and presses Apply.
 // @match        http://bip-app.siammakro.co.th:9714/*
+// @match        http://raadw-app.siammakro.co.th:7777/*
 // @grant        none
 // @run-at       document-idle
 // @downloadURL  https://teerawatsinlee2543-art.github.io/makro-finder/bip-buyer.user.js
@@ -31,6 +32,53 @@
     if(once){send();return}
     var n=0,iv=setInterval(function(){send();if(++n>400)clearInterval(iv)},1500);
   }
-  // the Shelf-Life Monitor page is the only recipient
-  slmBipSender('https://teerawatsinlee2543-art.github.io', false);
+  /* Stock Movement report: the Shelf-Life Monitor opens it as ...Daily_StockMovement_Store_14_Days.xdo#slm=<Item No>. The part after # never leaves this browser.
+     Store "42 …" is chosen, the Item No. typed into the "Item (*)" box and Apply pressed, once per Item No. (and again when the button is pressed for another item). */
+  function slmFillReport(){
+    var chip=null,done='',tries=0,iv=null;
+    function say(m,ok){if(!document.body)return;if(!chip){chip=document.createElement('div');chip.style.cssText='position:fixed;right:8px;bottom:8px;z-index:99999;padding:5px 12px;border-radius:8px;font:13px sans-serif;color:#fff;box-shadow:0 2px 8px #0005';document.body.appendChild(chip)}chip.style.background=ok?'#1f7a45':'#555';chip.textContent=m}
+    function wanted(){var m=String(location.hash).match(/slm=(\d{3,9})\b/);return m?m[1]:''}
+    function docs(){var o=[document],f=document.querySelectorAll('iframe'),i;for(i=0;i<f.length;i++){try{if(f[i].contentDocument&&f[i].contentDocument.body)o.push(f[i].contentDocument)}catch(e){}}return o}
+    /* the first field after a label whose own text is e.g. "Item (*)" */
+    function fieldAfter(d,re,sel){
+      var all=d.querySelectorAll('td,th,label,span,div,b'),i,e,t,j,c,lab=null;
+      for(i=0;i<all.length&&!lab;i++){e=all[i];t='';for(j=0;j<e.childNodes.length;j++)if(e.childNodes[j].nodeType===3)t+=e.childNodes[j].nodeValue;if(re.test(t.replace(/\s+/g,' ').trim()))lab=e}
+      if(!lab)return null;
+      c=d.querySelectorAll(sel);
+      for(i=0;i<c.length;i++)if(lab.compareDocumentPosition(c[i])&4)return c[i];
+      return null}
+    function setVal(el,v){
+      var proto=el.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype,d=Object.getOwnPropertyDescriptor(proto,'value');
+      if(d&&d.set)d.set.call(el,v);else el.value=v;
+      ['input','change','blur'].forEach(function(n){el.dispatchEvent(new Event(n,{bubbles:true}))})}
+    function applyBtn(d){
+      var b=d.querySelectorAll('input[type=button],input[type=submit],button,a'),i,t;
+      for(i=0;i<b.length;i++){t=(b[i].value||b[i].textContent||'').replace(/\s+/g,' ').trim();if(/^Apply$/i.test(t))return b[i]}
+      return d.getElementById('reportViewApply')||null}
+    function attempt(item){
+      var ds=docs(),i,d,box=null,st=null,btn=null;
+      for(i=0;i<ds.length&&!box;i++){d=ds[i];box=fieldAfter(d,/^Item\s*\(\*\)\s*:?$/i,'input[type=text],input:not([type])');if(box){st=fieldAfter(d,/^Store\s*\(\*\)\s*:?$/i,'select');btn=applyBtn(d)}}
+      if(!box)return false;
+      if(st){var k,o=st.options;for(k=0;k<o.length;k++)if(/^\s*42\b/.test(o[k].text)){if(st.selectedIndex!==k)setVal(st,o[k].value);break}}
+      setVal(box,item);
+      /* give the page a moment to react to the changes (a Store change can reload the Item field) before pressing Apply */
+      setTimeout(function(){var b2=btn;if(!b2)for(var j=0;j<ds.length&&!b2;j++)b2=applyBtn(ds[j]);
+        var box2=null;for(var q=0;q<ds.length&&!box2;q++)box2=fieldAfter(ds[q],/^Item\s*\(\*\)\s*:?$/i,'input[type=text],input:not([type])');
+        if(box2&&box2.value!==item)setVal(box2,item);
+        if(b2){b2.click();say('Shelf-Life: กรอก Item '+item+' แล้ว และกด Apply ให้ ✓',true)}else say('Shelf-Life: กรอก Item '+item+' แล้ว — กด Apply เอง (ไม่พบปุ่ม Apply)',true)},900);
+      return true}
+    function tick(){
+      var item=wanted();if(!item){say('Shelf-Life: สคริปต์ทำงานแล้ว — เปิดหน้านี้จากปุ่ม “Stock Movement 14 วัน” เพื่อให้กรอก Item ให้เอง');return}
+      if(done===item)return;
+      if(attempt(item)){done=item;tries=0;return}
+      if(++tries<60)say('Shelf-Life: รอฟอร์มรายงานโหลด — จะกรอก Item '+item+' ให้');else say('Shelf-Life: ไม่พบช่อง “Item (*)” ในหน้านี้ — พิมพ์ Item '+item+' เอง')}
+    window.addEventListener('hashchange',function(){done='';tries=0});
+    tick();iv=setInterval(function(){tick();if(done&&!/slm=/.test(location.hash))clearInterval(iv)},700);
+  }
+  if(/raadw-app/i.test(location.hostname)){
+    slmFillReport();
+  }else{
+    // the Shelf-Life Monitor page is the only recipient
+    slmBipSender('https://teerawatsinlee2543-art.github.io', false);
+  }
 })();
