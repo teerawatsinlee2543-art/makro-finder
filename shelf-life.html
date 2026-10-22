@@ -421,7 +421,9 @@ table.nbs-tbl .fbtn{padding:3px 4px}
 table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 .fbtn svg+svg{margin-left:-1px}
 @media (max-width:1500px){.fbtn svg+svg{display:none}}
-.agnext{display:flex;flex-direction:column;gap:1px;margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.4}
+.agnext{display:flex;flex-direction:column;gap:2px;margin-top:8px;padding:8px 10px;border:1px solid #f1c9c9;border-radius:10px;background:#fdeded;font-size:12.5px;line-height:1.4} /* the next status in a light-red box */
+:root[data-theme="dark"] .agnext{border-color:#6a3a40;background:#3b2327}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .agnext{border-color:#6a3a40;background:#3b2327}}
 .agnext b{font-variant-numeric:tabular-nums}
 .ag-l{font-size:11px;font-weight:700;color:var(--muted);margin:0 0 2px;letter-spacing:.02em}
 /* a table cell holding a chip + notes goes in one block, so the card layout (td>* {flex:1}) can't stretch the chip into a tall oval or clip its text */
