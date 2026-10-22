@@ -293,6 +293,12 @@ table.ct-tbl .cn{font-weight:700}
 /* the two buttons: side by side when there is room, else one under the other, always the same width and flush with the box edges */
 .bid-tools{flex:1 1 240px;align-self:center;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:6px}
 .bid-tools .btn{white-space:normal;min-width:0;max-width:100%;box-sizing:border-box;text-align:center;line-height:1.25;padding:6px 8px;overflow-wrap:anywhere} /* long labels wrap inside the button instead of running past the box edge */
+/* Full Name Buyer: a panel that is not a dialog, so it stays until its own ✕ is pressed and sits above everything on the page (also the lifted card). It keeps to the left part of the screen (the Makro windows open on the right). Drag the title to move it. */
+#bnPanel{position:fixed;left:12px;top:12px;z-index:200;width:min(36vw,460px);min-width:min(320px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;box-sizing:border-box;padding:12px 16px 8px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px #000b;outline:3px solid #1f7a45}
+#bnPanel[hidden]{display:none}
+.bn-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;cursor:move;touch-action:none;position:sticky;top:-12px;background:var(--card);padding:12px 0 6px;margin-top:-12px;z-index:1}
+.bn-head h2{margin:0;font-size:17px}
+.bn-x{background:#e5484d;border-color:#e5484d;color:#fff;font-weight:700;cursor:pointer}
 .bn-row{display:grid;grid-template-columns:1fr auto;gap:0 10px;padding:8px 0;border-bottom:1px solid var(--line)}
 .bn-row:last-child{border-bottom:0}
 .bn-row>span{grid-column:1/-1;font-size:11.5px;font-weight:700;color:var(--muted)}
@@ -1043,9 +1049,8 @@ label.has-scan{position:relative}
   <p class="muted small" style="margin:0 0 10px">ค่าที่ใส่ใช้แทน Buyer ที่ระบบคำนวณเอง และทุกคนในทีมเห็นเหมือนกัน (เก็บต่อสินค้า 1 รายการ)</p>
   <p class="small" style="margin:0 0 10px"><a href="#" id="bidAutoLink">ดึง Buyer ID จากหน้า BIP อัตโนมัติ — วิธีตั้งค่า</a></p>
   <div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="bidClear">ล้างค่าที่ใส่ไว้</button><button type="button" class="btn cancel-btn" id="bidCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="bidSave">บันทึก</button></div></div></dialog>
-<dialog id="dlgBidNames" class="nbs-dlg imp-dlg"><div style="min-width:min(340px,86vw)"><h2 id="bnTitle" style="margin:0 0 10px"></h2>
-  <div id="bnList"></div>
-  <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="bnClose">ปิด</button></div></div></dialog>
+<div id="bnPanel" hidden><div class="bn-head" id="bnHead" title="ลากเพื่อย้าย"><h2 id="bnTitle"></h2><button type="button" class="btn sm bn-x" id="bnClose">✕ ปิด</button></div>
+  <div id="bnList"></div></div>
 <dialog id="dlgScan" class="scan-dlg"><form method="dialog">
   <div class="scan-head"><b>สแกน Barcode สินค้า</b><button class="scan-x" value="close" aria-label="ปิด"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></button></div>
   <div class="scan-view"><video id="scanVideo" playsinline muted autoplay></video><div class="scan-frame"></div></div>
@@ -1956,7 +1961,7 @@ function bidNames(uid){
   const ps=bidPeople(c);
   $('#bnTitle').innerHTML=`Full Name Buyer · <span class="bid" style="font-size:1em">${esc(uid)}</span>`;
   $('#bnList').innerHTML=ps.length?ps.map(p=>`<div class="bn-row"><span>${esc(p.role)}</span><b>${esc(p.name)}</b>${p.phone?`<a class="small num" href="tel:${esc(p.phone.replace(/[^\d+]/g,''))}">${esc(p.phone)}</a>`:''}</div>`).join(''):'<div class="muted small">ยังไม่มีรายชื่อ — เพิ่มได้ที่แท็บ Buyer / Commercial</div>';
-  $('#dlgBidNames').showModal()}
+  const p=$('#bnPanel');p.hidden=false;p.style.left='12px';p.style.top='12px';p.scrollTop=0}
 /* AUTO: a small script that runs inside the BIP window (the Tampermonkey script bip-buyer.user.js, or the bookmarklet from the help box) reads "Buyer ID" off the report
    and posts it back to this page, which opened that window. This page cannot read BIP itself (plain http on a private network), but the BIP page can talk back to its opener. */
 const BIP_ORIGIN='http://bip-app.siammakro.co.th:9714';
@@ -2031,7 +2036,14 @@ function bidPrev(){
 }
 $('#bidIn').addEventListener('input',bidPrev);
 $('#bidIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#bidSave').click()}});
-$('#bidCancel').onclick=()=>$('#dlgBid').close();$('#bnClose').onclick=()=>$('#dlgBidNames').close();$('#dlgBidNames').addEventListener('click',e=>{if(e.target.id==='dlgBidNames')e.target.close()});
+$('#bidCancel').onclick=()=>$('#dlgBid').close();$('#bnClose').onclick=()=>{$('#bnPanel').hidden=true};
+/* drag the title bar to move the panel (kept on screen) */
+$('#bnHead').addEventListener('pointerdown',e=>{
+  if(e.target.closest('button'))return;
+  const p=$('#bnPanel'),r=p.getBoundingClientRect(),dx=e.clientX-r.left,dy=e.clientY-r.top;
+  const mv=ev=>{p.style.left=Math.max(0,Math.min(innerWidth-60,ev.clientX-dx))+'px';p.style.top=Math.max(0,Math.min(innerHeight-40,ev.clientY-dy))+'px'};
+  const up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up)};
+  document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);e.preventDefault()});
 $('#bidAutoLink').onclick=e=>{e.preventDefault();bidAutoHelp()};$('#bidPasteDlg').onclick=async()=>{const u=await bidClip();if(u){$('#bidIn').value=u;bidPrev()}};$('#bidAutoClose').onclick=()=>$('#dlgBidAuto').close();
 $('#bidSave').onclick=async()=>{
   const u=$('#bidIn').value.trim().toUpperCase().replace(/\s+/g,''),k=amNum(bidNo);
