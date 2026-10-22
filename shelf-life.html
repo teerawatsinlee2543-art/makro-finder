@@ -293,25 +293,25 @@ table.ct-tbl .cn{font-weight:700}
 /* the two buttons: side by side when there is room, else one under the other, always the same width and flush with the box edges */
 .bid-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));grid-auto-rows:1fr;gap:6px}
 .bid-foot{grid-template-columns:1fr}
-.bid-tools .bid-edit{background:#f9c4c4;border:1.5px solid #e0605a;color:#9b1710;font-weight:700}
-.bid-tools .bid-edit:hover{background:#f5b0b0;border-color:#d4473f}
-:root[data-theme="dark"] .bid-tools .bid-edit{background:#72292f;border-color:#b5535b;color:#ffdada}
-:root[data-theme="dark"] .bid-tools .bid-edit:hover{background:#823239;border-color:#cb6a72}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid-tools .bid-edit{background:#72292f;border-color:#b5535b;color:#ffdada}:root:not([data-theme="light"]) .bid-tools .bid-edit:hover{background:#823239;border-color:#cb6a72}}
+.bid-tools .bid-edit{background:#fdeaea;border-color:#f0c6c6;color:#a52f29;font-weight:700}
+.bid-tools .bid-edit:hover{background:#fadcdc;border-color:#e8aeae}
+:root[data-theme="dark"] .bid-tools .bid-edit{background:#542a2f;border-color:#79414a;color:#ffd2d2}
+:root[data-theme="dark"] .bid-tools .bid-edit:hover{background:#613138;border-color:#8d4d56}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid-tools .bid-edit{background:#542a2f;border-color:#79414a;color:#ffd2d2}:root:not([data-theme="light"]) .bid-tools .bid-edit:hover{background:#613138;border-color:#8d4d56}}
 /* pastel: soft fill, a slightly deeper border and text of the same hue */
-.bid-tools .bid-move{background:#bcd6fb;border:1.5px solid #5b94e6;color:#0d3b8c;font-weight:700}
-.bid-tools .bid-move:hover{background:#a9cbf9;border-color:#3f7fd9}
-.bid-tools .bid-names{background:#dccdf7;border:1.5px solid #9a79dc;color:#45238c;font-weight:700}
-.bid-tools .bid-names:hover{background:#cfbdf3;border-color:#8662d2}
-:root[data-theme="dark"] .bid-tools .bid-move{background:#2b4c80;border-color:#5b8ad0;color:#d6e6ff}
-:root[data-theme="dark"] .bid-tools .bid-move:hover{background:#345c9a;border-color:#74a0e6}
-:root[data-theme="dark"] .bid-tools .bid-names{background:#47357a;border-color:#8268c4;color:#e8defc}
-:root[data-theme="dark"] .bid-tools .bid-names:hover{background:#54418f;border-color:#9a82d8}
+.bid-tools .bid-move{background:#e4eefc;border-color:#bcd3f2;color:#23518f;font-weight:700}
+.bid-tools .bid-move:hover{background:#d6e6fb;border-color:#a3c2ec}
+.bid-tools .bid-names{background:#eee8fa;border-color:#d7caf0;color:#573b98;font-weight:700}
+.bid-tools .bid-names:hover{background:#e3daf6;border-color:#c6b4e9}
+:root[data-theme="dark"] .bid-tools .bid-move{background:#27405f;border-color:#3e5d8a;color:#cbdcf8}
+:root[data-theme="dark"] .bid-tools .bid-move:hover{background:#2f4d73;border-color:#4d70a3}
+:root[data-theme="dark"] .bid-tools .bid-names{background:#382d5c;border-color:#56487f;color:#ddd2f6}
+:root[data-theme="dark"] .bid-tools .bid-names:hover{background:#43366c;border-color:#665792}
 @media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]) .bid-tools .bid-move{background:#2b4c80;border-color:#5b8ad0;color:#d6e6ff}
-  :root:not([data-theme="light"]) .bid-tools .bid-move:hover{background:#345c9a;border-color:#74a0e6}
-  :root:not([data-theme="light"]) .bid-tools .bid-names{background:#47357a;border-color:#8268c4;color:#e8defc}
-  :root:not([data-theme="light"]) .bid-tools .bid-names:hover{background:#54418f;border-color:#9a82d8}
+  :root:not([data-theme="light"]) .bid-tools .bid-move{background:#27405f;border-color:#3e5d8a;color:#cbdcf8}
+  :root:not([data-theme="light"]) .bid-tools .bid-move:hover{background:#2f4d73;border-color:#4d70a3}
+  :root:not([data-theme="light"]) .bid-tools .bid-names{background:#382d5c;border-color:#56487f;color:#ddd2f6}
+  :root:not([data-theme="light"]) .bid-tools .bid-names:hover{background:#43366c;border-color:#665792}
 }
 .bid-tools .btn{white-space:normal;min-width:0;max-width:100%;box-sizing:border-box;text-align:center;line-height:1.25;padding:6px 8px;overflow-wrap:anywhere} /* long labels wrap inside the button instead of running past the box edge */
 /* Full Name Buyer: a panel that is not a dialog, so it stays until its own ✕ is pressed and sits above everything on the page (also the lifted card). It keeps to the left part of the screen (the Makro windows open on the right). Drag the title to move it. */
@@ -436,6 +436,9 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .oos-banner.late{border-color:#c62828;background:var(--redbox);color:var(--redbox-ink)}
 .oos-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:12px;align-items:start}
 .oosc{display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px;border:1px solid var(--line);border-left:6px solid var(--seg-ok);border-radius:12px;background:var(--card)}
+.oosc .btn.pri{background:#3f78b5;border-color:#3f78b5} /* the main button of a card: a softer blue than the page accent */
+:root[data-theme="dark"] .oosc .btn.pri{background:var(--accent);border-color:var(--accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .oosc .btn.pri{background:var(--accent);border-color:var(--accent)}}
 .oosc.lv-warn{border-left-color:var(--seg-md2);background:#fffbe3} /* a pale yellow (it was a stronger orange-cream) */
 :root[data-theme="dark"] .oosc.lv-warn{background:var(--soonbg)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .oosc.lv-warn{background:var(--soonbg)}}
@@ -487,7 +490,7 @@ table.nbs-tbl tr.stk-focus td[data-l="Division"] .chip,table.nbs-tbl td[data-l="
   table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]{order:3}
 }
 .stk-pair{flex:none;margin-left:auto;display:flex;flex-direction:column;gap:6px}
-.btn.stk{flex:none;background:#1f7a45;border-color:#1f7a45;color:#fff;font-weight:600;white-space:nowrap}.btn.stk:hover{background:#18633a;border-color:#18633a}
+.btn.stk{flex:none;background:#4c8f69;border-color:#4c8f69;color:#fff;font-weight:600;white-space:nowrap}.btn.stk:hover{background:#3f7c59;border-color:#3f7c59}
 .oosc-m{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .oosc-f{display:flex;flex-wrap:wrap;gap:2px 14px}
 .c-md2{color:var(--md2);font-weight:700}
