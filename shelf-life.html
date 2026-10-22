@@ -291,7 +291,12 @@ table.ct-tbl .cn{font-weight:700}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid{color:#ff4b57}}
 .bid-src{font-size:12px}
 /* the two buttons: side by side when there is room, else one under the other, always the same width and flush with the box edges */
-.bid-tools{flex:1 1 240px;align-self:center;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:6px}
+.bid-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));grid-auto-rows:1fr;gap:6px}
+.bid-tools .bid-edit{background:#dcf3e4;border-color:#b8e0c6;color:#1d6b3d;font-weight:700}
+.bid-tools .bid-edit:hover{background:#c9ecd6;border-color:#9fd3b3}
+:root[data-theme="dark"] .bid-tools .bid-edit{background:#1f3d2d;border-color:#2f5a43;color:#bfe9cf}
+:root[data-theme="dark"] .bid-tools .bid-edit:hover{background:#27492f;border-color:#3a6b4f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bid-tools .bid-edit{background:#1f3d2d;border-color:#2f5a43;color:#bfe9cf}:root:not([data-theme="light"]) .bid-tools .bid-edit:hover{background:#27492f;border-color:#3a6b4f}}
 /* pastel: soft fill, a slightly deeper border and text of the same hue */
 .bid-tools .bid-move{background:#dbeafe;border-color:#b6d0f5;color:#1e4f9c;font-weight:700}
 .bid-tools .bid-move:hover{background:#c8dcfb;border-color:#9fc0f0}
@@ -1961,8 +1966,9 @@ function bidBlock(no,uid,note,warn){
   const src=ib?`<span class="muted bid-src">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</span>`:(note?`<span class="muted bid-src bsrc">${esc(note)}</span>`:'');
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
   const detail=u?(c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial — เพิ่มชื่อ Buyer นี้ที่แท็บ Buyer / Commercial เพื่อให้เห็นรายละเอียดผู้ดูแล</div>`):'';
-  const acts=`<div class="bid-acts"><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
-  return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}<span class="bid-tools"><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>${c?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</span></div>${detail}${wr}${acts}</div>`;
+  /* all the buttons of the block in one grid: the same width and height, side by side when there is room, else one under the other */
+  const tools=`<div class="bid-tools"><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>${c?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}<button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
+  return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}</div>${tools}${detail}${wr}</div>`;
 }
 /* "Full Name Buyer": everybody listed for this Buyer (from the Buyer / Commercial tab) with full name + phone, in a small box */
 function bidPeople(c){
