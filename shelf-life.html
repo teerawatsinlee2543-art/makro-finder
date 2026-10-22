@@ -853,6 +853,16 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
 :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile .chip{font-size:12px;padding:0 8px;flex:none}
 :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile .dvl,:is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile .small{display:none}
 :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile .mini{display:inline;font-size:11px;color:var(--muted);white-space:nowrap}
+/* computer: the pinned FF / DF / NF bar has the same size and shape as the Alert / Attention … boxes of Item NBS (a tall box, the number big in the middle, the name under it) */
+@media (min-width:701px){
+  :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck{padding:8px 0;gap:8px}
+  :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile{flex-wrap:wrap;justify-content:center;align-items:center;align-content:center;gap:2px 8px;padding:8px;min-height:68px;text-align:center;border-radius:12px}
+  :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile b{order:1;width:100%;font-size:26px;line-height:1.08;text-align:center;font-variant-numeric:tabular-nums}
+  :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile .chip{order:2;font-size:13px;line-height:1.25;padding:0 10px}
+  :is(#oosDivTiles,#shrDivTiles,#negDivTiles,#dmsDivTiles).stuck .tile .mini{order:3;font-size:14px;font-weight:700}
+  #shrDivTiles.stuck .dvpct{order:4;margin:0}
+}
+
 #shrDivTiles.stuck .dvpct{position:static;margin-left:auto;padding:0 8px;font-size:11px}
 #shrDivTiles.stuck .dvpct b{font-size:12.5px}
 @media (max-width:700px){
