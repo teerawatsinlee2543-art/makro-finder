@@ -1896,7 +1896,7 @@ function bidBlock(no,uid,note,warn){
   const src=ib?`<span class="muted bid-src">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</span>`:(note?`<span class="muted bid-src bsrc">${esc(note)}</span>`:'');
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
   const detail=u?(c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial — เพิ่มชื่อ Buyer นี้ที่แท็บ Buyer / Commercial เพื่อให้เห็นรายละเอียดผู้ดูแล</div>`):'';
-  const acts=`<div class="bid-acts"><button type="button" class="btn sm bid-paste" onclick="bidPaste('${k}')" title="ในหน้า BIP ดับเบิลคลิกค่า Buyer ID → Ctrl+C → กดปุ่มนี้">วางจากคลิปบอร์ด</button><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
+  const acts=`<div class="bid-acts"><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
   return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}</div>${detail}${wr}${acts}</div>`;
 }
 /* AUTO: a small script that runs inside the BIP window (the Tampermonkey script bip-buyer.user.js, or the bookmarklet from the help box) reads "Buyer ID" off the report
