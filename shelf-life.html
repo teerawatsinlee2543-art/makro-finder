@@ -1276,11 +1276,21 @@ label.has-scan{position:relative}
     <label>ที่ตั้ง / ชั้นวาง<input id="nLoc" placeholder="เช่น Loc 510 / Location 510-011"></label>
     <label>Last Recv. Date (ถ้าทราบ)<input type="date" id="nRecv"></label>
     <label>Last Sold Date (ถ้าทราบ)<input type="date" id="nLast"></label>
-    <label>แผนก (Department)<input id="nDept" placeholder="เช่น BAKERY, PROLINE"></label>
+    <label>Barcode<input id="nBarcode" inputmode="numeric" autocomplete="off" placeholder="เช่น 8850000000000"></label>
+    <label>Category (แผนก / Department)<input id="nDept" placeholder="เช่น BAKERY, COSMETIC &amp; DRUG"></label>
+    <label>Art Grp<input id="nArt" autocomplete="off" placeholder="เช่น 89"></label>
     <label>Aging Type<select id="nAgeType"></select></label>
     <label>Buyer UID<select id="nBuyer"></select></label>
     <label class="span3">สถานะ / การดำเนินการ<select id="nStat"></select></label>
     <label class="span3">Remark<textarea id="nRemark" rows="2" maxlength="300" placeholder="รายละเอียดเพิ่มเติม เช่น เหตุผลที่ไม่ขายได้ สิ่งที่ขอให้ Buyer ดำเนินการ"></textarea></label>
+  </div>
+  <div class="oos-photo">
+    <div id="nImgPrev" class="oos-ph"></div>
+    <div class="row" style="gap:8px">
+      <button type="button" class="btn" id="nCamBtn">ถ่ายรูปสินค้า</button><button type="button" class="btn" id="nFileBtn">แนบ / เปลี่ยนรูป</button><button type="button" class="btn danger" id="nPhotoDel" hidden>ลบรูป</button>
+      <input type="file" id="nCam" accept="image/*" capture="environment" hidden><input type="file" id="nFile" accept="image/*" hidden>
+    </div>
+    <span class="muted small" id="nPhotoMsg">ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน</span>
   </div>
   <p class="err-text" id="nErr" style="margin:8px 0 0"></p>
   <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn cancel-btn" id="nCancel">ยกเลิก</button><button type="button" class="btn pri save-btn" id="nSave">บันทึก</button></div>
@@ -4986,7 +4996,7 @@ function nbsPDFHtml(photos=true,whole=false){
   const body=all.map(r=>{
     const a=agingInfo(r),n=nbsDays(r),lim=NBS_LIMIT[r.division]||10,over=n!=null&&n>=lim,s=nStat(r.status),bu=nbsBuyerUid(r),b=nbsContact(bu),c=r.createdAt?new Date(r.createdAt):null;
     const ag=a.level!=null?chip(AGING_LV[a.level][0],AGING_LV[a.level][1])+(AGING_PROV[a.level]?`<div><b>Provision ${AGING_PROV[a.level]}%</b></div>`:'')+`<div class="m">${esc(a.name)} · ${a.age.toLocaleString()} วัน</div>`+(a.next?`<div class="m">อีก <b>${a.left.toLocaleString()} วัน</b> → ${chip(a.next[0],a.next[1])}</div><div class="m">ถึงวันที่ <b>${fmt(addD(today(),a.left))}</b></div>`:'<div class="m">ถึงสถานะสูงสุดแล้ว</div>'):(String(r.aging||'').trim()?chip(String(r.aging).trim(),'err')+'<div class="m">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>':'-');
-    const img=photos?(r.img||imageOf(r.itemNo)):'';
+    const img=photos?nbsImg(r):'';
     return`<tr><td><div class="nm">${photos?(img?`<img class="th" src="${esc(pdfThumbUrl(img))}" alt="">`:'<span class="th ph"></span>'):''}<div class="nt"><b>${esc(r.desc||'—')}</b><div class="m">Item No. <b>${esc(r.itemNo||'-')}</b>${r.barcode?' · Barcode '+esc(r.barcode):''}</div><div class="m">Category ${esc(r.dept||'-')}</div>${r.artGrp?`<div class="m">Art Grp ${esc(r.artGrp)}</div>`:''}</div></div></td>
 <td class="ctr">${pdfDivChip(r.division)}</td><td class="num">${r.stock!==''&&r.stock!=null?esc(qty2(r.stock)):'-'}</td><td>${esc(r.loc||'-')}</td>
 <td class="num">${r.lastRecv?fmt(fromIso(r.lastRecv)):'-'}</td><td class="num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
@@ -5417,9 +5427,9 @@ function renderNbs(){
   const list=all.slice(0,nbsLimit);
   $('#nbsEmpty').hidden=all.length>0||mode==='init';
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
-  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,bu=nbsBuyerUid(r),b=nbsContact(bu),img=r.img||imageOf(r.itemNo);
+  $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,bu=nbsBuyerUid(r),b=nbsContact(bu),img=nbsImg(r);
     return`<tr class="${r.status==='done'?'acted':''}">
-    <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div>${r.artGrp?`<div><dt>Art Grp :</dt><dd>${esc(r.artGrp)}</dd></div>`:''}</dl></div></td>
+    <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div><div><dt>Art Grp :</dt><dd>${esc(r.artGrp||'-')}</dd></div></dl></div></td>
     <td data-l="Division"><div class="cbox"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></div></td>
     <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(qty2(r.stock)):'-'}<div class="stk-one"><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)"><span>Item</span><span>Enquiry</span></button></div></td>
     <td data-l="Location" class="small">${esc(r.loc||'-')}</td>
@@ -5513,7 +5523,9 @@ function nbsBuyerOptions(sel){
     +(sel&&!l.some(c=>c.uid===sel)?`<option value="${esc(sel)}" selected>${esc(sel)}</option>`:'');
 }
 function nbsOpen(r){
-  nbsEditId=r?r._id:null;nbsDraft=r?{barcode:r.barcode||'',img:r.img||'',locs:r.locs||[]}:{};
+  nbsEditId=r?r._id:null;nbsDraft=r?{barcode:r.barcode||'',img:String(r.img||'').startsWith('img:')?'':r.img||'',locs:r.locs||[]}:{};
+  {const pid=nbsPhotoId(r);nbsPhoto={id:pid,data:null,old:pid};$('#nBarcode').value=r?r.barcode||'':'';$('#nArt').value=r?r.artGrp||'':'';
+   $('#nPhotoMsg').textContent='ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน'}
   $('#nbsTitle').textContent=r?'แก้ไข Item NBS':'เพิ่ม Item NBS';$('#nErr').textContent='';
   $('#nbsFind').hidden=r||!onMakroSite();if(!r&&onMakroSite())loadMakroData();
   $('#nAgeType').innerHTML='<option value="">ตามกลุ่มอัตโนมัติ (FF / DF / NF)</option>'+Object.entries(AGING_TYPES).map(([k,v])=>`<option value="${k}">Type ${k} · ${esc(v.n)}</option>`).join('');
@@ -5521,8 +5533,23 @@ function nbsOpen(r){
   const v=r||{division:nbsFilterDiv||'FF',itemNo:'',desc:'',lastSale:'',loc:'',stock:'',buyerUid:'',status:'check',remark:''};
   $('#nDiv').value=v.division;$('#nNo').value=v.itemNo||'';$('#nDesc').value=v.desc||'';$('#nLast').value=v.lastSaleDerived?'':v.lastSale||'';$('#nRecv').value=v.lastRecv||'';$('#nAgeType').value=v.agingType||'';$('#nDept').value=v.dept||'';$('#nLoc').value=v.loc||'';
   $('#nStock').value=v.stock??'';$('#nStat').value=v.status;$('#nRemark').value=v.remark||'';nbsBuyerOptions(v.buyerUid);
-  $('#nQ').value='';$('#nResults').innerHTML='';renderNbsPicked();renderNbsStatus();$('#dlgNbs').showModal();
+  $('#nQ').value='';$('#nResults').innerHTML='';renderNbsPicked();renderNbsStatus();nbsPhotoPrev();$('#dlgNbs').showModal();
 }
+/* the picture of an Item NBS row: one taken / attached here is kept in `imgs` as "img:<id>" (like the OOS+ shelf photos); else the picture picked from Makro Finder / the web shop */
+const nbsPhotoId=r=>String(r&&r.img||'').startsWith('img:')?String(r.img).slice(4):null;
+const nbsImg=r=>{const u=String(r&&r.img||'');return u.startsWith('img:')?imgData(u.slice(4)):(u||imageOf(r&&r.itemNo))};
+let nbsPhoto={id:null,data:null,old:null};
+function nbsPhotoPrev(){const d=nbsPhoto.id?imgData(nbsPhoto.id):nbsDraft.img||'';$('#nImgPrev').innerHTML=d?`<img src="${esc(d)}" alt="">`:'';$('#nPhotoDel').hidden=!d}
+async function nbsTakePhoto(file){
+  if(!file)return;
+  try{const data=await resizePhoto(file);if(data.length>350000)throw Error('รูปใหญ่เกินไป ลองรูปอื่น');
+    const id=nbsPhoto.id||rid();tmpImgs[id]=data;nbsPhoto={...nbsPhoto,id,data};
+    $('#nPhotoMsg').textContent=`ได้รูปแล้ว (${Math.round(data.length*.75/1024)} KB) — กด “บันทึก” เพื่อใช้รูปนี้`;nbsPhotoPrev();
+  }catch(e){$('#nPhotoMsg').textContent='ใช้รูปนี้ไม่ได้: '+e.message}
+}
+$('#nCamBtn').onclick=()=>$('#nCam').click();$('#nFileBtn').onclick=()=>$('#nFile').click();
+$('#nCam').onchange=$('#nFile').onchange=e=>{nbsTakePhoto(e.target.files[0]);e.target.value=''};
+$('#nPhotoDel').onclick=()=>{if(nbsPhoto.id)delete tmpImgs[nbsPhoto.id];nbsPhoto={...nbsPhoto,id:null,data:null};nbsDraft.img='';nbsPhotoPrev();$('#nPhotoMsg').textContent='ลบรูปแล้ว — กด “บันทึก” เพื่อยืนยัน'};
 function renderNbsPicked(){const d=nbsDraft,el=$('#nPicked');el.hidden=!(d.img||d.barcode);
   el.innerHTML=el.hidden?'':`${d.img?`<img src="${esc(d.img)}" alt="">`:''}<div><b>${esc($('#nDesc').value)}</b><div class="muted small">${esc($('#nNo').value)}${d.barcode?' · บาร์โค้ด '+esc(d.barcode):''}</div></div>`}
 function renderNbsStatus(){const el=$('#nStatus');if(!el)return;el.textContent=MF.state==='loading'?'กำลังโหลดข้อมูลสินค้าจาก Makro Finder…':MF.state==='ready'?`ค้นได้ ${MF.list.length.toLocaleString()} สินค้า`:MF.state==='error'?'โหลดข้อมูลสินค้าไม่สำเร็จ — กรอกรหัสและชื่อเองได้':''}
@@ -5532,20 +5559,25 @@ function nbsSearch(){
 }
 function nbsPick(no){const it=MF.items.get(no);if(!it)return;
   $('#nNo').value=it.itemNo;$('#nDesc').value=it.desc;if(it.locs.length)$('#nLoc').value=locText(it.locs.slice(0,2));
-  nbsDraft={barcode:it.barcode||'',img:MF.images[it.itemNo]||'',locs:it.locs.slice(0,3)};$('#nResults').innerHTML='';$('#nQ').value='';renderNbsPicked()}
+  nbsDraft={barcode:it.barcode||'',img:MF.images[it.itemNo]||'',locs:it.locs.slice(0,3)};$('#nBarcode').value=it.barcode||'';$('#nResults').innerHTML='';$('#nQ').value='';renderNbsPicked();nbsPhotoPrev()}
 function nbsEdit(id){const r=byId('nbs',id);if(r)nbsOpen(r)}
-async function nbsDel(id){const r=byId('nbs',id);if(!r||!await ask(`ลบ “${r.desc||r.itemNo}” ออกจาก Item NBS?${mode==='sheet'||mode==='db'?' (ลบให้ทุกคนในทีม)':''}`))return;act(()=>rmItem('nbs',r),'ลบรายการแล้ว')}
+async function nbsDel(id){const r=byId('nbs',id);if(!r||!await ask(`ลบ “${r.desc||r.itemNo}” ออกจาก Item NBS?${mode==='sheet'||mode==='db'?' (ลบให้ทุกคนในทีม)':''}`))return;{const ph=nbsPhotoId(r)?byId('imgs',nbsPhotoId(r)):null;act(async()=>{await rmItem('nbs',r);if(ph)await rmItem('imgs',ph)},'ลบรายการแล้ว')}}
 async function nbsSave(){
   const no=$('#nNo').value.trim(),desc=$('#nDesc').value.trim();
   if(!no&&!desc){$('#nErr').textContent='กรอกรหัสสินค้าหรือชื่อสินค้าอย่างน้อย 1 อย่าง';return}
   const prev=nbsEditId?byId('nbs',nbsEditId):null,now=new Date().toISOString();
   const o={...(prev?body(prev):{}),division:$('#nDiv').value,itemNo:no,desc,loc:$('#nLoc').value.trim(),lastSale:$('#nLast').value||(prev&&prev.lastSaleDerived?prev.lastSale:''),lastSaleDerived:!$('#nLast').value&&!!(prev&&prev.lastSaleDerived),lastRecv:$('#nRecv').value,agingType:$('#nAgeType').value?+$('#nAgeType').value:'',dept:$('#nDept').value.trim(),
     stock:$('#nStock').value===''?'':+$('#nStock').value,buyerUid:$('#nBuyer').value,status:$('#nStat').value,remark:$('#nRemark').value.trim(),
-    barcode:nbsDraft.barcode||'',img:nbsDraft.img||'',locs:nbsDraft.locs||[],updatedAt:now,updatedBy:myId||null};
+    barcode:$('#nBarcode').value.trim(),artGrp:$('#nArt').value.trim(),img:nbsPhoto.id?'img:'+nbsPhoto.id:nbsDraft.img||'',locs:nbsDraft.locs||[],updatedAt:now,updatedBy:myId||null};
   if(!prev){o.createdAt=now;o.createdBy=myId||null}
   if(nbsEditId)o._id=nbsEditId;
+  const ph={...nbsPhoto},keep=!!ph.id;
   $('#dlgNbs').close();
-  await act(()=>putItem('nbs',o),prev?'บันทึกการแก้ไขแล้ว':'เพิ่มรายการแล้ว');
+  await act(async()=>{
+    if(keep&&ph.data)await putItem('imgs',{_id:ph.id,data:ph.data});
+    if(ph.old&&!(keep&&ph.id===ph.old)){const x=byId('imgs',ph.old);if(x)await rmItem('imgs',x)} /* the old photo is no longer used */
+    await putItem('nbs',o);
+  },prev?'บันทึกการแก้ไขแล้ว':'เพิ่มรายการแล้ว');
 }
 function nbsTable(whole){
   const rows=[['division','department','item_no','description','barcode','stock','location','last_recv_date','last_sold_date','nbs_days','nbs_threshold','aging_status','aging_type','days_to_next_status','next_status','status','buyer_uid','remark','created_at','next_status_date']];
