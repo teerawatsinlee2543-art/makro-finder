@@ -725,6 +725,56 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   main,section,.card{max-width:100%}
   .lot-grid>*,.grid2>*,.grid>*,.row>*{min-width:0}
 }
+/* ===== phone: the same tidy tile layout as the lifted Item NBS card, so a card is easy to read (no long label | value list) ===== */
+@media (max-width:700px){
+  table.nbs-tbl tr:not(.stk-focus){display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-content:start;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+  table.nbs-tbl tr:not(.stk-focus) td{display:block;grid-column:span 2;width:auto;min-width:0;border:0;padding:8px 10px;white-space:normal;font-size:14px;font-weight:600;overflow-wrap:anywhere;background:var(--bg);border-radius:10px}
+  table.nbs-tbl tr:not(.stk-focus) td::before{content:attr(data-l);display:block;min-width:0;max-width:none;margin:0 0 3px;color:var(--muted);font-size:11.5px;font-weight:700}
+  table.nbs-tbl tr:not(.stk-focus) td>*{min-width:0}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="ชื่อสินค้า"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Aging Status"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"],table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]{grid-column:1/-1}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="สถานะ"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Remark"]{grid-column:span 3}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="ชื่อสินค้า"]{background:transparent;padding:2px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="ชื่อสินค้า"]::before{display:none}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"]{background:transparent;padding:0}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"]::before{margin:0 0 3px 2px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Stock"]{font-size:22px;font-weight:800;line-height:1.1}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Stock"] .stk-one{margin-top:6px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]{background:transparent;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;padding:6px 2px 0;font-size:13px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]::before{flex:0 0 100%;margin:0}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"] .actbtns{margin:0;flex-direction:row;gap:6px}
+  table.nbs-tbl tr:not(.stk-focus) .nhead{gap:12px;align-items:center}
+  table.nbs-tbl tr:not(.stk-focus) .nthumb{width:84px;height:84px}
+  table.nbs-tbl tr:not(.stk-focus) .nname{font-size:17px;font-weight:800;line-height:1.3}
+  table.nbs-tbl tr:not(.stk-focus) .nmeta{display:grid;grid-template-columns:1fr 1fr;gap:3px 14px}
+  table.nbs-tbl tr:not(.stk-focus) .stk-one .btn{width:auto}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"]{order:1}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="สถานะ"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Remark"]{order:2}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]{order:3}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Division"] .chip,table.nbs-tbl td[data-l="Division"] .chip{font-size:20px;font-weight:800;line-height:1.2;padding:4px 18px}
+  table.nbs-tbl tr:not(.stk-focus) .nmeta{grid-template-columns:1fr}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="สถานะ"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Remark"]{grid-column:1/-1} /* long status text gets the whole line */
+  table.nbs-tbl tr:not(.stk-focus) .chip{white-space:normal} /* Item No. / Barcode / Category / Art Grp: one per line so a long Barcode is not broken */
+  /* search: the label above, the input and the red Scan button on one line */
+  .search-row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;row-gap:5px;align-items:end}
+  .search-row>label.grow{display:contents}
+  .search-row .sr-t{grid-column:1/-1;font-size:13px;line-height:1.35}
+  .search-row .scan-btn{grid-column:2;font-size:13px;gap:5px;padding-left:10px;padding-right:10px}
+  .search-row .grow input{grid-column:1}
+  /* the name in the red pill may wrap instead of being cut with "…" */
+  .brandbox h1{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15;font-size:15px}
+  /* Buyer ID block: two buttons per line */
+  .bid-tools{grid-template-columns:repeat(auto-fit,minmax(min(100%,128px),1fr))}
+  .bid-tools>:last-child:nth-child(odd){grid-column:1/-1} /* a last button on its own line takes the whole line */
+  /* Buyer / Commercial cards: the label on the left, everything of a cell (name, phone …) stacked on the right; empty cells are hidden */
+  table.resp.ct-tbl td{display:grid;grid-template-columns:minmax(88px,34%) minmax(0,1fr);gap:1px 10px;align-items:start}
+  table.resp.ct-tbl td::before{grid-column:1;grid-row:1;max-width:none}
+  table.resp.ct-tbl td>*{grid-column:2;flex:none}
+  table.resp.ct-tbl td:has(>span.muted:only-child){display:none}
+  table.resp.ct-tbl td:not([data-l]){display:block}
+  table.resp.ct-tbl td:not([data-l])::before{display:none}
+  table.resp.ct-tbl tr.grp td{display:block;padding:8px 10px;font-weight:800;text-align:left}
+  table.resp.ct-tbl tr.grp td::before{display:none}
+}
 /* ===== data page (computer): two boxes side by side, one long row per item ===== */
 @media (min-width:1000px){
   #t-data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
@@ -1013,7 +1063,7 @@ label.has-scan{position:relative}
     <div class="add-step" id="mfBox" hidden>
       <div class="step-title"><span class="step-no">1</span>เลือกสินค้า</div>
       <div class="search-row">
-        <label class="grow">ค้นหาสินค้าจาก Makro Finder (รหัสสินค้า บาร์โค้ด หรือชื่อ)<input id="mfQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
+        <label class="grow"><span class="sr-t">ค้นหาสินค้าจาก Makro Finder (รหัสสินค้า บาร์โค้ด หรือชื่อ)</span><input id="mfQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
         <button type="button" class="btn scan-btn" id="scanBtn" title="สแกนบาร์โค้ดด้วยกล้อง"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M7 8v8M10 8v8M13 8v8M16 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>สแกน Barcode</button>
       </div>
       <p class="muted small" id="mfStatus" style="margin:0"></p>
@@ -1212,7 +1262,7 @@ label.has-scan{position:relative}
     <div class="card"><h2>สแกนสินค้า → ต้องทำอย่างไรต่อ</h2>
       <div id="jScanBox">
         <div class="search-row">
-          <label class="grow">รหัสสินค้า บาร์โค้ด หรือชื่อ<input id="jQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
+          <label class="grow"><span class="sr-t">รหัสสินค้า บาร์โค้ด หรือชื่อ</span><input id="jQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
           <button type="button" class="btn scan-btn" id="jScanBtn" title="สแกนบาร์โค้ดด้วยกล้อง"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M7 8v8M10 8v8M13 8v8M16 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>สแกน Barcode</button>
         </div>
         <div id="jResults" class="mf-results"></div>
@@ -1318,7 +1368,7 @@ label.has-scan{position:relative}
 <dialog id="dlgNbs" class="nbs-dlg"><div>
   <h2 id="nbsTitle">เพิ่ม Item NBS</h2>
   <div id="nbsFind" hidden>
-    <div class="search-row"><label class="grow">ค้นหาสินค้าจาก Makro Finder (รหัส บาร์โค้ด หรือชื่อ)<input id="nQ" placeholder="เช่น 210907 หรือ ชื่อสินค้า" autocomplete="off"></label>
+    <div class="search-row"><label class="grow"><span class="sr-t">ค้นหาสินค้าจาก Makro Finder (รหัส บาร์โค้ด หรือชื่อ)</span><input id="nQ" placeholder="เช่น 210907 หรือ ชื่อสินค้า" autocomplete="off"></label>
       <button type="button" class="btn scan-btn" id="nScanBtn" title="สแกนบาร์โค้ดด้วยกล้อง"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M7 8v8M10 8v8M13 8v8M16 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>สแกนสินค้า</button></div>
     <p class="muted small" id="nStatus" style="margin:4px 0 0"></p>
     <div id="nResults" class="mf-results"></div>
