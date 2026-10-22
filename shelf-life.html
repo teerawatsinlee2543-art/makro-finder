@@ -664,7 +664,10 @@ select,input,textarea{max-width:100%}
 #t-jul .grid2>.card h2{margin-top:0}
 .jconv{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:520px){.jconv{grid-template-columns:1fr}}
-.jbox{min-width:0}
+.jbox{min-width:0;container-type:inline-size}
+/* the result "296 DDD · 26296 YYDDD" stays on ONE line: the numbers shrink with the width of their box instead of the last label dropping to a second line */
+#jDout{white-space:nowrap}
+#jDout b{font-size:clamp(20px,8.3cqw,32px)}
 .jqk{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px}
 .jqk>span{flex:0 0 100%}
 .jref{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
