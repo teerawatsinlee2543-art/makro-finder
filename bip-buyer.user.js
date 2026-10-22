@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Shelf-Life Monitor: send the BIP Buyer ID back
 // @namespace    https://teerawatsinlee2543-art.github.io/makro-finder/
-// @version      1.2
-// @description  (1) Reads "Buyer ID" off the BIP Item Enquiry report and sends it back to the Shelf-Life Monitor page that opened this window (nothing is sent anywhere else). (2) On the Daily_StockMovement_Store_14_Days report opened from the "Stock Movement 14 วัน" button, fills in Store 42 and the Item No. and presses Apply.
+// @version      1.3
+// @description  (1) Reads "Buyer ID" off the BIP Item Enquiry report and sends it back to the Shelf-Life Monitor page that opened this window (nothing is sent anywhere else). (2) On the Daily_StockMovement_Store_14_Days report opened from the "Stock Movement 14 วัน" button, fills in Store 42 and the Item No. and presses Apply. (3) A small zoom bar (− + ⤢ fit width) in both BIP windows.
 // @match        http://bip-app.siammakro.co.th:9714/*
 // @match        http://raadw-app.siammakro.co.th:7777/*
 // @grant        none
@@ -75,6 +75,33 @@
     window.addEventListener('hashchange',function(){done='';tries=0});
     tick();iv=setInterval(function(){tick();if(done&&!/slm=/.test(location.hash))clearInterval(iv)},700);
   }
+  /* a small zoom bar (− 100% + ⤢) in the corner of both BIP windows: the reports are wide, so the right side (Buyer ID block, contacts) is cut off in the side window.
+     "⤢" shrinks the page until its width fits the window; the level is remembered for the next time. Pinch / Ctrl + wheel / Ctrl +− of Chrome still work as usual. */
+  function slmZoomBar(){
+    var KEY='slmZoom',z=1,bar,pct;
+    try{var s=parseFloat(localStorage.getItem(KEY));if(s>=.25&&s<=3)z=s}catch(e){}
+    function apply(v){
+      z=Math.max(.25,Math.min(3,Math.round(v*100)/100));
+      document.documentElement.style.zoom=z===1?'':String(z);
+      if(bar)bar.style.zoom=String(1/z);   // the bar itself keeps its size
+      if(pct)pct.textContent=Math.round(z*100)+'%';
+      try{localStorage.setItem(KEY,String(z))}catch(e){}}
+    function fit(){
+      var de=document.documentElement,old=de.style.zoom;de.style.zoom='';
+      var w=Math.max(de.scrollWidth,document.body?document.body.scrollWidth:0),vw=window.innerWidth;
+      de.style.zoom=old;
+      apply(w>vw?Math.floor(vw/w*20)/20:1)}
+    function btn(t,title,fn){var b=document.createElement('button');b.type='button';b.textContent=t;b.title=title;b.style.cssText='border:0;background:transparent;color:#fff;font:700 15px sans-serif;min-width:28px;height:26px;cursor:pointer;border-radius:6px';b.onmouseenter=function(){b.style.background='#fff3'};b.onmouseleave=function(){b.style.background='transparent'};b.onclick=fn;return b}
+    function build(){
+      if(!document.body||bar)return;
+      bar=document.createElement('div');
+      bar.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99999;display:flex;align-items:center;gap:2px;padding:3px 6px;border-radius:10px;background:#000b;box-shadow:0 2px 8px #0005;font:13px sans-serif;color:#fff;user-select:none';
+      pct=document.createElement('span');pct.style.cssText='min-width:42px;text-align:center;cursor:pointer';pct.title='กลับเป็น 100%';pct.onclick=function(){apply(1)};
+      bar.appendChild(btn('−','ซูมออก',function(){apply(z-.1)}));bar.appendChild(pct);bar.appendChild(btn('+','ซูมเข้า',function(){apply(z+.1)}));bar.appendChild(btn('⤢','พอดีความกว้างหน้าต่าง',fit));
+      document.body.appendChild(bar);apply(z)}
+    build();var n=0,iv=setInterval(function(){build();if(bar||++n>40)clearInterval(iv)},500);
+  }
+  slmZoomBar();
   if(/raadw-app/i.test(location.hostname)){
     slmFillReport();
   }else{
