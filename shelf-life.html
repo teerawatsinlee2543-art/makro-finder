@@ -796,7 +796,7 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
 }
 
 /* Julian page on a phone (also a phone shown as "desktop site", which is wide but touch): one box under the other, the shortcuts in an even grid */
-@media (max-width:700px),(pointer:coarse){
+@media (max-width:1000px),(pointer:coarse){
   #t-jul>.grid2{grid-template-columns:minmax(0,1fr)!important}
 }
 @media (max-width:700px){
@@ -805,6 +805,40 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   .jqk .btn{padding:10px 4px;font-size:14px;text-align:center}
   #jRefGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
   #jC,#jD,#jC2{height:50px}
+}
+
+/* Today page: six status boxes in an even grid (3 + 3 on a tablet, 6 in a row on a wide screen) instead of 5 + 1 left over */
+@media (min-width:561px) and (max-width:1000px){#tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* tablet / small laptop (cards in two columns): the same tidy tile layout for the Item NBS cards */
+@media (min-width:701px) and (max-width:1180px){
+  table.nbs-tbl tr:not(.stk-focus){display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-content:start;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+  table.nbs-tbl tr:not(.stk-focus) td{display:block;grid-column:span 2;width:auto;min-width:0;border:0;padding:8px 10px;white-space:normal;font-size:14px;font-weight:600;overflow-wrap:anywhere;background:var(--bg);border-radius:10px}
+  table.nbs-tbl tr:not(.stk-focus) td::before{content:attr(data-l);display:block;min-width:0;max-width:none;margin:0 0 3px;color:var(--muted);font-size:11.5px;font-weight:700}
+  table.nbs-tbl tr:not(.stk-focus) td>*{min-width:0}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="ชื่อสินค้า"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Aging Status"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"],table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]{grid-column:1/-1}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="สถานะ"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Remark"]{grid-column:span 3}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="ชื่อสินค้า"]{background:transparent;padding:2px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="ชื่อสินค้า"]::before{display:none}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"]{background:transparent;padding:0}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"]::before{margin:0 0 3px 2px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Stock"]{font-size:22px;font-weight:800;line-height:1.1}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Stock"] .stk-one{margin-top:6px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]{background:transparent;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;padding:6px 2px 0;font-size:13px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]::before{flex:0 0 100%;margin:0}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"] .actbtns{margin:0;flex-direction:row;gap:6px}
+  table.nbs-tbl tr:not(.stk-focus) .nhead{gap:12px;align-items:center}
+  table.nbs-tbl tr:not(.stk-focus) .nthumb{width:84px;height:84px}
+  table.nbs-tbl tr:not(.stk-focus) .nname{font-size:17px;font-weight:800;line-height:1.3}
+  table.nbs-tbl tr:not(.stk-focus) .nmeta{display:grid;grid-template-columns:1fr 1fr;gap:3px 14px}
+  table.nbs-tbl tr:not(.stk-focus) .stk-one .btn{width:auto}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"]{order:1}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="สถานะ"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Remark"]{order:2}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="บันทึกเมื่อ"]{order:3}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Division"] .chip,table.nbs-tbl td[data-l="Division"] .chip{font-size:20px;font-weight:800;line-height:1.2;padding:4px 18px}
+  table.nbs-tbl tr:not(.stk-focus) .nmeta{grid-template-columns:1fr}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="สถานะ"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Remark"]{grid-column:1/-1} /* long status text gets the whole line */
+  table.nbs-tbl tr:not(.stk-focus) .chip{white-space:normal} /* Item No. / Barcode / Category / Art Grp: one per line so a long Barcode is not broken */
 }
 
 /* ===== data page (computer): two boxes side by side, one long row per item ===== */
