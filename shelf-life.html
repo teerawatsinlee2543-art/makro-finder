@@ -187,11 +187,27 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .add-step[hidden]{display:none}
 /* Monitor item (computer): the three steps sit side by side as three equal boxes (select product | lot data | check and save) */
 @media (min-width:1100px){
-  #t-add .add-card{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+  #t-add .add-card{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
   #t-add .add-card:has(#mfBox[hidden]){grid-template-columns:repeat(2,minmax(0,1fr))}
   #t-add .add-card>.add-head{grid-column:1/-1}
   #t-add .add-card .lot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   #t-add .add-card .search-row{flex-wrap:wrap}
+  /* the three boxes are equally tall; each one is a column, so its last item (the "ค้นได้ … สินค้า" line, the Cancel / Save buttons) sits at the very bottom of the box */
+  #t-add .add-step{display:flex;flex-direction:column;gap:10px}
+  #t-add .add-step[hidden]{display:none}
+  #t-add #mfStatus{order:99;margin-top:auto!important}
+  #t-add .add-step>.save-row{margin-top:auto}
+  /* box 2: location and Remark on one line */
+  #t-add .add-card .lot-grid>label:has(#aLoc),#t-add .add-card .lot-grid>label:has(#aRemark){grid-column:span 1}
+  #t-add .add-card .lot-grid>label:has(#aQty){grid-column:1/-1} /* narrower screens: the quantity gets its own line so location and Remark can share the next one */
+}
+@media (min-width:1400px){
+  /* wide screens: Julian | date | quantity on one line, then location | Remark on one line */
+  #t-add .add-card .lot-grid{grid-template-columns:repeat(12,minmax(0,1fr))}
+  #t-add .add-card .lot-grid>label:has(#aSku){grid-column:1/-1}
+  #t-add .add-card .lot-grid>label:has(#aJ),#t-add .add-card .lot-grid>label:has(#aDate){grid-column:span 5}
+  #t-add .add-card .lot-grid>label:has(#aQty){grid-column:span 2}
+  #t-add .add-card .lot-grid>label:has(#aLoc),#t-add .add-card .lot-grid>label:has(#aRemark){grid-column:span 6}
 }
 .step-title{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}
 .step-no{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-size:14px;font-weight:800;flex:none}
