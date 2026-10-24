@@ -915,10 +915,9 @@ th.sortable:hover{color:var(--accent)}
 /* OOS+ (computer): cards in a row are the same height, buttons on the bottom line; a click on the chart shows chart (left) + item (right) */
 @media (min-width:1000px){
   .oos-list{align-items:stretch}
-  /* the Buyer ID box follows the card's info directly (no gap in the middle); the cards of a row stay the same height, any spare space ends up at the bottom edge */
+  /* the Buyer ID box follows the card's info directly (no gap in the middle); the cards of a row stay the same height, any spare space sits above the action buttons */
   .oosc>.bid-block{margin-top:10px}
-  .oosc>.bid-block~.oosc-a{margin-top:0}
-  .oosc-a{margin-top:auto}
+  .oosc-a{margin-top:auto} /* the action buttons (เริ่มเติม / เติมแล้ว / แก้ไข / ลบ) sit on the very bottom edge of every card, even when the Buyer box follows the info directly above */
   #oosMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
   #oosMain.drill .oos-chart{margin:0}
   #oosMain.drill .oos-list{grid-template-columns:minmax(0,1fr);align-items:start}
