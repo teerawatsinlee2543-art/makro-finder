@@ -668,6 +668,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .cat-card,.promo-add-banner,.pallet-open-btn,.role-option,.waste-io-btn,.noloc-btn,.result-item,.feedback-card[onclick]{transition:none}
   .cat-card:hover,.promo-add-banner:hover,.pallet-open-btn:hover,.role-option:hover,.waste-io-btn:hover,.noloc-btn:hover,.result-item:hover,.feedback-card[onclick]:hover{transform:none}
 }
+/* the three tools (ลบไฟล์ที่นำเข้า / นำเข้าข้อมูล / Item ที่ยังไม่มี Location) as tiles: icon in a white rounded square above the label, bigger rounded corners; the colours stay as they were */
+.loc-tools .waste-io-btn,.loc-tools .noloc-btn{flex-direction:column;gap:10px;min-height:128px;border-radius:24px;padding:18px 14px}
+.loc-tools .waste-io-btn i,.loc-tools .noloc-btn i{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:25px;background:#fff;box-shadow:0 3px 10px rgba(20,24,33,.14)}
+.loc-tools .waste-io-del i{color:#a85a00}
+.loc-tools .waste-io-imp i{color:#0b5cad}
+.loc-tools .noloc-btn i{color:#a85a00}
 .fb-empty{text-align:center;padding:24px 12px;color:var(--color-text-tertiary);font-size:12.5px}
 @media (max-width:479px){
   .pallet-action-row{flex-direction:column}
