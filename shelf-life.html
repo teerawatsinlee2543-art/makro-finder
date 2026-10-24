@@ -920,6 +920,7 @@ th.sortable:hover{color:var(--accent)}
   .oos-list{align-items:stretch}
   /* the Buyer ID box follows the card's info directly (no gap in the middle); the cards of a row stay the same height, any spare space sits above the action buttons */
   .oosc>.bid-block{margin-top:10px}
+  .oosc-found{margin-top:auto}.oosc-found+.oosc-a{margin-top:0} /* "ตรวจพบ …" sits right above the buttons, both at the bottom of the card */
   .oosc-a{margin-top:auto} /* the action buttons (เริ่มเติม / เติมแล้ว / แก้ไข / ลบ) sit on the very bottom edge of every card, even when the Buyer box follows the info directly above */
   #oosMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
   #oosMain.drill .oos-chart{margin:0}
@@ -3738,7 +3739,7 @@ function oosCard(r,ctx){
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div>${bcLine(r.itemNo,r.barcode)}<div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
     <div class="oosc-m">${dv?`<span class="chip div-${dv.toLowerCase()}">${dv}</span>`:''}${r.bucket&&OOS_BK[r.bucket]?`<span class="chip s-${OOS_BK[r.bucket][2]}">${esc(OOS_BK[r.bucket][0])}</span>`:''}<span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
     ${oosFactsHtml(r)}
-    <div class="muted small">ตรวจพบ ${oosFmt(oosMs(r))}</div>${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}
+    ${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}<div class="muted small oosc-found">ตรวจพบ ${oosFmt(oosMs(r))}</div>
     <div class="oosc-a w">${acts}<button type="button" class="btn sm" onclick="oosEdit('${k}')">แก้ไข</button><button type="button" class="btn sm danger" onclick="oosDel('${k}')">ลบ</button></div></div>`}
 /* "ดู Stock": the Makro stock pages. {item} in a link is replaced by the Item No. The Makro web needs its own login (never stored here).
    Every card has two buttons, Item lookup and Item Enquiry (BIP, Item No already filled in). Neither page can be framed in this page (the Makro web refuses cookies when framed, and BIP is plain http on a private network), so a button opens the REAL page in its own window on the right side of the screen (a phone opens a normal tab); the same window is reused. The Item No is copied for pasting.
