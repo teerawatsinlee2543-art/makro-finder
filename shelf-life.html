@@ -436,6 +436,17 @@ table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 .ag-file{margin-top:4px}
 .ag-grp{margin-top:2px;font-size:12px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
 .chip.ag-next{align-self:flex-start;margin:2px 0 4px}
+/* Aging Status "status now" badge: a solid, bold badge so ปกติ / Alert / Attention stand out */
+.cbox .chip.ag-now{font-size:14.5px;font-weight:800;line-height:1.25;padding:3px 14px;border:1.5px solid rgba(0,0,0,.25);box-shadow:0 1px 3px rgba(0,0,0,.16)}
+.cbox .chip.ag-now.s-ok{background:var(--ok);color:#fff}
+:root[data-theme="dark"] .cbox .chip.ag-now.s-ok{background:#6fd49a;color:#0f2a1a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cbox .chip.ag-now.s-ok{background:#6fd49a;color:#0f2a1a}}
+.cbox .chip.ag-now.s-md1{background:var(--seg-md1);color:var(--seg-ink)}
+.cbox .chip.ag-now.s-md2{background:var(--seg-md2);color:var(--seg-ink)}
+/* one-word status chip (e.g. รอตรวจสอบ) never breaks in the middle of the word; the column grows instead */
+table.nbs-tbl .chip.one{white-space:nowrap!important}
+/* computer table: the status chip sits in the middle of its column, text centred */
+@media (min-width:1181px){table.nbs-tbl td[data-l="สถานะ"] .cbox{display:flex;flex-direction:column;align-items:center;text-align:center}table.nbs-tbl td[data-l="สถานะ"] .chip{text-align:center}}
 /* the next-status chip is a solid, clearly readable badge (the pale tint vanished on the light-red box) */
 .agnext .chip.ag-next.mini{font-size:14px;font-weight:800;line-height:1.25;padding:3px 12px;border:1.5px solid rgba(0,0,0,.28);box-shadow:0 1px 3px rgba(0,0,0,.18);letter-spacing:.01em}
 .agnext .chip.ag-next.s-soon{background:#ffc928;color:#3b2a00}
@@ -5183,7 +5194,7 @@ function nbsAgingText(r){
   if(a.level==null)return t?`<span class="chip s-err">${esc(t)}</span><div class="muted small">ไม่ทราบอายุ — ใช้ค่าจากไฟล์</div>`:'<span class="muted">-</span>';
   const [lb,k]=AGING_LV[a.level],pv=AGING_PROV[a.level],fm=/^\s*([1-5])\s*-/.exec(t),fnote=fm&&+fm[1]!==a.level?`<div class="ag-row ag-file" title="สถานะในไฟล์ที่นำเข้า (นับถึงวันที่ออกรายงาน)"><span>ตามไฟล์</span><span class="ag-v">${esc(t)}</span></div>`:'';
   /* plain Thai: where the item is now, how old it is, and what comes next and when */
-  return`<div class="ag-l">สถานะตอนนี้</div><span class="chip s-${k}">${lb}</span><div class="ag-rows">${pv?`<div class="ag-row" title="สัดส่วนที่ต้องตั้งสำรอง (Provision) สำหรับสถานะนี้"><span>ตั้งสำรอง</span><b>${pv}%</b></div>`:''}<div class="ag-row" title="นับอายุตามกลุ่ม ${esc(a.name)}"><span>อายุ</span><b>${a.age.toLocaleString()} วัน</b></div></div><div class="ag-grp">กลุ่ม ${esc(a.name)}</div>`
+  return`<div class="ag-l">สถานะตอนนี้</div><span class="chip ag-now s-${k}">${lb}</span><div class="ag-rows">${pv?`<div class="ag-row" title="สัดส่วนที่ต้องตั้งสำรอง (Provision) สำหรับสถานะนี้"><span>ตั้งสำรอง</span><b>${pv}%</b></div>`:''}<div class="ag-row" title="นับอายุตามกลุ่ม ${esc(a.name)}"><span>อายุ</span><b>${a.age.toLocaleString()} วัน</b></div></div><div class="ag-grp">กลุ่ม ${esc(a.name)}</div>`
     +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน จะเปลี่ยนสถานะ"><span class="ag-l">สถานะถัดไป</span><span class="chip s-${a.next[1]} mini ag-next">${a.next[0]}</span><div class="ag-rows"><div class="ag-row"><span>อีก</span><b>${a.left.toLocaleString()} วัน</b></div><div class="ag-row"><span>วันที่</span><span class="ag-v">${fmt(addD(today(),a.left))}</span></div></div></div>`:'<div class="agnext"><span class="ag-l">สถานะถัดไป</span><span class="muted">ไม่มีแล้ว — อยู่สถานะสูงสุดแล้ว</span></div>')+fnote;
 }
 /* Buyer shown for an Item NBS row: its own Buyer; otherwise the Buyer the same Item No has on the OOS+ page (buyer_uid) or in the ItemList_Layout loaded on High Stock to DMS / Negative Stock (Buyer column) — so every page shows the same Buyer for the same item. Nothing is written: change the other page's data and this follows. */
@@ -5694,7 +5705,7 @@ function renderNbs(){
     <td data-l="Last Sold Date" class="small num">${r.lastSale&&!r.lastSaleDerived?fmt(fromIso(r.lastSale)):'-'}</td>
     <td data-l="ไม่มียอดขาย (NBS)" class="num">${nbsDaysText(r)}</td>
     <td data-l="Aging Status"><div class="cbox">${nbsAgingText(r)}</div></td>
-    <td data-l="สถานะ"><div class="cbox"><span class="chip ${s[2]}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</div></td>
+    <td data-l="สถานะ"><div class="cbox"><span class="chip ${s[2]}${/\s/.test(s[1])?'':' one'}">${esc(s[1])}</span>${r.autoNote?`<div class="muted small" style="margin-top:3px">${esc(r.autoNote)}</div>`:''}</div></td>
     <td data-l="Buyer" class="small"><div class="cbox">${bidBlock(r.itemNo,bu,!r.buyerUid&&bu?nbsBuyerNote(r):'',nbsBuyerWarn(r))}</div></td>
     <td data-l="Remark" class="small">${r.remark?`<div class="redbox">${esc(r.remark)}</div>`:'<span class="muted">-</span>'}</td>
     <td data-l="บันทึกเมื่อ" class="small num nsave">${c&&!isNaN(c)?`${fmt(c)}<div class="muted">${String(c.getHours()).padStart(2,'0')}.${String(c.getMinutes()).padStart(2,'0')} น.${r.source==='import'?' · จากไฟล์':''}</div>`:'-'}<div class="actbtns w"><button class="btn sm" onclick="nbsEdit('${k}')">แก้ไข</button><button class="btn sm danger" onclick="nbsDel('${k}')">ลบ</button></div></td></tr>`}).join('');
