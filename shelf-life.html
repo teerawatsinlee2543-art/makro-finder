@@ -438,6 +438,8 @@ table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 .ag-row b,.ag-row .ag-v{white-space:nowrap;font-weight:700}
 .ag-row b{font-variant-numeric:tabular-nums}
 .ag-file{margin-top:4px}
+.ag-sent{margin-top:4px;font-size:12.5px;line-height:1.5;color:var(--muted)} /* "อีก 15 วัน จะเข้าสู่สถานะถัดไป คือ วันที่ 8 พ.ย. 2026" as one sentence; the date never breaks in the middle */
+.ag-sent b{color:var(--ink);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ag-grp{margin-top:2px;font-size:12px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
 .chip.ag-next{align-self:flex-start;margin:2px 0 4px}
 .contact .ct-com{margin-top:8px} /* "Commercial: …" under the Buyer ID block of the Monitor table */
@@ -5221,7 +5223,7 @@ function nbsAgingText(r){
   const [lb,k]=AGING_LV[a.level],pv=AGING_PROV[a.level],fm=/^\s*([1-5])\s*-/.exec(t),fnote=fm&&+fm[1]!==a.level?`<div class="ag-row ag-file" title="สถานะในไฟล์ที่นำเข้า (นับถึงวันที่ออกรายงาน)"><span>ตามไฟล์</span><span class="ag-v">${esc(t)}</span></div>`:'';
   /* plain Thai: where the item is now, how old it is, and what comes next and when */
   return`<div class="ag-l">สถานะตอนนี้</div><span class="chip ag-now s-${k}">${lb}</span><div class="ag-rows">${pv?`<div class="ag-row" title="สัดส่วนที่ต้องตั้งสำรอง (Provision) สำหรับสถานะนี้"><span>โดนหักไป</span><b>${pv}%</b></div>`:''}<div class="ag-row ag-long" title="นับอายุตามกลุ่ม ${esc(a.name)}"><span>${agingBasis==='recv'?'Last Recv. Date':'วันที่ขายล่าสุด'} จนถึงวันนี้ เป็นระยะเวลา</span> <span class="ag-tail">ทั้งหมด <b>${a.age.toLocaleString()} วัน</b></span></div></div><div class="ag-grp">กลุ่ม ${esc(a.name)}</div>`
-    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน จะเปลี่ยนสถานะ"><span class="ag-l">สถานะถัดไป</span><span class="chip s-${a.next[1]} mini ag-next">${a.next[0]}</span><div class="ag-rows"><div class="ag-row"><span>อีก</span><b>${a.left.toLocaleString()} วัน</b></div><div class="ag-row"><span>วันที่</span><span class="ag-v">${fmt(addD(today(),a.left))}</span></div></div></div>`:'<div class="agnext"><span class="ag-l">สถานะถัดไป</span><span class="muted">ไม่มีแล้ว — อยู่สถานะสูงสุดแล้ว</span></div>')+fnote;
+    +(a.next?`<div class="agnext" title="ครบเกณฑ์ ${a.T[a.level]} วัน จะเปลี่ยนสถานะ"><span class="ag-l">สถานะถัดไป</span><span class="chip s-${a.next[1]} mini ag-next">${a.next[0]}</span><div class="ag-sent">อีก <b>${a.left.toLocaleString()} วัน</b> จะเข้าสู่สถานะถัดไป คือ วันที่ <b class="ag-date">${fmt(addD(today(),a.left))}</b></div></div>`:'<div class="agnext"><span class="ag-l">สถานะถัดไป</span><span class="muted">ไม่มีแล้ว — อยู่สถานะสูงสุดแล้ว</span></div>')+fnote;
 }
 /* Buyer shown for an Item NBS row: its own Buyer; otherwise the Buyer the same Item No has on the OOS+ page (buyer_uid) or in the ItemList_Layout loaded on High Stock to DMS / Negative Stock (Buyer column) — so every page shows the same Buyer for the same item. Nothing is written: change the other page's data and this follows. */
 var NBSB=null;
