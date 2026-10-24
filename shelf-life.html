@@ -3924,7 +3924,12 @@ function stkFocus(card,sel,quiet){
   btnBack.onclick=()=>stkUnfocus();
   /* a click on this page brings this page's window to the front and hides the Makro windows behind it: after every click the open Makro windows are raised again (a browser has no "always on top" for a window).
      Only after the click is finished (pointerup), never on focus: raising a window in the middle of a click would swallow the click. */
-  const raise=e=>{if(e&&e.target&&e.target.closest&&e.target.closest('.stk-back'))return;Object.values(stkOpened).forEach(w=>{try{if(w&&w.closed!==true)w.focus()}catch(x){}})};
+  /* the small boxes of this page (the Buyer ID dialog, the Full Name panel, a question box) stay in FRONT of the Makro windows so they can be read and closed: while one is open, this page is brought forward instead of the Makro windows.
+     The check waits a moment so it sees the box that the click itself has just opened. */
+  const raise=e=>{if(e&&e.target&&e.target.closest&&e.target.closest('.stk-back'))return;
+    setTimeout(()=>{const bn=document.getElementById('bnPanel');
+      if(document.querySelector('dialog[open]')||(bn&&!bn.hidden)){try{window.focus()}catch(x){}return}
+      Object.values(stkOpened).forEach(w=>{try{if(w&&w.closed!==true)w.focus()}catch(x){}})},80)};
   document.addEventListener('pointerup',raise,true);
   stkFoc={card,ph,dim,back,timer,sel,raise};
 }
