@@ -277,6 +277,8 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 .td-next{margin-top:6px;padding-top:6px;border-top:1px dashed var(--redbox-line);font-weight:600;line-height:1.35}
 .td-lbl{display:inline-block;font-size:11px;font-weight:700;background:#ffb4ae;color:#000;border:1px solid #e08a84;border-radius:4px;padding:0 6px;margin-right:6px;vertical-align:1px} /* black text on a light red label (both themes) */
 .td-when{font-weight:500;opacity:.85;margin-top:2px}
+.redbox.todo.todo-ok{--redbox:var(--okbg);--redbox-ink:var(--ok);--redbox-line:color-mix(in srgb,var(--ok) 35%,var(--okbg))} /* normal sale: the to-do box is green, not red */
+.redbox.todo.todo-ok .td-lbl{background:#b7ecc9;border-color:#6fbf8c}
 /* contacts table: header in the colours of the Makro org chart */
 table.ct-tbl{table-layout:fixed}
 table.ct-tbl thead th{background:#ffc85c;color:#2b1d00;border:0;text-transform:none;letter-spacing:0;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center;padding:7px 5px;vertical-align:middle}
@@ -1887,7 +1889,7 @@ function evalBatch(b){
 }
 function todoHTML(e){
   const nx=e.next;
-  return`<div class="redbox todo"><div class="td-now">${esc(e.todo||e.action)}</div>${nx?`<div class="td-next"><span class="td-lbl">ถัดไป</span>${esc(nx.what)}${nx.date?`<div class="td-when">${esc(fmtS(nx.date))} · ${nx.inDays===1?'พรุ่งนี้':nx.inDays===0?'วันนี้':`อีก ${nx.inDays} วัน`}</div>`:''}</div>`:''}</div>`;
+  return`<div class="redbox todo${e.st==='ok'?' todo-ok':''}"><div class="td-now">${esc(e.todo||e.action)}</div>${nx?`<div class="td-next"><span class="td-lbl">ถัดไป</span>${esc(nx.what)}${nx.date?`<div class="td-when">${esc(fmtS(nx.date))} · ${nx.inDays===1?'พรุ่งนี้':nx.inDays===0?'วันนี้':`อีก ${nx.inDays} วัน`}</div>`:''}</div>`:''}</div>`;
 }
 const ST=[['pull','Code 52'],['md2','ลดราคา 30%'],['md1','ลดราคา 15%'],['soon','พรุ่งนี้ลดราคา'],['ok','ขายปกติ'],['err','ต้องตรวจสอบ']];
 
