@@ -1918,7 +1918,7 @@ function evalBatch(b){
   if(day<1)return mk({st:'err',label:'วันรับในอนาคต',rank:-1},'ตรวจสอบ Julian code อีกครั้ง');
   const ap=amPm(p),pm=new Date().getHours()>=12;
   if(day>p.pullDay||(day===p.pullDay&&(!ap||pm)))return mk({st:'pull',label:'Code 52',rank:0},
-    `นำออกจากชั้นวาง ทำ Code 52${day>p.pullDay?` (เลยกำหนดมา ${day-p.pullDay} วัน)`:''}`,{what:'แจ้ง Buyer และ Commercial'});
+    `นำออกจากชั้นวาง ทำ Code 52${day>p.pullDay?` (เลยกำหนดมา ${day-p.pullDay} วัน)`:''}`,{what:'แจ้งหัวหน้าที่เป็น Duty และ SGM สาขา'});
   if(ap&&day===p.pullDay)return mk({st:'md2',label:`ลด ${p.md2Pct}%`,rank:1},`ช่วงเช้า ขายลดราคา ${p.md2Pct}%`,{what:'บ่ายวันนี้ทำ Code 52'});
   if(p.md2Day&&day>=p.md2Day)return mk({st:'md2',label:`ลด ${p.md2Pct}%`,rank:1},
     `ขายลดราคา ${p.md2Pct}% (Step ${p.md1Day?2:1})`,{what:ap?'Code 52 (ช่วงบ่าย)':'Code 52',d:p.pullDay});
