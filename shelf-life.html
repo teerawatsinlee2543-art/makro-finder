@@ -2166,21 +2166,21 @@ function bidBlock(no,uid,note,warn,noNames,bare){ /* bare: no buttons at all (th
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
   const detail=u?(c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial — เพิ่มชื่อ Buyer นี้ที่แท็บ Buyer / Commercial เพื่อให้เห็นรายละเอียดผู้ดูแล</div>`):'';
   /* all the buttons of the block in one grid: the same width and height, side by side when there is room, else one under the other */
-  const tools=`<div class="bid-tools"><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>${c&&!noNames?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</div>`;
+  const tools=`<div class="bid-tools"><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>${c&&!noNames?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}',this)" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</div>`;
   const editBtn=`<div class="bid-tools bid-foot"><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
   return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}</div>${bare?'':tools}${detail}${wr}${bare?'':editBtn}</div>`;
 }
 /* the same Buyer ID block without the Item buttons, for a lot that has no Item No. (only the Buyer the Shelf life rule names) */
 function bidSimple(uid,noNames){
   uid=String(uid||'');if(!uid)return'<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Buyer ID</span><span class="muted">— ยังไม่กำหนด —</span></div></div>';
-  const c=nbsContact(uid),tools=c&&!noNames?`<div class="bid-tools"><button type="button" class="btn sm bid-names" onclick="bidNames('${esc(uid)}')" title="ดูชื่อเต็มและเบอร์โทรของทุกคนที่ดูแล Buyer นี้">Full Name Buyer</button></div>`:'';
+  const c=nbsContact(uid),tools=c&&!noNames?`<div class="bid-tools"><button type="button" class="btn sm bid-names" onclick="bidNames('${esc(uid)}',this)" title="ดูชื่อเต็มและเบอร์โทรของทุกคนที่ดูแล Buyer นี้">Full Name Buyer</button></div>`:'';
   return`<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Buyer ID</span><b class="bid">${esc(uid)}</b></div>${tools}${c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(uid)} ในรายชื่อ Buyer / Commercial</div>`}</div>`}
 /* contact cell of the Monitor table: three boxes one under the other - Buyer ID, Commercial, and Full Name Buyer at the very bottom */
 function contactCell(e,p,ii){
   const bm=ii?nbsBuyerMap().get(amNum(ii.no)):'',ru=(e.buyer&&e.buyer.uid)||p.buyerUid||'',u=ii?(ibuyUid(ii.no)||ru||bm||''):ru;
   const buyer=ii?bidBlock(ii.no,ru||bm||'',!ru&&bm?'ตามข้อมูล OOS+ / ItemList':'',null,true,true):bidSimple(ru,true);
   const com=`<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Commercial</span></div><div>${who(e.com,p.comUid)}</div></div>`;
-  const names=u&&nbsContact(u)?`<button type="button" class="btn sm bid-names ct-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:'';
+  const names=u&&nbsContact(u)?`<button type="button" class="btn sm bid-names ct-names" onclick="bidNames('${esc(u)}',this)" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:'';
   return`<div class="small contact">${e.st==='ok'?'<span class="muted">ยังไม่ต้องติดต่อ</span>':''}${buyer}${com}${names}</div>`}
 /* "Full Name Buyer": everybody listed for this Buyer (from the Buyer / Commercial tab) with full name + phone, in a small box */
 function bidPeople(c){
@@ -2199,12 +2199,19 @@ function bidPeople(c){
   add('Associate Director',X&&X.ad.length?X.ad:(v.ad?[v.ad]:[]));
   add('Senior Director',X&&X.sd.length?X.sd:(v.sd?[v.sd]:[]));
   return out}
-function bidNames(uid){
+function bidNames(uid,btn){
   const c=nbsContact(uid);if(!c){toast('ไม่พบ '+uid+' ในรายชื่อ Buyer / Commercial');return}
   const ps=bidPeople(c);
   $('#bnTitle').innerHTML=`Full Name Buyer · <span class="bid" style="font-size:1em">${esc(uid)}</span>`;
   $('#bnList').innerHTML=ps.length?ps.map(p=>`<div class="bn-row"><span>${esc(p.role)}</span><b>${esc(p.name)}</b>${p.phone?`<a class="small num" href="tel:${esc(p.phone.replace(/[^\d+]/g,''))}">${esc(p.phone)}</a>`:''}</div>`).join(''):'<div class="muted small">ยังไม่มีรายชื่อ — เพิ่มได้ที่แท็บ Buyer / Commercial</div>';
-  const p=$('#bnPanel');p.hidden=false;p.style.left='12px';p.style.top='12px';p.scrollTop=0}
+  const p=$('#bnPanel');p.hidden=false;p.style.left='12px';p.style.top='12px';p.scrollTop=0;
+  /* open beside the Buyer box whose button was pressed (to its left, else its right), top lines up with the box, always kept on screen; still draggable */
+  const box=btn&&(btn.closest('.contact')||btn.closest('.bid-block')||btn);
+  if(box&&box.getBoundingClientRect){
+    const r=box.getBoundingClientRect(),w=p.offsetWidth,h=p.offsetHeight,gap=8;
+    let x=r.left-w-gap;if(x<8)x=r.right+gap;if(x+w>innerWidth-8)x=Math.max(8,Math.min(innerWidth-w-8,r.left-w-gap));
+    const y=Math.max(8,Math.min(r.top,innerHeight-h-8));
+    p.style.left=Math.round(x)+'px';p.style.top=Math.round(y)+'px'}}
 /* AUTO: a small script that runs inside the BIP window (the Tampermonkey script bip-buyer.user.js, or the bookmarklet from the help box) reads "Buyer ID" off the report
    and posts it back to this page, which opened that window. This page cannot read BIP itself (plain http on a private network), but the BIP page can talk back to its opener. */
 const BIP_ORIGIN='http://bip-app.siammakro.co.th:9714';
