@@ -674,6 +674,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .loc-tools .waste-io-del i{color:#a85a00}
 .loc-tools .waste-io-imp i{color:#0b5cad}
 .loc-tools .noloc-btn i{color:#a85a00}
+/* header: the language box and the scan box are the same size, with their content centred */
+.hdr-icon-col,.search-scan-btn{box-sizing:border-box;width:104px;height:46px;padding:0 8px;justify-content:center;align-items:center;text-align:center}
+.search-scan-btn{align-self:center}
+.hdr-icon-col{min-width:0;gap:3px}
 /* computer screens: the customer-feedback card is full width, and below it the four tools sit in one row: ลบไฟล์ | นำเข้าข้อมูล | Item ที่ยังไม่มี Location | Weight Loss and Waste O2O (other screens keep the old stacked layout) */
 @media (min-width:900px){
   #employeeFeedbackSection[style*="block"]{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 16px;align-items:stretch}
