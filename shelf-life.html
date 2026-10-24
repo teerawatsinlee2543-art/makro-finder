@@ -365,20 +365,21 @@ table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-in
 /* computer table: the Remark column is gone; the Remark sits in a grey box at the bottom-left of the row, under the item name (card layouts keep their own Remark cell) */
 .nrem-dock{display:none}
 @media (min-width:1181px){
-  table.nbs-tbl td[data-l="ชื่อสินค้า"]{height:1px}
-  table.nbs-tbl td[data-l="ชื่อสินค้า"] .ncell{height:100%}
-  .nrem-dock{display:grid;gap:4px;margin-top:auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.4;overflow-wrap:anywhere}
-  .nrem-dock .nrem-t{font-weight:600;white-space:pre-wrap}
-  table.nbs-tbl td[data-l="Remark"],table.nbs-tbl thead th:nth-child(11),table.nbs-tbl colgroup col:nth-child(11){display:none}
+  /* every rule here is for the plain table rows only: a lifted card (tr.stk-focus, a grid) keeps its own card layout, with its photo and its Remark cell */
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="ชื่อสินค้า"]{height:1px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="ชื่อสินค้า"] .ncell{height:100%}
+  table.nbs-tbl tr:not(.stk-focus) .nrem-dock{display:grid;gap:4px;margin-top:auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+  table.nbs-tbl tr:not(.stk-focus) .nrem-dock .nrem-t{font-weight:600;white-space:pre-wrap}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Remark"],table.nbs-tbl thead th:nth-child(11),table.nbs-tbl colgroup col:nth-child(11){display:none}
   /* both date columns (Last Recv. / Last Sold) show a whole date on one line, like "24 ก.ย. 2026" */
-  table.nbs-tbl td[data-l="Last Recv. Date"],table.nbs-tbl td[data-l="Last Sold Date"]{white-space:nowrap}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Last Recv. Date"],table.nbs-tbl tr:not(.stk-focus) td[data-l="Last Sold Date"]{white-space:nowrap}
   /* Buyer column wide enough for the buttons: "Stock Movement 14 วัน" on one line, centred and filling its box */
-  table.nbs-tbl td[data-l="Buyer"] .bid-tools{grid-template-columns:1fr}
-  table.nbs-tbl td[data-l="Buyer"] .bid-tools .btn{white-space:nowrap;text-align:center;justify-content:center;width:100%;padding-left:6px;padding-right:6px}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"] .bid-tools{grid-template-columns:1fr}
+  table.nbs-tbl tr:not(.stk-focus) td[data-l="Buyer"] .bid-tools .btn{white-space:nowrap;text-align:center;justify-content:center;width:100%;padding-left:6px;padding-right:6px}
   /* the last column (date + Edit / Delete) is squeezed */
-  table.nbs-tbl td.nsave{font-size:12px;padding-left:4px;padding-right:4px}
-  table.nbs-tbl td.nsave .actbtns{flex-direction:column}
-  table.nbs-tbl td.nsave .actbtns .btn{padding:3px 4px;font-size:12px}
+  table.nbs-tbl tr:not(.stk-focus) td.nsave{font-size:12px;padding-left:4px;padding-right:4px}
+  table.nbs-tbl tr:not(.stk-focus) td.nsave .actbtns{flex-direction:column}
+  table.nbs-tbl tr:not(.stk-focus) td.nsave .actbtns .btn{padding:3px 4px;font-size:12px}
 }
 .nhead{display:flex;gap:10px;align-items:flex-start}
 .nthumb{flex:none;width:68px;height:68px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--line)}
@@ -969,7 +970,7 @@ th.sortable:hover{color:var(--accent)}
   .oosc>.bid-block:last-child{margin-top:auto} /* cards that end with the Buyer ID box (%Shrink, Negative Stock, High Stock to DMS): the boxes of one row sit on the same line with the same space under them */
   .oosc-found{margin-top:auto}.oosc-found+.oosc-a{margin-top:0} /* "ตรวจพบ …" sits right above the buttons, both at the bottom of the card */
   .oosc-a{margin-top:auto} /* the action buttons (เริ่มเติม / เติมแล้ว / แก้ไข / ลบ) sit on the very bottom edge of every card, even when the Buyer box follows the info directly above */
-  #oosMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+  #oosMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start;padding:12px;border:1.5px solid color-mix(in srgb,var(--muted) 35%,var(--line));border-radius:18px} /* one rounded frame around the chart box + the card, with room inside so it never touches the purple / red edges */
   #oosMain.drill .oos-chart{margin:0}
   #oosMain.drill .oos-list{grid-template-columns:minmax(0,1fr);align-items:start}
 }
@@ -1058,7 +1059,7 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
 .sn-row{display:grid;gap:4px}
 .sn-row input{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
 @media (min-width:1000px){
-  #shrMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+  #shrMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start;padding:12px;border:1.5px solid color-mix(in srgb,var(--muted) 35%,var(--line));border-radius:18px}
   #shrMain.drill .oos-chart{margin:0}
   #shrMain.drill .oos-list{grid-template-columns:minmax(0,1fr);align-items:start}
 }
@@ -1104,7 +1105,7 @@ label:has(>:is(#negQ,#dmsQ)){color:var(--accent);font-weight:800;font-size:14px}
 :is(#negTiles,#dmsTiles) .tile{min-width:0}
 :is(#negTiles,#dmsTiles) .tile .chip{white-space:normal;line-height:1.25;max-width:100%}
 @media (min-width:1000px){
-  :is(#negMain,#dmsMain).drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+  :is(#negMain,#dmsMain).drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start;padding:12px;border:1.5px solid color-mix(in srgb,var(--muted) 35%,var(--line));border-radius:18px}
   :is(#negMain,#dmsMain).drill .oos-chart{margin:0}
   :is(#negMain,#dmsMain).drill .oos-list{grid-template-columns:minmax(0,1fr);align-items:start}
 }
