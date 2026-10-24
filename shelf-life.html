@@ -1154,7 +1154,7 @@ label.has-scan{position:relative}
     <div class="legend" id="dashLegend">
       <span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลดราคา 15%</span><span style="--c:var(--seg-md2)">ลดราคา 30%</span><span style="--c:var(--seg-pull)">Code 52</span><span class="today-key">กรอบสีม่วง = วันนี้</span>
     </div>
-    <table class="resp"><thead><tr><th>สถานะ</th><th>สินค้า</th><th>Julian รับ</th><th>วางขาย</th><th>Code 52</th><th>ต้องทำ</th><th>ติดต่อ</th><th>จำนวน</th><th class="no-print"></th></tr></thead>
+    <table class="resp"><thead><tr><th>สถานะ</th><th>สินค้า</th><th>Julian รับ</th><th>วางขาย</th><th>Code 52</th><th>ต้องทำ</th><th>ติดต่อ</th><th>จำนวน / Location</th><th class="no-print"></th></tr></thead>
     <tbody id="dashBody"></tbody></table>
     <p class="muted" id="dashLoading">กำลังโหลดข้อมูลทีม…</p>
     <p class="muted" id="dashEmpty" hidden>ยังไม่มีล็อตที่ตรงเงื่อนไข — ไปที่แท็บ “+ Monitor item”</p>
@@ -2286,7 +2286,7 @@ function renderDash(){
     <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
     <td data-l="ต้องทำ">${todoHTML(e)}</td>
     <td data-l="ติดต่อ"><div class="small contact">${e.st==='ok'?'<span class="muted">ยังไม่ต้องติดต่อ</span><br>':''}Buyer: ${who(e.buyer,p.buyerUid)}<br>Commercial: ${who(e.com,p.comUid)}</div></td>
-    <td data-l="จำนวน" class="num"><div>${esc(b.qty)}<div class="muted small">${esc(b.loc)}</div></div></td>
+    <td data-l="จำนวน / Location" class="num"><div>${esc(b.qty)}<div class="muted small">${esc(b.loc)}</div></div></td>
     <td class="no-print"><div class="actbtns">
       <button class="btn sm" title="คัดลอกข้อความแจ้ง Buyer/Commercial" onclick="copyMsg('${k}')">คัดลอก</button>
       ${e.st!=='ok'?`<button class="btn sm w" onclick="ack('${k}')">${done?'ยกเลิก ✓':'ทำแล้ว'}</button>`:''}
