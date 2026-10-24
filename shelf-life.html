@@ -305,17 +305,17 @@ table.ct-tbl .cn{font-weight:700}
 /* pastel: soft fill, a slightly deeper border and text of the same hue */
 .bid-tools .bid-move{background:#e4eefc;border-color:#bcd3f2;color:#23518f;font-weight:700}
 .bid-tools .bid-move:hover{background:#d6e6fb;border-color:#a3c2ec}
-.bid-tools .bid-names{background:#eee8fa;border-color:#d7caf0;color:#573b98;font-weight:700}
-.bid-tools .bid-names:hover{background:#e3daf6;border-color:#c6b4e9}
+:is(.bid-tools .bid-names,.contact .ct-names){background:#eee8fa;border-color:#d7caf0;color:#573b98;font-weight:700}
+:is(.bid-tools .bid-names,.contact .ct-names):hover{background:#e3daf6;border-color:#c6b4e9}
 :root[data-theme="dark"] .bid-tools .bid-move{background:#27405f;border-color:#3e5d8a;color:#cbdcf8}
 :root[data-theme="dark"] .bid-tools .bid-move:hover{background:#2f4d73;border-color:#4d70a3}
-:root[data-theme="dark"] .bid-tools .bid-names{background:#382d5c;border-color:#56487f;color:#ddd2f6}
-:root[data-theme="dark"] .bid-tools .bid-names:hover{background:#43366c;border-color:#665792}
+:root[data-theme="dark"] :is(.bid-tools .bid-names,.contact .ct-names){background:#382d5c;border-color:#56487f;color:#ddd2f6}
+:root[data-theme="dark"] :is(.bid-tools .bid-names,.contact .ct-names):hover{background:#43366c;border-color:#665792}
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]) .bid-tools .bid-move{background:#27405f;border-color:#3e5d8a;color:#cbdcf8}
   :root:not([data-theme="light"]) .bid-tools .bid-move:hover{background:#2f4d73;border-color:#4d70a3}
-  :root:not([data-theme="light"]) .bid-tools .bid-names{background:#382d5c;border-color:#56487f;color:#ddd2f6}
-  :root:not([data-theme="light"]) .bid-tools .bid-names:hover{background:#43366c;border-color:#665792}
+  :root:not([data-theme="light"]) :is(.bid-tools .bid-names,.contact .ct-names){background:#382d5c;border-color:#56487f;color:#ddd2f6}
+  :root:not([data-theme="light"]) :is(.bid-tools .bid-names,.contact .ct-names):hover{background:#43366c;border-color:#665792}
 }
 .bid-tools .btn{white-space:normal;min-width:0;max-width:100%;box-sizing:border-box;text-align:center;line-height:1.25;padding:6px 8px;overflow-wrap:anywhere} /* long labels wrap inside the button instead of running past the box edge */
 /* Full Name Buyer: a panel that is not a dialog, so it stays until its own ✕ is pressed and sits above everything on the page (also the lifted card). It keeps to the left part of the screen (the Makro windows open on the right). Drag the title to move it. */
