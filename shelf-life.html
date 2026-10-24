@@ -181,6 +181,11 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .cphone a{color:var(--accent);font-weight:600;text-decoration:none}
 .cbackup{font-size:12.5px;color:var(--muted)}
 .add-card{display:grid;gap:16px}
+.div-tabs{display:inline-flex;width:max-content;justify-self:start;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)} /* Monitor item: FF | DF & NF tabs at the top-left of the card */
+.div-tabs button{font:inherit;font-size:15px;font-weight:800;padding:9px 22px;border:0;background:var(--card);color:var(--ink);cursor:pointer}
+.div-tabs button+button{border-left:1px solid var(--line)}
+.div-tabs button.on{background:var(--accent);color:var(--accent-ink)}
+.div-tabs button:not(.on):hover{background:var(--bg)}
 .add-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
 .add-head h2{margin:0}
 .add-step{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:10px;background:var(--card)}
@@ -189,7 +194,7 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 @media (min-width:1100px){
   #t-add .add-card{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
   #t-add .add-card:has(#mfBox[hidden]){grid-template-columns:repeat(2,minmax(0,1fr))}
-  #t-add .add-card>.add-head{grid-column:1/-1}
+  #t-add .add-card>.add-head,#t-add .add-card>.div-tabs{grid-column:1/-1}
   #t-add .add-card .lot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   #t-add .add-card .search-row{flex-wrap:wrap}
   /* the three boxes are equally tall; each one is a column, so its last item (the "ค้นได้ … สินค้า" line, the Cancel / Save buttons) sits at the very bottom of the box */
@@ -1268,6 +1273,7 @@ label.has-scan{position:relative}
 <!-- ADD BATCH -->
 <section id="t-add" hidden>
   <div class="card add-card">
+    <div class="div-tabs" id="addDivTabs" role="tablist" aria-label="กลุ่มสินค้า"><button type="button" role="tab" data-d="FF" class="on" aria-selected="true">FF</button><button type="button" role="tab" data-d="DFNF" aria-selected="false">DF &amp; NF</button></div>
     <div class="add-head">
       <h2>Monitor item <span class="muted small" style="font-weight:400">· รับสินค้า / เพิ่มล็อต</span></h2>
       <span class="pill">นับวันตามคู่มือ: วันรับสินค้า = <b>วันที่ 1</b></span>
@@ -1527,6 +1533,7 @@ label.has-scan{position:relative}
     <label>รูปสินค้า (รหัสสินค้า Makro Finder หรือ URL รูป)<input name="img" placeholder="เช่น 411671 — เว้นว่าง = ใช้รูปมาตรฐาน"></label>
     <label>SKU / Item code (ถ้ามี)<input name="sku"></label>
     <label>ประเภท<select name="origin"><option value="import">ผักผลไม้นำเข้า</option><option value="local">ผักผลไม้ท้องถิ่น</option><option value="other">อื่นๆ</option></select></label>
+    <label>กลุ่มสินค้า (แท็บในหน้า Monitor item)<select name="div"><option value="FF">FF</option><option value="DFNF">DF &amp; NF</option></select></label>
     <label>หมวด<input name="cat"></label>
     <label>อุณหภูมิจัดเรียง<input name="temp" placeholder="เช่น 0–4°C"></label>
     <label>Shelf life (วัน)<input name="shelf" type="number" min="1" required></label>
@@ -2196,8 +2203,19 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');cl
 const chip=(k,l)=>`<span class="chip s-${k}">${esc(l)}</span>`;
 const who=(c,uid)=>!c&&uid?`<b>${esc(uid)}</b> <span class="muted">(ไม่มีรายชื่อในข้อมูลนี้)</span>`:c?`<b>${esc(c.uid)}</b> ${esc(c.name)}${c.phone?` · ${esc(c.phone)}`:""}${c.email?` · ${esc(c.email)}`:""}${c.backup?`<br><span class="muted">สำรอง: ${esc(c.backup)}</span>`:""}`:'<span class="muted">— ยังไม่กำหนด —</span>';
 const OO={import:0,local:1,other:2};
+/* Monitor item has two tabs: FF, and DF & NF. Each Shelf life rule belongs to one of them (rule.div = 'DFNF' for DF & NF; anything else, including the older rules, is FF). The rule box of the add form lists only the rules of the open tab. */
+const ruleDiv=p=>p&&p.div==='DFNF'?'DFNF':'FF';
+let addDiv='FF';try{addDiv=localStorage.getItem('shelfLifeMonitor.addDiv')==='DFNF'?'DFNF':'FF'}catch(e){}
+function renderAddDivTabs(){document.querySelectorAll('#addDivTabs button').forEach(b=>{const on=b.dataset.d===addDiv;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')})}
+function setAddDiv(d){
+  addDiv=d==='DFNF'?'DFNF':'FF';try{localStorage.setItem('shelfLifeMonitor.addDiv',addDiv)}catch(e){}
+  renderAddDivTabs();
+  const cur=$('#aSku').value,p=findProd(cur);
+  $('#aSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(p&&ruleDiv(p)===addDiv?cur:'',addDiv); /* a rule of the other tab is dropped from the box */
+  addPreview();
+}
 const bySku=()=>[...st.products].sort((a,b)=>(OO[a.origin]??3)-(OO[b.origin]??3)||a.shelf-b.shelf||String(a.desc).localeCompare(String(b.desc),'th'));
-function prodOptions(sel){return bySku().map(p=>`<option value="${esc(pkey(p))}"${pkey(p)===sel?' selected':''}>${p.sku?esc(p.sku)+' · ':''}${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} · ${p.shelf} วัน)</option>`).join('')}
+function prodOptions(sel,div){return bySku().filter(p=>!div||ruleDiv(p)===div).map(p=>`<option value="${esc(pkey(p))}"${pkey(p)===sel?' selected':''}>${p.sku?esc(p.sku)+' · ':''}${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} · ${p.shelf} วัน)</option>`).join('')}
 function ctOptions(sel,role){const l=st.contacts.filter(c=>!role||c.role===role),gs=[...new Set(l.map(grpOf))].sort();
   return'<option value="">— ไม่ระบุ —</option>'+gs.map(g=>`<optgroup label="${esc(g)}">`+l.filter(c=>grpOf(c)===g).sort((a,b)=>String(a.uid).localeCompare(String(b.uid))).map(c=>`<option value="${esc(c.uid)}"${c.uid===sel?' selected':''}>${esc(c.uid)} · ${esc(c.name)}</option>`).join('')+'</optgroup>').join('')}
 function planHTML(p,prod){
@@ -2540,7 +2558,7 @@ function renderMfResults(){
 }
 function pickMf(no){
   const it=MF.items.get(no);if(!it)return;mfPick=it;$('#mfResults').innerHTML='';$('#mfQ').value='';
-  const p=guessRule(it);$('#aSku').value=p?pkey(p):'';aSkuAuto=true; /* no matching rule = the rule box is emptied, never left on the previous product's rule */
+  const p=guessRule(it);if(p&&ruleDiv(p)!==addDiv)setAddDiv(ruleDiv(p));$('#aSku').value=p?pkey(p):'';aSkuAuto=true; /* no matching rule = the rule box is emptied, never left on the previous product's rule */
   $('#mfPicked').hidden=false;
   $('#mfPicked').innerHTML=`${MF.images[it.itemNo]?`<img src="${esc(MF.images[it.itemNo])}" alt="">`:''}<div><b>${esc(it.desc)}</b><div class="muted small">${esc(it.itemNo)}${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div>${it.locs.length?`<div class="small">ตำแหน่งในร้าน: <b>${esc(locText(it.locs))}</b></div>`:''}<div class="small ${p?'muted':'err-text'}">${p?`ใช้กฎ Shelf life: ${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} ${p.shelf} วัน) — เปลี่ยนได้ที่ช่อง “กฎ Shelf life” ด้านล่าง`:'ไม่พบกฎที่ตรงกับสินค้านี้ — เลือกกฎ Shelf life ด้านล่างเอง'}</div></div><button type="button" class="btn sm" id="mfClear">ไม่ใช้</button>`;
   $('#mfClear').onclick=()=>{mfPick=null;$('#mfPicked').hidden=true;if(aSkuAuto){$('#aSku').value='';aSkuAuto=false}addPreview()};
@@ -2594,7 +2612,7 @@ function addPreview(){
   ${buyerCom(it&&it.itemNo,p.buyerUid,st.contacts.find(c=>c.uid===p.comUid),p.comUid)}`;
   return prod&&!(j?.error)?prod:null;
 }
-$('#aSku').onchange=()=>{aSkuAuto=false;addPreview()};$('#aJ').oninput=addPreview;
+$('#aSku').onchange=()=>{aSkuAuto=false;addPreview()};$('#aJ').oninput=addPreview;document.querySelectorAll('#addDivTabs button').forEach(b=>b.onclick=()=>setAddDiv(b.dataset.d));renderAddDivTabs();
 $('#aDate').oninput=()=>{const v=$('#aDate').value;$('#aJ').value=v?jul(fromIso(v)).ddd:'';addPreview()};
 const remarkValue=()=>$('#aRemark').value==='__other'?$('#aRemarkOther').value.trim():$('#aRemark').value;
 $('#aRemark').onchange=()=>{const o=$('#aRemark').value==='__other';$('#aRemarkOtherWrap').hidden=!o;if(o)$('#aRemarkOther').focus()};
@@ -2624,7 +2642,7 @@ function renderProd(){
     <td class="pact"><div class="row w" style="gap:4px;flex-wrap:nowrap"><button class="btn sm" onclick="editProduct('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delProduct('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
 const dlgProd=$('#dlgProd'),fP=$('#fProd');let editId=null;
-const NUMF=['shelf','md1Day','md1Pct','md2Day','md2Pct','pullDay'],TXTF=['sku','desc','img','cat','origin','temp','buyerUid','comUid'];
+const NUMF=['shelf','md1Day','md1Pct','md2Day','md2Pct','pullDay'],TXTF=['sku','desc','img','cat','origin','div','temp','buyerUid','comUid'];
 let prodImgErr="";
 let prodPhoto={id:null,data:null,old:null}; /* id: current "img:" photo of this product · data: freshly taken/attached (not saved yet) · old: photo that was there when the dialog opened */
 function readProdForm(){const o={rv:2};TXTF.forEach(k=>o[k]=fP[k].value.trim());NUMF.forEach(k=>o[k]=+fP[k].value||0);const raw=o.img,r=resolveImg(raw);prodImgErr=r.err||"";o.img=raw?r.url:(prodPhoto.id?'img:'+prodPhoto.id:'');return o}
@@ -2650,7 +2668,7 @@ function editProduct(id){
   const p=cur||{sku:'',desc:'',cat:'',origin:'import',temp:'0–4°C',shelf:7,...autoRule(7,'import'),buyerUid:'',comUid:''};
   $('#dpTitle').textContent=cur?'แก้ไขสินค้า':'เพิ่มสินค้า';
   fP.buyerUid.innerHTML=ctOptions(p.buyerUid,'Buyer');fP.comUid.innerHTML=ctOptions(p.comUid,'Commercial');
-  [...TXTF.filter(k=>k!=='buyerUid'&&k!=='comUid'),...NUMF].forEach(k=>fP[k].value=p[k]??'');
+  [...TXTF.filter(k=>k!=='buyerUid'&&k!=='comUid'),...NUMF].forEach(k=>fP[k].value=p[k]??'');fP.div.value=ruleDiv(p);
   const pid=String(p.img||'').startsWith('img:')?String(p.img).slice(4):null;prodPhoto={id:pid,data:null,old:pid};if(pid)fP.img.value='';
   $('#dpPhotoMsg').textContent='ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน';
   if(onMakroSite())loadMakroData();prodPrev();dlgProd.showModal();
@@ -6272,7 +6290,7 @@ function renderAll0(){
   BBI=null; /* the item -> Buyer table is rebuilt from the latest OOS+ records */
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent="YYDDD "+jul(t).y2;$("#jmDate").textContent=$("#todayTxt").textContent;
-  const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(sel);$('#jSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(js);
+  const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(sel,addDiv);$('#jSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(js);
   renderDash();renderProd();renderCt();renderNbs();renderOos();addPreview();julTab();
   /* the report pages keep their numbers fresh when contacts / OOS records arrive while they are open */
   try{if(!$('#t-shr').hidden||SHR.files.length)renderShr();['neg','dms'].forEach(p=>{if(ILT[p])renderIlt(p)})}catch(e){}
