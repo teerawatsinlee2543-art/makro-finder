@@ -658,6 +658,16 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 #palletOpenBar[style*="block"]{display:flex!important;gap:12px}
 #palletOpenBar .pallet-open-btn{flex:1 1 0;min-width:0;width:auto;margin-top:0!important;text-align:center}
 @media (max-width:520px){#palletOpenBar{gap:8px!important}#palletOpenBar .pallet-open-btn{flex-direction:column;gap:6px;padding:12px 8px;font-size:13.5px;line-height:1.25}#palletOpenBar .pallet-open-btn i{width:30px;height:30px;font-size:17px}}
+/* hover motion: on a mouse, the box under the pointer lifts a little with a soft shadow (not on touch screens, so nothing sticks after a tap) */
+@media (hover:hover){
+  .cat-card,.promo-add-banner,.pallet-open-btn,.role-option,.waste-io-btn,.noloc-btn,.result-item,.feedback-card[onclick]{transition:transform .16s ease,box-shadow .16s ease,border-color .15s,background .15s}
+  .cat-card:hover,.promo-add-banner:hover,.pallet-open-btn:hover,.role-option:hover,.waste-io-btn:hover,.noloc-btn:hover,.result-item:hover,.feedback-card[onclick]:hover{transform:translateY(-4px);box-shadow:0 10px 22px rgba(20,24,33,.16)}
+  .cat-card:active,.promo-add-banner:active,.pallet-open-btn:active,.role-option:active,.waste-io-btn:active,.noloc-btn:active,.result-item:active,.feedback-card[onclick]:active{transform:translateY(-1px);box-shadow:0 4px 10px rgba(20,24,33,.12)}
+}
+@media (prefers-reduced-motion:reduce){
+  .cat-card,.promo-add-banner,.pallet-open-btn,.role-option,.waste-io-btn,.noloc-btn,.result-item,.feedback-card[onclick]{transition:none}
+  .cat-card:hover,.promo-add-banner:hover,.pallet-open-btn:hover,.role-option:hover,.waste-io-btn:hover,.noloc-btn:hover,.result-item:hover,.feedback-card[onclick]:hover{transform:none}
+}
 .fb-empty{text-align:center;padding:24px 12px;color:var(--color-text-tertiary);font-size:12.5px}
 @media (max-width:479px){
   .pallet-action-row{flex-direction:column}
