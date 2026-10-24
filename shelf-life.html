@@ -879,6 +879,9 @@ th.sortable:hover{color:var(--accent)}
 /* OOS+ (computer): cards in a row are the same height, buttons on the bottom line; a click on the chart shows chart (left) + item (right) */
 @media (min-width:1000px){
   .oos-list{align-items:stretch}
+  /* the Buyer ID box sits at the very bottom of every card (the cards of a row are the same height), so any spare space is above it and the boxes line up */
+  .oosc>.bid-block{margin-top:auto}
+  .oosc>.bid-block~.oosc-a{margin-top:0}
   .oosc-a{margin-top:auto}
   #oosMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
   #oosMain.drill .oos-chart{margin:0}
@@ -4321,7 +4324,7 @@ function shrCard(it,b){
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
     ${bits.length?`<div class="oosc-f small">${bits.join('')}</div>`:''}${rsHtml}
-    ${bidBlock(it.itemNo,it.buyer,'')}${!(ibuyUid(it.itemNo)||it.buyer)?shrComHtml(it):''}</div>`}
+    ${bidBlock(it.itemNo,it.buyer,'')}${!(ibuyUid(it.itemNo)||it.buyer)&&it.coms.length?shrComHtml(it):''}</div>`}
 function shrSrcHtml(){
   const f=SHR.files,sa=f.find(x=>x.kind==='sales'),co=f.filter(x=>x.kind==='code');
   if(!f.length)return'';
