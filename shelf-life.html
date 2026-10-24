@@ -225,6 +225,9 @@ select.need{outline:2px solid #e0892b;outline-offset:1px}
 tr.has-meta td{border-bottom:0}
 tr.meta-row td{padding-top:0;padding-bottom:12px}
 .meta{color:#0b5cad;font-size:13px;display:grid;gap:2px;line-height:1.5}
+.meta-l{display:grid;gap:2px;min-width:0}
+.meta.has-act{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:6px 12px} /* the row buttons (คัดลอก / ทำแล้ว / ลบ) sit at the right end of the "เวลาติดต่อ Buyer / Commercial" line */
+.meta.has-act .actbtns{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-end;margin-left:auto}
 .meta b{font-weight:800}
 .meta .hl{font-weight:800;background:#0b5cad14;border-radius:4px;padding:0 4px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .meta{color:#7fb6ff}}
@@ -445,9 +448,8 @@ table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 .ag-sent b{color:var(--ink);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ag-grp{margin-top:2px;font-size:12px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
 .chip.ag-next{align-self:flex-start;margin:2px 0 4px}
-/* overview table (computer): the contact column is wider, and the row buttons sit at the bottom-right corner of the row */
-@media (min-width:1101px){#dashBody td[data-l="ติดต่อ"]{min-width:230px}#dashBody td.no-print{vertical-align:bottom;text-align:right}#dashBody .actbtns{align-items:flex-end}}
-@media (max-width:1100px){#dashBody .actbtns{justify-content:flex-end}}
+/* overview table (computer): the contact column is wider */
+@media (min-width:1101px){#dashBody td[data-l="ติดต่อ"]{min-width:230px}}
 .contact{display:grid;gap:8px} /* Monitor table contact cell: Buyer ID box, Commercial box, Full Name Buyer box */
 .contact .ct-names{width:100%;padding:9px 10px;font-size:.9rem;border-radius:12px}
 /* Aging Status "status now" badge: a solid, bold badge so ปกติ / Alert / Attention stand out */
@@ -1198,7 +1200,7 @@ label.has-scan{position:relative}
     <div class="legend" id="dashLegend">
       <span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลดราคา 15%</span><span style="--c:var(--seg-md2)">ลดราคา 30%</span><span style="--c:var(--seg-pull)">Code 52</span><span class="today-key">กรอบสีม่วง = วันนี้</span>
     </div>
-    <table class="resp"><thead><tr><th>สถานะ</th><th>สินค้า</th><th>Julian รับ</th><th>วางขาย</th><th>Code 52</th><th>ต้องทำ</th><th>ติดต่อ</th><th>จำนวน / Location</th><th class="no-print"></th></tr></thead>
+    <table class="resp"><thead><tr><th>สถานะ</th><th>สินค้า</th><th>Julian รับ</th><th>วางขาย</th><th>Code 52</th><th>ต้องทำ</th><th>ติดต่อ</th><th>จำนวน / Location</th></tr></thead>
     <tbody id="dashBody"></tbody></table>
     <p class="muted" id="dashLoading">กำลังโหลดข้อมูลทีม…</p>
     <p class="muted" id="dashEmpty" hidden>ยังไม่มีล็อตที่ตรงเงื่อนไข — ไปที่แท็บ “+ Monitor item”</p>
@@ -2346,7 +2348,7 @@ function renderDash(){
   $('#dashLoading').hidden=mode!=='init'&&(mode!=='db'||COLS.every(c=>loaded[c]));
   $('#dashBody').innerHTML=list.map(({b,e})=>{
     const done=b.ack===e.st,p=e.p,k=esc(b._id),ii=itemInfo(b);
-    if(!p)return`<tr><td data-l="สถานะ">${chip('err',e.label)}</td><td data-l="สินค้า" colspan="7">${esc(e.action)}</td><td class="no-print"><button class="btn sm danger w" onclick="delBatch('${k}')">ลบ</button></td></tr>`;
+    if(!p)return`<tr><td data-l="สถานะ">${chip('err',e.label)}</td><td data-l="สินค้า" colspan="7">${esc(e.action)} <button class="btn sm danger w no-print" style="margin-left:8px" onclick="delBatch('${k}')">ลบ</button></td></tr>`;
     const pos=Math.min(100,Math.max(0,(e.day-.5)/p.pullDay*100));
     const by=done&&b.ackBy?(mode==='sheet'?` โดย ${esc(b.ackBy)}`:` โดย <span data-uid="${esc(b.ackBy)}">${b.ackBy===myId?'คุณ':'…'}</span>`):'';
     return`<tr class="has-meta${done?" acted":""}">
@@ -2358,21 +2360,21 @@ function renderDash(){
     <td data-l="ต้องทำ">${todoHTML(e)}</td>
     <td data-l="ติดต่อ">${contactCell(e,p,ii)}</td>
     <td data-l="จำนวน / Location" class="num"><div>${esc(b.qty)}<div class="muted small">${esc(b.loc).split(/ [\/·] /).join('<br>')}</div></div></td>
-    <td class="no-print"><div class="actbtns">
+    </tr>${metaRow(b,done,`<div class="actbtns no-print">
       <button class="btn sm" title="คัดลอกข้อความแจ้ง Buyer/Commercial" onclick="copyMsg('${k}')">คัดลอก</button>
       ${e.st!=='ok'?`<button class="btn sm w" onclick="ack('${k}')">${done?'ยกเลิก ✓':'ทำแล้ว'}</button>`:''}
-      <button class="btn sm danger w" onclick="delBatch('${k}')">ลบ</button></div></td></tr>${metaRow(b,done)}`}).join('');
+      <button class="btn sm danger w" onclick="delBatch('${k}')">ลบ</button></div>`)}`}).join('');
   fillNames();
 }
 /* lot footer: when it was created, plus the store's working rounds (today's rule highlighted) */
 const TH_DOW=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
-function metaRow(b,done){
+function metaRow(b,done,acts){
   const c=b.addedAt?new Date(b.addedAt):null,hm=d=>String(d.getHours()).padStart(2,'0')+'.'+String(d.getMinutes()).padStart(2,'0');
   const created=c&&!isNaN(c)?`${TH_DOW[c.getDay()]} ${fmt(c)} เวลา ${hm(c)} น.`:'— (ล็อตเก่า ไม่มีบันทึกเวลา)';
   const we=[0,6].includes(new Date().getDay());
-  return`<tr class="meta-row${done?' acted':''}"><td colspan="9"><div class="meta">
-    <div><b>Create (วันที่ทำ):</b> ${created}${b.addedBy&&mode==='sheet'?` · โดย ${esc(b.addedBy)}`:''}</div>
-    <div><b>เวลาติดต่อ Buyer / Commercial :</b> <span class="${we?'':'hl'}">จ–ศ = 2 รอบ ทำก่อน 10.00 น. และ 14.00 น.</span> / <span class="${we?'hl':''}">ส–อา = 1 รอบ ทำก่อน 14.00 น.</span></div>
+  return`<tr class="meta-row${done?' acted':''}"><td colspan="8"><div class="meta${acts?' has-act':''}">
+    <div class="meta-l"><div><b>Create (วันที่ทำ):</b> ${created}${b.addedBy&&mode==='sheet'?` · โดย ${esc(b.addedBy)}`:''}</div>
+    <div><b>เวลาติดต่อ Buyer / Commercial :</b> <span class="${we?'':'hl'}">จ–ศ = 2 รอบ ทำก่อน 10.00 น. และ 14.00 น.</span> / <span class="${we?'hl':''}">ส–อา = 1 รอบ ทำก่อน 14.00 น.</span></div></div>${acts||''}
   </div></td></tr>`;
 }
 async function fillNames(){
