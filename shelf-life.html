@@ -1181,7 +1181,7 @@ label.has-scan{position:relative}
   <button data-tab="add">+ Monitor item</button>
   <button data-tab="nbs">Item NBS<span class="tabcnt" id="nbsBadge" hidden></span></button>
   <button data-tab="oos">OOS+<span class="tabcnt" id="oosBadge" hidden></span></button>
-  <button data-tab="shr" title="จำนวนสินค้าที่ทิ้งเกิน ฿1,000">%Shrink<span class="tabcnt" id="shrBadge" hidden></span></button>
+  <button data-tab="shr" title="จำนวนสินค้าที่ทิ้งเกิน 1,000 ฿">%Shrink<span class="tabcnt" id="shrBadge" hidden></span></button>
   <button data-tab="neg" title="จำนวนสินค้าที่ Stock ติดลบ">Negative Stock<span class="tabcnt" id="negBadge" hidden></span></button>
   <button data-tab="dms" title="จำนวนสินค้าที่หมด / ใกล้หมดแต่ยังขายอยู่">High Stock to DMS<span class="tabcnt" id="dmsBadge" hidden></span></button>
   <button data-tab="prod">สินค้า & กฎลดราคา</button>
@@ -3784,7 +3784,7 @@ function oosFactsHtml(r){
   out.push(bidBlock(r.itemNo,r.buyerUid||'',by&&!r.buyerUid?'Buyer: '+by:''));
   const sq=oosNum(r.shortQty),ls=oosNum(r.lossBaht),b2=[];
   if(sq!=null)b2.push(`ขาด ${oosFmtN(sq)} ${esc(r.shortUnit||'หน่วย')}`);
-  if(ls)b2.push(`฿${ls.toLocaleString()}`);
+  if(ls)b2.push(`${ls.toLocaleString()} ฿`);
   if(r.chronicDays>=3)b2.push(`<b class="c-md2">ขาดซ้ำ ${r.chronicDays} วันในเดือน</b>`);
   if(r.reason)b2.push(`สาเหตุ: ${esc(r.reason)}`);
   if(b2.length)out.push(`<div class="oosc-f small muted">${b2.join(' · ')}</div>`);
@@ -4379,8 +4379,8 @@ const shrRs=rc=>{let n=SHR.names[rc]!=null&&SHR.names[rc]!==''?SHR.names[rc]:SHR
 const shrVal=(it,b)=>b==='code'?(it.hasCode?-it.cc:null):(it.amt==null?null:-it.amt);
 const shrRate=it=>it.pct==null?null:-it.pct;
 const shrMetric=(it,b)=>b==='pct'?shrRate(it):shrVal(it,b);
-const shrBaht=n=>'฿'+Math.round(n).toLocaleString();
-const shrBk=n=>{const a=Math.abs(n),s=n<0?'−':'';return a>=1e6?s+'฿'+(a/1e6).toFixed(2)+'M':a>=1e4?s+'฿'+(a/1e3).toFixed(1)+'k':s+'฿'+Math.round(a).toLocaleString()};
+const shrBaht=n=>(Math.round(n)||0).toLocaleString()+' ฿'; /* the baht sign goes after the number: -9,195 ฿ */
+const shrBk=n=>{const a=Math.abs(n),s=n<0?'-':'';return a>=1e6?s+(a/1e6).toFixed(2)+'M ฿':a>=1e4?s+(a/1e3).toFixed(1)+'k ฿':s+Math.round(a).toLocaleString()+' ฿'};
 const shrPct=r=>{if(r==null)return'';const a=Math.abs(r)*100;return(r<0?'−':'')+a.toFixed(a>=100?0:a>=10?1:2)+'%'};
 const SHR_BASES=[['mtd','ยอดทิ้ง ฿ (MTD)'],['pct','%Shrink'],['code','ตามรหัสเหตุผล']];
 let shrBasis='',shrTile='',shrDiv='',shrLimit=60,shrDrill=false;
@@ -4409,23 +4409,23 @@ function shrChartHtml(rows,b){
   const ranked=rows.map(it=>({it,m:shrMetric(it,b)})).filter(x=>x.m!=null&&x.m>0).sort((a,c)=>c.m-a.m).slice(0,10),mx=ranked.length?ranked[0].m:1;
   const lab=b==='pct'?'%Shrink สูงสุด':b==='code'?'ทิ้งมากสุด · ตามรหัสเหตุผล':'ทิ้งมากสุด · MTD';
   const seg=SHR_BASES.filter(([k])=>shrHas(k)).map(([k,l])=>`<button type="button" class="${b===k?'on':''}" data-p="${k}">${l}</button>`).join('');
-  const val=(it)=>{const v=shrVal(it,b),r=shrRate(it);return b==='pct'?`<b>${shrPct(r)}</b> · ${v!=null?shrBaht(v):''}`:b==='code'?`<b>${shrBaht(v)}</b> · ${Math.abs(it.cq).toLocaleString(undefined,{maximumFractionDigits:1})} MU`:`<b>${shrBaht(v)}</b>${r!=null?' · '+shrPct(r):''}`};
+  const val=(it)=>{const v=shrVal(it,b),r=shrRate(it);return b==='pct'?`<b>${shrPct(r)}</b> · ${v!=null?shrBaht(-v):''}`:b==='code'?`<b>${shrBaht(v)}</b> · ${Math.abs(it.cq).toLocaleString(undefined,{maximumFractionDigits:1})} MU`:`<b>${shrBaht(-v)}</b>${r!=null?' · '+shrPct(r):''}`};
   const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(m/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${ocV(val(it))}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ทิ้งในช่วงนี้</p>';
   const tot=rows.reduce((s,it)=>{const v=shrVal(it,b==='pct'?'mtd':b);return s+(v!=null&&v>0?v:0)},0);
-  return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · รวม ${shrBaht(tot)} จาก ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div><div class="oc-list">${bars}</div></div>`}
+  return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · รวม ${shrBaht(-tot)} จาก ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div><div class="oc-list">${bars}</div></div>`}
 const shrComHtml=it=>{if(!it.coms.length)return'<div class="muted small">ยังไม่ทราบ Buyer / Commercial</div>';const t=c=>String(c.dept||'').split(' · ')[0];return`<div class="small">Commercial: ${it.coms.map(c=>`<b>${esc(c.name)}</b>${t(c)?` <span class="muted">(${esc(t(c))})</span>`:''}`).join('  /  ')}<div class="muted small">ไม่มี Buyer คนเดียวที่ดูแล Class นี้ — แสดง Commercial ของ Buyer ที่ดูแลร่วมกัน</div></div>`};
 function shrCard(it,b){
   const lv=shrLevel(it,b),th=imageOf(it.itemNo),k=esc(it._id),v=shrVal(it,b),r=shrRate(it);
   const LV={late:['ทิ้งหนัก','pull'],warn:['ทิ้งปานกลาง','md2'],ok:['ทิ้งเล็กน้อย','ok'],done:['ไม่ได้ทิ้ง','ok']}[lv];
   const bits=[];
-  if(it.amt!=null){bits.push(`<span>${it.amt<0?'ทิ้ง':'ได้คืน'} MTD <b class="${it.amt<0?'c-md2':''}">${shrBaht(Math.abs(it.amt))}</b></span>`)}
+  if(it.amt!=null){bits.push(`<span>${it.amt<0?'ทิ้ง':'ได้คืน'} MTD <b class="${it.amt<0?'c-md2':''}">${it.amt<0?'':'+'}${shrBaht(it.amt)}</b></span>`)}
   if(it.sales!=null)bits.push(`<span>ยอดขาย <b>${shrBaht(it.sales)}</b></span>`);
   if(r!=null)bits.push(`<span>%Shrink <b class="${r>=SHR_P1?'c-md2':''}">${shrPct(r)}</b></span>`);
   const rsl=[...it.rs.entries()].sort((a,c)=>a[1].c-c[1].c),mx=Math.max(1,...rsl.map(([,x])=>Math.abs(x.c)));
   const rsHtml=rsl.length?`<div class="shr-rs" title="แยกตามรหัสเหตุผล (By Code)">`+rsl.map(([rc,x])=>`<span class="shr-r"><em>${esc(shrRs(rc))}</em><i style="--w:${Math.max(4,Math.round(Math.abs(x.c)/mx*100))}%;${x.c<0?'--g1:#ffbf70;--g2:#e5352b':'--g1:#b7ecc9;--g2:#14703c'}"></i><b class="${x.c<0?'c-md2':''}">${x.c<0?'':'+'}${shrBaht(x.c)}</b><small>${x.q.toLocaleString(undefined,{maximumFractionDigits:1})} MU</small></span>`).join('')+`<span class="small shr-tot">Total Shrinkage <b class="${it.cc<0?'sv-neg':'sv-pos'}">${it.cc<0?'':'+'}${shrBaht(it.cc)}</b> · เป็นจำนวน <b class="${it.cq<0?'sv-neg':'sv-pos'}">${it.cq.toLocaleString(undefined,{maximumFractionDigits:1})}</b> MU</span></div>`:'';
   const by=it.buyer?((SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||''):'';
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
-    <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
+    <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(-v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
     ${bits.length?`<div class="oosc-f small">${bits.join('')}</div>`:''}${rsHtml}
     ${bidBlock(it.itemNo,it.buyer,'')}${!(ibuyUid(it.itemNo)||it.buyer)&&it.coms.length?shrComHtml(it):''}</div>`}
 function shrSrcHtml(){
@@ -4449,14 +4449,14 @@ function renderShr(){
   /* %Actual Shrinkage of each group, as in the Power BI report: the group's Actual Shrinkage (net, gains included) ÷ the group's Sales (always from the sales + shrink report, whatever view is chosen) */
   const dvA={},dvS={};m.items.forEach(it=>{if(!it.hasSales)return;const d=it.div||'-';if(it.sales!=null)dvS[d]=(dvS[d]||0)+it.sales;if(it.amt!=null)dvA[d]=(dvA[d]||0)+it.amt});
   const dvPct=k=>dvS[k]>0&&SHR.sales?`<span class="dvpct ${dvA[k]<0?'neg':dvA[k]>0?'pos':''}" title="%Actual Shrinkage = Actual Shrinkage รวมของกลุ่ม ÷ ยอดขายรวมของกลุ่ม (ติดลบ = ของหาย / ทิ้งมากกว่าที่ได้คืน)"><span class="dpl">%Actual Shrink </span><b>${shrPct((dvA[k]||0)/dvS[k])}</b></span>`:'';
-  const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${shrDiv===k?' sel':''}" data-div="${k}">${dvPct(k)}${chip}<b>${shrBk(byDiv[k]||0)}</b><span class="mini">ทิ้ง</span><span class="muted small"><span class="tl">ทิ้ง </span>${(nDiv[k]||0).toLocaleString()} รายการ${gainDiv[k]?`<span class="tl"> · ได้คืน ${shrBk(gainDiv[k])}</span>`:''}</span></button>`;
+  const divTile=(k,chip)=>`<button type="button" class="tile dv dv-${k==='-'?'x':k.toLowerCase()}${shrDiv===k?' sel':''}" data-div="${k}">${dvPct(k)}${chip}<b>${shrBk(-(byDiv[k]||0))}</b><span class="mini">ทิ้ง</span><span class="muted small"><span class="tl">ทิ้ง </span>${(nDiv[k]||0).toLocaleString()} รายการ${gainDiv[k]?`<span class="tl"> · ได้คืน ${shrBk(gainDiv[k])}</span>`:''}</span></button>`;
   $('#shrDivTiles').innerHTML=Object.entries(NBS_DIV).map(([k,l])=>divTile(k,`<span class="chip div-${k.toLowerCase()}">${k}<span class="dvl"> · ${l}</span></span>`)).join('');
   /* summary tiles follow the group */
   const sub=elig.filter(it=>!shrDiv||it.div===shrDiv),gross=sub.reduce((s,it)=>s+lossOf(it),0),nLoss=sub.filter(it=>lossOf(it)>0).length;
   const salesSum=m.items.filter(it=>it.hasSales&&it.sales!=null&&(!shrDiv||it.div===shrDiv)).reduce((s,it)=>s+it.sales,0);
   const rate=b!=='code'&&salesSum>0?gross/salesSum:null;
   const nBig=sub.filter(it=>lossOf(it)>=SHR_BIG).length,nHi=sub.filter(it=>{const r=shrRate(it);return r!=null&&r>=SHR_P1}).length;
-  const tl=[['all','ทิ้งรวม','pull',shrBk(gross),`${nLoss.toLocaleString()} รายการ`],
+  const tl=[['all','ทิ้งรวม','pull',shrBk(-gross),`${nLoss.toLocaleString()} รายการ`],
     ['rate','%Shrink รวม','md1',rate==null?'—':shrPct(rate),rate==null?'ต้องมีรายงานยอดขาย':`ของยอดขาย ${shrBk(salesSum)}`],
     ['big','ทิ้งเกิน '+shrBaht(SHR_BIG),'soon',nBig.toLocaleString(),'รายการ'],
     ['hi','ทิ้งเกิน 1% ของยอดขาย','md2',nHi.toLocaleString(),b==='code'?'ใช้กับยอดขาย MTD':'รายการ']];
@@ -4833,7 +4833,7 @@ function ilSetHi(m){const T=IL_T;m.items.forEach(it=>{const a=it.a,dead=!(it.dms
 const ilElig=(it,p)=>p==='neg'?(it.a<=-0.1&&/^active$/i.test(it.r.st)):!!it.hi; /* Negative Stock: only Active items whose ASOH is -0.1 or lower */
 const ilDisc=it=>/discontinu/i.test(it.r.st); /* Discontinued items are not monitored (hidden unless the page's box is ticked) */
 const ilNoPrice=p=>{const d=ILT[p];return!!(d&&d.info&&d.info.mon&&!d.info.priced)}; /* a Negative Stock Monitor file with no price at all (nothing found in an ItemList): no money to show, quantities only */
-const ilMoney=(p,n)=>p==='neg'&&ilNoPrice('neg')?'—':p==='neg'?(n<.5?'฿0':n>=1e4?'฿-'+(n/1e3).toFixed(1)+'k':'฿-'+Math.round(n).toLocaleString()):shrBk(n); /* Negative Stock shows the money lost with its minus sign: ฿-4,340 */
+const ilMoney=(p,n)=>p==='neg'&&ilNoPrice('neg')?'—':p==='neg'?(n<.5?'0 ฿':n>=1e4?'-'+(n/1e3).toFixed(1)+'k ฿':'-'+Math.round(n).toLocaleString()+' ฿'):shrBk(n); /* Negative Stock shows the money lost with its minus sign: -4,340 ฿ */
 const ilN=(v,d)=>v==null?'':(Math.abs(v)>=100||Number.isInteger(v)?Math.round(v):Math.round(v*(d||10))/(d||10)).toLocaleString();
 const ilYmd=ms=>{if(ms==null)return'';const d=new Date(ms);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 function ilLevel(it,p){
@@ -5468,7 +5468,7 @@ function oosPDFHtml(rows,total,whole,photos=true){
       dms=oosNum(r.dms),dn=oosNum(r.dmsNew),sd=oosNum(r.stockDay),sq=oosNum(r.shortQty),ls=oosNum(r.lossBaht),
       fq=r.freqAll==null?'':OOS_PERIODS.map(([,l,tk,dk])=>`<div class="m">${l} <b>${(oosNum(r[tk])||0).toLocaleString()}</b> ครั้ง · ${(oosNum(r[dk])||0).toLocaleString()} วัน</div>`).join(''),
       dmsTxt=dms!=null&&dms>0?oosFmtN(dms)+(dn!=null&&dn!==dms?` → <b>${oosFmtN(dn)}</b>`:''):dn!=null?`ชั่วคราว <b>${oosFmtN(dn)}</b>`:dms!=null?oosFmtN(dms)+' <span class="m">(ใช้ไม่ได้)</span>':'-',
-      extra=[sq!=null?`ขาด ${oosFmtN(sq)} ${esc(r.shortUnit||'หน่วย')}`:'',ls?'฿'+ls.toLocaleString():'',r.chronicDays>=3?`ขาดซ้ำ ${r.chronicDays} วันในเดือน`:''].filter(Boolean).join(' · ');
+      extra=[sq!=null?`ขาด ${oosFmtN(sq)} ${esc(r.shortUnit||'หน่วย')}`:'',ls?ls.toLocaleString()+' ฿':'',r.chronicDays>=3?`ขาดซ้ำ ${r.chronicDays} วันในเดือน`:''].filter(Boolean).join(' · ');
     return`<tr><td>${d?pdfDivChip(d):''}<div style="margin-top:3px">${pdfChip(s[0],s[1])}</div></td>
 <td>${pdfNm(pdfPic(imageOf(r.itemNo)||(String(r.img||'').startsWith('img:')?imgData(String(r.img).slice(4)):''),photos),`<b>${esc(r.desc||'—')}</b><div class="m">Item ${esc(r.itemNo||'-')}${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''} · ${esc(r.loc||'ไม่ระบุตำแหน่ง')}</div>${extra?`<div class="m">${extra}</div>`:''}${r.reason?`<div class="m">สาเหตุ: ${esc(r.reason)}</div>`:''}${r.note?`<div class="m">${esc(r.note)}</div>`:''}`)}</td>
 <td>${bk?pdfChip(bk[0],bk[2])+`<div class="m">${esc(bk[1])}</div>`:'<span class="m">—</span>'}</td>
