@@ -42,7 +42,7 @@ h1{font-size:20px;margin:0}
 nav{display:flex;gap:4px;overflow-x:auto;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--line)}
 nav button{border:0;background:none;color:var(--ink);padding:8px 12px;border-radius:8px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;white-space:nowrap}
 nav button.on{background:var(--accent);color:var(--accent-ink)}
-main{max-width:1560px;margin:0 auto;padding:16px} /* one page width for every tab (it used to be 1280px, with 1560px only on Item NBS and Buyer / Commercial) */
+main{max-width:1960px;margin:0 auto;padding:16px} /* one page width for every tab, and wide enough to fill a full-HD computer screen (it used to be 1280px; 1560px only on Item NBS and Buyer / Commercial) */
 html{scrollbar-gutter:stable} /* the page does not shift sideways between tabs that do / do not need a scrollbar */
 section[hidden]{display:none}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
@@ -994,7 +994,7 @@ th.sortable:hover{color:var(--accent)}
 #shelfArrow{font-size:11px;color:var(--accent)}
 /* OOS+ (computer): cards in a row are the same height, buttons on the bottom line; a click on the chart shows chart (left) + item (right) */
 @media (min-width:1000px){
-  .oos-list{align-items:stretch}
+  .oos-list{align-items:stretch;grid-template-columns:repeat(auto-fill,minmax(min(380px,100%),1fr))} /* bigger cards on a computer screen: 4 across on a full-HD screen, 3 on a laptop */
   /* the Buyer ID box follows the card's info directly (no gap in the middle); the cards of a row stay the same height, any spare space sits above the action buttons */
   .oosc>.bid-block{margin-top:10px}
   .oosc>.bid-block:last-child{margin-top:auto} /* cards that end with the Buyer ID box (%Shrink, Negative Stock, High Stock to DMS): the boxes of one row sit on the same line with the same space under them */
