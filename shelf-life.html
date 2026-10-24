@@ -1476,7 +1476,7 @@ label.has-scan{position:relative}
   <div class="lot-grid" style="margin-top:12px">
     <label>กลุ่มสินค้า<select id="nDiv"><option value="FF">FF · Fresh Food</option><option value="DF">DF · Dry Food</option><option value="NF">NF · Non Food</option></select></label>
     <label>รหัสสินค้า (Item No)<input id="nNo" inputmode="numeric" placeholder="เช่น 210907"></label>
-    <label>Stock คงเหลือ (ชิ้น)<input type="number" min="0" id="nStock" placeholder="0"></label>
+    <label>Stock คงเหลือ (MU · หน่วย)<input type="number" min="0" id="nStock" placeholder="0"></label>
     <label class="span3">ชื่อสินค้า<input id="nDesc" placeholder="ชื่อสินค้า"></label>
     <label>ที่ตั้ง / ชั้นวาง<input id="nLoc" placeholder="เช่น Loc 510 / Location 510-011"></label>
     <label>Last Recv. Date (ถ้าทราบ)<input type="date" id="nRecv"></label>
@@ -4216,7 +4216,7 @@ $('#oiClose').onchange=$('#oiWinSel').onchange=()=>{if(oosImp)showOosPreview()};
    a NEGATIVE cost / amount = money lost (thrown away); a positive one = stock that came back.
    The data stays in this browser (IndexedDB) — nothing is written to the team database. */
 const SHR_DEPT={'01':'FRUIT & VEGETABLE','02':'BUTCHERY','03':'FISH','04':'BAKERY','05':'FROZEN & DAIRY','06':'SNACK & CONFECTIONARY','07':'BASIC COMMODITIES','08':'DRY GROCERY','09':'DRINK & BEVERAGE','10':'COSMETIC & DRUG','31':'LADYS WEAR','32':'MENS WEAR','33':'TEXTILE','34':'PROLINE','35':'ACCESORIES','37':'IN & OUT','41':'ELECTRIC','42':'OFFICE AUTOMATION','44':'D.I.Y.','45':'HOUSE HOLD','46':'STATIONERY'};
-const SHR_RS0={'52':'ทิ้ง / ถอดสินค้า (Code 52)'}; /* the only code whose meaning is known from the Shelf life rules; the team can name the others */
+const SHR_RS0={'52':'ทิ้ง / ถอดสินค้า'}; /* the only code whose meaning is known from the Shelf life rules; the team can name the others */
 const SHR_BIG=1000,SHR_HI=5000,SHR_P1=.01,SHR_P5=.05; /* ฿ / share of sales that make a "heavy" thrower */
 let SHR={files:[],code:[],sales:null,names:{}},SHR_REV=0,SHR_MEMO=null;
 const shrOpen=()=>new Promise(res=>{try{const rq=indexedDB.open('slm-shrink',1);rq.onupgradeneeded=()=>rq.result.createObjectStore('kv');rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);rq.onblocked=()=>res(null)}catch(e){res(null)}});
@@ -4282,7 +4282,7 @@ function shrBuild(){
     it.coms=[];if(!uid&&it.cn){const ck=it.div+'|'+it.cn;let cl=comCache.get(ck);if(!cl){const seen=new Set();cl=[];buyersByArt(String(amNum(it.cn))).filter(c=>divGroupOk(it.div,c.group)).forEach(b=>(comBy.get(String(b.uid).toUpperCase())||[]).forEach(c=>{if(!seen.has(c.uid)){seen.add(c.uid);cl.push(c)}}));if(cl.length>3)cl=[];comCache.set(ck,cl)}it.coms=cl;cl.forEach(c=>coms.set(c.uid,c))}
     it.q=[it.itemNo,it.desc,it.cl,it.cn,it.dlbl,it.div,uid,buyers.get(uid),...it.coms.map(c=>c.name+' '+c.uid)].join(' ').toLowerCase()});
   return SHR_MEMO={key,items,buyers,coms,depts:[...new Set(items.map(i=>i.dlbl).filter(Boolean))].sort(),classes:[...new Map(items.filter(i=>i.cn).map(i=>[i.cn,i.cn+' '+i.cl])).entries()].sort((a,b)=>amNum(a[0])-amNum(b[0])),reasons:[...new Set(SHR.code.map(r=>r.r))].sort((a,b)=>(+a||1e9)-(+b||1e9)||a.localeCompare(b))}}
-const shrRs=rc=>{const n=SHR.names[rc]!=null&&SHR.names[rc]!==''?SHR.names[rc]:SHR_RS0[rc];return n?rc+' · '+n:'รหัส '+rc};
+const shrRs=rc=>{let n=SHR.names[rc]!=null&&SHR.names[rc]!==''?SHR.names[rc]:SHR_RS0[rc];n=n?String(n).replace(/\s*\(Code\s*\d+\)\s*$/i,''):'';return n?'Code '+rc+' · '+n:'Code '+rc}; /* the reason code is always written as Code 11 / Code 52 / Code 10 … (a name saved earlier with "(Code 52)" at its end is shortened) */
 /* the numbers behind the three views: money lost (positive = thrown away) per basis, and the loss as a share of sales */
 const shrVal=(it,b)=>b==='code'?(it.hasCode?-it.cc:null):(it.amt==null?null:-it.amt);
 const shrRate=it=>it.pct==null?null:-it.pct;
@@ -4317,7 +4317,7 @@ function shrChartHtml(rows,b){
   const ranked=rows.map(it=>({it,m:shrMetric(it,b)})).filter(x=>x.m!=null&&x.m>0).sort((a,c)=>c.m-a.m).slice(0,10),mx=ranked.length?ranked[0].m:1;
   const lab=b==='pct'?'%Shrink สูงสุด':b==='code'?'ทิ้งมากสุด · ตามรหัสเหตุผล':'ทิ้งมากสุด · MTD';
   const seg=SHR_BASES.filter(([k])=>shrHas(k)).map(([k,l])=>`<button type="button" class="${b===k?'on':''}" data-p="${k}">${l}</button>`).join('');
-  const val=(it)=>{const v=shrVal(it,b),r=shrRate(it);return b==='pct'?`<b>${shrPct(r)}</b> · ${v!=null?shrBaht(v):''}`:b==='code'?`<b>${shrBaht(v)}</b> · ${Math.abs(it.cq).toLocaleString(undefined,{maximumFractionDigits:1})} ชิ้น`:`<b>${shrBaht(v)}</b>${r!=null?' · '+shrPct(r):''}`};
+  const val=(it)=>{const v=shrVal(it,b),r=shrRate(it);return b==='pct'?`<b>${shrPct(r)}</b> · ${v!=null?shrBaht(v):''}`:b==='code'?`<b>${shrBaht(v)}</b> · ${Math.abs(it.cq).toLocaleString(undefined,{maximumFractionDigits:1})} MU`:`<b>${shrBaht(v)}</b>${r!=null?' · '+shrPct(r):''}`};
   const bars=ranked.length?ranked.map(({it,m},ix)=>`<button type="button" class="oc-r" data-no="${esc(it.itemNo)}" title="กดเพื่อค้นหารายการนี้"><span class="oc-n">${esc(it.desc||it.itemNo)}</span><span class="oc-b"><i style="width:${Math.max(3,Math.round(m/mx*100))}%;--c:hsl(${ranked.length>1?Math.round(ix/(ranked.length-1)*50):0} 86% 48%)"></i></span><span class="oc-v">${ocV(val(it))}</span></button>`).join(''):'<p class="muted small" style="margin:6px 0 0">ไม่มีรายการที่ทิ้งในช่วงนี้</p>';
   const tot=rows.reduce((s,it)=>{const v=shrVal(it,b==='pct'?'mtd':b);return s+(v!=null&&v>0?v:0)},0);
   return`<div class="oos-chart"><div class="oc-h"><div><b>${lab}</b> <span class="muted small">10 อันดับแรกของรายการที่แสดงอยู่ · รวม ${shrBaht(tot)} จาก ${rows.length.toLocaleString()} รายการ</span></div><div class="oc-tools">${qs?'<button type="button" class="oc-back" title="ล้างคำค้นหา แล้วกลับไปดูกราฟของทุกรายการ">← กลับไปดูภาพรวม</button>':''}<div class="oc-seg">${seg}</div></div></div><div class="oc-list">${bars}</div></div>`}
@@ -4330,7 +4330,7 @@ function shrCard(it,b){
   if(it.sales!=null)bits.push(`<span>ยอดขาย <b>${shrBaht(it.sales)}</b></span>`);
   if(r!=null)bits.push(`<span>%Shrink <b class="${r>=SHR_P1?'c-md2':''}">${shrPct(r)}</b></span>`);
   const rsl=[...it.rs.entries()].sort((a,c)=>a[1].c-c[1].c),mx=Math.max(1,...rsl.map(([,x])=>Math.abs(x.c)));
-  const rsHtml=rsl.length?`<div class="shr-rs" title="แยกตามรหัสเหตุผล (By Code)">`+rsl.map(([rc,x])=>`<span class="shr-r"><em>${esc(shrRs(rc))}</em><i style="--w:${Math.max(4,Math.round(Math.abs(x.c)/mx*100))}%;--c:${x.c<0?'#d6453d':'#2e8b57'}"></i><b class="${x.c<0?'c-md2':''}">${x.c<0?'':'+'}${shrBaht(x.c)}</b><small>${x.q.toLocaleString(undefined,{maximumFractionDigits:1})} ชิ้น</small></span>`).join('')+`<span class="muted small">รวมตามรหัส <b>${it.cc<0?'':'+'}${shrBaht(it.cc)}</b> · ${it.cq.toLocaleString(undefined,{maximumFractionDigits:1})} ชิ้น</span></div>`:'';
+  const rsHtml=rsl.length?`<div class="shr-rs" title="แยกตามรหัสเหตุผล (By Code)">`+rsl.map(([rc,x])=>`<span class="shr-r"><em>${esc(shrRs(rc))}</em><i style="--w:${Math.max(4,Math.round(Math.abs(x.c)/mx*100))}%;--c:${x.c<0?'#d6453d':'#2e8b57'}"></i><b class="${x.c<0?'c-md2':''}">${x.c<0?'':'+'}${shrBaht(x.c)}</b><small>${x.q.toLocaleString(undefined,{maximumFractionDigits:1})} MU</small></span>`).join('')+`<span class="muted small">รวมตามรหัส <b>${it.cc<0?'':'+'}${shrBaht(it.cc)}</b> · ${it.cq.toLocaleString(undefined,{maximumFractionDigits:1})} MU</span></div>`:'';
   const by=it.buyer?((SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||''):'';
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
@@ -4490,7 +4490,7 @@ $('#sdList').onclick=async e=>{const b=e.target.closest('button[data-id]');if(!b
   SHR_REV++;shrBasis='';shrReset();shrSave();renderShrDel();renderShr();toast('ลบข้อมูลของไฟล์นั้นแล้ว')};
 function openShrNames(){
   const m=shrBuild();
-  $('#snList').innerHTML=m.reasons.length?m.reasons.map(rc=>{const x=SHR.code.filter(r=>r.r===rc),c=x.reduce((s,r)=>s+r.c,0);return`<label class="sn-row"><span><b>รหัส ${esc(rc)}</b><span class="muted small"> · ${x.length.toLocaleString()} บรรทัด · ${shrBaht(c)}</span></span><input data-rc="${esc(rc)}" value="${esc(SHR.names[rc]!=null?SHR.names[rc]:(SHR_RS0[rc]||''))}" placeholder="ชื่อเหตุผล เช่น ของเสีย / หมดอายุ / นับสต็อก"></label>`}).join(''):'<p class="muted">ยังไม่มีข้อมูล By Code — นำเข้าไฟล์ By Code ก่อน</p>';
+  $('#snList').innerHTML=m.reasons.length?m.reasons.map(rc=>{const x=SHR.code.filter(r=>r.r===rc),c=x.reduce((s,r)=>s+r.c,0);return`<label class="sn-row"><span><b>Code ${esc(rc)}</b><span class="muted small"> · ${x.length.toLocaleString()} บรรทัด · ${shrBaht(c)}</span></span><input data-rc="${esc(rc)}" value="${esc(SHR.names[rc]!=null?SHR.names[rc]:(SHR_RS0[rc]||''))}" placeholder="ชื่อเหตุผล เช่น ของเสีย / หมดอายุ / นับสต็อก"></label>`}).join(''):'<p class="muted">ยังไม่มีข้อมูล By Code — นำเข้าไฟล์ By Code ก่อน</p>';
   $('#dlgShNm').showModal()}
 $('#shrNames').onclick=openShrNames;$('#snCancel').onclick=()=>$('#dlgShNm').close();
 $('#snSave').onclick=async()=>{$('#snList').querySelectorAll('input[data-rc]').forEach(i=>{const v=i.value.trim(),rc=i.dataset.rc;if(v===(SHR_RS0[rc]||''))delete SHR.names[rc];else SHR.names[rc]=v});SHR_REV++;shrSave();$('#dlgShNm').close();renderShr();toast('บันทึกชื่อรหัสเหตุผลแล้ว')};
@@ -5410,7 +5410,7 @@ function shrPDFHtml(rows,total,b,photos=true){
 <td class="num">${it.amt==null?'-':`<b class="${it.amt<0?'ov':''}">${pdfBaht(Math.abs(it.amt))}</b><div class="m">${it.amt<0?'ทิ้ง':'ได้คืน'}</div>`}</td>
 <td class="num">${it.sales==null?'-':pdfBaht(it.sales)}</td>
 <td class="num">${r==null?'-':`<b class="${r>=SHR_P1?'ov':''}">${pdfPct(r)}</b>`}</td>
-<td>${rs.length?rs.map(([rc,x])=>`<div class="m">${esc(shrRs(rc))}: <b>${x.c<0?'':'+'}${pdfBaht(x.c)}</b> · ${pdfNum(x.q,1)} ชิ้น</div>`).join('')+`<div class="m">รวมตามรหัส <b>${it.cc<0?'':'+'}${pdfBaht(it.cc)}</b></div>`:'<span class="m">—</span>'}</td>
+<td>${rs.length?rs.map(([rc,x])=>`<div class="m">${esc(shrRs(rc))}: <b>${x.c<0?'':'+'}${pdfBaht(x.c)}</b> · ${pdfNum(x.q,1)} MU</div>`).join('')+`<div class="m">รวมตามรหัส <b>${it.cc<0?'':'+'}${pdfBaht(it.cc)}</b></div>`:'<span class="m">—</span>'}</td>
 <td>${who}</td></tr>`}).join('');
   const rate=SHR.sales?['FF','DF','NF'].filter(k=>dvS[k]>0).map(k=>`<span>%Actual Shrink ${k} ${pdfPct((dvA[k]||0)/dvS[k])}</span>`).join(''):'';
   const tileTxt={big:'ทิ้งเกิน '+pdfBaht(SHR_BIG),hi:'ทิ้งเกิน 1% ของยอดขาย'};
@@ -5606,7 +5606,7 @@ function openRepAdd(kind){
     neg:['เพิ่มสินค้า · Negative Stock','เพิ่มสินค้าที่ Stock ติดลบ 1 รายการเอง (ส่งให้ทั้งทีมเห็นด้วย) — จะหายถ้านำเข้าไฟล์ใหม่มาแทนที่'],
     dms:['เพิ่มสินค้า · High Stock to DMS','เพิ่มสินค้าที่ Stock สูง 1 รายการเอง (ส่งให้ทั้งทีมเห็นด้วย) — จะหายถ้านำเข้าไฟล์ใหม่มาแทนที่']}[kind];
   const itemNo='<label>Item No.<input name="i" inputmode="numeric" autocomplete="off"></label><label>ชื่อสินค้า<input name="n" autocomplete="off"></label>'+dept;
-  const html={shr:itemNo+`<label>รหัสเหตุผล<input name="r" list="raRs" autocomplete="off"></label><datalist id="raRs">${[...new Set(SHR.code.map(r=>r.r))].map(x=>`<option value="${esc(x)}">`).join('')}</datalist><label>จำนวนที่ทิ้ง (ชิ้น)<input name="q" type="number" step="any" inputmode="decimal"></label><label>มูลค่าที่ทิ้ง (฿)<input name="c" type="number" step="any" min="0" inputmode="decimal"></label>`,
+  const html={shr:itemNo+`<label>รหัสเหตุผล<input name="r" list="raRs" autocomplete="off"></label><datalist id="raRs">${[...new Set(SHR.code.map(r=>r.r))].map(x=>`<option value="${esc(x)}">`).join('')}</datalist><label>จำนวนที่ทิ้ง (MU · หน่วย)<input name="q" type="number" step="any" inputmode="decimal"></label><label>มูลค่าที่ทิ้ง (฿)<input name="c" type="number" step="any" min="0" inputmode="decimal"></label>`,
     neg:itemNo+'<label>Stock (ASOH) ติดลบ<input name="a" type="number" step="any" inputmode="decimal" placeholder="เช่น -5"></label><label>ราคาขาย (฿)<input name="pr" type="number" step="any" min="0" inputmode="decimal"></label><label>ขายต่อวัน (28 วัน)<input name="a28" type="number" step="any" min="0" inputmode="decimal"></label><label>Buyer UID (ถ้ามี)<input name="by" autocomplete="off"></label>',
     dms:itemNo+'<label>Stock (ASOH)<input name="a" type="number" step="any" min="0" inputmode="decimal"></label><label>ราคาขาย (฿)<input name="pr" type="number" step="any" min="0" inputmode="decimal"></label><label>ขายต่อวัน (28 วัน)<input name="a28" type="number" step="any" min="0" inputmode="decimal"></label><label>Buyer UID (ถ้ามี)<input name="by" autocomplete="off"></label>'}[kind];
   $('#raTitle').textContent=T[0];$('#raNote').textContent=T[1];$('#raFields').innerHTML=html;$('#raErr').textContent='';
