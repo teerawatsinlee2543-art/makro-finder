@@ -850,6 +850,14 @@ label:has(>#aQty){color:var(--accent);font-weight:800;font-size:14px}
   table.nbs-tbl tr:not(.stk-focus) .chip{white-space:normal} /* Item No. / Barcode / Category / Art Grp: one per line so a long Barcode is not broken */
 }
 
+/* computer, High Stock / Negative Stock: the title and its sentence on the first line, the three buttons centred under it (the export group stays at the right end of that line) */
+@media (min-width:1000px){
+  :is(#t-neg,#t-dms)>.card>.add-head{display:grid;grid-template-columns:1fr auto 1fr;grid-template-areas:"h h h" ". b e";align-items:center;gap:10px 8px}
+  :is(#t-neg,#t-dms)>.card>.add-head>h2{grid-area:h}
+  :is(#t-neg,#t-dms)>.card>.add-head>.row{grid-area:b;justify-content:center;flex-wrap:nowrap}
+  :is(#t-neg,#t-dms)>.card>.add-head>.exp{grid-area:e;justify-self:end;margin-left:0}
+}
+
 /* ===== data page (computer): two boxes side by side, one long row per item ===== */
 @media (min-width:1000px){
   #t-data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
