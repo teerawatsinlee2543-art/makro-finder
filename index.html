@@ -674,11 +674,21 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .loc-tools .waste-io-del i{color:#a85a00}
 .loc-tools .waste-io-imp i{color:#0b5cad}
 .loc-tools .noloc-btn i{color:#a85a00}
-/* computer screens: the customer-feedback card and the Weight Loss and Waste O2O card share one line as two equal boxes (other screens keep them one under the other) */
+/* computer screens: the customer-feedback card is full width, and below it the four tools sit in one row: ลบไฟล์ | นำเข้าข้อมูล | Item ที่ยังไม่มี Location | Weight Loss and Waste O2O (other screens keep the old stacked layout) */
 @media (min-width:900px){
-  #employeeFeedbackSection[style*="block"]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
-  #employeeFeedbackSection>.feedback-card[onclick]{margin-top:0!important;display:flex;align-items:center;justify-content:center;min-height:110px}
-  #employeeFeedbackSection>.waste-io-row{grid-column:1/-1;margin-top:0}
+  #employeeFeedbackSection[style*="block"]{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 16px;align-items:stretch}
+  #employeeFeedbackSection>.feedback-card:not([onclick]){grid-column:1/-1}
+  #employeeFeedbackSection>.waste-io-row{display:contents}
+  #employeeFeedbackSection #iLocDelBtn,#employeeFeedbackSection #iLocImportBtn,#employeeFeedbackSection #noLocBtn{grid-row:auto;grid-column:auto}
+  #employeeFeedbackSection #iLocDelBtn{order:1}
+  #employeeFeedbackSection #iLocImportBtn{order:2}
+  #employeeFeedbackSection #noLocBtn{order:3}
+  #employeeFeedbackSection>.feedback-card[onclick]{order:4;margin-top:0!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:128px;border-radius:24px;padding:18px 14px;text-align:center}
+  #employeeFeedbackSection>.feedback-card[onclick] .feedback-card-title{flex-direction:column;gap:10px!important;font-size:15px!important;margin:0!important;justify-content:center!important;text-align:center}
+  #employeeFeedbackSection>.feedback-card[onclick] .feedback-card-title i{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:25px;background:#fff;box-shadow:0 3px 10px rgba(20,24,33,.14)}
+  #employeeFeedbackSection .waste-io-note{grid-row:auto;margin:0}
+  #employeeFeedbackSection .lt-n1{order:5;grid-column:1/span 2}
+  #employeeFeedbackSection .lt-n2{order:6;grid-column:3/span 2}
 }
 .fb-empty{text-align:center;padding:24px 12px;color:var(--color-text-tertiary);font-size:12.5px}
 @media (max-width:479px){
