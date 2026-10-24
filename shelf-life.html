@@ -239,6 +239,9 @@ select.need{outline:2px solid #e0892b;outline-offset:1px}
 .cancel-btn:hover{border-color:var(--md2);background:var(--redbox)}
 .save-btn{min-width:220px;padding:12px 22px;font-size:16px}
 @media (max-width:520px){.save-btn,.cancel-btn{flex:1 1 0;min-width:0}}
+#t-add .save-row{flex-wrap:nowrap} /* Cancel and Save always share one line; they shrink to fit the box */
+#t-add .save-row .cancel-btn{flex:1 1 0;min-width:0;padding-left:12px;padding-right:12px}
+#t-add .save-row .save-btn{flex:1.6 1 0;min-width:0;padding-left:12px;padding-right:12px}
 .scan-dlg{width:min(420px,calc(100vw - 24px));padding:0;border:0;background:transparent;color:#fff;overflow:visible;max-height:none}
 .scan-dlg::backdrop{background:rgba(0,0,0,.9)}
 .scan-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
