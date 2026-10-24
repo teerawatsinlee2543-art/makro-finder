@@ -1016,6 +1016,13 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
 .dvpct b{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
 .dvpct.neg b{color:#c62828}.dvpct.pos b{color:#1f7a45}#shrQ{background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b5cad' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px 50%/20px;border:2px solid var(--accent);border-radius:12px;padding:11px 14px 11px 42px;font-size:16px;font-weight:600;box-shadow:0 2px 10px #0b5cad26}
 #shrQ::placeholder{color:var(--muted);font-weight:400}
+/* "Total Shrinkage ฿-1,490 · เป็นจำนวน -63 MU" on a %Shrink card: deep black text, the money and the number in red (green when it is a gain) */
+.shr-tot{color:#000;font-weight:600}
+.shr-tot b{font-weight:800;font-variant-numeric:tabular-nums}
+.shr-tot .sv-neg{color:#c62828}.shr-tot .sv-pos{color:#14703c}
+:root[data-theme="dark"] .shr-tot{color:var(--ink)}
+:root[data-theme="dark"] .shr-tot .sv-neg{color:#ff8a80}:root[data-theme="dark"] .shr-tot .sv-pos{color:#6fd49a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .shr-tot{color:var(--ink)}:root:not([data-theme="light"]) .shr-tot .sv-neg{color:#ff8a80}:root:not([data-theme="light"]) .shr-tot .sv-pos{color:#6fd49a}}
 #shrQ:focus{outline:0;box-shadow:0 0 0 4px #0b5cad33,0 2px 10px #0b5cad26}
 label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #shrQ{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}}
@@ -4415,7 +4422,7 @@ function shrCard(it,b){
   if(it.sales!=null)bits.push(`<span>ยอดขาย <b>${shrBaht(it.sales)}</b></span>`);
   if(r!=null)bits.push(`<span>%Shrink <b class="${r>=SHR_P1?'c-md2':''}">${shrPct(r)}</b></span>`);
   const rsl=[...it.rs.entries()].sort((a,c)=>a[1].c-c[1].c),mx=Math.max(1,...rsl.map(([,x])=>Math.abs(x.c)));
-  const rsHtml=rsl.length?`<div class="shr-rs" title="แยกตามรหัสเหตุผล (By Code)">`+rsl.map(([rc,x])=>`<span class="shr-r"><em>${esc(shrRs(rc))}</em><i style="--w:${Math.max(4,Math.round(Math.abs(x.c)/mx*100))}%;${x.c<0?'--g1:#ffbf70;--g2:#e5352b':'--g1:#b7ecc9;--g2:#14703c'}"></i><b class="${x.c<0?'c-md2':''}">${x.c<0?'':'+'}${shrBaht(x.c)}</b><small>${x.q.toLocaleString(undefined,{maximumFractionDigits:1})} MU</small></span>`).join('')+`<span class="muted small">รวมตามรหัส <b>${it.cc<0?'':'+'}${shrBaht(it.cc)}</b> · ${it.cq.toLocaleString(undefined,{maximumFractionDigits:1})} MU</span></div>`:'';
+  const rsHtml=rsl.length?`<div class="shr-rs" title="แยกตามรหัสเหตุผล (By Code)">`+rsl.map(([rc,x])=>`<span class="shr-r"><em>${esc(shrRs(rc))}</em><i style="--w:${Math.max(4,Math.round(Math.abs(x.c)/mx*100))}%;${x.c<0?'--g1:#ffbf70;--g2:#e5352b':'--g1:#b7ecc9;--g2:#14703c'}"></i><b class="${x.c<0?'c-md2':''}">${x.c<0?'':'+'}${shrBaht(x.c)}</b><small>${x.q.toLocaleString(undefined,{maximumFractionDigits:1})} MU</small></span>`).join('')+`<span class="small shr-tot">Total Shrinkage <b class="${it.cc<0?'sv-neg':'sv-pos'}">${it.cc<0?'':'+'}${shrBaht(it.cc)}</b> · เป็นจำนวน <b class="${it.cq<0?'sv-neg':'sv-pos'}">${it.cq.toLocaleString(undefined,{maximumFractionDigits:1})}</b> MU</span></div>`:'';
   const by=it.buyer?((SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||''):'';
   return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
@@ -5497,7 +5504,7 @@ function shrPDFHtml(rows,total,b,photos=true){
 <td class="num">${it.amt==null?'-':`<b class="${it.amt<0?'ov':''}">${pdfBaht(Math.abs(it.amt))}</b><div class="m">${it.amt<0?'ทิ้ง':'ได้คืน'}</div>`}</td>
 <td class="num">${it.sales==null?'-':pdfBaht(it.sales)}</td>
 <td class="num">${r==null?'-':`<b class="${r>=SHR_P1?'ov':''}">${pdfPct(r)}</b>`}</td>
-<td>${rs.length?rs.map(([rc,x])=>`<div class="m">${esc(shrRs(rc))}: <b>${x.c<0?'':'+'}${pdfBaht(x.c)}</b> · ${pdfNum(x.q,1)} MU</div>`).join('')+`<div class="m">รวมตามรหัส <b>${it.cc<0?'':'+'}${pdfBaht(it.cc)}</b></div>`:'<span class="m">—</span>'}</td>
+<td>${rs.length?rs.map(([rc,x])=>`<div class="m">${esc(shrRs(rc))}: <b>${x.c<0?'':'+'}${pdfBaht(x.c)}</b> · ${pdfNum(x.q,1)} MU</div>`).join('')+`<div class="m">Total Shrinkage <b>${it.cc<0?'':'+'}${pdfBaht(it.cc)}</b></div>`:'<span class="m">—</span>'}</td>
 <td>${who}</td></tr>`}).join('');
   const rate=SHR.sales?['FF','DF','NF'].filter(k=>dvS[k]>0).map(k=>`<span>%Actual Shrink ${k} ${pdfPct((dvA[k]||0)/dvS[k])}</span>`).join(''):'';
   const tileTxt={big:'ทิ้งเกิน '+pdfBaht(SHR_BIG),hi:'ทิ้งเกิน 1% ของยอดขาย'};
