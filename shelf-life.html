@@ -900,8 +900,8 @@ th.sortable:hover{color:var(--accent)}
 /* OOS+ (computer): cards in a row are the same height, buttons on the bottom line; a click on the chart shows chart (left) + item (right) */
 @media (min-width:1000px){
   .oos-list{align-items:stretch}
-  /* the Buyer ID box sits at the very bottom of every card (the cards of a row are the same height), so any spare space is above it and the boxes line up */
-  .oosc>.bid-block{margin-top:auto}
+  /* the Buyer ID box follows the card's info directly (no gap in the middle); the cards of a row stay the same height, any spare space ends up at the bottom edge */
+  .oosc>.bid-block{margin-top:10px}
   .oosc>.bid-block~.oosc-a{margin-top:0}
   .oosc-a{margin-top:auto}
   #oosMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
