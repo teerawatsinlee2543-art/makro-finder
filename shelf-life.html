@@ -185,6 +185,14 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .add-head h2{margin:0}
 .add-step{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:10px;background:var(--card)}
 .add-step[hidden]{display:none}
+/* Monitor item (computer): the three steps sit side by side as three equal boxes (select product | lot data | check and save) */
+@media (min-width:1100px){
+  #t-add .add-card{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+  #t-add .add-card:has(#mfBox[hidden]){grid-template-columns:repeat(2,minmax(0,1fr))}
+  #t-add .add-card>.add-head{grid-column:1/-1}
+  #t-add .add-card .lot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #t-add .add-card .search-row{flex-wrap:wrap}
+}
 .step-title{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}
 .step-no{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-size:14px;font-weight:800;flex:none}
 .search-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
