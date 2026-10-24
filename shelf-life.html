@@ -4240,7 +4240,7 @@ $('#oiClose').onchange=$('#oiWinSel').onchange=()=>{if(oosImp)showOosPreview()};
    a NEGATIVE cost / amount = money lost (thrown away); a positive one = stock that came back.
    The data stays in this browser (IndexedDB) — nothing is written to the team database. */
 const SHR_DEPT={'01':'FRUIT & VEGETABLE','02':'BUTCHERY','03':'FISH','04':'BAKERY','05':'FROZEN & DAIRY','06':'SNACK & CONFECTIONARY','07':'BASIC COMMODITIES','08':'DRY GROCERY','09':'DRINK & BEVERAGE','10':'COSMETIC & DRUG','31':'LADYS WEAR','32':'MENS WEAR','33':'TEXTILE','34':'PROLINE','35':'ACCESORIES','37':'IN & OUT','41':'ELECTRIC','42':'OFFICE AUTOMATION','44':'D.I.Y.','45':'HOUSE HOLD','46':'STATIONERY'};
-const SHR_RS0={'52':'ทิ้ง / ถอดสินค้า'}; /* the only code whose meaning is known from the Shelf life rules; the team can name the others */
+const SHR_RS0={'52':'ทิ้ง'}; /* the only code whose meaning is known from the Shelf life rules; the team can name the others */
 const SHR_BIG=1000,SHR_HI=5000,SHR_P1=.01,SHR_P5=.05; /* ฿ / share of sales that make a "heavy" thrower */
 let SHR={files:[],code:[],sales:null,names:{}},SHR_REV=0,SHR_MEMO=null;
 const shrOpen=()=>new Promise(res=>{try{const rq=indexedDB.open('slm-shrink',1);rq.onupgradeneeded=()=>rq.result.createObjectStore('kv');rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);rq.onblocked=()=>res(null)}catch(e){res(null)}});
