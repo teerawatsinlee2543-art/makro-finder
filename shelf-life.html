@@ -191,7 +191,9 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 #t-add .add-card .dn-step{display:none}
 #t-add .add-card[data-div="DFNF"] .dn-step{display:flex}
 #t-add .add-card[data-div="DFNF"] .ff-step{display:none!important}
-.dn-item{display:flex;gap:10px;align-items:flex-start}
+.dn-item{display:flex;gap:12px;align-items:flex-start}
+#dnInfo .dn-item>div>b{font-size:17px;line-height:1.3}
+#dnInfo .dn-item .muted,#dnInfo .dn-item .small{font-size:14px}
 .dn-item img,.dn-item .mf-noimg{width:64px;height:64px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--line);flex:none}
 .dn-item>div{display:grid;gap:3px;min-width:0;overflow-wrap:anywhere}
 .dn-item{min-width:0}
@@ -215,7 +217,19 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
   /* the three boxes are equally tall; each one is a column, so its last item (the "ค้นได้ … สินค้า" line, the Cancel / Save buttons) sits at the very bottom of the box */
   #t-add .add-step{display:flex;flex-direction:column;gap:10px}
   #t-add .add-step[hidden]{display:none}
-  #t-add #mfStatus{order:99;margin-top:auto!important}
+  #t-add #mfStatus,#t-add #dnStatus{order:99;margin-top:auto!important}
+  /* DF & NF boxes are exactly as tall as the FF ones at every width: the (invisible) FF boxes keep their place in the grid and the DF & NF boxes sit on the same cells, so the page does not jump when the tab is switched */
+  #t-add .add-card[data-div="DFNF"] .ff-step{display:flex!important;visibility:hidden;pointer-events:none}
+  #t-add .add-card[data-div="DFNF"] .ff-step[hidden]{display:none!important}
+  #t-add .add-card[data-div="DFNF"] .ff-step{grid-row:3}
+  #t-add .add-card[data-div="DFNF"] #mfBox{grid-column:1}
+  #t-add .add-card[data-div="DFNF"] #mfBox+.ff-step{grid-column:2}
+  #t-add .add-card[data-div="DFNF"] #mfBox+.ff-step+.ff-step{grid-column:3}
+  #t-add .add-card[data-div="DFNF"]:has(#mfBox[hidden]) #mfBox+.ff-step{grid-column:1}
+  #t-add .add-card[data-div="DFNF"]:has(#mfBox[hidden]) #mfBox+.ff-step+.ff-step{grid-column:2}
+  #t-add .add-card[data-div="DFNF"] #dnBox1{grid-column:1;grid-row:3}
+  #t-add .add-card[data-div="DFNF"] #dnBox2{grid-column:2;grid-row:3}
+  #t-add .add-card[data-div="DFNF"] #dnBox3{grid-column:3;grid-row:3}
   #t-add .add-step>.save-row{margin-top:auto}
   /* box 2: location and Remark on one line */
   #t-add .add-card .lot-grid>label:has(#aLoc),#t-add .add-card .lot-grid>label:has(#aRemark){grid-column:span 1}
@@ -466,10 +480,10 @@ dialog::backdrop{background:#0008}
 .toast.show{opacity:1}
 .err-text{color:var(--md2);font-weight:600}
 .howto{margin:0;padding-left:20px}
-#q,#nbsQ,#pQ,#ctQ,#mfQ,#nQ,#oosQ{background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b5cad' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px 50%/20px;border:2px solid var(--accent);border-radius:12px;padding:11px 14px 11px 42px;font-size:16px;font-weight:600;box-shadow:0 2px 10px #0b5cad26}
-#q::placeholder,#nbsQ::placeholder,#pQ::placeholder,#ctQ::placeholder,#mfQ::placeholder,#nQ::placeholder,#oosQ::placeholder{color:var(--muted);font-weight:400}
-#q:focus,#nbsQ:focus,#pQ:focus,#ctQ:focus,#mfQ:focus,#nQ:focus,#oosQ:focus{outline:0;box-shadow:0 0 0 4px #0b5cad33,0 2px 10px #0b5cad26}
-label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mfQ),label:has(>#nQ),label:has(>#oosQ),label:has(>#jD),label:has(>#jC),label:has(>#jC2),label:has(>#aJ),label:has(>#aDate){color:var(--accent);font-weight:800;font-size:14px}
+#q,#nbsQ,#pQ,#ctQ,#mfQ,#dnQ,#nQ,#oosQ{background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b5cad' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 13px 50%/20px;border:2px solid var(--accent);border-radius:12px;padding:11px 14px 11px 42px;font-size:16px;font-weight:600;box-shadow:0 2px 10px #0b5cad26}
+#q::placeholder,#nbsQ::placeholder,#pQ::placeholder,#ctQ::placeholder,#mfQ::placeholder,#dnQ::placeholder,#nQ::placeholder,#oosQ::placeholder{color:var(--muted);font-weight:400}
+#q:focus,#nbsQ:focus,#pQ:focus,#ctQ:focus,#mfQ:focus,#dnQ:focus,#nQ:focus,#oosQ:focus{outline:0;box-shadow:0 0 0 4px #0b5cad33,0 2px 10px #0b5cad26}
+label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mfQ),label:has(>#dnQ),label:has(>#nQ),label:has(>#oosQ),label:has(>#jD),label:has(>#jC),label:has(>#jC2),label:has(>#aJ),label:has(>#aDate){color:var(--accent);font-weight:800;font-size:14px}
 #jD,#jC,#jC2,#aJ,#aDate{background:var(--card);border:2px solid var(--accent);border-radius:12px;padding:10px 14px;font-size:16px;font-weight:700;box-shadow:0 2px 10px #0b5cad26}
 #jD:focus,#jC:focus,#jC2:focus,#aJ:focus,#aDate:focus{outline:0;box-shadow:0 0 0 4px #0b5cad33,0 2px 10px #0b5cad26}
 #jC::placeholder,#jC2::placeholder,#aJ::placeholder{color:var(--muted);font-weight:400}
@@ -480,8 +494,8 @@ label:has(>#q),label:has(>#nbsQ),label:has(>#pQ),label:has(>#ctQ),label:has(>#mf
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #jDout b{color:#ff4b57}}
 :root[data-theme="dark"] #jDout b{color:#ff4b57}
 #pQn{font-weight:700;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:13.5px!important;align-self:flex-end;margin-bottom:9px}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) :is(#q,#nbsQ,#pQ,#ctQ,#mfQ,#nQ,#oosQ){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}}
-:root[data-theme="dark"] :is(#q,#nbsQ,#pQ,#ctQ,#mfQ,#nQ,#oosQ){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) :is(#q,#nbsQ,#pQ,#ctQ,#mfQ,#dnQ,#nQ,#oosQ){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}}
+:root[data-theme="dark"] :is(#q,#nbsQ,#pQ,#ctQ,#mfQ,#dnQ,#nQ,#oosQ){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236aa8ff' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");box-shadow:0 2px 10px #0006}
 .th-in{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0}
 .th-in>span{line-height:1.25;min-width:0;overflow-wrap:anywhere}
 .fbtn{max-width:100%;padding:4px 5px}
@@ -801,7 +815,7 @@ select,input,textarea{max-width:100%}
 }
 /* ===== computer screens ===== */
 /* product search field and the red scan button: same height, same line */
-.search-row #mfQ,.search-row #nQ,.search-row #jQ,.search-row .scan-btn{height:54px;box-sizing:border-box}
+.search-row #mfQ,.search-row #dnQ,.search-row #nQ,.search-row #jQ,.search-row .scan-btn{height:54px;box-sizing:border-box}
 .search-row .scan-btn{border-radius:12px;padding-top:0;padding-bottom:0}
 #t-jul .grid2>.card{border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:14px;background:var(--card);box-shadow:0 2px 10px #0000000d}
 #t-jul .grid2>.card h2{margin-top:0}
@@ -1238,6 +1252,32 @@ label.has-scan{position:relative}
   .dbar .dv{grid-column:2;grid-row:1}
   .dbar .dt{grid-column:1/-1;grid-row:2;height:7px}
 }
+/* ===== everything that can be clicked reacts: it lifts + glows on hover, squeezes on press, and shows a clear ring on keyboard focus ===== */
+:is(main,dialog) button,.btn,.tile,.dtile,.lvb,.mf-hit,.scan-mini,.back-mf,.oc-back,.pdf-btn,.dbar-tog,.oc-seg button,nav button,summary,.dbar,.oc-r,th.sortable,.fmenu label,.f-chk{transition:transform .16s cubic-bezier(.3,1.4,.5,1),box-shadow .16s ease,filter .16s ease,background-color .16s ease,border-color .16s ease,opacity .16s ease,color .16s ease}
+:is(main,dialog) button:not(:disabled),.btn:not(:disabled),.tile,.dtile,.lvb,.mf-hit,.scan-mini,.back-mf,.oc-back,.pdf-btn,.dbar-tog,summary{cursor:pointer}
+button:disabled{cursor:not-allowed}
+input:not([type=checkbox]):not([type=radio]),select,textarea{transition:border-color .16s ease,box-shadow .18s ease,background-color .16s ease}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);cursor:pointer}
+label:has(>input[type=checkbox]),label:has(>input[type=radio]){cursor:pointer}
+:is(main,dialog) :is(button,a,summary,.tile,.dtile,.lvb,.mf-hit):focus-visible,nav button:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:2px}
+input:not([type=checkbox]):not([type=radio]):focus-visible,select:focus-visible,textarea:focus-visible{outline:0;border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+@media (hover:hover){
+  :is(main,dialog) button:not(:disabled):not(.fbtn):not(.scan-x):not(.bn-x):hover,.btn:not(:disabled):hover,.tile:hover,.dtile:hover,.lvb:hover,.mf-hit:hover,.scan-mini:hover,.back-mf:hover,.oc-back:hover,.pdf-btn:hover,.dbar-tog:hover{transform:translateY(-2px);box-shadow:0 7px 16px color-mix(in srgb,var(--accent) 26%,transparent);filter:brightness(1.05)}
+  .div-tabs:has(>.tile.sel)>.tile:not(.sel):hover,.tiles:has(>.tile.sel)>.tile:not(.sel):hover{opacity:.9}
+  nav button:not(.on):hover{background:color-mix(in srgb,var(--accent) 12%,transparent);transform:translateY(-1px)}
+  nav button.on:hover{filter:brightness(1.08)}
+  :is(main,dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea):hover:not(:focus){border-color:var(--accent);box-shadow:0 2px 10px color-mix(in srgb,var(--accent) 18%,transparent)}
+  label:has(>input[type=checkbox]):hover,label:has(>input[type=radio]):hover,.fmenu label:hover{color:var(--accent)}
+  summary:hover{color:var(--accent)}
+  th.sortable:hover{transform:none}
+  .dbar:hover,.oc-r:hover{transform:translateX(2px)}
+}
+:is(main,dialog) button:not(:disabled):not(.fbtn):not(.scan-x):not(.bn-x):active,.btn:not(:disabled):active,.tile:active,.dtile:active,.lvb:active,.mf-hit:active,.scan-mini:active,.back-mf:active,.oc-back:active,.pdf-btn:active,.dbar-tog:active,nav button:active{transform:scale(.96);box-shadow:none;filter:brightness(.94);transition-duration:.06s}
+nav{scrollbar-width:none}
+nav::-webkit-scrollbar{display:none} /* the tab bar still scrolls (wheel / touch / drag), it just no longer shows a bar across the top of the page */
+@media (prefers-reduced-motion:reduce){
+  :is(main,dialog) button,.btn,.tile,.dtile,.lvb,.mf-hit,nav button,.dbar,.oc-r{transition:none!important;transform:none!important}
+}
 </style>
 </head>
 <body>
@@ -1353,7 +1393,7 @@ label.has-scan{position:relative}
     </div>
 
     <div class="add-step dn-step" id="dnBox1">
-      <div class="step-title"><span class="step-no">1</span>ค้นหาสินค้า</div>
+      <div class="step-title"><span class="step-no">1</span>เลือกสินค้า</div>
       <div class="search-row">
         <label class="grow"><span class="sr-t">ค้นหาสินค้าจาก Makro Finder (รหัสสินค้า บาร์โค้ด หรือชื่อ)</span><input id="dnQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
         <button type="button" class="btn scan-btn" id="dnScanBtn" title="สแกนบาร์โค้ดด้วยกล้อง"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M16 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>สแกน Barcode</button>
@@ -2572,6 +2612,8 @@ async function loadMakroExtra(){
   }catch(e){}
 }
 function renderMfStatus(){const el=$('#mfStatus');if(!el)return;
+  const dn=$('#dnStatus');
+  if(dn)dn.textContent=MF.state==='loading'?'กำลังโหลดข้อมูลสินค้าจาก Makro Finder…':MF.state==='ready'?`ค้นได้ ${MF.list.length.toLocaleString()} สินค้า (รหัส บาร์โค้ด หรือชื่อ)`:MF.state==='error'?'โหลดข้อมูลสินค้าจาก Makro Finder ไม่สำเร็จ':'';
   el.textContent=MF.state==='loading'?'กำลังโหลดข้อมูลสินค้าจาก Makro Finder…':MF.state==='ready'?`ค้นได้ ${MF.list.length.toLocaleString()} สินค้า (รหัส บาร์โค้ด หรือชื่อ)${MF.extra?'':' · กำลังโหลดสินค้าที่ยังไม่มีตำแหน่งเพิ่ม…'}`:MF.state==='error'?'โหลดข้อมูลสินค้าจาก Makro Finder ไม่สำเร็จ — เลือกกฎจากรายการด้านล่างแทนได้':''}
 /* rule matching: fresh items start with the produce name (แอปเปิ้ลฟูจิ…, แก้วมังกรเวียดนาม…) — prefix match avoids
    drinks/snacks that merely mention a fruit flavour. "…อื่นๆ" rules are fallbacks for their prefix. */
@@ -2667,6 +2709,7 @@ function addPreview(){
   return prod&&!(j?.error)?prod:null;
 }
 $('#aSku').onchange=()=>{aSkuAuto=false;addPreview()};$('#aJ').oninput=addPreview;document.querySelectorAll('#addDivTabs button').forEach(b=>b.onclick=()=>setAddDiv(b.dataset.d));renderAddDivTabs();
+$('#tabs').addEventListener('wheel',e=>{const n=e.currentTarget;if(n.scrollWidth>n.clientWidth&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){n.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false}); /* the tab bar has no scrollbar any more: the mouse wheel moves it sideways when the tabs do not all fit */
 $('#dnQ').addEventListener('input',()=>{if(MF.state==='idle')loadMakroData();dnResults()});
 $('#dnResults').addEventListener('click',e=>{const b=e.target.closest('.mf-hit');if(b)dnPick(b.dataset.no)});
 $('#dnScanBtn').onclick=()=>openScan('dn');
