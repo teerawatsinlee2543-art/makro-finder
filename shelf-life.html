@@ -435,6 +435,15 @@ table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 .ag-file{margin-top:4px}
 .ag-grp{margin-top:2px;font-size:12px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
 .chip.ag-next{align-self:flex-start;margin:2px 0 4px}
+/* the next-status chip is a solid, clearly readable badge (the pale tint vanished on the light-red box) */
+.agnext .chip.ag-next.mini{font-size:14px;font-weight:800;line-height:1.25;padding:3px 12px;border:1.5px solid rgba(0,0,0,.28);box-shadow:0 1px 3px rgba(0,0,0,.18);letter-spacing:.01em}
+.agnext .chip.ag-next.s-soon{background:#ffc928;color:#3b2a00}
+.agnext .chip.ag-next.s-md1{background:var(--seg-md1);color:var(--seg-ink)}
+.agnext .chip.ag-next.s-md2{background:var(--seg-md2);color:var(--seg-ink)}
+.agnext .chip.ag-next.s-pull{background:var(--seg-pull);color:#fff}
+.agnext .chip.ag-next.s-ok{background:var(--seg-ok);color:#fff}
+.agnext .chip.ag-next.s-err{background:#7c3aed;color:#fff}
+.agnext .chip.ag-next.s-done{background:var(--ink);color:var(--card)}
 /* a table cell holding a chip + notes goes in one block, so the card layout (td>* {flex:1}) can't stretch the chip into a tall oval or clip its text */
 .cbox{min-width:0}
 .cbox>.chip,.cbox>.chip+*{max-width:100%}
