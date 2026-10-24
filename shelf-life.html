@@ -442,7 +442,8 @@ table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 .ag-sent b{color:var(--ink);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ag-grp{margin-top:2px;font-size:12px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
 .chip.ag-next{align-self:flex-start;margin:2px 0 4px}
-.contact .ct-com{margin-top:8px} /* "Commercial: …" under the Buyer ID block of the Monitor table */
+.contact{display:grid;gap:8px} /* Monitor table contact cell: Buyer ID box, Commercial box, Full Name Buyer box */
+.contact .ct-names{width:100%;padding:9px 10px;font-size:.9rem;border-radius:12px}
 /* Aging Status "status now" badge: a solid, bold badge so ปกติ / Alert / Attention stand out */
 .cbox .chip.ag-now{font-size:14.5px;font-weight:800;line-height:1.25;padding:3px 14px;border:1.5px solid rgba(0,0,0,.25);box-shadow:0 1px 3px rgba(0,0,0,.16)}
 .cbox .chip.ag-now.s-ok{background:var(--ok);color:#fff}
@@ -2159,21 +2160,28 @@ const ibuyOf=no=>ibuyMap().get(amNum(no))||null;
 const ibuyUid=no=>{const x=ibuyOf(no);return x?x.uid:''};
 /* "Buyer ID : F1D" (red, bold) + the Buyer's details (Merchandise Mgr. · Area · Description · Assistant …), the same on every card / row.
    uid = the Buyer the app worked out; a Buyer ID typed from BIP replaces it. */
-function bidBlock(no,uid,note,warn){
+function bidBlock(no,uid,note,warn,noNames){ /* noNames: the "Full Name Buyer" button is placed elsewhere (own box at the bottom of the Monitor table's contact cell) */
   const ib=ibuyOf(no),u=ib?ib.uid:String(uid||''),c=u?nbsContact(u):null,k=esc(String(no));
   const src=ib?`<span class="muted bid-src">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</span>`:(note?`<span class="muted bid-src bsrc">${esc(note)}</span>`:'');
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
   const detail=u?(c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial — เพิ่มชื่อ Buyer นี้ที่แท็บ Buyer / Commercial เพื่อให้เห็นรายละเอียดผู้ดูแล</div>`):'';
   /* all the buttons of the block in one grid: the same width and height, side by side when there is room, else one under the other */
-  const tools=`<div class="bid-tools"><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>${c?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</div>`;
+  const tools=`<div class="bid-tools"><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>${c&&!noNames?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</div>`;
   const editBtn=`<div class="bid-tools bid-foot"><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
   return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}</div>${tools}${detail}${wr}${editBtn}</div>`;
 }
 /* the same Buyer ID block without the Item buttons, for a lot that has no Item No. (only the Buyer the Shelf life rule names) */
-function bidSimple(uid){
+function bidSimple(uid,noNames){
   uid=String(uid||'');if(!uid)return'<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Buyer ID</span><span class="muted">— ยังไม่กำหนด —</span></div></div>';
-  const c=nbsContact(uid),tools=c?`<div class="bid-tools"><button type="button" class="btn sm bid-names" onclick="bidNames('${esc(uid)}')" title="ดูชื่อเต็มและเบอร์โทรของทุกคนที่ดูแล Buyer นี้">Full Name Buyer</button></div>`:'';
+  const c=nbsContact(uid),tools=c&&!noNames?`<div class="bid-tools"><button type="button" class="btn sm bid-names" onclick="bidNames('${esc(uid)}')" title="ดูชื่อเต็มและเบอร์โทรของทุกคนที่ดูแล Buyer นี้">Full Name Buyer</button></div>`:'';
   return`<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Buyer ID</span><b class="bid">${esc(uid)}</b></div>${tools}${c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(uid)} ในรายชื่อ Buyer / Commercial</div>`}</div>`}
+/* contact cell of the Monitor table: three boxes one under the other - Buyer ID, Commercial, and Full Name Buyer at the very bottom */
+function contactCell(e,p,ii){
+  const bm=ii?nbsBuyerMap().get(amNum(ii.no)):'',ru=(e.buyer&&e.buyer.uid)||p.buyerUid||'',u=ii?(ibuyUid(ii.no)||ru||bm||''):ru;
+  const buyer=ii?bidBlock(ii.no,ru||bm||'',!ru&&bm?'ตามข้อมูล OOS+ / ItemList':'',null,true):bidSimple(ru,true);
+  const com=`<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Commercial</span></div><div>${who(e.com,p.comUid)}</div></div>`;
+  const names=u&&nbsContact(u)?`<button type="button" class="btn sm bid-names ct-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:'';
+  return`<div class="small contact">${e.st==='ok'?'<span class="muted">ยังไม่ต้องติดต่อ</span>':''}${buyer}${com}${names}</div>`}
 /* "Full Name Buyer": everybody listed for this Buyer (from the Buyer / Commercial tab) with full name + phone, in a small box */
 function bidPeople(c){
   const v=ctView(c),X=v.x,out=[];
@@ -2325,7 +2333,7 @@ function renderDash(){
     <td data-l="วางขาย"><div><span class="num">วันที่ ${e.day} / ${p.pullDay}</span>${strip(p,e.day)}</div></td>
     <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
     <td data-l="ต้องทำ">${todoHTML(e)}</td>
-    <td data-l="ติดต่อ"><div class="small contact">${e.st==='ok'?'<span class="muted">ยังไม่ต้องติดต่อ</span><br>':''}${ii?bidBlock(ii.no,(e.buyer&&e.buyer.uid)||p.buyerUid||nbsBuyerMap().get(amNum(ii.no))||'',!(e.buyer&&e.buyer.uid)&&!p.buyerUid&&nbsBuyerMap().get(amNum(ii.no))?'ตามข้อมูล OOS+ / ItemList':''):bidSimple((e.buyer&&e.buyer.uid)||p.buyerUid||'')}<div class="ct-com">Commercial: ${who(e.com,p.comUid)}</div></div></td>
+    <td data-l="ติดต่อ">${contactCell(e,p,ii)}</td>
     <td data-l="จำนวน / Location" class="num"><div>${esc(b.qty)}<div class="muted small">${esc(b.loc)}</div></div></td>
     <td class="no-print"><div class="actbtns">
       <button class="btn sm" title="คัดลอกข้อความแจ้ง Buyer/Commercial" onclick="copyMsg('${k}')">คัดลอก</button>
