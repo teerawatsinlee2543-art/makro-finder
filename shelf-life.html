@@ -573,6 +573,21 @@ table.nbs-tbl tr.stk-focus td[data-l="Division"] .chip,table.nbs-tbl td[data-l="
 .oc-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .oc-back{font:inherit;font-weight:700;padding:5px 12px;border:1px solid #7a4fd6;border-radius:8px;background:#fff;color:#7a4fd6;cursor:pointer}
 .oc-back:hover{background:#7a4fd6;color:#fff}
+/* computer / tablet: the ranking boxes (OOS+ ความถี่ที่ขาด, %Shrink, Negative Stock, High Stock to DMS) are as compact as the yellow "รายการที่ต้องเติม แยกตามแผนก" box:
+   max 760px wide and centred, one short line per row (name | thin bar | numbers), small bold text */
+@media (min-width:561px){
+  .oos-chart{max-width:760px;margin:10px auto 14px;padding:8px 12px 6px}
+  .oos-chart .oc-h{margin-bottom:4px;gap:6px 12px}
+  .oos-chart .oc-h b{font-size:12.5px;font-weight:800}
+  .oos-chart .oc-h .muted{font-size:11.5px}
+  .oos-chart .oc-seg button,.oos-chart .oc-back{padding:3px 10px;font-size:12.5px}
+  .oos-chart .oc-list{row-gap:1px}
+  .oos-chart .oc-r{padding:2px 6px;min-height:24px}
+  .oos-chart .oc-n{font-size:12.5px;font-weight:700}
+  .oos-chart .oc-b{height:9px;border-radius:99px}
+  .oos-chart .oc-b i{border-radius:99px}
+  .oos-chart .oc-v,.oos-chart .oc-a,.oos-chart .oc-s{font-size:12.5px}
+}
 @media (max-width:560px){ /* phone: name and numbers on the first line, the bar under them; the numbers still line up in columns */
   .oc-list{grid-template-columns:minmax(0,1fr) max-content max-content;column-gap:6px}
   .oc-list>.oc-r{grid-template-areas:none;gap:2px 6px}
@@ -1018,19 +1033,6 @@ label:has(>#shrQ){color:var(--accent);font-weight:800;font-size:14px}
 .sn-row{display:grid;gap:4px}
 .sn-row input{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
 @media (min-width:1000px){
-  /* %Shrink and OOS+: the ranking box (ทิ้งมากสุด / ความถี่ที่ขาด) is exactly as wide as one item card (same column grid as the card list below it) */
-  :is(#shrMain,#oosMain):not(.drill){display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:12px;align-items:start}
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrChart,#oosChart){grid-column:1;min-width:0}
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrChart,#oosChart) .oos-chart{margin:0}
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrChart,#oosChart):empty{display:none}
-  /* one card wide is narrow: name and numbers on the first line, the bar under them (same as on a phone), so the names are not cut off */
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrChart,#oosChart) .oc-list{grid-template-columns:minmax(0,1fr) max-content max-content;column-gap:6px}
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrChart,#oosChart) .oc-list>.oc-r{grid-template-areas:none;gap:2px 6px}
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrChart,#oosChart) .oc-list .oc-n{grid-area:1/1/2/2;font-size:14px}
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrChart,#oosChart) .oc-list .oc-a{grid-area:1/2/2/3}
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrChart,#oosChart) .oc-list .oc-s{grid-area:1/3/2/4}
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrChart,#oosChart) .oc-list .oc-b{grid-area:2/1/3/4}
-  :is(#shrMain,#oosMain):not(.drill)>:is(#shrList,#oosList){grid-column:1/-1}
   #shrMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
   #shrMain.drill .oos-chart{margin:0}
   #shrMain.drill .oos-list{grid-template-columns:minmax(0,1fr);align-items:start}
