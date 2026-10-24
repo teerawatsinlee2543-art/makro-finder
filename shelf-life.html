@@ -1273,8 +1273,8 @@ input:not([type=checkbox]):not([type=radio]):focus-visible,select:focus-visible,
   .dbar:hover,.oc-r:hover{transform:translateX(2px)}
 }
 :is(main,dialog) button:not(:disabled):not(.fbtn):not(.scan-x):not(.bn-x):active,.btn:not(:disabled):active,.tile:active,.dtile:active,.lvb:active,.mf-hit:active,.scan-mini:active,.back-mf:active,.oc-back:active,.pdf-btn:active,.dbar-tog:active,nav button:active{transform:scale(.96);box-shadow:none;filter:brightness(.94);transition-duration:.06s}
-nav{scrollbar-width:none}
-nav::-webkit-scrollbar{display:none} /* the tab bar still scrolls (wheel / touch / drag), it just no longer shows a bar across the top of the page */
+nav,nav#tabs{scrollbar-width:none!important;-ms-overflow-style:none}
+nav::-webkit-scrollbar,nav#tabs::-webkit-scrollbar{display:none!important;width:0;height:0} /* the tab bar still scrolls (wheel / touch / drag), it just no longer shows a bar across the top of the page */
 @media (prefers-reduced-motion:reduce){
   :is(main,dialog) button,.btn,.tile,.dtile,.lvb,.mf-hit,nav button,.dbar,.oc-r{transition:none!important;transform:none!important}
 }
@@ -2305,8 +2305,8 @@ function renderDn(){
   if(!it){const e=pvEmpty('①','ยังไม่ได้เลือกสินค้า','ค้นหาหรือสแกนสินค้าในข้อ 1 ก่อน');info.innerHTML=e;buy.innerHTML=e;return}
   const no=String(it.itemNo),img=MF.images[no];
   info.innerHTML=`<div class="dn-item">${img?`<img src="${esc(img)}" alt="">`:'<span class="mf-noimg"></span>'}<div><b>${esc(it.desc)}</b><div class="muted small">Item No. <b>${esc(no)}</b>${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div>${it.locs.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(it.locs))}</b></div>`:''}</div></div>${lotStk(no)}`;
-  const u=ibuyUid(no)||nbsBuyerMap().get(amNum(no))||'',k=esc(no.replace(/["'\\]/g,''));
-  buy.innerHTML=(u?bidSimple(u):'<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Buyer ID</span><span class="muted">— ยังไม่ทราบ —</span></div></div>')+`<div class="bid-tools bid-foot"><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
+  const u=nbsBuyerMap().get(amNum(no))||'';
+  buy.innerHTML=bidBlock(no,u,!ibuyUid(no)&&u?'ตามข้อมูล OOS+ / ItemList':'',null,false,false,true); /* the same Buyer box as on every other tab (the Stock Movement button is already in box 2) */
 }
 const bySku=()=>[...st.products].sort((a,b)=>(OO[a.origin]??3)-(OO[b.origin]??3)||a.shelf-b.shelf||String(a.desc).localeCompare(String(b.desc),'th'));
 function prodOptions(sel){return bySku().map(p=>`<option value="${esc(pkey(p))}"${pkey(p)===sel?' selected':''}>${p.sku?esc(p.sku)+' · ':''}${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} · ${p.shelf} วัน)</option>`).join('')}
@@ -2341,15 +2341,16 @@ const ibuyOf=no=>ibuyMap().get(amNum(no))||null;
 const ibuyUid=no=>{const x=ibuyOf(no);return x?x.uid:''};
 /* "Buyer ID : F1D" (red, bold) + the Buyer's details (Merchandise Mgr. · Area · Description · Assistant …), the same on every card / row.
    uid = the Buyer the app worked out; a Buyer ID typed from BIP replaces it. */
-function bidBlock(no,uid,note,warn,noNames,bare){ /* bare: no buttons at all (the overview table shows only Buyer ID + details) */ /* noNames: the "Full Name Buyer" button is placed elsewhere (own box at the bottom of the Monitor table's contact cell) */
+function bidBlock(no,uid,note,warn,noNames,bare,noMove){ /* noMove: no "Stock Movement 14 วัน" button (DF & NF tab, where it already sits in the product box) */ /* bare: no buttons at all (the overview table shows only Buyer ID + details) */ /* noNames: the "Full Name Buyer" button is placed elsewhere (own box at the bottom of the Monitor table's contact cell) */
   const ib=ibuyOf(no),u=ib?ib.uid:String(uid||''),c=u?nbsContact(u):null,k=esc(String(no));
   const src=ib?`<span class="muted bid-src">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</span>`:(note&&note!=='ตามข้อมูล OOS+ / ItemList'?`<span class="muted bid-src bsrc">${esc(note)}</span>`:''); /* the "ตามข้อมูล OOS+ / ItemList" note is hidden */
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
   const detail=u?(c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial — เพิ่มชื่อ Buyer นี้ที่แท็บ Buyer / Commercial เพื่อให้เห็นรายละเอียดผู้ดูแล</div>`):'';
   /* all the buttons of the block in one grid: the same width and height, side by side when there is room, else one under the other */
-  const tools=`<div class="bid-tools"><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>${c&&!noNames?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}',this)" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</div>`;
+  const tbtn=(noMove?'':`<button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>`)+(c&&!noNames?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}',this)" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''),tools=tbtn?`<div class="bid-tools">${tbtn}</div>`:'';
   const editBtn=`<div class="bid-tools bid-foot"><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
-  return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}</div>${bare?'':tools}${detail}${wr}${bare?'':editBtn}</div>`;
+  /* the arguments stay on the block so that bidRefresh() can redraw it exactly the same way */
+  return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}" data-note="${esc(String(note||''))}" data-warn="${esc(String(warn||''))}"${noNames?' data-nn="1"':''}${bare?' data-bare="1"':''}${noMove?' data-nm="1"':''}><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}</div>${bare?'':tools}${detail}${wr}${bare?'':editBtn}</div>`;
 }
 /* the same Buyer ID block without the Item buttons, for a lot that has no Item No. (only the Buyer the Shelf life rule names) */
 function bidSimple(uid,noNames){
@@ -2420,7 +2421,7 @@ async function bidAuto(no,uid,src){
 }
 /* refresh the Buyer blocks in place (a full redraw would close the card that is lifted to the left) */
 function bidRefresh(){
-  document.querySelectorAll('.bid-block[data-no]').forEach(el=>{const t=document.createElement('div');t.innerHTML=bidBlock(el.dataset.no,el.dataset.uid||'','','');el.replaceWith(t.firstElementChild)});
+  document.querySelectorAll('.bid-block[data-no]').forEach(el=>{const t=document.createElement('div');const d=el.dataset;t.innerHTML=bidBlock(d.no,d.uid||'',d.note||'',d.warn||'',!!d.nn,!!d.bare,!!d.nm);el.replaceWith(t.firstElementChild)});
 }
 /* the code that runs in the BIP window: it is also written out as the bookmarklet (once=true) */
 function slmBipSender(origin,once){
