@@ -3885,10 +3885,14 @@ function stkWin(url,i){
     const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||window.innerWidth<700;
     let w;
     if(phone)w=window.open(url,'mkStock'+i);
-    else{const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,ww=Math.min(1000,Math.round(W*.62)),fresh=!(stkOpened[i]&&stkOpened[i].closed!==true);
+    else{const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,fresh=!(stkOpened[i]&&stkOpened[i].closed!==true);
+      let ww=Math.min(1000,Math.round(W*.62)),wl=L+W-ww;
+      /* the Makro window opens right next to the lifted card (the card sits at the left of this page): no empty gap between the two, and the window takes the rest of the screen up to 1300px */
+      try{if(window.innerWidth>=900){const cw=Math.min(Math.round(window.innerWidth*.36),460),bl=Math.max(0,Math.round(((window.outerWidth||window.innerWidth)-window.innerWidth)/2)),edge=(window.screenX!=null?window.screenX:L)+bl+12+cw+8;
+        if(edge>L&&edge<L+W-500){wl=edge;ww=Math.min(1300,L+W-edge)}}}catch(e){}
       /* width / height in the features are the INSIDE of the window (the title bar and address bar come on top and would push the bottom off the screen): ask for less, then set the real outer size */
-      w=window.open(url,'mkStock'+i,`popup=yes,width=${ww},height=${Math.max(400,H-100)},left=${L+W-ww},top=${T}`);
-      if(w&&fresh){try{w.moveTo(L+W-ww,T);w.resizeTo(ww,H)}catch(e){}} /* a window that is already open keeps the size the person gave it */}
+      w=window.open(url,'mkStock'+i,`popup=yes,width=${ww},height=${Math.max(400,H-100)},left=${wl},top=${T}`);
+      if(w&&fresh){try{w.moveTo(wl,T);w.resizeTo(ww,H)}catch(e){}} /* a window that is already open keeps the size the person gave it */}
     if(w)stkOpened[i]=w;
     return w;
   }catch(e){return null}
