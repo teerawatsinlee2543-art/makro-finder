@@ -1911,8 +1911,9 @@ function evalBatch(b){
   const p=st.products.find(x=>pkey(x)===b.sku);const t=today();
   if(!p)return{st:'err',label:'ไม่พบสินค้า',todo:`ไม่มี “${b.sku}” ในรายการสินค้า`,action:`ไม่มี “${b.sku}” ในรายการสินค้า`,rank:-1};
   const prod=fromIso(b.prod),day=diffD(t,prod)+1,c52=addD(prod,p.pullDay-1),left=p.pullDay-day;
-  const buyer=st.contacts.find(c=>c.uid===p.buyerUid),com=st.contacts.find(c=>c.uid===p.comUid);
-  const base={p,prod,day,c52,left,buyer,com};
+  /* the Buyer is the one linked to the item (Buyer ID read from the BIP page, shared by the whole team), else the one the Shelf life rule names */
+  const bUid=(b.itemNo&&ibuyUid(b.itemNo))||p.buyerUid||'',buyer=st.contacts.find(c=>c.uid===bUid)||(bUid&&bUid!==p.buyerUid?nbsContact(bUid):null)||null,com=st.contacts.find(c=>c.uid===p.comUid);
+  const base={p,prod,day,c52,left,buyer,buyerUid:bUid,com};
   const mk=(o,todo,next)=>{const nx=next&&next.d!=null?{...next,date:addD(prod,next.d-1),inDays:next.d-day}:next||null;
     return{...base,...o,todo,next:nx,action:todo+(nx?` · ถัดไป: ${nx.what}${nx.date?` ${fmtS(nx.date)} (อีก ${nx.inDays} วัน)`:''}`:'')}};
   if(day<1)return mk({st:'err',label:'วันรับในอนาคต',rank:-1},'ตรวจสอบ Julian code อีกครั้ง');
@@ -2185,11 +2186,18 @@ function bidSimple(uid,noNames){
   return`<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Buyer ID</span><b class="bid">${esc(uid)}</b></div>${tools}${c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(uid)} ในรายชื่อ Buyer / Commercial</div>`}</div>`}
 /* contact cell of the Monitor table: three boxes one under the other - Buyer ID, Commercial, and Full Name Buyer at the very bottom */
 function contactCell(e,p,ii){
-  const bm=ii?nbsBuyerMap().get(amNum(ii.no)):'',ru=(e.buyer&&e.buyer.uid)||p.buyerUid||'',u=ii?(ibuyUid(ii.no)||ru||bm||''):ru;
+  const bm=ii?nbsBuyerMap().get(amNum(ii.no)):'',ru=e.buyerUid||p.buyerUid||'',u=ii?(ibuyUid(ii.no)||ru||bm||''):ru;
   const buyer=ii?bidBlock(ii.no,ru||bm||'',!ru&&bm?'ตามข้อมูล OOS+ / ItemList':'',null,true,true):bidSimple(ru,true);
   const com=`<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Commercial</span></div><div>${who(e.com,p.comUid)}</div></div>`;
   const names=u&&nbsContact(u)?`<button type="button" class="btn sm bid-names ct-names" onclick="bidNames('${esc(u)}',this)" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:'';
   return`<div class="small contact">${e.st==='ok'?'<span class="muted">ยังไม่ต้องติดต่อ</span>':''}${buyer}${com}${names}</div>`}
+/* Buyer + Commercial boxes for a lot / the lot being added: the same Buyer ID block as everywhere else (Buyer ID linked from the BIP page by Item No., Stock Movement, Full Name Buyer, edit),
+   with the rule's Buyer as the fallback when the item has no Buyer ID yet, and the Commercial box beside it */
+function buyerCom(no,ru,com,cuid){
+  ru=String(ru||'');const bm=no?nbsBuyerMap().get(amNum(no)):'';
+  const buyer=no?bidBlock(no,ru||bm||'',!ru&&bm?'ตามข้อมูล OOS+ / ItemList':''):bidSimple(ru);
+  const comb=`<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Commercial</span></div><div>${who(com,cuid)}</div></div>`;
+  return`<div class="ccards">${buyer}${comb}</div>`}
 /* "Full Name Buyer": everybody listed for this Buyer (from the Buyer / Commercial tab) with full name + phone, in a small box */
 function bidPeople(c){
   const v=ctView(c),X=v.x,out=[];
@@ -2385,7 +2393,7 @@ Julian ${jul(e.prod).ddd} | วันรับ ${fmt(e.prod)} | Code 52 ${fmt(e.
 วางขายวันที่ ${e.day}/${p.pullDay}
 จำนวน ${b.qty} | ที่ตั้ง ${b.loc||'-'}${b.remark?"\nRemark: "+b.remark:""}
 ต้องทำ: ${e.action}
-Buyer UID: ${c(e.buyer)}
+Buyer UID: ${e.buyer?c(e.buyer):(e.buyerUid||'-')}
 Commercial: ${c(e.com)}`;
   copyText(txt,'คัดลอกข้อความแล้ว — วางใน LINE/อีเมลได้เลย');
 }
@@ -2524,7 +2532,7 @@ function addPreview(){
   const title=it?esc(it.desc):esc(p.desc);
   const who=it?`<span class="pill">Item ${esc(it.itemNo)}</span><span class="pill">กฎ: ${esc(p.desc)} · ${ORIGINS[p.origin]||'อื่นๆ'}</span>`:'';
   $('#aPreview').innerHTML=msg+`<div class="pv-head">${pic}<b class="pv-name">${title}</b>${who}<span class="pill">Shelf life ${p.shelf} วัน</span><span class="pill pill-green">ขายราคาเต็ม ${fd>1?`วันที่ 1–${fd}`:'วันที่ 1'}</span>${p.temp?`<span class="pill">ตู้แช่ ${esc(p.temp)}</span>`:''}</div>${prod?'':'<p class="muted small" style="margin:6px 0 0">ใส่ Julian code หรือวันที่รับสินค้า เพื่อดูวันที่จริงของแต่ละขั้น</p>'}<div class="pv-body"><div class="pv-plan">${planHTML(p,prod)}</div><div class="pv-strip"><div class="clabel">Shelf life · แถบสี${prod?` · วันนี้ = วันที่ ${diffD(today(),prod)+1}`:""}</div>${strip(p,prod?diffD(today(),prod)+1:undefined).replace("class=\"strip\"","class=\"strip big\"")}<div class="legend sm"><span style="--c:var(--seg-ok)">ขาย</span><span style="--c:var(--seg-md1)">ลด 15%</span><span style="--c:var(--seg-md2)">ลด 30%</span><span style="--c:var(--seg-pull)">Code 52</span>${prod?`<span class="today-key">วันนี้</span>`:""}</div></div></div>
-  <div class="ccards">${contactCard('Buyer',st.contacts.find(c=>c.uid===p.buyerUid),p.buyerUid)}${contactCard('Commercial',st.contacts.find(c=>c.uid===p.comUid),p.comUid)}</div>`;
+  ${buyerCom(it&&it.itemNo,p.buyerUid,st.contacts.find(c=>c.uid===p.comUid),p.comUid)}`;
   return prod&&!(j?.error)?prod:null;
 }
 $('#aSku').onchange=()=>{aSkuAuto=false;addPreview()};$('#aJ').oninput=addPreview;
@@ -5038,7 +5046,7 @@ let julPickIt=null,julRuleAuto=false;
 function julVirtual(p,date){return{sku:pkey(p),prod:iso(date)}} /* a lot that is not saved: just a rule + a receive date */
 function julLotHTML(b,head){
   const e=evalBatch(b),p=e.p;
-  const contacts=p?`<div class="ccards">${contactCard('Buyer',e.buyer,p.buyerUid)}${contactCard('Commercial',e.com,p.comUid)}</div>`:'';
+  const contacts=p?buyerCom(b.itemNo,e.buyerUid||p.buyerUid,e.com,p.comUid):'';
   const day=e.day>=1?`วันนี้ = วันที่ ${e.day} ของ Shelf life ${p?p.shelf+' วัน':''}`:'';
   return`<div class="jlot"><div class="jlot-h">${head}${chip(e.st,e.label)}</div>${day?`<div class="muted small">${esc(day)}</div>`:''}${todoHTML(e)}${p&&e.day>=1?`<div class="pv-strip" style="margin-top:8px">${strip(p,e.day).replace('class="strip"','class="strip big"')}</div>`:''}${contacts}</div>`;
 }
@@ -5120,7 +5128,7 @@ function parseCSV(t){t=t.replace(/^﻿/,'');const rows=[];let r=[],c='',q=false;
   const h=rows.shift()?.map(x=>x.trim().toLowerCase())||[];return rows.filter(r=>r.some(x=>x.trim())).map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]??'').trim()])))}
 function lotsTable(whole){
   const rows=[['status','sku','description','origin','julian_receive','receive_date','day_on_shelf','shelf_life','code52_day','code52_date','days_to_code52','action','qty','location','buyer_uid','buyer_name','commercial_uid','commercial_name','done','note','remark']];
-  dashList(dashRows(),whole===true).forEach(({b,e})=>{const p=e.p||{};rows.push([e.label,p.sku||'',p.desc||b.sku,ORIGINS[p.origin]||'',e.prod?jul(e.prod).ddd:'',b.prod,e.day,p.shelf,p.pullDay,e.c52?iso(e.c52):'',e.left,e.action,b.qty,b.loc,p.buyerUid,e.buyer?.name,p.comUid,e.com?.name,b.ack===e.st?'Y':'',b.note,b.remark||''])});
+  dashList(dashRows(),whole===true).forEach(({b,e})=>{const p=e.p||{};rows.push([e.label,p.sku||'',p.desc||b.sku,ORIGINS[p.origin]||'',e.prod?jul(e.prod).ddd:'',b.prod,e.day,p.shelf,p.pullDay,e.c52?iso(e.c52):'',e.left,e.action,b.qty,b.loc,e.buyerUid||p.buyerUid,e.buyer?.name,p.comUid,e.com?.name,b.ack===e.st?'Y':'',b.note,b.remark||''])});
   return rows}
 function exportBatchesCSV(arg){const w=arg===true;if(!dashList(dashRows(),w).length){toast('ไม่มีรายการให้ส่งออก');return}dl(`shelf-life_${iso(today())}.csv`,toCSV(lotsTable(w)),'text/csv;charset=utf-8',()=>batchesPDF(w))}
 const PROD_TPL_ROWS=[['sku','description','origin','temp','shelf_life','step1_day','step1_pct','step2_day','step2_pct','code52_day','buyer_uid','commercial_uid'],['','บลูเบอรี่','import','0–4°C',7,8,15,10,30,11,'',''],['123456','ตัวอย่าง: เว้นวันว่าง = ใช้กฎตามคู่มือ','local','',5,'','','','','','','']];
@@ -5389,7 +5397,7 @@ function batchesPDFHtml(whole,photos=true){
 <td class="num">วันที่ ${e.day} / ${p.pullDay}</td>
 <td class="num">${fmt(e.c52)}<div class="m ${e.left<=1?'ov':''}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></td>
 <td>${esc(e.action||'')}</td>
-<td><div class="m">Buyer</div>${esc(p.buyerUid||'-')}${e.buyer?' '+esc(e.buyer.name):''}<div class="m">Commercial</div>${esc(p.comUid||'-')}${e.com?' '+esc(e.com.name):''}</td>
+<td><div class="m">Buyer</div>${esc(e.buyerUid||p.buyerUid||'-')}${e.buyer?' '+esc(e.buyer.name):''}<div class="m">Commercial</div>${esc(p.comUid||'-')}${e.com?' '+esc(e.com.name):''}</td>
 <td class="num">${esc(b.qty??'')}</td><td>${esc(b.loc||'-')}</td><td>${esc(b.remark||'')}</td></tr>`}).join('');
   return pdfPage({title:'Shelf-Life Monitor · ล็อตและสถานะวันนี้',
     sub:`Julian วันนี้ ${jul(today()).ddd} (YYDDD ${jul(today()).y2}) · พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · ${whole===true?'ทั้งหมด':'ที่แสดง'} ${list.length.toLocaleString()} ล็อต`,
