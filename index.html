@@ -714,6 +714,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .loc-tools .waste-io-imp{border-color:#7FAAEF}
 .loc-tools .noloc-btn{border-color:#EFAE2F}
 .loc-tools .waste-io-btn i,.loc-tools .noloc-btn i{border:1.5px solid rgba(20,24,33,.14)}
+/* the two pallet buttons (จัดการพาเลท / หาสินค้าตามพาเลท) share one line */
+#palletOpenBar[style*="block"]{display:flex!important;gap:12px}
+#palletOpenBar .pallet-open-btn{flex:1 1 0;min-width:0;width:auto;margin-top:0!important;text-align:center}
+@media (max-width:520px){#palletOpenBar{gap:8px!important}#palletOpenBar .pallet-open-btn{flex-direction:column;gap:6px;padding:12px 8px;font-size:13.5px;line-height:1.25}#palletOpenBar .pallet-open-btn i{width:30px;height:30px;font-size:17px}}
 .fb-empty{text-align:center;padding:24px 12px;color:var(--color-text-tertiary);font-size:12.5px}
 @media (max-width:479px){
   .pallet-action-row{flex-direction:column}
