@@ -186,6 +186,16 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .div-tabs button+button{border-left:1px solid var(--line)}
 .div-tabs button.on{background:var(--accent);color:var(--accent-ink)}
 .div-tabs button:not(.on):hover{background:var(--bg)}
+/* Monitor item, DF & NF tab: its own three boxes; the FF lot form is hidden there (and the DF & NF boxes are hidden on the FF tab) */
+#t-add .add-card .dn-step{display:none}
+#t-add .add-card[data-div="DFNF"] .dn-step{display:flex}
+#t-add .add-card[data-div="DFNF"] .ff-step{display:none!important}
+.dn-item{display:flex;gap:10px;align-items:flex-start}
+.dn-item img,.dn-item .mf-noimg{width:64px;height:64px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--line);flex:none}
+.dn-item>div{display:grid;gap:3px;min-width:0}
+#t-add #dnInfo .lot-stk{margin-top:12px}
+#t-add #dnBuyer{display:grid;gap:8px}
+@media (min-width:1100px){#t-add .add-card[data-div="DFNF"]{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 .add-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
 .add-head h2{margin:0}
 .add-step{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:10px;background:var(--card)}
@@ -1282,7 +1292,7 @@ label.has-scan{position:relative}
       <span class="pill">นับวันตามคู่มือ: วันรับสินค้า = <b>วันที่ 1</b></span>
     </div>
 
-    <div class="add-step" id="mfBox" hidden>
+    <div class="add-step ff-step" id="mfBox" hidden>
       <div class="step-title"><span class="step-no">1</span>เลือกสินค้า</div>
       <div class="search-row">
         <label class="grow"><span class="sr-t">ค้นหาสินค้าจาก Makro Finder (รหัสสินค้า บาร์โค้ด หรือชื่อ)</span><input id="mfQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
@@ -1293,7 +1303,7 @@ label.has-scan{position:relative}
       <div id="mfPicked" class="mf-picked" hidden></div>
     </div>
 
-    <div class="add-step">
+    <div class="add-step ff-step">
       <div class="step-title"><span class="step-no" id="stepNo2">2</span>ข้อมูลล็อต</div>
       <div class="lot-grid">
         <label class="span3">กฎ Shelf life (ประเภทสินค้าตามคู่มือ)<select id="aSku"></select></label>
@@ -1329,11 +1339,31 @@ label.has-scan{position:relative}
       </div>
     </div>
 
-    <div class="add-step">
+    <div class="add-step ff-step">
       <div class="step-title"><span class="step-no" id="stepNo3">3</span>ตรวจกำหนดการ แล้วบันทึก</div>
       <div id="aPreview" class="preview-box"></div>
       <p class="add-hint" id="aHint"></p>
       <div class="save-row"><button type="button" class="btn cancel-btn" id="aCancel">ยกเลิก</button><button class="btn pri w save-btn" id="aSave">บันทึกล็อต</button></div>
+    </div>
+
+    <div class="add-step dn-step" id="dnBox1">
+      <div class="step-title"><span class="step-no">1</span>ค้นหาสินค้า</div>
+      <div class="search-row">
+        <label class="grow"><span class="sr-t">ค้นหาสินค้าจาก Makro Finder (รหัสสินค้า บาร์โค้ด หรือชื่อ)</span><input id="dnQ" placeholder="เช่น 210907 หรือ บลูเบอรี่" autocomplete="off"></label>
+        <button type="button" class="btn scan-btn" id="dnScanBtn" title="สแกนบาร์โค้ดด้วยกล้อง"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M16 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>สแกน Barcode</button>
+      </div>
+      <div id="dnResults" class="mf-results"></div>
+      <p class="muted small" id="dnStatus" style="margin:0"></p>
+    </div>
+
+    <div class="add-step dn-step" id="dnBox2">
+      <div class="step-title"><span class="step-no">2</span>ข้อมูลสินค้า</div>
+      <div id="dnInfo"></div>
+    </div>
+
+    <div class="add-step dn-step" id="dnBox3">
+      <div class="step-title"><span class="step-no">3</span>ข้อมูลที่ต้องติดต่อ Buyer</div>
+      <div id="dnBuyer"></div>
     </div>
   </div>
 </section>
@@ -1536,7 +1566,6 @@ label.has-scan{position:relative}
     <label>รูปสินค้า (รหัสสินค้า Makro Finder หรือ URL รูป)<input name="img" placeholder="เช่น 411671 — เว้นว่าง = ใช้รูปมาตรฐาน"></label>
     <label>SKU / Item code (ถ้ามี)<input name="sku"></label>
     <label>ประเภท<select name="origin"><option value="import">ผักผลไม้นำเข้า</option><option value="local">ผักผลไม้ท้องถิ่น</option><option value="other">อื่นๆ</option></select></label>
-    <label>กลุ่มสินค้า (แท็บในหน้า Monitor item)<select name="div"><option value="FF">FF</option><option value="DFNF">DF &amp; NF</option></select></label>
     <label>หมวด<input name="cat"></label>
     <label>อุณหภูมิจัดเรียง<input name="temp" placeholder="เช่น 0–4°C"></label>
     <label>Shelf life (วัน)<input name="shelf" type="number" min="1" required></label>
@@ -2206,19 +2235,35 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');cl
 const chip=(k,l)=>`<span class="chip s-${k}">${esc(l)}</span>`;
 const who=(c,uid)=>!c&&uid?`<b>${esc(uid)}</b> <span class="muted">(ไม่มีรายชื่อในข้อมูลนี้)</span>`:c?`<b>${esc(c.uid)}</b> ${esc(c.name)}${c.phone?` · ${esc(c.phone)}`:""}${c.email?` · ${esc(c.email)}`:""}${c.backup?`<br><span class="muted">สำรอง: ${esc(c.backup)}</span>`:""}`:'<span class="muted">— ยังไม่กำหนด —</span>';
 const OO={import:0,local:1,other:2};
-/* Monitor item has two tabs: FF, and DF & NF. Each Shelf life rule belongs to one of them (rule.div = 'DFNF' for DF & NF; anything else, including the older rules, is FF). The rule box of the add form lists only the rules of the open tab. */
-const ruleDiv=p=>p&&p.div==='DFNF'?'DFNF':'FF';
+/* Monitor item has two tabs. FF is the lot form (unchanged). DF & NF has three boxes: 1 search a product | 2 its information (Item Enquiry / Stock Movement) | 3 who to contact at the Buyer. */
 let addDiv='FF';try{addDiv=localStorage.getItem('shelfLifeMonitor.addDiv')==='DFNF'?'DFNF':'FF'}catch(e){}
-function renderAddDivTabs(){document.querySelectorAll('#addDivTabs button').forEach(b=>{const on=b.dataset.d===addDiv;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')})}
+function renderAddDivTabs(){document.querySelectorAll('#addDivTabs button').forEach(b=>{const on=b.dataset.d===addDiv;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')});const card=document.querySelector('#t-add .add-card');if(card)card.dataset.div=addDiv}
 function setAddDiv(d){
   addDiv=d==='DFNF'?'DFNF':'FF';try{localStorage.setItem('shelfLifeMonitor.addDiv',addDiv)}catch(e){}
   renderAddDivTabs();
-  const cur=$('#aSku').value,p=findProd(cur);
-  $('#aSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(p&&ruleDiv(p)===addDiv?cur:'',addDiv); /* a rule of the other tab is dropped from the box */
-  addPreview();
+  if(addDiv==='DFNF'){if(onMakroSite()&&MF.state==='idle')loadMakroData();renderDn()}
+}
+let dnItem=null;
+function dnHit(it){const img=MF.images[it.itemNo];return`<button type="button" class="mf-hit" data-no="${esc(it.itemNo)}">${img?`<img src="${esc(img)}" alt="" loading="lazy">`:'<span class="mf-noimg"></span>'}<span><b>${esc(it.desc)}</b><span class="muted small">${esc(it.itemNo)}${it.barcode?' · '+esc(it.barcode):''}${it.locs.length?' · '+esc(locText(it.locs)):''}</span></span></button>`}
+function dnResults(){
+  const q=$('#dnQ').value.trim(),list=MF.state==='ready'?mfSearch(q):[];
+  $('#dnResults').innerHTML=list.map(dnHit).join('')
+    +(q&&MF.state==='ready'&&!list.length?'<p class="muted small" style="margin:6px 0">ไม่พบสินค้าใน Makro Finder</p>':'')
+    +(q&&MF.state!=='ready'?'<p class="muted small" style="margin:6px 0">กำลังโหลดข้อมูลสินค้า…</p>':'');
+}
+function dnPick(no){const it=MF.items.get(no);if(!it)return;dnItem=it;$('#dnResults').innerHTML='';$('#dnQ').value='';renderDn()}
+function renderDn(){
+  const info=$('#dnInfo'),buy=$('#dnBuyer'),stt=$('#dnStatus');if(!info||!buy)return;
+  stt.textContent=!onMakroSite()?'ค้นหาสินค้าได้เมื่อเปิดหน้านี้จาก Makro Finder':MF.state==='loading'?'กำลังโหลดข้อมูลสินค้าจาก Makro Finder…':MF.state==='ready'?`ค้นได้ ${MF.list.length.toLocaleString()} สินค้า (รหัส บาร์โค้ด หรือชื่อ)`:'';
+  const it=dnItem;
+  if(!it){const e=pvEmpty('①','ยังไม่ได้เลือกสินค้า','ค้นหาหรือสแกนสินค้าในข้อ 1 ก่อน');info.innerHTML=e;buy.innerHTML=e;return}
+  const no=String(it.itemNo),img=MF.images[no];
+  info.innerHTML=`<div class="dn-item">${img?`<img src="${esc(img)}" alt="">`:'<span class="mf-noimg"></span>'}<div><b>${esc(it.desc)}</b><div class="muted small">Item No. <b>${esc(no)}</b>${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div>${it.locs.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(it.locs))}</b></div>`:''}</div></div>${lotStk(no)}`;
+  const u=ibuyUid(no)||nbsBuyerMap().get(amNum(no))||'',k=esc(no.replace(/["'\\]/g,''));
+  buy.innerHTML=(u?bidSimple(u):'<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Buyer ID</span><span class="muted">— ยังไม่ทราบ —</span></div></div>')+`<div class="bid-tools bid-foot"><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
 }
 const bySku=()=>[...st.products].sort((a,b)=>(OO[a.origin]??3)-(OO[b.origin]??3)||a.shelf-b.shelf||String(a.desc).localeCompare(String(b.desc),'th'));
-function prodOptions(sel,div){return bySku().filter(p=>!div||ruleDiv(p)===div).map(p=>`<option value="${esc(pkey(p))}"${pkey(p)===sel?' selected':''}>${p.sku?esc(p.sku)+' · ':''}${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} · ${p.shelf} วัน)</option>`).join('')}
+function prodOptions(sel){return bySku().map(p=>`<option value="${esc(pkey(p))}"${pkey(p)===sel?' selected':''}>${p.sku?esc(p.sku)+' · ':''}${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} · ${p.shelf} วัน)</option>`).join('')}
 function ctOptions(sel,role){const l=st.contacts.filter(c=>!role||c.role===role),gs=[...new Set(l.map(grpOf))].sort();
   return'<option value="">— ไม่ระบุ —</option>'+gs.map(g=>`<optgroup label="${esc(g)}">`+l.filter(c=>grpOf(c)===g).sort((a,b)=>String(a.uid).localeCompare(String(b.uid))).map(c=>`<option value="${esc(c.uid)}"${c.uid===sel?' selected':''}>${esc(c.uid)} · ${esc(c.name)}</option>`).join('')+'</optgroup>').join('')}
 function planHTML(p,prod){
@@ -2517,7 +2562,7 @@ async function loadMakroExtra(){
     Object.entries(extra||{}).forEach(([no,v])=>{no=String(no);if(MF.items.has(no)||!v||!v.desc)return;
       const it={itemNo:no,desc:String(v.desc).trim(),barcode:String(v.barcode||'').trim(),locs:[],noLoc:true};it.n=normTh(it.desc);
       MF.items.set(no,it);if(it.barcode&&!MF.bar.has(it.barcode))MF.bar.set(it.barcode,no);n++});
-    MF.list=[...MF.items.values()];MF.extra=n;renderMfStatus();if($('#mfQ').value.trim())renderMfResults();
+    MF.list=[...MF.items.values()];MF.extra=n;renderMfStatus();if($('#mfQ').value.trim())renderMfResults();renderDn();if($('#dnQ').value.trim())dnResults();
   }catch(e){}
 }
 function renderMfStatus(){const el=$('#mfStatus');if(!el)return;
@@ -2561,7 +2606,7 @@ function renderMfResults(){
 }
 function pickMf(no){
   const it=MF.items.get(no);if(!it)return;mfPick=it;$('#mfResults').innerHTML='';$('#mfQ').value='';
-  const p=guessRule(it);if(p&&ruleDiv(p)!==addDiv)setAddDiv(ruleDiv(p));$('#aSku').value=p?pkey(p):'';aSkuAuto=true; /* no matching rule = the rule box is emptied, never left on the previous product's rule */
+  const p=guessRule(it);$('#aSku').value=p?pkey(p):'';aSkuAuto=true; /* no matching rule = the rule box is emptied, never left on the previous product's rule */
   $('#mfPicked').hidden=false;
   $('#mfPicked').innerHTML=`${MF.images[it.itemNo]?`<img src="${esc(MF.images[it.itemNo])}" alt="">`:''}<div><b>${esc(it.desc)}</b><div class="muted small">${esc(it.itemNo)}${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div>${it.locs.length?`<div class="small">ตำแหน่งในร้าน: <b>${esc(locText(it.locs))}</b></div>`:''}<div class="small ${p?'muted':'err-text'}">${p?`ใช้กฎ Shelf life: ${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} ${p.shelf} วัน) — เปลี่ยนได้ที่ช่อง “กฎ Shelf life” ด้านล่าง`:'ไม่พบกฎที่ตรงกับสินค้านี้ — เลือกกฎ Shelf life ด้านล่างเอง'}</div></div><button type="button" class="btn sm" id="mfClear">ไม่ใช้</button>`;
   $('#mfClear').onclick=()=>{mfPick=null;$('#mfPicked').hidden=true;if(aSkuAuto){$('#aSku').value='';aSkuAuto=false}addPreview()};
@@ -2616,6 +2661,11 @@ function addPreview(){
   return prod&&!(j?.error)?prod:null;
 }
 $('#aSku').onchange=()=>{aSkuAuto=false;addPreview()};$('#aJ').oninput=addPreview;document.querySelectorAll('#addDivTabs button').forEach(b=>b.onclick=()=>setAddDiv(b.dataset.d));renderAddDivTabs();
+$('#dnQ').addEventListener('input',()=>{if(MF.state==='idle')loadMakroData();dnResults()});
+$('#dnResults').addEventListener('click',e=>{const b=e.target.closest('.mf-hit');if(b)dnPick(b.dataset.no)});
+$('#dnScanBtn').onclick=()=>openScan('dn');
+if(!onMakroSite())$('#dnScanBtn').hidden=true;
+async function useScannedDn(code){$('#dnQ').value=code;await scanWaitMf();const it=mfFindByCode(code);if(it){dnPick(it.itemNo);toast('พบสินค้า: '+it.desc)}else{dnResults();toast('ไม่พบบาร์โค้ด '+code+' ใน Makro Finder')}}
 $('#aDate').oninput=()=>{const v=$('#aDate').value;$('#aJ').value=v?jul(fromIso(v)).ddd:'';addPreview()};
 const remarkValue=()=>$('#aRemark').value==='__other'?$('#aRemarkOther').value.trim():$('#aRemark').value;
 $('#aRemark').onchange=()=>{const o=$('#aRemark').value==='__other';$('#aRemarkOtherWrap').hidden=!o;if(o)$('#aRemarkOther').focus()};
@@ -2645,7 +2695,7 @@ function renderProd(){
     <td class="pact"><div class="row w" style="gap:4px;flex-wrap:nowrap"><button class="btn sm" onclick="editProduct('${k}')">แก้ไข</button><button class="btn sm danger" onclick="delProduct('${k}')">ลบ</button></div></td></tr>`}).join('');
 }
 const dlgProd=$('#dlgProd'),fP=$('#fProd');let editId=null;
-const NUMF=['shelf','md1Day','md1Pct','md2Day','md2Pct','pullDay'],TXTF=['sku','desc','img','cat','origin','div','temp','buyerUid','comUid'];
+const NUMF=['shelf','md1Day','md1Pct','md2Day','md2Pct','pullDay'],TXTF=['sku','desc','img','cat','origin','temp','buyerUid','comUid'];
 let prodImgErr="";
 let prodPhoto={id:null,data:null,old:null}; /* id: current "img:" photo of this product · data: freshly taken/attached (not saved yet) · old: photo that was there when the dialog opened */
 function readProdForm(){const o={rv:2};TXTF.forEach(k=>o[k]=fP[k].value.trim());NUMF.forEach(k=>o[k]=+fP[k].value||0);const raw=o.img,r=resolveImg(raw);prodImgErr=r.err||"";o.img=raw?r.url:(prodPhoto.id?'img:'+prodPhoto.id:'');return o}
@@ -2671,7 +2721,7 @@ function editProduct(id){
   const p=cur||{sku:'',desc:'',cat:'',origin:'import',temp:'0–4°C',shelf:7,...autoRule(7,'import'),buyerUid:'',comUid:''};
   $('#dpTitle').textContent=cur?'แก้ไขสินค้า':'เพิ่มสินค้า';
   fP.buyerUid.innerHTML=ctOptions(p.buyerUid,'Buyer');fP.comUid.innerHTML=ctOptions(p.comUid,'Commercial');
-  [...TXTF.filter(k=>k!=='buyerUid'&&k!=='comUid'),...NUMF].forEach(k=>fP[k].value=p[k]??'');fP.div.value=ruleDiv(p);
+  [...TXTF.filter(k=>k!=='buyerUid'&&k!=='comUid'),...NUMF].forEach(k=>fP[k].value=p[k]??'');
   const pid=String(p.img||'').startsWith('img:')?String(p.img).slice(4):null;prodPhoto={id:pid,data:null,old:pid};if(pid)fP.img.value='';
   $('#dpPhotoMsg').textContent='ถ่ายหรือแนบรูปได้ — ระบบย่อรูปให้อัตโนมัติ และทุกคนในทีมเห็นรูปเดียวกัน';
   if(onMakroSite())loadMakroData();prodPrev();dlgProd.showModal();
@@ -6293,8 +6343,8 @@ function renderAll0(){
   BBI=null; /* the item -> Buyer table is rebuilt from the latest OOS+ records */
   const t=today();$('#todayTxt').textContent=t.toLocaleDateString('th-TH-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   $("#todayJ").textContent=jul(t).ddd;$("#todayJ2").textContent="YYDDD "+jul(t).y2;$("#jmNum").textContent=jul(t).ddd;$("#jmY").textContent="YYDDD "+jul(t).y2;$("#jmDate").textContent=$("#todayTxt").textContent;
-  const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(sel,addDiv);$('#jSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(js);
-  renderDash();renderProd();renderCt();renderNbs();renderOos();addPreview();julTab();
+  const sel=$('#aSku').value,js=$('#jSku').value;$('#aSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(sel);$('#jSku').innerHTML='<option value="">— เลือกกฎ Shelf life —</option>'+prodOptions(js);
+  renderDash();renderProd();renderCt();renderNbs();renderOos();addPreview();julTab();renderDn();
   /* the report pages keep their numbers fresh when contacts / OOS records arrive while they are open */
   try{if(!$('#t-shr').hidden||SHR.files.length)renderShr();['neg','dms'].forEach(p=>{if(ILT[p])renderIlt(p)})}catch(e){}
 }
@@ -6360,7 +6410,7 @@ function scanNote(msg){
   clearTimeout(scanNoteT);scanNoteT=setTimeout(()=>{h.textContent=keep;h.classList.remove('warn')},3000);
 }
 async function openScan(target,inputEl){
-  scanFor=target==='nbs'?'nbs':target==='field'?'field':target==='jul'?'jul':'mf';scanInput=target==='field'?inputEl:null;
+  scanFor=target==='nbs'?'nbs':target==='field'?'field':target==='jul'?'jul':target==='dn'?'dn':'mf';scanInput=target==='field'?inputEl:null;
   const d=$('#dlgScan'),video=$('#scanVideo'),hint=$('#scanMsg'),err=$('#scanErr');
   stopScan();
   const run=camScan.run={};camScan.code=null;camScan.count=0;camScan.locked=false;camScan.video=video;
@@ -6452,6 +6502,7 @@ async function useScanned(code){
   if(scanFor==='nbs')return useScannedNbs(code);
   if(scanFor==='field')return useScannedField(code);
   if(scanFor==='jul')return useScannedJul(code);
+  if(scanFor==='dn')return useScannedDn(code);
   $('#mfQ').value=code;await scanWaitMf();
   const it=mfFindByCode(code);
   if(it){pickMf(it.itemNo);toast('พบสินค้า: '+it.desc)}
