@@ -277,8 +277,7 @@ tr.meta-row td{padding-top:0;padding-bottom:12px}
 .td-next{margin-top:6px;padding-top:6px;border-top:1px dashed var(--redbox-line);font-weight:600;line-height:1.35}
 .td-lbl{display:inline-block;font-size:11px;font-weight:700;background:#ffb4ae;color:#000;border:1px solid #e08a84;border-radius:4px;padding:0 6px;margin-right:6px;vertical-align:1px} /* black text on a light red label (both themes) */
 .td-when{font-weight:500;opacity:.85;margin-top:2px}
-.redbox.todo.todo-ok{--redbox:var(--okbg);--redbox-ink:var(--ok);--redbox-line:color-mix(in srgb,var(--ok) 35%,var(--okbg))} /* normal sale: the to-do box is green, not red */
-.redbox.todo.todo-ok .td-lbl{background:#b7ecc9;border-color:#6fbf8c}
+.redbox.todo.todo-ok .td-now{color:var(--ok)} /* normal sale: only the heading text is green, the box stays red */
 /* contacts table: header in the colours of the Makro org chart */
 table.ct-tbl{table-layout:fixed}
 table.ct-tbl thead th{background:#ffc85c;color:#2b1d00;border:0;text-transform:none;letter-spacing:0;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center;padding:7px 5px;vertical-align:middle}
