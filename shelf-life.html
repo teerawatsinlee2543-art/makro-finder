@@ -469,6 +469,11 @@ table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 .chip.ag-next{align-self:flex-start;margin:2px 0 4px}
 /* overview table (computer): the contact column is wider */
 @media (min-width:1101px){#dashBody td[data-l="ติดต่อ"]{min-width:230px}}
+/* the two boxes under the product (Item Enquiry / Stock Movement 14 วัน): full-width, same look as the other Item buttons */
+.lot-stk{margin-top:8px}
+.lot-stk .btn{white-space:nowrap;text-align:center;justify-content:center;padding:8px 6px;font-size:.9rem;border-radius:12px;width:100%}
+.lot-stk .btn.stk{background:#1f7a45;border:1.5px solid rgba(0,0,0,.25);color:#fff;font-weight:800;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.lot-stk .btn.stk:hover{background:#18633a}
 @media (min-width:1400px){#dashBody td[data-l="ติดต่อ"]{min-width:300px}#dashBody td[data-l="ต้องทำ"]{min-width:250px}#dashBody td[data-l="สินค้า"]{min-width:260px}} /* the freed space goes to the wide columns: product, to-do, contact */
 .contact{display:grid;gap:8px} /* Monitor table contact cell: Buyer ID box, Commercial box, Full Name Buyer box */
 .contact .ct-names{width:100%;padding:9px 10px;font-size:.9rem;border-radius:12px}
@@ -2383,7 +2388,7 @@ function renderDash(){
     const by=done&&b.ackBy?(mode==='sheet'?` โดย ${esc(b.ackBy)}`:` โดย <span data-uid="${esc(b.ackBy)}">${b.ackBy===myId?'คุณ':'…'}</span>`):'';
     return`<tr class="has-meta${done?" acted":""}">
     <td data-l="สถานะ"><div>${chip(e.st,e.label)}${done?`<div class="small" style="margin-top:4px">✓ ทำแล้ว${by}</div>`:''}</div></td>
-    <td data-l="สินค้า"><div>${(ii?.img||prodImg(p))?`<img class="pthumb" src="${esc(ii?.img||prodImg(p))}" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div><div class="small">จำนวน <b>${esc(b.qty)}</b>${b.loc&&!ii?.locs?.length?` · ตำแหน่ง: <b>${esc(String(b.loc).split(/ [\/·] /).join(' / '))}</b>`:''}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง:<b>${esc(locText(ii.locs))}</b></div>`:""}${b.note?`<div class="redbox" style="margin-top:6px"><b>หมายเหตุ:</b> ${esc(b.note)}</div>`:''}${b.remark?`<div class="redbox remark" style="margin-top:6px"><b>Remark:</b> ${esc(b.remark)}</div>`:''}</div></td>
+    <td data-l="สินค้า"><div>${(ii?.img||prodImg(p))?`<img class="pthumb" src="${esc(ii?.img||prodImg(p))}" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div><div class="small">จำนวน <b>${esc(b.qty)}</b>${b.loc&&!ii?.locs?.length?` · ตำแหน่ง: <b>${esc(String(b.loc).split(/ [\/·] /).join(' / '))}</b>`:''}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง:<b>${esc(locText(ii.locs))}</b></div>`:""}${ii?lotStk(ii.no):""}${b.note?`<div class="redbox" style="margin-top:6px"><b>หมายเหตุ:</b> ${esc(b.note)}</div>`:''}${b.remark?`<div class="redbox remark" style="margin-top:6px"><b>Remark:</b> ${esc(b.remark)}</div>`:''}</div></td>
     <td data-l="Julian รับ" class="num"><div><b>${jul(e.prod).ddd}</b><div class="small">${fmt(e.prod)}</div></div></td>
     <td data-l="วางขาย"><div><span class="num">วันที่ ${e.day} / ${p.pullDay}</span>${strip(p,e.day)}</div></td>
     <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
@@ -3841,6 +3846,15 @@ function stkMove(no,btn){
   if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[2]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
     const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr'));if(card)stkFocus(card,`[onclick^="stkMove('${no.replace(/["'\\]/g,'')}'"]`)}
   else oosStockPick(no,[url],[STOCK_LABELS[2]]);
+}
+/* the two Makro stock pages for the lot's Item, one press away (Item Enquiry / Stock Movement 14 วัน), in the overview table's product cell */
+function lotStk(no){const k=esc(String(no||'').replace(/["'\\]/g,''));return`<div class="bid-tools lot-stk no-print"><button type="button" class="btn sm stk" onclick="stkEnq('${k}',this)" title="เปิดหน้า Item Enquiry ของ Item นี้">Item Enquiry</button><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้">Stock Movement 14 วัน</button></div>`}
+function stkEnq(no,btn){
+  no=String(no||'');const url=(STOCK_URLS[1]||STOCK_URLS[0]).replace(/\{item\}/g,encodeURIComponent(no));
+  try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
+  const w=stkWin(url,1);
+  if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[1]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`)}
+  else oosStockPick(no,[url],[STOCK_LABELS[1]]);
 }
 let stkOpened={};
 function stkWin(url,i){
