@@ -445,6 +445,9 @@ table.nbs-tbl .fbtn svg:first-child{width:15px;height:15px}
 .ag-sent b{color:var(--ink);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ag-grp{margin-top:2px;font-size:12px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
 .chip.ag-next{align-self:flex-start;margin:2px 0 4px}
+/* overview table (computer): the contact column is wider, and the row buttons sit at the bottom-right corner of the row */
+@media (min-width:1101px){#dashBody td[data-l="ติดต่อ"]{min-width:230px}#dashBody td.no-print{vertical-align:bottom;text-align:right}#dashBody .actbtns{align-items:flex-end}}
+@media (max-width:1100px){#dashBody .actbtns{justify-content:flex-end}}
 .contact{display:grid;gap:8px} /* Monitor table contact cell: Buyer ID box, Commercial box, Full Name Buyer box */
 .contact .ct-names{width:100%;padding:9px 10px;font-size:.9rem;border-radius:12px}
 /* Aging Status "status now" badge: a solid, bold badge so ปกติ / Alert / Attention stand out */
@@ -2345,7 +2348,7 @@ function renderDash(){
     <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
     <td data-l="ต้องทำ">${todoHTML(e)}</td>
     <td data-l="ติดต่อ">${contactCell(e,p,ii)}</td>
-    <td data-l="จำนวน / Location" class="num"><div>${esc(b.qty)}<div class="muted small">${esc(b.loc)}</div></div></td>
+    <td data-l="จำนวน / Location" class="num"><div>${esc(b.qty)}<div class="muted small">${esc(b.loc).split(/ [\/·] /).join('<br>')}</div></div></td>
     <td class="no-print"><div class="actbtns">
       <button class="btn sm" title="คัดลอกข้อความแจ้ง Buyer/Commercial" onclick="copyMsg('${k}')">คัดลอก</button>
       ${e.st!=='ok'?`<button class="btn sm w" onclick="ack('${k}')">${done?'ยกเลิก ✓':'ทำแล้ว'}</button>`:''}
