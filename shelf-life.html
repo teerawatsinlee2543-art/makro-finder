@@ -2160,7 +2160,7 @@ const ibuyOf=no=>ibuyMap().get(amNum(no))||null;
 const ibuyUid=no=>{const x=ibuyOf(no);return x?x.uid:''};
 /* "Buyer ID : F1D" (red, bold) + the Buyer's details (Merchandise Mgr. · Area · Description · Assistant …), the same on every card / row.
    uid = the Buyer the app worked out; a Buyer ID typed from BIP replaces it. */
-function bidBlock(no,uid,note,warn,noNames){ /* noNames: the "Full Name Buyer" button is placed elsewhere (own box at the bottom of the Monitor table's contact cell) */
+function bidBlock(no,uid,note,warn,noNames,bare){ /* bare: no buttons at all (the overview table shows only Buyer ID + details) */ /* noNames: the "Full Name Buyer" button is placed elsewhere (own box at the bottom of the Monitor table's contact cell) */
   const ib=ibuyOf(no),u=ib?ib.uid:String(uid||''),c=u?nbsContact(u):null,k=esc(String(no));
   const src=ib?`<span class="muted bid-src">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</span>`:(note?`<span class="muted bid-src bsrc">${esc(note)}</span>`:'');
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
@@ -2168,7 +2168,7 @@ function bidBlock(no,uid,note,warn,noNames){ /* noNames: the "Full Name Buyer" b
   /* all the buttons of the block in one grid: the same width and height, side by side when there is room, else one under the other */
   const tools=`<div class="bid-tools"><button type="button" class="btn sm bid-move" onclick="stkMove('${k}',this)" title="เปิดรายงาน Daily_StockMovement_Store_14_Days ของ Item นี้ (รันให้อัตโนมัติ) ในหน้าต่างป๊อปอัพ">Stock Movement 14 วัน</button>${c&&!noNames?`<button type="button" class="btn sm bid-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</div>`;
   const editBtn=`<div class="bid-tools bid-foot"><button type="button" class="btn sm bid-edit" onclick="bidEdit('${k}')" title="ดูค่า Buyer ID ในหน้า BIP (Item Enquiry) แล้วใส่ที่นี่">${u?'แก้ Buyer ID':'ใส่ Buyer ID จาก BIP'}</button></div>`;
-  return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}</div>${tools}${detail}${wr}${editBtn}</div>`;
+  return`<div class="bid-block" data-no="${k}" data-uid="${esc(String(uid||''))}"><div class="bid-head"><span class="bid-lbl">Buyer ID</span>${u?`<b class="bid">${esc(u)}</b>`:'<span class="muted">-</span>'}${src}</div>${bare?'':tools}${detail}${wr}${bare?'':editBtn}</div>`;
 }
 /* the same Buyer ID block without the Item buttons, for a lot that has no Item No. (only the Buyer the Shelf life rule names) */
 function bidSimple(uid,noNames){
@@ -2178,7 +2178,7 @@ function bidSimple(uid,noNames){
 /* contact cell of the Monitor table: three boxes one under the other - Buyer ID, Commercial, and Full Name Buyer at the very bottom */
 function contactCell(e,p,ii){
   const bm=ii?nbsBuyerMap().get(amNum(ii.no)):'',ru=(e.buyer&&e.buyer.uid)||p.buyerUid||'',u=ii?(ibuyUid(ii.no)||ru||bm||''):ru;
-  const buyer=ii?bidBlock(ii.no,ru||bm||'',!ru&&bm?'ตามข้อมูล OOS+ / ItemList':'',null,true):bidSimple(ru,true);
+  const buyer=ii?bidBlock(ii.no,ru||bm||'',!ru&&bm?'ตามข้อมูล OOS+ / ItemList':'',null,true,true):bidSimple(ru,true);
   const com=`<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Commercial</span></div><div>${who(e.com,p.comUid)}</div></div>`;
   const names=u&&nbsContact(u)?`<button type="button" class="btn sm bid-names ct-names" onclick="bidNames('${esc(u)}')" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:'';
   return`<div class="small contact">${e.st==='ok'?'<span class="muted">ยังไม่ต้องติดต่อ</span>':''}${buyer}${com}${names}</div>`}
