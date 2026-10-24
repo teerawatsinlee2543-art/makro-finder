@@ -42,7 +42,8 @@ h1{font-size:20px;margin:0}
 nav{display:flex;gap:4px;overflow-x:auto;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--line)}
 nav button{border:0;background:none;color:var(--ink);padding:8px 12px;border-radius:8px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;white-space:nowrap}
 nav button.on{background:var(--accent);color:var(--accent-ink)}
-main{max-width:1280px;margin:0 auto;padding:16px}
+main{max-width:1560px;margin:0 auto;padding:16px} /* one page width for every tab (it used to be 1280px, with 1560px only on Item NBS and Buyer / Commercial) */
+html{scrollbar-gutter:stable} /* the page does not shift sideways between tabs that do / do not need a scrollbar */
 section[hidden]{display:none}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
 h2{font-size:17px;margin:0 0 12px}
@@ -641,7 +642,6 @@ table.nbs-tbl tr.stk-focus td[data-l="Division"] .chip,table.nbs-tbl td[data-l="
 .di-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
 .di-row>div{min-width:0}
 @media (min-width:1181px){
-  main:has(#t-nbs:not([hidden])){max-width:1560px}
   table.nbs-tbl{table-layout:fixed}
   table.nbs-tbl th{white-space:normal;text-transform:none;letter-spacing:0;font-size:13px;line-height:1.25;vertical-align:bottom;padding:9px 4px}
   table.nbs-tbl td{padding:10px 6px;overflow-wrap:anywhere}
@@ -1003,7 +1003,6 @@ table.nbs-tbl thead th{top:calc(var(--navh,52px) + var(--lvlh,0px) + 8px + env(s
   .lvb span{font-size:10.5px}
 }
 /* Buyer / Commercial has 14 columns: use the wide page like Item NBS */
-@media (min-width:1181px){main:has(#t-ct:not([hidden])){max-width:1560px}}
 /* %Shrink: same look as OOS+ (search box, FF / DF / NF tiles, ranking chart, cards) */
 #shrDivTiles .tile{position:relative}
 /* FF / DF / NF pinned under the tab bar while the list scrolls (same as the Item NBS Aging bar) */
