@@ -16,7 +16,7 @@
 :root[data-theme="dark"]{--bg:#11141a;--card:#1a1f28;--ink:#e6e9ef;--muted:#98a2b3;--line:#2c333f;--accent:#6aa8ff;--accent-ink:#0b1220;
 --ok:#6fd49a;--okbg:#16301f;--soon:#f5c060;--soonbg:#372a10;--md1:#f5e06a;--md1bg:#37320f;--md2:#ffb066;--md2bg:#3d2614;--pull:#fff;--pullbg:#c62828;--err:#bba6ff;--errbg:#2a2240;--redbox:#3b1c1c;--redbox-ink:#ffb4ae;--redbox-line:#6b2a2a;--today:#b18cff;--todaybg:#b18cff33;--seg-ok:#5a9e43;--seg-md1:#e3cf2c;--seg-md2:#de9430;--seg-pull:#c0392b;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sarabun,system-ui,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sarabun,system-ui,sans-serif;overflow-x:clip} /* no sideways scroll bar at the bottom of the window */
 header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
 h1{font-size:20px;margin:0}
 /* pill-shaped light-red banner; the round logo overlaps its left end */
@@ -42,8 +42,8 @@ h1{font-size:20px;margin:0}
 nav{display:flex;gap:4px;overflow-x:auto;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--line)}
 nav button{border:0;background:none;color:var(--ink);padding:8px 12px;border-radius:8px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;white-space:nowrap}
 nav button.on{background:var(--accent);color:var(--accent-ink)}
-main{max-width:1960px;margin:0 auto;padding:16px} /* one page width for every tab, and wide enough to fill a full-HD computer screen (it used to be 1280px; 1560px only on Item NBS and Buyer / Commercial) */
-html{scrollbar-gutter:stable} /* the page does not shift sideways between tabs that do / do not need a scrollbar */
+main{max-width:1760px;margin:0 auto;padding:16px} /* one locked page width for every tab, with a clear margin on both sides of a full-HD computer screen */
+html{scrollbar-gutter:stable;overflow-x:clip} /* the page does not shift sideways between tabs that do / do not need a scrollbar */
 section[hidden]{display:none}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
 h2{font-size:17px;margin:0 0 12px}
@@ -181,11 +181,10 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 .cphone a{color:var(--accent);font-weight:600;text-decoration:none}
 .cbackup{font-size:12.5px;color:var(--muted)}
 .add-card{display:grid;gap:16px}
-.div-tabs{display:inline-flex;width:max-content;justify-self:start;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)} /* Monitor item: FF | DF & NF tabs at the top-left of the card */
-.div-tabs button{font:inherit;font-size:15px;font-weight:800;padding:9px 22px;border:0;background:var(--card);color:var(--ink);cursor:pointer}
-.div-tabs button+button{border-left:1px solid var(--line)}
-.div-tabs button.on{background:var(--accent);color:var(--accent-ink)}
-.div-tabs button:not(.on):hover{background:var(--bg)}
+.div-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,300px));gap:12px;justify-self:start;width:100%;max-width:624px} /* Monitor item: FF | DF & NF as the same big tiles as the division tiles (selected = red frame, the other one fades) */
+.div-tabs .tile{min-width:0;box-shadow:0 1px 3px #0001}
+.div-tabs:has(>.tile.sel)>.tile:not(.sel){opacity:.42;filter:saturate(.45)}
+.div-tabs:has(>.tile.sel)>.tile:not(.sel):hover{opacity:.8}
 /* a long tile label wraps inside its tile on narrower screens instead of running out of it */
 @media (max-width:1000px){.tile .chip{white-space:normal;max-width:100%;overflow-wrap:anywhere}}
 /* Monitor item, DF & NF tab: its own three boxes; the FF lot form is hidden there (and the DF & NF boxes are hidden on the FF tab) */
@@ -1293,7 +1292,7 @@ label.has-scan{position:relative}
 <!-- ADD BATCH -->
 <section id="t-add" hidden>
   <div class="card add-card">
-    <div class="div-tabs" id="addDivTabs" role="tablist" aria-label="กลุ่มสินค้า"><button type="button" role="tab" data-d="FF" class="on" aria-selected="true">FF</button><button type="button" role="tab" data-d="DFNF" aria-selected="false">DF &amp; NF</button></div>
+    <div class="div-tabs" id="addDivTabs" role="tablist" aria-label="กลุ่มสินค้า"><button type="button" role="tab" data-d="FF" class="tile dv dv-ff sel" aria-selected="true"><span class="chip div-ff">FF<span class="dvl"> · Fresh Food</span></span></button><button type="button" role="tab" data-d="DFNF" class="tile dv dv-df" aria-selected="false"><span class="chip div-df">DF &amp; NF<span class="dvl"> · Dry &amp; Non Food</span></span></button></div>
     <div class="add-head">
       <h2>Monitor item <span class="muted small" style="font-weight:400">· รับสินค้า / เพิ่มล็อต</span></h2>
       <span class="pill">นับวันตามคู่มือ: วันรับสินค้า = <b>วันที่ 1</b></span>
@@ -2244,7 +2243,7 @@ const who=(c,uid)=>!c&&uid?`<b>${esc(uid)}</b> <span class="muted">(ไม่ม
 const OO={import:0,local:1,other:2};
 /* Monitor item has two tabs. FF is the lot form (unchanged). DF & NF has three boxes: 1 search a product | 2 its information (Item Enquiry / Stock Movement) | 3 who to contact at the Buyer. */
 let addDiv='FF';try{addDiv=localStorage.getItem('shelfLifeMonitor.addDiv')==='DFNF'?'DFNF':'FF'}catch(e){}
-function renderAddDivTabs(){document.querySelectorAll('#addDivTabs button').forEach(b=>{const on=b.dataset.d===addDiv;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')});const card=document.querySelector('#t-add .add-card');if(card)card.dataset.div=addDiv}
+function renderAddDivTabs(){document.querySelectorAll('#addDivTabs button').forEach(b=>{const on=b.dataset.d===addDiv;b.classList.toggle('sel',on);b.setAttribute('aria-selected',on?'true':'false')});const card=document.querySelector('#t-add .add-card');if(card)card.dataset.div=addDiv}
 function setAddDiv(d){
   addDiv=d==='DFNF'?'DFNF':'FF';try{localStorage.setItem('shelfLifeMonitor.addDiv',addDiv)}catch(e){}
   renderAddDivTabs();
