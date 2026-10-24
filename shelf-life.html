@@ -2208,7 +2208,7 @@ const ibuyUid=no=>{const x=ibuyOf(no);return x?x.uid:''};
    uid = the Buyer the app worked out; a Buyer ID typed from BIP replaces it. */
 function bidBlock(no,uid,note,warn,noNames,bare){ /* bare: no buttons at all (the overview table shows only Buyer ID + details) */ /* noNames: the "Full Name Buyer" button is placed elsewhere (own box at the bottom of the Monitor table's contact cell) */
   const ib=ibuyOf(no),u=ib?ib.uid:String(uid||''),c=u?nbsContact(u):null,k=esc(String(no));
-  const src=ib?`<span class="muted bid-src">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</span>`:(note?`<span class="muted bid-src bsrc">${esc(note)}</span>`:'');
+  const src=ib?`<span class="muted bid-src">ตามหน้า BIP${ib.auto?' · ดึงอัตโนมัติ':ib.by?' · ใส่โดย '+esc(ib.by):''}</span>`:(note&&note!=='ตามข้อมูล OOS+ / ItemList'?`<span class="muted bid-src bsrc">${esc(note)}</span>`:''); /* the "ตามข้อมูล OOS+ / ItemList" note is hidden */
   const wr=!ib&&warn?`<div class="small err-text bwarn">${esc(warn)}</div>`:'';
   const detail=u?(c?buyerCardHtml(c):`<div class="bid-warn">ไม่พบ ${esc(u)} ในรายชื่อ Buyer / Commercial — เพิ่มชื่อ Buyer นี้ที่แท็บ Buyer / Commercial เพื่อให้เห็นรายละเอียดผู้ดูแล</div>`):'';
   /* all the buttons of the block in one grid: the same width and height, side by side when there is room, else one under the other */
