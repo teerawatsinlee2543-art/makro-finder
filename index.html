@@ -509,6 +509,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .role-lang-btn{width:48px;height:32px;border-radius:8px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);color:var(--color-text-secondary);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .role-lang-caption{font-size:10px;color:var(--color-text-tertiary);font-weight:600;white-space:nowrap;line-height:1}
 .role-intro-desc{font-size:13px;color:var(--color-text-secondary);margin-bottom:22px;line-height:1.5}
+/* entry screens (choose role / sign in): a calmer deep red instead of the bright brand red, and a roomier white card on a computer screen */
+.role-screen,.login-screen{background:linear-gradient(160deg,#C4333E 0%,#A12630 100%)}
+.role-card-wrap,.login-card{box-shadow:0 18px 50px rgba(60,0,8,.28)}
 .role-option{display:flex;align-items:center;gap:14px;text-align:left;border:1.5px solid var(--color-border-secondary);border-radius:14px;padding:14px;cursor:pointer;margin-bottom:12px;transition:border-color .15s,background .15s;background:none;width:100%;font-family:inherit}
 .role-option:hover{border-color:var(--brand-red);background:#fff5f5}
 .role-option:last-child{margin-bottom:0}
@@ -517,6 +520,19 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .role-icon.emp{background:var(--brand-red)}
 .role-name{font-size:15px;font-weight:600;color:var(--color-text-primary)}
 .role-desc{font-size:12px;color:var(--color-text-tertiary);margin-top:2px}
+@media (min-width:900px){
+  .role-card-wrap,.login-card{max-width:620px;padding:48px 52px 44px;border-radius:28px}
+  .role-card-wrap .brand-logo,.login-card .brand-logo{width:210px;margin-bottom:12px}
+  .role-card-wrap .login-sub,.login-card .login-sub{font-size:19px;margin-bottom:18px}
+  .role-lang-col{top:22px;right:22px}
+  .role-lang-btn{width:60px;height:40px;border-radius:10px;font-size:24px}
+  .role-lang-caption{font-size:12px}
+  .role-intro-desc{font-size:17px;margin-bottom:28px}
+  .role-option{gap:20px;padding:22px 24px;border-radius:18px;margin-bottom:16px}
+  .role-icon{width:60px;height:60px;border-radius:16px;font-size:30px}
+  .role-name{font-size:21px}
+  .role-desc{font-size:15px;margin-top:4px}
+}
 .login-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
 .login-back.framed{border:1.5px solid #A6E0B3;border-radius:14px;padding:12px 14px;background:none;color:#1B7A3D;transition:border-color .15s,background .15s}
 .login-back.framed:hover{border-color:#1B7A3D;background:#DFF5E3}
