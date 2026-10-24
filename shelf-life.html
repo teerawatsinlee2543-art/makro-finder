@@ -931,6 +931,7 @@ th.sortable:hover{color:var(--accent)}
   .oos-list{align-items:stretch}
   /* the Buyer ID box follows the card's info directly (no gap in the middle); the cards of a row stay the same height, any spare space sits above the action buttons */
   .oosc>.bid-block{margin-top:10px}
+  .oosc>.bid-block:last-child{margin-top:auto} /* cards that end with the Buyer ID box (%Shrink, Negative Stock, High Stock to DMS): the boxes of one row sit on the same line with the same space under them */
   .oosc-found{margin-top:auto}.oosc-found+.oosc-a{margin-top:0} /* "ตรวจพบ …" sits right above the buttons, both at the bottom of the card */
   .oosc-a{margin-top:auto} /* the action buttons (เริ่มเติม / เติมแล้ว / แก้ไข / ลบ) sit on the very bottom edge of every card, even when the Buyer box follows the info directly above */
   #oosMain.drill{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
