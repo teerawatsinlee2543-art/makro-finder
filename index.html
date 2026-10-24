@@ -678,21 +678,21 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .hdr-icon-col,.search-scan-btn{box-sizing:border-box;width:104px;height:46px;padding:0 8px;justify-content:center;align-items:center;text-align:center}
 .search-scan-btn{align-self:center}
 .hdr-icon-col{min-width:0;gap:3px}
-/* computer screens: the customer-feedback card is full width, and below it the four tools sit in one row: ลบไฟล์ | นำเข้าข้อมูล | Item ที่ยังไม่มี Location | Weight Loss and Waste O2O (other screens keep the old stacked layout) */
+/* computer screens: the customer-feedback card is full width, and below it the four tools sit in one row, centred under the middle four category columns: ลบไฟล์ | นำเข้าข้อมูล | Item ที่ยังไม่มี Location | Weight Loss and Waste O2O (other screens keep the old stacked layout) */
 @media (min-width:900px){
   #employeeFeedbackSection[style*="block"]{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px 8px;align-items:stretch}
   #employeeFeedbackSection>.feedback-card:not([onclick]){grid-column:1/-1}
   #employeeFeedbackSection>.waste-io-row{display:contents}
   #employeeFeedbackSection #iLocDelBtn,#employeeFeedbackSection #iLocImportBtn,#employeeFeedbackSection #noLocBtn{grid-row:auto;grid-column:auto}
-  #employeeFeedbackSection #iLocDelBtn{order:1}
-  #employeeFeedbackSection #iLocImportBtn{order:2}
-  #employeeFeedbackSection #noLocBtn{order:3}
-  #employeeFeedbackSection>.feedback-card[onclick]{order:4;margin-top:0!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:128px;border-radius:24px;padding:18px 14px;text-align:center}
+  #employeeFeedbackSection #iLocDelBtn{order:1;grid-column:2}
+  #employeeFeedbackSection #iLocImportBtn{order:2;grid-column:3}
+  #employeeFeedbackSection #noLocBtn{order:3;grid-column:4}
+  #employeeFeedbackSection>.feedback-card[onclick]{order:4;grid-column:5;margin-top:0!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:128px;border-radius:24px;padding:18px 14px;text-align:center}
   #employeeFeedbackSection>.feedback-card[onclick] .feedback-card-title{flex-direction:column;gap:10px!important;font-size:15px!important;margin:0!important;justify-content:center!important;text-align:center}
   #employeeFeedbackSection>.feedback-card[onclick] .feedback-card-title i{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:25px;background:#fff;box-shadow:0 3px 10px rgba(20,24,33,.14)}
   #employeeFeedbackSection .waste-io-note{grid-row:auto;margin:0}
-  #employeeFeedbackSection .lt-n1{order:5;grid-column:1/span 2}
-  #employeeFeedbackSection .lt-n2{order:6;grid-column:3/span 2}
+  #employeeFeedbackSection .lt-n1{order:5;grid-column:2/span 2}
+  #employeeFeedbackSection .lt-n2{order:6;grid-column:4/span 2}
   /* each tool tile is exactly one column of the six-column category row above (same width, same gap, same height); the count badge moves to the corner so the tile stays as low as a category card */
   #employeeFeedbackSection #iLocDelBtn,#employeeFeedbackSection #iLocImportBtn,#employeeFeedbackSection #noLocBtn,#employeeFeedbackSection>.feedback-card[onclick]{position:relative;min-height:113px;border-radius:12px;padding:12px 8px;gap:8px}
   #employeeFeedbackSection .waste-io-btn,#employeeFeedbackSection .noloc-btn{font-size:13px;font-weight:700;line-height:1.25}
