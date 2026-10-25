@@ -2373,9 +2373,15 @@ function renderDn(){
   if(!it){const e=pvEmpty('①','ยังไม่ได้เลือกสินค้า','ค้นหาหรือสแกนสินค้าในข้อ 1 ก่อน');info.innerHTML=e;buy.innerHTML=e;return}
   const no=String(it.itemNo),img=MF.images[no];
   info.innerHTML=`<div class="dn-item" data-open-no="${esc(no)}" title="กดที่สินค้า = เปิด Item Enquiry">${img?`<img src="${esc(img)}" alt="">`:'<span class="mf-noimg"></span>'}<div><b>${esc(it.desc)}</b><div class="muted small">Item No. <b>${esc(no)}</b>${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div>${it.locs.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(it.locs))}</b></div>`:''}</div></div>${lotStk(no)}`;
-  const u=nbsBuyerMap().get(amNum(no))||'';
-  buy.innerHTML=bidBlock(no,u,!ibuyUid(no)&&u?'ตามข้อมูล OOS+ / ItemList':'',null,false,false,true); /* the same Buyer box as on every other tab (the Stock Movement button is already in box 2) */
+  /* Box 3 = the same three parts as the "ติดต่อ" cell of the overview table: Buyer ID with its details · Commercial · Full Name Buyer.
+     The Buyer is looked up like on Item NBS: the Buyer ID read from BIP, else the OOS+ / ItemList data of this item, else its Art Grp (item_class.json) in Buyer / Commercial */
+  loadItemClassSnap();
+  const row={itemNo:no,division:'',desc:it.desc,barcode:it.barcode},u=nbsBuyerUid(row),bc=u?nbsContact(u):null,cm=bc?comOfBuyer(bc.uid):null;
+  const note=ibuyUid(no)?'':nbsBuyerNote(row),warn=nbsBuyerWarn(row);
+  buy.innerHTML=`<div class="small contact">${bidBlock(no,u,note,warn,true,false,true)}<div class="bid-block"><div class="bid-head"><span class="bid-lbl">Commercial</span></div><div>${who(cm,'')}</div></div>${bc?`<button type="button" class="btn sm bid-names ct-names" onclick="bidNames('${esc(bc.uid)}',this)" title="ดูรายชื่อเต็มของคนในทีม Buyer นี้">Full Name Buyer</button>`:''}</div>`; /* Stock Movement is already a button of box 2 */
 }
+/* the Commercial who looks after a Buyer: the Commercial contact whose "(…)" list names this Buyer (as the Buyer card of Buyer / Commercial does) */
+const comOfBuyer=uid=>uid?st.contacts.find(x=>x.role==='Commercial'&&(String(x.dept||'').match(/\(([^)]*)\)/)||[,''])[1].split(/\s*,\s*/).includes(uid))||null:null;
 const bySku=()=>[...st.products].sort((a,b)=>(OO[a.origin]??3)-(OO[b.origin]??3)||a.shelf-b.shelf||String(a.desc).localeCompare(String(b.desc),'th'));
 function prodOptions(sel){return bySku().map(p=>`<option value="${esc(pkey(p))}"${pkey(p)===sel?' selected':''}>${p.sku?esc(p.sku)+' · ':''}${esc(p.desc)} (${ORIGINS[p.origin]||'อื่นๆ'} · ${p.shelf} วัน)</option>`).join('')}
 function ctOptions(sel,role){const l=st.contacts.filter(c=>!role||c.role===role),gs=[...new Set(l.map(grpOf))].sort();
@@ -5591,7 +5597,7 @@ var ICS=null;
 function icsFromJson(j){const m=new Map(),u=j.u||[];for(const k in j.i){const e=j.i[k];m.set(amNum(k),{d:String(e[0]),g:String(e[1]),s:e[2]?String(e[2]):'',u:e.length>3?(u[e[3]]||''):''})}return m}
 function loadItemClassSnap(){
   if(ICS!==null||!onMakroSite())return;ICS=new Map();
-  fetch('item_class.json').then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.i)return;ICS=icsFromJson(j);try{if(!$('#t-nbs').hidden)renderNbs()}catch(e){}}).catch(()=>{});
+  fetch('item_class.json').then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.i)return;ICS=icsFromJson(j);try{if(!$('#t-nbs').hidden)renderNbs()}catch(e){}try{renderDn()}catch(e){}}).catch(()=>{});
 }
 /* Buyer of a row that has none of its own and none from the OOS+ / ItemList pages: the Art Grp of the item -> the Buyer who holds that Art Grp in Buyer / Commercial ("Art Grp No." / สินค้าที่ดูแล rules, the Sub No when several Buyers share an Art Grp);
    when the rules cannot decide, the Buyer the ItemList gave the item. Nothing is written: change Buyer / Commercial and this follows. */
