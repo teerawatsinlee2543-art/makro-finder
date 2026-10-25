@@ -657,7 +657,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 /* the two pallet buttons (จัดการพาเลท / หาสินค้าตามพาเลท) share one line */
 #palletOpenBar[style*="block"]{display:flex!important;gap:12px}
 #palletOpenBar .pallet-open-btn{flex:1 1 0;min-width:0;width:auto;margin-top:0!important;text-align:center}
-@media (max-width:520px){#palletOpenBar{gap:8px!important}#palletOpenBar .pallet-open-btn{flex-direction:column;gap:6px;padding:12px 8px;font-size:13.5px;line-height:1.25}#palletOpenBar .pallet-open-btn i{width:30px;height:30px;font-size:17px}}
+@media (max-width:520px){#palletOpenBar{gap:8px!important}#palletOpenBar .pallet-open-btn{flex-direction:row;justify-content:center;align-items:center;gap:6px;padding:11px 8px;min-height:50px;font-size:13.5px;line-height:1.25}#palletOpenBar .pallet-open-btn i{flex:none;width:24px;height:24px;font-size:18px;display:inline-grid;place-items:center}}
 /* hover motion: on a mouse, the box under the pointer lifts a little with a soft shadow (not on touch screens, so nothing sticks after a tap) */
 @media (hover:hover){
   .cat-card,.promo-add-banner,.pallet-open-btn,.role-option,.waste-io-btn,.noloc-btn,.result-item,.feedback-card[onclick]{transition:transform .16s ease,box-shadow .16s ease,border-color .15s,background .15s}
