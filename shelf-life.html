@@ -2163,14 +2163,28 @@ const fbDoc=key=>fdb.collection('makroFinder').doc('shelfLife_'+key);
 const fbKeys=c=>SHARDED[c]?Array.from({length:SHARDED[c]},(_,i)=>c+'_'+i):[c];
 const fbItems=snap=>Object.entries(snap.exists?(snap.data().items||{}):{}).map(([id,d])=>({...d,_id:id}));
 async function fbPull(){const out={ok:true};for(const c of COLS){out[c]=[];for(const k of fbKeys(c))out[c].push(...fbItems(await fbDoc(k).get()))}return out}
+/* Every change of a shelf-life collection arrives as one snapshot per document (Item NBS = 8 documents, each snapshot twice: our own write first, then the server's answer).
+   Drawing the whole app for each of them made an import of 2,851 rows draw it 17 times (a minute of frozen page on the real data) and let an old snapshot bring a just-deleted row back while the delete was still being sent.
+   Now the snapshots are only collected; one redraw follows ~120 ms after the last one, never while a save is running, and an echo of our own write (hasPendingWrites) is not drawn again. */
+const FBP={},fbDirty=new Set();let fbTimer=0;
+function fbRebuild(c){st[c]=[].concat(...FBP[c].map(p=>p||[])).map(x=>c==='products'?normProduct(x):x);loaded[c]=FBP[c].every(Boolean)}
+function fbFlush(){
+  fbTimer=0;
+  if(busy){fbTimer=setTimeout(fbFlush,250);return} /* a save is in progress: its own result is already on screen */
+  const cols=[...fbDirty];fbDirty.clear();if(!cols.length)return;
+  cols.forEach(fbRebuild);lastPull=Date.now();
+  if(cols.length===1&&cols[0]==='ibuy'&&loaded.ibuy&&stkFoc){bidRefresh();return}
+  renderAll();applyRole();
+  const dd=$('#dlgDelImp');if(dd&&dd.open)renderDelImp(); /* the open "ลบไฟล์ที่นำเข้า" list follows the data */
+}
 function fbSubscribe(){
   COLS.forEach(c=>{
-    const keys=fbKeys(c),parts=keys.map(()=>null);
+    const keys=fbKeys(c);FBP[c]=keys.map(()=>null);
     keys.forEach((k,i)=>fbDoc(k).onSnapshot(s=>{
       if(!s.exists&&!s.metadata.fromCache)fbDoc(k).set({items:{},updatedAt:Date.now()},{merge:true}).catch(()=>{});
-      parts[i]=fbItems(s);
-      st[c]=[].concat(...parts.map(p=>p||[])).map(x=>c==='products'?normProduct(x):x);
-      loaded[c]=parts.every(Boolean);lastPull=Date.now();if(c==='ibuy'&&loaded.ibuy&&stkFoc){bidRefresh();return}renderAll();applyRole();
+      FBP[c][i]=fbItems(s);
+      if(s.metadata.hasPendingWrites&&loaded[c])return; /* our own write, already shown */
+      fbDirty.add(c);if(!fbTimer)fbTimer=setTimeout(fbFlush,120);
     },()=>toast('การเชื่อมต่อฐานข้อมูลหยุด — โหลดหน้าใหม่')));
   });
 }
@@ -2285,6 +2299,7 @@ async function act(fn,okMsg){
   catch(e){queue=null;notice(dbErr(e));if(mode==='sheet'){busy=false;pull()}return false}
   finally{busy=false;BBI=null;document.body.classList.remove('busy')}
 }
+/* an import / a delete that is pressed while another save is still running (the Makro item-list fill, a team member's save …) waits for it (up to 15 s) instead of being refused with a small toast and doing nothing */async function actWait(fn,okMsg){for(let i=0;i<60&&busy;i++)await new Promise(r=>setTimeout(r,250));return act(fn,okMsg)}
 async function replaceAll(s){
   if(mode==='sheet'){const data={};COLS.forEach(c=>data[c]=(s[c]||[]).map(x=>({...body(x),_id:x._id||rid()})));
     COLS.forEach(c=>st[c]=data[c].map(x=>c==='products'?normProduct(x):x));
@@ -2655,7 +2670,20 @@ async function loadMakroData(){
     MF.images=imgs||{};MF.list=[...MF.items.values()];MF.state='ready';
     loadMakroExtra();loadImagesExtra();loadPluMap();
   }catch(e){MF.state='error';console.warn('Makro Finder data',e)}
-  renderMfStatus();renderDash();renderNbs();refreshCardPages();
+  renderMfStatus();renderDash();renderNbs();refreshCardPages();mfFillRows();
+}
+/* The imports (Item NBS, OOS+) no longer wait for Makro Finder's item list (~180,000 rows; it can take half a minute): rows imported before it was ready get their EMPTY name / barcode / Location filled from it as soon as it is, in one save. */
+let mfFillPending=false,mfFillBusy=false;
+async function mfFillRows(){
+  if(!mfFillPending||mfFillBusy||MF.state!=='ready'||!canWrite||mode==='init')return;
+  if(busy){setTimeout(mfFillRows,1500);return}
+  const todo=[];
+  for(const col of ['nbs','oos'])for(const r of st[col]||[]){if(r.source!=='import')continue;const it=MF.items.get(String(r.itemNo));if(!it)continue;const p={};
+    if(!r.desc&&it.desc)p.desc=it.desc;if(!r.barcode&&it.barcode)p.barcode=it.barcode;if(!r.loc&&it.locs&&it.locs.length)p.loc=locText(it.locs.slice(0,2));
+    if(Object.keys(p).length)todo.push([col,r,p])}
+  mfFillPending=false;if(!todo.length)return;
+  mfFillBusy=true;
+  try{await act(async()=>{for(const [col,r,p] of todo)await patchItem(col,r,p)},null)}finally{mfFillBusy=false}
 }
 /* Item Master items that have no shelf location yet (many fresh items live only here) — large file, loaded after the main list */
 async function loadMakroExtra(){
@@ -3395,7 +3423,7 @@ async function runProductImport(){
   if(!prImp)return;
   const plan=planProducts(prImp.recs),runAt=new Date().toISOString();
   $('#prGo').disabled=true;$('#prGo').textContent='กำลังนำเข้า…';
-  const ok=await act(async()=>{
+  const ok=await actWait(async()=>{
     for(const a of plan.add)await putItem('products',{...a,source:'import',importFile:prImp.file,importRun:runAt});
     for(const u of plan.upd){const {_id,...d}=u.next;await putItem('products',{...d,_id:u.ex._id})}
   },null);
@@ -3610,7 +3638,7 @@ async function runContactImport(){
   const plan=planContacts(ctImp.recs,$('#ctDefRole').value),del=$('#ctDel').checked?plan.missing:[],runAt=new Date().toISOString();
   if(del.length&&!await ask(`ลบรายชื่อที่ไม่อยู่ในไฟล์ ${del.length.toLocaleString()} รายการ และล้าง Buyer/Commercial ในสินค้าที่ผูกอยู่?  (ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)`))return;
   $('#ctGo').disabled=true;$('#ctGo').textContent='กำลังนำเข้า…';
-  const ok=await act(async()=>{
+  const ok=await actWait(async()=>{
     for(const a of plan.add)await putItem('contacts',{...a,source:'import',importFile:ctImp.file,importRun:runAt});
     for(const u of plan.upd)await patchItem('contacts',u.ex,u.patch);
     if(del.length){const uids=new Set(del.map(c=>c.uid));
@@ -4494,10 +4522,10 @@ async function runOosImport(){
   const plan=planOos(oosImp,{close:$('#oiClose').checked,win:oosImp.info.o2o?oosWinSel():null}),now=new Date().toISOString(),file=oosImp.file;
   $('#oiGo').disabled=true;$('#oiGo').textContent='กำลังนำเข้า…';
   if(onMakroSite()&&MF.state==='idle')loadMakroData();
-  for(let i=0;i<60&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250));
-  const ready=MF.state==='ready',fill=x=>{const it=ready?MF.items.get(x.itemNo):null;return{desc:x.desc||it?.desc||'',loc:x.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),barcode:x.barcode||it?.barcode||''}};
+  const ready=MF.state==='ready';if(!ready&&onMakroSite())mfFillPending=true; /* no more waiting for the item list: empty name / Location / barcode are filled in afterwards (mfFillRows) */
+  const fill=x=>{const it=ready?MF.items.get(x.itemNo):null;return{desc:x.desc||it?.desc||'',loc:x.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),barcode:x.barcode||it?.barcode||''}};
   const KEEP=['division','dept','assignDept'];  /* set only while still empty: the team may have changed them */
-  const ok=await act(async()=>{
+  const ok=await actWait(async()=>{
     for(const x of plan.add){const f=fill(x);await putItem('oos',{itemNo:x.itemNo,desc:f.desc,loc:f.loc,barcode:f.barcode,stock:x.stock,status:'need',assignee:x.who,note:x.note,foundAt:x.foundAt||now,source:'import',importFile:file,importRun:now,createdAt:now,createdBy:myId||null,updatedAt:now,...oosExtra(x)})}
     for(const {ex,x} of plan.reopen){const f=fill(x),e=oosExtra(x);
       await patchItem('oos',ex,{status:'need',doneAt:'',doneBy:'',autoClosed:false,foundAt:x.foundAt||now,desc:ex.desc||f.desc,loc:x.loc||ex.loc||f.loc,stock:x.stock||ex.stock||'',...(x.who?{assignee:x.who}:{}),...e,
@@ -6389,7 +6417,7 @@ async function delImpFile(g){
   else if(delCol==='oos'){const ed=g.rows.filter(oosEdited).length;if(ed)warn=`\nรวมรายการที่ทีมเริ่มเติม/มอบหมาย/จดหมายเหตุ/ถ่ายรูปไว้แล้ว ${ed.toLocaleString()} รายการ`}
   else{const used=impUsage(g);if(used)warn=delCol==='products'?`\nมีล็อตที่ใช้สินค้าเหล่านี้ ${used.toLocaleString()} ล็อต — ล็อตจะแสดงเป็น “ไม่พบสินค้า”`:(()=>{const L=contactLinks(g);return(L.prod?`\nสินค้า Shelf-Life ${L.prod.toLocaleString()} รายการที่ผูกกับรายชื่อเหล่านี้จะถูกล้าง Buyer/Commercial`:'')+(L.nbs?`\nItem NBS ${L.nbs.toLocaleString()} รายการที่ใช้รายชื่อเหล่านี้เป็น Buyer จะไม่มี Buyer แสดงอีก`:'')+(L.oos?`\nOOS+ ${L.oos.toLocaleString()} รายการที่อ้าง buyer_uid ของรายชื่อเหล่านี้จะแสดงเป็น “ไม่พบในรายชื่อ”`:'')})()}
   if(!await ask(`ลบไฟล์ “${name}” และ${cfg.noun}ที่ไฟล์นี้เพิ่มเข้ามา ${n} รายการ ออกจากระบบ?${warn}\n(ลบให้ทุกคนในทีม ย้อนกลับไม่ได้)`))return;
-  const ok=await act(async()=>{
+  const ok=await actWait(async()=>{
     if(delCol==='contacts'){const u=new Set(g.rows.map(c=>c.uid));
       for(const p of st.products.filter(p=>u.has(p.buyerUid)||u.has(p.comUid)))
         await patchItem('products',p,{...(u.has(p.buyerUid)?{buyerUid:''}:{}),...(u.has(p.comUid)?{comUid:''}:{})});
@@ -6435,9 +6463,8 @@ async function runImport(){
   const {recs}=impState,autoClose=$('#impAuto').checked,plan=planImport(recs,autoClose),nowIso=new Date().toISOString(),ex=new Map((st.nbs||[]).map(r=>[nbsKey(r),r]));
   $('#impGo').disabled=true;$('#impGo').textContent='กำลังนำเข้า…';
   if(onMakroSite()&&MF.state==='idle')loadMakroData();
-  for(let i=0;i<60&&MF.state==='loading';i++)await new Promise(r=>setTimeout(r,250));
-  const ready=MF.state==='ready';
-  const ok=await act(async()=>{
+  const ready=MF.state==='ready';if(!ready&&onMakroSite())mfFillPending=true; /* no more waiting for the item list: empty name / Location / barcode are filled in afterwards (mfFillRows) */
+  const ok=await actWait(async()=>{
     const mvBy=new Map(plan.moves.map(m=>[nbsKey(m.rec),m.alt]));
     for(const r of recs){
       const it=ready?MF.items.get(r.itemNo):null,old=ex.get(nbsKey(r)),alt=old?null:mvBy.get(nbsKey(r));
