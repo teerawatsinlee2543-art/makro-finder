@@ -1288,6 +1288,8 @@ input:not([type=checkbox]):not([type=radio]):focus-visible,select:focus-visible,
   #addDivTabs.stuck .tile .chip{font-size:13.5px;padding:0 10px}
 }
 @media (max-width:420px){#addDivTabs .tile .dvl{display:none}}
+/* phone: the colour key of the overview scrolls with the page (pinned it took another ~60px under the logo bar and the tab bar) and is smaller */
+@media (max-width:700px){#dashLegend{position:static;font-size:12.5px;gap:6px 14px;padding:6px 0 4px;margin:0}#dashLegend span{gap:6px}#dashLegend span::before{width:18px;height:12px;border-radius:3px}}
 /* the card lifted from an overview (Monitor table) row */
 .stk-lotcard{gap:10px}
 .stk-lotcard .slc-prod{display:grid;gap:3px;min-width:0;overflow-wrap:anywhere}
