@@ -5029,6 +5029,8 @@ async function rsApply(kind,r){
   /* a emoved flag that an older version never cleared: if the data pieces of this very upload exist, the report was uploaded AFTER the delete and is valid */
   if(r.removed&&r.chunks){try{const probe=await rsDoc().collection('chunks').doc(kind+'_'+r.at+'_0').get();if(probe.exists)r={...r,removed:false}}catch(e){}}
   if(r.removed){
+    /* the team's record keeps "removed" for ever after a delete. A device that has nothing of this report has nothing to remove: it stays silent. Before, EVERY visit of such a device (an empty one, or one that had already removed it) showed "ทีมลบข้อมูลแล้ว" although nobody deleted anything just then */
+    if(!(kind==='shr'?rsStamp('shr')>0:!!ILT[kind]))return;
     if(kind==='shr'){SHR={files:[],code:[],sales:null,names:{}};SHR.upd=r.at;SHR_REV++;shrBasis='';shrReset();await shrSave(true);renderShr()}
     else{ILT[kind]=null;IL_REV[kind]++;ilReset(kind);await ilSave(kind,true);renderIlt(kind)}
     toast(RS_NAME[kind]+': ทีมลบข้อมูลแล้ว');return;
