@@ -189,7 +189,7 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
 @media (max-width:1000px){.tile .chip{white-space:normal;max-width:100%;overflow-wrap:anywhere}}
 /* Monitor item, DF & NF tab: its own three boxes; the FF lot form is hidden there (and the DF & NF boxes are hidden on the FF tab) */
 #t-add .add-card .dn-step{display:none}
-#t-add .add-card[data-div="DFNF"] .dn-step{display:flex}
+#t-add .add-card[data-div="DFNF"] .dn-step{display:flex;flex-direction:column;gap:10px}
 #t-add .add-card[data-div="DFNF"] .ff-step{display:none!important}
 .dn-item{display:flex;gap:12px;align-items:flex-start}
 #dnInfo .dn-item>div>b{font-size:17px;line-height:1.3}
@@ -221,15 +221,15 @@ td.c-ok{color:var(--ok);font-weight:600}td.c-md1{color:var(--md1);font-weight:60
   /* DF & NF boxes are exactly as tall as the FF ones at every width: the (invisible) FF boxes keep their place in the grid and the DF & NF boxes sit on the same cells, so the page does not jump when the tab is switched */
   #t-add .add-card[data-div="DFNF"] .ff-step{display:flex!important;visibility:hidden;pointer-events:none}
   #t-add .add-card[data-div="DFNF"] .ff-step[hidden]{display:none!important}
-  #t-add .add-card[data-div="DFNF"] .ff-step{grid-row:3}
+  #t-add .add-card[data-div="DFNF"] .ff-step{grid-row:2}
   #t-add .add-card[data-div="DFNF"] #mfBox{grid-column:1}
   #t-add .add-card[data-div="DFNF"] #mfBox+.ff-step{grid-column:2}
   #t-add .add-card[data-div="DFNF"] #mfBox+.ff-step+.ff-step{grid-column:3}
   #t-add .add-card[data-div="DFNF"]:has(#mfBox[hidden]) #mfBox+.ff-step{grid-column:1}
   #t-add .add-card[data-div="DFNF"]:has(#mfBox[hidden]) #mfBox+.ff-step+.ff-step{grid-column:2}
-  #t-add .add-card[data-div="DFNF"] #dnBox1{grid-column:1;grid-row:3}
-  #t-add .add-card[data-div="DFNF"] #dnBox2{grid-column:2;grid-row:3}
-  #t-add .add-card[data-div="DFNF"] #dnBox3{grid-column:3;grid-row:3}
+  #t-add .add-card[data-div="DFNF"] #dnBox1{grid-column:1;grid-row:2}
+  #t-add .add-card[data-div="DFNF"] #dnBox2{grid-column:2;grid-row:2}
+  #t-add .add-card[data-div="DFNF"] #dnBox3{grid-column:3;grid-row:2}
   #t-add .add-step>.save-row{margin-top:auto}
   /* box 2: location and Remark on one line */
   #t-add .add-card .lot-grid>label:has(#aLoc),#t-add .add-card .lot-grid>label:has(#aRemark){grid-column:span 1}
@@ -1273,6 +1273,21 @@ input:not([type=checkbox]):not([type=radio]):focus-visible,select:focus-visible,
   .dbar:hover,.oc-r:hover{transform:translateX(2px)}
 }
 :is(main,dialog) button:not(:disabled):not(.fbtn):not(.scan-x):not(.bn-x):active,.btn:not(:disabled):active,.tile:active,.dtile:active,.lvb:active,.mf-hit:active,.scan-mini:active,.back-mf:active,.oc-back:active,.pdf-btn:active,.dbar-tog:active,nav button:active{transform:scale(.96);box-shadow:none;filter:brightness(.94);transition-duration:.06s}
+/* Monitor item: the FF | DF & NF switch stays pinned under the tab bar while the form scrolls, and shrinks to a thin bar once it is pinned (the small phone size is smaller than the computer one) */
+#addDivTabs{position:sticky;top:calc(var(--navh,52px) + env(safe-area-inset-top,0px));z-index:7;background:var(--bg);padding:6px 0 8px;margin:0 0 10px}
+#addDivTabs.stuck{padding:4px 0;gap:8px;box-shadow:0 8px 8px -9px #0006}
+#addDivTabs.stuck .tile{padding:3px 10px;border-radius:10px;border-left-width:5px;box-shadow:none}
+#addDivTabs.stuck .tile .chip{font-size:15px;padding:1px 12px}
+#addDivTabs.stuck .tile .dvl{display:none}
+@media (max-width:700px){
+  #addDivTabs{gap:8px;padding:4px 0 6px;max-width:none}
+  #addDivTabs .tile{padding:5px 8px 5px 7px;border-radius:10px;border-left-width:5px}
+  #addDivTabs .tile .chip{font-size:15px;padding:2px 10px;white-space:nowrap}
+  #addDivTabs .tile .dvl{font-size:10.5px}
+  #addDivTabs.stuck .tile{padding:2px 8px 2px 7px}
+  #addDivTabs.stuck .tile .chip{font-size:13.5px;padding:0 10px}
+}
+@media (max-width:420px){#addDivTabs .tile .dvl{display:none}}
 /* the card lifted from an overview (Monitor table) row */
 .stk-lotcard{gap:10px}
 .stk-lotcard .slc-prod{display:grid;gap:3px;min-width:0;overflow-wrap:anywhere}
@@ -1350,8 +1365,8 @@ nav::-webkit-scrollbar,nav#tabs::-webkit-scrollbar{display:none!important;width:
 
 <!-- ADD BATCH -->
 <section id="t-add" hidden>
-  <div class="card add-card">
     <div class="div-tabs" id="addDivTabs" role="tablist" aria-label="กลุ่มสินค้า"><button type="button" role="tab" data-d="FF" class="tile dv dv-ff sel" aria-selected="true"><span class="chip div-ff">FF<span class="dvl"> · Fresh Food</span></span></button><button type="button" role="tab" data-d="DFNF" class="tile dv dv-df" aria-selected="false"><span class="chip div-df">DF &amp; NF<span class="dvl"> · Dry &amp; Non Food</span></span></button></div>
+  <div class="card add-card">
     <div class="add-head">
       <h2>Monitor item <span class="muted small" style="font-weight:400">· รับสินค้า / เพิ่มล็อต</span></h2>
       <span class="pill">นับวันตามคู่มือ: วันรับสินค้า = <b>วันที่ 1</b></span>
@@ -4862,6 +4877,18 @@ function pinCompact(el){
   window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',upd);$('#tabs').addEventListener('click',()=>setTimeout(upd,0));
 }
 pinCompact($('#oosDivTiles'));pinCompact($('#shrDivTiles'));
+/* Monitor item: the FF | DF & NF switch is pinned under the tab bar and turns into a thin bar once it is pinned. Its bottom margin grows by what it lost in height, so the form below does not jump */
+(function(){const el=$('#addDivTabs');if(!el)return;
+  const sp=document.createElement('div');sp.style.cssText='height:0;margin:0;padding:0;pointer-events:none';el.parentNode.insertBefore(sp,el);
+  const upd=()=>{if(!el.offsetParent)return;
+    const nb=document.querySelector('#tabs').getBoundingClientRect().bottom,stuck=sp.getBoundingClientRect().top<nb-1;
+    if(stuck===el.classList.contains('stuck'))return;
+    if(stuck){const h=el.offsetHeight;el.classList.add('stuck');el.style.marginBottom=(10+Math.max(0,h-el.offsetHeight))+'px'}
+    else{el.classList.remove('stuck');el.style.marginBottom=''}};
+  window.addEventListener('scroll',upd,{passive:true});
+  window.addEventListener('resize',()=>{el.classList.remove('stuck');el.style.marginBottom='';upd()});
+  $('#tabs').addEventListener('click',()=>setTimeout(upd,0));
+})();
 SHR_LOADED=shrLoad().then(()=>{if(SHR.files.length)(window.requestIdleCallback?requestIdleCallback(()=>renderShr(),{timeout:3000}):setTimeout(renderShr,800))}); /* the tab badge is worked out when the browser is idle, not while the page is starting */
 
 /* ---------- Negative Stock · High Stock to DMS: two views of the same "Item List" report ----------
