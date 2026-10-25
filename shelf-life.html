@@ -16,7 +16,7 @@
 :root[data-theme="dark"]{--bg:#11141a;--card:#1a1f28;--ink:#e6e9ef;--muted:#98a2b3;--line:#2c333f;--accent:#6aa8ff;--accent-ink:#0b1220;
 --ok:#6fd49a;--okbg:#16301f;--soon:#f5c060;--soonbg:#372a10;--md1:#f5e06a;--md1bg:#37320f;--md2:#ffb066;--md2bg:#3d2614;--pull:#fff;--pullbg:#c62828;--err:#bba6ff;--errbg:#2a2240;--redbox:#3b1c1c;--redbox-ink:#ffb4ae;--redbox-line:#6b2a2a;--today:#b18cff;--todaybg:#b18cff33;--seg-ok:#5a9e43;--seg-md1:#e3cf2c;--seg-md2:#de9430;--seg-pull:#c0392b;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sarabun,system-ui,sans-serif;overflow-x:clip} /* no sideways scroll bar at the bottom of the window */
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sarabun,system-ui,sans-serif;} /* (the sideways clip lives on html only: clip or hidden on body would make body its own scroll container and break every position:sticky pin) */
 header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
 h1{font-size:20px;margin:0}
 /* pill-shaped light-red banner; the round logo overlaps its left end */
@@ -754,7 +754,7 @@ select,input,textarea{max-width:100%}
   table.nbs-tbl td.nsave .actbtns{flex:1 1 100%}
 }
 @media (max-width:820px){
-  body{overflow-x:hidden}
+  /* no body{overflow-x:hidden} here: html already clips sideways, and hidden on body would turn body into a scroll container and unpin every sticky bar */
   header{padding:10px 12px}
   main{padding:10px}
   .nname,.nmeta dd,.cn,.bc-l b,.nmeta dt{overflow-wrap:anywhere}
