@@ -674,6 +674,18 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .loc-tools .waste-io-del i{color:#a85a00}
 .loc-tools .waste-io-imp i{color:#0b5cad}
 .loc-tools .noloc-btn i{color:#a85a00}
+/* phone / small screens: the two file tiles side by side, the "Item ที่ยังไม่มี Location" tool as one wide row (icon left, text, count at the right end), and the short captions tidy under their tiles */
+@media (max-width:820px){
+  .loc-tools{gap:10px}
+  .loc-tools .waste-io-btn{min-height:104px;border-radius:18px;padding:14px 10px;gap:8px;font-size:14px}
+  .loc-tools .waste-io-btn i{width:42px;height:42px;border-radius:14px;font-size:22px}
+  .loc-tools #noLocBtn{flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;gap:12px;min-height:72px;border-radius:18px;padding:12px 16px;text-align:left}
+  .loc-tools #noLocBtn i{flex:none;width:44px;height:44px;border-radius:14px;font-size:23px}
+  .loc-tools #noLocBtn>span:not(.noloc-count){flex:1;min-width:0;font-size:15px}
+  .loc-tools #noLocBtn .noloc-count{flex:none;margin-left:auto}
+  .loc-tools .waste-io-note{font-size:12.5px;line-height:1.4;color:var(--color-text-tertiary,#667085);padding:0 6px}
+  #employeeFeedbackSection{padding-bottom:88px} /* the round buttons at the bottom right never cover the last line */
+}
 /* header: the language box and the scan box are the same size, with their content centred */
 .hdr-icon-col,.search-scan-btn{box-sizing:border-box;width:104px;height:46px;padding:0 8px;justify-content:center;align-items:center;text-align:center}
 .search-scan-btn{align-self:center}
