@@ -1532,9 +1532,9 @@ function focusScanNext(){
 let ITEM_IMAGES={};
 let ITEM_IMAGES_READY=false;
 function loadItemImages(){
-  return fetch('item_images.json',{cache:'no-store'})
-    .then(r=>r.ok?r.json():{})
-    .then(data=>{ ITEM_IMAGES=data||{}; ITEM_IMAGES_READY=true; })
+  const get=f=>fetch(f,{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({}));
+  return Promise.all([get('item_images.json'),get('item_images_extra.json')]) /* the extra file only fills the gaps (pictures pulled from makro.pro) */
+    .then(([main,extra])=>{ ITEM_IMAGES=Object.assign({},extra||{},main||{}); ITEM_IMAGES_READY=true; })
     .catch(()=>{ ITEM_IMAGES={}; ITEM_IMAGES_READY=true; });
 }
 loadItemImages();

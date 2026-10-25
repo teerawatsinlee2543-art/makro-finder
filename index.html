@@ -7609,10 +7609,11 @@ refreshInlineMap();
 // ต้องวางไฟล์ item_images.json ไว้โฟลเดอร์เดียวกับ index.html
 let ITEM_IMAGES={};
 let ITEM_IMAGES_READY=false;
+// item_images_extra.json = รูปที่ดึงเพิ่มจาก makro.pro ให้สินค้าที่ item_images.json ยังไม่มี (Shelf-Life Monitor ใช้ไฟล์เดียวกัน) — ใช้เติมช่องว่างเท่านั้น ไม่ทับรูปเดิม
 function loadItemImages(){
-  return fetch('item_images.json',{cache:'no-store'})
-    .then(r=>r.ok?r.json():{})
-    .then(data=>{ ITEM_IMAGES=data||{}; ITEM_IMAGES_READY=true; })
+  const get=f=>fetch(f,{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({}));
+  return Promise.all([get('item_images.json'),get('item_images_extra.json')])
+    .then(([main,extra])=>{ ITEM_IMAGES=Object.assign({},extra||{},main||{}); ITEM_IMAGES_READY=true; })
     .catch(()=>{ ITEM_IMAGES={}; ITEM_IMAGES_READY=true; });
 }
 loadItemImages();
