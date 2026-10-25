@@ -4006,7 +4006,8 @@ function stkMove(no,btn){
   try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   const w=stkWin(url,2);
   if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[2]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
-    const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr'));if(card)stkFocus(card,`[onclick^="stkMove('${no.replace(/["'\\]/g,'')}'"]`)}
+    const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr')||stkLotCard(btn));
+    if(card){stkFocus(card,`[onclick^="stkMove('${no.replace(/["'\\]/g,'')}'"]`);if(card.dataset.clone&&(!stkFoc||stkFoc.card!==card))card.remove()}}
   else oosStockPick(no,[url],[STOCK_LABELS[2]]);
 }
 /* the two Makro stock pages for the lot's Item, one press away (Item Enquiry / Stock Movement 14 วัน), in the overview table's product cell */
