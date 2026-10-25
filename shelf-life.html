@@ -1287,9 +1287,10 @@ input:not([type=checkbox]):not([type=radio]):focus-visible,select:focus-visible,
 /* the product itself (picture / name) can be clicked: it opens Item Enquiry beside the lifted card */
 @media (hover:hover) and (pointer:fine){
   [data-open-no]{cursor:pointer}
+  [data-open-no] :is(.small,.muted,.bc-line,.small *,.muted *){cursor:default} /* only the picture and the NAME open Item Enquiry; the Item No. / Barcode / Location lines under it do not */
   [data-open-no] :is(.nthumb,.pthumb,img),img.pthumb[data-open-no]{transition:transform .18s cubic-bezier(.3,1.4,.5,1),box-shadow .18s ease}
   [data-open-no]:hover :is(.nthumb,.pthumb,img),img.pthumb[data-open-no]:hover{transform:scale(1.06);box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 30%,transparent)}
-  [data-open-no]:hover :is(b,.nname),b[data-open-no]:hover{color:var(--accent);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+  [data-open-no] :is(.oosc-t>b,.nname,.dn-item>div>b:first-child):hover,b[data-open-no]:hover{color:var(--accent);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
 }
 nav,nav#tabs{scrollbar-width:none!important;-ms-overflow-style:none}
 nav::-webkit-scrollbar,nav#tabs::-webkit-scrollbar{display:none!important;width:0;height:0} /* the tab bar still scrolls (wheel / touch / drag), it just no longer shows a bar across the top of the page */
@@ -4036,7 +4037,7 @@ function stkLotCard(btn){
 /* Click the product itself (its picture or name, in every mode: overview, Item NBS, OOS+, %Shrink, Negative Stock, High Stock, DF & NF) = open its Item Enquiry beside the lifted card.
    Not on a phone / touch screen (a tap there would only open a new tab), and never when the click was on a button, link or field inside the product area. */
 document.addEventListener('click',e=>{
-  const t=e.target.closest&&e.target.closest('[data-open-no]');if(!t||e.target.closest('button,a,input,select,textarea,label,summary'))return;
+  const t=e.target.closest&&e.target.closest('[data-open-no]');if(!t||e.target.closest('button,a,input,select,textarea,label,summary,.small,.muted,.bc-line'))return; /* the Item No. / Barcode / Location lines are not part of it */
   if(window.innerWidth<900||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return;
   const no=t.getAttribute('data-open-no');if(!no||no==='-')return;
   stkEnq(no,t)});
