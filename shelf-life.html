@@ -1273,6 +1273,24 @@ input:not([type=checkbox]):not([type=radio]):focus-visible,select:focus-visible,
   .dbar:hover,.oc-r:hover{transform:translateX(2px)}
 }
 :is(main,dialog) button:not(:disabled):not(.fbtn):not(.scan-x):not(.bn-x):active,.btn:not(:disabled):active,.tile:active,.dtile:active,.lvb:active,.mf-hit:active,.scan-mini:active,.back-mf:active,.oc-back:active,.pdf-btn:active,.dbar-tog:active,nav button:active{transform:scale(.96);box-shadow:none;filter:brightness(.94);transition-duration:.06s}
+/* the card lifted from an overview (Monitor table) row */
+.stk-lotcard{gap:10px}
+.stk-lotcard .slc-prod{display:grid;gap:3px;min-width:0;overflow-wrap:anywhere}
+.stk-lotcard .slc-prod .pthumb{width:84px;height:84px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--line);float:left;margin:0 12px 6px 0}
+.stk-lotcard .slc-prod>b{font-size:17px;line-height:1.3}
+.stk-lotcard .slc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;clear:both}
+.stk-lotcard .slc-b{background:var(--bg);border-radius:10px;padding:8px 10px;min-width:0;overflow-wrap:anywhere;font-size:14px}
+.stk-lotcard .slc-l{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.stk-lotcard .slc-ct{display:grid;gap:8px;min-width:0}
+.stk-lotcard .slc-meta{font-size:13px;min-width:0}
+.stk-lotcard .slc-meta .meta{display:grid;gap:8px}
+/* the product itself (picture / name) can be clicked: it opens Item Enquiry beside the lifted card */
+@media (hover:hover) and (pointer:fine){
+  [data-open-no]{cursor:pointer}
+  [data-open-no] :is(.nthumb,.pthumb,img),img.pthumb[data-open-no]{transition:transform .18s cubic-bezier(.3,1.4,.5,1),box-shadow .18s ease}
+  [data-open-no]:hover :is(.nthumb,.pthumb,img),img.pthumb[data-open-no]:hover{transform:scale(1.06);box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 30%,transparent)}
+  [data-open-no]:hover :is(b,.nname),b[data-open-no]:hover{color:var(--accent);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+}
 nav,nav#tabs{scrollbar-width:none!important;-ms-overflow-style:none}
 nav::-webkit-scrollbar,nav#tabs::-webkit-scrollbar{display:none!important;width:0;height:0} /* the tab bar still scrolls (wheel / touch / drag), it just no longer shows a bar across the top of the page */
 @media (prefers-reduced-motion:reduce){
@@ -2304,7 +2322,7 @@ function renderDn(){
   const it=dnItem;
   if(!it){const e=pvEmpty('①','ยังไม่ได้เลือกสินค้า','ค้นหาหรือสแกนสินค้าในข้อ 1 ก่อน');info.innerHTML=e;buy.innerHTML=e;return}
   const no=String(it.itemNo),img=MF.images[no];
-  info.innerHTML=`<div class="dn-item">${img?`<img src="${esc(img)}" alt="">`:'<span class="mf-noimg"></span>'}<div><b>${esc(it.desc)}</b><div class="muted small">Item No. <b>${esc(no)}</b>${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div>${it.locs.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(it.locs))}</b></div>`:''}</div></div>${lotStk(no)}`;
+  info.innerHTML=`<div class="dn-item" data-open-no="${esc(no)}" title="กดที่สินค้า = เปิด Item Enquiry">${img?`<img src="${esc(img)}" alt="">`:'<span class="mf-noimg"></span>'}<div><b>${esc(it.desc)}</b><div class="muted small">Item No. <b>${esc(no)}</b>${it.barcode?' · บาร์โค้ด '+esc(it.barcode):''}</div>${it.locs.length?`<div class="small">ตำแหน่ง: <b>${esc(locText(it.locs))}</b></div>`:''}</div></div>${lotStk(no)}`;
   const u=nbsBuyerMap().get(amNum(no))||'';
   buy.innerHTML=bidBlock(no,u,!ibuyUid(no)&&u?'ตามข้อมูล OOS+ / ItemList':'',null,false,false,true); /* the same Buyer box as on every other tab (the Stock Movement button is already in box 2) */
 }
@@ -2524,7 +2542,7 @@ function renderDash(){
     const by=done&&b.ackBy?(mode==='sheet'?` โดย ${esc(b.ackBy)}`:` โดย <span data-uid="${esc(b.ackBy)}">${b.ackBy===myId?'คุณ':'…'}</span>`):'';
     return`<tr class="has-meta${done?" acted":""}">
     <td data-l="สถานะ"><div>${chip(e.st,e.label)}${done?`<div class="small" style="margin-top:4px">✓ ทำแล้ว${by}</div>`:''}</div></td>
-    <td data-l="สินค้า"><div>${(ii?.img||prodImg(p))?`<img class="pthumb" src="${esc(ii?.img||prodImg(p))}" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div><div class="small">จำนวน <b>${esc(b.qty)}</b>${b.loc&&!ii?.locs?.length?` · ตำแหน่ง: <b>${esc(String(b.loc).split(/ [\/·] /).join(' / '))}</b>`:''}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง:<b>${esc(locText(ii.locs))}</b></div>`:""}${ii?lotStk(ii.no):""}${b.note?`<div class="redbox" style="margin-top:6px"><b>หมายเหตุ:</b> ${esc(b.note)}</div>`:''}${b.remark?`<div class="redbox remark" style="margin-top:6px"><b>Remark:</b> ${esc(b.remark)}</div>`:''}</div></td>
+    <td data-l="สินค้า"><div>${(ii?.img||prodImg(p))?`<img class="pthumb"${ii?` data-open-no="${esc(ii.no)}" title="กดที่สินค้า = เปิด Item Enquiry"`:''} src="${esc(ii?.img||prodImg(p))}" alt="" loading="lazy" onerror="this.remove()">`:""}<b${ii?` data-open-no="${esc(ii.no)}" title="กดที่สินค้า = เปิด Item Enquiry"`:''}>${esc(ii?.desc||p.desc)}</b><div class="muted small">${ii?esc(ii.no)+" · กฎ "+esc(p.desc)+" · ":p.sku?esc(p.sku)+" · ":""}${esc(p.cat||"")} · Shelf life ${p.shelf} วัน${p.temp?" · "+esc(p.temp):""}</div><div class="small">จำนวน <b>${esc(b.qty)}</b>${b.loc&&!ii?.locs?.length?` · ตำแหน่ง: <b>${esc(String(b.loc).split(/ [\/·] /).join(' / '))}</b>`:''}</div>${ii?.locs?.length?`<div class="small">ตำแหน่ง:<b>${esc(locText(ii.locs))}</b></div>`:""}${ii?lotStk(ii.no):""}${b.note?`<div class="redbox" style="margin-top:6px"><b>หมายเหตุ:</b> ${esc(b.note)}</div>`:''}${b.remark?`<div class="redbox remark" style="margin-top:6px"><b>Remark:</b> ${esc(b.remark)}</div>`:''}</div></td>
     <td data-l="Julian รับ" class="num"><div><b>${jul(e.prod).ddd}</b><div class="small">${fmt(e.prod)}</div></div></td>
     <td data-l="วางขาย"><div><span class="num">วันที่ ${e.day} / ${p.pullDay}</span>${strip(p,e.day)}</div></td>
     <td data-l="Code 52" class="num"><div>${fmt(e.c52)}<div class="small ${e.left<=1?'err-text':'muted'}">${e.left>0?`อีก ${e.left} วัน`:e.left===0?'วันนี้':`เลยมา ${-e.left} วัน`}</div></div></td>
@@ -3968,7 +3986,7 @@ function oosCard(r,ctx){
   const acts=r.status==='need'?`<button type="button" class="btn pri sm" onclick="oosStart('${k}')">เริ่มเติม</button><button type="button" class="btn sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button>`
     :r.status==='doing'?`<button type="button" class="btn pri sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button><button type="button" class="btn sm" onclick="oosBack('${k}')">กลับเป็นต้องเติม</button>`
     :`<button type="button" class="btn sm" onclick="oosBack('${k}')">เปิดใหม่ (ต้องเติม)</button>`;
-  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div>${bcLine(r.itemNo,r.barcode)}<div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h" data-open-no="${esc(r.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div>${bcLine(r.itemNo,r.barcode)}<div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
     <div class="oosc-m">${dv?`<span class="chip div-${dv.toLowerCase()}">${dv}</span>`:''}${r.bucket&&OOS_BK[r.bucket]?`<span class="chip s-${OOS_BK[r.bucket][2]}">${esc(OOS_BK[r.bucket][0])}</span>`:''}<span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
     ${oosFactsHtml(r)}
     ${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}<div class="muted small oosc-found">ตรวจพบ ${oosFmt(oosMs(r))}</div>
@@ -3997,9 +4015,30 @@ function stkEnq(no,btn){
   no=String(no||'');const url=(STOCK_URLS[1]||STOCK_URLS[0]).replace(/\{item\}/g,encodeURIComponent(no));
   try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   const w=stkWin(url,1);
-  if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[1]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`)}
+  if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[1]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
+    /* the card / row of this product is lifted to the left beside the window (same as the Item Enquiry button of an OOS+ card); a pressed product (data-open-no) is found again by that attribute */
+    const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr')||stkLotCard(btn)),k=no.replace(/["'\\]/g,'');
+    if(card){stkFocus(card,btn.hasAttribute('data-open-no')?`[data-open-no="${k}"]`:`[onclick^="stkEnq('${k}'"]`);if(card.dataset.clone&&(!stkFoc||stkFoc.card!==card))card.remove()}}
   else oosStockPick(no,[url],[STOCK_LABELS[1]]);
 }
+/* Overview (Monitor table): a lot row cannot be lifted as it is (its notes + buttons sit in a second row), so a card with the same content is built from the row and lifted instead.
+   Its buttons keep working (they are the same inline handlers); it is closed when the data is drawn again, so it never shows old values. */
+function stkLotCard(btn){
+  const tr=btn&&btn.closest&&btn.closest('#dashBody tr.has-meta');if(!tr)return null;
+  const cell=l=>[...tr.children].find(c=>c.dataset.l===l),meta=tr.nextElementSibling&&tr.nextElementSibling.classList.contains('meta-row')?tr.nextElementSibling.querySelector('td'):null;
+  const box=l=>{const td=cell(l);return td?`<div class="slc-b"><span class="slc-l">${l}</span>${td.innerHTML}</div>`:''};
+  let h=document.getElementById('stkLotHold');
+  if(!h){h=document.createElement('div');h.id='stkLotHold';h.style.cssText='height:0;overflow:hidden';document.body.appendChild(h)}
+  const c=document.createElement('div');c.className='oosc stk-lotcard';c.dataset.clone='1';
+  c.innerHTML=`<div class="slc-prod">${cell('สินค้า')?cell('สินค้า').innerHTML:''}</div><div class="slc-grid">${['สถานะ','Julian รับ','วางขาย','Code 52'].map(box).join('')}</div>${box('ต้องทำ')}${cell('ติดต่อ')?`<div class="slc-ct">${cell('ติดต่อ').innerHTML}</div>`:''}${meta?`<div class="slc-meta">${meta.innerHTML}</div>`:''}`;
+  h.appendChild(c);return c}
+/* Click the product itself (its picture or name, in every mode: overview, Item NBS, OOS+, %Shrink, Negative Stock, High Stock, DF & NF) = open its Item Enquiry beside the lifted card.
+   Not on a phone / touch screen (a tap there would only open a new tab), and never when the click was on a button, link or field inside the product area. */
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-open-no]');if(!t||e.target.closest('button,a,input,select,textarea,label,summary'))return;
+  if(window.innerWidth<900||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return;
+  const no=t.getAttribute('data-open-no');if(!no||no==='-')return;
+  stkEnq(no,t)});
 let stkOpened={};
 function stkWin(url,i){
   try{
@@ -4056,7 +4095,7 @@ function stkFocus(card,sel,quiet){
 }
 function stkUnfocus(instant){
   const f=stkFoc;if(!f)return;stkFoc=null;clearInterval(f.timer);document.removeEventListener('pointerup',f.raise,true);
-  const done=()=>{f.card.classList.remove('stk-focus');f.back.remove();f.ph.remove();f.dim.remove()};
+  const done=()=>{f.card.classList.remove('stk-focus');f.back.remove();f.ph.remove();f.dim.remove();if(f.card.dataset.clone)f.card.remove()};
   if(instant||stkReduce()||!f.card.isConnected||!f.ph.isConnected){done();return}
   const a=f.card.getBoundingClientRect(),b=f.ph.getBoundingClientRect();
   f.dim.style.opacity='0';
@@ -4611,7 +4650,7 @@ function shrCard(it,b){
   const rsl=[...it.rs.entries()].sort((a,c)=>a[1].c-c[1].c),mx=Math.max(1,...rsl.map(([,x])=>Math.abs(x.c)));
   const rsHtml=rsl.length?`<div class="shr-rs" title="แยกตามรหัสเหตุผล (By Code)">`+rsl.map(([rc,x])=>`<span class="shr-r"><em>${esc(shrRs(rc))}</em><i style="--w:${Math.max(4,Math.round(Math.abs(x.c)/mx*100))}%;${x.c<0?'--g1:#ffbf70;--g2:#e5352b':'--g1:#b7ecc9;--g2:#14703c'}"></i><b class="${x.c<0?'c-md2':''}">${x.c<0?'':'+'}${shrBaht(x.c)}</b><small>${x.q.toLocaleString(undefined,{maximumFractionDigits:1})} MU</small></span>`).join('')+`<span class="small shr-tot">Total Shrinkage <b class="${it.cc<0?'sv-neg':'sv-pos'}">${it.cc<0?'':'+'}${shrBaht(it.cc)}</b> · เป็นจำนวน <b class="${it.cq<0?'sv-neg':'sv-pos'}">${it.cq.toLocaleString(undefined,{maximumFractionDigits:1})}</b> MU</span></div>`:'';
   const by=it.buyer?((SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||''):'';
-  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h" data-open-no="${esc(it.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(-v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
     ${bits.length?`<div class="oosc-f small">${bits.join('')}</div>`:''}${rsHtml}
     ${bidBlock(it.itemNo,it.buyer,'')}${!(ibuyUid(it.itemNo)||it.buyer)&&it.coms.length?shrComHtml(it):''}</div>`}
@@ -5085,7 +5124,7 @@ function ilCard(p,it){
       ${rate}${it.trend&&(it.trend>=1.3||it.trend<=.7)?`<div class="small">${it.trend>=1.3?'<b class="c-md2">ขายเร่งขึ้น</b>':'<b>ขายชะลอลง</b>'} เดือนนี้ ${Math.round(it.trend*100)}% ของ DMS เฉลี่ย</div>`:''}${gapTxt}${ord}
       <div class="oosc-f small muted">${dates}</div>
       <div class="small"><b>แนะนำ:</b> ${TR[2]}</div>`}
-  return`<div class="oosc lv-${lv}"><div class="oosc-h">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h" data-open-no="${esc(it.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}${status}${head}</div>${facts}
     ${bidBlock(it.itemNo,it.by,'')}</div>`}
 function ilSrc(p){const d=ILT[p],nd=d?d.rows.filter(r=>p==='neg'?(r.a<=-0.1&&!/^active$/i.test(r.st)&&!r.sh):(/discontinu/i.test(r.st)&&!r.sh)).length:0;return d?`<span>ไฟล์: <b>${esc(d.name)}</b>${d.store?' · '+esc(d.store):''}${d.asOf?' · ข้อมูลเมื่อ '+ilD(d.asOf)+' '+String(new Date(d.asOf).getHours()).padStart(2,'0')+'.'+String(new Date(d.asOf).getMinutes()).padStart(2,'0')+' น.':''} · ${d.rows.length.toLocaleString()} รายการ${nd&&(p==='neg'||!$('#'+p+'Disc').checked)?` · ไม่นับ ${p==='neg'?'ที่ไม่ใช่ Active':'Discontinued'} ${nd.toLocaleString()}`:''}${d.info&&d.info.shared?` · สต็อกร่วม (~) ${d.info.shared.toLocaleString()}`:''}${p==='dms'?` · Stock สูง = เกิน ${IL_T} วันของยอดขายจริง`:''}</span>`:''}
@@ -5954,7 +5993,7 @@ function renderNbs(){
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
   $('#nbsBody').innerHTML=list.map(r=>{const k=esc(r._id),s=nStat(r.status),c=r.createdAt?new Date(r.createdAt):null,bu=nbsBuyerUid(r),b=nbsContact(bu),img=nbsImg(r);
     return`<tr class="${r.status==='done'?'acted':''}">
-    <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div><div><dt>Art Grp :</dt><dd>${esc(r.artGrp||'-')}</dd></div></dl><div class="nrem-dock"><span class="bid-lbl">Remark</span>${r.remark?`<div class="nrem-t">${esc(r.remark)}</div>`:'<span class="muted">-</span>'}</div></div></td>
+    <td data-l="ชื่อสินค้า"><div class="ncell"><div class="nhead" data-open-no="${esc(r.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${img?`<img class="nthumb" src="${esc(img)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<b class="nname">${esc(r.desc||'—')}</b></div><dl class="nmeta"><div><dt>Item No. :</dt><dd><b>${esc(r.itemNo||'-')}</b></dd></div><div><dt>Barcode :</dt><dd>${esc(r.barcode||'-')}</dd></div><div><dt>Category :</dt><dd>${esc(r.dept||'-')}</dd></div><div><dt>Art Grp :</dt><dd>${esc(r.artGrp||'-')}</dd></div></dl><div class="nrem-dock"><span class="bid-lbl">Remark</span>${r.remark?`<div class="nrem-t">${esc(r.remark)}</div>`:'<span class="muted">-</span>'}</div></div></td>
     <td data-l="Division"><div class="cbox"><span class="chip div-${esc(String(r.division).toLowerCase())}">${esc(r.division)}</span></div></td>
     <td data-l="Stock" class="num">${r.stock!==''&&r.stock!=null?esc(qty2(r.stock)):'-'}<div class="stk-one"><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)"><span>Item</span><span>Enquiry</span></button></div></td>
     <td data-l="Location" class="small">${esc(r.loc||'-')}</td>
