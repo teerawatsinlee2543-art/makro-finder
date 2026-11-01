@@ -100,6 +100,7 @@ button.go-app{background:none;border:0;padding:0;font:inherit;color:inherit;curs
 .logo.ltr{color:#fff;font-size:calc(var(--s) * .46);font-weight:800;line-height:1;user-select:none}
 .logo.fav img{object-fit:contain;padding:16%}
 .tile.custom .nm{overflow-wrap:anywhere}
+.nm .nw{white-space:nowrap}
 .tile.custom .sys-note{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tbadge{display:none;position:absolute;z-index:2;top:calc(var(--s) * -.02);right:calc((100% - min(var(--s),100%)) / 2 - 8px);width:clamp(26px,calc(var(--s) * .27),34px);height:clamp(26px,calc(var(--s) * .27),34px);align-items:center;justify-content:center;padding:0;border:2.5px solid var(--bg);border-radius:50%;background:#E8192C;color:#fff;font-size:15px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 body.editing .tbadge{display:inline-flex}
@@ -235,7 +236,7 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
     <div class="tile" data-id="gr">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/makro-finder/pallet.html" target="_blank" rel="noopener" aria-label="เปิด GR · จัดการพาเลท">
         <span class="logo"><img src="apps-logo-gr.png" alt="" width="150" height="150" loading="lazy"></span>
-        <span class="nm">GR · จัดการพาเลท</span>
+        <span class="nm">GR · <span class="nw">จัดการพาเลท</span></span>
       </a>
       <a class="more-link" href="#gr">ดูรายละเอียด</a>
     </div>
