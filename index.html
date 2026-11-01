@@ -579,8 +579,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .role-option{padding:clamp(12px,2.7vh,22px) 24px;margin-bottom:clamp(8px,1.9vh,16px)}
   .role-icon{width:clamp(44px,7.2vh,60px);height:clamp(44px,7.2vh,60px)}
 }.login-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
-.login-back.framed{border:1.5px solid #A6E0B3;border-radius:14px;padding:12px 14px;background:none;color:#1B7A3D;transition:border-color .15s,background .15s}
-.login-back.framed:hover{border-color:#1B7A3D;background:#DFF5E3}
+.login-back.framed{border:1.5px solid #1D9E75;border-radius:14px;padding:clamp(11px,2.2vh,16px) 14px;gap:8px;background:#1D9E75;color:#000;font-size:15px;font-weight:600;transition:border-color .15s,background .15s}
+.login-back.framed:hover{border-color:#27B386;background:#27B386}
+@media (min-width:900px){.login-back.framed{border-radius:18px;padding:clamp(12px,2.7vh,22px) 24px;gap:12px;font-size:21px}}
 .emp-stock-box{background:#FFF4E5;border:1px solid #FFD9A0;border-radius:10px;padding:10px 12px;margin-bottom:16px}
 .emp-stock-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
 .emp-stock-label{font-size:11px;font-weight:600;color:#95610A;text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:5px}
