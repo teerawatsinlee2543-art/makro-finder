@@ -83,7 +83,16 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .lang-btn-icon svg{border-radius:4px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,0.12)}
 .hdr-icon .lang-btn-icon svg{width:100%;height:100%;border-radius:6px}
 .role-lang-btn .lang-btn-icon svg{width:100%;height:100%;border-radius:8px}
-.promo-date-box input[type=text]{padding:10px 12px;border-radius:10px;border:1px solid var(--color-border-tertiary);font-size:16px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary)}
+/* language switch: a dark pill - flag, language code, chevron (tap opens the language list) */
+.lang-pill{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 10px 0 9px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:#1b1f29;color:#fff;font-family:inherit;font-size:15px;font-weight:800;letter-spacing:.02em;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:background .15s,transform .08s}
+.lang-pill:hover{background:#2a3040}
+.lang-pill:active{transform:scale(.97)}
+.lang-pill:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(232,25,44,.45),0 2px 8px rgba(0,0,0,.2)}
+.lang-pill .lang-btn-icon{width:26px;height:18px;flex:none}
+.lang-pill .lang-btn-icon svg{width:100%;height:100%;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.22)}
+.lang-pill .lang-btn-icon i{font-size:16px}
+.lang-pill .lang-code{min-width:1.45em;text-align:left}
+.lang-pill>i{flex:none;font-size:15px;color:#9aa3b5}.promo-date-box input[type=text]{padding:10px 12px;border-radius:10px;border:1px solid var(--color-border-tertiary);font-size:16px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary)}
 .new-item-barcode-row{display:flex;gap:8px;align-items:center}
 .new-item-barcode-row input{flex:1;min-width:0}
 .new-item-scan-btn{flex-shrink:0;width:42px;height:42px;border-radius:10px;border:1px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--brand-red);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -219,17 +228,22 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .pallet-print-footer{display:flex;justify-content:space-between;gap:24px;margin-top:16px;font-size:28px;font-weight:600;color:#000;flex:0 0 auto}
 }
 /* ===== Makro Pallet: ส่วนที่เขียนใหม่สำหรับแอปแยก ===== */
-.app-bar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--brand-red);color:#fff;display:none;align-items:center;gap:10px;padding:0 clamp(12px,3vw,24px);z-index:2000;box-shadow:0 1px 6px rgba(0,0,0,.22)}
-.app-bar-logo{height:36px;width:auto;display:block;flex-shrink:0}
+.app-bar{position:fixed;top:0;left:0;right:0;height:var(--bar-h);background:var(--brand-red);color:#fff;display:none;align-items:center;gap:clamp(8px,1.4vw,16px);padding:0 clamp(12px,3vw,28px);z-index:2000;box-shadow:0 1px 6px rgba(0,0,0,.22)}
+.app-bar-logo{height:var(--bar-logo);width:auto;display:block;flex-shrink:0}
 .app-bar-title{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.15}
-.app-bar-name{font-size:17px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap}
-.app-bar-name i{font-size:18px}
-.app-bar-user{font-size:11.5px;opacity:.88;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.app-bar-btn{width:38px;height:38px;border-radius:10px;border:none;background:rgba(255,255,255,.14);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;font-family:inherit}
+.app-bar-name{font-size:var(--bar-name);font-weight:800;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.app-bar-name i{font-size:1em}
+.app-bar-user{font-size:var(--bar-user);font-weight:500;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-bar-btn{width:var(--bar-btn);height:var(--bar-btn);border-radius:12px;border:.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.14);color:#fff;font-size:calc(var(--bar-btn) * .52);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;font-family:inherit}
 .app-bar-btn:hover{background:rgba(255,255,255,.26)}
-.app-bar-btn .lang-btn-icon{width:26px;height:18px}
+:root{--bar-h:60px;--bar-logo:34px;--bar-name:18px;--bar-user:12.5px;--bar-btn:40px}
+@media (min-width:520px){:root{--bar-h:68px;--bar-logo:44px;--bar-name:22px;--bar-user:13.5px;--bar-btn:42px}}
+@media (min-width:900px){:root{--bar-h:78px;--bar-logo:54px;--bar-name:27px;--bar-user:14.5px;--bar-btn:48px}}
+.app-bar .lang-pill{height:var(--bar-btn);flex:none;box-shadow:none}
+@media (max-width:420px){:root{--bar-logo:30px;--bar-btn:36px;--bar-name:17px}.app-bar{gap:6px;padding:0 10px}.app-bar-name i{display:none}.app-bar .lang-pill{padding:0 6px;gap:4px;font-size:13px}.app-bar .lang-pill .lang-btn-icon{width:22px;height:15px}.app-bar .lang-pill>i{display:none}}
+@media (max-width:340px){:root{--bar-logo:26px;--bar-btn:34px;--bar-name:16px}.app-bar{gap:5px;padding:0 8px}}.app-bar-btn .lang-btn-icon{width:26px;height:18px}
 .app-bar-btn .lang-btn-icon svg{width:100%;height:100%;border-radius:3px}
-#palletOverlay{top:56px;padding:0;background:var(--color-background-secondary);align-items:stretch;justify-content:center;z-index:1}
+#palletOverlay{top:var(--bar-h);padding:0;background:var(--color-background-secondary);align-items:stretch;justify-content:center;z-index:1}
 #palletOverlay .pallet-overlay-content{max-width:920px;max-height:none;height:100%;border-radius:0}
 #palletOverlay .pallet-header{background:#fff;color:var(--color-text-primary);border-bottom:1px solid var(--color-border-tertiary);padding-top:12px;padding-bottom:12px}
 #palletOverlay .pallet-header i{color:var(--brand-red)}
@@ -240,6 +254,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 #palletCloseBtn{display:none}
 .pallet-find-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#DDEBFB;border:1px solid #A9CBF0;color:#1B4E8C;border-radius:10px;padding:12px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:14px}
 .pallet-find-btn:hover{background:#CBE0F7}
+/* create + find side by side on one line (find alone = full width for people who cannot create) */
+.pallet-top-actions{display:flex;gap:10px;margin-bottom:14px}
+.pallet-top-actions>div{flex:1 1 0;min-width:0;width:auto;margin:0;padding:12px 8px;text-align:center;line-height:1.3}
+@media (min-width:480px){.pallet-top-actions>div{font-size:14.5px}}
 .pallet-list-actions{display:flex;gap:10px;margin-bottom:14px}
 .pallet-list-actions>div{margin-bottom:0;flex:1}
 @media (max-width:479px){.pallet-list-actions{flex-direction:column}}
@@ -247,7 +265,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .pallet-pdf-btn:hover{background:#FCE9A8}
 .login-screen{overflow-y:auto}
 .login-card .role-lang-col{top:14px;right:14px}
-.data-banner{display:none;position:fixed;left:50%;top:66px;transform:translateX(-50%);z-index:2100;background:#FFF3C4;color:#7A5200;border:1px solid #F0D775;border-radius:12px;padding:10px 14px;font-size:13px;max-width:min(92vw,520px);text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.data-banner{display:none;position:fixed;left:50%;top:calc(var(--bar-h) + 10px);transform:translateX(-50%);z-index:2100;background:#FFF3C4;color:#7A5200;border:1px solid #F0D775;border-radius:12px;padding:10px 14px;font-size:13px;max-width:min(92vw,520px);text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .data-banner button{margin-left:8px;border:none;background:var(--brand-red);color:#fff;border-radius:8px;padding:5px 12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
 
 </style>
@@ -259,7 +277,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div class="app-bar-name"><i class="ti ti-packages" aria-hidden="true"></i> Pallet</div>
     <div class="app-bar-user" id="appBarUser"></div>
   </div>
-  <button type="button" class="app-bar-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"></span></button>
+  <button type="button" class="lang-pill" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span><span class="lang-code">TH</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
   <button type="button" class="app-bar-btn" onclick="goToMakroFinder()" data-i18n-title="backToFinderAria" title="Makro Finder" aria-label="Makro Finder"><i class="ti ti-home" aria-hidden="true"></i></button>
   <button type="button" class="app-bar-btn" onclick="confirmLogout()" data-i18n-title="logoutAria" title="ออกจากระบบ" aria-label="ออกจากระบบ"><i class="ti ti-logout" aria-hidden="true"></i></button>
 </div>
@@ -269,8 +287,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
       <div class="role-lang-col">
-        <button type="button" class="role-lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
-        <span class="role-lang-caption" data-i18n="changeLanguageLabel">เปลี่ยนภาษา</span>
+        <button type="button" class="lang-pill" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span><span class="lang-code">TH</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
       </div>
 
       <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -595,10 +612,12 @@ function renderPalletListView(pallets){
     '<input type="text" id="palletSearchInput" class="pallet-search-input" placeholder="'+escapeHtml(t('searchPalletPlaceholder'))+'" value="'+escapeHtml(palletListFilterText)+'" oninput="filterPalletList(this.value)">'+
     '<i class="ti ti-scan" aria-hidden="true" onclick="openPalletLocScan()" aria-label="'+escapeHtml(t('scanTitleBay'))+'"></i>'+
   '</div>';
+  html+='<div class="pallet-top-actions">';
   if(isGR()){
     html+='<div class="pallet-new-btn" onclick="createNewPallet()"><i class="ti ti-plus" aria-hidden="true"></i> '+t('createNewPalletBtn')+'</div>';
   }
   html+='<div class="pallet-find-btn" onclick="openFindItemInPallets()"><i class="ti ti-search" aria-hidden="true"></i> '+t('grFindInPalletName')+'</div>';
+  html+='</div>';
   html+='<div id="palletGridContainer"></div>';
   body.innerHTML=html;
   renderPalletGrid(pallets);
@@ -2831,6 +2850,7 @@ function applyI18n(root){
   scope.querySelectorAll('[data-i18n-title]').forEach(el=>{ const v=t(el.getAttribute('data-i18n-title')); el.title=v; el.setAttribute('aria-label',v); });
   scope.querySelectorAll('[data-i18n-alt]').forEach(el=>{ el.alt=t(el.getAttribute('data-i18n-alt')); });
   scope.querySelectorAll('.lang-btn-icon').forEach(el=>{ el.innerHTML=flagSvg(currentLang); });
+  scope.querySelectorAll('.lang-code').forEach(el=>{ el.textContent=currentLang.toUpperCase(); });
 }
 function openLangModal(){
   const modal=document.getElementById('langModal');
