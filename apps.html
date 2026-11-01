@@ -70,6 +70,7 @@ button,.btn{font:inherit;font-weight:700;cursor:pointer}
 @media (max-width:480px){ .launch{gap:26px 12px} .tile{width:calc(50% - 8px)} .logo{width:min(100%,150px)} .nm{font-size:14.5px;padding:4px 8px} }
 .more-link{font-size:14px;font-weight:700;color:var(--muted);text-decoration:none;padding:4px 10px;border-radius:8px}
 .more-link:hover{color:var(--ink);text-decoration:underline}
+.hidebar{display:flex;justify-content:center;padding:22px 0 4px}
 .sec{margin:6px 4px 14px;font-size:20px;font-weight:800}
 .sec small{font-weight:600;font-size:14px;color:var(--muted);margin-left:8px}
 
@@ -137,7 +138,7 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
       <img src="logo-makro-finder.png" alt="" width="58" height="58">
       <div>
         <h1>ศูนย์รวมแอป Makro Store 42</h1>
-        <p>แตะโลโก้เพื่อเปิดแอปได้เลย หรือเลื่อนลงดูรายละเอียดของแต่ละแอป — ใช้ได้บนมือถือและคอม ไม่ต้องติดตั้ง</p>
+        <p>แตะโลโก้เพื่อเปิดแอปได้เลย — อยากอ่านรายละเอียดกด "แสดงรายละเอียดทั้งหมด" หรือ "ดูรายละเอียด" ใต้โลโก้ · ใช้ได้บนมือถือและคอม ไม่ต้องติดตั้ง</p>
       </div>
     </div>
     <div class="tools">
@@ -183,6 +184,7 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
     </div>
   </nav>
 
+  <section id="detailsWrap" hidden>
   <h2 class="sec" id="details">รายละเอียดของแต่ละแอป<small>กด &quot;รายละเอียดทั้งหมด&quot; ในการ์ดเพื่อกางอ่าน</small></h2>
   <main class="grid" id="apps">
 
@@ -349,6 +351,8 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
     </article>
 
   </main>
+  <div class="hidebar"><button type="button" class="pill" id="btnHide">ซ่อนรายละเอียด</button></div>
+  </section>
 
   <section class="share" aria-labelledby="shareTtl">
     <div>
@@ -474,21 +478,30 @@ document.querySelectorAll('.copy').forEach(b => b.addEventListener('click', asyn
 }));
 $('btnCopyHub').addEventListener('click', async () => { const ok = await copyText(HUB); toast(ok ? 'คัดลอกลิงก์หน้านี้แล้ว' : 'เบราว์เซอร์นี้คัดลอกไม่ได้'); });
 
-// "show all details" / "hide all"
+// the details are hidden until asked for: the top button, "ดูรายละเอียด" under a logo, or #all / #finder / #gr / #o2o / #shelf-life in the address
+const wrap = $('detailsWrap');
 const ds = () => [...document.querySelectorAll('.card details')];
-const setAll = open => { ds().forEach(d => d.open = open); sync(); };
-const sync = () => { const all = ds().every(d => d.open); $('btnAll').setAttribute('aria-pressed', String(all)); $('btnAll').classList.toggle('on', all); $('btnAllTxt').textContent = all ? 'พับรายละเอียดทั้งหมด' : 'แสดงรายละเอียดทั้งหมด'; };
-$('btnAll').addEventListener('click', () => setAll(!ds().every(d => d.open)));
-ds().forEach(d => d.addEventListener('toggle', sync));
-
-// #all opens every card; #finder / #gr / #o2o / #shelf-life open and show that one
+const refresh = () => { const shown = !wrap.hidden; $('btnAll').setAttribute('aria-pressed', String(shown)); $('btnAll').classList.toggle('on', shown); $('btnAllTxt').textContent = shown ? 'ซ่อนรายละเอียด' : 'แสดงรายละเอียดทั้งหมด'; };
+const showDetails = (openAll, card) => {
+  wrap.hidden = false; if (openAll) ds().forEach(d => d.open = true);
+  if (card) { const d = card.querySelector('details'); if (d) d.open = true; }
+  refresh(); (card || wrap).scrollIntoView({ block: 'start', behavior: 'smooth' });
+};
+const hideDetails = () => { wrap.hidden = true; ds().forEach(d => d.open = false); refresh(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+$('btnAll').addEventListener('click', () => wrap.hidden ? showDetails(true) : hideDetails());
+$('btnHide').addEventListener('click', hideDetails);
+document.querySelectorAll('.more-link').forEach(a => a.addEventListener('click', e => {
+  e.preventDefault(); const card = document.getElementById(a.getAttribute('href').slice(1));
+  try { history.replaceState(null, '', '#' + card.id); } catch (_) {}
+  showDetails(false, card);
+}));
 const fromHash = () => {
   const h = decodeURIComponent(location.hash.replace(/^#/, ''));
-  if (h === 'all') { setAll(true); return; }
+  if (h === 'all') { showDetails(true); return; }
   const card = h && document.getElementById(h);
-  if (card && card.classList.contains('card')) { const d = card.querySelector('details'); if (d) d.open = true; sync(); card.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+  if (card && card.classList.contains('card')) showDetails(false, card);
 };
-window.addEventListener('hashchange', fromHash); fromHash(); sync();
+window.addEventListener('hashchange', fromHash); fromHash(); refresh();
 })();
 </script>
 </body>
