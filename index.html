@@ -8541,6 +8541,16 @@ document.addEventListener('visibilitychange',closeCameraIfHidden);
 window.addEventListener('pagehide',closeCameraIfHidden);
 
 let currentRole=null;
+// ลิงก์ลัดจากหน้ารวมแอป (apps.html): ...?open=waste = เข้าหน้า "Weight Loss and Waste O2O" ให้เลยหลังล็อกอินพนักงาน (ลูกค้า/ยังไม่ล็อกอิน = ไม่ทำอะไร จนกว่าจะล็อกอินเป็นพนักงาน)
+let pendingOpen=(()=>{ try{ return new URLSearchParams(location.search).get('open')==='waste' ? 'waste' : null; }catch(e){ return null; } })();
+function runPendingOpen(){
+  if(pendingOpen!=='waste' || !isEmployee()) return;
+  pendingOpen=null;
+  try{ history.replaceState(null,'',location.pathname+location.hash); }catch(e){}
+  const main=document.getElementById('mainApp');
+  if(main && main.style.display==='none') showMain(getSession());      // (พนักงานแผนก GR เปิดมาที่หน้า GR ก่อน: ไปหน้าหลักแล้วค่อยเปิด)
+  setTimeout(()=>{ try{ openWasteLog(); }catch(e){} },0);
+}
 function showGRHome(sess){
   currentRole=sess.role;
   applyEmployeeOnlyVisibility();
@@ -8550,6 +8560,7 @@ function showGRHome(sess){
   document.getElementById('mainApp').style.display='none';
   document.getElementById('grHomeScreen').style.display='flex';
   document.getElementById('grHomeGreeting').textContent=t('grGreetingTemplate',{name:sess.name});
+  runPendingOpen();
 }
 function grGoToPalletManager(){
   const sess=getSession();
@@ -8607,6 +8618,7 @@ function showMain(sess){
   updatePalletBarVisibility();
   updateItemLookupBtnVisibility();
   renderPromoGallery();
+  runPendingOpen();
 }
 // ==== ข้อเสนอแนะ/คอมเพลนจากลูกค้า (แนบรูปได้ sync ผ่าน Firestore) ====
 let FEEDBACK_CACHE=[];
