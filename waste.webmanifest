@@ -1,0 +1,16 @@
+{
+    "name":  "Weight Loss and Waste O2O",
+    "short_name":  "Waste O2O",
+    "description":  "บันทึกของเสียรายวัน Store 42 · ส่งออก Excel",
+    "lang":  "th",
+    "start_url":  "waste.html",
+    "scope":  "./",
+    "display":  "standalone",
+    "background_color":  "#ffffff",
+    "theme_color":  "#E8192C",
+    "icons":  [
+                  { "type":  "image/png", "sizes":  "192x192", "src":  "waste-192.png" },
+                  { "type":  "image/png", "sizes":  "512x512", "src":  "waste-512.png" },
+                  { "type":  "image/svg+xml", "sizes":  "any", "src":  "waste-icon.svg" }
+              ]
+}
