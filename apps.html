@@ -9,7 +9,7 @@
 <meta property="og:description" content="Makro Finder · GR จัดการพาเลท · O2O Scan Logger · Shelf-Life Monitor — ดูรายละเอียดของทุกแอปแล้วกดเปิดหน้าเว็บได้เลย">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://teerawatsinlee2543-art.github.io/makro-finder/apps-icon-512.png">
-<meta name="theme-color" content="#0b3d91">
+<meta name="theme-color" content="#E8192C">
 <link rel="icon" type="image/svg+xml" href="apps-icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="apps-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="apps-192.png">
@@ -42,15 +42,27 @@ html{scrollbar-gutter:stable}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Sarabun,"Noto Sans Myanmar","Leelawadee UI",Tahoma,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--finder);outline-offset:2px;border-radius:8px}
-.wrap{max-width:1120px;margin:0 auto;padding:20px 18px 56px}
+.wrap{max-width:1120px;margin:0 auto;padding:26px 18px 56px}
 
 /* ---- top ---- */
-.top{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;margin-bottom:22px}
-.brand{display:flex;align-items:center;gap:14px;flex:1 1 320px;min-width:0}
-.brand img{width:58px;height:58px;border-radius:16px;flex:none;box-shadow:var(--shadow);background:#fff;object-fit:contain}
-.brand h1{margin:0;font-size:clamp(24px,4.6vw,34px);line-height:1.15;font-weight:800;letter-spacing:-.01em}
-.brand p{margin:3px 0 0;color:var(--muted);font-size:15px}
-.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+/* ---- the red bar, as in the header of Makro Finder (same red, same logo, same see-through buttons) ---- */
+.hdr{background:#E8192C;color:#fff;padding:18px clamp(16px,4vw,40px) 14px}
+.hdr :focus-visible{outline-color:#fff}
+.hdr-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 12px;max-width:1120px;margin:0 auto}
+.hdr-logo{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 280px}
+.hdr-logo-badge{height:46px;display:flex;align-items:center;flex:none}
+.hdr-logo-badge img{height:100%;width:auto;display:block}
+.hdr-logotext{margin:0;display:flex;align-items:center;gap:7px;font-size:clamp(20px,3.4vw,24px);font-weight:700;line-height:1.2;letter-spacing:0;color:#fff}
+.hdr-logotext svg{width:20px;height:20px;flex:none}
+.hdr-sub{font-size:13px;font-weight:500;line-height:1.3;color:rgba(255,255,255,.82)}
+.hdr-icons{display:flex;gap:8px;flex:none}
+.hdr-icon-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:104px;height:46px;padding:0 8px;box-sizing:border-box;background:rgba(255,255,255,.12);border:.5px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hdr-icon-col svg{width:20px;height:20px;flex:none}
+.hdr-icon-col span{font-size:11px;font-weight:600;line-height:1;white-space:nowrap;color:rgba(255,255,255,.92)}
+.hdr-icon-col:hover{background:rgba(255,255,255,.2)}
+.hdr-icon-col.on{background:rgba(255,255,255,.32)}
+.hdr-hint{max-width:1120px;margin:12px auto 0;padding:9px 14px;border-radius:10px;background:rgba(255,255,255,.12);border:.5px solid rgba(255,255,255,.2);font-size:14.5px;line-height:1.45;color:rgba(255,255,255,.94)}
+@media (max-width:560px){ .hdr-logo-badge{height:38px} .hdr-icons{width:100%} .hdr-icon-col{flex:1;min-width:0} }
 button,.btn{font:inherit;font-weight:700;cursor:pointer}
 .pill{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;box-shadow:var(--shadow)}
 .pill:hover{border-color:var(--finder)}
@@ -130,30 +142,33 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
 .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,14px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9}
 .toast.show{opacity:.96;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-@media print{.tools,.go .copy,.toast{display:none!important}details{border:0}details>summary{display:none}.card{break-inside:avoid;box-shadow:none}}
+@media print{.hdr-icons,.go .copy,.toast{display:none!important}details{border:0}details>summary{display:none}.card{break-inside:avoid;box-shadow:none}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <img src="logo-makro-finder.png" alt="" width="58" height="58">
+<div class="hdr">
+  <div class="hdr-row">
+    <div class="hdr-logo">
+      <div class="hdr-logo-badge"><img src="logo-makro-finder.png" alt="makro" width="155" height="46"></div>
       <div>
-        <h1>ศูนย์รวมแอป Makro Store 42</h1>
-        <p>แตะโลโก้เพื่อเปิดแอปได้เลย — อยากอ่านรายละเอียดกด "แสดงรายละเอียดทั้งหมด" หรือ "ดูรายละเอียด" ใต้โลโก้ · ใช้ได้บนมือถือและคอม ไม่ต้องติดตั้ง</p>
+        <h1 class="hdr-logotext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>ศูนย์รวมแอป</h1>
+        <div class="hdr-sub">Store 42 · Ramintra</div>
       </div>
     </div>
-    <div class="tools">
-      <button type="button" class="pill" id="btnAll" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/><path d="m6 3 6 6 6-6" opacity=".45"/></svg>
-        <span id="btnAllTxt">แสดงรายละเอียดทั้งหมด</span>
+    <div class="hdr-icons">
+      <button type="button" class="hdr-icon-col" id="btnAll" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        <span id="btnAllTxt">แสดงรายละเอียด</span>
       </button>
-      <button type="button" class="pill" id="btnCopyHub">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
-        <span>คัดลอกลิงก์หน้านี้</span>
+      <button type="button" class="hdr-icon-col" id="btnCopyHub">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+        <span>คัดลอกลิงก์</span>
       </button>
     </div>
-  </header>
+  </div>
+  <div class="hdr-hint">แตะโลโก้เพื่อเปิดแอปได้เลย — อยากอ่านรายละเอียดกด "แสดงรายละเอียด" หรือ "ดูรายละเอียด" ใต้โลโก้ · ใช้ได้บนมือถือและคอม ไม่ต้องติดตั้ง</div>
+</div>
+<div class="wrap">
 
   <h2 class="grp">แอปของทีม</h2>
   <nav class="launch" aria-label="แอปของทีม">
@@ -610,7 +625,7 @@ $('btnCopyHub').addEventListener('click', async () => { const ok = await copyTex
 // the details are hidden until asked for: the top button, "ดูรายละเอียด" under a logo, or #all / #finder / #gr / #o2o / #shelf-life in the address
 const wrap = $('detailsWrap');
 const ds = () => [...document.querySelectorAll('.card details')];
-const refresh = () => { const shown = !wrap.hidden; $('btnAll').setAttribute('aria-pressed', String(shown)); $('btnAll').classList.toggle('on', shown); $('btnAllTxt').textContent = shown ? 'ซ่อนรายละเอียด' : 'แสดงรายละเอียดทั้งหมด'; };
+const refresh = () => { const shown = !wrap.hidden; $('btnAll').setAttribute('aria-pressed', String(shown)); $('btnAll').classList.toggle('on', shown); $('btnAllTxt').textContent = shown ? 'ซ่อนรายละเอียด' : 'แสดงรายละเอียด'; };
 const showDetails = (openAll, card) => {
   wrap.hidden = false; if (openAll) ds().forEach(d => d.open = true);
   if (card) { const d = card.querySelector('details'); if (d) d.open = true; }
