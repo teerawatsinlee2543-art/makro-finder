@@ -1,0 +1,28 @@
+{
+    "name":  "Makro Pallet · GR จัดการพาเลท",
+    "short_name":  "GR Pallet",
+    "description":  "จัดการพาเลท Store 42",
+    "lang":  "th",
+    "start_url":  "pallet.html",
+    "scope":  "./",
+    "display":  "standalone",
+    "background_color":  "#ffffff",
+    "theme_color":  "#d9480f",
+    "icons":  [
+                  {
+                      "type":  "image/png",
+                      "sizes":  "192x192",
+                      "src":  "pallet-192.png"
+                  },
+                  {
+                      "type":  "image/png",
+                      "sizes":  "512x512",
+                      "src":  "pallet-512.png"
+                  },
+                  {
+                      "type":  "image/svg+xml",
+                      "sizes":  "any",
+                      "src":  "pallet-icon.svg"
+                  }
+              ]
+}

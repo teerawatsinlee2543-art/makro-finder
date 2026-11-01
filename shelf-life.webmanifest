@@ -1,0 +1,28 @@
+{
+    "name":  "Shelf-Life Monitor",
+    "short_name":  "Shelf-Life",
+    "description":  "ติดตามอายุสินค้าและจัดลำดับสินค้าเสี่ยง",
+    "lang":  "th",
+    "start_url":  "shelf-life.html",
+    "scope":  "./",
+    "display":  "standalone",
+    "background_color":  "#f5f6f8",
+    "theme_color":  "#14783f",
+    "icons":  [
+                  {
+                      "type":  "image/png",
+                      "sizes":  "192x192",
+                      "src":  "slm-192.png"
+                  },
+                  {
+                      "type":  "image/png",
+                      "sizes":  "512x512",
+                      "src":  "slm-512.png"
+                  },
+                  {
+                      "type":  "image/svg+xml",
+                      "sizes":  "any",
+                      "src":  "slm-icon.svg"
+                  }
+              ]
+}

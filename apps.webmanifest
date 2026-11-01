@@ -1,0 +1,28 @@
+{
+    "name":  "ศูนย์รวมแอป Makro Store 42",
+    "short_name":  "Makro Apps",
+    "description":  "รวมลิงก์และรายละเอียดของทุกแอป",
+    "lang":  "th",
+    "start_url":  "apps.html",
+    "scope":  "./",
+    "display":  "standalone",
+    "background_color":  "#f4f7fc",
+    "theme_color":  "#0b3d91",
+    "icons":  [
+                  {
+                      "type":  "image/png",
+                      "sizes":  "192x192",
+                      "src":  "apps-192.png"
+                  },
+                  {
+                      "type":  "image/png",
+                      "sizes":  "512x512",
+                      "src":  "apps-512.png"
+                  },
+                  {
+                      "type":  "image/svg+xml",
+                      "sizes":  "any",
+                      "src":  "apps-icon.svg"
+                  }
+              ]
+}
