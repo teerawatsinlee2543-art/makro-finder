@@ -172,11 +172,11 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .nav-info-loc-group+.nav-info-loc-group{margin-top:16px}
 .nav-info-edit-btn{background:none;border:none;color:var(--brand-red);font-size:11.5px;font-weight:700;cursor:pointer;padding:0;margin-left:6px;font-family:inherit;text-decoration:underline}
 .promo-gallery-empty{font-size:12.5px;color:var(--color-text-tertiary);padding:6px 0 12px;margin-bottom:16px}
-.promo-view-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;justify-content:center;z-index:2150;padding:16px}
+.promo-view-overlay{position:fixed;inset:0;background:rgba(8,11,22,.97);display:none;align-items:center;align-items:safe center;justify-content:center;overflow-y:auto;z-index:2150;padding:16px}
 .promo-view-overlay img{width:min(92vw,1000px);height:calc(100dvh - 130px);max-height:100%;object-fit:contain;border-radius:8px;display:block}
 .promo-view-loading{color:#fff;font-size:13px}
 .promo-view-caption{color:#fff;font-size:13px;margin-top:10px;text-align:center}
-.promo-date-overlay{position:fixed;inset:0;background:rgba(8,11,22,.6);display:none;align-items:center;justify-content:center;z-index:2150;padding:16px}
+.promo-date-overlay{position:fixed;inset:0;background:rgba(8,11,22,.6);display:none;align-items:center;align-items:safe center;justify-content:center;overflow-y:auto;z-index:2150;padding:16px}
 .promo-date-box{width:100%;max-width:340px;background:var(--color-background-primary);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px}
 .promo-date-title{font-size:15px;font-weight:700;color:var(--color-text-primary);margin-bottom:4px;display:flex;align-items:center;gap:6px}
 .promo-date-title i{color:var(--brand-red)}
@@ -197,6 +197,16 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .lang-btn-icon svg{border-radius:4px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,0.12)}
 .hdr-icon .lang-btn-icon svg{width:100%;height:100%;border-radius:6px}
 .role-lang-btn .lang-btn-icon svg{width:100%;height:100%;border-radius:8px}
+/* language switch: a dark pill - flag, language code, chevron (tap opens the language list) */
+.lang-pill{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 10px 0 9px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:#1b1f29;color:#fff;font-family:inherit;font-size:15px;font-weight:800;letter-spacing:.02em;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:background .15s,transform .08s}
+.lang-pill:hover{background:#2a3040}
+.lang-pill:active{transform:scale(.97)}
+.lang-pill:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(232,25,44,.45),0 2px 8px rgba(0,0,0,.2)}
+.lang-pill .lang-btn-icon{width:26px;height:18px;flex:none}
+.lang-pill .lang-btn-icon svg{width:100%;height:100%;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.22)}
+.lang-pill .lang-btn-icon i{font-size:16px}
+.lang-pill .lang-code{min-width:1.45em;text-align:left}
+.lang-pill>i{flex:none;font-size:15px;color:#9aa3b5}
 .promo-date-box input[type=text]{padding:10px 12px;border-radius:10px;border:1px solid var(--color-border-tertiary);font-size:16px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary)}
 .new-item-barcode-row{display:flex;gap:8px;align-items:center}
 .new-item-barcode-row input{flex:1;min-width:0}
@@ -269,7 +279,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .pallet-open-btn.yellow{background:#FFF3C4;border-color:#F0D775;color:#8A6600}
 .pallet-open-btn.yellow:hover{background:#FCE9A8}
 .pallet-open-btn.compact{width:auto;display:inline-flex;padding:9px 18px}
-.waste-overlay{position:fixed;inset:0;background:rgba(20,30,45,.55);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
+.waste-overlay{position:fixed;inset:0;background:rgba(20,30,45,.55);display:none;align-items:center;align-items:safe center;justify-content:center;overflow-y:auto;z-index:2100;padding:16px}
 .waste-panel{width:100%;max-width:900px;max-height:92vh;max-height:92dvh;overflow-y:auto;background:#ffffff;color:#173350;border-radius:16px;padding:20px 22px;box-sizing:border-box;font-family:inherit;border:1px solid #d7e7f8}
 .waste-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
 #wasteLogOverlay .waste-panel{padding:0}
@@ -403,7 +413,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
   .waste-datetime-row{flex-direction:column;align-items:stretch}
   .waste-day-row .waste-btn{width:100%}
 }
-.pallet-overlay{position:fixed;inset:0;background:rgba(8,11,22,.6);display:none;align-items:center;justify-content:center;z-index:2100;padding:16px}
+.pallet-overlay{position:fixed;inset:0;background:rgba(8,11,22,.6);display:none;align-items:center;align-items:safe center;justify-content:center;overflow-y:auto;z-index:2100;padding:16px}
 .pallet-overlay-content{width:100%;max-width:480px;max-height:92vh;background:var(--color-background-primary);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
 .pallet-header{background:var(--brand-red);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .pallet-header i{font-size:20px;cursor:pointer;flex-shrink:0}
@@ -523,8 +533,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .emp-bar{display:flex;align-items:center;justify-content:space-between;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:8px 12px;margin-bottom:16px;font-size:12.5px;color:var(--color-text-secondary);gap:8px}
 .emp-bar b{color:var(--color-text-primary)}
 .emp-bar button{background:none;border:none;color:var(--brand-red);font-size:12.5px;cursor:pointer;font-family:inherit;padding:0;flex-shrink:0}
-.role-screen{position:fixed;inset:0;background:var(--brand-red);display:flex;align-items:center;justify-content:center;padding:24px;z-index:1500}
-.role-card-wrap{position:relative;background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
+.role-screen{position:fixed;inset:0;background:var(--brand-red);display:flex;align-items:center;justify-content:center;padding:24px;z-index:1500;overflow-y:auto}
+.role-card-wrap{position:relative;background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center;margin:auto}
 .role-lang-col{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;align-items:center;gap:4px}
 .role-lang-btn{width:48px;height:32px;border-radius:8px;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);color:var(--color-text-secondary);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .role-lang-caption{font-size:10px;color:var(--color-text-tertiary);font-weight:600;white-space:nowrap;line-height:1}
@@ -545,7 +555,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .role-card-wrap .brand-logo,.login-card .brand-logo{width:210px;margin-bottom:12px}
   .role-card-wrap .login-sub,.login-card .login-sub{font-size:19px;margin-bottom:18px}
   .role-lang-col{top:22px;right:22px}
-  .role-lang-btn{width:60px;height:40px;border-radius:10px;font-size:24px}
+  .role-lang-col .lang-pill{height:42px;font-size:16px;padding:0 12px 0 10px}
   .role-lang-caption{font-size:12px}
   .role-intro-desc{font-size:17px;margin-bottom:28px}
   .role-option{gap:20px;padding:22px 24px;border-radius:18px;margin-bottom:16px}
@@ -553,7 +563,22 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   .role-name{font-size:21px}
   .role-desc{font-size:15px;margin-top:4px}
 }
-.login-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
+/* entry screens (choose role / GR home / sign in) fit the window: sizes follow the window height, and a really short window scrolls the card instead of cutting its top and bottom */
+.role-screen,.login-screen{padding:clamp(10px,2.6vh,24px) 24px}
+.role-card-wrap,.login-card{padding-top:clamp(18px,4.6vh,32px);padding-bottom:clamp(18px,4.6vh,32px)}
+.role-card-wrap .brand-logo,.login-card .brand-logo{width:clamp(80px,19.5vh,150px);margin-bottom:clamp(4px,1vh,8px)}
+.role-card-wrap .login-sub,.login-card .login-sub{margin-bottom:clamp(6px,1.6vh,14px)}
+.role-intro-desc{margin-bottom:clamp(12px,2.8vh,22px)}
+.role-option{padding:clamp(9px,1.9vh,14px) 14px;margin-bottom:clamp(8px,1.6vh,12px)}
+.role-icon{width:clamp(36px,6vh,44px);height:clamp(36px,6vh,44px)}
+@media (min-width:900px){
+  .role-card-wrap,.login-card{padding:clamp(20px,5.2vh,48px) 52px clamp(18px,4.8vh,44px)}
+  .role-card-wrap .brand-logo,.login-card .brand-logo{width:clamp(84px,25vh,210px);margin-bottom:clamp(6px,1.3vh,12px)}
+  .role-card-wrap .login-sub,.login-card .login-sub{margin-bottom:clamp(8px,1.9vh,18px)}
+  .role-intro-desc{margin-bottom:clamp(12px,3.2vh,28px)}
+  .role-option{padding:clamp(12px,2.7vh,22px) 24px;margin-bottom:clamp(8px,1.9vh,16px)}
+  .role-icon{width:clamp(44px,7.2vh,60px);height:clamp(44px,7.2vh,60px)}
+}.login-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
 .login-back.framed{border:1.5px solid #A6E0B3;border-radius:14px;padding:12px 14px;background:none;color:#1B7A3D;transition:border-color .15s,background .15s}
 .login-back.framed:hover{border-color:#1B7A3D;background:#DFF5E3}
 .emp-stock-box{background:#FFF4E5;border:1px solid #FFD9A0;border-radius:10px;padding:10px 12px;margin-bottom:16px}
@@ -563,7 +588,15 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .feedback-card-title{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--color-text-primary);margin-bottom:10px}
 .feedback-card-title i{color:var(--brand-red);font-size:18px}
 .waste-card-logo{flex:none;width:1.5em;height:1.5em;border-radius:50%;object-fit:cover;box-shadow:0 2px 6px rgba(20,24,33,.2)}
-.feedback-box{margin-top:2px}
+.waste-card-sub{display:none}
+@media (max-width:899px){
+  #employeeFeedbackSection>.feedback-card[onclick]{display:flex;align-items:center;gap:12px;min-height:84px;padding:14px 18px 14px 14px;border-radius:18px;background:linear-gradient(180deg,#FFF8F8,#FFECEE)!important;box-shadow:0 1px 3px rgba(16,24,40,.08)}
+  #employeeFeedbackSection>.feedback-card[onclick] .feedback-card-title{flex:1;min-width:0;justify-content:flex-start!important;text-align:left!important;gap:14px!important;font-size:17px!important;line-height:1.25;margin:0!important}
+  #employeeFeedbackSection>.feedback-card[onclick] .waste-card-logo{width:54px;height:54px;box-shadow:0 3px 10px rgba(20,24,33,.22)}
+  #employeeFeedbackSection>.feedback-card[onclick] .waste-card-text{min-width:0;text-wrap:balance}
+  .waste-card-sub{display:block;margin-top:3px;font-size:12.5px;font-weight:500;color:var(--color-text-secondary)}
+  #employeeFeedbackSection>.feedback-card[onclick]::after{content:"";flex:none;width:9px;height:9px;margin-right:4px;border-top:2.5px solid var(--brand-red);border-right:2.5px solid var(--brand-red);transform:rotate(45deg)}
+}.feedback-box{margin-top:2px}
 .fb-textarea{width:100%;border:1px solid var(--color-border-secondary);border-radius:10px;padding:10px 12px;font-size:16px;font-family:inherit;resize:vertical;min-height:64px;outline:none;color:var(--color-text-primary);background:#fff}
 .fb-textarea:focus{border-color:var(--brand-red)}
 .fb-photo-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
@@ -694,6 +727,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 @media (max-width:520px){.hdr-icon-col,.search-scan-btn{width:84px;padding:0 4px}.search-scan-btn{font-size:12.5px}}
 @media (max-width:420px){.hdr-icon-col,.search-scan-btn{width:68px;padding:0 2px}.search-scan-btn{font-size:12px;gap:2px}.hdr-logo{gap:6px}.hdr-logo-badge{height:36px}.hdr-logotext{font-size:17px;gap:3px}.hdr-logotext i{font-size:15px}.hdr-sub{font-size:11.5px}.hdr-row{gap:6px}}
 @media (max-width:360px){.hdr-logotext i{display:none}}
+.hdr-lang-col{background:none;border:none;padding:0}
+.hdr-lang-col .lang-pill{width:100%;height:100%;padding:0 6px;gap:6px;box-shadow:none}
+@media (max-width:520px){.hdr-lang-col .lang-pill{gap:5px;font-size:14px}.hdr-lang-col .lang-btn-icon{width:24px;height:16px}}
+@media (max-width:420px){.hdr-lang-col .lang-pill{gap:3px;font-size:13px;padding:0 3px}.hdr-lang-col .lang-btn-icon{width:22px;height:15px}.hdr-lang-col .lang-pill>i{font-size:13px}}
 /* computer screens: the customer-feedback card is full width, and below it the four tools sit in one row, centred under the middle four category columns: ลบไฟล์ | นำเข้าข้อมูล | Item ที่ยังไม่มี Location | Weight Loss and Waste O2O (other screens keep the old stacked layout) */
 @media (min-width:900px){
   #employeeFeedbackSection[style*="block"]{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px 8px;align-items:stretch}
@@ -856,8 +893,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="role-screen" id="roleScreen">
     <div class="role-card-wrap">
       <div class="role-lang-col">
-        <button type="button" class="role-lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
-        <span class="role-lang-caption" data-i18n="changeLanguageLabel">เปลี่ยนภาษา</span>
+        <button type="button" class="lang-pill" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span><span class="lang-code">TH</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
       </div>
       <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
@@ -887,8 +923,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="role-screen" id="grHomeScreen" style="display:none">
     <div class="role-card-wrap">
       <div class="role-lang-col">
-        <button type="button" class="role-lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
-        <span class="role-lang-caption" data-i18n="changeLanguageLabel">เปลี่ยนภาษา</span>
+        <button type="button" class="lang-pill" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span><span class="lang-code">TH</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
       </div>
       <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line x1="94" y1="216" x2="30" y2="280" stroke="#E8192C" stroke-width="28" stroke-linecap="round"/>
@@ -919,8 +954,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
       <div class="role-lang-col">
-        <button type="button" class="role-lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
-        <span class="role-lang-caption" data-i18n="changeLanguageLabel">เปลี่ยนภาษา</span>
+        <button type="button" class="lang-pill" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span><span class="lang-code">TH</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
       </div>
       <button class="login-back" onclick="showRoleScreen()"><i class="ti ti-arrow-left" aria-hidden="true"></i> <span data-i18n="loginBackBtn">กลับ</span></button>
       <svg class="brand-logo" viewBox="0 0 330 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -978,9 +1012,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
       <div class="hdr-icons">
-        <div class="hdr-icon-col">
-          <button class="hdr-icon lang-btn" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span></button>
-          <span class="hdr-icon-caption" data-i18n="changeLanguageLabel">เปลี่ยนภาษา</span>
+        <div class="hdr-icon-col hdr-lang-col">
+          <button type="button" class="lang-pill" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span><span class="lang-code">TH</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
         </div>
       </div>
     </div>
@@ -1057,7 +1090,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <div id="fbList" class="fb-list"></div>
         </div>
         <div class="feedback-card" style="border:1.5px solid var(--brand-red);background:#FFF5F5;margin-top:12px;cursor:pointer" onclick="openWasteLog()">
-          <div class="feedback-card-title" style="color:var(--brand-red);justify-content:center;text-align:center;font-size:20px;margin-bottom:0"><img class="waste-card-logo" src="waste-icon-144.png" alt="" width="46" height="46"> Weight Loss and Waste O2O</div>
+          <div class="feedback-card-title" style="color:var(--brand-red);justify-content:center;text-align:center;font-size:20px;margin-bottom:0"><img class="waste-card-logo" src="waste-icon-144.png" alt="" width="46" height="46"> <span class="waste-card-text">Weight Loss and Waste O2O<small class="waste-card-sub">บันทึกของเสียรายวัน · ส่งออก Excel</small></span></div>
         </div>
         <div class="waste-io-row loc-tools">
           <button type="button" class="waste-io-btn waste-io-del" id="iLocDelBtn" onclick="openItemLocImportInfo()"><i class="ti ti-trash" aria-hidden="true"></i> ลบไฟล์ที่นำเข้า</button>
@@ -3878,6 +3911,7 @@ function applyI18n(root){
   scope.querySelectorAll('[data-i18n-title]').forEach(el=>{ const v=t(el.getAttribute('data-i18n-title')); el.title=v; el.setAttribute('aria-label',v); });
   scope.querySelectorAll('[data-i18n-alt]').forEach(el=>{ el.alt=t(el.getAttribute('data-i18n-alt')); });
   scope.querySelectorAll('.lang-btn-icon').forEach(el=>{ el.innerHTML=flagSvg(currentLang); });
+  scope.querySelectorAll('.lang-code').forEach(el=>{ el.textContent=currentLang.toUpperCase(); });
 }
 function setLang(code){
   if(!I18N[code])return;
