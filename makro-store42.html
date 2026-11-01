@@ -72,12 +72,12 @@ button,.btn{font:inherit;font-weight:700;cursor:pointer}
 .pill.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
 /* ---- the logos: sized from the screen (its width AND its height) so both rows fit without zooming out or scrolling wherever the screen allows; a phone shows 3 per row ---- */
-.launch{--vh:100vh;--g:clamp(8px,1.1vw,16px);--s:clamp(64px,min(calc((var(--vh) - 385px) / 2),calc((min(100vw,1280px) - 150px) / 8.75),150px),150px);display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(10px,2.2vh,22px) var(--g);padding:2px 0 clamp(8px,2vh,22px)}
+.launch{--vh:100vh;--g:clamp(8px,1.6vw,22px);--s:clamp(64px,min(calc((var(--vh) - 385px) / 2),calc((min(100vw,1280px) - 150px) / 7.8),150px),150px);display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(10px,2.2vh,22px) var(--g);padding:2px 0 clamp(8px,2vh,22px)}
 @supports (height:100dvh){.launch{--vh:100dvh}}
 .grp{margin:clamp(2px,.8vh,8px) 4px clamp(4px,1vh,10px);font-size:clamp(14px,2.2vh,18px);font-weight:800;text-align:center;line-height:1.25}
 .grp small{display:block;font-size:clamp(11px,1.7vh,13px);font-weight:600;color:var(--muted)}
 .sys-note{font-size:clamp(11px,1.8vh,12.5px);font-weight:600;line-height:1.3;color:var(--muted);padding:2px 6px;text-align:center}
-.tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:calc(var(--s) * 1.25)}
+.tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:calc(var(--s) * 1.3)}
 .tile[hidden]{display:none}
 .go-app{display:flex;flex-direction:column;align-items:center;gap:clamp(6px,1.4vh,12px);text-decoration:none;-webkit-tap-highlight-color:transparent}
 .logo{display:grid;place-items:center;width:var(--s);aspect-ratio:1;border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18),0 10px 26px rgba(0,0,0,.16);transition:transform .24s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
@@ -92,8 +92,17 @@ button,.btn{font:inherit;font-weight:700;cursor:pointer}
 .more-link{display:inline-flex;align-items:center;min-height:24px;font-size:clamp(11.5px,calc(var(--s) * .105),14px);font-weight:700;color:var(--muted);text-decoration:none;padding:2px 8px;border-radius:8px}
 .more-link:hover{color:var(--ink);text-decoration:underline}
 /* ---- the "เพิ่มเว็บ" and red "แก้ไข" tiles, shortcuts people add themselves, and the ✕ shown in edit mode ---- */
-button.go-app{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
-.logo.add{background:var(--addbg);color:var(--ink);box-shadow:none}
+.wrap{position:relative}
+.hub-tools{position:absolute;top:12px;right:18px;display:flex;gap:8px;z-index:3}
+.tool-btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px 0 9px;border:0;border-radius:10px;font:inherit;font-size:13.5px;font-weight:700;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s,filter .15s}
+.tool-btn svg{width:17px;height:17px;flex:none;display:block}
+.tool-btn .tico{display:inline-flex}
+.tool-btn.add{background:var(--addbg);color:var(--ink)}
+.tool-btn.edit{background:#E8192C;color:#fff}
+.tool-btn:hover{filter:brightness(.94)}
+.tool-btn:active{transform:scale(.95)}
+.tool-btn[aria-pressed="true"]{box-shadow:0 0 0 3px rgba(232,25,44,.3)}
+@media (max-width:560px){.hub-tools{top:12px;right:12px}.tool-btn{width:34px;height:34px;padding:0;justify-content:center}.tool-btn .lbl{display:none}.tool-btn svg{width:19px;height:19px}}.logo.add{background:var(--addbg);color:var(--ink);box-shadow:none}
 .logo.add svg{width:36%;height:36%}
 .logo.edit{background:#E8192C;color:#fff}
 .logo.edit svg{width:44%;height:44%}
@@ -189,7 +198,7 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
 .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,14px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9}
 .toast.show{opacity:.96;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-@media print{.hdr-icons,.go .copy,.toast,.tile-ctl,.tbadge,.edit-hint,.sc-dlg{display:none!important}details{border:0}details>summary{display:none}.card{break-inside:avoid;box-shadow:none}}
+@media print{.hdr-icons,.go .copy,.toast,.hub-tools,.tbadge,.edit-hint,.sc-dlg{display:none!important}details{border:0}details>summary{display:none}.card{break-inside:avoid;box-shadow:none}}
 </style>
 </head>
 <body>
@@ -216,6 +225,10 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
   </div>
 </div>
 <div class="wrap">
+  <div class="hub-tools">
+    <button type="button" class="tool-btn add" id="btnAdd" aria-label="เพิ่มเว็บ" title="เพิ่มเว็บ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">เพิ่มเว็บ</span></button>
+    <button type="button" class="tool-btn edit" id="btnEdit" aria-pressed="false" aria-label="แก้ไข" title="แก้ไข"><span id="editLogo" class="tico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span><span class="lbl" id="editTxt">แก้ไข</span></button>
+  </div>
 
   <h2 class="grp">แอปของทีม</h2>
   <nav class="launch" aria-label="แอปของทีม">
@@ -261,12 +274,7 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
       </a>
       <a class="more-link" href="#forklift">ดูรายละเอียด</a>
     </div>
-    <div class="tile tile-ctl" id="tileAdd">
-      <button type="button" class="go-app" id="btnAdd" aria-label="เพิ่มเว็บ">
-        <span class="logo add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
-        <span class="nm">เพิ่มเว็บ</span>
-      </button>
-    </div>  </nav>
+  </nav>
   <h2 class="grp">ระบบ Makro<small>ระบบภายในบริษัทเปิดได้เมื่อต่อเครือข่ายบริษัท</small></h2>
   <nav class="launch" aria-label="ระบบ Makro">
     <div class="tile" data-id="item">
@@ -303,12 +311,6 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
         <span class="nm">RA ADHOC(ADW)</span>
       </a>
       <span class="sys-note">ระบบภายในบริษัท</span>
-    </div>
-    <div class="tile tile-ctl" id="tileEdit">
-      <button type="button" class="go-app" id="btnEdit" aria-pressed="false" aria-label="แก้ไข">
-        <span class="logo edit" id="editLogo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
-        <span class="nm" id="editTxt">แก้ไข</span>
-      </button>
     </div>
   </nav>
   <p class="edit-hint" id="editHint" hidden>โหมดแก้ไข: แตะ ✕ ที่โลโก้เพื่อซ่อน/ลบ · แตะ ↺ เพื่อเอากลับ · แตะเว็บที่เพิ่มเองเพื่อแก้ชื่อหรือลิงก์ · กด "เสร็จ" เมื่อเรียบร้อย</p>
@@ -723,7 +725,7 @@ const save = () => {
   try { localStorage.setItem(KEY, JSON.stringify({ custom: st.custom.filter(c => !c.rm).map(({ id, name, url }) => ({ id, name, url })), hidden: st.hidden })); }
   catch (_) { toast('เบราว์เซอร์นี้เก็บข้อมูลไม่ได้ (โหมดส่วนตัว?) — ที่เพิ่มไว้จะหายเมื่อปิดหน้า'); }
 };
-const grid1 = document.querySelector('nav.launch'), addTile = $('tileAdd');
+const grid1 = document.querySelector('nav.launch');
 let editing = false, dlgId = null;
 const COLORS = ['#d9480f', '#0b5cad', '#1f8a4c', '#7b3fa0', '#c2323d', '#00838f', '#a85a00', '#455a99'];
 const colorOf = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.codePointAt(0)) >>> 0; return COLORS[h % COLORS.length]; };
@@ -756,7 +758,7 @@ const makeCustom = c => {
 };
 const render = () => {
   document.querySelectorAll('.tile.custom').forEach(t => t.remove());
-  st.custom.forEach(c => { const t = makeCustom(c); t.hidden = !!c.rm && !editing; t.classList.toggle('is-gone', !!c.rm); setBadge(t, !!c.rm); grid1.insertBefore(t, addTile); });
+  st.custom.forEach(c => { const t = makeCustom(c); t.hidden = !!c.rm && !editing; t.classList.toggle('is-gone', !!c.rm); setBadge(t, !!c.rm); grid1.appendChild(t); });
   document.querySelectorAll('.tile[data-id]').forEach(t => { const gone = st.hidden.includes(t.dataset.id); t.hidden = gone && !editing; t.classList.toggle('is-gone', gone); setBadge(t, gone); });
 };
 const setEditing = on => {
