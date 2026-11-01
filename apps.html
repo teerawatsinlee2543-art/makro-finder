@@ -23,19 +23,19 @@
 :root{
   --bg:#f4f7fc; --card:#ffffff; --ink:#1d2433; --muted:#5b6475; --line:#d7e1f0; --soft:#eef3fb;
   --shadow:0 1px 3px rgba(11,61,145,.08),0 8px 24px rgba(11,61,145,.06);
-  --finder:#0b5cad; --gr:#d9480f; --o2o:#c2323d; --slm:#1f8a4c; --brand:#E8192C;
+  --finder:#0b5cad; --gr:#d9480f; --o2o:#c2323d; --slm:#1f8a4c; --brand:#E8192C; --waste:#2a5fa8; --fk:#c26a00;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#0e1320; --card:#161d2e; --ink:#e8edf7; --muted:#9aa6bd; --line:#26314a; --soft:#1b2438;
     --shadow:0 1px 3px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.35);
-    --finder:#4da3ff; --gr:#ff8a50; --o2o:#ff6b76; --slm:#3ccf7a; --brand:#ff6b76;
+    --finder:#4da3ff; --gr:#ff8a50; --o2o:#ff6b76; --slm:#3ccf7a; --brand:#ff6b76; --waste:#6aa6f0; --fk:#ffb347;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0e1320; --card:#161d2e; --ink:#e8edf7; --muted:#9aa6bd; --line:#26314a; --soft:#1b2438;
   --shadow:0 1px 3px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.35);
-  --finder:#4da3ff; --gr:#ff8a50; --o2o:#ff6b76; --slm:#3ccf7a; --brand:#ff6b76;
+  --finder:#4da3ff; --gr:#ff8a50; --o2o:#ff6b76; --slm:#3ccf7a; --brand:#ff6b76; --waste:#6aa6f0; --fk:#ffb347;
 }
 *{box-sizing:border-box}
 html{scrollbar-gutter:stable}
@@ -58,10 +58,12 @@ button,.btn{font:inherit;font-weight:700;cursor:pointer}
 .pill.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
 /* ---- the logos: a long row, the real logo in a circle with its name under it (like the quick-tool buttons of Makro Finder) ---- */
-.launch{display:flex;flex-wrap:wrap;justify-content:center;gap:30px clamp(12px,3.5vw,48px);padding:6px 0 34px}
-.tile{display:flex;flex-direction:column;align-items:center;gap:10px;width:clamp(120px,21vw,200px)}
+.launch{display:flex;flex-wrap:wrap;justify-content:center;gap:28px clamp(10px,2vw,28px);padding:4px 0 26px}
+.grp{margin:6px 4px 10px;font-size:18px;font-weight:800;text-align:center}.grp small{display:block;font-size:13px;font-weight:600;color:var(--muted)}
+.sys-note{font-size:12.5px;font-weight:600;color:var(--muted);padding:4px 6px;text-align:center}
+.tile{display:flex;flex-direction:column;align-items:center;gap:10px;width:clamp(104px,12.5vw,150px)}
 .go-app{display:flex;flex-direction:column;align-items:center;gap:14px;text-decoration:none;-webkit-tap-highlight-color:transparent}
-.logo{display:grid;place-items:center;width:clamp(104px,18vw,176px);aspect-ratio:1;border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18),0 10px 26px rgba(0,0,0,.16);transition:transform .15s,box-shadow .15s}
+.logo{display:grid;place-items:center;width:clamp(96px,12vw,150px);aspect-ratio:1;border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18),0 10px 26px rgba(0,0,0,.16);transition:transform .15s,box-shadow .15s}
 .logo img{display:block;width:100%;height:100%;object-fit:cover}
 .logo.pad img{object-fit:contain;padding:9%}
 .go-app:hover .logo{transform:translateY(-4px);box-shadow:0 4px 10px rgba(0,0,0,.2),0 16px 34px rgba(0,0,0,.2)}
@@ -79,7 +81,7 @@ button,.btn{font:inherit;font-weight:700;cursor:pointer}
 @media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
 .card{--c:var(--finder);position:relative;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;scroll-margin-top:16px}
 .card::before{content:"";display:block;height:6px;background:var(--c)}
-.card.finder{--c:var(--finder)} .card.gr{--c:var(--gr)} .card.o2o{--c:var(--o2o)} .card.slm{--c:var(--slm)}
+.card.finder{--c:var(--finder)} .card.gr{--c:var(--gr)} .card.o2o{--c:var(--o2o)} .card.slm{--c:var(--slm)} .card.waste{--c:var(--waste)} .card.fk{--c:var(--fk)}
 .card:target{outline:3px solid var(--c);outline-offset:2px}
 .head{display:flex;gap:14px;align-items:flex-start;padding:18px 20px 6px}
 .ico{flex:none;width:60px;height:60px;border-radius:50%;overflow:hidden;display:block;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18),0 6px 16px color-mix(in srgb,var(--c) 30%,transparent)}.ico img{display:block;width:100%;height:100%;object-fit:cover}.ico.pad img{object-fit:contain;padding:9%}
@@ -153,34 +155,87 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
     </div>
   </header>
 
-  <nav class="launch" aria-label="เปิดแอป">
+  <h2 class="grp">แอปของทีม</h2>
+  <nav class="launch" aria-label="แอปของทีม">
     <div class="tile">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/makro-finder/" target="_blank" rel="noopener" aria-label="เปิด Makro Finder">
-        <span class="logo pad"><img src="makro-finder-favicon.png" alt="" width="176" height="176"></span>
+        <span class="logo pad"><img src="makro-finder-favicon.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">Makro Finder</span>
       </a>
       <a class="more-link" href="#finder">ดูรายละเอียด</a>
     </div>
     <div class="tile">
+      <a class="go-app" href="https://teerawatsinlee2543-art.github.io/makro-finder/?open=waste" target="_blank" rel="noopener" aria-label="เปิด Weight Loss and Waste O2O">
+        <span class="logo"><img src="apps-logo-waste.png" alt="" width="150" height="150" loading="lazy"></span>
+        <span class="nm">Weight Loss and Waste O2O</span>
+      </a>
+      <a class="more-link" href="#waste">ดูรายละเอียด</a>
+    </div>
+    <div class="tile">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/makro-finder/pallet.html" target="_blank" rel="noopener" aria-label="เปิด GR · จัดการพาเลท">
-        <span class="logo"><img src="apps-logo-gr.png" alt="" width="176" height="176"></span>
+        <span class="logo"><img src="apps-logo-gr.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">GR · จัดการพาเลท</span>
       </a>
       <a class="more-link" href="#gr">ดูรายละเอียด</a>
     </div>
     <div class="tile">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/o2o-scan-logger/" target="_blank" rel="noopener" aria-label="เปิด O2O Scan Logger">
-        <span class="logo"><img src="apps-logo-o2o.png" alt="" width="176" height="176"></span>
+        <span class="logo"><img src="apps-logo-o2o.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">O2O Scan Logger</span>
       </a>
       <a class="more-link" href="#o2o">ดูรายละเอียด</a>
     </div>
     <div class="tile">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/makro-finder/shelf-life.html" target="_blank" rel="noopener" aria-label="เปิด Shelf-Life Monitor">
-        <span class="logo"><img src="shrink-icon.webp" alt="" width="176" height="176"></span>
+        <span class="logo"><img src="shrink-icon.webp" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">Shelf-Life Monitor</span>
       </a>
       <a class="more-link" href="#shelf-life">ดูรายละเอียด</a>
+    </div>
+    <div class="tile">
+      <a class="go-app" href="https://teerawatsinlee2543-art.github.io/forklift-key-app/" target="_blank" rel="noopener" aria-label="เปิด เบิกกุญแจโฟล์คลิฟท์">
+        <span class="logo"><img src="apps-logo-forklift.png" alt="" width="150" height="150" loading="lazy"></span>
+        <span class="nm">เบิกกุญแจโฟล์คลิฟท์</span>
+      </a>
+      <a class="more-link" href="#forklift">ดูรายละเอียด</a>
+    </div>
+  </nav>
+  <h2 class="grp">ระบบ Makro<small>ระบบภายในบริษัทเปิดได้เมื่อต่อเครือข่ายบริษัท</small></h2>
+  <nav class="launch" aria-label="ระบบ Makro">
+    <div class="tile">
+      <a class="go-app" href="https://ssmobile.siammakro.co.th/login.html" target="_blank" rel="noopener" aria-label="เปิด Item Lookup">
+        <span class="logo"><img src="item-lookup-icon.png" alt="" width="150" height="150" loading="lazy"></span>
+        <span class="nm">Item Lookup</span>
+      </a>
+      <span class="sys-note">ระบบ Makro</span>
+    </div>
+    <div class="tile">
+      <a class="go-app" href="http://sso.siammakro.co.th:7006/LandingPage/" target="_blank" rel="noopener" aria-label="เปิด Makro SSO">
+        <span class="logo"><img src="apps-logo-sso.png" alt="" width="150" height="150" loading="lazy"></span>
+        <span class="nm">Makro SSO</span>
+      </a>
+      <span class="sys-note">ระบบภายในบริษัท</span>
+    </div>
+    <div class="tile">
+      <a class="go-app" href="http://sim-app.siammakro.co.th:28888/sim-prd/launch?template=sim_jnlp_template.vm" target="_blank" rel="noopener" aria-label="เปิด SIM">
+        <span class="logo"><img src="apps-logo-sim.png" alt="" width="150" height="150" loading="lazy"></span>
+        <span class="nm">SIM</span>
+      </a>
+      <span class="sys-note">ระบบภายในบริษัท</span>
+    </div>
+    <div class="tile">
+      <a class="go-app" href="http://raadw-app.siammakro.co.th:7777/analytics/saw.dll?bieehome" target="_blank" rel="noopener" aria-label="เปิด RAADW Analytics">
+        <span class="logo"><img src="apps-logo-raadw.png" alt="" width="150" height="150" loading="lazy"></span>
+        <span class="nm">RAADW Analytics</span>
+      </a>
+      <span class="sys-note">ระบบภายในบริษัท</span>
+    </div>
+    <div class="tile">
+      <a class="go-app" href="http://raadw-adhoc.siammakro.co.th:7777/analytics/saw.dll?catalog" target="_blank" rel="noopener" aria-label="เปิด RAADW Ad-hoc">
+        <span class="logo"><img src="apps-logo-adhoc.png" alt="" width="150" height="150" loading="lazy"></span>
+        <span class="nm">RAADW Ad-hoc</span>
+      </a>
+      <span class="sys-note">ระบบภายในบริษัท</span>
     </div>
   </nav>
 
@@ -229,6 +284,38 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
       </div>
     </article>
 
+    <!-- Weight Loss and Waste O2O -->
+    <article class="card waste" id="waste">
+      <div class="head">
+        <span class="ico" aria-hidden="true"><img src="apps-logo-waste.png" alt="" width="60" height="60"></span>
+        <h2>Weight Loss and Waste O2O<small>บันทึกของเสียรายวัน · ส่งออก Excel</small></h2>
+      </div>
+      <p class="lead">บันทึกข้อมูลรายวัน สแกนบาร์โค้ดเพื่อกรอกอัตโนมัติ แล้วส่งออกเป็น Excel</p>
+      <div class="for"><span class="chip"><b>ใช้กับ</b> พนักงาน</span><span class="chip">ต้องล็อกอินพนักงานใน Makro Finder</span></div>
+      <ul class="hl">
+        <li>เปิดจากปุ่มนี้ แล้วเข้าหน้าบันทึกของเสียให้เลย (ครั้งแรกใส่ชื่อ แผนก และรหัสพนักงาน)</li>
+        <li>สแกนบาร์โค้ดเพื่อกรอกรายการอัตโนมัติ</li>
+        <li>ดูประวัติและส่งออกเป็น Excel</li>
+      </ul>
+      <details>
+        <summary>รายละเอียดทั้งหมด</summary>
+        <div class="more">
+          <h3>ทำอะไรได้บ้าง</h3>
+          <ul>
+            <li>บันทึกของเสียรายวันของแต่ละแผนก</li>
+            <li>สแกนบาร์โค้ดสินค้า ระบบกรอกชื่อสินค้าและราคาให้อัตโนมัติ</li>
+            <li>ดูประวัติการบันทึก และส่งออกเป็นไฟล์ Excel</li>
+          </ul>
+          <h3>การใช้งาน</h3>
+          <p>เป็นหน้าหนึ่งใน Makro Finder สำหรับพนักงาน ปุ่มลัดในหน้ารวมจะเปิด Makro Finder แล้วเข้าหน้านี้ให้ทันทีหลังล็อกอินพนักงาน ถ้าเปิดในมุมมองลูกค้าจะไม่เข้าหน้านี้</p>
+        </div>
+      </details>
+      <div class="go">
+        <a class="open" href="https://teerawatsinlee2543-art.github.io/makro-finder/?open=waste" target="_blank" rel="noopener"><span>เปิดแอป</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+        <button type="button" class="copy" data-copy="https://teerawatsinlee2543-art.github.io/makro-finder/?open=waste">คัดลอกลิงก์</button>
+        <p class="url">teerawatsinlee2543-art.github.io/makro-finder/?open=waste</p>
+      </div>
+    </article>
     <!-- 2 GR -->
     <article class="card gr" id="gr">
       <div class="head">
@@ -350,6 +437,41 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
       </div>
     </article>
 
+
+    <!-- เบิกกุญแจโฟล์คลิฟท์ -->
+    <article class="card fk" id="forklift">
+      <div class="head">
+        <span class="ico" aria-hidden="true"><img src="apps-logo-forklift.png" alt="" width="60" height="60"></span>
+        <h2>เบิกกุญแจโฟล์คลิฟท์<small>เบิก · คืน · ประวัติการใช้ · Store 42</small></h2>
+      </div>
+      <p class="lead">เบิกและคืนกุญแจโฟล์คลิฟท์ พร้อมลายเซ็นและประวัติการใช้</p>
+      <div class="for"><span class="chip"><b>ใช้กับ</b> ผู้ขับโฟล์คลิฟท์</span><span class="chip">ผู้กำกับ / หัวหน้างาน</span></div>
+      <ul class="hl">
+        <li>เลือกเบอร์กุญแจ กรอกชื่อ แผนก และเลขใบอนุญาตขับโฟล์คลิฟท์ 5 หลัก</li>
+        <li>คืนกุญแจพร้อมเซ็นชื่อด้วยนิ้ว</li>
+        <li>ดูประวัติการใช้งาน (ย้อนหลัง 6 เดือน) และส่งออก Excel</li>
+      </ul>
+      <details>
+        <summary>รายละเอียดทั้งหมด</summary>
+        <div class="more">
+          <h3>ทำอะไรได้บ้าง</h3>
+          <ul>
+            <li>เบิกกุญแจ: เลือกเบอร์กุญแจ ใส่ชื่อผู้เบิก แผนก และเลขบัตรใบอนุญาตขับโฟล์คลิฟท์ แล้วยืนยันการเบิก</li>
+            <li>คืนกุญแจ: เซ็นชื่อยืนยันการคืนด้วยนิ้วบนหน้าจอ</li>
+            <li>คืนเกิน 3 ชั่วโมง: ต้องระบุเหตุผล และให้ผู้กำกับ (หัวหน้างาน) เซ็นยืนยัน</li>
+            <li>ดูประวัติการใช้งานย้อนหลัง 6 เดือน และส่งออกเป็น Excel</li>
+          </ul>
+          <h3>เหมาะกับใคร</h3>
+          <p>ผู้ขับโฟล์คลิฟท์ทุกแผนกของ Makro Store 42 (รามอินทรา) และผู้กำกับที่ต้องตรวจสอบการเบิก-คืน</p>
+        </div>
+      </details>
+      <div class="go">
+        <a class="open" href="https://teerawatsinlee2543-art.github.io/forklift-key-app/" target="_blank" rel="noopener"><span>เปิดแอป</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+        <button type="button" class="copy" data-copy="https://teerawatsinlee2543-art.github.io/forklift-key-app/">คัดลอกลิงก์</button>
+        <p class="url">teerawatsinlee2543-art.github.io/forklift-key-app/</p>
+      </div>
+    </article>
+
   </main>
   <div class="hidebar"><button type="button" class="pill" id="btnHide">ซ่อนรายละเอียด</button></div>
   </section>
@@ -360,14 +482,21 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
       <ul class="links">
         <li><b>ศูนย์รวมแอป (หน้านี้)</b><a id="hubLink" href="#"></a></li>
         <li><b>Makro Finder</b><a href="https://teerawatsinlee2543-art.github.io/makro-finder/" target="_blank" rel="noopener">teerawatsinlee2543-art.github.io/makro-finder/</a></li>
+        <li><b>Weight Loss and Waste O2O</b><a href="https://teerawatsinlee2543-art.github.io/makro-finder/?open=waste" target="_blank" rel="noopener">teerawatsinlee2543-art.github.io/makro-finder/?open=waste</a></li>
         <li><b>GR · จัดการพาเลท</b><a href="https://teerawatsinlee2543-art.github.io/makro-finder/pallet.html" target="_blank" rel="noopener">teerawatsinlee2543-art.github.io/makro-finder/pallet.html</a></li>
         <li><b>O2O Scan Logger</b><a href="https://teerawatsinlee2543-art.github.io/o2o-scan-logger/" target="_blank" rel="noopener">teerawatsinlee2543-art.github.io/o2o-scan-logger/</a></li>
         <li><b>Shelf-Life Monitor</b><a href="https://teerawatsinlee2543-art.github.io/makro-finder/shelf-life.html" target="_blank" rel="noopener">teerawatsinlee2543-art.github.io/makro-finder/shelf-life.html</a></li>
+        <li><b>เบิกกุญแจโฟล์คลิฟท์</b><a href="https://teerawatsinlee2543-art.github.io/forklift-key-app/" target="_blank" rel="noopener">teerawatsinlee2543-art.github.io/forklift-key-app/</a></li>
+        <li><b>Item Lookup</b><a href="https://ssmobile.siammakro.co.th/login.html" target="_blank" rel="noopener">ssmobile.siammakro.co.th/login.html</a></li>
+        <li><b>Makro SSO</b><a href="http://sso.siammakro.co.th:7006/LandingPage/" target="_blank" rel="noopener">sso.siammakro.co.th:7006/LandingPage/</a></li>
+        <li><b>SIM</b><a href="http://sim-app.siammakro.co.th:28888/sim-prd/launch?template=sim_jnlp_template.vm" target="_blank" rel="noopener">sim-app.siammakro.co.th:28888/sim-prd/launch?template=sim_jnlp_template.vm</a></li>
+        <li><b>RAADW Analytics</b><a href="http://raadw-app.siammakro.co.th:7777/analytics/saw.dll?bieehome" target="_blank" rel="noopener">raadw-app.siammakro.co.th:7777/analytics/saw.dll?bieehome</a></li>
+        <li><b>RAADW Ad-hoc</b><a href="http://raadw-adhoc.siammakro.co.th:7777/analytics/saw.dll?catalog" target="_blank" rel="noopener">raadw-adhoc.siammakro.co.th:7777/analytics/saw.dll?catalog</a></li>
       </ul>
     </div>
     <div class="qr"><div id="qrBox" aria-label="QR code ของหน้านี้" role="img"></div><span>สแกนเพื่อเปิดหน้านี้</span></div>
   </section>
-  <p class="foot">เปิดรายละเอียดของแอปเดียวโดยตรง: เติม <b>#finder</b> · <b>#gr</b> · <b>#o2o</b> · <b>#shelf-life</b> ต่อท้ายลิงก์ · เปิดทุกแอปพร้อมกัน: เติม <b>#all</b></p>
+  <p class="foot">เปิดรายละเอียดของแอปเดียวโดยตรง: เติม <b>#finder</b> · <b>#waste</b> · <b>#gr</b> · <b>#o2o</b> · <b>#shelf-life</b> · <b>#forklift</b> ต่อท้ายลิงก์ · เปิดทุกแอปพร้อมกัน: เติม <b>#all</b></p>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
