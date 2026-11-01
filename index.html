@@ -8541,7 +8541,7 @@ document.addEventListener('visibilitychange',closeCameraIfHidden);
 window.addEventListener('pagehide',closeCameraIfHidden);
 
 let currentRole=null;
-// ลิงก์ลัดจากหน้ารวมแอป (apps.html): ...?open=waste = เข้าหน้า "Weight Loss and Waste O2O" ให้เลยหลังล็อกอินพนักงาน (ลูกค้า/ยังไม่ล็อกอิน = ไม่ทำอะไร จนกว่าจะล็อกอินเป็นพนักงาน)
+// ลิงก์ลัดจากหน้ารวมแอป (makro-store42.html): ...?open=waste = เข้าหน้า "Weight Loss and Waste O2O" ให้เลยหลังล็อกอินพนักงาน (ลูกค้า/ยังไม่ล็อกอิน = ไม่ทำอะไร จนกว่าจะล็อกอินเป็นพนักงาน)
 let pendingOpen=(()=>{ try{ return new URLSearchParams(location.search).get('open')==='waste' ? 'waste' : null; }catch(e){ return null; } })();
 function runPendingOpen(){
   if(pendingOpen!=='waste' || !isEmployee()) return;

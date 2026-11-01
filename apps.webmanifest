@@ -3,7 +3,7 @@
     "short_name":  "Makro Apps",
     "description":  "รวมลิงก์และรายละเอียดของทุกแอป",
     "lang":  "th",
-    "start_url":  "apps.html",
+    "start_url":  "makro-store42.html",
     "scope":  "./",
     "display":  "standalone",
     "background_color":  "#f4f7fc",
