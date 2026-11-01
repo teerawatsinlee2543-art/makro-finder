@@ -21,19 +21,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f4f7fc; --card:#ffffff; --ink:#1d2433; --nm:#000000; --muted:#5b6475; --line:#d7e1f0; --soft:#eef3fb;
+  --bg:#f4f7fc; --card:#ffffff; --ink:#1d2433; --nm:#000000; --addbg:#e8eaed; --muted:#5b6475; --line:#d7e1f0; --soft:#eef3fb;
   --shadow:0 1px 3px rgba(11,61,145,.08),0 8px 24px rgba(11,61,145,.06);
   --finder:#0b5cad; --gr:#d9480f; --o2o:#c2323d; --slm:#1f8a4c; --brand:#E8192C; --waste:#2a5fa8; --fk:#c26a00;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0e1320; --card:#161d2e; --ink:#e8edf7; --nm:#ffffff; --muted:#9aa6bd; --line:#26314a; --soft:#1b2438;
+    --bg:#0e1320; --card:#161d2e; --ink:#e8edf7; --nm:#ffffff; --addbg:#273047; --muted:#9aa6bd; --line:#26314a; --soft:#1b2438;
     --shadow:0 1px 3px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.35);
     --finder:#4da3ff; --gr:#ff8a50; --o2o:#ff6b76; --slm:#3ccf7a; --brand:#ff6b76; --waste:#6aa6f0; --fk:#ffb347;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0e1320; --card:#161d2e; --ink:#e8edf7; --nm:#ffffff; --muted:#9aa6bd; --line:#26314a; --soft:#1b2438;
+  --bg:#0e1320; --card:#161d2e; --ink:#e8edf7; --nm:#ffffff; --addbg:#273047; --muted:#9aa6bd; --line:#26314a; --soft:#1b2438;
   --shadow:0 1px 3px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.35);
   --finder:#4da3ff; --gr:#ff8a50; --o2o:#ff6b76; --slm:#3ccf7a; --brand:#ff6b76; --waste:#6aa6f0; --fk:#ffb347;
 }
@@ -72,12 +72,13 @@ button,.btn{font:inherit;font-weight:700;cursor:pointer}
 .pill.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
 /* ---- the logos: sized from the screen (its width AND its height) so both rows fit without zooming out or scrolling wherever the screen allows; a phone shows 3 per row ---- */
-.launch{--vh:100vh;--g:clamp(8px,1.6vw,22px);--s:clamp(64px,min(calc((var(--vh) - 385px) / 2),calc((min(100vw,1280px) - 150px) / 7.8),150px),150px);display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(10px,2.2vh,22px) var(--g);padding:2px 0 clamp(8px,2vh,22px)}
+.launch{--vh:100vh;--g:clamp(8px,1.1vw,16px);--s:clamp(64px,min(calc((var(--vh) - 385px) / 2),calc((min(100vw,1280px) - 150px) / 8.75),150px),150px);display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(10px,2.2vh,22px) var(--g);padding:2px 0 clamp(8px,2vh,22px)}
 @supports (height:100dvh){.launch{--vh:100dvh}}
 .grp{margin:clamp(2px,.8vh,8px) 4px clamp(4px,1vh,10px);font-size:clamp(14px,2.2vh,18px);font-weight:800;text-align:center;line-height:1.25}
 .grp small{display:block;font-size:clamp(11px,1.7vh,13px);font-weight:600;color:var(--muted)}
 .sys-note{font-size:clamp(11px,1.8vh,12.5px);font-weight:600;line-height:1.3;color:var(--muted);padding:2px 6px;text-align:center}
-.tile{display:flex;flex-direction:column;align-items:center;gap:4px;width:calc(var(--s) * 1.3)}
+.tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:calc(var(--s) * 1.25)}
+.tile[hidden]{display:none}
 .go-app{display:flex;flex-direction:column;align-items:center;gap:clamp(6px,1.4vh,12px);text-decoration:none;-webkit-tap-highlight-color:transparent}
 .logo{display:grid;place-items:center;width:var(--s);aspect-ratio:1;border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18),0 10px 26px rgba(0,0,0,.16);transition:transform .24s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
 .logo img{display:block;width:100%;height:100%;object-fit:cover}
@@ -90,6 +91,33 @@ button,.btn{font:inherit;font-weight:700;cursor:pointer}
 .nm{max-width:100%;padding:0 2px;color:var(--nm);font-size:clamp(12px,calc(var(--s) * .14),17px);font-weight:800;line-height:1.3;text-align:center}
 .more-link{display:inline-flex;align-items:center;min-height:24px;font-size:clamp(11.5px,calc(var(--s) * .105),14px);font-weight:700;color:var(--muted);text-decoration:none;padding:2px 8px;border-radius:8px}
 .more-link:hover{color:var(--ink);text-decoration:underline}
+/* ---- the "เพิ่มเว็บ" and red "แก้ไข" tiles, shortcuts people add themselves, and the ✕ shown in edit mode ---- */
+button.go-app{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.logo.add{background:var(--addbg);color:var(--ink);box-shadow:none}
+.logo.add svg{width:36%;height:36%}
+.logo.edit{background:#E8192C;color:#fff}
+.logo.edit svg{width:44%;height:44%}
+.logo.ltr{color:#fff;font-size:calc(var(--s) * .46);font-weight:800;line-height:1;user-select:none}
+.logo.fav img{object-fit:contain;padding:16%}
+.tile.custom .nm{overflow-wrap:anywhere}
+.tile.custom .sys-note{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbadge{display:none;position:absolute;z-index:2;top:calc(var(--s) * -.02);right:calc((100% - min(var(--s),100%)) / 2 - 8px);width:clamp(26px,calc(var(--s) * .27),34px);height:clamp(26px,calc(var(--s) * .27),34px);align-items:center;justify-content:center;padding:0;border:2.5px solid var(--bg);border-radius:50%;background:#E8192C;color:#fff;font-size:15px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+body.editing .tbadge{display:inline-flex}
+.tile.is-gone .tbadge{background:#1D9E75}
+.tile.is-gone .logo,.tile.is-gone .nm,.tile.is-gone .sys-note,.tile.is-gone .more-link{opacity:.38;filter:grayscale(1)}
+.edit-hint{margin:2px auto 8px;max-width:640px;text-align:center;font-size:clamp(12px,1.8vh,13.5px);font-weight:600;color:var(--muted);line-height:1.45}
+.sc-dlg{border:0;border-radius:20px;padding:0;width:min(92vw,400px);background:var(--card);color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.4)}
+.sc-dlg::backdrop{background:rgba(8,12,22,.55)}
+.sc-dlg form{display:flex;flex-direction:column;gap:12px;padding:22px 22px 20px}
+.sc-dlg h3{margin:0;font-size:20px;font-weight:800}
+.sc-dlg label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:700;color:var(--muted)}
+.sc-dlg input{font:inherit;font-size:16px;font-weight:500;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;min-height:48px;width:100%}
+.sc-dlg input:focus{outline:none;border-color:#E8192C;box-shadow:0 0 0 3px rgba(232,25,44,.2)}
+.sc-err{margin:0;color:#d4182b;font-size:14px;font-weight:700}
+.sc-act{display:flex;gap:10px;margin-top:4px}
+.sc-act button{flex:1;min-height:48px;border-radius:14px;border:0;font-size:16px}
+.sc-cancel{background:var(--soft);color:var(--ink)}
+.sc-ok{background:#E8192C;color:#fff}
 @media (max-width:560px){
   .launch{--g:8px;--s:calc((100vw - 36px - 2 * var(--g)) / 3.25)}
   .tile{width:calc((100% - 2 * var(--g)) / 3)}
@@ -160,7 +188,7 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
 .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,14px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9}
 .toast.show{opacity:.96;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-@media print{.hdr-icons,.go .copy,.toast{display:none!important}details{border:0}details>summary{display:none}.card{break-inside:avoid;box-shadow:none}}
+@media print{.hdr-icons,.go .copy,.toast,.tile-ctl,.tbadge,.edit-hint,.sc-dlg{display:none!important}details{border:0}details>summary{display:none}.card{break-inside:avoid;box-shadow:none}}
 </style>
 </head>
 <body>
@@ -190,88 +218,99 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
 
   <h2 class="grp">แอปของทีม</h2>
   <nav class="launch" aria-label="แอปของทีม">
-    <div class="tile">
+    <div class="tile" data-id="finder">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/makro-finder/" target="_blank" rel="noopener" aria-label="เปิด Makro Finder">
         <span class="logo pad"><img src="makro-finder-favicon.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">Makro Finder</span>
       </a>
       <a class="more-link" href="#finder">ดูรายละเอียด</a>
     </div>
-    <div class="tile">
+    <div class="tile" data-id="waste">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/makro-finder/?open=waste" target="_blank" rel="noopener" aria-label="เปิด Weight Loss and Waste O2O">
         <span class="logo"><img src="apps-logo-waste.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">Weight Loss and Waste O2O</span>
       </a>
       <a class="more-link" href="#waste">ดูรายละเอียด</a>
     </div>
-    <div class="tile">
+    <div class="tile" data-id="gr">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/makro-finder/pallet.html" target="_blank" rel="noopener" aria-label="เปิด GR · จัดการพาเลท">
         <span class="logo"><img src="apps-logo-gr.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">GR · จัดการพาเลท</span>
       </a>
       <a class="more-link" href="#gr">ดูรายละเอียด</a>
     </div>
-    <div class="tile">
+    <div class="tile" data-id="o2o">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/o2o-scan-logger/" target="_blank" rel="noopener" aria-label="เปิด O2O Scan Logger">
         <span class="logo"><img src="apps-logo-o2o.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">O2O Scan Logger</span>
       </a>
       <a class="more-link" href="#o2o">ดูรายละเอียด</a>
     </div>
-    <div class="tile">
+    <div class="tile" data-id="shelf">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/makro-finder/shelf-life.html" target="_blank" rel="noopener" aria-label="เปิด Shelf-Life Monitor">
         <span class="logo"><img src="apps-logo-slm.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">Shelf-Life Monitor</span>
       </a>
       <a class="more-link" href="#shelf-life">ดูรายละเอียด</a>
     </div>
-    <div class="tile">
+    <div class="tile" data-id="forklift">
       <a class="go-app" href="https://teerawatsinlee2543-art.github.io/forklift-key-app/" target="_blank" rel="noopener" aria-label="เปิด เบิกกุญแจโฟล์คลิฟท์">
         <span class="logo"><img src="apps-logo-forklift.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">เบิกกุญแจโฟล์คลิฟท์</span>
       </a>
       <a class="more-link" href="#forklift">ดูรายละเอียด</a>
     </div>
-  </nav>
+    <div class="tile tile-ctl" id="tileAdd">
+      <button type="button" class="go-app" id="btnAdd" aria-label="เพิ่มเว็บ">
+        <span class="logo add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+        <span class="nm">เพิ่มเว็บ</span>
+      </button>
+    </div>  </nav>
   <h2 class="grp">ระบบ Makro<small>ระบบภายในบริษัทเปิดได้เมื่อต่อเครือข่ายบริษัท</small></h2>
   <nav class="launch" aria-label="ระบบ Makro">
-    <div class="tile">
+    <div class="tile" data-id="item">
       <a class="go-app" href="https://ssmobile.siammakro.co.th/login.html" target="_blank" rel="noopener" aria-label="เปิด Item Lookup">
         <span class="logo"><img src="item-lookup-icon.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">Item Lookup</span>
       </a>
       <span class="sys-note">ระบบ Makro</span>
     </div>
-    <div class="tile">
+    <div class="tile" data-id="sso">
       <a class="go-app" href="http://sso.siammakro.co.th:7006/LandingPage/" target="_blank" rel="noopener" aria-label="เปิด Makro SSO">
         <span class="logo"><img src="apps-logo-sso.png?v=2" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">Makro SSO</span>
       </a>
       <span class="sys-note">ระบบภายในบริษัท</span>
     </div>
-    <div class="tile">
+    <div class="tile" data-id="sim">
       <a class="go-app" href="http://sim-app.siammakro.co.th:28888/sim-prd/launch?template=sim_jnlp_template.vm" target="_blank" rel="noopener" aria-label="เปิด SIM">
         <span class="logo"><img src="apps-logo-sim.png?v=2" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">SIM</span>
       </a>
       <span class="sys-note">ระบบภายในบริษัท</span>
     </div>
-    <div class="tile">
+    <div class="tile" data-id="bi">
       <a class="go-app" href="http://raadw-app.siammakro.co.th:7777/analytics/saw.dll?bieehome" target="_blank" rel="noopener" aria-label="เปิด BI Publisher/OBIEE(ADW)">
         <span class="logo"><img src="apps-logo-raadw.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">BI Publisher/<wbr>OBIEE(ADW)</span>
       </a>
       <span class="sys-note">ระบบภายในบริษัท</span>
     </div>
-    <div class="tile">
+    <div class="tile" data-id="adhoc">
       <a class="go-app" href="http://raadw-adhoc.siammakro.co.th:7777/analytics/saw.dll?catalog" target="_blank" rel="noopener" aria-label="เปิด RA ADHOC(ADW)">
         <span class="logo"><img src="apps-logo-adhoc.png" alt="" width="150" height="150" loading="lazy"></span>
         <span class="nm">RA ADHOC(ADW)</span>
       </a>
       <span class="sys-note">ระบบภายในบริษัท</span>
     </div>
+    <div class="tile tile-ctl" id="tileEdit">
+      <button type="button" class="go-app" id="btnEdit" aria-pressed="false" aria-label="แก้ไข">
+        <span class="logo edit" id="editLogo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+        <span class="nm" id="editTxt">แก้ไข</span>
+      </button>
+    </div>
   </nav>
-
+  <p class="edit-hint" id="editHint" hidden>โหมดแก้ไข: แตะ ✕ ที่โลโก้เพื่อซ่อน/ลบ · แตะ ↺ เพื่อเอากลับ · แตะเว็บที่เพิ่มเองเพื่อแก้ชื่อหรือลิงก์ · กด "เสร็จ" เมื่อเรียบร้อย</p>
   <section id="detailsWrap" hidden>
   <h2 class="sec" id="details">รายละเอียดของแต่ละแอป<small>กด &quot;รายละเอียดทั้งหมด&quot; ในการ์ดเพื่อกางอ่าน</small></h2>
   <main class="grid" id="apps">
@@ -529,9 +568,17 @@ details[open] summary::after{transform:rotate(-135deg) translate(-2px,-1px)}
     </div>
     <div class="qr"><div id="qrBox" aria-label="QR code ของหน้านี้" role="img"></div><span>สแกนเพื่อเปิดหน้านี้</span></div>
   </section>
-  <p class="foot">เปิดรายละเอียดของแอปเดียวโดยตรง: เติม <b>#finder</b> · <b>#waste</b> · <b>#gr</b> · <b>#o2o</b> · <b>#shelf-life</b> · <b>#forklift</b> ต่อท้ายลิงก์ · เปิดทุกแอปพร้อมกัน: เติม <b>#all</b></p>
+  <p class="foot">เปิดรายละเอียดของแอปเดียวโดยตรง: เติม <b>#finder</b> · <b>#waste</b> · <b>#gr</b> · <b>#o2o</b> · <b>#shelf-life</b> · <b>#forklift</b> ต่อท้ายลิงก์ · เปิดทุกแอปพร้อมกัน: เติม <b>#all</b> · เว็บที่กด "เพิ่มเว็บ" และแอปที่ซ่อนไว้ เก็บในเบราว์เซอร์เครื่องนี้เท่านั้น (ไม่ขึ้นเครื่องอื่น)</p>
 </div>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog class="sc-dlg" id="scDlg" aria-labelledby="scTitle">
+  <form id="scForm" method="dialog" novalidate>
+    <h3 id="scTitle">เพิ่มเว็บ</h3>
+    <label>ชื่อ<input id="scName" type="text" maxlength="40" autocomplete="off" placeholder="เช่น Makro Pro"></label>
+    <label>ลิงก์ (URL)<input id="scUrl" type="url" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="https://…"></label>
+    <p class="sc-err" id="scErr" role="alert" hidden></p>
+    <div class="sc-act"><button type="button" class="sc-cancel" id="scCancel">ยกเลิก</button><button type="submit" class="sc-ok">บันทึก</button></div>
+  </form>
+</dialog><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 /* QR code of the order number, drawn by our own small encoder (byte mode, error correction M, versions 1-10 — an order number is 11 characters, so version 1) so it works offline with no library.
    qrMatrix() returns the matrix as rows of true (dark) / false; qrSvg() draws it with a quiet zone of white round it. */
@@ -663,6 +710,93 @@ const fromHash = () => {
   const card = h && document.getElementById(h);
   if (card && card.classList.contains('card')) showDetails(false, card);
 };
+// "เพิ่มเว็บ" / "แก้ไข": shortcuts people add themselves, and apps they hide - kept only in this browser (localStorage)
+const KEY = 'makro-hub-v1';
+const st = { custom: [], hidden: [] };
+try {
+  const j = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (j && Array.isArray(j.custom)) st.custom = j.custom.filter(c => c && typeof c.id === 'string' && typeof c.name === 'string' && typeof c.url === 'string' && /^https?:\/\//i.test(c.url)).slice(0, 40);
+  if (j && Array.isArray(j.hidden)) st.hidden = j.hidden.filter(x => typeof x === 'string');
+} catch (_) {}
+const save = () => {
+  try { localStorage.setItem(KEY, JSON.stringify({ custom: st.custom.filter(c => !c.rm).map(({ id, name, url }) => ({ id, name, url })), hidden: st.hidden })); }
+  catch (_) { toast('เบราว์เซอร์นี้เก็บข้อมูลไม่ได้ (โหมดส่วนตัว?) — ที่เพิ่มไว้จะหายเมื่อปิดหน้า'); }
+};
+const grid1 = document.querySelector('nav.launch'), addTile = $('tileAdd');
+let editing = false, dlgId = null;
+const COLORS = ['#d9480f', '#0b5cad', '#1f8a4c', '#7b3fa0', '#c2323d', '#00838f', '#a85a00', '#455a99'];
+const colorOf = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.codePointAt(0)) >>> 0; return COLORS[h % COLORS.length]; };
+const hostOf = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (_) { return u; } };
+const normUrl = raw => {                                              // "makro.pro" -> https://makro.pro/ ; only http(s) is accepted
+  let s = (raw || '').trim(); if (!s) return null;
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(s)) s = 'https://' + s;
+  try { const u = new URL(s); return /^https?:$/.test(u.protocol) && u.hostname ? u.href : null; } catch (_) { return null; }
+};
+const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+const ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const badge = onClick => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tbadge'; b.addEventListener('click', onClick); return b; };
+const setBadge = (tile, gone) => { const b = tile.querySelector('.tbadge'); b.textContent = gone ? '↺' : '✕'; b.setAttribute('aria-label', gone ? 'เอากลับมา' : (tile.classList.contains('custom') ? 'ลบ' : 'ซ่อน')); };
+const toggleBuiltIn = id => { const i = st.hidden.indexOf(id); if (i >= 0) st.hidden.splice(i, 1); else st.hidden.push(id); save(); render(); };
+const toggleCustom = id => { const c = st.custom.find(x => x.id === id); if (c) { c.rm = !c.rm; save(); render(); } };
+const makeCustom = c => {
+  const t = document.createElement('div'); t.className = 'tile custom'; t.dataset.cid = c.id;
+  const a = document.createElement('a'); a.className = 'go-app'; a.href = c.url; a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'เปิด ' + c.name);
+  const lg = document.createElement('span'); lg.className = 'logo ltr'; lg.style.background = colorOf(c.name + c.url); lg.textContent = (Array.from(c.name.trim())[0] || '?').toUpperCase();
+  const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = c.name;
+  a.append(lg, nm);
+  const note = document.createElement('span'); note.className = 'sys-note'; note.textContent = hostOf(c.url);
+  t.append(a, note, badge(() => toggleCustom(c.id)));
+  try {                                                               // the site's own icon replaces the letter when it can be loaded
+    const im = new Image(); im.alt = ''; im.referrerPolicy = 'no-referrer';
+    im.onload = () => { if (im.naturalWidth >= 24) { lg.className = 'logo fav'; lg.style.background = ''; lg.textContent = ''; lg.append(im); } };
+    im.src = new URL(c.url).origin + '/favicon.ico';
+  } catch (_) {}
+  return t;
+};
+const render = () => {
+  document.querySelectorAll('.tile.custom').forEach(t => t.remove());
+  st.custom.forEach(c => { const t = makeCustom(c); t.hidden = !!c.rm && !editing; t.classList.toggle('is-gone', !!c.rm); setBadge(t, !!c.rm); grid1.insertBefore(t, addTile); });
+  document.querySelectorAll('.tile[data-id]').forEach(t => { const gone = st.hidden.includes(t.dataset.id); t.hidden = gone && !editing; t.classList.toggle('is-gone', gone); setBadge(t, gone); });
+};
+const setEditing = on => {
+  editing = on; document.body.classList.toggle('editing', on);
+  $('btnEdit').setAttribute('aria-pressed', String(on)); $('editTxt').textContent = on ? 'เสร็จ' : 'แก้ไข'; $('editLogo').innerHTML = on ? ICON_OK : ICON_EDIT; $('editHint').hidden = !on;
+  if (!on) { st.custom = st.custom.filter(c => !c.rm); save(); }
+  render();
+};
+const commit = (name, url) => {
+  if (dlgId) { const c = st.custom.find(x => x.id === dlgId); if (c) { c.name = name; c.url = url; } }
+  else { if (st.custom.length >= 40) { toast('เพิ่มได้สูงสุด 40 เว็บ'); return; } st.custom.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, url }); }
+  save(); render(); toast(dlgId ? 'แก้ไขแล้ว' : 'เพิ่มแล้ว');
+};
+const dlg = $('scDlg');
+const openDlg = c => {
+  dlgId = c ? c.id : null;
+  if (typeof dlg.showModal !== 'function') {                          // very old browsers: plain prompts
+    const url = normUrl(prompt('ลิงก์ของเว็บ (URL)', c ? c.url : 'https://')); if (!url) return;
+    commit((prompt('ชื่อ', c ? c.name : hostOf(url)) || '').trim().slice(0, 40) || hostOf(url), url); return;
+  }
+  $('scTitle').textContent = c ? 'แก้ไขเว็บ' : 'เพิ่มเว็บ'; $('scName').value = c ? c.name : ''; $('scUrl').value = c ? c.url : ''; $('scErr').hidden = true;
+  dlg.showModal(); setTimeout(() => (c ? $('scName') : $('scUrl')).focus(), 30);
+};
+$('scForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const url = normUrl($('scUrl').value);
+  if (!url) { $('scErr').textContent = 'ลิงก์ไม่ถูกต้อง — พิมพ์เช่น makro.pro หรือ https://makro.pro'; $('scErr').hidden = false; $('scUrl').focus(); return; }
+  commit(($('scName').value || '').trim().slice(0, 40) || hostOf(url), url); dlg.close();
+});
+$('scCancel').addEventListener('click', () => dlg.close());
+dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+$('btnAdd').addEventListener('click', () => openDlg(null));
+$('btnEdit').addEventListener('click', () => setEditing(!editing));
+document.addEventListener('click', e => {                             // in edit mode a tap on a logo edits it instead of opening the app
+  if (!editing) return;
+  const a = e.target.closest('.tile .go-app[href]'); if (!a) return;
+  e.preventDefault();
+  const t = a.closest('.tile'); if (t.classList.contains('custom')) { const c = st.custom.find(x => x.id === t.dataset.cid); if (c && !c.rm) openDlg(c); }
+});
+document.querySelectorAll('.tile[data-id]').forEach(t => t.append(badge(() => toggleBuiltIn(t.dataset.id))));
+render();
 window.addEventListener('hashchange', fromHash); fromHash(); refresh();
 })();
 </script>
