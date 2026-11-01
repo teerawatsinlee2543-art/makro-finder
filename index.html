@@ -581,6 +581,8 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 }.login-back{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--color-text-tertiary);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:12px;padding:0}
 .login-back.framed{border:1.5px solid #1D9E75;border-radius:14px;padding:clamp(11px,2.2vh,16px) 14px;gap:8px;background:#1D9E75;color:#000;font-size:15px;font-weight:600;transition:border-color .15s,background .15s}
 .login-back.framed:hover{border-color:#27B386;background:#27B386}
+.login-back:not(.framed){gap:6px;padding:7px 14px;border-radius:10px;background:var(--brand-red);color:#fff;font-size:14px;font-weight:600;box-shadow:0 2px 6px rgba(232,25,44,.28);transition:filter .15s}      /* the "กลับ" box of the sign-in card is red */
+.login-back:not(.framed):hover{filter:brightness(1.08)}
 @media (min-width:900px){.login-back.framed{border-radius:18px;padding:clamp(12px,2.7vh,22px) 24px;gap:12px;font-size:21px}}
 .emp-stock-box{background:#FFF4E5;border:1px solid #FFD9A0;border-radius:10px;padding:10px 12px;margin-bottom:16px}
 .emp-stock-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
@@ -988,7 +990,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <option>O2O</option>
           <option>SAFETY</option>
           <option>SALE (AS)</option>
-          <option>Tela Sale</option>
+          <option>Tele Sale</option>
+          <option>ประชาสัมพันธ์</option>
+          <option>GA</option>
+          <option>OOS</option>
+          <option>OCS</option>
+          <option>Premium</option>
         </select>
       </div>
       <div class="login-field">
@@ -10156,6 +10163,15 @@ function submitLogin(){
   localStorage.setItem('mf_session',JSON.stringify(sess));
   if(dept==='GR') showGRHome(sess); else showMain(sess);
 }
+// Enter moves on in the sign-in form: name -> department -> PIN -> sign in (not while an IME is still composing)
+(function(){
+  const nameEl=document.getElementById('empName'), deptEl=document.getElementById('empDept'), pinEl=document.getElementById('empPin');
+  if(!nameEl||!deptEl||!pinEl)return;
+  const onEnter=(el,go)=>el.addEventListener('keydown',e=>{ if(e.key!=='Enter'||e.isComposing||e.keyCode===229)return; e.preventDefault(); go(); });
+  onEnter(nameEl,()=>deptEl.focus());
+  onEnter(deptEl,()=>pinEl.focus());
+  onEnter(pinEl,()=>submitLogin());
+})();
 function switchRole(){
   localStorage.removeItem('mf_session');
   document.getElementById('empName').value='';

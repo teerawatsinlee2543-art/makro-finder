@@ -321,7 +321,12 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
           <option>O2O</option>
           <option>SAFETY</option>
           <option>SALE (AS)</option>
-          <option>Tela Sale</option>
+          <option>Tele Sale</option>
+          <option>ประชาสัมพันธ์</option>
+          <option>GA</option>
+          <option>OOS</option>
+          <option>OCS</option>
+          <option>Premium</option>
         </select>
       </div>
       <div class="login-field">
@@ -3010,6 +3015,15 @@ function submitLogin(){
   document.getElementById('empPin').value='';
   showApp(sess);
 }
+// Enter moves on in the sign-in form: name -> department -> PIN -> sign in (not while an IME is still composing)
+(function(){
+  const nameEl=document.getElementById('empName'), deptEl=document.getElementById('empDept'), pinEl=document.getElementById('empPin');
+  if(!nameEl||!deptEl||!pinEl)return;
+  const onEnter=(el,go)=>el.addEventListener('keydown',e=>{ if(e.key!=='Enter'||e.isComposing||e.keyCode===229)return; e.preventDefault(); go(); });
+  onEnter(nameEl,()=>deptEl.focus());
+  onEnter(deptEl,()=>pinEl.focus());
+  onEnter(pinEl,()=>submitLogin());
+})();
 function confirmLogout(){
   if(!window.confirm(t('logoutConfirmMsg')))return;
   try{ localStorage.removeItem('mf_session'); }catch(e){}
