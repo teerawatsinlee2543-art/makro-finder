@@ -232,7 +232,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .app-bar-logo{height:var(--bar-logo);width:auto;display:block;flex-shrink:0}
 .app-bar-title{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.15}
 .app-bar-name{font-size:var(--bar-name);font-weight:800;display:flex;align-items:center;gap:8px;white-space:nowrap}
-.app-bar-name i{font-size:1em}
+.app-bar-ico{width:calc(var(--bar-name) * 1.5);height:calc(var(--bar-name) * 1.5);border-radius:22%;display:block;flex:none;box-shadow:0 1px 5px rgba(0,0,0,.28)}
 .app-bar-user{font-size:var(--bar-user);font-weight:500;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .app-bar-btn{width:var(--bar-btn);height:var(--bar-btn);border-radius:12px;border:.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.14);color:#fff;font-size:calc(var(--bar-btn) * .52);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;font-family:inherit}
 .app-bar-btn:hover{background:rgba(255,255,255,.26)}
@@ -240,8 +240,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 @media (min-width:520px){:root{--bar-h:68px;--bar-logo:44px;--bar-name:22px;--bar-user:13.5px;--bar-btn:42px}}
 @media (min-width:900px){:root{--bar-h:78px;--bar-logo:54px;--bar-name:27px;--bar-user:14.5px;--bar-btn:48px}}
 .app-bar .lang-pill{height:var(--bar-btn);flex:none;box-shadow:none}
-@media (max-width:420px){:root{--bar-logo:30px;--bar-btn:36px;--bar-name:17px}.app-bar{gap:6px;padding:0 10px}.app-bar-name i{display:none}.app-bar .lang-pill{padding:0 6px;gap:4px;font-size:13px}.app-bar .lang-pill .lang-btn-icon{width:22px;height:15px}.app-bar .lang-pill>i{display:none}}
-@media (max-width:340px){:root{--bar-logo:26px;--bar-btn:34px;--bar-name:16px}.app-bar{gap:5px;padding:0 8px}}.app-bar-btn .lang-btn-icon{width:26px;height:18px}
+@media (max-width:420px){:root{--bar-logo:28px;--bar-btn:34px;--bar-name:16px}.app-bar{gap:6px;padding:0 10px}.app-bar .lang-pill{padding:0 6px;gap:4px;font-size:13px}.app-bar .lang-pill .lang-btn-icon{width:22px;height:15px}.app-bar .lang-pill>i{display:none}}
+@media (max-width:340px){:root{--bar-logo:26px;--bar-btn:32px;--bar-name:16px}.app-bar{gap:5px;padding:0 8px}.app-bar-name-txt{display:none}}
+.app-bar-btn .lang-btn-icon{width:26px;height:18px}
 .app-bar-btn .lang-btn-icon svg{width:100%;height:100%;border-radius:3px}
 #palletOverlay{top:var(--bar-h);padding:0;background:var(--color-background-secondary);align-items:stretch;justify-content:center;z-index:1}
 #palletOverlay .pallet-overlay-content{max-width:920px;max-height:none;height:100%;border-radius:0}
@@ -274,7 +275,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 <div class="app-bar" id="appBar">
   <img class="app-bar-logo" src="logo-makro-finder.png" alt="makro">
   <div class="app-bar-title">
-    <div class="app-bar-name"><i class="ti ti-packages" aria-hidden="true"></i> Pallet</div>
+    <div class="app-bar-name"><img class="app-bar-ico" src="pallet-192.png" alt="" width="40" height="40"><span class="app-bar-name-txt">Pallet</span></div>
     <div class="app-bar-user" id="appBarUser"></div>
   </div>
   <button type="button" class="lang-pill" onclick="openLangModal()" data-i18n-title="languageBtn" title="ภาษา" aria-label="ภาษา"><span class="lang-btn-icon"><i class="ti ti-language" aria-hidden="true"></i></span><span class="lang-code">TH</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
