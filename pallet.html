@@ -2992,13 +2992,16 @@ function showLogin(){
   document.getElementById('palletOverlay').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
 }
+// pallet.html#find (the "หาสินค้าตามพาเลท" buttons of Makro Finder) opens straight on the find page; plain pallet.html opens the pallet list
+let PALLET_OPEN_FIND=/^#find\b/.test(location.hash)||/[?&]open=find\b/.test(location.search);
 function showApp(sess){
   currentRole='employee';
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appBar').style.display='flex';
   document.getElementById('appBarUser').textContent=(sess.name||'')+(sess.dept?' · '+sess.dept:'');
   applyEmployeeOnlyVisibility();
-  openPalletManager();
+  if(PALLET_OPEN_FIND){ PALLET_OPEN_FIND=false; openFindItemInPallets(); }
+  else openPalletManager();
 }
 function submitLogin(){
   const name=document.getElementById('empName').value.trim();
