@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ผังร้าน 3D — แบบ B: Flat Illustration</title>
+<style>
+:root{
+  --bg:#FAF6EE; --ink:#241F17; --muted:#8F8571; --line:#E9E1CF;
+  --card-bg:#FFFDF8; --card-line:#EBE2CB; --accent:#E30613; --chip-bg:#F3ECDA;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#161310; --ink:#F3ECDD; --muted:#9C927E; --line:#332C22;
+    --card-bg:#1C1812; --card-line:#3A3125; --accent:#FF5347; --chip-bg:#231D14;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161310; --ink:#F3ECDD; --muted:#9C927E; --line:#332C22;
+  --card-bg:#1C1812; --card-line:#3A3125; --accent:#FF5347; --chip-bg:#231D14;
+}
+:root[data-theme="light"]{
+  --bg:#FAF6EE; --ink:#241F17; --muted:#8F8571; --line:#E9E1CF;
+  --card-bg:#FFFDF8; --card-line:#EBE2CB; --accent:#E30613; --chip-bg:#F3ECDA;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Sarabun,"Leelawadee UI","Segoe UI",Tahoma,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1180px;margin:0 auto;padding:36px 24px 56px;display:flex;flex-direction:column;gap:20px}
+header.top{display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line);padding-bottom:18px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0;font-size:clamp(22px,3.6vw,30px);font-weight:800;letter-spacing:-.01em;text-wrap:balance}
+.sub{margin:0;color:var(--muted);font-size:14.5px;max-width:66ch;line-height:1.55}
+
+.toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.toolbar .rot-group{display:flex;align-items:center;gap:10px;flex:1;min-width:200px}
+.toolbar label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.toolbar input[type="range"]{flex:1;accent-color:var(--accent)}
+.toolbar .deg{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--muted);width:3.2em;text-align:right}
+button.btn{
+  font:inherit;font-size:13px;font-weight:700;color:var(--ink);
+  background:var(--card-bg);border:1px solid var(--card-line);border-radius:10px;
+  padding:8px 14px;cursor:pointer;white-space:nowrap;
+}
+button.btn:hover{background:var(--chip-bg)}
+button.btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+
+.floor-wrap{
+  position:relative;background:var(--card-bg);border:1px solid var(--card-line);border-radius:20px;
+  padding:14px;box-shadow:0 1px 2px rgba(20,14,6,.06),0 24px 48px -28px rgba(20,14,6,.4);
+}
+.svg-host{width:100%;line-height:0;touch-action:none;cursor:grab}
+.svg-host:active{cursor:grabbing}
+.svg-host svg{display:block;width:100%;height:auto}
+
+aside.legend{
+  display:flex;flex-direction:column;gap:12px;background:var(--card-bg);border:1px solid var(--card-line);
+  border-radius:20px;padding:16px 16px 18px;box-shadow:0 1px 2px rgba(20,14,6,.06),0 24px 48px -28px rgba(20,14,6,.4);
+}
+aside.legend h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.legend-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:560px;overflow-y:auto}
+.legend-list li{display:flex;align-items:center;gap:9px;font-size:13px}
+.legend-list .swatch{width:13px;height:13px;border-radius:5px;flex:none}
+.legend-list .txt{display:flex;flex-direction:column;line-height:1.22;min-width:0}
+.legend-list .th{font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend-list .en{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.badge{display:inline-flex;align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--accent);padding:4px 10px;border-radius:999px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <span class="badge">Concept B</span>
+    <span class="eyebrow">3D Store Map &middot; Flat Illustration &middot; Makro รามอินทรา St.042</span>
+    <h1>ผังร้าน 3D — สไตล์ Flat Illustration</h1>
+    <p class="sub">โทนสีแบนราบ ทันสมัย ให้ความรู้สึกเหมือนภาพประกอบ (illustration) มากกว่าภาพเรนเดอร์สมจริง &middot; ลากบนผังเพื่อหมุนรอบตัวเอง 360° &middot; Shift+ลาก เพื่อเลื่อนมุมมอง &middot; สกรอลล์/พินช์เพื่อซูม</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="rot-group">
+      <label for="rot">หมุนผัง</label>
+      <input id="rot" type="range" min="0" max="359" value="25" step="1" />
+      <span class="deg" id="rotDeg">25&deg;</span>
+    </div>
+    <button class="btn" type="button" id="spinBtn">▶ หมุนอัตโนมัติ</button>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="floor-wrap">
+        <div class="svg-host" id="svgHost"></div>
+      </div>
+    </div>
+    <aside class="legend">
+      <h2>แผนกในร้าน</h2>
+      <ul class="legend-list" id="legendList"></ul>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  const MAP_FLOOR={x:8,y:15,w:1293,h:773};
+  const MAP_FLOOR_CX=MAP_FLOOR.x+MAP_FLOOR.w/2, MAP_FLOOR_CY=MAP_FLOOR.y+MAP_FLOOR.h/2;
+  const MAP_ISO_COS=Math.cos(Math.PI/6), MAP_ISO_SIN=Math.sin(Math.PI/6);
+  const MAP_MAIN_SIZE=16, MAP_SUB_SIZE=12;
+  const FLOOR_BG='#F6F1E4';
+  const MAP_ZONE_LABELS={
+    dryfood_:{main:'Dry Food',sub:'Loc. 29-44',color:'#A6437A',subColor:'#C983AC'},
+    nonfood_:{main:'Non-Food',sub:'Loc. 1-25',color:'#4B4098',subColor:'#8B7ED4'}
+  };
+
+  function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function isoProject(x,y,z,rotationDeg){
+    const theta=(rotationDeg||0)*Math.PI/180;
+    const rx=x-MAP_FLOOR_CX, ry=y-MAP_FLOOR_CY;
+    const rotX=rx*Math.cos(theta)-ry*Math.sin(theta);
+    const rotY=rx*Math.sin(theta)+ry*Math.cos(theta);
+    return [ (rotX-rotY)*MAP_ISO_COS, (rotX+rotY)*MAP_ISO_SIN - z ];
+  }
+  function shadeColor(hex,amt){
+    const c=String(hex).replace('#','');
+    if(c.length!==6) return hex;
+    const num=parseInt(c,16);
+    let r=(num>>16)&255, g=(num>>8)&255, b=num&255;
+    r=Math.max(0,Math.round(r*(1-amt))); g=Math.max(0,Math.round(g*(1-amt))); b=Math.max(0,Math.round(b*(1-amt)));
+    return 'rgb('+r+','+g+','+b+')';
+  }
+  function lightenColor(hex,amt){
+    const c=String(hex).replace('#','');
+    if(c.length!==6) return hex;
+    const num=parseInt(c,16);
+    let r=(num>>16)&255, g=(num>>8)&255, b=num&255;
+    r=Math.round(r+(255-r)*amt); g=Math.round(g+(255-g)*amt); b=Math.round(b+(255-b)*amt);
+    return 'rgb('+r+','+g+','+b+')';
+  }
+  function polyPts(pts){ return pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '); }
+
+  // flat-illustration box: crisp two-tone faces, thin dark contour, soft long shadow
+  function boxFaces(x0,y0,x1,y1,z0,z1,rot,fillTop,fillRight,fillFront){
+    const top=[isoProject(x0,y0,z1,rot),isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x0,y1,z1,rot)];
+    const right=[isoProject(x1,y0,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x1,y1,z0,rot),isoProject(x1,y0,z0,rot)];
+    const front=[isoProject(x0,y1,z1,rot),isoProject(x1,y1,z1,rot),isoProject(x1,y1,z0,rot),isoProject(x0,y1,z0,rot)];
+    return ''
+      +'<polygon points="'+polyPts(right)+'" fill="'+fillRight+'" stroke="rgba(36,31,23,.35)" stroke-width="0.6" stroke-linejoin="round"/>'
+      +'<polygon points="'+polyPts(front)+'" fill="'+fillFront+'" stroke="rgba(36,31,23,.35)" stroke-width="0.6" stroke-linejoin="round"/>'
+      +'<polygon points="'+polyPts(top)+'" fill="'+fillTop+'" stroke="rgba(36,31,23,.28)" stroke-width="0.6" stroke-linejoin="round"/>';
+  }
+  function longShadow(x0,y0,x1,y1,rot){
+    // soft flat drop shadow cast toward the viewer's lower-right, illustration style
+    const p=[isoProject(x0,y0,0,rot),isoProject(x1,y0,0,rot),isoProject(x1,y1,0,rot),isoProject(x0,y1,0,rot)];
+    const cx=(p[0][0]+p[1][0]+p[2][0]+p[3][0])/4, cy=(p[0][1]+p[1][1]+p[2][1]+p[3][1])/4;
+    const w=Math.max(...p.map(q=>q[0]))-Math.min(...p.map(q=>q[0]));
+    const h=Math.max(...p.map(q=>q[1]))-Math.min(...p.map(q=>q[1]));
+    return '<ellipse cx="'+(cx+4).toFixed(1)+'" cy="'+(cy+h*0.32).toFixed(1)+'" rx="'+(w*0.56).toFixed(1)+'" ry="'+(h*0.34).toFixed(1)+'" fill="rgba(36,31,23,.10)"/>';
+  }
+  function signAt(x,y,z,rot,th,en,tint,big){
+    const p=isoProject(x,y,z,rot);
+    const poleTop=[p[0],p[1]-(big?18:10)];
+    const w=Math.max(big?72:42, Math.max((th||'').length,(en||'').length)*(big?7.8:5.3));
+    const h=big?34:20;
+    const top=poleTop[1]-h;
+    return '<line x1="'+p[0].toFixed(1)+'" y1="'+p[1].toFixed(1)+'" x2="'+poleTop[0].toFixed(1)+'" y2="'+poleTop[1].toFixed(1)+'" stroke="'+shadeColor(tint,0.1)+'" stroke-width="1.6" stroke-linecap="round"/>'
+      +'<rect x="'+(p[0]-w/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w+'" height="'+h+'" rx="'+(big?10:7)+'" fill="'+tint+'" stroke="rgba(36,31,23,.25)" stroke-width="0.8"/>'
+      +(th?'<text x="'+p[0].toFixed(1)+'" y="'+(top+(big?15:12)).toFixed(1)+'" text-anchor="middle" font-size="'+(big?11.5:8.5)+'" font-weight="800" fill="#fff">'+escapeHtml(th)+'</text>':'')
+      +(big&&en?'<text x="'+p[0].toFixed(1)+'" y="'+(top+27).toFixed(1)+'" text-anchor="middle" font-size="8.5" font-weight="700" fill="rgba(255,255,255,.75)" letter-spacing="0.3">'+escapeHtml(en)+'</text>':'');
+  }
+  function rackUnit(x0,y0,x1,y1,rot,tint,H,levels,th,en,big){
+    const inset=big?4:2.4;
+    x0+=inset; x1-=inset; y0+=inset; y1-=inset;
+    const parts=[longShadow(x0,y0,x1,y1,rot)];
+    const postColor=shadeColor(tint,0.55), postColorL=lightenColor(tint,0.1);
+    [[x0,y1],[x1,y1],[x1,y0]].forEach(([px,py])=>{
+      const pw=big?4:2.2;
+      parts.push(boxFaces(px-pw/2,py-pw/2,px+pw/2,py+pw/2,0,H,rot,postColorL,postColor,shadeColor(postColor,0.15)));
+    });
+    levels=Math.max(1,levels||2);
+    // bold flat bands instead of tiny crates — cleaner, more "illustration"
+    const bandColors=[lightenColor(tint,0.28),tint,shadeColor(tint,0.18)];
+    for(let li=0; li<levels; li++){
+      const z0=H*(li/(levels+0.15))+2, z1=H*((li+1)/(levels+0.15))-2;
+      const c=bandColors[li%bandColors.length];
+      parts.push(boxFaces(x0,y0,x1,y1,z0,z1,rot,lightenColor(c,0.14),shadeColor(c,0.22),c));
+    }
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function freezerCase(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[longShadow(x0,y0,x1,y1,rot)];
+    parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,lightenColor(tint,0.2),shadeColor(tint,0.22),tint));
+    const frontTop=[isoProject(x0,y1,H,rot),isoProject(x1,y1,H,rot)];
+    const frontBot=[isoProject(x0,y1,H*0.18,rot),isoProject(x1,y1,H*0.18,rot)];
+    parts.push('<polygon points="'+polyPts([frontTop[0],frontTop[1],frontBot[1],frontBot[0]])+'" fill="rgba(210,238,255,.5)" stroke="rgba(255,255,255,.6)" stroke-width="1"/>');
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function produceStall(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[longShadow(x0,y0,x1,y1,rot)];
+    const rows=[
+      {th:'ผลไม้นำเข้า', en:'Imported Fruit', c:'#E8912E'},
+      {th:'ผักสด', en:'Fresh Veg', c:'#4FA85A'}
+    ];
+    const rowDepth=(y1-y0)/rows.length;
+    rows.forEach((rowDef,ri)=>{
+      const ry0=y0+ri*rowDepth, ry1=ry0+rowDepth-6;
+      parts.push(boxFaces(x0,ry0,x1,ry1,0,H*0.6,rot,lightenColor(rowDef.c,0.32),shadeColor(rowDef.c,0.18),rowDef.c));
+      parts.push(signAt((x0+x1)/2,ry0-2,H*0.6+16,rot,rowDef.th,rowDef.en,rowDef.c,true));
+    });
+    if(th) parts.push(signAt((x0+x1)/2,y0-2,H+42,rot,th,en,'#2E7D4A',true));
+    return parts.join('');
+  }
+  function bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[longShadow(x0,y0,x1,y1,rot)];
+    const wood='#D8B378';
+    parts.push(boxFaces(x0,y0,x1,y1,0,H*0.7,rot,lightenColor(wood,0.24),shadeColor(wood,0.2),wood));
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+10,rot,th,en,'#C0272D',true));
+    return parts.join('');
+  }
+  function iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[longShadow(x0,y0,x1,y1,rot)];
+    parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,'#FBFBF9',shadeColor(tint,0.18),tint));
+    if(th) parts.push(signAt((x0+x1)/2,y1,H+16,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function cashierRow(x0,y0,x1,y1,rot,H,lanes){
+    lanes=lanes||8;
+    const parts=[longShadow(x0,y0,x1,y1,rot)];
+    const laneW=(x1-x0)/lanes;
+    const red='#E30613', steel='#D8D2C4';
+    for(let i=0;i<lanes;i++){
+      const inset=3.2;
+      const lx0=x0+i*laneW+inset, lx1=x0+(i+1)*laneW-inset;
+      parts.push(boxFaces(lx0,y0,lx1,y1,0,H,rot,lightenColor(steel,0.16),shadeColor(steel,0.2),red));
+      const pp=isoProject(lx1-3,y1-4,H,rot);
+      parts.push('<rect x="'+(pp[0]-6).toFixed(1)+'" y="'+(pp[1]-24).toFixed(1)+'" width="12" height="9" rx="2" fill="#fff" stroke="'+red+'" stroke-width="1"/>');
+      parts.push('<text x="'+pp[0].toFixed(1)+'" y="'+(pp[1]-17.3).toFixed(1)+'" text-anchor="middle" font-size="7" font-weight="800" fill="'+red+'">'+(i+1)+'</text>');
+    }
+    return parts.join('');
+  }
+  function counterUnit(x0,y0,x1,y1,rot,tint,H,th,en){
+    const parts=[longShadow(x0,y0,x1,y1,rot)];
+    parts.push(boxFaces(x0,y0,x1,y1,0,H,rot,lightenColor(tint,0.2),shadeColor(tint,0.16),tint));
+    if(th) parts.push(signAt((x0+x1)/2,y0,H+6,rot,th,en,tint,true));
+    return parts.join('');
+  }
+  function aisleHeadUnit(x0,y0,x1,y1,rot,n1,n2){
+    const parts=[rackUnit(x0,y0,x1,y1,rot,'#C6CDD4',34,2,'','',false)];
+    const cx=(x0+x1)/2;
+    const baseP=isoProject(cx,y1,34,rot);
+    const poleTopY=baseP[1]-58;
+    parts.push('<line x1="'+baseP[0].toFixed(1)+'" y1="'+baseP[1].toFixed(1)+'" x2="'+baseP[0].toFixed(1)+'" y2="'+poleTopY.toFixed(1)+'" stroke="#8892a0" stroke-width="2"/>');
+    const bw=24, bh=n2?44:28;
+    const bx=baseP[0]-bw/2, by=poleTopY-bh;
+    parts.push('<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw+'" height="'+bh+'" rx="5" fill="#E30613" stroke="#fff" stroke-width="1.4"/>');
+    if(n2){
+      parts.push('<line x1="'+bx.toFixed(1)+'" y1="'+(by+bh*0.5).toFixed(1)+'" x2="'+(bx+bw).toFixed(1)+'" y2="'+(by+bh*0.5).toFixed(1)+'" stroke="rgba(255,255,255,.4)" stroke-width="1"/>');
+      if(n1) parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.36).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
+      parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.86).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">'+escapeHtml(n2)+'</text>');
+    } else if(n1){
+      parts.push('<text x="'+baseP[0].toFixed(1)+'" y="'+(by+bh*0.68).toFixed(1)+'" text-anchor="middle" font-size="16" font-weight="900" fill="#fff">'+escapeHtml(n1)+'</text>');
+    }
+    return parts.join('');
+  }
+  function glassDoor(pt,label,tint){
+    const w=54,h=34;
+    return '<g transform="translate('+pt[0].toFixed(1)+','+(pt[1]-6).toFixed(1)+')">'
+      +'<rect x="'+(-w/2)+'" y="'+(-h)+'" width="'+w+'" height="'+h+'" rx="6" fill="'+lightenColor(tint,0.85)+'" stroke="'+tint+'" stroke-width="2"/>'
+      +'<text x="0" y="14" text-anchor="middle" font-size="10.5" font-weight="800" fill="'+tint+'">'+escapeHtml(label)+'</text>'
+      +'</g>';
+  }
+  function generateAisleGroup(idPrefix,bx0,by0,bx1,by1,startNum,endNum,fill,textColor,height){
+    const total=endNum-startNum+1;
+    const blockCount=Math.ceil(total/2);
+    const gap=4;
+    const w=((bx1-bx0)-gap*(blockCount-1))/blockCount;
+    const arr=[];
+    let cur=startNum;
+    for(let i=0;i<blockCount;i++){
+      const x0=Math.round(bx0+i*(w+gap));
+      const isSingle=(endNum-cur)<1;
+      const n1=cur, n2=isSingle?null:cur+1;
+      const idSuffix=isSingle?String(n1):(n1+'_'+n2);
+      const lines=isSingle?[{text:String(n1)}]:[{text:String(n1)},{text:String(n2)}];
+      arr.push({ id:idPrefix+idSuffix, x:x0, y:by0, w:Math.round(w), h:by1-by0, fill:fill, height:height, lines:lines });
+      cur+=isSingle?1:2;
+    }
+    return arr;
+  }
+  const MAP_BLOCK_SKIN={
+    cashier:{type:'cashier'}, infopoint:{type:'counter'},
+    butchery:{type:'freezer'}, fishseafood:{type:'freezer'},
+    fruitveg:{type:'produce'}, bakery:{type:'bakery'}, icecream:{type:'icecream'}
+  };
+  function getBlockSkin(b){
+    if(MAP_BLOCK_SKIN[b.id]) return MAP_BLOCK_SKIN[b.id];
+    if(b.id.indexOf('dryfood_')===0||b.id.indexOf('nonfood_')===0) return {type:'aisle'};
+    return {type:'rack',levels:3};
+  }
+  function blockText(b){
+    if(b.th!==undefined) return [b.th||'', b.en||''];
+    if(b.lines) return [(b.lines[0]&&b.lines[0].text)||'', (b.lines[1]&&b.lines[1].text)||''];
+    return ['',''];
+  }
+  function mapBlockPieces(b,rot){
+    const H=b.height||54;
+    const x0=b.x,y0=b.y,x1=b.x+b.w,y1=b.y+b.h;
+    const tint=b.fill;
+    const [th,en]=blockText(b);
+    const skin=getBlockSkin(b);
+    let skinMarkup;
+    if(skin.type==='freezer') skinMarkup=freezerCase(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='icecream') skinMarkup=iceCreamStall(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='bakery') skinMarkup=bakeryStall(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='produce') skinMarkup=produceStall(x0,y0,x1,y1,rot,tint,H,th,en);
+    else if(skin.type==='cashier') skinMarkup=cashierRow(x0,y0,x1,y1,rot,H,8)+signAt((x0+x1)/2,y0,H+30,rot,th,en,'#E30613',true);
+    else if(skin.type==='aisle') skinMarkup=aisleHeadUnit(x0,y0,x1,y1,rot,th,en);
+    else if(skin.type==='counter') skinMarkup=counterUnit(x0,y0,x1,y1,rot,tint,H,th,en);
+    else skinMarkup=rackUnit(x0,y0,x1,y1,rot,tint,H,skin.levels||3,th,en,true);
+    const baseMarkup=boxFaces(x0,y0,x1,y1,-6,0,rot,shadeColor('#4A4E54',0.02),'#1C1E21','#2C2F33');
+    skinMarkup=baseMarkup+skinMarkup;
+    const depth=(function(){
+      const rTheta=(rot||0)*Math.PI/180;
+      const rx=((x0+x1)/2)-MAP_FLOOR_CX, ry=((y0+y1)/2)-MAP_FLOOR_CY;
+      const rotX=rx*Math.cos(rTheta)-ry*Math.sin(rTheta), rotY=rx*Math.sin(rTheta)+ry*Math.cos(rTheta);
+      return rotX+rotY;
+    })();
+    return {depth, skinMarkup};
+  }
+  function renderMapSVG(zones,rot,zoom,panX,panY){
+    zoom=zoom||1; panX=panX||0; panY=panY||0;
+    const aisleBlocks=generateAisleGroup('dryfood_',470,85,1180,300,29,44,'#F9DDEC','#A6437A',84)
+      .concat(generateAisleGroup('nonfood_',335,335,1220,550,1,25,'#E6E1F8','#4B4098',84));
+    const blocks=zones.concat(aisleBlocks);
+    const pieces=blocks.map(b=>mapBlockPieces(b,rot));
+    const sortedPieces=pieces.slice().sort((a,b)=>a.depth-b.depth);
+    const blockMarkup=sortedPieces.map(p=>p.skinMarkup).join('');
+
+    const F=MAP_FLOOR;
+    const floorTop=[isoProject(F.x,F.y,0,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
+    const wallH=36;
+    const leftWall=[isoProject(F.x,F.y,wallH,rot),isoProject(F.x,F.y+F.h,wallH,rot),isoProject(F.x,F.y+F.h,0,rot),isoProject(F.x,F.y,0,rot)];
+    const backWall=[isoProject(F.x,F.y,wallH,rot),isoProject(F.x+F.w,F.y,wallH,rot),isoProject(F.x+F.w,F.y,0,rot),isoProject(F.x,F.y,0,rot)];
+    const rightWall=[isoProject(F.x+F.w,F.y,wallH,rot),isoProject(F.x+F.w,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x+F.w,F.y,0,rot)];
+    const frontWall=[isoProject(F.x,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,wallH,rot),isoProject(F.x+F.w,F.y+F.h,0,rot),isoProject(F.x,F.y+F.h,0,rot)];
+    const wallCandidates=[
+      {poly:leftWall, normal:[-1,0]},{poly:backWall, normal:[0,-1]},
+      {poly:rightWall, normal:[1,0]},{poly:frontWall, normal:[0,1]}
+    ];
+    const theta=rot*Math.PI/180;
+    const camDir=[Math.sin(theta),Math.cos(theta)];
+    const wallsMarkup=wallCandidates.filter(w=>{
+      const dot=w.normal[0]*camDir[0]+w.normal[1]*camDir[1];
+      return dot<-0.05;
+    }).map(w=>'<polygon points="'+polyPts(w.poly)+'" fill="'+shadeColor(FLOOR_BG,0.05)+'" stroke="rgba(36,31,23,.08)" stroke-width="0.6"/>').join('');
+
+    const zoneLabels=Object.keys(MAP_ZONE_LABELS).map(prefix=>{
+      const group=blocks.filter(b=>b.id.indexOf(prefix)===0);
+      if(!group.length) return '';
+      const minX=Math.min(...group.map(b=>b.x)), maxX=Math.max(...group.map(b=>b.x+b.w));
+      const minY=Math.min(...group.map(b=>b.y)), maxH=Math.max(...group.map(b=>b.height||54));
+      const info=MAP_ZONE_LABELS[prefix];
+      const p=isoProject((minX+maxX)/2, minY+22, maxH, rot);
+      return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="'+MAP_MAIN_SIZE+'" font-weight="800" letter-spacing="0.4" fill="'+info.color+'">'+escapeHtml(info.main)+'</text>'+
+        '<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+17).toFixed(1)+'" text-anchor="middle" font-size="'+MAP_SUB_SIZE+'" font-weight="700" letter-spacing="0.4" fill="'+info.subColor+'">'+escapeHtml(info.sub)+'</text>';
+    }).join('');
+
+    const allPts=[floorTop,leftWall,backWall,rightWall,frontWall].reduce((a,p)=>a.concat(p),[]);
+    blocks.forEach(b=>{
+      const H=b.height||54;
+      [[b.x,b.y,H],[b.x+b.w,b.y,H],[b.x+b.w,b.y+b.h,H],[b.x,b.y+b.h,H],[b.x,b.y+b.h,0],[b.x+b.w,b.y+b.h,0]].forEach(([x,y,z])=>{
+        allPts.push(isoProject(x,y,z,rot));
+      });
+    });
+    const entrance=isoProject(MAP_FLOOR.x+339,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
+    const exit=isoProject(MAP_FLOOR.x+870,MAP_FLOOR.y+MAP_FLOOR.h+8,0,rot);
+    allPts.push(entrance,exit);
+    const minX=Math.min(...allPts.map(p=>p[0])), maxX=Math.max(...allPts.map(p=>p[0]));
+    const minY=Math.min(...allPts.map(p=>p[1])), maxY=Math.max(...allPts.map(p=>p[1]));
+    const pad=26;
+    const baseX=minX-pad, baseY=minY-pad, baseW=(maxX-minX)+pad*2, baseH=(maxY-minY)+pad*2+18;
+    const cx=baseX+baseW/2, cy=baseY+baseH/2;
+    const vbW=baseW/zoom, vbH=baseH/zoom;
+    const vbX=cx-vbW/2+panX, vbY=cy-vbH/2+panY;
+
+    // subtle dotted grid on floor for a clean illustration feel
+    const gridLines=[];
+    for(let gx=F.x; gx<=F.x+F.w; gx+=64){
+      const a=isoProject(gx,F.y,0.2,rot), b=isoProject(gx,F.y+F.h,0.2,rot);
+      gridLines.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(36,31,23,.045)" stroke-width="1"/>');
+    }
+    for(let gy=F.y; gy<=F.y+F.h; gy+=64){
+      const a=isoProject(F.x,gy,0.2,rot), b=isoProject(F.x+F.w,gy,0.2,rot);
+      gridLines.push('<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="rgba(36,31,23,.045)" stroke-width="1"/>');
+    }
+
+    return '<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ผังร้าน Makro รามอินทรา St.042 แบบ 3 มิติ สไตล์ flat illustration">'+
+      '<polygon points="'+polyPts(floorTop)+'" fill="'+FLOOR_BG+'"/>'+
+      gridLines.join('')+
+      wallsMarkup+
+      '<g font-family="Sarabun,Segoe UI,sans-serif">'+blockMarkup+zoneLabels+'</g>'+
+      glassDoor(entrance,'ทางเข้า · IN','#2E9E5B')+
+      glassDoor(exit,'ทางออก · OUT','#E35A3A')+
+      '</svg>';
+  }
+
+  function defaultItems(){
+    return [
+      {id:'fruitveg',x:190,y:240,w:160,h:75,height:60,fill:'#DCF0CE',th:'ผัก-ผลไม้',en:'Fruit & Veg'},
+      {id:'infopoint',x:85,y:530,w:90,h:65,height:50,fill:'#D7E6F7',th:'จุดประชาสัมพันธ์',en:'Information'},
+      {id:'cashier',x:460,y:620,w:300,h:90,height:42,fill:'#D6F3E4',th:'แคชเชียร์',en:'Cashier'},
+      {id:'bulkpallet',x:690,y:660,w:595,h:120,height:90,fill:'#E4DEF0',th:'พาเลทสินค้ากองรวม',en:'Bulk Pallet Display'},
+      {id:'butchery',x:8,y:18,w:158,h:103,height:70,fill:'#FAD9D9',th:'เนื้อสัตว์และแช่แข็ง',en:'Butchery & Frozen'},
+      {id:'snack',x:174,y:18,w:158,h:103,height:70,fill:'#D9F2E0',th:'ขนม',en:'Snack'},
+      {id:'winebeer',x:8,y:128,w:158,h:103,height:70,fill:'#D2F0F0',th:'ไวน์/เบียร์',en:'Wine & Beer'},
+      {id:'drink',x:174,y:128,w:158,h:103,height:70,fill:'#E3DBF6',th:'เครื่องดื่ม',en:'Drink'},
+      {id:'fishseafood',x:8,y:318,w:158,h:100,height:70,fill:'#D3E7F8',th:'ปลา/อาหารทะเล',en:'Fish & Seafood'},
+      {id:'grilledchicken',x:174,y:318,w:158,h:100,height:70,fill:'#FBE4C6',th:'ไก่ย่าง',en:'Grilled Chicken'},
+      {id:'o2o',x:8,y:425,w:158,h:98,height:85,fill:'#FCE7C0',th:'O2O แผนกออนไลน์',en:'Makro Pro'},
+      {id:'condiments',x:174,y:425,w:158,h:98,height:60,fill:'#FAD5C6',th:'เครื่องเทศ',en:'Condiments / Spices'},
+      {id:'bakery',x:8,y:600,w:158,h:178,height:70,fill:'#F1E0C2',th:'เบเกอรี่',en:'Bakery'},
+      {id:'icecream',x:174,y:600,w:158,h:178,height:70,fill:'#CFECEF',th:'ไอศกรีม',en:'Ice Cream'}
+    ];
+  }
+
+  const svgHost=document.getElementById('svgHost');
+  const rotInput=document.getElementById('rot');
+  const rotDeg=document.getElementById('rotDeg');
+  const legendList=document.getElementById('legendList');
+  const spinBtn=document.getElementById('spinBtn');
+  const zones=defaultItems();
+
+  let currentRot=Number(rotInput.value)||25;
+  let zoomLevel=1, panX=0, panY=0;
+
+  function renderLegend(){
+    legendList.innerHTML=zones.map(function(z){
+      return '<li><span class="swatch" style="background:'+z.fill+'"></span>'
+        +'<span class="txt"><span class="th">'+escapeHtml(z.th)+'</span><span class="en">'+escapeHtml(z.en)+'</span></span></li>';
+    }).join('');
+  }
+  function renderMap(){
+    rotInput.value=String(Math.round(currentRot)%360);
+    rotDeg.textContent=Math.round(currentRot)%360+'°';
+    svgHost.innerHTML=renderMapSVG(zones,currentRot,zoomLevel,panX,panY);
+  }
+  rotInput.addEventListener('input', function(){ currentRot=Number(rotInput.value); renderMap(); });
+
+  (function(){
+    let dragging=false, panMode=false, lastX=0, lastY=0;
+    const ROT_SENS=0.45;
+    function svgViewScale(){
+      const svgEl=svgHost.querySelector('svg');
+      if(!svgEl) return 1;
+      const vb=svgEl.viewBox.baseVal;
+      const rect=svgEl.getBoundingClientRect();
+      if(!rect.width) return 1;
+      return vb.width/rect.width;
+    }
+    svgHost.addEventListener('pointerdown', function(e){
+      dragging=true; panMode=!!e.shiftKey;
+      lastX=e.clientX; lastY=e.clientY;
+      svgHost.setPointerCapture(e.pointerId);
+    });
+    svgHost.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      const dx=e.clientX-lastX, dy=e.clientY-lastY;
+      lastX=e.clientX; lastY=e.clientY;
+      if(panMode){ const s=svgViewScale(); panX-=dx*s; panY-=dy*s; }
+      else { currentRot=(currentRot+dx*ROT_SENS+360*100)%360; }
+      renderMap();
+    });
+    function endDrag(e){ if(!dragging) return; dragging=false; try{ svgHost.releasePointerCapture(e.pointerId); }catch(err){} }
+    svgHost.addEventListener('pointerup', endDrag);
+    svgHost.addEventListener('pointercancel', endDrag);
+    svgHost.addEventListener('wheel', function(e){
+      e.preventDefault();
+      const factor=e.deltaY<0?1.08:1/1.08;
+      zoomLevel=Math.max(0.5,Math.min(3.5,zoomLevel*factor));
+      renderMap();
+    }, {passive:false});
+  })();
+
+  let spinning=false, spinRaf=null;
+  function spinStep(){
+    currentRot=(currentRot+0.25)%360;
+    renderMap();
+    spinRaf=requestAnimationFrame(spinStep);
+  }
+  spinBtn.addEventListener('click', function(){
+    spinning=!spinning;
+    spinBtn.classList.toggle('active', spinning);
+    spinBtn.textContent = spinning ? '⏸ หยุดหมุน' : '▶ หมุนอัตโนมัติ';
+    if(spinning) spinStep(); else if(spinRaf) cancelAnimationFrame(spinRaf);
+  });
+
+  renderLegend();
+  renderMap();
+})();
+</script>
+</body>
+</html>
