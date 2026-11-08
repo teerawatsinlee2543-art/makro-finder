@@ -118,13 +118,15 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .fbar.f4>label.f-q{grid-column:auto}
 .fbar.f6{grid-template-columns:2fr repeat(5,1fr)}
 .fbar.f6>label.f-q{grid-column:auto}
+.fbar.f7{grid-template-columns:2fr repeat(6,1fr)} /* OOS+: one more filter (product department) */
+.fbar.f7>label.f-q{grid-column:auto}
 @media (max-width:1099px){
-  .fbar.f4,.fbar.f6{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .fbar.f4>label.f-q,.fbar.f6>label.f-q{grid-column:1/-1}
+  .fbar.f4,.fbar.f6,.fbar.f7{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .fbar.f4>label.f-q,.fbar.f6>label.f-q,.fbar.f7>label.f-q{grid-column:1/-1}
 }
 @media (max-width:640px){
-  .fbar,.fbar.f4,.fbar.f6{grid-template-columns:1fr}
-  .fbar>label.f-q,.fbar.f4>label.f-q,.fbar.f6>label.f-q{grid-column:auto}
+  .fbar,.fbar.f4,.fbar.f6,.fbar.f7{grid-template-columns:1fr}
+  .fbar>label.f-q,.fbar.f4>label.f-q,.fbar.f6>label.f-q,.fbar.f7>label.f-q{grid-column:auto}
   .fbar .f-act{justify-content:stretch}
   .fbar .f-act .f-chk{flex:1 1 100%;margin-right:0}
   .fbar .f-act .btn{flex:1 1 100%}
@@ -1538,10 +1540,12 @@ nav::-webkit-scrollbar,nav#tabs::-webkit-scrollbar{display:none!important;width:
     <div class="tiles" id="oosDivTiles" style="margin:12px 0 0"></div>
     <div class="tiles" id="oosTiles" style="margin:12px 0"></div>
     <div class="oos-dchips" id="oosDeptTiles"></div>
-    <div class="fbar f6">
+    <div class="oos-dchips" id="oosPDeptTiles"></div>
+    <div class="fbar f7">
       <label class="f-q">ค้นหา<input id="oosQ" placeholder="รหัส / ชื่อสินค้า / ตำแหน่ง / Buyer / แผนก / ผู้รับผิดชอบ"></label>
       <label>สถานะ<select id="oosFSt"><option value="">ทั้งหมด</option><option value="need">ต้องเติม</option><option value="doing">กำลังเติม</option><option value="done">เติมแล้ว</option></select></label>
       <label>ประเภทปัญหา<select id="oosFBk"><option value="">ทั้งหมด</option><option value="stock">มีของในระบบ (A + B)</option><option value="A">มีของในระบบ · หาไม่เจอ</option><option value="B">สต็อกในระบบไม่ตรง</option><option value="C">ของหมดจริง</option><option value="X">ยังไม่ระบุสาเหตุ</option></select></label>
+      <label>แผนกสินค้า<select id="oosFPDept"><option value="">ทั้งหมด</option></select></label>
       <label>แผนกที่เติม<select id="oosFDept"><option value="">ทั้งหมด</option></select></label>
       <label>ผู้รับผิดชอบ<select id="oosFWho"><option value="">ทั้งหมด</option></select></label>
       <label>เรียงตาม<select id="oosSort"><option value="age">ค้างนานสุดก่อน</option><option value="loc">ตำแหน่งชั้น</option><option value="name">ชื่อสินค้า</option></select></label>
@@ -4001,7 +4005,7 @@ function oosDivCtx(){
 const oosDiv=(r,ctx)=>{if(r.division&&NBS_DIV[r.division])return r.division;const k=amNum(r.itemNo);if(k&&ctx.byNo.has(k))return ctx.byNo.get(k);const d=String(r.dept||'').trim().toLowerCase();return d&&ctx.dd.get(d)||''};
 const oosInDiv=(r,ctx)=>!oosDivFilter||(oosDivFilter==='-'?oosDiv(r,ctx)==='':oosDiv(r,ctx)===oosDivFilter);
 function oosVisible(ctx){
-  const q=$('#oosQ').value.trim().toLowerCase(),fs=$('#oosFSt').value,fw=$('#oosFWho').value,fb=$('#oosFBk').value,fd=$('#oosFDept').value,hide=$('#oosHide').checked,t0=new Date();t0.setHours(0,0,0,0);
+  const q=$('#oosQ').value.trim().toLowerCase(),fs=$('#oosFSt').value,fw=$('#oosFWho').value,fb=$('#oosFBk').value,fd=$('#oosFDept').value,fp=$('#oosFPDept').value,hide=$('#oosHide').checked,t0=new Date();t0.setHours(0,0,0,0);
   const rows=oosAll().filter(r=>{
     if(!oosInDiv(r,ctx))return false;
     if(oosTile==='need'&&r.status!=='need')return false;
@@ -4013,6 +4017,7 @@ function oosVisible(ctx){
     if(fw&&(r.assignee||'')!==fw)return false;
     if(fb){const b=r.bucket||'';if(fb==='stock'?!(b==='A'||b==='B'):b!==fb)return false}
     if(fd&&(r.assignDept||'')!==fd)return false;
+    if(fp&&String(r.dept||'').trim()!==fp)return false; /* product department as written in the report (e.g. "05 FROZEN & DAIRY") */
     return!q||[r.itemNo,r.desc,r.loc,r.assignee,r.note,r.buyerName,r.buyerUid,r.dept].join(' ').toLowerCase().includes(q)});
   const s=$('#oosSort').value;
   return rows.sort((a,b)=>(a.status==='done')-(b.status==='done')||(a.status==='done'?oosDoneMs(b)-oosDoneMs(a):
@@ -4222,6 +4227,11 @@ function renderOos(){
   dsel.innerHTML='<option value="">ทั้งหมด</option>'+dnames.map(n=>`<option${n===dcur?' selected':''}>${esc(n)}</option>`).join('');
   const dcnt={};sActive.forEach(r=>{if(r.assignDept)dcnt[r.assignDept]=(dcnt[r.assignDept]||0)+1});
   deptBars($('#oosDeptTiles'),Object.entries(dcnt).sort((a,b)=>b[1]-a[1]),n=>n.toLocaleString()+' รายการ',dsel.value,'รายการที่ต้องเติม แยกตามแผนก');
+  /* product departments (the department column of the report, e.g. 01 FRUIT & VEGETABLE): a bar per department with the items still to refill, and the select of the filter bar */
+  const psel=$('#oosFPDept'),pcur=psel.value,pdept=r=>String(r.dept||'').trim(),pnames=[...new Set(all.map(pdept).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
+  psel.innerHTML='<option value="">ทั้งหมด</option>'+pnames.map(n=>`<option${n===pcur?' selected':''}>${esc(n)}</option>`).join('');
+  const pcnt={};sActive.forEach(r=>{const d=pdept(r);if(d)pcnt[d]=(pcnt[d]||0)+1});
+  deptBars($('#oosPDeptTiles'),Object.entries(pcnt).sort((a,b)=>b[1]-a[1]),n=>n.toLocaleString()+' รายการ',psel.value,'รายการที่ต้องเติม แยกตามแผนกสินค้า');
   const sel=$('#oosFWho'),cur=sel.value,names=[...new Set(all.map(r=>r.assignee).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   sel.innerHTML='<option value="">ทั้งหมด</option>'+names.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('');
   const rows=oosVisible(ctx),shown=rows.slice(0,oosLimit);
@@ -4292,12 +4302,13 @@ $('#oosTiles').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;oosTil
 $('#oosDivTiles').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;oosDivFilter=oosDivFilter===b.dataset.div?'':b.dataset.div;oosLimit=60;renderOos()};
 $('#oosMore').onclick=()=>{oosLimit+=60;renderOos()};
 let oosQT;$('#oosQ').oninput=()=>{oosDrill=false;clearTimeout(oosQT);oosQT=setTimeout(()=>{oosLimit=60;renderOos()},150)};
-['#oosFSt','#oosFWho','#oosFBk','#oosFDept','#oosSort','#oosHide'].forEach(s=>$(s).onchange=()=>{oosLimit=60;renderOos()});
+['#oosFSt','#oosFWho','#oosFBk','#oosFDept','#oosFPDept','#oosSort','#oosHide'].forEach(s=>$(s).onchange=()=>{oosLimit=60;renderOos()});
 $('#oosChart').onclick=e=>{
   const bk=e.target.closest('.oc-back');if(bk){oosDrill=false;$('#oosQ').value='';oosLimit=60;renderOos();$('#oosChart').scrollIntoView({block:'nearest',behavior:'smooth'});return}
   const sg=e.target.closest('.oc-seg button');if(sg){oosFreqP=sg.dataset.p;renderOos();return}
   const bar=e.target.closest('.oc-r');if(bar){oosDrill=true;$('#oosQ').value=bar.dataset.no;oosLimit=60;renderOos();$('#oosList').scrollIntoView({block:'nearest',behavior:'smooth'})}};
 $('#oosDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b||!b.dataset.d)return;const d=$('#oosFDept');d.value=d.value===b.dataset.d?'':b.dataset.d;oosLimit=60;renderOos()};
+$('#oosPDeptTiles').onclick=e=>{const b=e.target.closest('button');if(!b||!b.dataset.d)return;const d=$('#oosFPDept');d.value=d.value===b.dataset.d?'':b.dataset.d;oosLimit=60;renderOos()};
 $('#oosBannerGo').onclick=()=>document.querySelector('#tabs button[data-tab="oos"]').click();
 $('#nbsBannerGo').onclick=()=>document.querySelector('#tabs button[data-tab="nbs"]').click();
 setInterval(()=>{if(!document.hidden)renderOos()},60000); /* the "ค้าง … ชม." counters and colours move on without a click */
@@ -5836,7 +5847,7 @@ function oosPDFHtml(rows,total,whole,photos=true){
 <td>${by||r.buyerUid?esc(by||r.buyerUid):'-'}${by&&r.buyerUid?`<div class="m">${esc(r.buyerUid)}</div>`:''}</td>
 <td>${fq||'<span class="m">—</span>'}</td>
 <td class="num">${dmsTxt}${sd!=null?`<div class="m">Stock Day ${oosFmtN(sd)}</div>`:''}</td></tr>`}).join('');
-  const flt=whole===true?'ทุกรายการ (ไม่ได้กรอง)':pdfFlt([['กลุ่ม',oosDivFilter==='-'?'ไม่ระบุกลุ่ม':oosDivFilter],['กล่องสรุป',tileTxt[oosTile]||''],['สถานะ',pdfSel('#oosFSt')],['ประเภทปัญหา',pdfSel('#oosFBk')],['แผนกที่เติม',pdfSel('#oosFDept')],['ผู้เติม',pdfSel('#oosFWho')],['ค้นหา',$('#oosQ').value.trim()]]);
+  const flt=whole===true?'ทุกรายการ (ไม่ได้กรอง)':pdfFlt([['กลุ่ม',oosDivFilter==='-'?'ไม่ระบุกลุ่ม':oosDivFilter],['กล่องสรุป',tileTxt[oosTile]||''],['สถานะ',pdfSel('#oosFSt')],['ประเภทปัญหา',pdfSel('#oosFBk')],['แผนกสินค้า',pdfSel('#oosFPDept')],['แผนกที่เติม',pdfSel('#oosFDept')],['ผู้เติม',pdfSel('#oosFWho')],['ค้นหา',$('#oosQ').value.trim()]]);
   return pdfPage({title:'OOS+ · สินค้าหมดชั้น / หมดสต็อก',
     sub:`${flt}${whole!==true&&!$('#oosHide').checked&&!oosTile&&!$('#oosFSt').value?' · รวมที่เติมแล้ว':''} · ${pdfStamp()} · ${rows.length.toLocaleString()}${rows.length<total?' จาก '+total.toLocaleString():''} รายการ`,
     sum:`<span>ต้องเติม ${(cnt.need||0).toLocaleString()}</span><span>กำลังเติม ${(cnt.doing||0).toLocaleString()}</span><span>เติมแล้ว ${(cnt.done||0).toLocaleString()}</span><span>ค้างเกิน ${OOS_LATE_H} ชม. ${cnt.late.toLocaleString()}</span>`+Object.entries(dv).map(([k,v])=>`<span>${k} ${v.toLocaleString()}</span>`).join(''),
