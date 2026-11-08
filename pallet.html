@@ -517,6 +517,15 @@ let BUILTIN_ITEM_DAY=new Map();
 function getItemByNo(itemNo){ return PRODUCTS_INDEX[itemNo]; }
 
 
+// กดรูปสินค้าในรายการพาเลท = เปิดรูปขยาย + เลข Item (ฟังก์ชันนี้หลุดหายไปตอนแยกหน้า pallet.html ออกจาก index.html ปุ่มรูปจึงแจ้ง error)
+function openPalletItemPhotoViewer(i,itemNo){
+  const wrap=document.getElementById('palletPhoto'+i);
+  const img=wrap&&wrap.querySelector('img');
+  if(!img)return;
+  document.getElementById('promoViewImg').src=img.src;
+  document.getElementById('promoViewCaption').textContent='Item '+itemNo;
+  document.getElementById('promoViewOverlay').style.display='flex';
+}
 function closePromoViewer(){
   document.getElementById('promoViewOverlay').style.display='none';
 }
