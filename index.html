@@ -59,7 +59,12 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .frame{background:var(--color-background-secondary);min-height:100dvh;width:100%;display:flex;flex-direction:column}
 .phone{background:var(--color-background-primary);flex:1;display:flex;flex-direction:column;width:100%}
 #mainApp{flex:1;flex-direction:column;width:100%}
-.hdr{background:var(--brand-red);padding:18px clamp(16px,4vw,40px) 14px}
+.hdr{background:var(--brand-red);padding:18px clamp(16px,4vw,40px) 10px;position:sticky;top:0;z-index:50}
+/* แถบหัวหน้าจอปักหมุด: เลื่อนลงแล้วแถวโลโก้/ภาษาเลื่อนหายไป เหลือแถบเล็ก "กลับ + ค้นหา + สแกน" ติดขอบบน
+   (ค่า top ติดลบถูกคำนวณใน initStickyHeader ให้แถวค้นหาพอดีขอบบน / ปุ่มกลับในแถวค้นหาโผล่เฉพาะตอนปักหมุด ความสูงหัวหน้าจอไม่เปลี่ยนเลยจึงไม่มีหน้ากระตุก) */
+.hdr .sr-back{display:none;align-self:center}
+.hdr.pinned .sr-back{display:flex}
+.hdr.pinned{box-shadow:0 2px 8px rgba(0,0,0,.28)}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:min(1100px,94vw);margin:0 auto;width:100%}
 .hdr-logo{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .hdr-logo>div:last-child{min-width:0;overflow:hidden}
@@ -1043,6 +1048,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
     </div>
     <div class="search-row">
+      <button class="hdr-icon hdr-back sr-back" onclick="goBackOneStep()" data-i18n-title="backBtnAria" title="กลับ" aria-label="กลับไปหน้าก่อนหน้า"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5"/><path d="M11.5 5.5 5 12l6.5 6.5"/></svg></button>
       <div class="search-box">
         <i class="ti ti-search" aria-hidden="true"></i>
         <input type="text" id="si" data-i18n-placeholder="searchPlaceholder" placeholder="ค้นหาสินค้า..." oninput="searchInput(this.value)">
@@ -8486,6 +8492,28 @@ function barcodeSVG(code){
   }
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+svgH+'" shape-rendering="crispEdges" aria-hidden="true"><g fill="#000">'+rects+'</g>'+texts+'</svg>';
 }
+
+// ==== หัวหน้าจอปักหมุด: เลื่อนหน้าลงแล้วเหลือแถบเล็ก [กลับ][ค้นหา][สแกน] ติดขอบบนตลอด ====
+// ใช้ position:sticky ที่ .hdr โดยให้ top ติดลบเท่าความสูงส่วนที่อยู่เหนือแถวค้นหา (โลโก้/ภาษาเลื่อนหายไปเอง)
+// สลับคลาส .pinned ด้วย IntersectionObserver (ไม่ฟัง scroll) แล้วเปิดปุ่มกลับที่อยู่ในแถวค้นหา
+(function initStickyHeader(){
+  const hdr=document.querySelector('#mainApp .hdr');
+  const row=hdr&&hdr.querySelector('.hdr-row'), sr=hdr&&hdr.querySelector('.search-row');
+  if(!hdr||!row||!sr)return;
+  const TOP_GAP=6;
+  function place(){
+    const y=sr.offsetTop;
+    if(y>TOP_GAP)hdr.style.top=(TOP_GAP-y)+'px';
+  }
+  place();
+  try{ new ResizeObserver(place).observe(hdr); }catch(e){}
+  window.addEventListener('resize',place);
+  window.addEventListener('load',place);
+  try{ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(place); }catch(e){}
+  try{
+    new IntersectionObserver(es=>{ hdr.classList.toggle('pinned',!es[es.length-1].isIntersecting); },{threshold:0}).observe(row);
+  }catch(e){}
+})();
 
 function renderList(matches,q){
   const rl=document.getElementById('resultsList');
