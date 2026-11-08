@@ -1395,6 +1395,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <label class="map-edit-color-label"><span data-i18n="bgColorLabel">พื้นหลัง</span> <input type="color" id="mapBgColorInput" onchange="onMapBgColorChange(this.value)"></label>
       <button class="map-edit-add-btn" onclick="addMapBlock()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addBoxBtn">เพิ่มกล่อง</span></button>
     </div>
+    <div class="map-edit-bar-row map-edit-tools-row">
+      <button class="map-edit-add-btn" id="mapAlignBaysBtn" onclick="alignMapBays()"><i class="ti ti-layout-distribute-horizontal" aria-hidden="true"></i> <span data-i18n="alignBaysBtn">จัดแถวช่อง 1-44 ให้ตรง</span></button>
+    </div>
     <div class="map-edit-bar-row map-edit-selected-row" id="mapSelectedRow" style="display:none">
       <label class="map-edit-color-label"><span data-i18n="boxColorLabel">สีกล่อง</span> <input type="color" id="mapBlockColorInput" onchange="onMapBlockColorChange(this.value)"></label>
       <label class="map-edit-color-label"><span data-i18n="boxHeightLabel">ความสูง</span> <input type="number" id="mapBlockHeightInput" min="20" max="130" step="1" style="width:56px" onchange="onMapBlockHeightChange(this.value)"></label>
@@ -1862,6 +1865,8 @@ const I18N={
     boxHeightLabel:'ความสูง',
     editTextColorSizeBtn:'แก้ข้อความ/สี/ขนาด',
     deleteBoxBtn:'ลบกล่อง',
+    alignBaysBtn:'จัดแถวช่อง 1-44 ให้ตรง',
+    alignBaysDone:'จัดแถวช่อง 1-44 แล้ว (ขยับ {n} กล่อง) · ตรวจดูแล้วกด "บันทึก" หรือกด "ยกเลิก" เพื่อย้อนกลับ',
     setGpsOriginBtn:'ตั้งจุดอ้างอิง GPS ที่นี่',
     gpsNotSetStatus:'ยังไม่ได้ตั้งจุดอ้างอิง',
     gpsSetStatus:'ตั้งจุดอ้างอิงแล้ว',
@@ -2233,6 +2238,8 @@ const I18N={
     boxHeightLabel:'Height',
     editTextColorSizeBtn:'Edit text/color/size',
     deleteBoxBtn:'Delete box',
+    alignBaysBtn:'Straighten aisles 1-44',
+    alignBaysDone:'Aisles 1-44 straightened ({n} boxes moved) · check it, then press "Save" (or "Cancel" to undo)',
     setGpsOriginBtn:'Set GPS reference point here',
     gpsNotSetStatus:'Reference point not set',
     gpsSetStatus:'Reference point set',
@@ -7453,6 +7460,25 @@ function addMapBlock(){
   selectedBlockId=id;
   rerenderMapEditorSVG();
   updateSelectedBlockUI();
+}
+// จัดแถวช่อง 1-44 (Non-Food 1-25 และ Dry Food 29-44) ให้ตรง: แต่ละกลุ่มเรียงเป็นแถวเดียว ระดับเดียวกัน ห่างเท่ากันทุกช่อง เรียงตามเลขช่อง
+// กว้างเท่าเดิม = ช่วงซ้ายสุด-ขวาสุดของกลุ่มที่ตั้งไว้ตอนนี้ / ระดับ (y) = ค่ากลางของกลุ่ม / ขนาดกล่องไม่เปลี่ยน
+// ทำในหน่วยความจำเท่านั้น ยังไม่บันทึกจนกว่าจะกด "บันทึก" (กด "ยกเลิก" ก็ย้อนกลับได้ทั้งหมด)
+function alignMapBays(){
+  if(!mapEditMode)return;
+  let moved=0;
+  ['nonfood_','dryfood_'].forEach(prefix=>{
+    const bays=currentMapBlocks.filter(b=>b.id.indexOf(prefix)===0)
+      .sort((a,b)=>(parseInt(a.id.slice(prefix.length),10)||0)-(parseInt(b.id.slice(prefix.length),10)||0));
+    if(bays.length<2)return;
+    const x0=Math.min(...bays.map(b=>b.x)), x1=Math.max(...bays.map(b=>b.x));
+    const ys=bays.map(b=>b.y).sort((a,b)=>a-b), mid=ys.length%2?ys[(ys.length-1)/2]:(ys[ys.length/2-1]+ys[ys.length/2])/2;
+    const step=Math.max((x1-x0)/(bays.length-1),Math.max(...bays.map(b=>b.w))+4); /* never closer than one box + a 4-unit gap */
+    bays.forEach((b,i)=>{ const nx=Math.round(x0+step*i), ny=Math.round(mid); if(b.x!==nx||b.y!==ny)moved++; b.x=nx; b.y=ny; });
+  });
+  rerenderMapEditorSVG();
+  const hint=document.getElementById('mapEditHint');
+  if(hint)hint.textContent=t('alignBaysDone',{n:moved});
 }
 function deleteSelectedBlock(){
   if(!selectedBlockId)return;
