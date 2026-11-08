@@ -450,6 +450,8 @@ table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-in
 }
 .nhead{display:flex;gap:10px;align-items:flex-start}
 .nthumb{flex:none;width:68px;height:68px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--line)}
+.bc-img{display:block;width:fit-content;max-width:100%;margin:0;padding:3px 6px;background:#fff;border:1px solid var(--line);border-radius:6px;line-height:0} /* the small barcode under the "Barcode" line: always black on white (a scanner cannot read it on the dark theme), 2 px per module so it stays scannable */
+.bc-img svg{display:block;max-width:100%;height:auto}
 .nph{display:block;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a0a8b5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='2'/%3E%3Ccircle cx='9' cy='10' r='1.6'/%3E%3Cpath d='M21 16l-5-5-8 8'/%3E%3C/svg%3E") no-repeat center/30px}
 .nbody{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
 .nname{flex:1;min-width:0;font-size:15px;line-height:1.3}
@@ -1326,7 +1328,7 @@ input:not([type=checkbox]):not([type=radio]):focus-visible,select:focus-visible,
 /* the product itself (picture / name) can be clicked: it opens Item Enquiry beside the lifted card */
 @media (hover:hover) and (pointer:fine){
   [data-open-no]{cursor:pointer}
-  [data-open-no] :is(.small,.muted,.bc-line,.small *,.muted *){cursor:default} /* only the picture and the NAME open Item Enquiry; the Item No. / Barcode / Location lines under it do not */
+  [data-open-no] :is(.small,.muted,.bc-line,.bc-img,.small *,.muted *){cursor:default} /* only the picture and the NAME open Item Enquiry; the Item No. / Barcode / Location lines under it do not */
   [data-open-no] :is(.nthumb,.pthumb,img),img.pthumb[data-open-no]{transition:transform .18s cubic-bezier(.3,1.4,.5,1),box-shadow .18s ease}
   [data-open-no]:hover :is(.nthumb,.pthumb,img),img.pthumb[data-open-no]:hover{transform:scale(1.06);box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 30%,transparent)}
   [data-open-no] :is(.oosc-t>b,.nname,.dn-item>div>b:first-child):hover,b[data-open-no]:hover{color:var(--accent);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
@@ -4061,7 +4063,7 @@ function oosCard(r,ctx){
   const acts=r.status==='need'?`<button type="button" class="btn pri sm" onclick="oosStart('${k}')">เริ่มเติม</button><button type="button" class="btn sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button>`
     :r.status==='doing'?`<button type="button" class="btn pri sm" onclick="oosDone('${k}')">เติมแล้ว ✓</button><button type="button" class="btn sm" onclick="oosBack('${k}')">กลับเป็นต้องเติม</button>`
     :`<button type="button" class="btn sm" onclick="oosBack('${k}')">เปิดใหม่ (ต้องเติม)</button>`;
-  return`<div class="oosc lv-${lv}"><div class="oosc-h" data-open-no="${esc(r.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div>${bcLine(r.itemNo,r.barcode)}<div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h" data-open-no="${esc(r.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(r.desc||'—')}</b><div class="muted small">Item No. <b>${esc(r.itemNo||'-')}</b>${r.stock!==''&&r.stock!=null?' · สต็อก '+esc(r.stock):''}</div>${bcLine(r.itemNo,r.barcode)}<div class="small">${esc(r.loc||'ไม่ระบุตำแหน่งชั้น')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>${bcImg(r.itemNo,r.barcode)}
     <div class="oosc-m">${dv?`<span class="chip div-${dv.toLowerCase()}">${dv}</span>`:''}${r.bucket&&OOS_BK[r.bucket]?`<span class="chip s-${OOS_BK[r.bucket][2]}">${esc(OOS_BK[r.bucket][0])}</span>`:''}<span class="chip s-${s[1]}">${s[0]}</span>${age}${r.assignee?`<span class="small">ผู้เติม: <b>${esc(r.assignee)}</b></span>`:'<span class="muted small">ยังไม่มีผู้เติม</span>'}</div>
     ${oosFactsHtml(r)}
     ${ph?`<img class="oosc-photo" src="${esc(ph)}" alt="">`:''}${r.note?`<div class="oosc-note">${esc(r.note)}</div>`:''}<div class="muted small oosc-found">ตรวจพบ ${oosFmt(oosMs(r))}</div>
@@ -4111,7 +4113,7 @@ function stkLotCard(btn){
 /* Click the product itself (its picture or name, in every mode: overview, Item NBS, OOS+, %Shrink, Negative Stock, High Stock, DF & NF) = open its Item Enquiry beside the lifted card.
    Not on a phone / touch screen (a tap there would only open a new tab), and never when the click was on a button, link or field inside the product area. */
 document.addEventListener('click',e=>{
-  const t=e.target.closest&&e.target.closest('[data-open-no]');if(!t||e.target.closest('button,a,input,select,textarea,label,summary,.small,.muted,.bc-line'))return; /* the Item No. / Barcode / Location lines are not part of it */
+  const t=e.target.closest&&e.target.closest('[data-open-no]');if(!t||e.target.closest('button,a,input,select,textarea,label,summary,.small,.muted,.bc-line,.bc-img'))return; /* the Item No. / Barcode / Location lines are not part of it */
   if(window.innerWidth<900||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return;
   const no=t.getAttribute('data-open-no');if(!no||no==='-')return;
   stkEnq(no,t)});
@@ -4726,7 +4728,7 @@ function shrCard(it,b){
   const rsl=[...it.rs.entries()].sort((a,c)=>a[1].c-c[1].c),mx=Math.max(1,...rsl.map(([,x])=>Math.abs(x.c)));
   const rsHtml=rsl.length?`<div class="shr-rs" title="แยกตามรหัสเหตุผล (By Code)">`+rsl.map(([rc,x])=>`<span class="shr-r"><em>${esc(shrRs(rc))}</em><i style="--w:${Math.max(4,Math.round(Math.abs(x.c)/mx*100))}%;${x.c<0?'--g1:#ffbf70;--g2:#e5352b':'--g1:#b7ecc9;--g2:#14703c'}"></i><b class="${x.c<0?'c-md2':''}">${x.c<0?'':'+'}${shrBaht(x.c)}</b><small>${x.q.toLocaleString(undefined,{maximumFractionDigits:1})} MU</small></span>`).join('')+`<span class="small shr-tot">Total Shrinkage <b class="${it.cc<0?'sv-neg':'sv-pos'}">${it.cc<0?'':'+'}${shrBaht(it.cc)}</b> · เป็นจำนวน <b class="${it.cq<0?'sv-neg':'sv-pos'}">${it.cq.toLocaleString(undefined,{maximumFractionDigits:1})}</b> MU</span></div>`:'';
   const by=it.buyer?((SHR_MEMO&&SHR_MEMO.buyers.get(it.buyer))||''):'';
-  return`<div class="oosc lv-${lv}"><div class="oosc-h" data-open-no="${esc(it.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h" data-open-no="${esc(it.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn)+(it.cl?' '+esc(it.cl):''):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>${bcImg(it.itemNo)}
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}<span class="chip s-${LV[1]}">${LV[0]}</span>${v!=null&&v>0&&b!=='pct'?`<span class="shr-big">${shrBaht(-v)}</span>`:b==='pct'&&r!=null&&r>0?`<span class="shr-big">${shrPct(r)}</span>`:''}</div>
     ${bits.length?`<div class="oosc-f small">${bits.join('')}</div>`:''}${rsHtml}
     ${bidBlock(it.itemNo,it.buyer,'')}${!(ibuyUid(it.itemNo)||it.buyer)&&it.coms.length?shrComHtml(it):''}</div>`}
@@ -4920,9 +4922,41 @@ function barcodeOf(no,own){
   const n=String(no==null?'':no).trim(),m=MF.items.get(n)||MF.items.get(amNum(n));if(m&&m.barcode&&amNum(m.barcode)!==amNum(n))return m.barcode;
   return(IBC&&IBC[amNum(n)])||'';
 }
+/* ---------- the small scannable barcode under the "Barcode" line of a card ----------
+   EAN-13 / UPC-A / EAN-8 (the check digit has to be right) are drawn to the standard; any other all-digit code is drawn as Code 128 (set C, with a set-B tail for an odd length),
+   which stays short even for a 14-digit carton code. 2 px per module (whole pixels keep every bar sharp), no digits under the bars (the number is the line above). */
+const BC_L=['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'],
+  BC_PAR=['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'],
+  BC_128='212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 114131 311141 411131 211412 211214 211232 2331112'.split(' ');
+const bcR=d=>BC_L[d].replace(/[01]/g,c=>c==='0'?'1':'0'),bcG=d=>bcR(d).split('').reverse().join('');
+function bcChk(s){let n=0;for(let i=s.length-2,w=3;i>=0;i--,w=4-w)n+=(+s[i])*w;return(10-n%10)%10===+s[s.length-1]}
+function bcMods(code){ /* → the modules as a string of 1 (bar) / 0 (space), or '' when the code cannot be drawn */
+  let s=String(code==null?'':code).trim();if(!/^\d+$/.test(s))return'';
+  if(/^\d{12}$/.test(s)&&bcChk(s))s='0'+s; /* UPC-A is an EAN-13 with a leading 0 */
+  if(/^\d{13}$/.test(s)&&bcChk(s)){const p=BC_PAR[+s[0]];let m='101';for(let i=0;i<6;i++){const d=+s[i+1];m+=p[i]==='L'?BC_L[d]:bcG(d)}m+='01010';for(let i=0;i<6;i++)m+=bcR(+s[i+7]);return m+'101'}
+  if(/^\d{8}$/.test(s)&&bcChk(s)){let m='101';for(let i=0;i<4;i++)m+=BC_L[+s[i]];m+='01010';for(let i=0;i<4;i++)m+=bcR(+s[i+4]);return m+'101'}
+  if(s.length<2||s.length>40)return'';
+  const v=[105],n=s.length-s.length%2;for(let i=0;i<n;i+=2)v.push(+s.slice(i,i+2));
+  if(s.length%2)v.push(100,+s[s.length-1]+16); /* odd length: switch to set B for the last digit */
+  let sum=v[0];for(let i=1;i<v.length;i++)sum+=v[i]*i;v.push(sum%103,106);
+  return v.map(x=>{let m='',bar=1;for(const ch of BC_128[x]){m+=(bar?'1':'0').repeat(+ch);bar^=1}return m}).join('');
+}
+function bcSvg(code,px,h){
+  px=px||2;h=h||32;const m=bcMods(code);if(!m)return'';
+  const Q=4,H=h/px; /* the viewBox is in modules, so its height is the pixel height divided by the pixels per module (otherwise the drawing is scaled down to fit the height) */
+  let r='',i=0;
+  while(i<m.length){if(m[i]==='1'){let j=i;while(j<m.length&&m[j]==='1')j++;r+=`<rect x="${i+Q}" y="0" width="${j-i}" height="${H}"/>`;i=j}else i++}
+  const W=m.length+2*Q;
+  return`<svg xmlns="http://www.w3.org/2000/svg" width="${W*px}" height="${h}" viewBox="0 0 ${W} ${H}" shape-rendering="crispEdges" role="img" aria-label="barcode ${esc(String(code).trim())}"><g fill="#000">${r}</g></svg>`;
+}
 function bcLine(no,own){
   const b=barcodeOf(no,own);
   return b?`<div class="muted small bc-line">Barcode <b>${esc(b)}</b></div>`:(IBC_STATE==='ready'||MF.state==='ready'?'<div class="muted small bc-line">Barcode <b>-</b></div>':'');
+}
+/* the small barcode itself: a row of its own right under the card header (the text column beside the picture is far too narrow for it on a phone) */
+function bcImg(no,own){
+  const b=barcodeOf(no,own),g=b?bcSvg(b):'';
+  return g?`<div class="bc-img" title="สแกนได้ด้วยเครื่องสแกน · ${esc(b)}">${g}</div>`:'';
 }
 function loadMakroImages(){
   if(!onMakroSite()||MF.state!=='idle'||MF.imgOnly)return;MF.imgOnly=true;
@@ -5214,7 +5248,7 @@ function ilCard(p,it){
       ${rate}${it.trend&&(it.trend>=1.3||it.trend<=.7)?`<div class="small">${it.trend>=1.3?'<b class="c-md2">ขายเร่งขึ้น</b>':'<b>ขายชะลอลง</b>'} เดือนนี้ ${Math.round(it.trend*100)}% ของ DMS เฉลี่ย</div>`:''}${gapTxt}${ord}
       <div class="oosc-f small muted">${dates}</div>
       <div class="small"><b>แนะนำ:</b> ${TR[2]}</div>`}
-  return`<div class="oosc lv-${lv}"><div class="oosc-h" data-open-no="${esc(it.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>
+  return`<div class="oosc lv-${lv}"><div class="oosc-h" data-open-no="${esc(it.itemNo||'')}" title="กดที่สินค้า = เปิด Item Enquiry">${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy">`:'<span class="nthumb nph"></span>'}<div class="oosc-t"><b>${esc(it.desc||'—')}</b><div class="muted small">Item No. <b>${esc(it.itemNo)}</b>${it.cn?' · Class '+esc(it.cn):''}</div>${bcLine(it.itemNo)}<div class="small">${esc(it.dlbl||'ไม่ระบุแผนก')}</div></div><span class="stk-pair"><button type="button" class="btn sm stk" onclick="oosStock('${k}',0,this)">Item lookup</button><button type="button" class="btn sm stk" onclick="oosStock('${k}',1,this)">Item Enquiry</button></span></div>${bcImg(it.itemNo)}
     <div class="oosc-m">${it.div?`<span class="chip div-${it.div.toLowerCase()}">${it.div}</span>`:''}${status}${head}</div>${facts}
     ${bidBlock(it.itemNo,it.by,'')}</div>`}
 function ilSrc(p){const d=ILT[p],nd=d?d.rows.filter(r=>p==='neg'?(r.a<=-0.1&&!/^active$/i.test(r.st)&&!r.sh):(/discontinu/i.test(r.st)&&!r.sh)).length:0;return d?`<span>ไฟล์: <b>${esc(d.name)}</b>${d.store?' · '+esc(d.store):''}${d.asOf?' · ข้อมูลเมื่อ '+ilD(d.asOf)+' '+String(new Date(d.asOf).getHours()).padStart(2,'0')+'.'+String(new Date(d.asOf).getMinutes()).padStart(2,'0')+' น.':''} · ${d.rows.length.toLocaleString()} รายการ${nd&&(p==='neg'||!$('#'+p+'Disc').checked)?` · ไม่นับ ${p==='neg'?'ที่ไม่ใช่ Active':'Discontinued'} ${nd.toLocaleString()}`:''}${d.info&&d.info.shared?` · สต็อกร่วม (~) ${d.info.shared.toLocaleString()}`:''}${p==='dms'?` · Stock สูง = เกิน ${IL_T} วันของยอดขายจริง`:''}</span>`:''}
