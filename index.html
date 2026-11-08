@@ -136,7 +136,6 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .result-barcode{display:none;flex:0 1 250px;min-width:0;max-width:100%;padding:6px 10px 4px;background:#fff;border:1px solid #d4d4d4;border-radius:12px;box-sizing:border-box;align-items:center;justify-content:center}
 .result-barcode.on{display:flex}
 .result-barcode svg{display:block;width:100%;height:auto;max-height:118px}
-@media (max-width:719px){ .result-barcode{flex:1 1 100%;max-width:300px} }
 .result-barcode text{font-family:"Courier New",Consolas,monospace;fill:#111;user-select:text;-webkit-user-select:text}
 .result-info .loc-row{margin-bottom:0}
 .result-edit-btn{border-radius:20px;background:color-mix(in srgb, var(--brand-red) 8%, white);border:1px solid color-mix(in srgb, var(--brand-red) 22%, white);color:var(--brand-red);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;cursor:pointer;flex-shrink:0;font-size:15px;padding:8px 14px;transition:background .15s,border-color .15s}
@@ -148,6 +147,7 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .result-item-icon img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit}
 .result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
+.result-cat-badge span{white-space:nowrap}
 .loc-row{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
 .loc-combo{border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .loc-combo-green{background:var(--color-background-success);border:0.5px solid var(--color-border-success)}
@@ -177,6 +177,23 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .loc-sticker-edit{position:absolute;top:-6px;right:-6px;background:var(--brand-red);color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:9px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .loc-photo-box{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:9px;overflow:hidden;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);flex-shrink:0;color:var(--color-text-tertiary);font-size:22px;box-sizing:border-box}
 .loc-photo-box img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+/* หน้ารายละเอียดสินค้าบนมือถือ: รูปสินค้าเล็กอยู่ซ้าย ชื่อ+ป้าย Item No อยู่ขวา แล้วป้ายบาร์โค้ดกับป้าย Loc/Location เต็มความกว้างอยู่ใต้ลงมา
+   (จอตั้งแต่ 720px ขึ้นไปใช้แบบเดิม: รูปซ้าย ข้อมูลขวา) ต้องอยู่ต่อจาก .result-flex / .result-image-banner / .loc-* ข้างบนเพื่อให้ค่าชุดนี้ชนะ */
+@media (max-width:719px){
+  .result-flex{display:grid;grid-template-columns:132px minmax(0,1fr);grid-template-areas:"img name" "meta meta";gap:12px 14px;align-items:start}
+  .result-info{display:contents}
+  .result-image-banner{grid-area:img;width:132px;margin:0;font-size:56px;border-radius:14px}
+  .result-name-row{grid-area:name;align-self:center;margin-bottom:0}
+  .result-meta-row{grid-area:meta}
+  .result-cat-badge{border-radius:12px;line-height:1.45;padding:3px 10px}
+  .result-cat-badge span{display:block}
+  .result-cat-badge .rb-sep{display:none}
+  .result-barcode{flex:1 1 100%;max-width:none;padding:8px 10px 6px}
+  .result-barcode svg{max-height:104px}
+  .result-meta-row .loc-row{flex:1 1 100%}
+  .result-meta-row .loc-group-row{width:100%;gap:8px;align-items:stretch}
+  .result-meta-row .loc-combo-gray{flex:1 1 130px;align-items:center}
+}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
@@ -8558,7 +8575,8 @@ function renderDetail(item,fromList){
   rBc.innerHTML=bcSvg;
   rBc.classList.toggle('on',!!bcSvg);
   if(bcSvg)rBc.setAttribute('aria-label',t('barcodeLabel')+' '+item.barcode); else rBc.removeAttribute('aria-label');
-  document.getElementById('rBadge').textContent=t('itemNoLabel')+' '+item.itemNo+(item.barcode?' · '+t('barcodeLabel')+' '+item.barcode:'');
+  // แยกเป็น 2 ส่วนเพื่อให้จอแคบขึ้นบรรทัดใหม่ตรงกลางเป๊ะ (Item No บรรทัดบน / บาร์โค้ดบรรทัดล่าง) ไม่ตัดกลางตัวเลข
+  document.getElementById('rBadge').innerHTML='<span>'+escapeHtml(t('itemNoLabel')+' '+item.itemNo)+'</span>'+(item.barcode?'<span class="rb-sep"> · </span><span>'+escapeHtml(t('barcodeLabel')+' '+item.barcode)+'</span>':'');
   document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary)';
   const rEditBtn=document.getElementById('rEditBtn');
   if(isEmployee()){
@@ -8581,13 +8599,13 @@ function renderDetail(item,fromList){
     rLoc.innerHTML=locGroups.map(g=>
       '<div class="loc-group-row">'+
       '<div class="loc-combo loc-combo-green">'+
-      '<div class="loc-combo-label"><i class="ti ti-map-pin" aria-hidden="true"></i>'+t('locLabel')+' '+escapeHtml(g.loc)+'</div>'+
+      '<div class="loc-combo-label"><i class="ti ti-map-pin" aria-hidden="true"></i><span>'+t('locLabel')+' <span style="white-space:nowrap">'+escapeHtml(g.loc)+'</span></span></div>'+
       renderLocSignHTML(g.loc)+
       '<div class="loc-combo-caption">'+t('locSampleImageLabel')+'</div>'+
       '</div>'+
       g.locations.map(loc=>
         '<div class="loc-combo loc-combo-gray'+(canEditLoc?' loc-pill-editable':'')+'"'+(canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')+'>'+
-        '<div class="loc-combo-label"><i class="ti ti-map-2" aria-hidden="true"></i>'+t('locationLabel')+' '+escapeHtml(loc)+(canEditLoc?'<i class="ti ti-pencil" aria-hidden="true"></i>':'')+'</div>'+
+        '<div class="loc-combo-label"><i class="ti ti-map-2" aria-hidden="true"></i><span>'+t('locationLabel')+' <span style="white-space:nowrap">'+escapeHtml(loc)+'</span></span>'+(canEditLoc?'<i class="ti ti-pencil" aria-hidden="true"></i>':'')+'</div>'+
         renderLocationStickerHTML(loc,false,'')+
         '<div class="loc-combo-caption">'+t('locSampleImageLabel')+'</div>'+
         '</div>'
