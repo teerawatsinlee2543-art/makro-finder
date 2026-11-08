@@ -450,7 +450,10 @@ table.resp thead th{position:sticky;top:calc(var(--navh,52px) + env(safe-area-in
 .nhead{display:flex;gap:10px;align-items:flex-start}
 .nthumb{flex:none;width:68px;height:68px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--line)}
 .bc-img{display:block;width:fit-content;max-width:100%;margin:0;padding:4px 8px 5px;background:#fff;border:1px solid var(--line);border-radius:6px;line-height:1.2;color:#111}
-.bc-cap{font-size:11px;font-weight:700;color:#475569;margin:0 0 3px;text-align:left} /* "Barcode" at the top left of the label */
+.bc-cap{font-size:11px;font-weight:700;color:#475569;margin:0 0 3px;text-align:left} /* "Item No." / "Barcode" at the top left of the label */
+.bc-sw{display:block;margin:5px 0 0 auto;padding:2px 10px;border:1px solid #f4b6bd;border-radius:99px;background:#fde8ea;color:#c0182b;font:inherit;font-size:11px;font-weight:700;line-height:1.35;cursor:pointer} /* small light-red pill: switch between the Item No. barcode and the product Barcode */
+.bc-sw:hover{background:#fbd5d9}
+@media print{.bc-sw{display:none!important}}
 .bc-num{margin-top:3px;font:600 12.5px/1.2 "Courier New",Consolas,monospace;letter-spacing:.06em;color:#111;text-align:center;user-select:text;-webkit-user-select:text;white-space:nowrap} /* the number under the bars, grouped like on a pack (8 851932 392266) */ /* the small barcode under the "Barcode" line: always black on white (a scanner cannot read it on the dark theme), 2 px per module so it stays scannable */
 .bc-img svg{display:block;max-width:100%;height:auto}
 .nph{display:block;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a0a8b5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='2'/%3E%3Ccircle cx='9' cy='10' r='1.6'/%3E%3Cpath d='M21 16l-5-5-8 8'/%3E%3C/svg%3E") no-repeat center/30px}
@@ -4942,19 +4945,19 @@ const BC_L=['0001101','0011001','0010011','0111101','0100011','0110001','0101111
   BC_128='212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 114131 311141 411131 211412 211214 211232 2331112'.split(' ');
 const bcR=d=>BC_L[d].replace(/[01]/g,c=>c==='0'?'1':'0'),bcG=d=>bcR(d).split('').reverse().join('');
 function bcChk(s){let n=0;for(let i=s.length-2,w=3;i>=0;i--,w=4-w)n+=(+s[i])*w;return(10-n%10)%10===+s[s.length-1]}
-function bcMods(code){ /* → the modules as a string of 1 (bar) / 0 (space), or '' when the code cannot be drawn */
+function bcMods(code,sym){ /* → the modules as a string of 1 (bar) / 0 (space), or '' when the code cannot be drawn. sym='128': always Code 128 (the Item No is drawn like this, whatever its length) */
   let s=String(code==null?'':code).trim();if(!/^\d+$/.test(s))return'';
-  if(/^\d{12}$/.test(s)&&bcChk(s))s='0'+s; /* UPC-A is an EAN-13 with a leading 0 */
-  if(/^\d{13}$/.test(s)&&bcChk(s)){const p=BC_PAR[+s[0]];let m='101';for(let i=0;i<6;i++){const d=+s[i+1];m+=p[i]==='L'?BC_L[d]:bcG(d)}m+='01010';for(let i=0;i<6;i++)m+=bcR(+s[i+7]);return m+'101'}
-  if(/^\d{8}$/.test(s)&&bcChk(s)){let m='101';for(let i=0;i<4;i++)m+=BC_L[+s[i]];m+='01010';for(let i=0;i<4;i++)m+=bcR(+s[i+4]);return m+'101'}
+  if(sym!=='128'&&/^\d{12}$/.test(s)&&bcChk(s))s='0'+s; /* UPC-A is an EAN-13 with a leading 0 */
+  if(sym!=='128'&&/^\d{13}$/.test(s)&&bcChk(s)){const p=BC_PAR[+s[0]];let m='101';for(let i=0;i<6;i++){const d=+s[i+1];m+=p[i]==='L'?BC_L[d]:bcG(d)}m+='01010';for(let i=0;i<6;i++)m+=bcR(+s[i+7]);return m+'101'}
+  if(sym!=='128'&&/^\d{8}$/.test(s)&&bcChk(s)){let m='101';for(let i=0;i<4;i++)m+=BC_L[+s[i]];m+='01010';for(let i=0;i<4;i++)m+=bcR(+s[i+4]);return m+'101'}
   if(s.length<2||s.length>40)return'';
   const v=[105],n=s.length-s.length%2;for(let i=0;i<n;i+=2)v.push(+s.slice(i,i+2));
   if(s.length%2)v.push(100,+s[s.length-1]+16); /* odd length: switch to set B for the last digit */
   let sum=v[0];for(let i=1;i<v.length;i++)sum+=v[i]*i;v.push(sum%103,106);
   return v.map(x=>{let m='',bar=1;for(const ch of BC_128[x]){m+=(bar?'1':'0').repeat(+ch);bar^=1}return m}).join('');
 }
-function bcSvg(code,px,h){
-  px=px||2;h=h||32;const m=bcMods(code);if(!m)return'';
+function bcSvg(code,px,h,sym){
+  px=px||2;h=h||32;const m=bcMods(code,sym);if(!m)return'';
   const Q=4,H=h/px; /* the viewBox is in modules, so its height is the pixel height divided by the pixels per module (otherwise the drawing is scaled down to fit the height) */
   let r='',i=0;
   while(i<m.length){if(m[i]==='1'){let j=i;while(j<m.length&&m[j]==='1')j++;r+=`<rect x="${i+Q}" y="0" width="${j-i}" height="${H}"/>`;i=j}else i++}
@@ -4965,11 +4968,27 @@ function bcLine(no,own){
   const b=barcodeOf(no,own);
   return b?`<div class="muted small bc-line">Barcode <b>${esc(b)}</b></div>`:(IBC_STATE==='ready'||MF.state==='ready'?'<div class="muted small bc-line">Barcode <b>-</b></div>':'');
 }
-/* the small barcode itself: a row of its own right under the card header (the text column beside the picture is far too narrow for it on a phone) */
-function bcImg(no,own){
-  const b=barcodeOf(no,own),g=b?bcSvg(b):'';
-  return g?`<div class="bc-img" title="สแกนได้ด้วยเครื่องสแกน · ${esc(b)}"><div class="bc-cap">Barcode</div>${g}<div class="bc-num">${esc(bcFmt(b))}</div></div>`:'';
+/* the barcode label itself (a row of its own right under the card header, or the end of the product cell in the Item NBS table).
+   It shows the barcode of the ITEM NO first (Code 128, "Item No." caption) and has a small light-red pill that switches it to the product barcode on the pack ("Barcode") and back.
+   Each label keeps its own state in data-mode; every time a list is drawn again it starts at the Item No. */
+function bcLabelInner(no,bc,mode){
+  const it=no?bcSvg(no,2,32,'128'):'',pr=(bc&&bc!==no)?bcSvg(bc):'',both=!!(it&&pr),m=(mode==='prod'&&pr)?'prod':(it?'item':(pr?'prod':''));
+  if(!m)return'';
+  const svg=m==='item'?it:pr,cap=m==='item'?'Item No.':'Barcode',digits=m==='item'?no:bcFmt(bc);
+  return`<div class="bc-cap">${cap}</div>${svg}<div class="bc-num">${esc(digits)}</div>`+(both?`<button type="button" class="bc-sw">${m==='item'?'สลับเป็น Barcode':'สลับเป็น Item No.'}</button>`:'');
 }
+function bcImg(no,own){
+  const n=String(no==null?'':no).trim(),b=String(barcodeOf(no,own)||'').trim(),inner=bcLabelInner(n,b,'item');
+  return inner?`<div class="bc-img" data-no="${esc(n)}" data-bc="${esc(b)}" data-mode="item" title="สแกนได้ด้วยเครื่องสแกน">${inner}</div>`:'';
+}
+/* one click handler for every label (also for the copy of a card that is lifted beside the Item Enquiry window): the pill never opens the card's own click action */
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('.bc-sw');if(!b)return;
+  const box=b.closest('.bc-img');if(!box)return;
+  e.preventDefault();e.stopPropagation();
+  box.dataset.mode=box.dataset.mode==='item'?'prod':'item';
+  box.innerHTML=bcLabelInner(box.dataset.no,box.dataset.bc,box.dataset.mode);
+},true);
 function bcFmt(code){ /* the digits grouped like the number printed under the bars of a pack */
   const s=String(code==null?'':code).trim();
   if(/^\d{13}$/.test(s)&&bcChk(s))return s[0]+' '+s.slice(1,7)+' '+s.slice(7);
