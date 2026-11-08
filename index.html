@@ -212,6 +212,16 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 /* จอแคบมาก (กว้างน้อยกว่า 340px เช่น iPhone SE รุ่นแรก): ช่องขวาของรูปเหลือราว 110px แคบเกินกว่าจะสแกนได้ จึงใช้ป้ายเต็มความกว้างใต้แถวรูปแทน
    (ทดสอบถอดรหัสที่ความละเอียดจอมือถือจริง x2 / x3: กล่องเล็กกว้าง 120–198px อ่านได้ครบ) */
 @media (max-width:339px){ .rb-m.on{display:none} .result-barcode.on{display:block} }
+/* จอตั้งแต่ 720px ขึ้นไป: ป้ายบาร์โค้ดกับป้าย Loc / Location อยู่แถวเดียวกัน ให้สูงเท่ากันทุกช่อง (ป้ายยืดตามกัน เนื้อหาในป้ายบาร์โค้ดกระจายบน-ล่าง ปุ่มสลับอยู่ล่างสุด) */
+@media (min-width:720px){
+  .result-meta-row{align-items:stretch}
+  .result-meta-row .loc-row{display:flex;flex-direction:column}
+  .result-meta-row .loc-group-row{flex:1 1 auto;align-items:stretch}
+  .result-meta-row .loc-group-row>.loc-combo{justify-content:space-between}
+  .result-barcode .rb-num{margin-bottom:6px}
+  .result-barcode .rb-cap{margin-bottom:auto;padding-bottom:3px}
+  .result-barcode .rb-sw{margin-top:auto}
+}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
