@@ -177,37 +177,37 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .loc-sticker-edit{position:absolute;top:-6px;right:-6px;background:var(--brand-red);color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:9px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .loc-photo-box{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:9px;overflow:hidden;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);flex-shrink:0;color:var(--color-text-tertiary);font-size:22px;box-sizing:border-box}
 .loc-photo-box img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-/* หน้ารายละเอียดสินค้าบนมือถือ: รูปสินค้าเล็กอยู่ซ้าย ชื่อ+ป้าย Item No อยู่ขวา แล้วป้ายบาร์โค้ดกับป้าย Loc/Location เต็มความกว้างอยู่ใต้ลงมา
+/* หน้ารายละเอียดสินค้าบนมือถือ: รูปสินค้าเล็กอยู่ซ้าย ชื่อ + ป้าย Item No/เลขบาร์โค้ด + บาร์โค้ดตัวเล็ก (สแกนได้) อยู่ขวา แล้วป้าย Loc/Location แบบเดิมอยู่ใต้ลงมา
    (จอตั้งแต่ 720px ขึ้นไปใช้แบบเดิม: รูปซ้าย ข้อมูลขวา) ต้องอยู่ต่อจาก .result-flex / .result-image-banner / .loc-* ข้างบนเพื่อให้ค่าชุดนี้ชนะ */
 .result-barcode .rb-mob{display:none}
 .result-barcode .rb-desk{width:100%}
+.rb-m{display:none}
 @media (max-width:719px){
   .result-flex{display:grid;grid-template-columns:132px minmax(0,1fr);grid-template-areas:"img name" "meta meta";gap:12px 14px;align-items:start}
   .result-info{display:contents}
   .result-image-banner{grid-area:img;width:132px;margin:0;font-size:56px;border-radius:14px}
   .result-name-row{grid-area:name;align-self:center;margin-bottom:0}
+  .result-name-block{flex:1 1 auto}
   .result-meta-row{grid-area:meta}
   .result-cat-badge{border-radius:12px;line-height:1.45;padding:3px 10px}
   .result-cat-badge span{display:block}
   .result-cat-badge .rb-sep{display:none}
-  /* ป้ายบาร์โค้ดบนมือถือ: "บาร์โค้ด" มุมซ้ายบน / แท่งล้วนกึ่งกลาง / เลขตัวหนังสือใต้แท่ง (จอกว้างใช้ .rb-desk แบบเดิม) */
-  .result-barcode{flex:1 1 100%;max-width:none;display:none;padding:9px 12px 8px;border-radius:14px}
-  .result-barcode.on{display:block}
+  /* บาร์โค้ดตัวเล็กใต้เลขบาร์โค้ด: กล่องขาวเล็ก ๆ แท่งสูง 40px (ช่องละ ~1.7px ขึ้นไป) สแกนจากหน้าจอได้ */
+  .rb-m.on{display:block;width:min(100%,214px);margin-top:8px;padding:5px 7px;background:#fff;border:1px solid #d4d4d4;border-radius:10px;box-sizing:border-box}
+  .rb-m svg{display:block;width:100%;height:40px}
+  /* ป้ายใหญ่เต็มความกว้างใต้แถวรูป ใช้เฉพาะรหัสยาว (Code 39 เช่นบาร์โค้ดลัง) ที่ย่อเป็นกล่องเล็กแล้วสแกนไม่ติด: "บาร์โค้ด" มุมซ้ายบน / แท่งกึ่งกลาง / เลขใต้แท่ง */
+  .result-barcode{flex:1 1 100%;max-width:none;padding:9px 12px 8px;border-radius:14px}
+  .result-barcode.on{display:none}
+  .result-barcode.on.rb-wide{display:block}
   .result-barcode .rb-desk{display:none}
   .result-barcode .rb-mob{display:block}
   .rb-cap{font-size:12px;font-weight:700;line-height:1.2;color:#475569;margin-bottom:5px}
   .result-barcode .rb-mob svg{display:block;width:min(100%,300px);height:54px;max-height:none;margin:0 auto}
   .rb-num{margin-top:5px;font:600 16px/1.2 "Courier New",Consolas,monospace;letter-spacing:.12em;color:#111;text-align:center;white-space:nowrap;user-select:text;-webkit-user-select:text}
-  /* Loc + Location: สองช่องเท่ากันเรียงข้างกัน (Loc สีเขียว | Location สีเทา) เนื้อหากึ่งกลางทั้งคู่ / มี Location หลายอัน ก็เรียงต่อเป็นคู่ ๆ ลงมา */
-  .result-meta-row .loc-row{flex:1 1 100%}
-  .result-meta-row .loc-group-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch;width:100%}
-  .result-meta-row .loc-group-row>*{min-width:0}
-  .result-meta-row .loc-group-row>:only-child{grid-column:1/-1}
-  .result-meta-row .loc-group-row>.loc-combo{align-items:center;justify-content:space-between;padding:10px 8px 8px}
-  .result-meta-row .loc-combo-label{justify-content:center;padding-left:0;text-align:center}
 }
-/* จอแคบมาก (ราว 360px ลงไป): ชื่อ "Location 035-033" ขึ้นสองบรรทัด จึงจองความสูงสองบรรทัดให้ป้ายทั้งสองช่อง ป้ายตัวอย่างสองอันจะได้อยู่ระดับเดียวกัน */
-@media (max-width:380px){ .result-meta-row .loc-combo-label{min-height:34px} }
+/* จอแคบมาก (กว้างน้อยกว่า 340px เช่น iPhone SE รุ่นแรก): ช่องขวาของรูปเหลือราว 110px แคบเกินกว่าจะสแกนได้ จึงใช้ป้ายเต็มความกว้างใต้แถวรูปแทน
+   (ทดสอบถอดรหัสที่ความละเอียดจอมือถือจริง x2 / x3: กล่องเล็กกว้าง 120–198px อ่านได้ครบ) */
+@media (max-width:339px){ .rb-m.on{display:none} .result-barcode.on{display:block} }
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
@@ -1187,6 +1187,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
               <div class="result-name-block">
                 <div class="result-name" id="rName"></div>
                 <span class="result-cat-badge" id="rBadge"></span>
+                <div class="rb-m" id="rBarcodeM" role="img"></div>
               </div>
               <span id="editBtnDesktopSlot" class="edit-btn-desktop-slot"></span>
             </div>
@@ -8497,7 +8498,7 @@ function barcodeSVG(code,bare){
   const BAR_H=38,GUARD_H=44,TXT_Y=52,SVG_H=bare?GUARD_H+1:55;
   let rects='',texts='',W=0,svgH=SVG_H,m=eanModel(code);
   if(m){
-    const qL=bare?9:m.qL,qR=bare?9:m.qR;
+    const qL=bare?6:m.qL,qR=bare?6:m.qR;
     let x=qL;
     m.segs.forEach(sg=>{
       const bits=sg[0],tall=sg[1];
@@ -8600,6 +8601,13 @@ function renderDetail(item,fromList){
   rBc.innerHTML=bcSvg?('<div class="rb-desk">'+bcSvg+'</div><div class="rb-mob"><div class="rb-cap">'+escapeHtml(t('barcodeLabel'))+'</div>'+barcodeSVG(item.barcode,true)+'<div class="rb-num">'+escapeHtml(barcodeDigits(item.barcode))+'</div></div>'):'';
   rBc.classList.toggle('on',!!bcSvg);
   if(bcSvg)rBc.setAttribute('aria-label',t('barcodeLabel')+' '+item.barcode); else rBc.removeAttribute('aria-label');
+  // มือถือ: EAN/UPC (ตัวสั้น) → กล่องเล็กใต้เลขบาร์โค้ดข้างรูป / รหัสยาว (Code 39) → ป้ายเต็มความกว้างใต้แถวรูป (rb-wide) กล่องเล็กจะสแกนไม่ติด
+  const bcWide=!!bcSvg&&!eanModel(String(item.barcode).trim());
+  rBc.classList.toggle('rb-wide',bcWide);
+  const rBm=document.getElementById('rBarcodeM');
+  rBm.innerHTML=(bcSvg&&!bcWide)?barcodeSVG(item.barcode,true):'';
+  rBm.classList.toggle('on',!!bcSvg&&!bcWide);
+  if(bcSvg&&!bcWide)rBm.setAttribute('aria-label',t('barcodeLabel')+' '+item.barcode); else rBm.removeAttribute('aria-label');
   // แยกเป็น 2 ส่วนเพื่อให้จอแคบขึ้นบรรทัดใหม่ตรงกลางเป๊ะ (Item No บรรทัดบน / บาร์โค้ดบรรทัดล่าง) ไม่ตัดกลางตัวเลข
   document.getElementById('rBadge').innerHTML='<span>'+escapeHtml(t('itemNoLabel')+' '+item.itemNo)+'</span>'+(item.barcode?'<span class="rb-sep"> · </span><span>'+escapeHtml(t('barcodeLabel')+' '+item.barcode)+'</span>':'');
   document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary)';
