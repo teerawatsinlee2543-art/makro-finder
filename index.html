@@ -179,6 +179,8 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
 .loc-photo-box img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 /* หน้ารายละเอียดสินค้าบนมือถือ: รูปสินค้าเล็กอยู่ซ้าย ชื่อ+ป้าย Item No อยู่ขวา แล้วป้ายบาร์โค้ดกับป้าย Loc/Location เต็มความกว้างอยู่ใต้ลงมา
    (จอตั้งแต่ 720px ขึ้นไปใช้แบบเดิม: รูปซ้าย ข้อมูลขวา) ต้องอยู่ต่อจาก .result-flex / .result-image-banner / .loc-* ข้างบนเพื่อให้ค่าชุดนี้ชนะ */
+.result-barcode .rb-mob{display:none}
+.result-barcode .rb-desk{width:100%}
 @media (max-width:719px){
   .result-flex{display:grid;grid-template-columns:132px minmax(0,1fr);grid-template-areas:"img name" "meta meta";gap:12px 14px;align-items:start}
   .result-info{display:contents}
@@ -188,12 +190,24 @@ input,textarea{user-select:text;-webkit-user-select:text;-webkit-touch-callout:d
   .result-cat-badge{border-radius:12px;line-height:1.45;padding:3px 10px}
   .result-cat-badge span{display:block}
   .result-cat-badge .rb-sep{display:none}
-  .result-barcode{flex:1 1 100%;max-width:none;padding:8px 10px 6px}
-  .result-barcode svg{max-height:104px}
+  /* ป้ายบาร์โค้ดบนมือถือ: "บาร์โค้ด" มุมซ้ายบน / แท่งล้วนกึ่งกลาง / เลขตัวหนังสือใต้แท่ง (จอกว้างใช้ .rb-desk แบบเดิม) */
+  .result-barcode{flex:1 1 100%;max-width:none;display:none;padding:9px 12px 8px;border-radius:14px}
+  .result-barcode.on{display:block}
+  .result-barcode .rb-desk{display:none}
+  .result-barcode .rb-mob{display:block}
+  .rb-cap{font-size:12px;font-weight:700;line-height:1.2;color:#475569;margin-bottom:5px}
+  .result-barcode .rb-mob svg{display:block;width:min(100%,300px);height:54px;max-height:none;margin:0 auto}
+  .rb-num{margin-top:5px;font:600 16px/1.2 "Courier New",Consolas,monospace;letter-spacing:.12em;color:#111;text-align:center;white-space:nowrap;user-select:text;-webkit-user-select:text}
+  /* Loc + Location: สองช่องเท่ากันเรียงข้างกัน (Loc สีเขียว | Location สีเทา) เนื้อหากึ่งกลางทั้งคู่ / มี Location หลายอัน ก็เรียงต่อเป็นคู่ ๆ ลงมา */
   .result-meta-row .loc-row{flex:1 1 100%}
-  .result-meta-row .loc-group-row{width:100%;gap:8px;align-items:stretch}
-  .result-meta-row .loc-combo-gray{flex:1 1 130px;align-items:center}
+  .result-meta-row .loc-group-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch;width:100%}
+  .result-meta-row .loc-group-row>*{min-width:0}
+  .result-meta-row .loc-group-row>:only-child{grid-column:1/-1}
+  .result-meta-row .loc-group-row>.loc-combo{align-items:center;justify-content:space-between;padding:10px 8px 8px}
+  .result-meta-row .loc-combo-label{justify-content:center;padding-left:0;text-align:center}
 }
+/* จอแคบมาก (ราว 360px ลงไป): ชื่อ "Location 035-033" ขึ้นสองบรรทัด จึงจองความสูงสองบรรทัดให้ป้ายทั้งสองช่อง ป้ายตัวอย่างสองอันจะได้อยู่ระดับเดียวกัน */
+@media (max-width:380px){ .result-meta-row .loc-combo-label{min-height:34px} }
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
@@ -8476,13 +8490,15 @@ function eanModel(code){
   }
   return null;
 }
-function barcodeSVG(code){
+// bare=true: แท่งล้วน (ไม่มีเลขใต้แท่ง สูงเท่าแท่ง ตัวเลขไปใส่เป็นตัวหนังสือ HTML แทน) ใช้กับป้ายบนมือถือ ที่ยืดความสูงเองด้วย CSS
+function barcodeSVG(code,bare){
   code=String(code||'').trim();
   if(!code)return '';
-  const BAR_H=38,GUARD_H=44,TXT_Y=52,SVG_H=55;
+  const BAR_H=38,GUARD_H=44,TXT_Y=52,SVG_H=bare?GUARD_H+1:55;
   let rects='',texts='',W=0,svgH=SVG_H,m=eanModel(code);
   if(m){
-    let x=m.qL;
+    const qL=bare?9:m.qL,qR=bare?9:m.qR;
+    let x=qL;
     m.segs.forEach(sg=>{
       const bits=sg[0],tall=sg[1];
       let i=0;
@@ -8491,8 +8507,8 @@ function barcodeSVG(code){
       }
       x+=bits.length;
     });
-    W=x+m.qR;
-    m.digits.forEach(d=>{ texts+='<text x="'+d.x+'" y="'+TXT_Y+'" font-size="10" text-anchor="middle">'+d.ch+'</text>'; });
+    W=x+qR;
+    if(!bare)m.digits.forEach(d=>{ texts+='<text x="'+d.x+'" y="'+TXT_Y+'" font-size="10" text-anchor="middle">'+d.ch+'</text>'; });
   } else {
     const up=code.toUpperCase();
     if(!/^[0-9A-Z.\- $\/+%]+$/.test(up)||up.length>30)return '';
@@ -8503,11 +8519,19 @@ function barcodeSVG(code){
     W=x+10;
     // Code 39 ยาวกว่า EAN มาก ถ้าใช้ความสูงเท่ากันจะแบนเป็นเส้นบาง ๆ จึงเพิ่มความสูงตามความกว้าง
     const bh=Math.max(GUARD_H,Math.round(W*0.3)),fs=Math.max(10,Math.round(W*0.05));
-    svgH=bh+fs+3;
+    svgH=bare?bh+1:bh+fs+3;
     rs.forEach(r=>{ rects+='<rect x="'+r[0]+'" y="0" width="'+r[1]+'" height="'+bh+'"/>'; });
-    texts='<text x="'+(W/2)+'" y="'+(bh+fs)+'" font-size="'+fs+'" text-anchor="middle">'+escapeHtml(up)+'</text>';
+    if(!bare)texts='<text x="'+(W/2)+'" y="'+(bh+fs)+'" font-size="'+fs+'" text-anchor="middle">'+escapeHtml(up)+'</text>';
   }
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+svgH+'" shape-rendering="crispEdges" aria-hidden="true"><g fill="#000">'+rects+'</g>'+texts+'</svg>';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+svgH+'"'+(bare?' preserveAspectRatio="none"':'')+' shape-rendering="crispEdges" aria-hidden="true"><g fill="#000">'+rects+'</g>'+texts+'</svg>';
+}
+// เลขใต้แท่งแบบจัดกลุ่มเหมือนที่พิมพ์บนห่อสินค้า (8 850125 073364)
+function barcodeDigits(code){
+  const s=String(code||'').trim();
+  if(/^\d{13}$/.test(s)&&eanCheckOk(s))return s[0]+' '+s.slice(1,7)+' '+s.slice(7);
+  if(/^\d{12}$/.test(s)&&eanCheckOk(s))return s[0]+' '+s.slice(1,6)+' '+s.slice(6,11)+' '+s[11];
+  if(/^\d{8}$/.test(s)&&eanCheckOk(s))return s.slice(0,4)+' '+s.slice(4);
+  return s.toUpperCase();
 }
 
 // ==== หัวหน้าจอปักหมุด: เลื่อนหน้าลงแล้วเหลือแถบเล็ก [กลับ][ค้นหา][สแกน] ติดขอบบนตลอด ====
@@ -8572,7 +8596,8 @@ function renderDetail(item,fromList){
   // ป้าย "Item No · บาร์โค้ด" เป็นข้อความเหมือนเดิม (คัดลอกเลขได้) + รูปแท่งบาร์โค้ดเพิ่มอีกป้ายอยู่ข้าง Loc/Location (วาดไม่ได้ก็ซ่อนรูปไว้)
   const bcSvg=item.barcode?barcodeSVG(item.barcode):'';
   const rBc=document.getElementById('rBarcode');
-  rBc.innerHTML=bcSvg;
+  // จอกว้างใช้แบบเดิม (เลขอยู่ใน SVG) / มือถือใช้ป้ายใหม่: คำว่า "บาร์โค้ด" มุมซ้ายบน + แท่งล้วน + เลขตัวหนังสือใต้แท่ง (สลับด้วย CSS)
+  rBc.innerHTML=bcSvg?('<div class="rb-desk">'+bcSvg+'</div><div class="rb-mob"><div class="rb-cap">'+escapeHtml(t('barcodeLabel'))+'</div>'+barcodeSVG(item.barcode,true)+'<div class="rb-num">'+escapeHtml(barcodeDigits(item.barcode))+'</div></div>'):'';
   rBc.classList.toggle('on',!!bcSvg);
   if(bcSvg)rBc.setAttribute('aria-label',t('barcodeLabel')+' '+item.barcode); else rBc.removeAttribute('aria-label');
   // แยกเป็น 2 ส่วนเพื่อให้จอแคบขึ้นบรรทัดใหม่ตรงกลางเป๊ะ (Item No บรรทัดบน / บาร์โค้ดบรรทัดล่าง) ไม่ตัดกลางตัวเลข
