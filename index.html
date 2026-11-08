@@ -1036,7 +1036,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div class="search-row">
       <div class="search-box">
         <i class="ti ti-search" aria-hidden="true"></i>
-        <input type="text" id="si" data-i18n-placeholder="searchPlaceholder" placeholder="ค้นหาสินค้า..." oninput="search(this.value)">
+        <input type="text" id="si" data-i18n-placeholder="searchPlaceholder" placeholder="ค้นหาสินค้า..." oninput="searchInput(this.value)">
         <i class="ti ti-x" id="clr" style="display:none;cursor:pointer" onclick="clearSearch()" data-i18n-title="clearAria" aria-label="ล้าง"></i>
       </div>
       <span class="search-scan-btn" onclick="openScanner()" data-i18n-title="scanTitle" title="สแกน QR" role="button" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i><span data-i18n="scanCaption">สแกน</span></span>
@@ -8335,6 +8335,73 @@ function search(q){
     renderList(matches,q);
   }
 }
+
+/* เครื่องสแกนบาร์โค้ด USB (ทำงานเหมือนคีย์บอร์ด: พิมพ์เลขทีละตัวเร็วมากแล้วปิดด้วย Enter / Tab หรือไม่ปิดเลย) ใช้กับช่องค้นหาได้ครบ:
+   1) สแกนชิ้นต่อไป "แทนที่" ชิ้นก่อน (เดิมต่อท้ายเลขเก่า จึงค้นไม่เจอทุกครั้งที่สแกนซ้ำ ต้องกดล้างเอง)
+   2) Enter / Tab ที่เครื่องสแกนส่งมา ไม่ทำให้เคอร์เซอร์หลุดออกจากช่อง
+   3) คีย์บอร์ด Windows เป็นภาษาไทย: เครื่องสแกนส่งตัวอักษรไทยตามตำแหน่งปุ่ม แปลงกลับเป็นเลขจากรหัสปุ่ม (ใช้เฉพาะตอนพิมพ์เร็วแบบเครื่องสแกน ไม่กระทบการพิมพ์ชื่อสินค้าเป็นภาษาไทยด้วยมือ)
+   4) สแกนตอนยังไม่ได้คลิกช่องค้นหา: เลขที่รัวเข้ามาเร็วผิดปกติถูกส่งเข้าช่องค้นหาให้ (เฉพาะหน้าค้นหา ไม่มีหน้าต่างซ้อนเปิดอยู่ และไม่มีช่องกรอกอื่นถูกโฟกัสอยู่)
+   "เร็วแบบเครื่องสแกน" = อย่างน้อย 6 ตัวอักษร เฉลี่ยห่างกันไม่เกิน 45 มิลลิวินาที (คนพิมพ์ช้ากว่านั้นมาก) */
+(function initHandScanner(){
+  const si=document.getElementById('si'); if(!si)return;
+  const FAST=45, MINLEN=6, GAP=300, IDLE=150;
+  let scanTyping=false;      // true ระหว่างที่ตัวอักษรรัวเข้ามาเร็วแบบเครื่องสแกน: searchInput() ไม่ค้นทีละตัว
+  window.searchInput=q=>{ if(!scanTyping)search(q); };
+  const latinOf=e=>{
+    const m=/^(?:Digit|Numpad)(\d)$/.exec(e.code||''); if(m)return m[1];
+    const k=/^Key([A-Z])$/.exec(e.code||''); if(k)return e.shiftKey?k[1]:k[1].toLowerCase();
+    return '';
+  };
+  // ---- ในช่องค้นหา ----
+  /* เวลาของปุ่มใช้ e.timeStamp (เวลาที่เบราว์เซอร์รับปุ่มจริง) ไม่ใช่เวลาที่โค้ดนี้ได้ทำงาน: ทุกตัวอักษรทำให้ค้นสินค้า 17,000 รายการ (~40-80 ms) ซึ่งหน่วงโค้ดนี้ ถ้าจับเวลาตอนทำงาน เครื่องสแกนจะดูเหมือนคนพิมพ์ช้า */
+  const b={first:0,last:0,n:0,codes:''}; let idleT=null;
+  const reset=()=>{ b.first=b.last=0; b.n=0; b.codes=''; scanTyping=false; };
+  const isBurst=()=>b.n>=MINLEN&&(b.last-b.first)/(b.n-1)<FAST;
+  function finish(){
+    clearTimeout(idleT);
+    if(!isBurst()){ const was=scanTyping; reset(); if(was)search(si.value); return false; }
+    let v=si.value;
+    if(/[^\x00-\x7F]/.test(v)&&b.codes.length===v.length&&/^[0-9A-Za-z]+$/.test(b.codes)){ v=b.codes; si.value=v; }      // (คีย์บอร์ดไทย: ตัวอักษรไทย -> เลขจากรหัสปุ่ม)
+    reset(); search(v);      // ค้นครั้งเดียวตอนสแกนจบ (ระหว่างที่รัวเข้ามา ไม่ค้นทีละตัว)
+    si.select();      // สแกนชิ้นต่อไปจะแทนที่ค่านี้ทั้งหมด
+    return true;
+  }
+  si.addEventListener('keydown',e=>{
+    if(e.isComposing||e.keyCode===229)return;
+    if(e.key==='Enter'||e.key==='Tab'){ if(finish()&&e.key==='Tab')e.preventDefault(); return; }
+    if(e.key==='Backspace'||e.key==='Delete'||e.key==='Escape'){ reset(); return; }
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    const c=latinOf(e)||(e.key&&e.key.length===1&&/[0-9A-Za-z]/.test(e.key)?e.key:''); if(!c)return;
+    const now=e.timeStamp||performance.now();
+    if(now-b.last>GAP){ b.first=now; b.n=0; b.codes=''; scanTyping=false; }
+    b.n++; b.last=now; b.codes+=c;
+    scanTyping=b.n>=3&&(b.last-b.first)/(b.n-1)<FAST;      // เร็วแบบเครื่องสแกนแล้ว: งดค้นทีละตัวจนกว่าจะจบ
+    clearTimeout(idleT); idleT=setTimeout(finish,IDLE);
+  });
+  // ---- ยังไม่ได้โฟกัสช่องไหนเลย ----
+  let g={buf:'',first:0,last:0,n:0}, gT=null;
+  const canTake=()=>{
+    const main=document.getElementById('mainApp'); if(!main||getComputedStyle(main).display==='none')return false;
+    return ![...document.querySelectorAll('.promo-date-overlay,.pallet-overlay,.waste-overlay,.map-overlay,.promo-view-overlay,.scan-overlay')].some(el=>getComputedStyle(el).display!=='none');
+  };
+  function take(){
+    clearTimeout(gT);
+    const ok=g.n>=MINLEN&&(g.last-g.first)/(g.n-1)<FAST, code=g.buf; g.buf='';g.n=0;
+    if(!ok||!canTake())return false;
+    si.focus(); search(code); si.select(); return true;
+  }
+  document.addEventListener('keydown',e=>{
+    const a=document.activeElement;
+    if(a&&(/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||a.isContentEditable))return;
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    if(e.key==='Enter'||e.key==='Tab'){ if(g.n>=MINLEN&&take())e.preventDefault(); g.buf='';g.n=0; return; }
+    const c=latinOf(e)||(e.key&&e.key.length===1&&/[0-9A-Za-z]/.test(e.key)?e.key:''); if(!c)return;
+    const now=e.timeStamp||performance.now();
+    if(now-g.last>GAP){ g.first=now; g.n=0; g.buf=''; }
+    g.n++; g.last=now; g.buf+=c;
+    clearTimeout(gT); gT=setTimeout(take,IDLE);
+  },true);
+})();
 
 function renderList(matches,q){
   const rl=document.getElementById('resultsList');
