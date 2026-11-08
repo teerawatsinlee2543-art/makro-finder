@@ -5714,10 +5714,23 @@ function nbsContact(uid){return uid?(st.contacts.find(x=>x.uid===uid)||ctFindBuy
 function nbsBuyerNote(r){return r.buyerUid?'':nbsBuyerMap().get(amNum(r.itemNo))?'ตามข้อมูล OOS+ / ItemList':nbsRuleInfo(r).src}
 function nbsBuyerWarn(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))?'':nbsRuleInfo(r).warn||''}
 /* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
+/* The Department column of an NBS file holds the name only (HOUSE HOLD); every other page shows the department with its number (45 HOUSE HOLD). The number comes from the same table (SHR_DEPT), matched on the name; a name that is not in the table, or one that already starts with a number, is shown as it is. */
+var NBS_DLBL=new Map(),NBS_DREV=null;
+const nbsDeptKey=s=>String(s).toUpperCase().replace(/[^A-Z0-9฀-๿]/g,'');
+function nbsDeptLbl(r){
+  const d=String(r.dept||'').trim();if(!d)return'';
+  let v=NBS_DLBL.get(d);if(v!==undefined)return v;
+  v=d;
+  if(!/^\d/.test(d)){try{
+    if(!NBS_DREV){NBS_DREV=new Map();for(const c in SHR_DEPT)NBS_DREV.set(nbsDeptKey(SHR_DEPT[c]),c);NBS_DREV.set('ACCESSORIES','35');NBS_DREV.set('LADIESWEAR','31')}
+    const c=NBS_DREV.get(nbsDeptKey(d));if(c)v=c+' '+SHR_DEPT[c]; /* the table's own spelling, so HOUSEHOLD / House Hold / HOUSE HOLD are one bar */
+  }catch(e){}}
+  NBS_DLBL.set(d,v);return v;
+}
 function nbsFiltered(whole,skipDept){ /* skipDept: every filter except the product department (what the department bars count, so a picked department never empties its own chart) */
   nbsBuyerMap(true);
   const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value,fd=skipDept?'':$('#nbsFDept').value;
-  return rows.filter(r=>whole===true||((!nbsFilterDiv||r.division===nbsFilterDiv)&&(!fd||dselHas(fd,String(r.dept||'').trim()))&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
+  return rows.filter(r=>whole===true||((!nbsFilterDiv||r.division===nbsFilterDiv)&&(!fd||dselHas(fd,nbsDeptLbl(r)))&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
     &&(!q||[r.itemNo,r.desc,nbsBuyerUid(r),r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q))))
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
@@ -6163,7 +6176,7 @@ function renderNbs(){
   $('#nbsLevels').innerHTML=open.some(r=>r.lastSale||r.lastRecv)?AGING_LV.slice(1).map((l,i)=>`<button type="button" class="lvb s-${l[1]}${cur==='e'+(i+1)?' sel':''}" data-lv="${i+1}" title="แสดงเฉพาะรายการระดับ ${esc(l[0])}"><b>${lv[i+1].toLocaleString()}</b><span>${esc(l[0])}</span></button>`).join(''):'';
   $('#nbsLevels').classList.toggle('has-sel',/^e\d$/.test(cur));
   /* filters live in nbsFiltered(). Product departments (the Department column of the file, e.g. 05 FROZEN & DAIRY): a bar per department with the items the table would show without the department filter, and the select of the filter bar; a click on a bar picks it (several at once) */
-  const base=nbsFiltered(false,true),fdSel=$('#nbsFDept'),fdCur=fdSel.value,pd=r=>String(r.dept||'').trim();
+  const base=nbsFiltered(false,true),fdSel=$('#nbsFDept'),fdCur=fdSel.value,pd=nbsDeptLbl;
   const fdNames=[...new Set(rows.map(pd).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
   fdSel.innerHTML=deptOptsHtml(fdNames,dselList(fdCur).filter(d=>fdNames.includes(d)).join('\u0001')); /* a picked department that is no longer in the data (file deleted / replaced) drops out of the filter */
   const pcnt={};base.forEach(r=>{const d=pd(r);if(d)pcnt[d]=(pcnt[d]||0)+1});
