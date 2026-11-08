@@ -116,17 +116,19 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 /* four-field bar (search + 3 selects): one row on wide screens, search on top of a 3-up row on tablets */
 .fbar.f4{grid-template-columns:2fr 1fr 1fr 1fr}
 .fbar.f4>label.f-q{grid-column:auto}
+.fbar.f5{grid-template-columns:2fr repeat(4,1fr)} /* Item NBS: one more filter (product department) */
+.fbar.f5>label.f-q{grid-column:auto}
 .fbar.f6{grid-template-columns:2fr repeat(5,1fr)}
 .fbar.f6>label.f-q{grid-column:auto}
 .fbar.f7{grid-template-columns:2fr repeat(6,1fr)} /* OOS+: one more filter (product department) */
 .fbar.f7>label.f-q{grid-column:auto}
 @media (max-width:1099px){
-  .fbar.f4,.fbar.f6,.fbar.f7{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .fbar.f4>label.f-q,.fbar.f6>label.f-q,.fbar.f7>label.f-q{grid-column:1/-1}
+  .fbar.f4,.fbar.f5,.fbar.f6,.fbar.f7{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .fbar.f4>label.f-q,.fbar.f5>label.f-q,.fbar.f6>label.f-q,.fbar.f7>label.f-q{grid-column:1/-1}
 }
 @media (max-width:640px){
-  .fbar,.fbar.f4,.fbar.f6,.fbar.f7{grid-template-columns:1fr}
-  .fbar>label.f-q,.fbar.f4>label.f-q,.fbar.f6>label.f-q,.fbar.f7>label.f-q{grid-column:auto}
+  .fbar,.fbar.f4,.fbar.f5,.fbar.f6,.fbar.f7{grid-template-columns:1fr}
+  .fbar>label.f-q,.fbar.f4>label.f-q,.fbar.f5>label.f-q,.fbar.f6>label.f-q,.fbar.f7>label.f-q{grid-column:auto}
   .fbar .f-act{justify-content:stretch}
   .fbar .f-act .f-chk{flex:1 1 100%;margin-right:0}
   .fbar .f-act .btn{flex:1 1 100%}
@@ -1516,9 +1518,11 @@ nav::-webkit-scrollbar,nav#tabs::-webkit-scrollbar{display:none!important;width:
     <div class="tiles" id="nbsTiles" style="margin:12px 0"></div>
     <div class="row" id="nbsSummary" style="gap:8px;margin:0 0 8px;align-items:center"></div>
     <div class="lvbar" id="nbsLevels"></div>
-    <div class="fbar f4">
+    <div class="oos-dchips" id="nbsDeptTiles"></div>
+    <div class="fbar f5">
       <label class="f-q">ค้นหา<input id="nbsQ" placeholder="รหัส / ชื่อ / Buyer UID / ที่ตั้ง / Remark"></label>
       <label>สถานะ<select id="nbsFSt"><option value="">ทั้งหมด</option></select></label>
+      <label>แผนกสินค้า<select id="nbsFDept"><option value="">ทั้งหมด</option></select></label>
       <label>ระดับ Aging<select id="nbsFAl"><option value="">ทั้งหมด</option><option value="nbs">เกินเกณฑ์ NBS</option><option value="l1">Alert ขึ้นไป</option><option value="l2">Attention ขึ้นไป</option><option value="l3">Critical ขึ้นไป</option><option value="l4">Obsolete ขึ้นไป</option><option value="l5">Full Provision</option><option value="e1">เฉพาะ Alert</option><option value="e2">เฉพาะ Attention</option><option value="e3">เฉพาะ Critical</option><option value="e4">เฉพาะ Obsolete</option><option value="e5">เฉพาะ Full Provision</option></select></label>
       <label>นับอายุ Aging จาก<select id="nbsBasis"><option value="recv">วันที่รับสินค้าล่าสุด (Last Recv.) — ตามกฎ Makro</option><option value="sold">วันที่ไม่มียอดขาย (Last Sold)</option></select></label>
       <div class="f-act">
@@ -5710,10 +5714,10 @@ function nbsContact(uid){return uid?(st.contacts.find(x=>x.uid===uid)||ctFindBuy
 function nbsBuyerNote(r){return r.buyerUid?'':nbsBuyerMap().get(amNum(r.itemNo))?'ตามข้อมูล OOS+ / ItemList':nbsRuleInfo(r).src}
 function nbsBuyerWarn(r){return r.buyerUid||nbsBuyerMap().get(amNum(r.itemNo))?'':nbsRuleInfo(r).warn||''}
 /* the rows currently shown by every filter (tiles, column filters, search, status, level); also what the PDF prints */
-function nbsFiltered(whole){
+function nbsFiltered(whole,skipDept){ /* skipDept: every filter except the product department (what the department bars count, so a picked department never empties its own chart) */
   nbsBuyerMap(true);
-  const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value;
-  return rows.filter(r=>whole===true||((!nbsFilterDiv||r.division===nbsFilterDiv)&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
+  const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value,fd=skipDept?'':$('#nbsFDept').value;
+  return rows.filter(r=>whole===true||((!nbsFilterDiv||r.division===nbsFilterDiv)&&(!fd||dselHas(fd,String(r.dept||'').trim()))&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
     &&(!q||[r.itemNo,r.desc,nbsBuyerUid(r),r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q))))
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
@@ -5754,7 +5758,7 @@ td{padding:4px 5px;border-bottom:1px solid #eadada;vertical-align:top;overflow-w
 .th{flex:none;width:38px;height:38px;object-fit:contain;border:1px solid #eadada;border-radius:5px;background:#fff}.th.ph{background:#f4eeee}
 .dv{display:inline-block;border-radius:99px;padding:0 7px;font-weight:800;font-size:9px;white-space:nowrap}.okd{color:#1f7a45}</style></head><body>
 <h1>Item NBS · สินค้าที่ไม่มียอดขาย</h1>
-<p class="sub">พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · แสดง ${all.length.toLocaleString()} จาก ${total.toLocaleString()} รายการ${all.length<total?' (ตามตัวกรองที่เลือกอยู่)':''} · เกณฑ์ NBS: FF ≥5 / DF ≥7 / NF ≥10 วัน · Aging ตามตาราง Aging Stock</p>
+<p class="sub">พิมพ์เมื่อ ${fmt(now)} ${String(now.getHours()).padStart(2,'0')}.${String(now.getMinutes()).padStart(2,'0')} น. · แสดง ${all.length.toLocaleString()} จาก ${total.toLocaleString()} รายการ${all.length<total?' (ตามตัวกรองที่เลือกอยู่)':''}${!whole&&pdfSel('#nbsFDept')?' · แผนกสินค้า '+esc(pdfSel('#nbsFDept')):''} · เกณฑ์ NBS: FF ≥5 / DF ≥7 / NF ≥10 วัน · Aging ตามตาราง Aging Stock</p>
 <div class="sum">${Object.entries(NBS_DIV).map(([k,l])=>{const c=PDF_DIV[k];return`<span style="background:${c[0]};color:${c[1]};border-color:${c[1]}66">${k} · ${l} ${(cnt[k]||0).toLocaleString()}</span>`}).join('')}${AGING_LV.slice(1).map((l,i)=>{const c=P2[l[1]];return`<span style="background:${c[0]};color:${c[1]};border-color:${c[1]}66">${l[0]} ${lvc[i+1].toLocaleString()}</span>`}).join('')}</div>
 <table><colgroup><col style="width:19.5%"><col style="width:5%"><col style="width:4.5%"><col style="width:7.5%"><col style="width:7%"><col style="width:7%"><col style="width:7.5%"><col style="width:11%"><col style="width:8.5%"><col style="width:17%"><col style="width:6%"></colgroup>
 <thead><tr><th>ชื่อสินค้า</th><th class="ctr">Division</th><th>Stock</th><th>Location</th><th>Last Recv. Date</th><th>Last Sold Date</th><th>ไม่มียอดขาย (NBS)</th><th>Aging Status</th><th>สถานะ</th><th>Buyer / Remark</th><th>บันทึกเมื่อ</th></tr></thead><tbody>${body}</tbody></table></body></html>`;
@@ -6158,8 +6162,14 @@ function renderNbs(){
   const cur=$('#nbsFAl').value;
   $('#nbsLevels').innerHTML=open.some(r=>r.lastSale||r.lastRecv)?AGING_LV.slice(1).map((l,i)=>`<button type="button" class="lvb s-${l[1]}${cur==='e'+(i+1)?' sel':''}" data-lv="${i+1}" title="แสดงเฉพาะรายการระดับ ${esc(l[0])}"><b>${lv[i+1].toLocaleString()}</b><span>${esc(l[0])}</span></button>`).join(''):'';
   $('#nbsLevels').classList.toggle('has-sel',/^e\d$/.test(cur));
-  /* filters live in nbsFiltered() */
-  const all=nbsFiltered();
+  /* filters live in nbsFiltered(). Product departments (the Department column of the file, e.g. 05 FROZEN & DAIRY): a bar per department with the items the table would show without the department filter, and the select of the filter bar; a click on a bar picks it (several at once) */
+  const base=nbsFiltered(false,true),fdSel=$('#nbsFDept'),fdCur=fdSel.value,pd=r=>String(r.dept||'').trim();
+  const fdNames=[...new Set(rows.map(pd).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
+  fdSel.innerHTML=deptOptsHtml(fdNames,dselList(fdCur).filter(d=>fdNames.includes(d)).join('\u0001')); /* a picked department that is no longer in the data (file deleted / replaced) drops out of the filter */
+  const pcnt={};base.forEach(r=>{const d=pd(r);if(d)pcnt[d]=(pcnt[d]||0)+1});
+  dselList(fdSel.value).forEach(d=>{if(!(d in pcnt))pcnt[d]=0}); /* a picked department with nothing left in this view stays on the chart so it can be un-picked */
+  deptBars($('#nbsDeptTiles'),Object.entries(pcnt).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'en',{numeric:true})),n=>n.toLocaleString()+' รายการ',fdSel.value,'รายการ Item NBS แยกตามแผนกสินค้า');
+  const fdv=fdSel.value,all=fdv?base.filter(r=>dselHas(fdv,pd(r))):base;
   const list=all.slice(0,nbsLimit);
   $('#nbsEmpty').hidden=all.length>0||mode==='init';
   $('#nbsMoreWrap').hidden=all.length<=nbsLimit;$('#nbsMoreTxt').textContent=`แสดง ${list.length.toLocaleString()} จาก ${all.length.toLocaleString()} รายการ`;
@@ -6329,7 +6339,7 @@ let nbsT;$('#nQ').oninput=()=>{clearTimeout(nbsT);nbsT=setTimeout(nbsSearch,150)
 $('#nResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)nbsPick(b.dataset.no)};
 const nbsRe=()=>{nbsLimit=200;renderNbs()};
 $('#nbsLevels').onclick=e=>{const b=e.target.closest('.lvb');if(!b)return;const v='e'+b.dataset.lv,sel=$('#nbsFAl');sel.value=sel.value===v?'':v;nbsRe();
-  if(sel.value){const t=document.querySelector('table.nbs-tbl');if(t)t.scrollIntoView({block:'start',behavior:'smooth'})}}; /* jump to the list of that level */$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsBasis').value=agingBasis;$('#nbsBasis').onchange=()=>{agingBasis=$('#nbsBasis').value;try{localStorage.setItem('shelfLifeMonitor.agingBasis2',agingBasis)}catch(e){}nbsRe()};$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
+  if(sel.value){const t=document.querySelector('table.nbs-tbl');if(t)t.scrollIntoView({block:'start',behavior:'smooth'})}}; /* jump to the list of that level */$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsFDept').onchange=nbsRe;$('#nbsDeptTiles').onclick=e=>deptBarsClick(e,$('#nbsFDept'),nbsRe);$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsBasis').value=agingBasis;$('#nbsBasis').onchange=()=>{agingBasis=$('#nbsBasis').value;try{localStorage.setItem('shelfLifeMonitor.agingBasis2',agingBasis)}catch(e){}nbsRe()};$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
 $('#nbsFSt').innerHTML+=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
 $('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;nbsColF.div=null;nbsLimit=200;renderNbs()};
 $('#t-nbs thead').onclick=e=>{const b=e.target.closest('.fbtn');if(b)openFMenu(b)};
