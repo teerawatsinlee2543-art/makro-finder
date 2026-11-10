@@ -5730,7 +5730,7 @@ function nbsDeptLbl(r){
 function nbsFiltered(whole,skipDept){ /* skipDept: every filter except the product department (what the department bars count, so a picked department never empties its own chart) */
   nbsBuyerMap(true);
   const rows=st.nbs||[],q=$('#nbsQ').value.trim().toLowerCase(),fs=$('#nbsFSt').value,hide=$('#nbsHide').checked,fa=$('#nbsFAl').value,fd=skipDept?'':$('#nbsFDept').value;
-  return rows.filter(r=>whole===true||((!nbsFilterDiv||r.division===nbsFilterDiv)&&(!fd||dselHas(fd,nbsDeptLbl(r)))&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?(agingInfo(r).level??-1)===+fa.slice(1):(agingInfo(r).level??-1)>=+fa.slice(1)))
+  return rows.filter(r=>whole===true||((!nbsFilterDiv||r.division===nbsFilterDiv)&&(!fd||dselHas(fd,nbsDeptLbl(r)))&&(!nbsColF.div||nbsColF.div.has(r.division))&&(!nbsColF.aging||nbsColF.aging.has(agingKey(r)))&&(!fs||r.status===fs)&&!(hide&&r.status==='done')&&(!fa||(fa==='nbs'?nbsOver(r):fa[0]==='e'?fa.slice(1).includes(String(agingInfo(r).level??-1)):(agingInfo(r).level??-1)>=+fa.slice(1)))
     &&(!q||[r.itemNo,r.desc,nbsBuyerUid(r),r.loc,r.remark,r.barcode,r.dept,r.artGrp].join(' ').toLowerCase().includes(q))))
     .sort((a,b)=>(a.status==='done')-(b.status==='done')||(nbsDays(b)??-1)-(nbsDays(a)??-1)||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
@@ -6171,10 +6171,10 @@ function renderNbs(){
   nbsBannerUpdate(open,nOver);
   $('#nbsSummary').innerHTML=(li?`<span class="pill">นำเข้าล่าสุด <b>${fmt(li)} ${String(li.getHours()).padStart(2,'0')}.${String(li.getMinutes()).padStart(2,'0')} น.</b></span>`:'')
     +(open.some(r=>r.lastSale||r.lastRecv)?`<span class="pill">เกินเกณฑ์ NBS <b>${nOver.toLocaleString()}</b></span>`:'');
-  /* the five Aging levels: a pinned bar of big buttons that fills the width; a tap lists only the items at that level (tap again = all) */
-  const cur=$('#nbsFAl').value;
-  $('#nbsLevels').innerHTML=open.some(r=>r.lastSale||r.lastRecv)?AGING_LV.slice(1).map((l,i)=>`<button type="button" class="lvb s-${l[1]}${cur==='e'+(i+1)?' sel':''}" data-lv="${i+1}" title="แสดงเฉพาะรายการระดับ ${esc(l[0])}"><b>${lv[i+1].toLocaleString()}</b><span>${esc(l[0])}</span></button>`).join(''):'';
-  $('#nbsLevels').classList.toggle('has-sel',/^e\d$/.test(cur));
+  /* the five Aging levels: a pinned bar of big buttons that fills the width; a tap lists only the items at that level, more taps add more levels (tap a lit one again to take it off; none lit = all) */
+  const cur=$('#nbsFAl').value,curLv=nbsLvSet(cur);
+  $('#nbsLevels').innerHTML=open.some(r=>r.lastSale||r.lastRecv)?AGING_LV.slice(1).map((l,i)=>`<button type="button" class="lvb s-${l[1]}${curLv.includes(String(i+1))?' sel':''}" data-lv="${i+1}" aria-pressed="${curLv.includes(String(i+1))}" title="แสดงเฉพาะรายการระดับ ${esc(l[0])} · กดหลายปุ่มเพื่อเลือกหลายระดับ"><b>${lv[i+1].toLocaleString()}</b><span>${esc(l[0])}</span></button>`).join(''):'';
+  $('#nbsLevels').classList.toggle('has-sel',curLv.length>0);
   /* filters live in nbsFiltered(). Product departments (the Department column of the file, e.g. 05 FROZEN & DAIRY): a bar per department with the items the table would show without the department filter, and the select of the filter bar; a click on a bar picks it (several at once) */
   const base=nbsFiltered(false,true),fdSel=$('#nbsFDept'),fdCur=fdSel.value,pd=nbsDeptLbl;
   const fdNames=[...new Set(rows.map(pd).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
@@ -6351,8 +6351,16 @@ $('#nDiv').onchange=()=>nbsBuyerOptions($('#nBuyer').value);
 let nbsT;$('#nQ').oninput=()=>{clearTimeout(nbsT);nbsT=setTimeout(nbsSearch,150)};
 $('#nResults').onclick=e=>{const b=e.target.closest('.mf-hit');if(b)nbsPick(b.dataset.no)};
 const nbsRe=()=>{nbsLimit=200;renderNbs()};
-$('#nbsLevels').onclick=e=>{const b=e.target.closest('.lvb');if(!b)return;const v='e'+b.dataset.lv,sel=$('#nbsFAl');sel.value=sel.value===v?'':v;nbsRe();
-  if(sel.value){const t=document.querySelector('table.nbs-tbl');if(t)t.scrollIntoView({block:'start',behavior:'smooth'})}}; /* jump to the list of that level */$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsFDept').onchange=nbsRe;$('#nbsDeptTiles').onclick=e=>deptBarsClick(e,$('#nbsFDept'),nbsRe);$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsBasis').value=agingBasis;$('#nbsBasis').onchange=()=>{agingBasis=$('#nbsBasis').value;try{localStorage.setItem('shelfLifeMonitor.agingBasis2',agingBasis)}catch(e){}nbsRe()};$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
+/* Aging level filter value: '' = all, 'nbs', 'l1'..'l5' = that level and up, 'e3' = only level 3, 'e34' = only levels 3 and 4 (several buttons lit). The select shows a picked group as one extra option. */
+function nbsLvSet(v){return /^e\d+$/.test(v||'')?v.slice(1).split(''):[]}
+function nbsAlSet(v){const sel=$('#nbsFAl');
+  sel.querySelectorAll('option[data-multi]').forEach(o=>o.remove());
+  if(/^e\d{2,}$/.test(v)){const o=document.createElement('option');o.value=v;o.dataset.multi='1';o.textContent='เฉพาะ '+v.slice(1).split('').map(n=>AGING_LV[+n][0]).join(' + ');sel.appendChild(o)}
+  sel.value=v}
+$('#nbsLevels').onclick=e=>{const b=e.target.closest('.lvb');if(!b)return;const sel=$('#nbsFAl'),n=b.dataset.lv,had=!!sel.value,set=nbsLvSet(sel.value),i=set.indexOf(n);
+  if(i>=0)set.splice(i,1);else set.push(n);
+  set.sort();nbsAlSet(set.length?'e'+set.join(''):'');nbsRe();
+  if(sel.value&&!had){const t=document.querySelector('table.nbs-tbl');if(t)t.scrollIntoView({block:'start',behavior:'smooth'})}}; /* the first pick jumps to the list; the next ones stay where they are so several levels can be picked in a row */$('#nbsQ').oninput=nbsRe;$('#nbsFSt').onchange=nbsRe;$('#nbsFDept').onchange=nbsRe;$('#nbsDeptTiles').onclick=e=>deptBarsClick(e,$('#nbsFDept'),nbsRe);$('#nbsHide').onchange=nbsRe;$('#nbsFAl').onchange=nbsRe;$('#nbsBasis').value=agingBasis;$('#nbsBasis').onchange=()=>{agingBasis=$('#nbsBasis').value;try{localStorage.setItem('shelfLifeMonitor.agingBasis2',agingBasis)}catch(e){}nbsRe()};$('#nbsMore').onclick=()=>{nbsLimit+=200;renderNbs()};
 $('#nbsFSt').innerHTML+=NBS_STAT.map(x=>`<option value="${x[0]}">${esc(x[1])}</option>`).join('');
 $('#nbsTiles').onclick=e=>{const t=e.target.closest('.tile');if(!t)return;nbsFilterDiv=nbsFilterDiv===t.dataset.div?'':t.dataset.div;nbsColF.div=null;nbsLimit=200;renderNbs()};
 $('#t-nbs thead').onclick=e=>{const b=e.target.closest('.fbtn');if(b)openFMenu(b)};
