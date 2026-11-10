@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Shelf-Life Monitor: send the BIP Buyer ID back
 // @namespace    https://teerawatsinlee2543-art.github.io/makro-finder/
-// @version      1.3
-// @description  (1) Reads "Buyer ID" off the BIP Item Enquiry report and sends it back to the Shelf-Life Monitor page that opened this window (nothing is sent anywhere else). (2) On the Daily_StockMovement_Store_14_Days report opened from the "Stock Movement 14 วัน" button, fills in Store 42 and the Item No. and presses Apply. (3) A small zoom bar (− + ⤢ fit width) in both BIP windows.
+// @version      1.4
+// @description  (1) Reads "Buyer ID" off the BIP Item Enquiry report and sends it back to the Shelf-Life Monitor page that opened this window (nothing is sent anywhere else). (2) On the Daily_StockMovement_Store_14_Days report opened from the "Stock Movement 14 วัน" button, fills in Store 42 and the Item No. and presses Apply. (3) A small zoom bar (− + ⤢ fit width) in both BIP windows. (4) The keys ← → (or , and . = the "<" ">" keys) pressed in a BIP window tell the Shelf-Life Monitor page to go to the previous / next item (the ‹ › buttons of its lifted card).
 // @match        http://bip-app.siammakro.co.th:9714/*
 // @match        http://raadw-app.siammakro.co.th:7777/*
 // @grant        none
@@ -101,6 +101,27 @@
       document.body.appendChild(bar);apply(z)}
     build();var n=0,iv=setInterval(function(){build();if(bar||++n>40)clearInterval(iv)},500);
   }
+  /* ← / , = previous item, → / . = next item, pressed while this BIP window has the keyboard: sent back to the Shelf-Life Monitor page that opened it (the ‹ › buttons of its lifted card). Nothing else is sent.
+     Keys are read by position (e.code), so the Thai keyboard works too. Not while typing in a box, and not with Ctrl / Alt / Cmd. The report is often in a frame of the same site: the listener is put on it as well. */
+  function slmKeys(origin){
+    if(window.top!==window)return;
+    function cmd(e){
+      if(e.altKey||e.ctrlKey||e.metaKey||e.repeat||e.isComposing)return '';
+      var t=e.target,n=t&&t.tagName;
+      if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT'||(t&&t.isContentEditable))return '';
+      var c=e.code;
+      return (c==='ArrowRight'||c==='Period')?'next':(c==='ArrowLeft'||c==='Comma')?'prev':'';
+    }
+    function on(e){
+      var c=cmd(e);if(!c||!window.opener)return;
+      e.preventDefault();e.stopPropagation();
+      try{window.opener.postMessage({type:'slm-key',v:1,cmd:c},origin)}catch(x){}
+    }
+    function bind(d){try{if(d&&!d.__slmKeys){d.__slmKeys=1;d.addEventListener('keydown',on,true)}}catch(e){}}
+    function scan(){bind(document);var f=document.querySelectorAll('iframe'),i;for(i=0;i<f.length;i++){try{bind(f[i].contentDocument)}catch(e){}}}
+    scan();setInterval(scan,1000);
+  }
+  slmKeys('https://teerawatsinlee2543-art.github.io');
   slmZoomBar();
   if(/raadw-app/i.test(location.hostname)){
     slmFillReport();
