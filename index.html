@@ -8938,6 +8938,7 @@ function grGoToPalletManager(){ openPalletPage(); }
 function grGoToFindInPallet(){ openPalletPage('find'); }
 function grGoToMainSearch(){
   const sess=getSession();
+  if(!sess){showRoleScreen();return} /* no saved session (cleared / expired while the home screen was open): back to the role screen instead of a TypeError */
   showMain(sess);
 }
 function showRoleScreen(){

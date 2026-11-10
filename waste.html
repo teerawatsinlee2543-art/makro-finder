@@ -88,7 +88,12 @@ body.waste-app #wasteLogOverlay .waste-mode-indicator{border-radius:0}
 .frame{background:var(--color-background-secondary);min-height:100dvh;width:100%;display:flex;flex-direction:column}
 .phone{background:var(--color-background-primary);flex:1;display:flex;flex-direction:column;width:100%}
 #mainApp{flex:1;flex-direction:column;width:100%}
-.hdr{background:var(--brand-red);padding:18px clamp(16px,4vw,40px) 14px}
+.hdr{background:var(--brand-red);padding:18px clamp(16px,4vw,40px) 10px;position:sticky;top:0;z-index:50}
+/* แถบหัวหน้าจอปักหมุด: เลื่อนลงแล้วแถวโลโก้/ภาษาเลื่อนหายไป เหลือแถบเล็ก "กลับ + ค้นหา + สแกน" ติดขอบบน
+   (ค่า top ติดลบถูกคำนวณใน initStickyHeader ให้แถวค้นหาพอดีขอบบน / ปุ่มกลับในแถวค้นหาโผล่เฉพาะตอนปักหมุด ความสูงหัวหน้าจอไม่เปลี่ยนเลยจึงไม่มีหน้ากระตุก) */
+.hdr .sr-back{display:none;align-self:center}
+.hdr.pinned .sr-back{display:flex}
+.hdr.pinned{box-shadow:0 2px 8px rgba(0,0,0,.28)}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;max-width:min(1100px,94vw);margin:0 auto;width:100%}
 .hdr-logo{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .hdr-logo>div:last-child{min-width:0;overflow:hidden}
@@ -153,6 +158,19 @@ body.waste-app #wasteLogOverlay .waste-mode-indicator{border-radius:0}
 .result-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .result-name-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
 .result-name-block{min-width:0}
+/* แถวใต้ชื่อ: ป้ายบาร์โค้ด + ป้าย Loc/Location วางเรียงข้างกันในแถวเดียว (จอกว้าง) พับลงเป็นบรรทัดใหม่เองเมื่อที่ไม่พอ (จอแคบ) */
+.result-meta-row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px 12px}
+.result-meta-row .loc-row{flex:1 1 auto;min-width:0}
+/* ป้ายบาร์โค้ด: พื้นขาวตายตัว (บาร์โค้ดต้องเป็นแท่งดำบนพื้นขาวเสมอ แม้ใช้โหมดมืด) */
+.result-barcode{display:none;flex:0 1 250px;min-width:0;max-width:100%;padding:7px 10px 7px;background:#fff;border:1px solid #d4d4d4;border-radius:12px;box-sizing:border-box;flex-direction:column;align-items:stretch}
+.result-barcode.on{display:flex}
+.result-barcode svg,.rb-m svg{display:block;width:100%;height:58px}
+/* หัวป้าย "Item No." / "Barcode" + เลขใต้แท่ง (ตัวหนังสือจริง เลือกคัดลอกได้) + ปุ่มสลับเล็กสีแดงอ่อนที่ท้ายป้าย */
+.rb-cap{font-size:11px;font-weight:700;line-height:1.2;color:#475569;margin-bottom:3px;text-align:left}
+.rb-num{margin-top:3px;font:600 15px/1.2 "Courier New",Consolas,monospace;letter-spacing:.1em;color:#111;text-align:center;white-space:nowrap;user-select:text;-webkit-user-select:text}
+.rb-sw{display:block;margin:6px 0 0 auto;padding:2px 10px;border:1px solid #f4b6bd;border-radius:99px;background:#fde8ea;color:#c0182b;font:inherit;font-size:11px;font-weight:700;line-height:1.35;cursor:pointer}
+.rb-sw:hover{background:#fbd5d9}
+.rb-sw:active{transform:scale(.96)}
 .result-info .loc-row{margin-bottom:0}
 .result-edit-btn{border-radius:20px;background:color-mix(in srgb, var(--brand-red) 8%, white);border:1px solid color-mix(in srgb, var(--brand-red) 22%, white);color:var(--brand-red);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;cursor:pointer;flex-shrink:0;font-size:15px;padding:8px 14px;transition:background .15s,border-color .15s}
 .result-edit-btn:hover{background:color-mix(in srgb, var(--brand-red) 14%, white);border-color:color-mix(in srgb, var(--brand-red) 32%, white)}
@@ -163,6 +181,7 @@ body.waste-app #wasteLogOverlay .waste-mode-indicator{border-radius:0}
 .result-item-icon img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit}
 .result-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
 .result-cat-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-top:3px;display:inline-block}
+.result-cat-badge span{white-space:nowrap}
 .loc-row{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
 .loc-combo{border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .loc-combo-green{background:var(--color-background-success);border:0.5px solid var(--color-border-success)}
@@ -192,6 +211,46 @@ body.waste-app #wasteLogOverlay .waste-mode-indicator{border-radius:0}
 .loc-sticker-edit{position:absolute;top:-6px;right:-6px;background:var(--brand-red);color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:9px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .loc-photo-box{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:9px;overflow:hidden;background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);flex-shrink:0;color:var(--color-text-tertiary);font-size:22px;box-sizing:border-box}
 .loc-photo-box img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+/* หน้ารายละเอียดสินค้าบนมือถือ: รูปสินค้าเล็กอยู่ซ้าย ชื่อ + ป้าย Item No/เลขบาร์โค้ด + บาร์โค้ดตัวเล็ก (สแกนได้) อยู่ขวา แล้วป้าย Loc/Location แบบเดิมอยู่ใต้ลงมา
+   (จอตั้งแต่ 720px ขึ้นไปใช้แบบเดิม: รูปซ้าย ข้อมูลขวา) ต้องอยู่ต่อจาก .result-flex / .result-image-banner / .loc-* ข้างบนเพื่อให้ค่าชุดนี้ชนะ */
+.rb-m{display:none}
+@media (max-width:719px){
+  .result-flex{display:grid;grid-template-columns:132px minmax(0,1fr);grid-template-areas:"img name" "meta meta";gap:12px 14px;align-items:start}
+  .result-info{display:contents}
+  .result-image-banner{grid-area:img;width:132px;margin:0;font-size:56px;border-radius:14px}
+  .result-name-row{grid-area:name;align-self:center;margin-bottom:0}
+  .result-name-block{flex:1 1 auto}
+  .result-meta-row{grid-area:meta}
+  .result-cat-badge{border-radius:12px;line-height:1.45;padding:3px 10px}
+  .result-cat-badge span{display:block}
+  .result-cat-badge .rb-sep{display:none}
+  /* บาร์โค้ดตัวเล็กใต้เลขบาร์โค้ด: กล่องขาวเล็ก ๆ คำว่า Item No. / Barcode มุมซ้ายบน / แท่งสูง 36px (ช่องละ ~1.7px ขึ้นไป) สแกนจากหน้าจอได้ / เลขใต้แท่ง / ปุ่มสลับสีแดงอ่อนด้านล่าง */
+  .rb-m.on{display:block;width:min(100%,214px);margin-top:8px;padding:6px 8px 6px;background:#fff;border:1px solid #d4d4d4;border-radius:10px;box-sizing:border-box}
+  .rb-m svg{display:block;width:100%;height:36px}
+  .rb-m .rb-cap{margin-bottom:3px}
+  .rb-m .rb-num{margin-top:3px;font-size:12px;letter-spacing:.05em}
+  .rb-m .rb-sw{margin-top:5px;padding:1px 9px;font-size:10.5px}
+  /* ป้ายใหญ่เต็มความกว้างใต้แถวรูป ใช้เฉพาะรหัสยาว (Code 39 เช่นบาร์โค้ดลัง) ที่ย่อเป็นกล่องเล็กแล้วสแกนไม่ติด */
+  .result-barcode{flex:1 1 100%;max-width:none;padding:9px 12px 8px;border-radius:14px}
+  .result-barcode.on{display:none}
+  .result-barcode.on.rb-wide{display:block}
+  .result-barcode svg{width:min(100%,300px);height:54px;margin:0 auto}
+  .result-barcode .rb-cap{font-size:12px;margin-bottom:5px}
+  .result-barcode .rb-num{margin-top:5px;font-size:16px;letter-spacing:.12em}
+}
+/* จอแคบมาก (กว้างน้อยกว่า 340px เช่น iPhone SE รุ่นแรก): ช่องขวาของรูปเหลือราว 110px แคบเกินกว่าจะสแกนได้ จึงใช้ป้ายเต็มความกว้างใต้แถวรูปแทน
+   (ทดสอบถอดรหัสที่ความละเอียดจอมือถือจริง x2 / x3: กล่องเล็กกว้าง 120–198px อ่านได้ครบ) */
+@media (max-width:339px){ .rb-m.on{display:none} .result-barcode.on{display:block} }
+/* จอตั้งแต่ 720px ขึ้นไป: ป้ายบาร์โค้ดกับป้าย Loc / Location อยู่แถวเดียวกัน ให้สูงเท่ากันทุกช่อง (ป้ายยืดตามกัน เนื้อหาในป้ายบาร์โค้ดกระจายบน-ล่าง ปุ่มสลับอยู่ล่างสุด) */
+@media (min-width:720px){
+  .result-meta-row{align-items:stretch}
+  .result-meta-row .loc-row{display:flex;flex-direction:column}
+  .result-meta-row .loc-group-row{flex:1 1 auto;align-items:stretch}
+  .result-meta-row .loc-group-row>.loc-combo{justify-content:space-between}
+  .result-barcode .rb-num{margin-bottom:6px}
+  .result-barcode .rb-cap{margin-bottom:auto;padding-bottom:3px}
+  .result-barcode .rb-sw{margin-top:auto}
+}
 .tip-box{background:var(--color-background-info);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;border:0.5px solid var(--color-border-info)}
 .tip-box i{color:var(--color-text-info);font-size:18px;flex-shrink:0;margin-top:1px}
 .tip-text{font-size:13px;color:var(--color-text-info)}
@@ -1058,9 +1117,10 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       </div>
     </div>
     <div class="search-row">
+      <button class="hdr-icon hdr-back sr-back" onclick="goBackOneStep()" data-i18n-title="backBtnAria" title="กลับ" aria-label="กลับไปหน้าก่อนหน้า"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5"/><path d="M11.5 5.5 5 12l6.5 6.5"/></svg></button>
       <div class="search-box">
         <i class="ti ti-search" aria-hidden="true"></i>
-        <input type="text" id="si" data-i18n-placeholder="searchPlaceholder" placeholder="ค้นหาสินค้า..." oninput="search(this.value)">
+        <input type="text" id="si" data-i18n-placeholder="searchPlaceholder" placeholder="ค้นหาสินค้า..." oninput="searchInput(this.value)">
         <i class="ti ti-x" id="clr" style="display:none;cursor:pointer" onclick="clearSearch()" data-i18n-title="clearAria" aria-label="ล้าง"></i>
       </div>
       <span class="search-scan-btn" onclick="openScanner()" data-i18n-title="scanTitle" title="สแกน QR" role="button" aria-label="สแกน QR"><i class="ti ti-qrcode" aria-hidden="true"></i><span data-i18n="scanCaption">สแกน</span></span>
@@ -1165,10 +1225,14 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
               <div class="result-name-block">
                 <div class="result-name" id="rName"></div>
                 <span class="result-cat-badge" id="rBadge"></span>
+                <div class="rb-m" id="rBarcodeM"></div>
               </div>
               <span id="editBtnDesktopSlot" class="edit-btn-desktop-slot"></span>
             </div>
-            <div class="loc-row" id="rLoc"></div>
+            <div class="result-meta-row">
+              <div class="result-barcode" id="rBarcode"></div>
+              <div class="loc-row" id="rLoc"></div>
+            </div>
           </div>
         </div>
         <button type="button" class="result-edit-btn" id="rEditBtn" style="display:none" aria-label="แก้ไขข้อมูลสินค้า"><i class="ti ti-pencil" aria-hidden="true"></i><span data-i18n="editProductModalTitle">แก้ไขข้อมูลสินค้า</span></button>
@@ -1368,6 +1432,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
     <div class="map-edit-bar-row map-edit-tools-row">
       <label class="map-edit-color-label"><span data-i18n="bgColorLabel">พื้นหลัง</span> <input type="color" id="mapBgColorInput" onchange="onMapBgColorChange(this.value)"></label>
       <button class="map-edit-add-btn" onclick="addMapBlock()"><i class="ti ti-plus" aria-hidden="true"></i> <span data-i18n="addBoxBtn">เพิ่มกล่อง</span></button>
+    </div>
+    <div class="map-edit-bar-row map-edit-tools-row">
+      <button class="map-edit-add-btn" id="mapAlignBaysBtn" onclick="alignMapBays()"><i class="ti ti-layout-distribute-horizontal" aria-hidden="true"></i> <span data-i18n="alignBaysBtn">จัดแถวช่อง 1-44 ให้ตรง</span></button>
     </div>
     <div class="map-edit-bar-row map-edit-selected-row" id="mapSelectedRow" style="display:none">
       <label class="map-edit-color-label"><span data-i18n="boxColorLabel">สีกล่อง</span> <input type="color" id="mapBlockColorInput" onchange="onMapBlockColorChange(this.value)"></label>
@@ -1810,6 +1877,8 @@ const I18N={
     newItemModalTitle:'เพิ่มรายการ Item ใหม่',
     itemNoFieldLabel:'เลข Item',
     barcodeLabel:'บาร์โค้ด',
+    bcSwitchToBarcode:'สลับเป็น Barcode',
+    bcSwitchToItem:'สลับเป็น Item No.',
     barcodeOptionalPlaceholder:'บาร์โค้ด (ไม่บังคับ)',
     locOptionalPlaceholder:'เช่น 025 (ไม่บังคับ)',
     locationOptionalPlaceholder:'เช่น 025-209 (ไม่บังคับ)',
@@ -1846,6 +1915,8 @@ const I18N={
     boxHeightLabel:'ความสูง',
     editTextColorSizeBtn:'แก้ข้อความ/สี/ขนาด',
     deleteBoxBtn:'ลบกล่อง',
+    alignBaysBtn:'จัดแถวช่อง 1-44 ให้ตรง',
+    alignBaysDone:'จัดแถวช่อง 1-44 แล้ว (ขยับ {n} กล่อง) · ตรวจดูแล้วกด "บันทึก" หรือกด "ยกเลิก" เพื่อย้อนกลับ',
     setGpsOriginBtn:'ตั้งจุดอ้างอิง GPS ที่นี่',
     gpsNotSetStatus:'ยังไม่ได้ตั้งจุดอ้างอิง',
     gpsSetStatus:'ตั้งจุดอ้างอิงแล้ว',
@@ -2181,6 +2252,8 @@ const I18N={
     newItemModalTitle:'Add new item',
     itemNoFieldLabel:'Item No',
     barcodeLabel:'Barcode',
+    bcSwitchToBarcode:'Switch to Barcode',
+    bcSwitchToItem:'Switch to Item No.',
     barcodeOptionalPlaceholder:'Barcode (optional)',
     locOptionalPlaceholder:'e.g. 025 (optional)',
     locationOptionalPlaceholder:'e.g. 025-209 (optional)',
@@ -2217,6 +2290,8 @@ const I18N={
     boxHeightLabel:'Height',
     editTextColorSizeBtn:'Edit text/color/size',
     deleteBoxBtn:'Delete box',
+    alignBaysBtn:'Straighten aisles 1-44',
+    alignBaysDone:'Aisles 1-44 straightened ({n} boxes moved) · check it, then press "Save" (or "Cancel" to undo)',
     setGpsOriginBtn:'Set GPS reference point here',
     gpsNotSetStatus:'Reference point not set',
     gpsSetStatus:'Reference point set',
@@ -7438,6 +7513,25 @@ function addMapBlock(){
   rerenderMapEditorSVG();
   updateSelectedBlockUI();
 }
+// จัดแถวช่อง 1-44 (Non-Food 1-25 และ Dry Food 29-44) ให้ตรง: แต่ละกลุ่มเรียงเป็นแถวเดียว ระดับเดียวกัน ห่างเท่ากันทุกช่อง เรียงตามเลขช่อง
+// กว้างเท่าเดิม = ช่วงซ้ายสุด-ขวาสุดของกลุ่มที่ตั้งไว้ตอนนี้ / ระดับ (y) = ค่ากลางของกลุ่ม / ขนาดกล่องไม่เปลี่ยน
+// ทำในหน่วยความจำเท่านั้น ยังไม่บันทึกจนกว่าจะกด "บันทึก" (กด "ยกเลิก" ก็ย้อนกลับได้ทั้งหมด)
+function alignMapBays(){
+  if(!mapEditMode)return;
+  let moved=0;
+  ['nonfood_','dryfood_'].forEach(prefix=>{
+    const bays=currentMapBlocks.filter(b=>b.id.indexOf(prefix)===0)
+      .sort((a,b)=>(parseInt(a.id.slice(prefix.length),10)||0)-(parseInt(b.id.slice(prefix.length),10)||0));
+    if(bays.length<2)return;
+    const x0=Math.min(...bays.map(b=>b.x)), x1=Math.max(...bays.map(b=>b.x));
+    const ys=bays.map(b=>b.y).sort((a,b)=>a-b), mid=ys.length%2?ys[(ys.length-1)/2]:(ys[ys.length/2-1]+ys[ys.length/2])/2;
+    const step=Math.max((x1-x0)/(bays.length-1),Math.max(...bays.map(b=>b.w))+4); /* never closer than one box + a 4-unit gap */
+    bays.forEach((b,i)=>{ const nx=Math.round(x0+step*i), ny=Math.round(mid); if(b.x!==nx||b.y!==ny)moved++; b.x=nx; b.y=ny; });
+  });
+  rerenderMapEditorSVG();
+  const hint=document.getElementById('mapEditHint');
+  if(hint)hint.textContent=t('alignBaysDone',{n:moved});
+}
 function deleteSelectedBlock(){
   if(!selectedBlockId)return;
   if(!confirm(t('deleteBoxConfirm')))return;
@@ -8370,6 +8464,223 @@ function search(q){
   }
 }
 
+/* เครื่องสแกนบาร์โค้ด USB (ทำงานเหมือนคีย์บอร์ด: พิมพ์เลขทีละตัวเร็วมากแล้วปิดด้วย Enter / Tab หรือไม่ปิดเลย) ใช้กับช่องค้นหาได้ครบ:
+   1) สแกนชิ้นต่อไป "แทนที่" ชิ้นก่อน (เดิมต่อท้ายเลขเก่า จึงค้นไม่เจอทุกครั้งที่สแกนซ้ำ ต้องกดล้างเอง)
+   2) Enter / Tab ที่เครื่องสแกนส่งมา ไม่ทำให้เคอร์เซอร์หลุดออกจากช่อง
+   3) คีย์บอร์ด Windows เป็นภาษาไทย: เครื่องสแกนส่งตัวอักษรไทยตามตำแหน่งปุ่ม แปลงกลับเป็นเลขจากรหัสปุ่ม (ใช้เฉพาะตอนพิมพ์เร็วแบบเครื่องสแกน ไม่กระทบการพิมพ์ชื่อสินค้าเป็นภาษาไทยด้วยมือ)
+   4) สแกนตอนยังไม่ได้คลิกช่องค้นหา: เลขที่รัวเข้ามาเร็วผิดปกติถูกส่งเข้าช่องค้นหาให้ (เฉพาะหน้าค้นหา ไม่มีหน้าต่างซ้อนเปิดอยู่ และไม่มีช่องกรอกอื่นถูกโฟกัสอยู่)
+   "เร็วแบบเครื่องสแกน" = อย่างน้อย 6 ตัวอักษร เฉลี่ยห่างกันไม่เกิน 45 มิลลิวินาที (คนพิมพ์ช้ากว่านั้นมาก) */
+(function initHandScanner(){
+  const si=document.getElementById('si'); if(!si)return;
+  const FAST=45, MINLEN=6, GAP=300, IDLE=150;
+  let scanTyping=false;      // true ระหว่างที่ตัวอักษรรัวเข้ามาเร็วแบบเครื่องสแกน: searchInput() ไม่ค้นทีละตัว
+  window.searchInput=q=>{ if(!scanTyping)search(q); };
+  const latinOf=e=>{
+    const m=/^(?:Digit|Numpad)(\d)$/.exec(e.code||''); if(m)return m[1];
+    const k=/^Key([A-Z])$/.exec(e.code||''); if(k)return e.shiftKey?k[1]:k[1].toLowerCase();
+    return '';
+  };
+  // ---- ในช่องค้นหา ----
+  /* เวลาของปุ่มใช้ e.timeStamp (เวลาที่เบราว์เซอร์รับปุ่มจริง) ไม่ใช่เวลาที่โค้ดนี้ได้ทำงาน: ทุกตัวอักษรทำให้ค้นสินค้า 17,000 รายการ (~40-80 ms) ซึ่งหน่วงโค้ดนี้ ถ้าจับเวลาตอนทำงาน เครื่องสแกนจะดูเหมือนคนพิมพ์ช้า */
+  const b={first:0,last:0,n:0,codes:''}; let idleT=null;
+  const reset=()=>{ b.first=b.last=0; b.n=0; b.codes=''; scanTyping=false; };
+  const isBurst=()=>b.n>=MINLEN&&(b.last-b.first)/(b.n-1)<FAST;
+  function finish(){
+    clearTimeout(idleT);
+    if(!isBurst()){ const was=scanTyping; reset(); if(was)search(si.value); return false; }
+    let v=si.value;
+    if(/[^\x00-\x7F]/.test(v)&&b.codes.length===v.length&&/^[0-9A-Za-z]+$/.test(b.codes)){ v=b.codes; si.value=v; }      // (คีย์บอร์ดไทย: ตัวอักษรไทย -> เลขจากรหัสปุ่ม)
+    reset(); search(v);      // ค้นครั้งเดียวตอนสแกนจบ (ระหว่างที่รัวเข้ามา ไม่ค้นทีละตัว)
+    si.select();      // สแกนชิ้นต่อไปจะแทนที่ค่านี้ทั้งหมด
+    return true;
+  }
+  si.addEventListener('keydown',e=>{
+    if(e.isComposing||e.keyCode===229)return;
+    if(e.key==='Enter'||e.key==='Tab'){ if(finish()&&e.key==='Tab')e.preventDefault(); return; }
+    if(e.key==='Backspace'||e.key==='Delete'||e.key==='Escape'){ reset(); return; }
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    const c=latinOf(e)||(e.key&&e.key.length===1&&/[0-9A-Za-z]/.test(e.key)?e.key:''); if(!c)return;
+    const now=e.timeStamp||performance.now();
+    if(now-b.last>GAP){ b.first=now; b.n=0; b.codes=''; scanTyping=false; }
+    b.n++; b.last=now; b.codes+=c;
+    scanTyping=b.n>=3&&(b.last-b.first)/(b.n-1)<FAST;      // เร็วแบบเครื่องสแกนแล้ว: งดค้นทีละตัวจนกว่าจะจบ
+    clearTimeout(idleT); idleT=setTimeout(finish,IDLE);
+  });
+  // ---- ยังไม่ได้โฟกัสช่องไหนเลย ----
+  let g={buf:'',first:0,last:0,n:0}, gT=null;
+  const canTake=()=>{
+    const main=document.getElementById('mainApp'); if(!main||getComputedStyle(main).display==='none')return false;
+    return ![...document.querySelectorAll('.promo-date-overlay,.pallet-overlay,.waste-overlay,.map-overlay,.promo-view-overlay,.scan-overlay')].some(el=>getComputedStyle(el).display!=='none');
+  };
+  function take(){
+    clearTimeout(gT);
+    const ok=g.n>=MINLEN&&(g.last-g.first)/(g.n-1)<FAST, code=g.buf; g.buf='';g.n=0;
+    if(!ok||!canTake())return false;
+    si.focus(); search(code); si.select(); return true;
+  }
+  document.addEventListener('keydown',e=>{
+    const a=document.activeElement;
+    if(a&&(/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||a.isContentEditable))return;
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    if(e.key==='Enter'||e.key==='Tab'){ if(g.n>=MINLEN&&take())e.preventDefault(); g.buf='';g.n=0; return; }
+    const c=latinOf(e)||(e.key&&e.key.length===1&&/[0-9A-Za-z]/.test(e.key)?e.key:''); if(!c)return;
+    const now=e.timeStamp||performance.now();
+    if(now-g.last>GAP){ g.first=now; g.n=0; g.buf=''; }
+    g.n++; g.last=now; g.buf+=c;
+    clearTimeout(gT); gT=setTimeout(take,IDLE);
+  },true);
+})();
+
+// ==== รูปบาร์โค้ดแท่งใต้ชื่อสินค้า (แบบป้ายบาร์โค้ดบนบรรจุภัณฑ์) ====
+// EAN-13 / UPC-A / EAN-8 ที่เลขตรวจสอบถูก วาดตามมาตรฐาน พร้อมเลขใต้แท่ง (เช่น 8 850124 003874)
+// เลขรูปแบบอื่น (เช่นบาร์โค้ดลัง 14 หลัก หรือเลขเก่าที่ตัวเลขตรวจสอบไม่ผ่าน) วาดเป็น Code 39 ด้วยตัวเข้ารหัสเดิมของป้ายพาเลท จะได้อ่านกลับมาเป็นเลขเดิมเป๊ะ
+const EAN_L=['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
+const EAN_PARITY=['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+function eanR(d){ return EAN_L[d].replace(/[01]/g,c=>c==='0'?'1':'0'); }
+function eanG(d){ return eanR(d).split('').reverse().join(''); }
+function eanCheckOk(s){
+  let sum=0;
+  for(let i=s.length-2,w=3;i>=0;i--,w=4-w)sum+=(+s[i])*w;
+  return (10-sum%10)%10===+s[s.length-1];
+}
+// คืน {mods:'1010…', tall:[…แท่งที่ยาวลงมา], qL, qR, digits:[{ch,x}]}  (หน่วย = 1 โมดูล)
+function eanModel(code){
+  let s=code;
+  if(/^\d{12}$/.test(s)&&eanCheckOk(s))s='0'+s;
+  const segs=[],digits=[];
+  if(/^\d{13}$/.test(s)&&eanCheckOk(s)){
+    const par=EAN_PARITY[+s[0]],qL=11,qR=7;
+    segs.push(['101',1]);
+    for(let i=0;i<6;i++){ const d=+s[i+1]; segs.push([par[i]==='L'?EAN_L[d]:eanG(d),0]); digits.push({ch:s[i+1],x:qL+3+7*i+3.5}); }
+    segs.push(['01010',1]);
+    for(let i=0;i<6;i++){ segs.push([eanR(+s[i+7]),0]); digits.push({ch:s[i+7],x:qL+3+42+5+7*i+3.5}); }
+    segs.push(['101',1]);
+    digits.unshift({ch:s[0],x:qL-5});
+    return {segs,digits,qL,qR};
+  }
+  if(/^\d{8}$/.test(s)&&eanCheckOk(s)){
+    const qL=7,qR=7;
+    segs.push(['101',1]);
+    for(let i=0;i<4;i++){ segs.push([EAN_L[+s[i]],0]); digits.push({ch:s[i],x:qL+3+7*i+3.5}); }
+    segs.push(['01010',1]);
+    for(let i=0;i<4;i++){ segs.push([eanR(+s[i+4]),0]); digits.push({ch:s[i+4],x:qL+3+28+5+7*i+3.5}); }
+    segs.push(['101',1]);
+    return {segs,digits,qL,qR};
+  }
+  return null;
+}
+// Code 128 (ตัวเลขล้วน) ใช้เข้ารหัสเลข Item: สั้นกว่า Code 39 มาก (เลข 6 หลัก ~88 ช่อง แทน ~147) แท่งจึงใหญ่และสแกนง่ายกว่าในกล่องเล็กเท่ากัน
+// ชุด C = เลขสองหลักต่อหนึ่งสัญลักษณ์ / จำนวนหลักเป็นคี่ จะสลับไปชุด B เพื่อตัวสุดท้าย (ตรวจย้อนด้วย ZXing ครบทุกคู่เลข 00-99 แล้ว)
+const BC128='212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 114131 311141 411131 211412 211214 211232 2331112'.split(' ');
+function code128Mods(s){
+  if(!/^\d{2,40}$/.test(s))return '';
+  const v=[105],n=s.length-s.length%2;
+  for(let i=0;i<n;i+=2)v.push(+s.slice(i,i+2));
+  if(s.length%2)v.push(100,+s[s.length-1]+16);
+  let sum=v[0];for(let i=1;i<v.length;i++)sum+=v[i]*i;
+  v.push(sum%103,106);
+  return v.map(x=>{let m='',bar=1;for(const ch of BC128[x]){m+=(bar?'1':'0').repeat(+ch);bar^=1}return m}).join('');
+}
+// bare=true: แท่งล้วน (ไม่มีเลขใต้แท่ง สูงเท่าแท่ง ตัวเลขไปใส่เป็นตัวหนังสือ HTML แทน) ใช้กับป้ายบาร์โค้ด ที่ยืดความสูงเองด้วย CSS
+// sym='128': บังคับใช้ Code 128 (สำหรับเลข Item) ถ้าเป็นตัวเลขล้วน / ไม่ระบุ: EAN-13 / UPC-A / EAN-8 ที่เลขตรวจสอบถูก ไม่งั้น Code 39
+function barcodeSVG(code,bare,sym){
+  code=String(code||'').trim();
+  if(!code)return '';
+  const BAR_H=38,GUARD_H=44,TXT_Y=52,SVG_H=bare?GUARD_H+1:55;
+  const m128=sym==='128'?code128Mods(code):'';
+  let rects='',texts='',W=0,svgH=SVG_H,m=(sym==='128')?null:eanModel(code);
+  if(m128){
+    let x=10,i=0;
+    while(i<m128.length){ if(m128[i]==='1'){ let j=i; while(j<m128.length&&m128[j]==='1')j++; rects+='<rect x="'+(x+i)+'" y="0" width="'+(j-i)+'" height="'+GUARD_H+'"/>'; i=j; } else i++; }
+    W=m128.length+20;
+    svgH=bare?GUARD_H+1:GUARD_H+13;
+    if(!bare)texts='<text x="'+(W/2)+'" y="'+(GUARD_H+10)+'" font-size="10" text-anchor="middle">'+escapeHtml(code)+'</text>';
+  } else if(m){
+    const qL=bare?6:m.qL,qR=bare?6:m.qR;
+    let x=qL;
+    m.segs.forEach(sg=>{
+      const bits=sg[0],tall=sg[1];
+      let i=0;
+      while(i<bits.length){
+        if(bits[i]==='1'){ let j=i; while(j<bits.length&&bits[j]==='1')j++; rects+='<rect x="'+(x+i)+'" y="0" width="'+(j-i)+'" height="'+(tall?GUARD_H:BAR_H)+'"/>'; i=j; } else i++;
+      }
+      x+=bits.length;
+    });
+    W=x+qR;
+    if(!bare)m.digits.forEach(d=>{ texts+='<text x="'+d.x+'" y="'+TXT_Y+'" font-size="10" text-anchor="middle">'+d.ch+'</text>'; });
+  } else {
+    const up=code.toUpperCase();
+    if(!/^[0-9A-Z.\- $\/+%]+$/.test(up)||up.length>30)return '';
+    let bars;
+    try{ bars=code39Bars(up); }catch(e){ return ''; }
+    let x=10; const rs=[];
+    bars.forEach(b=>{ const w=b.wide?3:1; if(b.isBar)rs.push([x,w]); x+=w; });
+    W=x+10;
+    // Code 39 ยาวกว่า EAN มาก ถ้าใช้ความสูงเท่ากันจะแบนเป็นเส้นบาง ๆ จึงเพิ่มความสูงตามความกว้าง
+    const bh=Math.max(GUARD_H,Math.round(W*0.3)),fs=Math.max(10,Math.round(W*0.05));
+    svgH=bare?bh+1:bh+fs+3;
+    rs.forEach(r=>{ rects+='<rect x="'+r[0]+'" y="0" width="'+r[1]+'" height="'+bh+'"/>'; });
+    if(!bare)texts='<text x="'+(W/2)+'" y="'+(bh+fs)+'" font-size="'+fs+'" text-anchor="middle">'+escapeHtml(up)+'</text>';
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+svgH+'"'+(bare?' preserveAspectRatio="none"':'')+' shape-rendering="crispEdges" aria-hidden="true"><g fill="#000">'+rects+'</g>'+texts+'</svg>';
+}
+// เลขใต้แท่งแบบจัดกลุ่มเหมือนที่พิมพ์บนห่อสินค้า (8 850125 073364)
+function barcodeDigits(code){
+  const s=String(code||'').trim();
+  if(/^\d{13}$/.test(s)&&eanCheckOk(s))return s[0]+' '+s.slice(1,7)+' '+s.slice(7);
+  if(/^\d{12}$/.test(s)&&eanCheckOk(s))return s[0]+' '+s.slice(1,6)+' '+s.slice(6,11)+' '+s[11];
+  if(/^\d{8}$/.test(s)&&eanCheckOk(s))return s.slice(0,4)+' '+s.slice(4);
+  return s.toUpperCase();
+}
+
+// ==== ป้ายบาร์โค้ดในหน้ารายละเอียด: สลับระหว่างบาร์โค้ดของเลข Item กับบาร์โค้ดบนห่อสินค้า (เริ่มที่เลข Item เสมอ) ====
+let bcMode='item'; // 'item' = บาร์ของเลข Item (แสดงก่อนเสมอทุกครั้งที่เปิดสินค้า ไม่จำค่าที่เคยสลับ) | 'prod' = บาร์โค้ดบนห่อสินค้า
+function bcSvgWide(svg){ const m=/viewBox="0 0 ([\d.]+) /.exec(svg||''); return m?+m[1]>130:false; }
+function renderBarcodeLabels(item){
+  const rBc=document.getElementById('rBarcode'), rBm=document.getElementById('rBarcodeM');
+  if(!rBc||!rBm)return;
+  const no=String(item.itemNo||'').trim(), bc=String(item.barcode||'').trim();
+  const mk=(txt,sym,cap,digits)=>{ if(!txt)return null; const svg=barcodeSVG(txt,true,sym); return svg?{svg,cap,digits}:null; };
+  const opts={ item:mk(no,'128','Item No.',no), prod:(bc&&bc!==no)?mk(bc,'','Barcode',barcodeDigits(bc)):null };
+  const both=!!(opts.item&&opts.prod);
+  if(!opts.item&&!opts.prod){
+    rBc.innerHTML=''; rBc.classList.remove('on','rb-wide'); rBc.removeAttribute('aria-label');
+    rBm.innerHTML=''; rBm.classList.remove('on'); rBm.removeAttribute('aria-label');
+    return;
+  }
+  const mode=(bcMode==='prod'&&opts.prod)?'prod':(opts.item?'item':'prod');
+  const cur=opts[mode];
+  const sw=both?'<button type="button" class="rb-sw" onclick="toggleBarcodeMode()">'+escapeHtml(t(mode==='item'?'bcSwitchToBarcode':'bcSwitchToItem'))+'</button>':'';
+  const inner='<div class="rb-cap">'+escapeHtml(cur.cap)+'</div>'+cur.svg+'<div class="rb-num">'+escapeHtml(cur.digits)+'</div>'+sw;
+  const wide=bcSvgWide(cur.svg), label=cur.cap+' '+(mode==='item'?no:bc);
+  // จอกว้าง/รหัสยาวบนมือถือ → ป้ายใหญ่ข้าง Loc หรือเต็มความกว้างใต้แถวรูป / มือถือรหัสสั้น → กล่องเล็กใต้เลขในป้ายข้างรูป (สลับด้วย CSS)
+  rBc.innerHTML=inner; rBc.classList.add('on'); rBc.classList.toggle('rb-wide',wide); rBc.setAttribute('aria-label',label);
+  rBm.innerHTML=wide?'':inner; rBm.classList.toggle('on',!wide); if(wide)rBm.removeAttribute('aria-label'); else rBm.setAttribute('aria-label',label);
+}
+function toggleBarcodeMode(){ bcMode=bcMode==='item'?'prod':'item'; if(lastDetailItem)renderBarcodeLabels(lastDetailItem); }
+
+// ==== หัวหน้าจอปักหมุด: เลื่อนหน้าลงแล้วเหลือแถบเล็ก [กลับ][ค้นหา][สแกน] ติดขอบบนตลอด ====
+// ใช้ position:sticky ที่ .hdr โดยให้ top ติดลบเท่าความสูงส่วนที่อยู่เหนือแถวค้นหา (โลโก้/ภาษาเลื่อนหายไปเอง)
+// สลับคลาส .pinned ด้วย IntersectionObserver (ไม่ฟัง scroll) แล้วเปิดปุ่มกลับที่อยู่ในแถวค้นหา
+(function initStickyHeader(){
+  const hdr=document.querySelector('#mainApp .hdr');
+  const row=hdr&&hdr.querySelector('.hdr-row'), sr=hdr&&hdr.querySelector('.search-row');
+  if(!hdr||!row||!sr)return;
+  const TOP_GAP=6;
+  function place(){
+    const y=sr.offsetTop;
+    if(y>TOP_GAP)hdr.style.top=(TOP_GAP-y)+'px';
+  }
+  place();
+  try{ new ResizeObserver(place).observe(hdr); }catch(e){}
+  window.addEventListener('resize',place);
+  window.addEventListener('load',place);
+  try{ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(place); }catch(e){}
+  try{
+    new IntersectionObserver(es=>{ hdr.classList.toggle('pinned',!es[es.length-1].isIntersecting); },{threshold:0}).observe(row);
+  }catch(e){}
+})();
+
 function renderList(matches,q){
   const rl=document.getElementById('resultsList');
   const shown=matches.slice(0,50);
@@ -8407,7 +8718,12 @@ function renderDetail(item,fromList){
   const fc=document.getElementById('foundCard');
   fc.style.display='block';
   document.getElementById('rName').textContent=item.desc;
-  document.getElementById('rBadge').textContent=t('itemNoLabel')+' '+item.itemNo+(item.barcode?' · '+t('barcodeLabel')+' '+item.barcode:'');
+  // ป้าย "Item No · บาร์โค้ด" เป็นข้อความเหมือนเดิม (คัดลอกเลขได้) + รูปแท่งบาร์โค้ดเพิ่มอีกป้ายอยู่ข้าง Loc/Location (วาดไม่ได้ก็ซ่อนรูปไว้)
+  // ป้ายบาร์โค้ด: เริ่มที่บาร์ของเลข Item เสมอ (Item No.) มีปุ่มเล็กสีแดงอ่อนด้านล่างป้ายไว้สลับเป็นบาร์โค้ดบนห่อสินค้า (Barcode) และสลับกลับ
+  bcMode='item';
+  renderBarcodeLabels(item);
+  // แยกเป็น 2 ส่วนเพื่อให้จอแคบขึ้นบรรทัดใหม่ตรงกลางเป๊ะ (Item No บรรทัดบน / บาร์โค้ดบรรทัดล่าง) ไม่ตัดกลางตัวเลข
+  document.getElementById('rBadge').innerHTML='<span>'+escapeHtml(t('itemNoLabel')+' '+item.itemNo)+'</span>'+(item.barcode?'<span class="rb-sep"> · </span><span>'+escapeHtml(t('barcodeLabel')+' '+item.barcode)+'</span>':'');
   document.getElementById('rBadge').style.cssText='background:var(--color-background-secondary);color:var(--color-text-secondary)';
   const rEditBtn=document.getElementById('rEditBtn');
   if(isEmployee()){
@@ -8430,13 +8746,13 @@ function renderDetail(item,fromList){
     rLoc.innerHTML=locGroups.map(g=>
       '<div class="loc-group-row">'+
       '<div class="loc-combo loc-combo-green">'+
-      '<div class="loc-combo-label"><i class="ti ti-map-pin" aria-hidden="true"></i>'+t('locLabel')+' '+escapeHtml(g.loc)+'</div>'+
+      '<div class="loc-combo-label"><i class="ti ti-map-pin" aria-hidden="true"></i><span>'+t('locLabel')+' <span style="white-space:nowrap">'+escapeHtml(g.loc)+'</span></span></div>'+
       renderLocSignHTML(g.loc)+
       '<div class="loc-combo-caption">'+t('locSampleImageLabel')+'</div>'+
       '</div>'+
       g.locations.map(loc=>
         '<div class="loc-combo loc-combo-gray'+(canEditLoc?' loc-pill-editable':'')+'"'+(canEditLoc?' onclick="editItemLocation('+jsStr(item.itemNo)+','+jsStr(g.loc)+','+jsStr(loc)+')"':'')+'>'+
-        '<div class="loc-combo-label"><i class="ti ti-map-2" aria-hidden="true"></i>'+t('locationLabel')+' '+escapeHtml(loc)+(canEditLoc?'<i class="ti ti-pencil" aria-hidden="true"></i>':'')+'</div>'+
+        '<div class="loc-combo-label"><i class="ti ti-map-2" aria-hidden="true"></i><span>'+t('locationLabel')+' <span style="white-space:nowrap">'+escapeHtml(loc)+'</span></span>'+(canEditLoc?'<i class="ti ti-pencil" aria-hidden="true"></i>':'')+'</div>'+
         renderLocationStickerHTML(loc,false,'')+
         '<div class="loc-combo-caption">'+t('locSampleImageLabel')+'</div>'+
         '</div>'
@@ -8656,6 +8972,7 @@ function grGoToPalletManager(){ openPalletPage(); }
 function grGoToFindInPallet(){ openPalletPage('find'); }
 function grGoToMainSearch(){
   const sess=getSession();
+  if(!sess){showRoleScreen();return} /* no saved session (cleared / expired while the home screen was open): back to the role screen instead of a TypeError */
   showMain(sess);
 }
 function showRoleScreen(){

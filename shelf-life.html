@@ -4198,6 +4198,7 @@ function stkRefocus(sel){
   if(card)stkFocus(card,sel,true)}
 function stkFocus(card,sel,quiet){
   if(window.innerWidth<560||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return; /* from 560 px up (a window snapped to half of the screen): under 900 px the card takes the whole width of the window */
+  if(!card||!card.parentNode)return; /* a card that is no longer in the page (the list was drawn again between the press and now) cannot be lifted */
   if(stkFoc){if(stkFoc.card===card)return;stkUnfocus(true)}
   const first=card.getBoundingClientRect();
   const isRow=card.tagName==='TR'; /* a table row (Item NBS) leaves a table row behind, a card leaves a box */
@@ -4524,8 +4525,8 @@ const OOS_COLS=[
   ['ow',/^(orderway)$/],
   ['repl',/^(replmethod)$/],
   ['deliv',/^(deliverydate|วันส่งมอบ|วันที่ส่งมอบ)$/],
-  ['stock',/^(onhand|stockonhand|stockqty|stock|qty|quantity|คงเหลือ|สต็อก|จำนวน)$/],
-  ['found',/^(datetime|date|time|วันที่|เวลา|ตรวจพบ|วันที่ตรวจพบ|orderdate|founddate|foundat)$/],
+  ['stock',/^(onhand|stockonhand|availablestockonhand|availablestock|stockqty|stock|qty|quantity|คงเหลือ|สต็อก|จำนวน)$/], /* "Available stock on hand" of the O2O OOS export */
+  ['found',/^(datetime|date|time|วันที่|เวลา|ตรวจพบ|วันที่ตรวจพบ|orderdate|founddate|foundat|ooscreatetime|oosdatetime)$/], /* "OOS Create time" of the O2O OOS export */
   ['who',/(assign|owner|ผู้รับผิดชอบ|ผู้เติม|พนักงาน)/],
   ['note',/^(remark|note|หมายเหตุ|remarks)$/]];
 function oosMapHeader(row){const m={},used=new Set();
@@ -4535,8 +4536,9 @@ function oosParseDate(v){
   if(v===''||v==null)return'';
   let d;
   if(typeof v==='number'&&v>20000&&v<80000){const ms=Math.round((v-25569)*864e5);d=new Date(ms+new Date(ms).getTimezoneOffset()*6e4)}
-  else{const s=String(v).trim(),m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})(?:[ T,]+(\d{1,2})[:.](\d{2}))?/);
-    if(m){let y=+m[3];if(y<100)y+=2000;if(y>2400)y-=543;d=new Date(y,+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0))}else d=new Date(s)}
+  else{const s=String(v).trim(),m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})(?:[ T,]+(\d{1,2})[:.](\d{2}))?/),bi=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+    if(bi&&+bi[1]>2400)d=new Date(+bi[1]-543,+bi[2]-1,+bi[3],+(bi[4]||0),+(bi[5]||0),+(bi[6]||0)); /* "2569-11-11 01:50:07" (Buddhist year, as the O2O OOS export writes its times) */
+    else if(m){let y=+m[3];if(y<100)y+=2000;if(y>2400)y-=543;d=new Date(y,+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0))}else d=new Date(s)}
   if(isNaN(d))return'';
   const n=new Date();if(d.getHours()===0&&d.getMinutes()===0&&d.toDateString()===n.toDateString())return n.toISOString();
   return d.toISOString()}
@@ -4574,9 +4576,10 @@ function parseOosFile(wb){
   const rows=[],lines=[],info={cols:{},skipped:0,headerless:false,o2o:false,nonPos:0,stale:0,minDay:null,maxDay:null,span:0,items:0},seen=new Map();
   const num=v=>{const n=parseFloat(String(v??'').replace(/,/g,''));return isNaN(n)?null:n};
   const take=(g)=>{const no=String(g.item??'').trim().replace(/\.0+$/,'');if(!no){info.skipped++;return}
-    const x={itemNo:no,barcode:String(g.barcode??'').trim(),desc:String(g.desc??'').trim(),loc:String(g.loc??'').trim(),division:divFrom(g.div),dept:String(g.dept??'').trim(),stock:String(g.stock??'').trim(),foundAt:oosParseDate(g.found),who:String(g.who??'').trim(),note:String(g.note??'').trim(),
+    const sv=num(g.stock),x={itemNo:no,barcode:String(g.barcode??'').trim(),desc:String(g.desc??'').trim(),loc:String(g.loc??'').trim(),division:divFrom(g.div),dept:String(g.dept??'').trim(),stock:sv==null?String(g.stock??'').trim():String(Math.round(sv*100)/100),foundAt:oosParseDate(g.found),who:String(g.who??'').trim(),note:String(g.note??'').trim(), /* "38.0000" → "38" */
       buyerUid:String(g.buyerUid??'').trim(),buyerName:String(g.buyerName??'').trim(),dms:num(g.dms),stockDay:num(g.stockDay)};
-    const k=amNum(no);if(seen.has(k))rows[seen.get(k)]=x;else{seen.set(k,rows.length);rows.push(x)}}; /* the same Item twice: the last row wins */
+    /* the same Item twice (one line per order in the O2O export): the line with the later time gives the stock and the other fields, the earliest time is when the item was first found short */
+    const k=amNum(no);if(seen.has(k)){const p=rows[seen.get(k)],later=(x.foundAt||'')>=(p.foundAt||'')?x:p;rows[seen.get(k)]={...later,foundAt:[p.foundAt,x.foundAt].filter(Boolean).sort()[0]||''}}else{seen.set(k,rows.length);rows.push(x)}};
   const takeLine=(g)=>{
     const no=String(g.item??'').trim().replace(/\.0+$/,'');if(!no){info.skipped++;return}
     const short=num(g.short)??0,ps=String(g.ps??'').trim().toLowerCase();
@@ -4745,6 +4748,8 @@ async function runOosImport(){
     for(const {ex,x} of plan.upd){const f=fill(x),e=oosExtra(x),p={};
       Object.entries(e).forEach(([k,v])=>{if(KEEP.includes(k)){if(!ex[k])p[k]=v}else if(String(ex[k]??'')!==String(v))p[k]=v});
       if(!ex.desc&&f.desc)p.desc=f.desc;if(naLoc(ex.loc))p.loc=x.loc||f.loc||'';else if(!ex.loc&&(x.loc||f.loc))p.loc=x.loc||f.loc;if(x.stock&&x.stock!==String(ex.stock??''))p.stock=x.stock;if(!ex.note&&x.note)p.note=x.note;
+      /* the time of the file (plain list with a time column, e.g. "OOS Create time") is the real time the item was found: an earlier one replaces the time an earlier import stamped (the import time); a later one never moves it forward */
+      if(!oosImp.info.o2o&&x.foundAt&&ex.source==='import'){const xs=Date.parse(x.foundAt),es=ex.foundAt?Date.parse(ex.foundAt):NaN;if(!isNaN(xs)&&(isNaN(es)||xs<es))p.foundAt=x.foundAt}
       if(Object.keys(p).length)await patchItem('oos',ex,{...p,updatedAt:now})}
     for(const r of plan.close)await patchItem('oos',r,{status:'done',doneAt:now,doneBy:'ปิดอัตโนมัติ',autoClosed:true,updatedAt:now});
   },null);
