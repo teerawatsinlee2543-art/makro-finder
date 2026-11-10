@@ -4192,8 +4192,8 @@ function stkFocus(card,sel,quiet){
       nav.querySelector('.stk-prev').onclick=()=>stkNav(-1);nav.querySelector('.stk-next').onclick=()=>stkNav(1);
     }
     /* Item NBS / OOS+: a delete button, one press and the item is gone (no question); the next card is lifted at once and the toast has "เลิกทำ" for a few seconds */
-    if(sec&&(sec.id==='t-nbs'||sec.id==='t-oos')&&card.querySelector('[onclick^="oosStock("]')){
-      const del=document.createElement('button');del.type='button';del.className='btn sm stk-del';del.title='ลบรายการนี้ทันที (ไม่ถามซ้ำ) — เลิกทำได้ช่วงสั้นๆ';del.setAttribute('aria-label','ลบรายการนี้');
+    if(sec&&STK_DEL_COL[sec.id]&&card.querySelector('[onclick^="oosStock("]')){
+      const del=document.createElement('button');del.type='button';del.className='btn sm stk-del';del.title=(sec.id==='t-nbs'||sec.id==='t-oos')?'ลบรายการนี้ทันที (ไม่ถามซ้ำ) — เลิกทำได้ช่วงสั้นๆ':'ลบรายการนี้ออกจากข้อมูลรายงานทันที (ไม่ถามซ้ำ) — นำเข้ารายงานใหม่แล้วจะกลับมา · เลิกทำได้ช่วงสั้นๆ';del.setAttribute('aria-label','ลบรายการนี้');
       del.innerHTML='<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> ลบ';
       del.onclick=()=>stkDelCard();back.insertBefore(del,btnBack);
     }
@@ -4276,16 +4276,36 @@ function stkKeyMark(){const k=stkFoc&&stkFoc.back&&stkFoc.back.querySelector('.s
   k.title=on?'คีย์ ← → หรือ , . (ปุ่ม < >) ใช้ได้แม้กดในหน้าต่าง BIP — สคริปต์ v1.5 ทำงานอยู่':'ยังไม่พบสคริปต์ Tampermonkey v1.5 ในหน้าต่าง BIP — คีย์ใช้ได้เฉพาะตอนที่หน้านี้รับคีย์บอร์ดอยู่ (กดเพื่อดูรายละเอียด)'}
 /* Delete from the lifted card: no question. The item is removed for the whole team (same as the "ลบ" button of the list, minus the confirm box), the next card (else the previous one) is lifted and its Item opened in the Makro window, and the toast offers "เลิกทำ" for 8 seconds: it puts the item (and its photo) back. */
 const stkCardId=card=>{const m=/oosStock\('([^']*)'/.exec([...card.querySelectorAll('[onclick^="oosStock("]')].map(b=>b.getAttribute('onclick')).join(' '));return m?m[1]:''};
+const STK_DEL_COL={'t-nbs':'nbs','t-oos':'oos','t-shr':'shr','t-neg':'neg','t-dms':'dms'},STK_PUSH_MS=5000;
+/* returns {label, undo} or null. Item NBS / OOS+: the record is deleted for the team, as the "ลบ" button of the list does.
+   %Shrink / Negative Stock / High Stock to DMS: there is no record per item, the item is its rows in the imported report: those rows are taken out of the report data (this device's copy at once; sent to the team 5 s after the last change, like an import) and put back by "เลิกทำ".
+   Importing the report again brings the item back. */
 async function stkDelRec(col,id){
+  if(col==='shr'||col==='neg'||col==='dms')return stkDelReport(col,id);
   const r=byId(col,id);if(!r){toast('ไม่พบรายการนี้ — อาจถูกลบไปแล้ว');return null}
-  const pid=col==='nbs'?nbsPhotoId(r):oosPhotoId(r),ph=pid?byId('imgs',pid):null,snap={col,rec:{...r},ph:ph?{...ph}:null};
+  const pid=col==='nbs'?nbsPhotoId(r):oosPhotoId(r),ph=pid?byId('imgs',pid):null,rec={...r},phc=ph?{...ph}:null;
   const ok=await act(async()=>{await rmItem(col,r);if(ph)await rmItem('imgs',ph)},'');
-  return ok?snap:null;
+  return ok?{label:r.desc||r.itemNo||'',undo:()=>act(async()=>{if(phc)await putItem('imgs',phc);await putItem(col,rec)},'เลิกทำแล้ว — นำรายการกลับมาแล้ว')}:null;
+}
+async function stkDelReport(col,id){
+  const gone=()=>{toast('ไม่พบรายการนี้ — อาจถูกลบไปแล้ว');return null};
+  if(col==='shr'){
+    const it=shrFind(id);if(!it)return gone();
+    const k=amNum(it.itemNo),code=SHR.code.filter(r=>amNum(r.i)===k),sales=SHR.sales&&SHR.sales.rows?SHR.sales.rows.filter(r=>amNum(r.i)===k):[];
+    SHR.code=SHR.code.filter(r=>amNum(r.i)!==k);if(sales.length)SHR.sales.rows=SHR.sales.rows.filter(r=>amNum(r.i)!==k);
+    SHR_REV++;SHR_MEMO=null;renderShr();await shrSave(false,STK_PUSH_MS);
+    return{label:it.desc||it.itemNo||'',undo:async()=>{SHR.code=SHR.code.concat(code);if(sales.length&&SHR.sales&&SHR.sales.rows)SHR.sales.rows=SHR.sales.rows.concat(sales);SHR_REV++;SHR_MEMO=null;renderShr();await shrSave(false,STK_PUSH_MS);toast('เลิกทำแล้ว — นำรายการกลับมาแล้ว');return true}};
+  }
+  const it=ilFind(id);if(!it||!ILT[col])return gone();
+  const k=amNum(it.itemNo),rows=ILT[col].rows.filter(r=>amNum(r.i)===k);
+  ILT[col].rows=ILT[col].rows.filter(r=>amNum(r.i)!==k);
+  IL_REV[col]++;renderIlt(col);await ilSave(col,false,STK_PUSH_MS);
+  return{label:it.desc||it.itemNo||'',undo:async()=>{if(!ILT[col])return false;ILT[col].rows=ILT[col].rows.concat(rows);IL_REV[col]++;renderIlt(col);await ilSave(col,false,STK_PUSH_MS);toast('เลิกทำแล้ว — นำรายการกลับมาแล้ว');return true}};
 }
 let stkDelBusy=false;
 async function stkDelCard(){
   const f=stkFoc;if(!f||f.card.dataset.clone||stkDelBusy)return;
-  const sec=f.card.closest('section'),col=sec&&sec.id==='t-nbs'?'nbs':sec&&sec.id==='t-oos'?'oos':'',id=stkCardId(f.card);if(!col||!id)return;
+  const sec=f.card.closest('section'),col=(sec&&STK_DEL_COL[sec.id])||'',id=stkCardId(f.card);if(!col||!id)return;
   const list=stkSiblings(f.card),i=list.indexOf(f.card),sel=f.sel;
   let nid='';for(const j of [...list.keys()].filter(j=>j>i).concat([...list.keys()].filter(j=>j<i).reverse())){const c=list[j],x=stkCardId(c);if(x&&stkOpener(c,sel)){nid=x;break}}
   stkDelBusy=true;
@@ -4300,8 +4320,8 @@ async function stkDelCard(){
     }
     if(stkFoc&&stkFoc.card.isConnected&&stkFoc.card===f.card)stkUnfocus(true);
     if(nc){const op=stkOpener(nc,sel);if(op){try{nc.scrollIntoView({block:'nearest'})}catch(e){}op()}}
-    stkUndoToast('ลบแล้ว · '+(snap.rec.desc||snap.rec.itemNo||''),async()=>{
-      const ok=await act(async()=>{if(snap.ph)await putItem('imgs',snap.ph);await putItem(snap.col,snap.rec)},'เลิกทำแล้ว — นำรายการกลับมาแล้ว');
+    stkUndoToast('ลบแล้ว · '+snap.label,async()=>{
+      let ok=false;try{ok=await snap.undo()}catch(e){}
       if(!ok)toast('เลิกทำไม่สำเร็จ');
     });
   }finally{stkDelBusy=false}
@@ -4755,7 +4775,7 @@ const SHR_RS0={'52':'ทิ้ง'}; /* the only code whose meaning is known fro
 const SHR_BIG=1000,SHR_HI=5000,SHR_P1=.01,SHR_P5=.05; /* ฿ / share of sales that make a "heavy" thrower */
 let SHR={files:[],code:[],sales:null,names:{}},SHR_REV=0,SHR_MEMO=null;
 const shrOpen=()=>new Promise(res=>{try{const rq=indexedDB.open('slm-shrink',1);rq.onupgradeneeded=()=>rq.result.createObjectStore('kv');rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);rq.onblocked=()=>res(null)}catch(e){res(null)}});
-async function shrSave(noSync){if(!noSync&&SHR)SHR.upd=Date.now();const ok=await shrSaveLocal();if(!noSync)rsSchedule('shr');return ok}
+async function shrSave(noSync,ms){if(!noSync&&SHR)SHR.upd=Date.now();const ok=await shrSaveLocal();if(!noSync)rsSchedule('shr',ms);return ok}
 async function shrSaveLocal(){const db=await shrOpen();if(!db)return false;return new Promise(res=>{try{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(SHR,'v1');tx.oncomplete=()=>res(true);tx.onerror=()=>res(false);tx.onabort=()=>res(false)}catch(e){res(false)}})}
 async function shrLoad(){const db=await shrOpen();if(!db)return;const rec=await new Promise(res=>{try{const g=db.transaction('kv').objectStore('kv').get('v1');g.onsuccess=()=>res(g.result||null);g.onerror=()=>res(null)}catch(e){res(null)}});
   if(rec&&rec.files){SHR={files:rec.files||[],code:rec.code||[],sales:rec.sales||null,names:rec.names||{}};SHR_REV++}}
@@ -5170,7 +5190,7 @@ const IL_BK={neg:['ของหมด / ติดลบ แต่ยังขา
 const IL_LOW=3,IL_OVER=30;
 const ILT={neg:null,dms:null},IL_REV={neg:0,dms:0},IL_MEMO={neg:null,dms:null},IL_ST={neg:{div:'',tile:'',basis:'val',limit:60,drill:false},dms:{div:'',tile:'',basis:'over',limit:60,drill:false}};
 const ilOpen=()=>new Promise(res=>{try{const rq=indexedDB.open('slm-itemlist',1);rq.onupgradeneeded=()=>rq.result.createObjectStore('kv');rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);rq.onblocked=()=>res(null)}catch(e){res(null)}});
-async function ilSave(p,noSync){if(!noSync&&ILT[p])ILT[p].upd=Date.now();const ok=await ilSaveLocal(p);if(!noSync)rsSchedule(p);return ok}
+async function ilSave(p,noSync,ms){if(!noSync&&ILT[p])ILT[p].upd=Date.now();const ok=await ilSaveLocal(p);if(!noSync)rsSchedule(p,ms);return ok}
 async function ilSaveLocal(p){const db=await ilOpen();if(!db)return false;return new Promise(res=>{try{const tx=db.transaction('kv','readwrite');if(ILT[p])tx.objectStore('kv').put(ILT[p],p);else tx.objectStore('kv').delete(p);tx.oncomplete=()=>res(true);tx.onerror=()=>res(false);tx.onabort=()=>res(false)}catch(e){res(false)}})}
 async function ilLoad(){const db=await ilOpen();if(!db)return;for(const p of ['neg','dms']){const rec=await new Promise(res=>{try{const g=db.transaction('kv').objectStore('kv').get(p);g.onsuccess=()=>res(g.result||null);g.onerror=()=>res(null)}catch(e){res(null)}});if(rec&&rec.rows){ILT[p]=rec;IL_REV[p]++}}}
 /* ===== %Shrink / Negative Stock / High Stock to DMS: shared by the whole team (the same database as OOS+ and Item NBS) =====
@@ -5208,10 +5228,10 @@ function rsSplit(s,n){
 }
 function rsWhy(e){const c=e&&e.code;return c==='permission-denied'?'ฐานข้อมูลไม่อนุญาตให้เขียน — ต้องเปิดสิทธิ์เขียนใน Firestore Rules':c==='resource-exhausted'?'บันทึกถี่เกินไป':(e&&e.message)||'ตรวจอินเทอร์เน็ต'}
 function rsEnqueue(fn){RS.q=RS.q.then(fn).catch(e=>{console.error(e);if(!RS.warned){RS.warned=true;toast('ซิงก์ข้อมูลรายงานกับทีมไม่สำเร็จ — '+rsWhy(e))}})}
-function rsSchedule(kind){
+function rsSchedule(kind,ms){ /* ms: wait this long without another change before sending (default 1.2 s; the one-press delete on a lifted card waits longer so a run of deletes is sent once) */
   if(!rsReady())return;
   clearTimeout(RS.timers[kind]);
-  RS.timers[kind]=setTimeout(()=>rsEnqueue(()=>rsPush(kind)),1200);
+  RS.timers[kind]=setTimeout(()=>rsEnqueue(()=>rsPush(kind)),ms||1200);
 }
 async function rsPush(kind){
   if(!rsReady())return false;
