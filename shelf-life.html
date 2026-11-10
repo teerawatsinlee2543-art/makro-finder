@@ -643,6 +643,11 @@ table.nbs-tbl tr.stk-focus .nname{font-size:17px;font-weight:800;line-height:1.3
 table.nbs-tbl tr.stk-focus .nmeta{display:grid;grid-template-columns:1fr 1fr;gap:3px 14px}
 table.nbs-tbl tr.stk-focus .stk-one .btn{width:auto}
 table.nbs-tbl tr.stk-focus td[data-l="Buyer"]{order:1}
+@media (max-width:899px){.oosc.stk-focus,table.nbs-tbl tr.stk-focus{width:calc(100vw - 24px)}} /* a window snapped to half of the screen: the lifted card takes the whole width, the Makro window is on the other half */
+.stk-kbhint{position:absolute;left:calc(min(36vw,460px) + 40px);top:24px;max-width:min(440px,calc(100vw - min(36vw,460px) - 70px));padding:14px 16px;border-radius:12px;background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:0 12px 40px #000a;font-size:14px;line-height:1.5}
+.stk-kbhint p{margin:6px 0}
+.stk-kbhint kbd{display:inline-block;padding:0 7px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;background:var(--bg);font:inherit;font-weight:700}
+.stk-kbhint .btn{margin-top:4px}
 table.nbs-tbl tr.stk-focus td[data-l="สถานะ"],table.nbs-tbl tr.stk-focus td[data-l="Remark"]{order:2}
 table.nbs-tbl tr.stk-focus td[data-l="บันทึกเมื่อ"]{order:3}
 table.nbs-tbl tr.stk-focus td[data-l="Division"] .chip,table.nbs-tbl td[data-l="Division"] .chip{font-size:20px;font-weight:800;line-height:1.2;padding:4px 18px}
@@ -4144,7 +4149,7 @@ function stkLotCard(btn){
    Not on a phone / touch screen (a tap there would only open a new tab), and never when the click was on a button, link or field inside the product area. */
 document.addEventListener('click',e=>{
   const t=e.target.closest&&e.target.closest('[data-open-no]');if(!t||e.target.closest('button,a,input,select,textarea,label,summary,.small,.muted,.bc-line,.bc-img'))return; /* the Item No. / Barcode / Location lines are not part of it */
-  if(window.innerWidth<900||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return;
+  if(window.innerWidth<560||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return;
   const no=t.getAttribute('data-open-no');if(!no||no==='-')return;
   stkEnq(no,t)});
 let stkOpened={};
@@ -4152,24 +4157,37 @@ let stkOpened={};
    For the Makro window to stay visible while this page has the focus the two windows must not overlap (Windows: Win+← on this page, Win+→ on the Makro window). */
 let stkKbMode=false;try{stkKbMode=localStorage.getItem('slmKbMode')==='1'}catch(e){}
 function stkFocusWin(w){if(stkKbMode){setTimeout(()=>{try{window.focus()}catch(e){}},300);return}try{w.focus()}catch(e){}} /* keyboard mode: the Makro window is not brought forward; this page asks for the keyboard back (the browser may ignore that: then one click on the card does it) */
+/* where the Makro window goes: right next to the lifted card (no empty gap), taking the rest of the screen up to 1300px.
+   Everything is worked out in screen units: the page's own pixels (CSS px) are scaled by the browser zoom (outerWidth / innerWidth), so the gap does not appear when the page is zoomed out (Ctrl -) as it did before.
+   A narrow window (the window snapped to the left half of the screen with Win+←, under 900 px): the Makro window goes to the right of this whole window. */
+function stkGeom(){
+  const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0;
+  let ww=Math.min(1000,Math.round(W*.62)),wl=L+W-ww;
+  try{
+    const iw=window.innerWidth,z=window.outerWidth&&iw?Math.min(3,Math.max(.25,window.outerWidth/iw)):1,sx=window.screenX!=null?window.screenX:L;
+    const edge=iw>=900?sx+Math.round((12+Math.min(Math.round(iw*.36),460)+8)*z):sx+window.outerWidth+2;
+    if(edge>L&&edge<L+W-400){wl=edge;ww=Math.min(1300,L+W-edge)}
+  }catch(e){}
+  return{wl,ww,H,T};
+}
+function stkAlign(w){const g=stkGeom();try{w.moveTo(g.wl,g.T);w.resizeTo(g.ww,g.H)}catch(e){}}
 function stkWin(url,i){
   try{
-    const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||window.innerWidth<700;
-    let w;
-    if(!phone&&stkKbMode&&stkOpened[i]&&stkOpened[i].closed!==true){try{stkOpened[i].location.href=url;return stkOpened[i]}catch(e){}}
+    const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||window.innerWidth<560;
+    let w;const first=!stkFoc; /* the first press of a lift: the Makro window is put next to the card (also when it was already open, e.g. left where it was in an earlier visit) */
+    if(!phone&&stkKbMode&&stkOpened[i]&&stkOpened[i].closed!==true){try{const o=stkOpened[i];o.location.href=url;if(first)stkAlign(o);return o}catch(e){}}
     if(phone)w=window.open(url,'mkStock'+i);
-    else{const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,fresh=!(stkOpened[i]&&stkOpened[i].closed!==true);
-      let ww=Math.min(1000,Math.round(W*.62)),wl=L+W-ww;
-      /* the Makro window opens right next to the lifted card (the card sits at the left of this page): no empty gap between the two, and the window takes the rest of the screen up to 1300px */
-      try{if(window.innerWidth>=900){const cw=Math.min(Math.round(window.innerWidth*.36),460),bl=Math.max(0,Math.round(((window.outerWidth||window.innerWidth)-window.innerWidth)/2)),edge=(window.screenX!=null?window.screenX:L)+bl+12+cw+8;
-        if(edge>L&&edge<L+W-500){wl=edge;ww=Math.min(1300,L+W-edge)}}}catch(e){}
+    else{const g=stkGeom(),fresh=!(stkOpened[i]&&stkOpened[i].closed!==true);
       /* width / height in the features are the INSIDE of the window (the title bar and address bar come on top and would push the bottom off the screen): ask for less, then set the real outer size */
-      w=window.open(url,'mkStock'+i,`popup=yes,width=${ww},height=${Math.max(400,H-100)},left=${wl},top=${T}`);
-      if(w&&fresh){try{w.moveTo(wl,T);w.resizeTo(ww,H)}catch(e){}} /* a window that is already open keeps the size the person gave it */}
+      w=window.open(url,'mkStock'+i,`popup=yes,width=${g.ww},height=${Math.max(400,g.H-100)},left=${g.wl},top=${g.T}`);
+      if(w&&(fresh||first)){try{w.moveTo(g.wl,g.T);w.resizeTo(g.ww,g.H)}catch(e){}} /* during a walk with ‹ › the window keeps the size the person gave it */}
     if(w)stkOpened[i]=w;
     return w;
   }catch(e){return null}
 }
+/* the window was resized, snapped or zoomed while a card is lifted: the Makro window follows to stay right next to it */
+let stkRsT=0;
+window.addEventListener('resize',()=>{if(!stkFoc)return;clearTimeout(stkRsT);stkRsT=setTimeout(()=>{if(!stkFoc)return;Object.values(stkOpened).forEach(w=>{try{if(w&&w.closed!==true)stkAlign(w)}catch(e){}});stkKbBanner()},700)});
 /* the card whose Stock button was tapped is lifted to the left side of the screen, alone (the rest is dimmed), while the Makro window is open on the right.
    It stays there until the "✕ ย่อกลับ" button is pressed (closing the Makro window, Esc or a tap on the dimmed area no longer send it back; only a tab change does, as the card's tab is hidden then).
    When the data is drawn again (a team member's change arrives) the same card is lifted again at once, found by `sel` = the selector of the button that was pressed. Not on phones / narrow screens (no room beside the window). */
@@ -4179,7 +4197,7 @@ function stkRefocus(sel){
   const b=[...document.querySelectorAll(sel)].find(x=>x.offsetParent!==null),card=b&&(b.closest('.oosc')||b.closest('table.nbs-tbl tr'));
   if(card)stkFocus(card,sel,true)}
 function stkFocus(card,sel,quiet){
-  if(window.innerWidth<900||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return;
+  if(window.innerWidth<560||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return; /* from 560 px up (a window snapped to half of the screen): under 900 px the card takes the whole width of the window */
   if(stkFoc){if(stkFoc.card===card)return;stkUnfocus(true)}
   const first=card.getBoundingClientRect();
   const isRow=card.tagName==='TR'; /* a table row (Item NBS) leaves a table row behind, a card leaves a box */
@@ -4222,7 +4240,7 @@ function stkFocus(card,sel,quiet){
       Object.values(stkOpened).forEach(w=>{try{if(w&&w.closed!==true)w.focus()}catch(x){}})},80)};
   document.addEventListener('pointerup',raise,true);
   stkFoc={card,ph,dim,back,timer,sel,raise};
-  stkKeyMark();
+  stkKeyMark();stkKbBanner();
 }
 function stkUnfocus(instant){
   const f=stkFoc;if(!f)return;stkFoc=null;clearInterval(f.timer);document.removeEventListener('pointerup',f.raise,true);
@@ -4281,10 +4299,19 @@ window.addEventListener('message',e=>{
 let stkKeyAt=0;
 const stkKeyOn=()=>Date.now()-stkKeyAt<12000;
 function stkKeyMark(){const k=stkFoc&&stkFoc.back&&stkFoc.back.querySelector('.stk-key');if(!k)return;const on=stkKeyOn();k.classList.toggle('on',on);k.classList.toggle('kb',stkKbMode);
-  k.title=stkKbMode?'โหมดคีย์บอร์ด: เปิดอยู่ — หน้านี้ถือคีย์บอร์ดไว้ กด ← → หรือ , . (ปุ่ม < >) ที่หน้านี้ได้เลย โดยหน้าต่าง BIP ต้องไม่ซ้อนกับหน้านี้ (Win+← / Win+→) · กดเพื่อปิดโหมด':on?'คีย์ ← → หรือ , . ใช้ได้แม้กดในหน้าต่าง BIP (สคริปต์ v1.5 ทำงานอยู่) · กดเพื่อเปิดโหมดคีย์บอร์ด':'กดเพื่อเปิดโหมดคีย์บอร์ด — ให้หน้านี้ถือคีย์บอร์ดไว้ แล้วกด ← → หรือ , . ที่หน้านี้ (ไม่ต้องใช้สคริปต์)'}
+  k.title=stkKbMode?'โหมดคีย์บอร์ด: เปิดอยู่ — หน้านี้ถือคีย์บอร์ดไว้ กด ← → หรือ , . (ปุ่ม < >) ที่หน้านี้ได้เลย โดยหน้าต่าง BIP ต้องไม่ซ้อนกับหน้านี้ (กด Win+← ที่หน้านี้ให้เหลือครึ่งซ้าย) · กดเพื่อปิดโหมด':on?'คีย์ ← → หรือ , . ใช้ได้แม้กดในหน้าต่าง BIP (สคริปต์ v1.5 ทำงานอยู่) · กดเพื่อเปิดโหมดคีย์บอร์ด':'กดเพื่อเปิดโหมดคีย์บอร์ด — ให้หน้านี้ถือคีย์บอร์ดไว้ แล้วกด ← → หรือ , . ที่หน้านี้ (ไม่ต้องใช้สคริปต์)'}
+/* keyboard mode on a wide window: this page covers the Makro window, so say so (and how to see both) in the dimmed area where that window would be */
+function stkKbBanner(){
+  if(!stkFoc)return;const dim=stkFoc.dim;dim.querySelectorAll('.stk-kbhint').forEach(x=>x.remove());
+  if(!stkKbMode||window.innerWidth<900)return;
+  const b=document.createElement('div');b.className='stk-kbhint';
+  b.innerHTML='<b>⌨ โหมดคีย์บอร์ดเปิดอยู่</b><p>หน้านี้ถือคีย์บอร์ดไว้ จึงบังหน้าต่าง BIP อยู่ (ข้อมูล Item Enquiry จะไม่โผล่ขึ้นมา)</p><p><b>จะเห็นทั้งสองหน้าต่างพร้อมกัน:</b> กด <kbd>Win</kbd> + <kbd>←</kbd> ที่หน้านี้ให้เหลือครึ่งซ้ายของจอ หน้าต่าง BIP จะไปอยู่ครึ่งขวาเอง แล้วกด ← → หรือ , . ได้เลย</p><button type="button" class="btn sm">ปิดโหมดคีย์บอร์ด (ใช้เมาส์ ‹ › แล้ว BIP อยู่หน้าเสมอ)</button>';
+  b.querySelector('button').onclick=()=>stkKbToggle();
+  dim.appendChild(b);
+}
 function stkKbToggle(){
-  stkKbMode=!stkKbMode;try{localStorage.setItem('slmKbMode',stkKbMode?'1':'0')}catch(e){}stkKeyMark();
-  toast(stkKbMode?'เปิดโหมดคีย์บอร์ดแล้ว — จัดหน้าต่างซ้าย-ขวาไม่ให้ซ้อนกัน (Win+← ที่หน้านี้ แล้วเลือกหน้าต่าง BIP ไปฝั่งขวา) จากนั้นคลิกที่การ์ดหนึ่งครั้ง แล้วกด ← → หรือ , . ได้เลย':'ปิดโหมดคีย์บอร์ดแล้ว',stkKbMode?9000:2400);
+  stkKbMode=!stkKbMode;try{localStorage.setItem('slmKbMode',stkKbMode?'1':'0')}catch(e){}stkKeyMark();stkKbBanner();
+  toast(stkKbMode?'เปิดโหมดคีย์บอร์ดแล้ว — กด Win+← ที่หน้านี้ให้เหลือครึ่งซ้ายของจอ หน้าต่าง BIP จะไปอยู่ครึ่งขวาเอง แล้วกด ← → หรือ , . ได้เลย (ถ้ายังไม่เปลี่ยน คลิกที่การ์ดหนึ่งครั้งก่อน)':'ปิดโหมดคีย์บอร์ดแล้ว',stkKbMode?9000:2400);
 }
 /* Delete from the lifted card: no question. The item is removed for the whole team (same as the "ลบ" button of the list, minus the confirm box), the next card (else the previous one) is lifted and its Item opened in the Makro window, and the toast offers "เลิกทำ" for 8 seconds: it puts the item (and its photo) back. */
 const stkCardId=card=>{const m=/oosStock\('([^']*)'/.exec([...card.querySelectorAll('[onclick^="oosStock("]')].map(b=>b.getAttribute('onclick')).join(' '));return m?m[1]:''};
