@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shelf-Life Monitor: send the BIP Buyer ID back
 // @namespace    https://teerawatsinlee2543-art.github.io/makro-finder/
-// @version      1.4
+// @version      1.5
 // @description  (1) Reads "Buyer ID" off the BIP Item Enquiry report and sends it back to the Shelf-Life Monitor page that opened this window (nothing is sent anywhere else). (2) On the Daily_StockMovement_Store_14_Days report opened from the "Stock Movement 14 วัน" button, fills in Store 42 and the Item No. and presses Apply. (3) A small zoom bar (− + ⤢ fit width) in both BIP windows. (4) The keys ← → (or , and . = the "<" ">" keys) pressed in a BIP window tell the Shelf-Life Monitor page to go to the previous / next item (the ‹ › buttons of its lifted card).
 // @match        http://bip-app.siammakro.co.th:9714/*
 // @match        http://raadw-app.siammakro.co.th:7777/*
@@ -119,7 +119,16 @@
     }
     function bind(d){try{if(d&&!d.__slmKeys){d.__slmKeys=1;d.addEventListener('keydown',on,true)}}catch(e){}}
     function scan(){bind(document);var f=document.querySelectorAll('iframe'),i;for(i=0;i<f.length;i++){try{bind(f[i].contentDocument)}catch(e){}}}
-    scan();setInterval(scan,1000);
+    /* "I am running": said to the Shelf-Life page every few seconds (it lights the ⌨ sign on its lifted card), and shown here for a few seconds when the page has loaded */
+    function hello(){try{if(window.opener)window.opener.postMessage({type:'slm-key',v:1,cmd:'hello'},origin)}catch(x){}}
+    function badge(){
+      if(!document.body||document.getElementById('slmKeyBadge'))return;
+      var b=document.createElement('div');b.id='slmKeyBadge';
+      b.style.cssText='position:fixed;right:8px;bottom:44px;z-index:99999;padding:4px 10px;border-radius:8px;font:13px sans-serif;color:#fff;background:#1f7a45;box-shadow:0 2px 8px #0005;transition:opacity .6s';
+      b.textContent='Shelf-Life: ← → หรือ , . = รายการก่อนหน้า / ถัดไป ✓';
+      document.body.appendChild(b);setTimeout(function(){b.style.opacity='0'},6000);setTimeout(function(){if(b.parentNode)b.parentNode.removeChild(b)},7000);
+    }
+    var tick=0;scan();hello();badge();setInterval(function(){scan();if(++tick%3===0)hello()},1000);
   }
   slmKeys('https://teerawatsinlee2543-art.github.io');
   slmZoomBar();
