@@ -4507,8 +4507,8 @@ const OOS_COLS=[
   ['item',/^(itemno|item|itemnumber|itemcode|article|articleno|sku|รหัส|รหัสสินค้า|เลขสินค้า|เลขitem)$/],
   ['barcode',/(barcode|บาร์โค้ด|^ean$|^gtin$)/],
   ['desc',/^(itemdesc|itemdescription|description|desc|name|itemname|productname|ชื่อสินค้า|ชื่อ|สินค้า|รายการสินค้า|รายการ)$/],
-  ['loc',/(location|^loc$|ตำแหน่ง|ชั้น|bay)/],
-  ['div',/^(division|div|group|กลุ่ม|กลุ่มสินค้า|ffdfnf)$/],
+  ['loc',{test:n=>/(location|^loc$|ตำแหน่ง|ชั้น|bay)/.test(n)&&!/shelf/.test(n)}], /* a "Shelf Location" column (O2O pick export: 510-241-NA-26, 0-NA-0 …) is NOT read: those codes are not the shelf locations of this store and made the data wrong */
+  ['div',/^(division|div|group|กลุ่ม|กลุ่มสินค้า|ffdfnf|itemdivision|divisiondesc|divisionname)$/], /* "Item division" = FRESH FOOD / DRY FOOD / NON FOOD in the O2O export */
   ['dept',/(category|dept|department|หมวด|แผนก)/],
   ['buyerUid',/^(buyeruid|buyerid)$/],
   ['buyerName',/^(buyername|ชื่อbuyer)$/],
@@ -4736,14 +4736,15 @@ async function runOosImport(){
   const ready=MF.state==='ready';if(!ready&&onMakroSite())mfFillPending=true; /* no more waiting for the item list: empty name / Location / barcode are filled in afterwards (mfFillRows) */
   const fill=x=>{const it=ready?MF.items.get(x.itemNo):null;return{desc:x.desc||it?.desc||'',loc:x.loc||(it&&it.locs.length?locText(it.locs.slice(0,2)):''),barcode:x.barcode||it?.barcode||''}};
   const KEEP=['division','dept','assignDept'];  /* set only while still empty: the team may have changed them */
+  const naLoc=s=>/(^|-)NA-\d+$/.test(String(s||'').trim()); /* a Shelf Location code of the O2O export that an earlier import stored as the Location (510-241-NA-26, 0-NA-0): cleared / replaced by the real Location from Makro Finder when the report is imported again */
   const ok=await actWait(async()=>{
     for(const x of plan.add){const f=fill(x);await putItem('oos',{itemNo:x.itemNo,desc:f.desc,loc:f.loc,barcode:f.barcode,stock:x.stock,status:'need',assignee:x.who,note:x.note,foundAt:x.foundAt||now,source:'import',importFile:file,importRun:now,createdAt:now,createdBy:myId||null,updatedAt:now,...oosExtra(x)})}
     for(const {ex,x} of plan.reopen){const f=fill(x),e=oosExtra(x);
-      await patchItem('oos',ex,{status:'need',doneAt:'',doneBy:'',autoClosed:false,foundAt:x.foundAt||now,desc:ex.desc||f.desc,loc:x.loc||ex.loc||f.loc,stock:x.stock||ex.stock||'',...(x.who?{assignee:x.who}:{}),...e,
+      await patchItem('oos',ex,{status:'need',doneAt:'',doneBy:'',autoClosed:false,foundAt:x.foundAt||now,desc:ex.desc||f.desc,loc:x.loc||(naLoc(ex.loc)?'':ex.loc)||f.loc,stock:x.stock||ex.stock||'',...(x.who?{assignee:x.who}:{}),...e,
         ...Object.fromEntries(KEEP.filter(k=>ex[k]&&e[k]).map(k=>[k,ex[k]])),importFile:file,importRun:now,updatedAt:now})}
     for(const {ex,x} of plan.upd){const f=fill(x),e=oosExtra(x),p={};
       Object.entries(e).forEach(([k,v])=>{if(KEEP.includes(k)){if(!ex[k])p[k]=v}else if(String(ex[k]??'')!==String(v))p[k]=v});
-      if(!ex.desc&&f.desc)p.desc=f.desc;if(!ex.loc&&(x.loc||f.loc))p.loc=x.loc||f.loc;if(x.stock&&x.stock!==String(ex.stock??''))p.stock=x.stock;if(!ex.note&&x.note)p.note=x.note;
+      if(!ex.desc&&f.desc)p.desc=f.desc;if(naLoc(ex.loc))p.loc=x.loc||f.loc||'';else if(!ex.loc&&(x.loc||f.loc))p.loc=x.loc||f.loc;if(x.stock&&x.stock!==String(ex.stock??''))p.stock=x.stock;if(!ex.note&&x.note)p.note=x.note;
       if(Object.keys(p).length)await patchItem('oos',ex,{...p,updatedAt:now})}
     for(const r of plan.close)await patchItem('oos',r,{status:'done',doneAt:now,doneBy:'ปิดอัตโนมัติ',autoClosed:true,updatedAt:now});
   },null);
