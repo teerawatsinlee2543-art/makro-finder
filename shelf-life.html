@@ -604,6 +604,14 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .stk-back{display:block;margin:0}
 .stk-bar .stk-back{background:#e5484d;border-color:#e5484d;color:#fff;font-weight:700}
 .stk-bar .stk-back:hover{background:#d93a3f;border-color:#d93a3f}
+.stk-bar{justify-content:space-between}
+.stk-bar .stk-back{margin-left:auto}
+.stk-nav{display:flex;align-items:center;gap:6px;pointer-events:auto;flex:none}
+.stk-nav .btn{font-size:15px;font-weight:800;line-height:1.1;background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:0 3px 10px #0006;white-space:nowrap}
+.stk-nav .btn:disabled{opacity:.4;cursor:default;box-shadow:none}
+.stk-nav .btn .t{font-size:12.5px;font-weight:700}
+.stk-pos{padding:3px 10px;border:1px solid var(--line);border-radius:99px;background:var(--card);color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 3px 10px #0006}
+@media (max-width:1099px){.stk-nav .btn .t{display:none}}
 table.nbs-tbl tr.stk-focus{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-content:start;position:fixed;left:12px;top:12px;width:min(36vw,460px);max-height:calc(100vh - 24px);overflow:auto;z-index:95;margin:0;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px #000b;outline:3px solid #1f7a45}
 table.nbs-tbl tr.stk-focus>.stk-bar{grid-column:1/-1}
 table.nbs-tbl tr.stk-focus td{display:block;grid-column:span 2;width:auto;min-width:0;border:0;padding:8px 10px;white-space:normal;font-size:14px;font-weight:600;overflow-wrap:anywhere;background:var(--bg);border-radius:10px}
@@ -4167,6 +4175,16 @@ function stkFocus(card,sel,quiet){
   const dim=document.createElement('div');dim.className='stk-dim';document.body.appendChild(dim);
   const btnBack=document.createElement('button');btnBack.type='button';btnBack.className='btn sm stk-back';btnBack.textContent='✕ ย่อกลับ';
   const back=document.createElement('div');back.className='stk-bar';back.appendChild(btnBack);card.prepend(back);
+  /* ‹ ›: the previous / next product of the same list (see stkNav) */
+  if(!card.dataset.clone){
+    const sib=stkSiblings(card),ix=sib.indexOf(card),sec=card.closest('section'),more=!!(sec&&sec.querySelector('[id$="MoreWrap"]:not([hidden])'));
+    if(ix>=0&&(sib.length>1||more)){
+      const nav=document.createElement('div');nav.className='stk-nav';
+      nav.innerHTML=`<button type="button" class="btn sm stk-prev" title="รายการก่อนหน้า (ปุ่มลูกศรซ้าย ←)" aria-label="รายการก่อนหน้า"${ix===0?' disabled':''}>‹<span class="t"> ก่อนหน้า</span></button><span class="stk-pos" title="ลำดับในรายการที่แสดงอยู่">${ix+1} / ${sib.length}</span><button type="button" class="btn sm stk-next" title="รายการถัดไป (ปุ่มลูกศรขวา →)" aria-label="รายการถัดไป"${ix===sib.length-1&&!more?' disabled':''}><span class="t">ถัดไป </span>›</button>`;
+      back.prepend(nav);
+      nav.querySelector('.stk-prev').onclick=()=>stkNav(-1);nav.querySelector('.stk-next').onclick=()=>stkNav(1);
+    }
+  }
   card.classList.add('stk-focus');
   const last=card.getBoundingClientRect();
   if(!quiet&&!stkReduce())card.animate([{transformOrigin:'0 0',transform:`translate(${first.left-last.left}px,${first.top-last.top}px) scale(${first.width/last.width},${first.height/last.height})`},{transformOrigin:'0 0',transform:'none'}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'});
@@ -4193,6 +4211,42 @@ function stkUnfocus(instant){
   const an=f.card.animate([{transformOrigin:'0 0',transform:'none'},{transformOrigin:'0 0',transform:`translate(${b.left-a.left}px,${b.top-a.top}px) scale(${b.width/a.width},${b.height/a.height})`}],{duration:220,easing:'ease-in',fill:'forwards'});
   an.onfinish=()=>{done();an.cancel()};an.oncancel=done;setTimeout(()=>{try{an.cancel()}catch(e){}},400); /* safety: never leave the card stuck if the browser is slow to report the end */ /* cancel: "forwards" would keep the transform after the card is back in the flow */
 }
+/* ‹ › on the lifted card = the previous / next product of the same list: that card is lifted instead and the Makro window (the same one, the same kind of page that was open for this card) is pointed at its Item No. at once, so a whole list can be checked one after another without going back to the list.
+   Past the last card on the page the page's own "show more" button is pressed and the walk goes on. The arrow keys ← → do the same while no field or box is open. A card built for the Overview table (a copy, no list of its own) has no arrows. */
+function stkSiblings(card){
+  const p=card.parentNode;if(!p)return[card];
+  const isRow=card.tagName==='TR';
+  return[...p.children].filter(x=>!x.classList.contains('stk-ph')&&(isRow?x.tagName==='TR'&&!x.classList.contains('meta-row'):x.classList.contains('oosc')&&!x.dataset.clone));
+}
+function stkOpener(card,sel){ /* what to run to open the same page for another card: found from the selector of the button that was pressed on the lifted one */
+  let b=null,m;
+  if(/^\[data-open-no=/.test(sel)){const h=card.querySelector('[data-open-no]'),no=h&&h.getAttribute('data-open-no');return no&&no!=='-'?()=>stkEnq(no,h):null}
+  if((m=/^\[onclick\^="oosStock\('[^']*',(\d)"\]$/.exec(sel)))b=[...card.querySelectorAll('[onclick^="oosStock("]')].find(x=>x.getAttribute('onclick').indexOf("',"+m[1]+",this")>0);
+  else if(/^\[onclick\^="stkMove\(/.test(sel))b=card.querySelector('[onclick^="stkMove("]');
+  else if(/^\[onclick\^="stkEnq\(/.test(sel))b=card.querySelector('[onclick^="stkEnq("]');
+  return b?()=>b.click():null;
+}
+let stkNavBusy=false;
+function stkNav(dir){
+  const f=stkFoc;if(!f||f.card.dataset.clone)return;
+  const list=stkSiblings(f.card),i=list.indexOf(f.card);if(i<0)return;
+  for(let j=i+dir;j>=0&&j<list.length;j+=dir){
+    const c=list[j],op=stkOpener(c,f.sel);if(!op)continue; /* a card without that button is skipped */
+    try{c.scrollIntoView({block:'nearest'})}catch(e){} /* so "ย่อกลับ" lands on the product that was looked at last */
+    op();return;
+  }
+  if(dir>0){
+    const sec=f.card.closest('section'),more=sec&&sec.querySelector('[id$="MoreWrap"]:not([hidden]) button');
+    if(more&&!stkNavBusy){const sf=f.sel;stkUnfocus(true);more.click();stkRefocus(sf);stkNavBusy=true;try{if(stkFoc)stkNav(1)}finally{stkNavBusy=false}return}
+  }
+  toast(dir>0?'ถึงรายการสุดท้ายแล้ว':'ถึงรายการแรกแล้ว');
+}
+document.addEventListener('keydown',e=>{
+  if(!stkFoc||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||(e.key!=='ArrowLeft'&&e.key!=='ArrowRight'))return;
+  const t=e.target;if(t&&t.closest&&t.closest('input,textarea,select,[contenteditable="true"]'))return;
+  if(document.querySelector('dialog[open]'))return;
+  e.preventDefault();stkNav(e.key==='ArrowRight'?1:-1);
+});
 $('#tabs').addEventListener('click',()=>stkUnfocus(true)); /* switching tab goes back at once */
 function oosStockPick(no,urls,labs){
   const d=document.createElement('dialog');
