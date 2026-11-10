@@ -612,6 +612,9 @@ nav button.on .tabcnt.late{background:#c62828;color:#fff}
 .stk-nav .btn:disabled{opacity:.4;cursor:default;box-shadow:none}
 .stk-key{display:inline-flex;align-items:center;justify-content:center;height:28px;min-width:28px;padding:0 6px;border:1px solid var(--line);border-radius:99px;background:var(--card);color:var(--muted);font:14px/1 "Segoe UI Symbol","Segoe UI",sans-serif;box-shadow:0 3px 10px #0006;cursor:help;opacity:.65} /* lit green when the BIP window's script has said it is running */
 .stk-key.on{color:#1f7a45;border-color:#1f7a45;opacity:1;font-weight:800}
+.stk-key.kb{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);opacity:1;font-weight:800} /* keyboard mode on */
+.stk-key .t{margin-left:3px;font-size:12px;font-weight:700}
+@media (max-width:1099px){.stk-key .t{display:none}}
 .stk-bar .stk-del{pointer-events:auto;flex:none;margin-left:auto;background:var(--card);color:#e5484d;border:1.5px solid #e5484d;font-weight:800;box-shadow:0 3px 10px #0006;display:inline-flex;align-items:center;gap:4px}
 .stk-bar .stk-del:hover{background:#e5484d;color:#fff}
 .stk-bar .stk-del+.stk-back{margin-left:10px}
@@ -2378,7 +2381,7 @@ async function connect(){
 /* ---------- ui helpers ---------- */
 function ask(msg,okOnly){return new Promise(res=>{const d=$('#dlgAsk');let done=false;const fin=v=>{if(!done){done=true;res(v)}};$('#askMsg').textContent=msg;$('#askNo').hidden=!!okOnly;d.returnValue='';d.onclose=()=>fin(d.returnValue==='yes');d.querySelectorAll('button').forEach(b=>{b.onclick=()=>fin(b.value==='yes')});d.showModal()})}
 const notice=m=>ask(m,true);
-function toast(m){const t=$('#toast');t.classList.remove('undo');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400)}
+function toast(m,ms){const t=$('#toast');t.classList.remove('undo');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),ms||2400)}
 const chip=(k,l)=>`<span class="chip s-${k}">${esc(l)}</span>`;
 const who=(c,uid)=>!c&&uid?`<b>${esc(uid)}</b> <span class="muted">(ไม่มีรายชื่อในข้อมูลนี้)</span>`:c?`<b>${esc(c.uid)}</b> ${esc(c.name)}${c.phone?` · ${esc(c.phone)}`:""}${c.email?` · ${esc(c.email)}`:""}${c.backup?`<br><span class="muted">สำรอง: ${esc(c.backup)}</span>`:""}`:'<span class="muted">— ยังไม่กำหนด —</span>';
 const OO={import:0,local:1,other:2};
@@ -4109,7 +4112,7 @@ function stkMove(no,btn){
   no=String(no||'');const url=STOCK_URLS[2].replace(/\{item\}/g,encodeURIComponent(no));
   try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   const w=stkWin(url,2);
-  if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[2]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
+  if(w){stkFocusWin(w);toast(`เปิด ${STOCK_LABELS[2]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
     const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr')||stkLotCard(btn));
     if(card){stkFocus(card,`[onclick^="stkMove('${no.replace(/["'\\]/g,'')}'"]`);if(card.dataset.clone&&(!stkFoc||stkFoc.card!==card))card.remove()}}
   else oosStockPick(no,[url],[STOCK_LABELS[2]]);
@@ -4120,7 +4123,7 @@ function stkEnq(no,btn){
   no=String(no||'');const url=(STOCK_URLS[1]||STOCK_URLS[0]).replace(/\{item\}/g,encodeURIComponent(no));
   try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   const w=stkWin(url,1);
-  if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[1]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
+  if(w){stkFocusWin(w);toast(`เปิด ${STOCK_LABELS[1]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
     /* the card / row of this product is lifted to the left beside the window (same as the Item Enquiry button of an OOS+ card); a pressed product (data-open-no) is found again by that attribute */
     const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr')||stkLotCard(btn)),k=no.replace(/["'\\]/g,'');
     if(card){stkFocus(card,btn.hasAttribute('data-open-no')?`[data-open-no="${k}"]`:`[onclick^="stkEnq('${k}'"]`);if(card.dataset.clone&&(!stkFoc||stkFoc.card!==card))card.remove()}}
@@ -4145,10 +4148,15 @@ document.addEventListener('click',e=>{
   const no=t.getAttribute('data-open-no');if(!no||no==='-')return;
   stkEnq(no,t)});
 let stkOpened={};
+/* KEYBOARD MODE (the ⌨ button of the lifted card): this page keeps the keyboard. The Makro window is no longer pulled to the front after a click, and when it is already open a new Item is loaded into it by setting its address (w.location.href, which is allowed for the window this page opened and does not give it the focus) instead of window.open (which brings it to the front and hands it the keyboard). Then ← → , . pressed on this page work without any script in the Makro window.
+   For the Makro window to stay visible while this page has the focus the two windows must not overlap (Windows: Win+← on this page, Win+→ on the Makro window). */
+let stkKbMode=false;try{stkKbMode=localStorage.getItem('slmKbMode')==='1'}catch(e){}
+function stkFocusWin(w){if(stkKbMode){setTimeout(()=>{try{window.focus()}catch(e){}},300);return}try{w.focus()}catch(e){}} /* keyboard mode: the Makro window is not brought forward; this page asks for the keyboard back (the browser may ignore that: then one click on the card does it) */
 function stkWin(url,i){
   try{
     const phone=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||window.innerWidth<700;
     let w;
+    if(!phone&&stkKbMode&&stkOpened[i]&&stkOpened[i].closed!==true){try{stkOpened[i].location.href=url;return stkOpened[i]}catch(e){}}
     if(phone)w=window.open(url,'mkStock'+i);
     else{const sc=window.screen||{},W=sc.availWidth||1280,H=sc.availHeight||800,L=sc.availLeft||0,T=sc.availTop||0,fresh=!(stkOpened[i]&&stkOpened[i].closed!==true);
       let ww=Math.min(1000,Math.round(W*.62)),wl=L+W-ww;
@@ -4186,9 +4194,9 @@ function stkFocus(card,sel,quiet){
     const sib=stkSiblings(card),ix=sib.indexOf(card),sec=card.closest('section'),more=!!(sec&&sec.querySelector('[id$="MoreWrap"]:not([hidden])'));
     if(ix>=0&&(sib.length>1||more)){
       const nav=document.createElement('div');nav.className='stk-nav';
-      nav.innerHTML=`<button type="button" class="btn sm stk-prev" title="รายการก่อนหน้า (ปุ่มลูกศรซ้าย ←)" aria-label="รายการก่อนหน้า"${ix===0?' disabled':''}>‹<span class="t"> ก่อนหน้า</span></button><span class="stk-pos" title="ลำดับในรายการที่แสดงอยู่">${ix+1} / ${sib.length}</span><button type="button" class="btn sm stk-next" title="รายการถัดไป (ปุ่มลูกศรขวา →)" aria-label="รายการถัดไป"${ix===sib.length-1&&!more?' disabled':''}><span class="t">ถัดไป </span>›</button><button type="button" class="stk-key" aria-label="สถานะคีย์ลัด">⌨</button>`;
+      nav.innerHTML=`<button type="button" class="btn sm stk-prev" title="รายการก่อนหน้า (ปุ่มลูกศรซ้าย ←)" aria-label="รายการก่อนหน้า"${ix===0?' disabled':''}>‹<span class="t"> ก่อนหน้า</span></button><span class="stk-pos" title="ลำดับในรายการที่แสดงอยู่">${ix+1} / ${sib.length}</span><button type="button" class="btn sm stk-next" title="รายการถัดไป (ปุ่มลูกศรขวา →)" aria-label="รายการถัดไป"${ix===sib.length-1&&!more?' disabled':''}><span class="t">ถัดไป </span>›</button><button type="button" class="stk-key" aria-label="โหมดคีย์บอร์ด">⌨<span class="t"> คีย์</span></button>`;
       back.prepend(nav);
-      nav.querySelector('.stk-key').onclick=()=>toast(stkKeyOn()?'คีย์ ← → หรือ , . ใช้ได้แม้กดในหน้าต่าง BIP (สคริปต์ Tampermonkey v1.5 ทำงานอยู่)':'ยังไม่พบสคริปต์ Tampermonkey (v1.5) ในหน้าต่าง BIP — คีย์ ← → , . ใช้ได้เฉพาะตอนที่หน้านี้เป็นหน้าต่างที่รับคีย์บอร์ด');
+      nav.querySelector('.stk-key').onclick=()=>stkKbToggle();
       nav.querySelector('.stk-prev').onclick=()=>stkNav(-1);nav.querySelector('.stk-next').onclick=()=>stkNav(1);
     }
     /* Item NBS / OOS+: a delete button, one press and the item is gone (no question); the next card is lifted at once and the toast has "เลิกทำ" for a few seconds */
@@ -4208,7 +4216,7 @@ function stkFocus(card,sel,quiet){
      Only after the click is finished (pointerup), never on focus: raising a window in the middle of a click would swallow the click. */
   /* the small boxes of this page (the Buyer ID dialog, the Full Name panel, a question box) stay in FRONT of the Makro windows so they can be read and closed: while one is open, this page is brought forward instead of the Makro windows.
      The check waits a moment so it sees the box that the click itself has just opened. */
-  const raise=e=>{if(e&&e.target&&e.target.closest&&e.target.closest('.stk-back'))return;
+  const raise=e=>{if(stkKbMode)return;if(e&&e.target&&e.target.closest&&e.target.closest('.stk-back'))return;
     setTimeout(()=>{const bn=document.getElementById('bnPanel');
       if(document.querySelector('dialog[open]')||(bn&&!bn.hidden)){try{window.focus()}catch(x){}return}
       Object.values(stkOpened).forEach(w=>{try{if(w&&w.closed!==true)w.focus()}catch(x){}})},80)};
@@ -4272,8 +4280,12 @@ window.addEventListener('message',e=>{
 });
 let stkKeyAt=0;
 const stkKeyOn=()=>Date.now()-stkKeyAt<12000;
-function stkKeyMark(){const k=stkFoc&&stkFoc.back&&stkFoc.back.querySelector('.stk-key');if(!k)return;const on=stkKeyOn();k.classList.toggle('on',on);
-  k.title=on?'คีย์ ← → หรือ , . (ปุ่ม < >) ใช้ได้แม้กดในหน้าต่าง BIP — สคริปต์ v1.5 ทำงานอยู่':'ยังไม่พบสคริปต์ Tampermonkey v1.5 ในหน้าต่าง BIP — คีย์ใช้ได้เฉพาะตอนที่หน้านี้รับคีย์บอร์ดอยู่ (กดเพื่อดูรายละเอียด)'}
+function stkKeyMark(){const k=stkFoc&&stkFoc.back&&stkFoc.back.querySelector('.stk-key');if(!k)return;const on=stkKeyOn();k.classList.toggle('on',on);k.classList.toggle('kb',stkKbMode);
+  k.title=stkKbMode?'โหมดคีย์บอร์ด: เปิดอยู่ — หน้านี้ถือคีย์บอร์ดไว้ กด ← → หรือ , . (ปุ่ม < >) ที่หน้านี้ได้เลย โดยหน้าต่าง BIP ต้องไม่ซ้อนกับหน้านี้ (Win+← / Win+→) · กดเพื่อปิดโหมด':on?'คีย์ ← → หรือ , . ใช้ได้แม้กดในหน้าต่าง BIP (สคริปต์ v1.5 ทำงานอยู่) · กดเพื่อเปิดโหมดคีย์บอร์ด':'กดเพื่อเปิดโหมดคีย์บอร์ด — ให้หน้านี้ถือคีย์บอร์ดไว้ แล้วกด ← → หรือ , . ที่หน้านี้ (ไม่ต้องใช้สคริปต์)'}
+function stkKbToggle(){
+  stkKbMode=!stkKbMode;try{localStorage.setItem('slmKbMode',stkKbMode?'1':'0')}catch(e){}stkKeyMark();
+  toast(stkKbMode?'เปิดโหมดคีย์บอร์ดแล้ว — จัดหน้าต่างซ้าย-ขวาไม่ให้ซ้อนกัน (Win+← ที่หน้านี้ แล้วเลือกหน้าต่าง BIP ไปฝั่งขวา) จากนั้นคลิกที่การ์ดหนึ่งครั้ง แล้วกด ← → หรือ , . ได้เลย':'ปิดโหมดคีย์บอร์ดแล้ว',stkKbMode?9000:2400);
+}
 /* Delete from the lifted card: no question. The item is removed for the whole team (same as the "ลบ" button of the list, minus the confirm box), the next card (else the previous one) is lifted and its Item opened in the Makro window, and the toast offers "เลิกทำ" for 8 seconds: it puts the item (and its photo) back. */
 const stkCardId=card=>{const m=/oosStock\('([^']*)'/.exec([...card.querySelectorAll('[onclick^="oosStock("]')].map(b=>b.getAttribute('onclick')).join(' '));return m?m[1]:''};
 const STK_DEL_COL={'t-nbs':'nbs','t-oos':'oos','t-shr':'shr','t-neg':'neg','t-dms':'dms'},STK_PUSH_MS=5000;
@@ -4346,7 +4358,7 @@ function oosStock(id,which,btn){
   const i=which===1?1:0,no=String(r.itemNo||''),url=(STOCK_URLS[i]||STOCK_URLS[0]).replace(/\{item\}/g,encodeURIComponent(no));
   try{navigator.clipboard&&navigator.clipboard.writeText(no).catch(()=>{})}catch(e){}
   const w=stkWin(url,i);
-  if(w){try{w.focus()}catch(e){}toast(`เปิด ${STOCK_LABELS[i]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
+  if(w){stkFocusWin(w);toast(`เปิด ${STOCK_LABELS[i]} แล้ว · Item ${no} (คัดลอกเลข Item ไว้ให้แล้ว)`);
     const card=btn&&btn.closest&&(btn.closest('.oosc')||btn.closest('table.nbs-tbl tr'));if(card)stkFocus(card,`[onclick^="oosStock('${String(id).replace(/["'\\]/g,'')}',${i}"]`)}
   else oosStockPick(no,[url],[STOCK_LABELS[i]]); /* the browser blocked the window: open it from the list */
 }
